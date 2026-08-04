@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Hero foreground">
+  <defs>
+    <linearGradient id="fg" x1="0%" y1="100%" x2="0%" y2="40%">
+      <stop offset="0%" stop-color="#0e0609" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#0e0609" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <path d="M0 900 C260 820 480 960 720 880 C980 790 1200 950 1480 870 C1700 810 1840 900 1920 860 L1920 1080 L0 1080 Z" fill="#12080c" opacity="0.85"/>
+  <rect width="1920" height="1080" fill="url(#fg)"/>
+  <path d="M120 980 C200 900 280 920 340 980" stroke="#e85a7a" stroke-width="2" opacity="0.35" fill="none"/>
+  <path d="M1500 1000 C1580 910 1700 930 1780 1005" stroke="#f3b8c4" stroke-width="2" opacity="0.28" fill="none"/>
+</svg>

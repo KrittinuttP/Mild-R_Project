@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Hero midground">
+  <defs>
+    <linearGradient id="mid" x1="50%" y1="100%" x2="50%" y2="20%">
+      <stop offset="0%" stop-color="#1a0a10" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#1a0a10" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <path d="M0 720 C280 620 520 780 760 690 C980 610 1180 760 1440 680 C1680 610 1840 700 1920 650 L1920 1080 L0 1080 Z" fill="#241018" opacity="0.75"/>
+  <path d="M0 840 C340 760 640 900 960 820 C1240 750 1560 880 1920 800 L1920 1080 L0 1080 Z" fill="url(#mid)"/>
+  <ellipse cx="1180" cy="520" rx="220" ry="70" fill="#e85a7a" opacity="0.08"/>
+</svg>

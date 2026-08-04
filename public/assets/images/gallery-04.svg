@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" role="img" aria-label="Gallery motif placeholder">
+  <rect width="1000" height="1000" fill="#1a0c12"/>
+  <circle cx="500" cy="500" r="220" fill="none" stroke="#e85a7a" stroke-width="3" opacity="0.55"/>
+  <circle cx="500" cy="500" r="140" fill="none" stroke="#f3b8c4" stroke-width="2" opacity="0.4"/>
+  <circle cx="500" cy="500" r="40" fill="#e85a7a" opacity="0.85"/>
+  <g stroke="#fff5f7" stroke-width="1.5" opacity="0.35">
+    <line x1="500" y1="120" x2="500" y2="260"/>
+    <line x1="500" y1="740" x2="500" y2="880"/>
+    <line x1="120" y1="500" x2="260" y2="500"/>
+    <line x1="740" y1="500" x2="880" y2="500"/>
+  </g>
+  <text x="56" y="920" fill="#fff5f7" font-family="Georgia, serif" font-size="28" opacity="0.55">04</text>
+</svg>

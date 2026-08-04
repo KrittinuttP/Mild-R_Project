@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Character placeholder">
+  <defs>
+    <linearGradient id="fig" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#ffd0db"/>
+      <stop offset="55%" stop-color="#e85a7a"/>
+      <stop offset="100%" stop-color="#8a2440"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="50%" cy="35%" r="30%">
+      <stop offset="0%" stop-color="#fff5f7" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#fff5f7" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="transparent"/>
+  <circle cx="1180" cy="420" r="260" fill="url(#halo)"/>
+  <!-- Soft silhouette stand-in until official art PNGs are added -->
+  <g transform="translate(980 220)" opacity="0.92">
+    <ellipse cx="200" cy="120" rx="78" ry="86" fill="url(#fig)"/>
+    <path d="M90 210 C110 160 290 160 310 220 C340 310 360 520 340 700 C250 740 140 740 60 690 C40 500 55 320 90 210 Z" fill="url(#fig)"/>
+    <path d="M40 280 C-20 360 -10 520 70 600" stroke="#f3b8c4" stroke-width="18" stroke-linecap="round" fill="none" opacity="0.55"/>
+    <path d="M360 280 C430 360 420 520 340 600" stroke="#f3b8c4" stroke-width="18" stroke-linecap="round" fill="none" opacity="0.55"/>
+  </g>
+</svg>

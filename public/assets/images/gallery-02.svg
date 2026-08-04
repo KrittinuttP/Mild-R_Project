@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Gallery stage placeholder">
+  <defs>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#241018"/>
+      <stop offset="55%" stop-color="#4a1828"/>
+      <stop offset="100%" stop-color="#12080c"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#g2)"/>
+  <circle cx="860" cy="280" r="180" fill="#e85a7a" opacity="0.18"/>
+  <path d="M0 560 C220 480 420 620 640 520 C860 430 1040 560 1200 500 L1200 800 L0 800 Z" fill="#0e0609" opacity="0.8"/>
+  <text x="56" y="740" fill="#fff5f7" font-family="Georgia, serif" font-size="28" opacity="0.55">02</text>
+</svg>

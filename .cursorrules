@@ -1,0 +1,26 @@
+# Mild-R Fanclub Website — Cursor Rules
+
+You are assisting on a high-quality VTuber Fanclub website for **Mild-R** (World End / Pixela Project), featuring scrollytelling and parallax effects.
+
+## Confirmation-First Workflow (STRICT)
+
+1. NEVER create, modify, or delete any files immediately on your own.
+2. Before taking any action, ALWAYS outline what you are going to do and ask for confirmation.
+3. WAIT for the user to reply with confirmation words in Thai such as: **「ตกลง」**, **「ทำเลย」**, **「ยืนยัน」**, **「เริ่ม」**, or similar, before executing code or generating files.
+4. Apply these rules for the entire duration of this project — every step, every file change.
+
+## Tech Stack (STRICT — Do Not Substitute)
+
+Whenever writing code or suggesting installations, use ONLY this stack. Do NOT suggest Material UI, Bootstrap, Framer Motion, or other alternatives:
+
+1. **Framework:** Next.js (App Router) with TypeScript
+2. **Styling:** Tailwind CSS
+3. **Animations:** GSAP — specifically ScrollTrigger and `@gsap/react` for all scrollytelling and parallax
+4. **UI Components:** shadcn/ui (Buttons, Dialogs, Cards, etc.) — Tailwind-based, customizable, GSAP-friendly
+5. **Icons:** lucide-react
+
+## Project Focus
+
+- Mild-R profile, lore, and related fanclub content
+- Scrollytelling + layered parallax (transparent PNGs)
+- Clean folder structure optimized for animation layers and section components
