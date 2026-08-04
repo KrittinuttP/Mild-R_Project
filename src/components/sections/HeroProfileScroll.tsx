@@ -31,15 +31,15 @@ function formatDebutDate(iso: string) {
 /** Locked visual scale (desktop sticky path) — tuned for portrait KV */
 const SCALE_HERO = 1.12;
 const SCALE_LOCK = 0.92;
-/** Desktop L/R story steps — 1.5× the locked side size */
-const SCALE_SIDE = SCALE_LOCK * 1.5;
+/** Desktop L/R story steps — fit inside half-frame slots */
+const SCALE_SIDE = 0.98;
 const ART_MOVE = 0.24;
 const ART_SETTLE = 0.1;
 
 /** Inset from edges (~away from bezel) for L/R story art */
 const SLOT_CENTER = { left: "0%", width: "100%" };
-const SLOT_RIGHT = { left: "39%", width: "52%" };
-const SLOT_LEFT = { left: "-14%", width: "52%" };
+const SLOT_RIGHT = { left: "48%", width: "48%" };
+const SLOT_LEFT = { left: "4%", width: "48%" };
 
 export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -732,7 +732,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
           >
             <div
               data-scroll-char-inner
-              className="relative h-[88%] w-[min(68%,640px)] will-change-transform"
+              className="relative h-[85%] w-[min(92%,520px)] will-change-transform"
             >
               <div
                 data-char-float
