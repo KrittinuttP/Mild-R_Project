@@ -28,9 +28,9 @@ function formatDebutDate(iso: string) {
   }).format(new Date(iso));
 }
 
-/** Locked visual scale (desktop sticky path) */
-const SCALE_HERO = 1.66;
-const SCALE_LOCK = 1.34;
+/** Locked visual scale (desktop sticky path) — tuned for portrait KV */
+const SCALE_HERO = 1.12;
+const SCALE_LOCK = 0.92;
 /** Desktop L/R story steps — 1.5× the locked side size */
 const SCALE_SIDE = SCALE_LOCK * 1.5;
 const ART_MOVE = 0.24;
@@ -54,7 +54,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
 
   const { basic, fan, characterDesign, lore } = data;
   const characterSrc =
-    characterLayer?.src ?? "/assets/layers/hero-character.svg";
+    characterLayer?.src ?? "/assets/mild/kv/Mild-R_KV.png";
   const characterAlt =
     characterLayer?.alt ?? `${basic.name} character`;
 
@@ -151,7 +151,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
       if (reduceMotion) {
         gsap.set(
           root.querySelectorAll(
-            "[data-m-reveal], [data-scroll-char], [data-scroll-char-inner], [data-hero-copy], [data-hero-scroll], [data-cycle], [data-phase-name], [data-finale], [data-finale-left], [data-finale-right]"
+            "[data-m-reveal], [data-m-hero-art], [data-char-float], [data-scroll-char], [data-scroll-char-inner], [data-hero-copy], [data-hero-scroll], [data-cycle], [data-phase-name], [data-finale], [data-finale-left], [data-finale-right]"
           ),
           { clearProps: "all", autoAlpha: 1 }
         );
@@ -172,17 +172,26 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
         const heroScroll =
           mobile.querySelector<HTMLElement>("[data-hero-scroll]");
         const heroArt = mobile.querySelector<HTMLElement>("[data-m-hero-art]");
+        const charFloat =
+          mobile.querySelector<HTMLElement>("[data-char-float]");
 
         gsap.set([unit, title, greet, cta, heroScroll].filter(Boolean), {
           autoAlpha: 0,
         });
         if (heroArt) {
-          gsap.set(heroArt, { opacity: 0, x: 24 });
+          gsap.set(heroArt, { opacity: 0, x: 40, scale: 1.06 });
+        }
+        if (charFloat) {
+          gsap.set(charFloat, { y: 0, rotation: 0, transformOrigin: "55% 45%" });
         }
 
         const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
         if (heroArt) {
-          intro.to(heroArt, { opacity: 1, x: 0, duration: 0.9 }, 0);
+          intro.to(
+            heroArt,
+            { opacity: 1, x: 0, scale: 1, duration: 1.15 },
+            0
+          );
         }
         if (unit) {
           intro.fromTo(
@@ -220,6 +229,20 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
           intro.to(heroScroll, { autoAlpha: 1, duration: 0.35 }, 0.75);
         }
 
+        let floatTween: gsap.core.Tween | undefined;
+        if (charFloat) {
+          intro.eventCallback("onComplete", () => {
+            floatTween = gsap.to(charFloat, {
+              y: -12,
+              rotate: 0.7,
+              duration: 2.7,
+              ease: "sine.inOut",
+              yoyo: true,
+              repeat: -1,
+            });
+          });
+        }
+
         const reveals = gsap.utils.toArray<HTMLElement>(
           "[data-m-reveal]",
           mobile
@@ -246,6 +269,8 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
         });
 
         return () => {
+          intro.eventCallback("onComplete", null);
+          floatTween?.kill();
           intro.kill();
           triggers.forEach((t) => t.kill());
         };
@@ -327,22 +352,28 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
           { autoAlpha: 0 }
         );
 
+        const charFloat =
+          desk.querySelector<HTMLElement>("[data-char-float]");
+
         if (character) gsap.set(character, { ...SLOT_CENTER });
         if (charInner) {
           gsap.set(charInner, {
             autoAlpha: 0,
-            scale: SCALE_LOCK,
-            y: 28,
+            scale: SCALE_HERO * 0.86,
+            y: 48,
             force3D: true,
             transformOrigin: "50% 55%",
           });
+        }
+        if (charFloat) {
+          gsap.set(charFloat, { y: 0, rotate: 0, transformOrigin: "50% 55%" });
         }
 
         const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
         if (charInner) {
           intro.to(
             charInner,
-            { autoAlpha: 1, scale: SCALE_HERO, y: 0, duration: 1.2 },
+            { autoAlpha: 1, scale: SCALE_HERO, y: 0, duration: 1.4 },
             0
           );
         }
@@ -380,6 +411,20 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
         }
         if (heroScroll) {
           intro.to(heroScroll, { autoAlpha: 1, duration: 0.4 }, 0.8);
+        }
+
+        let floatTween: gsap.core.Tween | undefined;
+        if (charFloat) {
+          intro.eventCallback("onComplete", () => {
+            floatTween = gsap.to(charFloat, {
+              y: -16,
+              rotate: 0.8,
+              duration: 3,
+              ease: "sine.inOut",
+              yoyo: true,
+              repeat: -1,
+            });
+          });
         }
 
         const tl = gsap.timeline({
@@ -451,6 +496,8 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
           .to({}, { duration: 0.2 });
 
         return () => {
+          intro.eventCallback("onComplete", null);
+          floatTween?.kill();
           intro.kill();
           tl.scrollTrigger?.kill();
           tl.kill();
@@ -497,13 +544,18 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
             data-m-hero-art
             className="pointer-events-none absolute inset-0 z-[2] overflow-hidden"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={characterSrc}
-              alt={characterAlt}
-              className="absolute top-[2%] -right-[18%] h-[76dvh] w-[118vw] object-cover object-[70%_38%]"
-              draggable={false}
-            />
+            <div
+              data-char-float
+              className="absolute top-[2%] -right-[10%] h-[70dvh] w-[92vw] will-change-transform"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={characterSrc}
+                alt={characterAlt}
+                className="h-full w-full object-cover object-[55%_18%]"
+                draggable={false}
+              />
+            </div>
           </div>
 
           {/* Copy: lower-left block with room above for art */}
@@ -680,15 +732,20 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
           >
             <div
               data-scroll-char-inner
-              className="relative h-[92%] w-[min(96%,864px)] will-change-transform"
+              className="relative h-[88%] w-[min(68%,640px)] will-change-transform"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={characterSrc}
-                alt={characterAlt}
-                className="h-full w-full object-contain object-center"
-                draggable={false}
-              />
+              <div
+                data-char-float
+                className="relative h-full w-full will-change-transform"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={characterSrc}
+                  alt={characterAlt}
+                  className="h-full w-full object-contain object-center"
+                  draggable={false}
+                />
+              </div>
             </div>
           </div>
 

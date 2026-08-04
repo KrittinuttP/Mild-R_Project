@@ -15,9 +15,9 @@ const syne = Syne({
 });
 
 export const metadata: Metadata = {
-  title: "Mild-R | Pixela-World-End Fanclub",
+  title: "Mild-R | Lumina-World-End Fanclub",
   description:
-    "Fanclub scrollytelling site for Mild-R from Pixela-World-End / Pixela Project.",
+    "Fanclub scrollytelling site for Mild-R from Lumina-World-End / Lumina Project.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -1,6 +1,6 @@
 # VTuber Data Schema — Mild-R
 
-Schema สำหรับเก็บข้อมูลแนะนำตัว Mild-R (Pixela-World-End / Pixela Project)  
+Schema สำหรับเก็บข้อมูลแนะนำตัว Mild-R (Lumina-World-End / Lumina Project)  
 ใช้เป็นสัญญาข้อมูลร่วมระหว่าง documentation, TypeScript types, และ mock data
 
 ---
@@ -108,8 +108,8 @@ export interface VtuberProfile {
   "basic": {
     "name": "Mild-R",
     "nameLocal": "มายด์-อาร์",
-    "unit": "Pixela-World-End",
-    "agency": "Pixela Project",
+    "unit": "Lumina-World-End",
+    "agency": "Lumina Project",
     "greeting": "マイ-R ใครแอบใจโยกน่ะ ฉันเห็นนะ 👀",
     "catchphrase": "",
     "debutDate": "2024-05-23",

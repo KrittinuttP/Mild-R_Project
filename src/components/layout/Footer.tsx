@@ -45,7 +45,7 @@ export function Footer({ data }: FooterProps) {
           </ul>
 
           <p className="text-xs tracking-wide text-[#f3b8c4]/45">
-            © {year} Fan-made · Not affiliated with Pixela Project
+            © {year} Fan-made · Not affiliated with Lumina Project
           </p>
         </div>
       </div>

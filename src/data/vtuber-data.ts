@@ -101,8 +101,8 @@ export const mildRData: VtuberProfile = {
   basic: {
     name: "Mild-R",
     nameLocal: "มายด์-อาร์",
-    unit: "Pixela-World-End",
-    agency: "Pixela Project",
+    unit: "Lumina-World-End",
+    agency: "Lumina Project",
     greeting: "マイ-R ใครแอบใจโยกน่ะ ฉันเห็นนะ 👀",
     catchphrase: "ฮันนี่รายงานตัว~",
     debutDate: "2024-05-23",
@@ -115,12 +115,13 @@ export const mildRData: VtuberProfile = {
   },
   lore: {
     summary:
-      "Mild-R เป็นสมาชิกยูนิต Pixela-World-End จาก Pixela Project ในคอนเซปต์ภัยพิบัติของโลกที่ใกล้ถึงจุดจบ",
+      "Mild-R เป็นสมาชิกยูนิต Lumina-World-End จาก Lumina Project ในคอนเซปต์ภัยพิบัติของโลกที่ใกล้ถึงจุดจบ",
     theme: "Mutant / viral outbreak · fan motif 💉",
     paragraphs: [
-      "ในโลกที่ภัยพิบัติรูปแบบต่าง ๆ ปะทุพร้อมกัน Mild-R คือหนึ่งในตัวตนที่ผูกกับความไม่แน่นอนของการระบาดและความโกลาหลที่ค่อย ๆ กัดกินชีวิตประจำวัน",
-      "แม้ธีมจะหนัก แต่คาแรคเตอร์ของเธอเต็มไปด้วยพลังงานเล่นใหญ่ ความน่ารักแบบอันตราย และสายตาที่จับได้ทุกจังหวะใจโยกของฮันนี่",
-      "เรื่องราวฉบับเต็มจะถูกเล่าผ่าน scrollytelling ทีละฉาก — จากเปิดตัว สู่ต้นกำเนิด และความสัมพันธ์กับเหล่าฮันนี่",
+      "มายด์อาร์ Mutant มนุษย์กลายพันธุ์ที่จะมารักษาหัวใจคุณแบบ super exclusive ",
+      "แต่เมื่อหลงเข้ามาแล้วจงระวัง เพราะมายมีตาวิเศษเห็นนะ!!",
+      "หลังจากออกจากหลอดทดลอง บอกตรงๆว่ามีหลายอารมณ์เกิดขึ้นมากมาย",
+      "ถ้าเค้ามีร่างกายที่ผิดมนุษย์แบบนี้แล้ว . . . เธอจะยังรักเค้าอยู่มั้ยนะ . . . ?"
     ],
     chapters: [
       {
@@ -244,9 +245,9 @@ export const mildRData: VtuberProfile = {
     },
     {
       id: "hero-character",
-      src: "/assets/layers/hero-character.svg",
+      src: "/assets/mild/kv/Mild-R_KV.png",
       speed: 0.55,
-      alt: "Mild-R character layer",
+      alt: "Mild-R key visual",
       zIndex: 2,
     },
     {
