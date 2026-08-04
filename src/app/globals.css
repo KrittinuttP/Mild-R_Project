@@ -82,6 +82,8 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --heart-beat: 1.45s;
+  --heart-ecg: calc(var(--heart-beat) * 3); /* 4.35s — shorter loop, still beat-locked */
 }
 
 .dark {
@@ -127,5 +129,70 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* Heart atmosphere — pulse + ECG share --heart-beat / --heart-ecg */
+
+@keyframes heart-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.2;
+  }
+  14% {
+    transform: scale(1.12);
+    opacity: 0.38;
+  }
+  28% {
+    transform: scale(0.98);
+    opacity: 0.22;
+  }
+  42% {
+    transform: scale(1.18);
+    opacity: 0.42;
+  }
+  70% {
+    transform: scale(1);
+    opacity: 0.2;
+  }
+}
+
+@keyframes ecg-trace {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -1000;
+  }
+}
+
+@utility animate-heart-pulse {
+  animation: heart-pulse var(--heart-beat) ease-in-out infinite;
+  transform-origin: center;
+}
+
+@utility animate-heart-pulse-delayed {
+  animation: heart-pulse var(--heart-beat) ease-in-out
+    calc(var(--heart-beat) * 0.18) infinite;
+  transform-origin: center;
+}
+
+@utility animate-heart-pulse-slow {
+  animation: heart-pulse var(--heart-beat) ease-in-out
+    calc(var(--heart-beat) * 0.36) infinite;
+  transform-origin: center;
+}
+
+@utility animate-ecg-trace {
+  animation: ecg-trace var(--heart-ecg) linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-heart-pulse,
+  .animate-heart-pulse-delayed,
+  .animate-heart-pulse-slow,
+  .animate-ecg-trace {
+    animation: none !important;
   }
 }

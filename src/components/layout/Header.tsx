@@ -46,14 +46,14 @@ export function Header({ data }: HeaderProps) {
           : "border-b border-transparent bg-transparent"
       )}
     >
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6 sm:px-10 lg:px-16">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5 pt-[env(safe-area-inset-top)] sm:h-16 sm:px-10 lg:px-16">
         <Link
           href="#top"
-          className="font-[family-name:var(--font-display)] text-lg font-bold tracking-tight text-[#fff5f7]"
+          className="font-[family-name:var(--font-display)] text-base font-bold tracking-tight text-[#fff5f7] sm:text-lg"
           onClick={() => setOpen(false)}
         >
           {data.basic.name}
-          <span className="ml-2 text-sm font-medium text-[#e85a7a]">
+          <span className="ml-1.5 text-sm font-medium text-[#e85a7a] sm:ml-2">
             {data.fan.oshiMark}
           </span>
         </Link>
@@ -92,12 +92,15 @@ export function Header({ data }: HeaderProps) {
           open ? "block" : "hidden"
         )}
       >
-        <nav className="mx-auto flex max-w-6xl flex-col gap-1 px-6 py-4" aria-label="Mobile">
+        <nav
+          className="mx-auto flex max-w-6xl flex-col gap-0.5 px-5 py-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6"
+          aria-label="Mobile"
+        >
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="py-3 text-base text-[#f7d7de] transition hover:text-[#fff5f7]"
+              className="min-h-12 py-3.5 text-base text-[#f7d7de] transition hover:text-[#fff5f7]"
               onClick={() => setOpen(false)}
             >
               {link.label}

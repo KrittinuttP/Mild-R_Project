@@ -101,16 +101,16 @@ export function Lore({ data }: LoreProps) {
     <section
       ref={rootRef}
       id="lore"
-      className="relative scroll-mt-24 overflow-hidden bg-[#10080c] px-6 py-28 text-[#fff5f7] sm:px-10 lg:px-16"
+      className="relative scroll-mt-20 overflow-hidden bg-[#10080c] px-5 py-20 text-[#fff5f7] sm:scroll-mt-24 sm:px-10 sm:py-28 lg:px-16"
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#140a0d] to-transparent" />
 
       <div className="relative mx-auto max-w-6xl">
         <div className="max-w-2xl">
-          <p className="text-sm tracking-[0.28em] text-[#f3b8c4]/75 uppercase">
+          <p className="text-[0.7rem] tracking-[0.28em] text-[#f3b8c4]/75 uppercase sm:text-sm">
             Lore
           </p>
-          <h2 className="mt-3 font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight sm:text-5xl">
+          <h2 className="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
             เรื่องราวหลังภัย
           </h2>
           {data.lore.theme ? (
@@ -120,12 +120,12 @@ export function Lore({ data }: LoreProps) {
           ) : null}
         </div>
 
-        <div className="mt-12 max-w-2xl space-y-6">
+        <div className="mt-8 max-w-2xl space-y-5 sm:mt-12 sm:space-y-6">
           {data.lore.paragraphs.map((paragraph) => (
             <p
               key={paragraph}
               data-lore-paragraph
-              className="text-base leading-relaxed text-[#f7d7de]/85 sm:text-lg"
+              className="text-sm leading-relaxed text-[#f7d7de]/85 sm:text-base md:text-lg"
             >
               {paragraph}
             </p>
@@ -135,7 +135,7 @@ export function Lore({ data }: LoreProps) {
         {chapters.length > 0 ? (
           <div
             data-lore-track
-            className="relative mt-24 grid gap-0 lg:grid-cols-[4rem_1fr]"
+            className="relative mt-16 grid gap-0 sm:mt-24 lg:grid-cols-[4rem_1fr]"
           >
             <div className="relative hidden lg:block" aria-hidden>
               <div className="sticky top-28 h-[50vh]">
@@ -152,23 +152,23 @@ export function Lore({ data }: LoreProps) {
                 <article
                   key={chapter.id}
                   data-lore-chapter
-                  className="min-h-[70vh] border-t border-[#f3b8c4]/15 py-16 lg:min-h-[80vh] lg:py-24"
+                  className="min-h-0 border-t border-[#f3b8c4]/15 py-12 sm:min-h-[60vh] sm:py-16 lg:min-h-[80vh] lg:py-24"
                 >
                   <div
                     data-lore-chapter-inner
-                    className="grid gap-6 md:grid-cols-[7rem_1fr] md:gap-10"
+                    className="grid gap-4 sm:gap-6 md:grid-cols-[7rem_1fr] md:gap-10"
                   >
                     <span
                       data-lore-index
-                      className="font-[family-name:var(--font-display)] text-4xl font-bold text-[#e85a7a]/80"
+                      className="font-[family-name:var(--font-display)] text-3xl font-bold text-[#e85a7a]/80 sm:text-4xl"
                     >
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <div>
-                      <h3 className="font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight sm:text-4xl">
+                      <h3 className="font-[family-name:var(--font-display)] text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
                         {chapter.title}
                       </h3>
-                      <p className="mt-6 max-w-xl text-base leading-relaxed text-[#f7d7de]/85 sm:text-lg">
+                      <p className="mt-4 max-w-xl text-sm leading-relaxed text-[#f7d7de]/85 sm:mt-6 sm:text-base md:text-lg">
                         {chapter.body}
                       </p>
                     </div>
