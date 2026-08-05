@@ -1,6 +1,21 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Project docs
+
+เอกสารโปรเจกต์อยู่ใน [`doc/`](./doc/):
+
+| Doc | Contents |
+|-----|----------|
+| [`doc/setup-guide.md`](./doc/setup-guide.md) | ติดตั้ง dependency |
+| [`doc/project-structure.md`](./doc/project-structure.md) | โครงโฟลเดอร์ |
+| [`doc/content-data.md`](./doc/content-data.md) | แก้ JSON คอนเทนต์ + ทิศทาง Supabase |
+| [`doc/vtuber-data-schema.md`](./doc/vtuber-data-schema.md) | Schema / types |
+| [`doc/update.md`](./doc/update.md) | Roadmap / สถานะงาน |
+
+Content แยกเป็น JSON ที่ `src/data/mild-r/` — อย่าลืมอัปเดต `doc/` เมื่อเปลี่ยนโครง
+
 ## Getting Started
+
 
 First, run the development server:
 

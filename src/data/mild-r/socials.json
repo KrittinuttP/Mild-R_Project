@@ -1,0 +1,16 @@
+[
+  {
+    "id": "youtube",
+    "platform": "youtube",
+    "label": "YouTube",
+    "handle": "@MildRWorldEnd",
+    "url": "https://www.youtube.com/@MildRWorldEnd"
+  },
+  {
+    "id": "x",
+    "platform": "x",
+    "label": "X (Twitter)",
+    "handle": "@MildRWorldEnd",
+    "url": "https://x.com/MildRWorldEnd"
+  }
+]

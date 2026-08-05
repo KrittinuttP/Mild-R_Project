@@ -22,6 +22,11 @@ function PlatformIcon({ platform }: { platform: string }) {
   return <ExternalLink className="size-5" aria-hidden />;
 }
 
+function getXHashtagUrl(tag: string) {
+  const slug = tag.replace(/^#/, "").trim();
+  return `https://x.com/hashtag/${encodeURIComponent(slug)}`;
+}
+
 export function Socials({ data }: SocialsProps) {
   const tags = data.hashtags.flatMap((group) => group.tags);
   const song = data.basic.originalSong;
@@ -105,16 +110,18 @@ export function Socials({ data }: SocialsProps) {
             <h3 className="text-[0.7rem] tracking-[0.2em] text-[#f3b8c4]/65 uppercase sm:text-sm">
               Hashtags
             </h3>
-            <p className="mt-4 text-sm text-[#f7d7de]/70">
-              แท็กสำหรับแฟนอาร์ต มีม และการรายงานตัวของ{data.fan.fanName}
-            </p>
             <ul className="mt-6 space-y-3 sm:mt-8">
               {tags.map((tag) => (
-                <li
-                  key={tag}
-                  className="border-l border-[#e85a7a]/60 pl-4 font-[family-name:var(--font-display)] text-lg text-[#fff5f7] sm:text-xl md:text-2xl"
-                >
-                  {tag}
+                <li key={tag}>
+                  <Link
+                    href={getXHashtagUrl(tag)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center justify-between gap-3 border-l border-[#e85a7a]/60 pl-4 font-[family-name:var(--font-display)] text-lg text-[#fff5f7] transition hover:text-[#e85a7a] sm:text-xl md:text-2xl"
+                  >
+                    <span>{tag}</span>
+                    <ExternalLink className="size-4 shrink-0 opacity-40 transition group-hover:opacity-100" />
+                  </Link>
                 </li>
               ))}
             </ul>

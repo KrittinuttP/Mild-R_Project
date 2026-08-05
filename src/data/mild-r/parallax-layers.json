@@ -1,0 +1,37 @@
+[
+  {
+    "id": "hero-bg",
+    "src": "/assets/layers/hero-bg.svg",
+    "speed": 0.15,
+    "alt": "Hero background atmosphere",
+    "zIndex": 0
+  },
+  {
+    "id": "hero-mid",
+    "src": "/assets/layers/hero-mid.svg",
+    "speed": 0.35,
+    "alt": "Hero midground environment",
+    "zIndex": 1
+  },
+  {
+    "id": "hero-character",
+    "src": "/assets/mild/kv/Mild-R_KV.png",
+    "speed": 0.55,
+    "alt": "Mild-R key visual",
+    "zIndex": 2
+  },
+  {
+    "id": "hero-fg",
+    "src": "/assets/layers/hero-fg.svg",
+    "speed": 0.85,
+    "alt": "Hero foreground props",
+    "zIndex": 3
+  },
+  {
+    "id": "hero-particles",
+    "src": "/assets/layers/hero-particles.svg",
+    "speed": 1.1,
+    "alt": "Foreground particles / atmosphere",
+    "zIndex": 4
+  }
+]

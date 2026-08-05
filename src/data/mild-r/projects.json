@@ -1,0 +1,72 @@
+[
+  {
+    "id": "cafe",
+    "slug": "cafe",
+    "title": "Honey Pulse Cafe",
+    "titleLocal": "คาเฟ่ฮันนี่พัลส์",
+    "summary": "โปรโมทคาเฟ่ธีม Mild-R — เมนูพิเศษ ของที่ระลึก และโซนถ่ายรูปสำหรับฮันนี่",
+    "cover": "/assets/images/gallery-02.svg",
+    "status": "upcoming",
+    "category": "cafe",
+    "highlights": [
+      "เมนูเครื่องดื่มธีม รักษาหัวใจ",
+      "โซนถ่ายรูป + พร็อพ 💉",
+      "Goods สุดเอ็กซ์คลูซีฟช่วงอีเวนต์"
+    ],
+    "body": [
+      "Honey Pulse Cafe คือโปรเจกต์โปรโมทคาเฟ่ภายใต้ธีม Mild-R สำหรับฮันนี่ที่อยากมาเจอกันแบบออฟไลน์ รายละเอียดสถานที่และช่วงเวลาจะอัปเดตเมื่อใกล้เปิดตัว",
+      "หน้านี้ใช้เก็บสรุปแนวคิดและจุดเด่นของโปรเจกต์ก่อน — เมื่อมีข้อมูลจริงสามารถแทนที่ข้อความและรูปปกได้จากไฟล์ JSON โดยตรง"
+    ],
+    "cta": {
+      "label": "ติดตามประกาศบน X",
+      "url": "https://x.com/MildRWorldEnd"
+    }
+  },
+  {
+    "id": "heart-cure",
+    "slug": "heart-cure",
+    "title": "Heart Cure",
+    "titleLocal": "รักษาหัวใจ",
+    "summary": "Fansong ต้นฉบับของ Mild-R — รวมลิงก์รับชมและไฮไลต์ของมิวสิควิดีโอ",
+    "cover": "/assets/images/gallery-03.svg",
+    "status": "active",
+    "category": "fansong",
+    "highlights": [
+      "เพลงต้นฉบับ「รักษาหัวใจ」",
+      "รับชมบน YouTube",
+      "ธีมหัวใจ / mutant motif"
+    ],
+    "body": [
+      "Fansong รวมจุดโปรโมทมิวสิควิดีโอของ Mild-R ไว้ที่เดียว ให้ฮันนี่ส่งต่อและกลับมารับชมซ้ำได้ง่าย",
+      "สามารถฝังคลิปด้านล่าง และเพิ่มคอนเทนต์เบื้องหลังได้เมื่อมีวัสดุพร้อม"
+    ],
+    "youtubeUrl": "https://www.youtube.com/watch?v=-fxIAm8dozk",
+    "cta": {
+      "label": "ดูบน YouTube",
+      "url": "https://www.youtube.com/watch?v=-fxIAm8dozk"
+    }
+  },
+  {
+    "id": "hbd",
+    "slug": "hbd",
+    "title": "Birthday Wishes",
+    "titleLocal": "แกลเลอรีอวยพรวันเกิด",
+    "summary": "รวมคำอวยพรจากฮันนี่ในรูปแบบเลื่อนดูทีละการ์ด — พร้อมเตรียมรองรับรูปอัปโหลดในอนาคต",
+    "cover": "/assets/images/gallery-01.svg",
+    "status": "active",
+    "category": "hbd",
+    "highlights": [
+      "Scrollytelling ทีละคำอวยพร",
+      "รองรับรูปประกอบ + credit",
+      "เตรียม flag fromUpload สำหรับ Storage"
+    ],
+    "body": [
+      "โปรเจกต์ HBD รวมคำอวยพรวันเกิดของ Mild-R ไว้ในหน้าประสบการณ์เลื่อนยาว ให้อ่านทีละใบแบบแกลเลอรี",
+      "ตอนนี้ใช้ข้อมูล mock จาก JSON — ภายหลังสามารถดึงรูปจากการอัปโหลดผ่าน Supabase ได้โดยไม่ต้องเปลี่ยนโครงหน้า"
+    ],
+    "cta": {
+      "label": "เปิดแกลเลอรีอวยพร",
+      "url": "/hbd"
+    }
+  }
+]

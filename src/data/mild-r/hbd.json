@@ -1,0 +1,55 @@
+{
+  "title": "Happy Birthday",
+  "titleLocal": "สุขสันต์วันเกิด Mild-R",
+  "subtitle": "รวมคำอวยพรจากฮันนี่ — เลื่อนลงเพื่อเปิดการ์ดทีละใบ",
+  "year": 2026,
+  "occasionLabel": "Birthday gallery",
+  "closingMessage": "รักนะมายด์อาร์ — ฮันนี่จะรักษาหัวใจเธอต่อไปทุกปี 💉",
+  "wishes": [
+    {
+      "id": "wish-01",
+      "from": "ฮันนี่ A",
+      "message": "สุขสันต์วันเกิดนะมายด์อาร์ ปีนี้ก็ขอให้มีรอยยิ้มเยอะๆ และไลฟ์สนุกเหมือนเดิม!",
+      "image": "/assets/images/gallery-01.svg",
+      "alt": "HBD wish card placeholder"
+    },
+    {
+      "id": "wish-02",
+      "from": "ฮันนี่ B",
+      "message": "ขอบคุณที่รักษาหัวใจพวกเรามาตลอด ปีใหม่ของเธอขอให้เต็มไปด้วยคนที่รักและกำลังใจแน่นๆ",
+      "image": "/assets/images/gallery-03.svg",
+      "alt": "HBD wish card placeholder"
+    },
+    {
+      "id": "wish-03",
+      "from": "ฮันนี่ C",
+      "message": "HBD Mild-R รายงานตัว! ขอให้ปีนี้เป็นการทดลองที่เต็มไปด้วยความสุขและความสร้างสรรค์",
+      "image": "/assets/images/gallery-02.svg",
+      "alt": "HBD wish card placeholder"
+    },
+    {
+      "id": "wish-04",
+      "from": "ฮันนี่ D",
+      "message": "เกิดมาเพื่อส่องแสงในวันที่มืดที่สุด วันนี้พวกเราจะส่องกลับไปหาเธอทั้งหมดเลย",
+      "image": "/assets/images/gallery-04.svg",
+      "alt": "HBD wish card placeholder"
+    },
+    {
+      "id": "wish-05",
+      "from": "ฮันนี่ E",
+      "message": "อวยพรสั้นๆ แต่เต็มใจ: มีความสุขมากๆ นะ อยู่ดูแลหัวใจพวกเรานานๆ",
+      "image": "/assets/images/gallery-03.svg",
+      "alt": "HBD wish card placeholder",
+      "loadOnDemand": true
+    },
+    {
+      "id": "wish-06",
+      "from": "ฮันนี่ F",
+      "message": "จากฮันนี่ทุกคน — วันเกิดนี้ขอเป็นยาต้านที่อบอุ่นที่สุดให้เธอ",
+      "image": "/assets/images/gallery-01.svg",
+      "alt": "HBD wish card placeholder",
+      "loadOnDemand": true,
+      "fromUpload": true
+    }
+  ]
+}

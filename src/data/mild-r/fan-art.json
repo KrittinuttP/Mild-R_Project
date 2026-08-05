@@ -1,0 +1,113 @@
+[
+  {
+    "id": "fan-01",
+    "src": "/assets/images/gallery-01.svg",
+    "alt": "Fan art placeholder portrait",
+    "caption": "Soft injection",
+    "credit": "Fan art · #MildRArt",
+    "size": "lg",
+    "artist": {
+      "name": "HoneySketch",
+      "handle": "@honeysketch"
+    }
+  },
+  {
+    "id": "fan-02",
+    "src": "/assets/images/gallery-03.svg",
+    "alt": "Fan art placeholder glow",
+    "caption": "Rose signal",
+    "credit": "Fan art · #MildRArt",
+    "size": "md",
+    "artist": {
+      "name": "PulseInk",
+      "handle": "@pulseink"
+    }
+  },
+  {
+    "id": "fan-03",
+    "src": "/assets/images/gallery-02.svg",
+    "alt": "Fan art placeholder stage",
+    "caption": "Night report",
+    "credit": "Fan art · #MildRArt",
+    "size": "tall",
+    "artist": {
+      "name": "EndLight",
+      "handle": "@endlight"
+    }
+  },
+  {
+    "id": "fan-04",
+    "src": "/assets/images/gallery-04.svg",
+    "alt": "Fan art placeholder motif",
+    "caption": "Oshi mark study",
+    "credit": "Fan art · #MildRArt",
+    "size": "sm",
+    "artist": {
+      "name": "SyringeBee",
+      "handle": "@syringebee"
+    }
+  },
+  {
+    "id": "fan-05",
+    "src": "/assets/images/gallery-03.svg",
+    "alt": "Fan art placeholder warm",
+    "caption": "Warm pulse",
+    "credit": "Fan art · #MildRArt",
+    "size": "wide",
+    "artist": {
+      "name": "LuminaHoney",
+      "handle": "@luminahoney"
+    }
+  },
+  {
+    "id": "fan-06",
+    "src": "/assets/images/gallery-01.svg",
+    "alt": "Fan art placeholder glance",
+    "caption": "Close report",
+    "credit": "Fan art · #MildRArt",
+    "size": "md",
+    "artist": {
+      "name": "MutantMint",
+      "handle": "@mutantmint"
+    }
+  },
+  {
+    "id": "fan-07",
+    "src": "/assets/images/gallery-04.svg",
+    "alt": "Fan art placeholder fragment",
+    "caption": "Fragment heart",
+    "credit": "Fan art · load on demand",
+    "size": "sm",
+    "loadOnDemand": true,
+    "artist": {
+      "name": "ArchiveBee",
+      "handle": "@archivebee"
+    }
+  },
+  {
+    "id": "fan-08",
+    "src": "/assets/images/gallery-02.svg",
+    "alt": "Fan art placeholder night",
+    "caption": "Outbreak doodle",
+    "credit": "Fan art · load on demand",
+    "size": "tall",
+    "loadOnDemand": true,
+    "artist": {
+      "name": "WorldEndPen",
+      "handle": "@worldendpen"
+    }
+  },
+  {
+    "id": "fan-09",
+    "src": "/assets/images/gallery-03.svg",
+    "alt": "Fan art placeholder bloom",
+    "caption": "Honey bloom",
+    "credit": "Fan art · load on demand",
+    "size": "md",
+    "loadOnDemand": true,
+    "artist": {
+      "name": "PinkTrace",
+      "handle": "@pinktrace"
+    }
+  }
+]

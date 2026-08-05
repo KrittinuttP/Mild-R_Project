@@ -5,11 +5,7 @@ import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
-import {
-  HeartAtmosphere,
-  HeartAtmospherePreviewControls,
-  HeartAtmosphereProvider,
-} from "@/components/animations/HeartAtmosphere";
+import { HeartAtmosphere } from "@/components/animations/HeartAtmosphere";
 import { gsap, registerGsapPlugins, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 import type { VtuberProfile } from "@/types/vtuber";
@@ -510,9 +506,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
   );
 
   return (
-    <HeartAtmosphereProvider>
     <div ref={rootRef} id="top" className="bg-[#140a0d]">
-      <HeartAtmospherePreviewControls />
       {/* ========== MOBILE: vertical stack ========== */}
       <div data-mobile-root className="md:hidden">
         <section
@@ -940,6 +934,5 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
         </div>
       </div>
     </div>
-    </HeartAtmosphereProvider>
   );
 }

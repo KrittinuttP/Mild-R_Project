@@ -1,7 +1,19 @@
 # VTuber Data Schema — Mild-R
 
 Schema สำหรับเก็บข้อมูลแนะนำตัว Mild-R (Lumina-World-End / Lumina Project)  
-ใช้เป็นสัญญาข้อมูลร่วมระหว่าง documentation, TypeScript types, และ mock data
+ใช้เป็นสัญญาข้อมูลร่วมระหว่าง documentation, TypeScript types, และ JSON content
+
+**เนื้อหาจริงแยกไฟล์:** ดู [`content-data.md`](./content-data.md)
+
+---
+
+## Type locations
+
+| Piece | Path |
+|-------|------|
+| Interfaces | `src/types/vtuber.ts` |
+| Assembler (`mildRData`) | `src/data/vtuber-data.ts` |
+| JSON by category | `src/data/mild-r/*.json` |
 
 ---
 
@@ -44,7 +56,6 @@ export interface LoreBlock {
   summary: string;
   theme?: string;
   paragraphs: string[];
-  /** Optional extended lore beats for scrollytelling scenes */
   chapters?: Array<{
     id: string;
     title: string;
@@ -63,96 +74,143 @@ export interface FanIdentity {
 /** Parallax layer metadata for GSAP scroll speed */
 export interface ParallaxLayer {
   id: string;
-  /** Public URL path, e.g. `/assets/layers/hero-bg.png` */
   src: string;
-  /** Relative scroll speed (1 = normal, <1 = slower / farther, >1 = faster / closer) */
   speed: number;
   alt?: string;
   zIndex?: number;
 }
 
-/** Root VTuber profile document */
+export type GalleryTileSize = "sm" | "md" | "lg" | "tall" | "wide";
+
+export interface GalleryItem {
+  id: string;
+  src: string;
+  alt: string;
+  caption?: string;
+  credit?: string;
+  size?: GalleryTileSize;
+  loadOnDemand?: boolean;
+}
+
+export interface FanArtItem extends GalleryItem {
+  artist: {
+    name: string;
+    handle?: string;
+    url?: string;
+  };
+}
+
+export type MediaCategory =
+  | "original"
+  | "cover"
+  | "event"
+  | "birthday-pv"
+  | "worldend-pv"
+  | "debut-pv";
+
+export interface MediaClip {
+  id: string;
+  title: string;
+  titleLocal?: string;
+  description?: string;
+  youtubeUrl: string;
+  category: MediaCategory;
+  /** true = iframe embed; false/omitted = thumbnail → open YouTube */
+  embedExternal?: boolean;
+  featured?: boolean;
+}
+
+export interface HbdWish {
+  id: string;
+  from: string;
+  message: string;
+  image?: string;
+  alt?: string;
+  fromUpload?: boolean;
+  loadOnDemand?: boolean;
+}
+
+export interface HbdPage {
+  title: string;
+  titleLocal?: string;
+  subtitle: string;
+  year?: number;
+  occasionLabel?: string;
+  closingMessage?: string;
+  wishes: HbdWish[];
+}
+
+export interface VtuberBasic {
+  name: string;
+  nameLocal?: string;
+  unit: string;
+  agency: string;
+  greeting: string;
+  catchphrase?: string;
+  debutDate: string; // ISO YYYY-MM-DD
+  originalSong?: {
+    title: string;
+    titleEn?: string;
+    url?: string;
+    releasedAt?: string;
+  };
+}
+
+export type ProjectStatus = "upcoming" | "active" | "ended";
+
+export interface ProjectItem {
+  id: string;
+  slug: string;
+  title: string;
+  titleLocal?: string;
+  summary: string;
+  cover: string;
+  status: ProjectStatus;
+  category: string;
+  highlights?: string[];
+  body: string[];
+  cta?: { label: string; url: string };
+  youtubeUrl?: string;
+}
+
 export interface VtuberProfile {
   id: string;
-  basic: {
-    name: string;
-    nameLocal?: string;
-    unit: string;
-    agency: string;
-    greeting: string;
-    catchphrase?: string;
-    debutDate: string; // ISO date YYYY-MM-DD
-    originalSong?: {
-      title: string;
-      titleEn?: string;
-      url?: string;
-      releasedAt?: string;
-    };
-  };
+  basic: VtuberBasic;
   lore: LoreBlock;
   characterDesign: CharacterDesign;
   socials: SocialLink[];
   hashtags: HashtagGroup[];
   fan: FanIdentity;
+  gallery: GalleryItem[];
+  fanArt: FanArtItem[];
+  media: MediaClip[];
   parallax_layers: ParallaxLayer[];
+  projects: ProjectItem[];
+  hbd: HbdPage;
 }
 ```
 
 ---
 
-## JSON Example (shape reference)
+## JSON file map (source of truth for content)
 
-```json
-{
-  "id": "mild-r",
-  "basic": {
-    "name": "Mild-R",
-    "nameLocal": "มายด์-อาร์",
-    "unit": "Lumina-World-End",
-    "agency": "Lumina Project",
-    "greeting": "マイ-R ใครแอบใจโยกน่ะ ฉันเห็นนะ 👀",
-    "catchphrase": "",
-    "debutDate": "2024-05-23",
-    "originalSong": {
-      "title": "รักษาหัวใจ",
-      "titleEn": "Heart Cure",
-      "url": "https://www.youtube.com/watch?v=-fxIAm8dozk",
-      "releasedAt": "2024-05-19"
-    }
-  },
-  "lore": {
-    "summary": "สมาชิกยูนิต World End ภายใต้ธีมภัยพิบัติ",
-    "theme": "Mutant / viral disaster (fanclub motif 💉)",
-    "paragraphs": [],
-    "chapters": []
-  },
-  "characterDesign": {
-    "illustrator": {
-      "name": "atwomaru",
-      "handle": "@atwomaru"
-    },
-    "rigger": {
-      "name": "Karamo Kitchen",
-      "handle": "@karamomokitchen"
-    }
-  },
-  "socials": [],
-  "hashtags": [],
-  "fan": {
-    "fanName": "ฮันนี่",
-    "fanNameEn": "Honey",
-    "oshiMark": "💉"
-  },
-  "parallax_layers": [
-    {
-      "id": "hero-bg",
-      "src": "/assets/layers/hero-bg.png",
-      "speed": 0.2,
-      "zIndex": 0
-    }
-  ]
-}
-```
+| File | Type |
+|------|------|
+| `meta.json` | `{ id: string }` |
+| `basic.json` | `VtuberBasic` |
+| `lore.json` | `LoreBlock` |
+| `character-design.json` | `CharacterDesign` |
+| `socials.json` | `SocialLink[]` |
+| `hashtags.json` | `HashtagGroup[]` |
+| `fan.json` | `FanIdentity` |
+| `gallery.json` | `GalleryItem[]` |
+| `fan-art.json` | `FanArtItem[]` |
+| `media.json` | `MediaClip[]` |
+| `hbd.json` | `HbdPage` |
+| `parallax-layers.json` | `ParallaxLayer[]` |
+| `projects.json` | `ProjectItem[]` |
+
+Assembler รวมเป็น `VtuberProfile` ใน `loadMildRProfile()`.
 
 ---
 
@@ -160,19 +218,16 @@ export interface VtuberProfile {
 
 | Field | Notes |
 |-------|--------|
-| `basic.debutDate` | ใช้ ISO `YYYY-MM-DD` เพื่อ format ฝั่ง UI ได้ง่าย |
-| `basic.greeting` | ข้อความแนะนำตัว / bio สั้นจากโซเชียล |
-| `lore.chapters` | ตัดเป็นฉากสำหรับ scrollytelling ได้ทีละ section |
-| `parallax_layers.speed` | map ตรงกับ GSAP `y` / scrub parallax (ยิ่งเล็กยิ่งเคลื่อนช้า = อยู่ไกล) |
-| `parallax_layers.src` | path ภายใต้ `public/` แต่ใน URL **ไม่ใส่** คำว่า `public` |
-| Social / hashtag `id` | slug คงที่สำหรับ key ใน React เช่น `youtube`, `tag-general` |
+| `basic.debutDate` | ISO `YYYY-MM-DD` |
+| `basic.greeting` | bio สั้นจากโซเชียล |
+| `lore.chapters` | ฉากสำหรับ scrollytelling |
+| `gallery.size` | bento span |
+| `gallery.loadOnDemand` | รอ「โหลดเพิ่ม」 |
+| `parallax_layers.speed` | GSAP parallax (<1 = ไกล/ช้า) |
+| `parallax_layers.src` | path ใต้ `public/` โดยไม่ใส่คำว่า `public` ใน URL |
 
 ---
 
-## Suggested File Mapping
+## Suggested Supabase tables
 
-| Schema piece | Runtime location |
-|--------------|------------------|
-| Interfaces | `src/types/vtuber.ts` (อนาคต) |
-| Mock / content object | `src/data/vtuber-data.ts` |
-| Layer image files | `public/assets/layers/*` |
+ดูตาราง mapping เต็มใน [`content-data.md`](./content-data.md)

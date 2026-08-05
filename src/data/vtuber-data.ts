@@ -1,270 +1,95 @@
 /**
- * Mild-R content / mock data
- * Shape follows: doc/vtuber-data-schema.md
+ * Mild-R profile assembler
  *
- * NOTE: Public profile fields are filled from known sources (social bio, debut timing,
- * design credits, fan tags). Lore paragraphs are placeholders for scrollytelling copy.
+ * Content lives in JSON under `./mild-r/` (one file per category)
+ * so it can later map 1:1 to Supabase tables / storage.
+ *
+ * Docs: doc/content-data.md · doc/vtuber-data-schema.md
  */
 
-export interface SocialLink {
-  id: string;
-  platform: "youtube" | "x" | "tiktok" | "facebook" | "twitch" | "other";
-  label: string;
-  url: string;
-  handle?: string;
-}
+import type {
+  CharacterDesign,
+  FanArtItem,
+  FanIdentity,
+  GalleryItem,
+  HashtagGroup,
+  HbdPage,
+  LoreBlock,
+  MediaClip,
+  ParallaxLayer,
+  ProjectItem,
+  SocialLink,
+  VtuberBasic,
+  VtuberProfile,
+} from "@/types/vtuber";
 
-export interface HashtagGroup {
-  id: string;
-  category: "general" | "art" | "meme" | "fan" | "other";
-  tags: string[];
-}
+import meta from "./mild-r/meta.json";
+import basic from "./mild-r/basic.json";
+import lore from "./mild-r/lore.json";
+import characterDesign from "./mild-r/character-design.json";
+import socials from "./mild-r/socials.json";
+import hashtags from "./mild-r/hashtags.json";
+import fan from "./mild-r/fan.json";
+import gallery from "./mild-r/gallery.json";
+import fanArt from "./mild-r/fan-art.json";
+import media from "./mild-r/media.json";
+import parallaxLayers from "./mild-r/parallax-layers.json";
+import projects from "./mild-r/projects.json";
+import hbd from "./mild-r/hbd.json";
 
-export interface CharacterDesign {
-  illustrator: {
-    name: string;
-    handle?: string;
-    url?: string;
+/** Merge category JSON into a single profile document. */
+export function loadMildRProfile(): VtuberProfile {
+  return {
+    id: meta.id,
+    basic: basic as VtuberBasic,
+    lore: lore as LoreBlock,
+    characterDesign: characterDesign as CharacterDesign,
+    socials: socials as SocialLink[],
+    hashtags: hashtags as HashtagGroup[],
+    fan: fan as FanIdentity,
+    gallery: gallery as GalleryItem[],
+    fanArt: fanArt as FanArtItem[],
+    media: media as MediaClip[],
+    parallax_layers: parallaxLayers as ParallaxLayer[],
+    projects: projects as ProjectItem[],
+    hbd: hbd as HbdPage,
   };
-  rigger: {
-    name: string;
-    handle?: string;
-    url?: string;
-  };
-  notes?: string;
 }
 
-export interface LoreBlock {
-  summary: string;
-  theme?: string;
-  paragraphs: string[];
-  chapters?: Array<{
-    id: string;
-    title: string;
-    body: string;
-  }>;
+export const mildRData: VtuberProfile = loadMildRProfile();
+
+export function getProjectBySlug(slug: string): ProjectItem | undefined {
+  return mildRData.projects.find((project) => project.slug === slug);
 }
 
-export interface FanIdentity {
-  fanName: string;
-  fanNameEn?: string;
-  oshiMark: string;
-  greetingToFans?: string;
+export function getProjectsByCategory(category: string): ProjectItem[] {
+  return mildRData.projects.filter(
+    (project) => project.category.toLowerCase() === category.toLowerCase()
+  );
 }
 
-export interface ParallaxLayer {
-  id: string;
-  /** Public URL path under /public (omit the `public` segment) */
-  src: string;
-  /** GSAP scroll parallax factor (<1 farther / slower, >1 closer / faster) */
-  speed: number;
-  alt?: string;
-  zIndex?: number;
+export function hasProjectCategory(category: string): boolean {
+  return getProjectsByCategory(category).length > 0;
 }
-
-export interface GalleryItem {
-  id: string;
-  src: string;
-  alt: string;
-  caption?: string;
-  credit?: string;
-}
-
-export interface VtuberProfile {
-  id: string;
-  basic: {
-    name: string;
-    nameLocal?: string;
-    unit: string;
-    agency: string;
-    greeting: string;
-    catchphrase?: string;
-    debutDate: string;
-    originalSong?: {
-      title: string;
-      titleEn?: string;
-      url?: string;
-      releasedAt?: string;
-    };
-  };
-  lore: LoreBlock;
-  characterDesign: CharacterDesign;
-  socials: SocialLink[];
-  hashtags: HashtagGroup[];
-  fan: FanIdentity;
-  gallery: GalleryItem[];
-  parallax_layers: ParallaxLayer[];
-}
-
-export const mildRData: VtuberProfile = {
-  id: "mild-r",
-  basic: {
-    name: "Mild-R",
-    nameLocal: "มายด์-อาร์",
-    unit: "Lumina-World-End",
-    agency: "Lumina Project",
-    greeting: "マイ-R ใครแอบใจโยกน่ะ ฉันเห็นนะ 👀",
-    catchphrase: "ฮันนี่รายงานตัว~",
-    debutDate: "2024-05-23",
-    originalSong: {
-      title: "รักษาหัวใจ",
-      titleEn: "Heart Cure",
-      url: "https://www.youtube.com/watch?v=-fxIAm8dozk",
-      releasedAt: "2024-05-19",
-    },
-  },
-  lore: {
-    summary:
-      "Mild-R เป็นสมาชิกยูนิต Lumina-World-End จาก Lumina Project ในคอนเซปต์ภัยพิบัติของโลกที่ใกล้ถึงจุดจบ",
-    theme: "Mutant / viral outbreak · fan motif 💉",
-    paragraphs: [
-      "มายด์อาร์ Mutant มนุษย์กลายพันธุ์ที่จะมารักษาหัวใจคุณแบบ super exclusive ",
-      "แต่เมื่อหลงเข้ามาแล้วจงระวัง เพราะมายมีตาวิเศษเห็นนะ!!",
-      "หลังจากออกจากหลอดทดลอง บอกตรงๆว่ามีหลายอารมณ์เกิดขึ้นมากมาย",
-      "ถ้าเค้ามีร่างกายที่ผิดมนุษย์แบบนี้แล้ว . . . เธอจะยังรักเค้าอยู่มั้ยนะ . . . ?"
-    ],
-    chapters: [
-      {
-        id: "arrival",
-        title: "จุดเริ่มต้นที่ปลายโลก",
-        body: "วันเดบิวต์คือจุดที่ประตูเปิด — Mild-R ก้าวเข้ามาในโลกสตรีม พร้อมธีมภัยพิบัติและรอยยิ้มที่ไม่บอกทั้งหมดในครั้งเดียว",
-      },
-      {
-        id: "outbreak",
-        title: "สัญญาณระบาด",
-        body: "บรรยากาศโลกหลังภัยเริ่มเปลี่ยน มีเพียงเสียงหัวเราะ การร้อง และการรายงานตัวของฮันนี่ที่ยังฟังดูอบอุ่นท่ามกลางความวุ่นวาย",
-      },
-      {
-        id: "honey",
-        title: "ฮันนี่คือยาต้าน",
-        body: "ใครก็ตามที่อยู่ฝั่ง Mild-R มีชื่อว่าฮันนี่ — พวกเขาคือทั้งแฟนคลับ และส่วนหนึ่งของจังหวะหายใจในแต่ละไลฟ์",
-      },
-    ],
-  },
-  characterDesign: {
-    illustrator: {
-      name: "atwomaru",
-      handle: "@atwomaru",
-      url: "https://x.com/atwomaru",
-    },
-    rigger: {
-      name: "Karamo Kitchen",
-      handle: "@karamomokitchen",
-      url: "https://x.com/karamomokitchen",
-    },
-    notes: "Mama: illustrator · Papa: rigger (as credited on official socials)",
-  },
-  socials: [
-    {
-      id: "youtube",
-      platform: "youtube",
-      label: "YouTube",
-      handle: "@MildRWorldEnd",
-      url: "https://www.youtube.com/@MildRWorldEnd",
-    },
-    {
-      id: "x",
-      platform: "x",
-      label: "X (Twitter)",
-      handle: "@MildRWorldEnd",
-      url: "https://x.com/MildRWorldEnd",
-    },
-  ],
-  hashtags: [
-    {
-      id: "tag-general",
-      category: "general",
-      tags: ["#MildReverse"],
-    },
-    {
-      id: "tag-art",
-      category: "art",
-      tags: ["#MildRArt"],
-    },
-    {
-      id: "tag-meme",
-      category: "meme",
-      tags: ["#MildRMeme"],
-    },
-    {
-      id: "tag-fan",
-      category: "fan",
-      tags: ["#ฮันนี่รายงานตัว", "#วันๆของฮันนี่"],
-    },
-  ],
-  fan: {
-    fanName: "ฮันนี่",
-    fanNameEn: "Honey",
-    oshiMark: "💉",
-    greetingToFans: "ฮันนี่รายงานตัว~",
-  },
-  gallery: [
-    {
-      id: "gallery-01",
-      src: "/assets/images/gallery-01.svg",
-      alt: "Mild-R portrait placeholder",
-      caption: "Portrait study",
-      credit: "Placeholder · replace with official / fan art",
-    },
-    {
-      id: "gallery-02",
-      src: "/assets/images/gallery-02.svg",
-      alt: "Mild-R stage atmosphere placeholder",
-      caption: "Outbreak stage",
-      credit: "Placeholder · replace with stream key art",
-    },
-    {
-      id: "gallery-03",
-      src: "/assets/images/gallery-03.svg",
-      alt: "Mild-R soft glow placeholder",
-      caption: "Honey glow",
-      credit: "Placeholder · replace with #MildRArt",
-    },
-    {
-      id: "gallery-04",
-      src: "/assets/images/gallery-04.svg",
-      alt: "Mild-R motif placeholder",
-      caption: "Signal motif",
-      credit: "Placeholder · replace with campaign visual",
-    },
-  ],
-  parallax_layers: [
-    {
-      id: "hero-bg",
-      src: "/assets/layers/hero-bg.svg",
-      speed: 0.15,
-      alt: "Hero background atmosphere",
-      zIndex: 0,
-    },
-    {
-      id: "hero-mid",
-      src: "/assets/layers/hero-mid.svg",
-      speed: 0.35,
-      alt: "Hero midground environment",
-      zIndex: 1,
-    },
-    {
-      id: "hero-character",
-      src: "/assets/mild/kv/Mild-R_KV.png",
-      speed: 0.55,
-      alt: "Mild-R key visual",
-      zIndex: 2,
-    },
-    {
-      id: "hero-fg",
-      src: "/assets/layers/hero-fg.svg",
-      speed: 0.85,
-      alt: "Hero foreground props",
-      zIndex: 3,
-    },
-    {
-      id: "hero-particles",
-      src: "/assets/layers/hero-particles.svg",
-      speed: 1.1,
-      alt: "Foreground particles / atmosphere",
-      zIndex: 4,
-    },
-  ],
-};
 
 export default mildRData;
+
+export type {
+  CharacterDesign,
+  FanArtItem,
+  FanIdentity,
+  GalleryItem,
+  GalleryTileSize,
+  HashtagGroup,
+  HbdPage,
+  HbdWish,
+  LoreBlock,
+  MediaCategory,
+  MediaClip,
+  ParallaxLayer,
+  ProjectItem,
+  ProjectStatus,
+  SocialLink,
+  VtuberBasic,
+  VtuberProfile,
+} from "@/types/vtuber";

@@ -1,0 +1,19 @@
+[
+  {
+    "id": "tag-general",
+    "category": "general",
+    "tags": ["#MildReverse"]
+  },
+  {
+    "id": "tag-art",
+    "category": "art",
+    "tags": ["#MildRArt"]
+  },
+  {
+    "id": "tag-meme",
+    "category": "meme",
+    "tags": ["#MildRMeme"]
+  }
+
+]
+

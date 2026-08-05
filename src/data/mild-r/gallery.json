@@ -1,0 +1,152 @@
+[
+  {
+    "id": "gallery-01",
+    "src": "/assets/images/gallery-01.svg",
+    "alt": "Mild-R portrait placeholder",
+    "caption": "Portrait study",
+    "credit": "Placeholder · replace with official / fan art",
+    "size": "lg"
+  },
+  {
+    "id": "gallery-02",
+    "src": "/assets/images/gallery-02.svg",
+    "alt": "Mild-R stage atmosphere placeholder",
+    "caption": "Outbreak stage",
+    "credit": "Placeholder · replace with stream key art",
+    "size": "md"
+  },
+  {
+    "id": "gallery-03",
+    "src": "/assets/images/gallery-03.svg",
+    "alt": "Mild-R soft glow placeholder",
+    "caption": "Honey glow",
+    "credit": "Placeholder · replace with #MildRArt",
+    "size": "tall"
+  },
+  {
+    "id": "gallery-04",
+    "src": "/assets/images/gallery-04.svg",
+    "alt": "Mild-R motif placeholder",
+    "caption": "Signal motif",
+    "credit": "Placeholder · replace with campaign visual",
+    "size": "sm"
+  },
+  {
+    "id": "gallery-05",
+    "src": "/assets/images/gallery-04.svg",
+    "alt": "Wide motif placeholder",
+    "caption": "Wide signal",
+    "credit": "Placeholder",
+    "size": "wide"
+  },
+  {
+    "id": "gallery-06",
+    "src": "/assets/images/gallery-02.svg",
+    "alt": "Stage light study placeholder",
+    "caption": "Stage light",
+    "credit": "Placeholder",
+    "size": "md"
+  },
+  {
+    "id": "gallery-07",
+    "src": "/assets/images/gallery-01.svg",
+    "alt": "Soft expression placeholder",
+    "caption": "Soft glance",
+    "credit": "Placeholder",
+    "size": "sm"
+  },
+  {
+    "id": "gallery-08",
+    "src": "/assets/images/gallery-03.svg",
+    "alt": "Pulse glow placeholder",
+    "caption": "Pulse",
+    "credit": "Placeholder",
+    "size": "tall"
+  },
+  {
+    "id": "gallery-09",
+    "src": "/assets/images/gallery-04.svg",
+    "alt": "Motif fragment placeholder",
+    "caption": "Fragment",
+    "credit": "Placeholder",
+    "size": "sm"
+  },
+  {
+    "id": "gallery-10",
+    "src": "/assets/images/gallery-01.svg",
+    "alt": "Close-up study placeholder",
+    "caption": "Close-up",
+    "credit": "Placeholder",
+    "size": "md"
+  },
+  {
+    "id": "gallery-11",
+    "src": "/assets/images/gallery-02.svg",
+    "alt": "Night outbreak placeholder",
+    "caption": "Night signal",
+    "credit": "Placeholder",
+    "size": "wide"
+  },
+  {
+    "id": "gallery-12",
+    "src": "/assets/images/gallery-03.svg",
+    "alt": "Warm rose placeholder",
+    "caption": "Warm rose",
+    "credit": "Placeholder",
+    "size": "sm"
+  },
+  {
+    "id": "gallery-13",
+    "src": "/assets/images/gallery-04.svg",
+    "alt": "Archive tile placeholder",
+    "caption": "Archive 13",
+    "credit": "Placeholder · load on demand",
+    "size": "md",
+    "loadOnDemand": true
+  },
+  {
+    "id": "gallery-14",
+    "src": "/assets/images/gallery-01.svg",
+    "alt": "Archive tile placeholder",
+    "caption": "Archive 14",
+    "credit": "Placeholder · load on demand",
+    "size": "tall",
+    "loadOnDemand": true
+  },
+  {
+    "id": "gallery-15",
+    "src": "/assets/images/gallery-01.svg",
+    "alt": "Archive tile placeholder",
+    "caption": "Archive 15",
+    "credit": "Placeholder · load on demand",
+    "size": "lg",
+    "loadOnDemand": true
+  },
+  {
+    "id": "gallery-16",
+    "src": "/assets/images/gallery-02.svg",
+    "alt": "Archive tile placeholder",
+    "caption": "Archive 16",
+    "credit": "Placeholder · load on demand",
+    "size": "sm",
+    "loadOnDemand": true
+  },
+  {
+    "id": "gallery-17",
+    "src": "/assets/images/gallery-03.svg",
+    "alt": "Archive tile placeholder",
+    "caption": "Archive 17",
+    "credit": "Placeholder · load on demand",
+    "size": "wide",
+    "loadOnDemand": true
+  },
+  {
+    "id": "gallery-18",
+    "src": "/assets/images/gallery-04.svg",
+    "alt": "Archive tile placeholder",
+    "caption": "Archive 18",
+    "credit": "Placeholder · load on demand",
+    "size": "md",
+    "loadOnDemand": true
+  }
+]

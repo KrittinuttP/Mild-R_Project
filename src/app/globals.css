@@ -130,6 +130,10 @@
   html {
     @apply font-sans;
   }
+  img {
+    -webkit-user-drag: none;
+    user-select: none;
+  }
 }
 
 /* Heart atmosphere — pulse + ECG share --heart-beat / --heart-ecg */
@@ -188,11 +192,63 @@
   animation: ecg-trace var(--heart-ecg) linear infinite;
 }
 
+@keyframes splash-heartbeat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.14);
+  }
+  30% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.1);
+  }
+  60% {
+    transform: scale(1);
+  }
+}
+
+@keyframes splash-bar {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@utility animate-splash-heartbeat {
+  animation: splash-heartbeat 1.2s ease-in-out infinite;
+  display: inline-block;
+}
+
+@utility animate-splash-bar {
+  animation: splash-bar 0.9s ease-out forwards;
+}
+
+@utility animate-splash-bar-long {
+  animation: splash-bar 1.8s ease-out forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-heart-pulse,
   .animate-heart-pulse-delayed,
   .animate-heart-pulse-slow,
   .animate-ecg-trace {
     animation: none !important;
+  }
+
+  .animate-splash-heartbeat,
+  .animate-splash-bar,
+  .animate-splash-bar-long {
+    animation: none !important;
+  }
+
+  .animate-splash-bar,
+  .animate-splash-bar-long {
+    width: 100%;
   }
 }

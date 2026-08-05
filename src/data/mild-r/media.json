@@ -1,0 +1,92 @@
+[
+  {
+    "id": "heart-cure-mv",
+    "title": "Heart Cure",
+    "titleLocal": "รักษาหัวใจ",
+    "description": "Original song MV ของ Mild-R",
+    "youtubeUrl": "https://www.youtube.com/watch?v=-fxIAm8dozk",
+    "category": "original",
+    "featured": true,
+    "embedExternal": true
+  },
+  {
+    "id": "cover-rockstar",
+    "title": "Rockstar [Futuristic Rock ver.]",
+    "titleLocal": "Cover — Lisa",
+    "youtubeUrl": "https://www.youtube.com/watch?v=vnszSPQaP0g",
+    "category": "cover",
+    "embedExternal": true
+  },
+  {
+    "id": "cover-tipsy",
+    "title": "Tipsy",
+    "titleLocal": "Cover — Wanuka · Wonder Festival 2024",
+    "youtubeUrl": "https://www.youtube.com/watch?v=uYLqRw5Sghk",
+    "category": "cover",
+    "embedExternal": false
+  },
+  {
+    "id": "cover-getcha",
+    "title": "GETCHA!",
+    "titleLocal": "Cover — Giga & KIRA · with Jolly Estaa",
+    "youtubeUrl": "https://www.youtube.com/watch?v=OBaPdA0Ayg4",
+    "category": "cover",
+    "embedExternal": false
+  },
+  {
+    "id": "event-pixela-stage",
+    "title": "รอบนี้สวยหล่อ (กี่โมง??)",
+    "titleLocal": "Pixela Stage · Together Garden",
+    "youtubeUrl": "https://www.youtube.com/watch?v=lUMHYCLHWik",
+    "category": "event",
+    "embedExternal": false
+  },
+  {
+    "id": "event-maruya-44",
+    "title": "MARUYA #44: The Movie",
+    "titleLocal": "Pixela The Musical",
+    "youtubeUrl": "https://www.youtube.com/watch?v=mthEJz3rmBQ",
+    "category": "event",
+    "embedExternal": false
+  },
+  {
+    "id": "event-pastry-fantasy",
+    "title": "Pastry Fantasy Vtuber Concert",
+    "titleLocal": "Pixela World End · Farmhouse",
+    "youtubeUrl": "https://www.youtube.com/watch?v=zLHeiuFDo4c",
+    "category": "event",
+    "embedExternal": false
+  },
+  {
+    "id": "birthday-pv-teaser",
+    "title": "คำอธิษฐานที่ฝากถึงดวงดาว",
+    "titleLocal": "Birthday Teaser",
+    "youtubeUrl": "https://www.youtube.com/watch?v=ilowFP9Uw3o",
+    "category": "birthday-pv",
+    "embedExternal": true
+  },
+  {
+    "id": "birthday-pv-chat",
+    "title": "สนใจอยู่คุยด้วยกันไหมคะ?",
+    "titleLocal": "Birthday PV",
+    "youtubeUrl": "https://www.youtube.com/watch?v=Y1R-L7DN7aw",
+    "category": "birthday-pv",
+    "embedExternal": true
+  },
+  {
+    "id": "debut-pv",
+    "title": "เมื่อวันก่อน ไปดูใครมาห่ะ?",
+    "titleLocal": "Debut PV",
+    "youtubeUrl": "https://www.youtube.com/watch?v=fBt1KyGY88E",
+    "category": "debut-pv",
+    "embedExternal": true
+  },
+  {
+    "id": "worldend-pv",
+    "title": "ภัยพิบัติระดับ Virtual Youtuber",
+    "titleLocal": "Pixela World End PV",
+    "youtubeUrl": "https://www.youtube.com/watch?v=Xyh7xlkYri8",
+    "category": "worldend-pv",
+    "embedExternal": true
+  }
+]

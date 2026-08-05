@@ -1,0 +1,103 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+
+import { BackToTop } from "@/components/layout/BackToTop";
+import { Footer } from "@/components/layout/Footer";
+import { Header } from "@/components/layout/Header";
+import { MediaProtection } from "@/components/media/MediaProtection";
+import { ProjectList } from "@/components/projects/ProjectList";
+import { getProjectsByCategory, mildRData } from "@/data/vtuber-data";
+
+const CATEGORY_COPY: Record<
+  string,
+  { eyebrow: string; title: string; description: string }
+> = {
+  fansong: {
+    eyebrow: "Fansong",
+    title: "Fansong",
+    description:
+      "รวมเพลง / MV ของ Mild-R — เลือกจากรายการเพื่อดูรายละเอียดและรับชม",
+  },
+};
+
+type ProjectsPageProps = {
+  searchParams: Promise<{ category?: string }>;
+};
+
+export async function generateMetadata({
+  searchParams,
+}: ProjectsPageProps): Promise<Metadata> {
+  const { category } = await searchParams;
+  const key = category?.toLowerCase();
+  const copy = key ? CATEGORY_COPY[key] : undefined;
+
+  if (copy) {
+    return {
+      title: `${copy.title} | Mild-R Fanclub`,
+      description: copy.description,
+    };
+  }
+
+  return {
+    title: "Projects | Mild-R Fanclub",
+    description:
+      "รวมโปรเจกต์โปรโมทของ Mild-R เช่น Cafe และ Fansong — ดูรายการและเข้าดูรายละเอียดได้ที่นี่",
+  };
+}
+
+export default async function ProjectsPage({
+  searchParams,
+}: ProjectsPageProps) {
+  const { category: rawCategory } = await searchParams;
+  const category = rawCategory?.trim().toLowerCase() || undefined;
+  const copy = category ? CATEGORY_COPY[category] : undefined;
+
+  const projects = category
+    ? getProjectsByCategory(category)
+    : mildRData.projects;
+
+  const eyebrow = copy?.eyebrow ?? "Projects";
+  const title = copy?.title ?? "รวมโปรเจกต์";
+  const description =
+    copy?.description ??
+    "คาเฟ่ Fansong และแคมเปญอื่นๆ ของ Mild-R — เลือกจากรายการเพื่อดูรายละเอียด";
+
+  return (
+    <>
+      <MediaProtection />
+      <Header data={mildRData} />
+      <main className="flex-1 bg-[#140a0d]">
+        <section className="relative px-5 pb-24 pt-28 text-[#fff5f7] sm:px-10 sm:pt-32 lg:px-16">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(ellipse_at_20%_0%,rgba(232,90,122,0.18),transparent_55%)]" />
+
+          <div className="relative mx-auto max-w-6xl">
+            {category ? (
+              <Link
+                href="/projects"
+                className="text-sm tracking-wide text-[#f3b8c4]/75 transition hover:text-[#fff5f7]"
+              >
+                ← โปรเจกต์ทั้งหมด
+              </Link>
+            ) : null}
+
+            <p
+              className={`text-[0.7rem] tracking-[0.28em] text-[#f3b8c4]/75 uppercase sm:text-sm ${category ? "mt-4" : ""}`}
+            >
+              {eyebrow}
+            </p>
+            <h1 className="mt-4 max-w-2xl font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+              {title}
+            </h1>
+            <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#f7d7de]/85 sm:text-base">
+              {description}
+            </p>
+
+            <ProjectList projects={projects} emptyLabel={category} />
+          </div>
+        </section>
+      </main>
+      <Footer data={mildRData} />
+      <BackToTop />
+    </>
+  );
+}

@@ -1,27 +1,84 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
+import { scrollToHashTarget } from "@/lib/scroll-to-hash";
 import { cn } from "@/lib/utils";
 import type { VtuberProfile } from "@/types/vtuber";
 
-const NAV_LINKS = [
-  { href: "#profile", label: "Profile" },
-  { href: "#lore", label: "Lore" },
-  { href: "#gallery", label: "Gallery" },
-  { href: "#socials", label: "Connect" },
-] as const;
+type NavLink =
+  | { label: string; kind: "section"; hash: string }
+  | { label: string; kind: "page"; href: string; homeHash?: string };
+
+const NAV_LINKS: NavLink[] = [
+  // Hero+Profile scrollytelling starts at #top (desktop profile pin breaks #profile)
+  { kind: "section", hash: "#top", label: "Profile" },
+  { kind: "section", hash: "#lore", label: "Lore" },
+  { kind: "page", href: "/gallery", homeHash: "#gallery", label: "Gallery" },
+  { kind: "page", href: "/fan-art", homeHash: "#fan-art", label: "Fan art" },
+  { kind: "section", hash: "#media", label: "Media" },
+  { kind: "section", hash: "#socials", label: "Connect" },
+  { kind: "page", href: "/projects", label: "Projects" },
+];
 
 type HeaderProps = {
   data: VtuberProfile;
 };
 
 export function Header({ data }: HeaderProps) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const onHome = pathname === "/";
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+
+  const resolveHref = (link: NavLink) => {
+    if (link.kind === "section") {
+      return onHome ? link.hash : `/${link.hash}`;
+    }
+    if (onHome && link.homeHash) return link.homeHash;
+    return link.href;
+  };
+
+  const isActive = (link: NavLink) => {
+    if (link.kind === "page") {
+      return pathname === link.href || pathname.startsWith(`${link.href}/`);
+    }
+    return false;
+  };
+
+  const handleNavClick = (
+    event: MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
+    setOpen(false);
+
+    const hashIndex = href.indexOf("#");
+    if (hashIndex === -1) return;
+
+    const hash = href.slice(hashIndex);
+    const path = href.slice(0, hashIndex) || "/";
+
+    // Same-page hash: always scroll (even if hash already matches)
+    if (onHome && (path === "" || path === "/")) {
+      event.preventDefault();
+      scrollToHashTarget(hash, "smooth");
+      if (window.location.hash !== hash) {
+        history.pushState(null, "", hash);
+      }
+      return;
+    }
+
+    // From another route to /#section
+    if (path === "/" && hash) {
+      event.preventDefault();
+      router.push(`/${hash}`);
+    }
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -48,9 +105,18 @@ export function Header({ data }: HeaderProps) {
     >
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5 pt-[env(safe-area-inset-top)] sm:h-16 sm:px-10 lg:px-16">
         <Link
-          href="#top"
+          href={onHome ? "#top" : "/"}
           className="font-[family-name:var(--font-display)] text-base font-bold tracking-tight text-[#fff5f7] sm:text-lg"
-          onClick={() => setOpen(false)}
+          onClick={(event) => {
+            if (onHome) {
+              event.preventDefault();
+              scrollToHashTarget("#top", "smooth");
+              if (window.location.hash !== "#top") {
+                history.pushState(null, "", "#top");
+              }
+            }
+            setOpen(false);
+          }}
         >
           {data.basic.name}
           <span className="ml-1.5 text-sm font-medium text-[#e85a7a] sm:ml-2">
@@ -58,16 +124,26 @@ export function Header({ data }: HeaderProps) {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex" aria-label="Primary">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm tracking-wide text-[#f7d7de]/80 transition hover:text-[#fff5f7]"
-            >
-              {link.label}
-            </Link>
-          ))}
+        <nav
+          className="hidden items-center gap-5 lg:gap-7 md:flex"
+          aria-label="Primary"
+        >
+          {NAV_LINKS.map((link) => {
+            const href = resolveHref(link);
+            return (
+              <Link
+                key={link.label}
+                href={href}
+                onClick={(event) => handleNavClick(event, href)}
+                className={cn(
+                  "text-sm tracking-wide transition hover:text-[#fff5f7]",
+                  isActive(link) ? "text-[#fff5f7]" : "text-[#f7d7de]/80"
+                )}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
 
         <button
@@ -96,16 +172,19 @@ export function Header({ data }: HeaderProps) {
           className="mx-auto flex max-w-6xl flex-col gap-0.5 px-5 py-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6"
           aria-label="Mobile"
         >
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="min-h-12 py-3.5 text-base text-[#f7d7de] transition hover:text-[#fff5f7]"
-              onClick={() => setOpen(false)}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {NAV_LINKS.map((link) => {
+            const href = resolveHref(link);
+            return (
+              <Link
+                key={link.label}
+                href={href}
+                className="min-h-12 py-3.5 text-base text-[#f7d7de] transition hover:text-[#fff5f7]"
+                onClick={(event) => handleNavClick(event, href)}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
       </div>
     </header>
