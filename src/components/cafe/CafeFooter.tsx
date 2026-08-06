@@ -26,57 +26,57 @@ export function CafeFooter({ cafe }: CafeFooterProps) {
   const followLabel = xFromData?.label ?? CAFE_X.label;
 
   return (
-    <footer className="border-t border-[#9a7b5a]/25 bg-[#07090b] px-6 py-14 text-[#d8d0c4] sm:px-10 lg:px-16">
+    <footer className="border-t border-[#9a7b5a]/25 bg-[#07090b] px-5 py-12 text-[#d8d0c4] sm:px-10 sm:py-14 lg:px-16">
       <div className="mx-auto max-w-6xl">
         <div className="space-y-1" aria-hidden>
           <div className="border-t-2 border-[#9a7b5a]/35" />
           <div className="border-t border-[#9a7b5a]/25" />
         </div>
 
-        <div className="mt-8 flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-[0.62rem] tracking-[0.28em] text-[#9a7b5a] uppercase">
+        <div className="mt-7 flex flex-col gap-8 sm:mt-8 md:flex-row md:items-end md:justify-between md:gap-10">
+          <div className="min-w-0">
+            <p className="text-[0.58rem] tracking-[0.24em] text-[#9a7b5a] uppercase sm:text-[0.62rem] sm:tracking-[0.28em]">
               Fan project · Not official
               {cafe.edition?.caseNo ? ` · ${cafe.edition.caseNo}` : ""}
             </p>
-            <p className="mt-2 font-[family-name:var(--font-cafe-serif)] text-2xl font-semibold tracking-tight text-[#f4ebe3] italic sm:text-3xl">
+            <p className="mt-2 font-[family-name:var(--font-cafe-serif)] text-xl font-semibold tracking-tight text-[#f4ebe3] italic sm:text-2xl md:text-3xl">
               {masthead}
             </p>
             {cafe.titleLocal ? (
               <p className="mt-1 text-sm text-[#c4b8a8]">{cafe.titleLocal}</p>
             ) : null}
-            <p className="mt-4 max-w-md font-[family-name:var(--font-cafe-serif)] text-sm leading-relaxed text-[#c4b8a8]/90">
+            <p className="mt-3 max-w-md font-[family-name:var(--font-cafe-serif)] text-sm leading-relaxed text-[#c4b8a8]/90 sm:mt-4">
               คาเฟ่นี้จัดทำโดยแฟนคลับ Honeycomb — ไม่ใช่โครงการทางการของ Mild-R /
               หน่วยงานอย่างเป็นทางการ · เว็บโปรโมทนี้ก็เป็นงานแฟนเมดเช่นกัน
             </p>
 
-            <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+            <div className="mt-5 flex flex-col gap-3 sm:mt-5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2">
               <Link
                 href={followUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[#c46a7a] transition hover:text-[#f4ebe3]"
+                className="inline-flex w-fit items-center gap-1.5 border border-[#a84d5f]/45 bg-[#a84d5f]/15 px-3 py-2 text-sm text-[#f4ebe3] transition hover:border-[#c46a7a]/60 hover:bg-[#a84d5f]/25"
               >
                 {followLabel}
-                <span className="text-[#9a7b5a]">({CAFE_X.handle})</span>
-                <ExternalLink className="size-3.5 opacity-60" />
+                <span className="text-[#c4b8a8]">({CAFE_X.handle})</span>
+                <ExternalLink className="size-3.5 opacity-70" />
               </Link>
               <Link
                 href="/projects/cafe"
-                className="text-[#d8d0c4] transition hover:text-[#c46a7a]"
+                className="text-sm text-[#d8d0c4] transition hover:text-[#c46a7a]"
               >
                 Case file
               </Link>
             </div>
           </div>
 
-          <div className="space-y-3 md:text-right">
+          <div className="space-y-3 border-t border-[#9a7b5a]/20 pt-6 md:border-t-0 md:pt-0 md:text-right">
             {cafe.disclaimer ? (
               <p className="max-w-md text-xs leading-relaxed text-[#9a7b5a]/85 md:ml-auto">
                 {cafe.disclaimer}
               </p>
             ) : null}
-            <p className="text-xs tracking-[0.16em] text-[#9a7b5a]/70 uppercase">
+            <p className="text-[0.65rem] tracking-[0.14em] text-[#9a7b5a]/70 uppercase sm:text-xs sm:tracking-[0.16em]">
               © {year} · Honey Pulse Cafe · Fan-made
             </p>
             <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs tracking-wide text-[#9a7b5a]/70 md:justify-end">

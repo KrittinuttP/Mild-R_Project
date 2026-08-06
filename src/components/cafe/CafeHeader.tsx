@@ -96,11 +96,11 @@ export function CafeHeader({
           aria-hidden
         />
       )}
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-5 pt-[env(safe-area-inset-top)] sm:h-16 sm:px-10 lg:px-16">
-        <div className="min-w-0">
+      <div className="mx-auto flex min-h-14 max-w-6xl items-center justify-between gap-3 px-5 pt-[env(safe-area-inset-top)] sm:h-16 sm:gap-4 sm:px-10 lg:px-16">
+        <div className="min-w-0 flex-1">
           <Link
             href="/cafe"
-            className="block font-[family-name:var(--font-cafe-serif)] text-base font-semibold tracking-tight text-[#f4ebe3] italic sm:text-lg"
+            className="block truncate font-[family-name:var(--font-cafe-serif)] text-[0.95rem] font-semibold tracking-tight text-[#f4ebe3] italic sm:text-lg"
             onClick={(event) => {
               if (onCafeRoot) {
                 event.preventDefault();
@@ -114,15 +114,15 @@ export function CafeHeader({
           >
             {masthead}
           </Link>
-          <div className="mt-0.5 hidden items-center gap-2 sm:flex">
+          <div className="mt-0.5 flex items-center gap-2 sm:flex">
             {cafe.edition?.caseNo ? (
-              <span className="text-[0.58rem] tracking-[0.18em] text-[#9a7b5a]/90 uppercase">
+              <span className="truncate text-[0.55rem] tracking-[0.14em] text-[#9a7b5a]/90 uppercase sm:text-[0.58rem] sm:tracking-[0.18em]">
                 {cafe.edition.caseNo}
               </span>
             ) : null}
             <Link
               href={mildRHomeHref}
-              className="text-[0.65rem] tracking-[0.18em] text-[#a84d5f] uppercase transition hover:text-[#c46a7a]"
+              className="hidden text-[0.65rem] tracking-[0.18em] text-[#a84d5f] uppercase transition hover:text-[#c46a7a] sm:inline"
             >
               เว็บหลัก →
             </Link>
@@ -130,7 +130,7 @@ export function CafeHeader({
         </div>
 
         <nav
-          className="hidden items-center gap-1 md:flex"
+          className="hidden items-center gap-1 lg:flex"
           aria-label="Cafe"
         >
           {CAFE_NAV.map((link, index) => {
@@ -165,7 +165,7 @@ export function CafeHeader({
           type="button"
           className={cn(
             buttonVariants({ variant: "ghost", size: "icon" }),
-            "rounded-none text-[#f4ebe3] md:hidden"
+            "rounded-none text-[#f4ebe3] lg:hidden"
           )}
           aria-expanded={open}
           aria-controls="cafe-mobile-nav"
@@ -179,7 +179,7 @@ export function CafeHeader({
       <div
         id="cafe-mobile-nav"
         className={cn(
-          "border-t border-[#9a7b5a]/25 bg-[#0a0c0e]/95 md:hidden",
+          "border-t border-[#9a7b5a]/25 bg-[#0a0c0e]/95 lg:hidden",
           open ? "block" : "hidden"
         )}
       >
