@@ -17,25 +17,47 @@ function SoftHeart({ className }: { className?: string }) {
   );
 }
 
-function PulseHearts({ reduced }: { reduced: boolean }) {
+function PulseHearts({
+  reduced,
+  soft,
+}: {
+  reduced: boolean;
+  soft?: boolean;
+}) {
+  const a = soft
+    ? "absolute top-[14%] left-[10%] size-[16vw] max-w-36 text-[#c46a7a]/70 md:left-[14%] md:size-[11vw]"
+    : "absolute top-[18%] left-[12%] size-[18vw] max-w-40 text-[#e85a7a]/25 md:left-[18%] md:size-[12vw]";
+  const b = soft
+    ? "absolute top-[28%] right-[4%] size-[24vw] max-w-52 text-[#a84d5f]/65 md:right-[8%] md:size-[14vw]"
+    : "absolute top-[34%] right-[8%] size-[28vw] max-w-56 text-[#e85a7a]/18 md:right-[14%] md:size-[16vw]";
+  const c = soft
+    ? "absolute bottom-[20%] left-[18%] size-[13vw] max-w-28 text-[#c46a7a]/60 md:bottom-[16%] md:left-[28%] md:size-[9vw]"
+    : "absolute bottom-[28%] left-[28%] size-[14vw] max-w-28 text-[#f3b8c4]/16 md:bottom-[22%] md:left-[40%] md:size-[9vw]";
+
   return (
     <div className="absolute inset-0 overflow-hidden">
       <SoftHeart
         className={cn(
-          "absolute top-[18%] left-[12%] size-[18vw] max-w-40 text-[#e85a7a]/25 md:left-[18%] md:size-[12vw]",
-          !reduced && "animate-heart-pulse"
+          a,
+          !reduced && (soft ? "animate-heart-pulse-soft" : "animate-heart-pulse")
         )}
       />
       <SoftHeart
         className={cn(
-          "absolute top-[34%] right-[8%] size-[28vw] max-w-56 text-[#e85a7a]/18 md:right-[14%] md:size-[16vw]",
-          !reduced && "animate-heart-pulse-delayed"
+          b,
+          !reduced &&
+            (soft
+              ? "animate-heart-pulse-soft-delayed"
+              : "animate-heart-pulse-delayed")
         )}
       />
       <SoftHeart
         className={cn(
-          "absolute bottom-[28%] left-[28%] size-[14vw] max-w-28 text-[#f3b8c4]/16 md:bottom-[22%] md:left-[40%] md:size-[9vw]",
-          !reduced && "animate-heart-pulse-slow"
+          c,
+          !reduced &&
+            (soft
+              ? "animate-heart-pulse-soft-slow"
+              : "animate-heart-pulse-slow")
         )}
       />
     </div>
@@ -109,8 +131,15 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
-/** Soft heart-wave layer behind character / with BG — always pulse + ECG */
-export function HeartAtmosphere({ className }: { className?: string }) {
+/** Soft heart-wave layer behind character / with BG — pulse always; ECG optional */
+export function HeartAtmosphere({
+  className,
+  soft = false,
+}: {
+  className?: string;
+  /** Quieter cafe-style: rose tint, no ECG */
+  soft?: boolean;
+}) {
   const reduced = usePrefersReducedMotion();
 
   return (
@@ -121,9 +150,11 @@ export function HeartAtmosphere({ className }: { className?: string }) {
       )}
       aria-hidden
     >
-      <PulseHearts reduced={reduced} />
-      <EcgWave reduced={reduced} />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#140a0d]/35" />
+      <PulseHearts reduced={reduced} soft={soft} />
+      {!soft ? <EcgWave reduced={reduced} /> : null}
+      {!soft ? (
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#140a0d]/35" />
+      ) : null}
     </div>
   );
 }

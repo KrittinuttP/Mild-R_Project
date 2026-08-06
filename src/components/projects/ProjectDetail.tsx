@@ -33,6 +33,11 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
   const backLabel =
     categoryKey === "fansong" ? "Fansong ทั้งหมด" : "โปรเจกต์ทั้งหมด";
 
+  const actions = [
+    ...(project.cta ? [project.cta] : []),
+    ...(project.ctas ?? []),
+  ];
+
   return (
     <article className="relative mx-auto max-w-6xl px-5 pb-24 pt-28 sm:px-10 sm:pt-32 lg:px-16">
       <Link
@@ -67,25 +72,34 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
             {project.summary}
           </p>
 
-          {project.cta ? (
-            <Link
-              href={project.cta.url}
-              target={project.cta.url.startsWith("http") ? "_blank" : undefined}
-              rel={
-                project.cta.url.startsWith("http")
-                  ? "noopener noreferrer"
-                  : undefined
-              }
-              className={cn(
-                buttonVariants({ size: "lg" }),
-                "mt-8 border-transparent bg-[#e85a7a] text-white hover:bg-[#e85a7a]/85"
-              )}
-            >
-              {project.cta.label}
-              {project.cta.url.startsWith("http") ? (
-                <ExternalLink className="size-4 opacity-80" />
-              ) : null}
-            </Link>
+          {actions.length > 0 ? (
+            <div className="mt-8 flex flex-wrap gap-3">
+              {actions.map((action, index) => {
+                const external = action.url.startsWith("http");
+                return (
+                  <Link
+                    key={action.url + action.label}
+                    href={action.url}
+                    target={external ? "_blank" : undefined}
+                    rel={external ? "noopener noreferrer" : undefined}
+                    className={cn(
+                      buttonVariants({
+                        size: "lg",
+                        variant: index === 0 ? "default" : "outline",
+                      }),
+                      index === 0
+                        ? "border-transparent bg-[#e85a7a] text-white hover:bg-[#e85a7a]/85"
+                        : "border-[#f3b8c4]/30 bg-transparent text-[#fff5f7] hover:border-[#e85a7a]/50 hover:bg-[#e85a7a]/15 hover:text-[#fff5f7]"
+                    )}
+                  >
+                    {action.label}
+                    {external ? (
+                      <ExternalLink className="size-4 opacity-80" />
+                    ) : null}
+                  </Link>
+                );
+              })}
+            </div>
           ) : null}
         </div>
 

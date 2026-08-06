@@ -103,6 +103,11 @@ export interface VtuberBasic {
 
 export type ProjectStatus = "upcoming" | "active" | "ended";
 
+export interface ProjectCta {
+  label: string;
+  url: string;
+}
+
 /** Promo / campaign project (Cafe, MV, …) listed under /projects */
 export interface ProjectItem {
   id: string;
@@ -115,10 +120,10 @@ export interface ProjectItem {
   category: string;
   highlights?: string[];
   body: string[];
-  cta?: {
-    label: string;
-    url: string;
-  };
+  /** Primary CTA (backwards compatible) */
+  cta?: ProjectCta;
+  /** Extra CTAs — rendered with `cta` when present */
+  ctas?: ProjectCta[];
   /** Optional YouTube watch URL (e.g. MV pages) */
   youtubeUrl?: string;
 }
@@ -173,6 +178,97 @@ export interface HbdPage {
   wishes: HbdWish[];
 }
 
+export interface CafeMenuItem {
+  id: string;
+  name: string;
+  nameLocal?: string;
+  description?: string;
+  priceLabel?: string;
+  /** Menu photo path under /public */
+  image?: string;
+  imageAlt?: string;
+}
+
+export interface CafeGoodsItem {
+  id: string;
+  name: string;
+  nameLocal?: string;
+  description?: string;
+  image?: string;
+  imageAlt?: string;
+}
+
+export interface CafeScheduleItem {
+  time: string;
+  title: string;
+  titleLocal?: string;
+  detail?: string;
+}
+
+export interface CafeDaySchedule {
+  title: string;
+  titleLocal?: string;
+  dateLabel?: string;
+  items: CafeScheduleItem[];
+}
+
+/** Broadsheet / dossier chrome for `/cafe` */
+export interface CafeEdition {
+  /** e.g. "The Honey Pulse Gazette" */
+  masthead: string;
+  /** e.g. "SPECIAL EDITION" */
+  kicker?: string;
+  /** e.g. "CASE · MR-HP-001" */
+  caseNo?: string;
+  /** e.g. "Vol. I · No. 1 · Mild-R Fanclub" */
+  dateline?: string;
+}
+
+export type CafeVisualKind = "atmosphere" | "location" | "art" | "other";
+
+/** Atmosphere / location / sample art plates on `/cafe` */
+export interface CafeVisual {
+  id: string;
+  src: string;
+  alt: string;
+  caption?: string;
+  kind?: CafeVisualKind;
+}
+
+/** Dedicated cafe promo page (`/cafe`) */
+export interface CafePage {
+  title: string;
+  titleLocal?: string;
+  tagline: string;
+  status: ProjectStatus;
+  statusLabel?: string;
+  /** Newspaper / Sherlock editorial frame */
+  edition?: CafeEdition;
+  heroImage: string;
+  heroAlt?: string;
+  /** Atmosphere, venue, sample art (not the home Gallery board) */
+  visuals?: CafeVisual[];
+  schedule: {
+    label: string;
+    detail?: string;
+  };
+  location: {
+    label: string;
+    detail?: string;
+    mapUrl?: string;
+    image?: string;
+    imageAlt?: string;
+  };
+  /** In-day activity timeline */
+  daySchedule?: CafeDaySchedule;
+  highlights: string[];
+  menu: CafeMenuItem[];
+  goods?: CafeGoodsItem[];
+  body: string[];
+  ctas: ProjectCta[];
+  disclaimer?: string;
+}
+
 export interface VtuberProfile {
   id: string;
   basic: VtuberBasic;
@@ -187,4 +283,5 @@ export interface VtuberProfile {
   parallax_layers: ParallaxLayer[];
   projects: ProjectItem[];
   hbd: HbdPage;
+  cafe: CafePage;
 }

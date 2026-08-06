@@ -1,0 +1,165 @@
+{
+  "title": "Honey Pulse Cafe",
+  "titleLocal": "คาเฟ่ฮันนี่พัลส์",
+  "tagline": "รายงานพิเศษจากห้องเคสของ Mild-R — คาเฟ่ลึกลับธีมนักสืบ พร้อมเมนูพิเศษ โซนถ่ายรูป และของที่ระลึกสำหรับฮันนี่",
+  "status": "upcoming",
+  "statusLabel": "CASE PENDING",
+  "edition": {
+    "masthead": "The Honey Pulse Gazette",
+    "kicker": "SPECIAL EDITION",
+    "caseNo": "CASE · MR-HP-001",
+    "dateline": "Vol. I · No. 1 · Mild-R Fanclub"
+  },
+  "heroImage": "/assets/mild/kv/Mild-R_KV.png",
+  "heroAlt": "Mild-R key visual — Honey Pulse Cafe sample art",
+  "visuals": [
+    {
+      "id": "atmosphere-floor",
+      "src": "/assets/images/gallery-01.svg",
+      "alt": "บรรยากาศร้าน (placeholder)",
+      "caption": "Atmosphere · cafe floor",
+      "kind": "atmosphere"
+    },
+    {
+      "id": "atmosphere-photo-zone",
+      "src": "/assets/images/gallery-02.svg",
+      "alt": "โซนถ่ายรูป (placeholder)",
+      "caption": "Atmosphere · photo zone",
+      "kind": "atmosphere"
+    },
+    {
+      "id": "location-exterior",
+      "src": "/assets/images/gallery-03.svg",
+      "alt": "หน้าตาสถานที่ (placeholder)",
+      "caption": "Location · venue plate",
+      "kind": "location"
+    },
+    {
+      "id": "art-sample",
+      "src": "/assets/mild/kv/Mild-R_KV.png",
+      "alt": "Sample art จาก Mild-R KV",
+      "caption": "Art · Mild-R KV sample",
+      "kind": "art"
+    }
+  ],
+  "schedule": {
+    "label": "Window",
+    "detail": "รอบเข้าชมจะประกาศเมื่อเคสถูกเปิดอย่างเป็นทางการ"
+  },
+  "location": {
+    "label": "Location",
+    "detail": "พิกัดจะอัปเดตก่อนวันเปิดเคส",
+    "image": "/assets/images/gallery-03.svg",
+    "imageAlt": "แผนผัง / ภาพสถานที่ (placeholder)"
+  },
+  "daySchedule": {
+    "title": "Daily Schedule",
+    "titleLocal": "ตารางกิจกรรมในวัน",
+    "dateLabel": "วันเปิดเคส · TBA",
+    "items": [
+      {
+        "time": "11:00",
+        "title": "Doors open",
+        "titleLocal": "เปิดประตู",
+        "detail": "เช็กอินและรับแผนที่เคสย่อ"
+      },
+      {
+        "time": "11:30",
+        "title": "First pour",
+        "titleLocal": "รอบเครื่องดื่มแรก",
+        "detail": "เปิดเมนูซิกเนเจอร์ Heart Cure Latte"
+      },
+      {
+        "time": "13:00",
+        "title": "Photo zone",
+        "titleLocal": "โซนถ่ายรูป",
+        "detail": "พร็อพนักสืบ / มุมหลักฐานหัวใจ"
+      },
+      {
+        "time": "15:00",
+        "title": "Goods drop",
+        "titleLocal": "ปล่อยของที่ระลึก",
+        "detail": "อะคริลิกและโฟโต้การ์ด (จำนวนจำกัด)"
+      },
+      {
+        "time": "17:30",
+        "title": "Last order",
+        "titleLocal": "ออเดอร์สุดท้าย",
+        "detail": "รับเครื่องดื่มและของหวานรอบท้าย"
+      },
+      {
+        "time": "18:30",
+        "title": "Case closed",
+        "titleLocal": "ปิดเคส",
+        "detail": "ปิดร้านและเก็บหลักฐานประจำวัน"
+      }
+    ]
+  },
+  "highlights": [
+    "ซิกเนเจอร์ดริ้งก์ธีมหัวใจ · รักษาหัวใจ",
+    "โซนถ่ายรูปพร็อพบรรยากาศนักสืบ",
+    "Goods ชิ้นพิเศษเฉพาะช่วงอีเวนต์"
+  ],
+  "menu": [
+    {
+      "id": "heart-cure-latte",
+      "name": "Heart Cure Latte",
+      "nameLocal": "ลาเต้น้ำตาฮันนี่",
+      "description": "ซิกเนเจอร์โทนกุหลาบหม่น — รายละเอียดรสชาติจะถูกเปิดเผยใกล้เปิดงาน",
+      "priceLabel": "CLASSIFIED",
+      "image": "/assets/images/gallery-01.svg",
+      "imageAlt": "Heart Cure Latte (placeholder)"
+    },
+    {
+      "id": "pulse-soda",
+      "name": "Pulse Soda",
+      "nameLocal": "พัลส์โซดา",
+      "description": "เครื่องดื่มซ่าเบาๆ จังหวะหัวใจใต้แสงไฟคาเฟ่",
+      "priceLabel": "CLASSIFIED",
+      "image": "/assets/images/gallery-02.svg",
+      "imageAlt": "Pulse Soda (placeholder)"
+    },
+    {
+      "id": "honey-parfait",
+      "name": "Honey Pulse Parfait",
+      "nameLocal": "ฮันนี่พัลส์พาเฟต์",
+      "description": "ของหวานโทนครีมหม่น ถ่ายรูปแล้วเหมือนหลักฐานชิ้นสวย",
+      "priceLabel": "CLASSIFIED",
+      "image": "/assets/images/gallery-04.svg",
+      "imageAlt": "Honey Pulse Parfait (placeholder)"
+    }
+  ],
+  "goods": [
+    {
+      "id": "acrylic-stand",
+      "name": "Acrylic Stand",
+      "nameLocal": "อะคริลิกสแตนด์",
+      "description": "วัตถุพยานสะสมธีมคาเฟ่ — รายการจริงประกาศก่อนขาย",
+      "image": "/assets/images/gallery-04.svg",
+      "imageAlt": "Acrylic stand (placeholder)"
+    },
+    {
+      "id": "photo-card",
+      "name": "Photo Card Set",
+      "nameLocal": "ชุดโฟโต้การ์ด",
+      "description": "ชุดรูปที่ระลึกสำหรับฮันนี่ที่ร่วมเปิดเคส",
+      "image": "/assets/mild/kv/Mild-R_KV.png",
+      "imageAlt": "Photo card set sample from Mild-R KV"
+    }
+  ],
+  "body": [
+    "Honey Pulse Cafe คือโปรเจกต์คาเฟ่ที่แฟนคลับ Honeycomb จัดทำเองภายใต้ธีม Mild-R — บรรยากาศนักสืบในห้องเคส แต่ยังคงหัวใจของฮันนี่ไว้",
+    "รายละเอียดวันเวลา สถานที่ และเมนูจริงจะอัปเดตเมื่อพร้อมเปิด · ติดตามประกาศคาเฟ่ได้ที่ @Mild_Honeycomb"
+  ],
+  "ctas": [
+    {
+      "label": "ติดตามข่าวคาเฟ่บน X",
+      "url": "https://x.com/Mild_Honeycomb"
+    },
+    {
+      "label": "ดูสรุปใน Projects",
+      "url": "/projects/cafe"
+    }
+  ],
+  "disclaimer": "คาเฟ่และเว็บโปรโมทนี้เป็นงานแฟนเมดที่แฟนคลับจัดทำเอง — ไม่ใช่ประกาศทางการของ Mild-R / เอเจนซี · รายละเอียดอีเวนต์อาจเปลี่ยน · รูปบางส่วนเป็น placeholder / sample art"
+}

@@ -8,6 +8,7 @@
  */
 
 import type {
+  CafePage,
   CharacterDesign,
   FanArtItem,
   FanIdentity,
@@ -36,6 +37,7 @@ import media from "./mild-r/media.json";
 import parallaxLayers from "./mild-r/parallax-layers.json";
 import projects from "./mild-r/projects.json";
 import hbd from "./mild-r/hbd.json";
+import cafe from "./mild-r/cafe.json";
 
 /** Merge category JSON into a single profile document. */
 export function loadMildRProfile(): VtuberProfile {
@@ -53,6 +55,7 @@ export function loadMildRProfile(): VtuberProfile {
     parallax_layers: parallaxLayers as ParallaxLayer[],
     projects: projects as ProjectItem[],
     hbd: hbd as HbdPage,
+    cafe: cafe as CafePage,
   };
 }
 
@@ -75,6 +78,7 @@ export function hasProjectCategory(category: string): boolean {
 export default mildRData;
 
 export type {
+  CafePage,
   CharacterDesign,
   FanArtItem,
   FanIdentity,
@@ -87,6 +91,7 @@ export type {
   MediaCategory,
   MediaClip,
   ParallaxLayer,
+  ProjectCta,
   ProjectItem,
   ProjectStatus,
   SocialLink,

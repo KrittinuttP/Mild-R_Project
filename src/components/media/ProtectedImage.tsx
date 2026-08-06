@@ -17,7 +17,10 @@ export function ProtectedImage({
   ...props
 }: ProtectedImageProps) {
   return (
-    <span data-protect-media className={cn("contents", wrapClassName)}>
+    <span
+      data-protect-media
+      className={cn(wrapClassName ?? "contents")}
+    >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         alt={alt}

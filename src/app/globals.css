@@ -162,6 +162,31 @@
   }
 }
 
+/* Cafe / quieter heroes — same beat, medium opacity (visible, not competing KV) */
+@keyframes heart-pulse-soft {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.28;
+  }
+  14% {
+    transform: scale(1.12);
+    opacity: 0.48;
+  }
+  28% {
+    transform: scale(0.98);
+    opacity: 0.32;
+  }
+  42% {
+    transform: scale(1.16);
+    opacity: 0.55;
+  }
+  70% {
+    transform: scale(1);
+    opacity: 0.28;
+  }
+}
+
 @keyframes ecg-trace {
   0% {
     stroke-dashoffset: 0;
@@ -184,6 +209,23 @@
 
 @utility animate-heart-pulse-slow {
   animation: heart-pulse var(--heart-beat) ease-in-out
+    calc(var(--heart-beat) * 0.36) infinite;
+  transform-origin: center;
+}
+
+@utility animate-heart-pulse-soft {
+  animation: heart-pulse-soft var(--heart-beat) ease-in-out infinite;
+  transform-origin: center;
+}
+
+@utility animate-heart-pulse-soft-delayed {
+  animation: heart-pulse-soft var(--heart-beat) ease-in-out
+    calc(var(--heart-beat) * 0.18) infinite;
+  transform-origin: center;
+}
+
+@utility animate-heart-pulse-soft-slow {
+  animation: heart-pulse-soft var(--heart-beat) ease-in-out
     calc(var(--heart-beat) * 0.36) infinite;
   transform-origin: center;
 }
@@ -237,6 +279,9 @@
   .animate-heart-pulse,
   .animate-heart-pulse-delayed,
   .animate-heart-pulse-slow,
+  .animate-heart-pulse-soft,
+  .animate-heart-pulse-soft-delayed,
+  .animate-heart-pulse-soft-slow,
   .animate-ecg-trace {
     animation: none !important;
   }

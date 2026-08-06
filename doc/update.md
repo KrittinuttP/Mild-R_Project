@@ -79,6 +79,15 @@
 - [x] `embedExternal` — คลิปที่ฝังไม่ได้ (Tipsy / GETCHA / Event) โชว์ thumbnail บนเว็บ แล้วเปิด YouTube · ที่เหลือฝังปกติ
 - [x] Hashtags คลิกแล้วเปิด X หน้าแท็ก (`x.com/hashtag/...`)
 - [x] Footer credit — Made with ♡ by ZAYZHIK 🦈 (ลิงก์ X)
+- [x] หน้า `/cafe` โปรโมทเต็ม + `/projects/cafe` ลิงก์ไปโปรโมทและ X
+- [x] `/cafe` โทน noir–rose นักสืบ/สายลับ + GSAP hero parallax / ScrollReveal
+- [x] Daily Schedule ไทม์ไลน์กิจกรรมในวันบน `/cafe`
+- [x] Cafe แยก layout ทั้ง Header/Footer จากเว็บ Mild-R
+- [x] `/cafe` โทน blend หนังสือพิมพ์ลอนดอน + dossier Sherlock (Newsreader + paper slabs) คง Mild-R rose
+- [x] `/cafe` ช่องรูป: hero KV, visuals (atmosphere/location/art), location.image, menu/goods images (+ placeholder)
+- [x] `/cafe` dark editorial รวม layout/สี/ตำแหน่ง — ไม่ใช้แผ่นครีมขาว เส้น copper–rose ทั้งหน้า
+- [x] `/cafe` loading สั้นโทน gazette (`CafeSplash`) — ข้ามเมื่อ soft-nav ในแอป · preload KV
+- [x] `/cafe` scroll reveal ผสม (editorial / soft / float) + จัดรูป mixed editorial (plates/menu 3:4/goods)
 
 ---
 

@@ -51,9 +51,10 @@ Mild-R_Project/
 │   │       ├── gallery.json
 │   │       ├── fan-art.json
 │   │       ├── media.json
+│   │       ├── cafe.json
 │   │       ├── hbd.json
 │   │       ├── parallax-layers.json
-│   │       └── projects.json    # Cafe, MV, HBD, …
+│   │       └── projects.json    # Cafe summary, Fansong, HBD, …
 │   ├── hooks/
 │   ├── lib/
 │   └── types/

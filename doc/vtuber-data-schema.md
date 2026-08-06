@@ -158,6 +158,11 @@ export interface VtuberBasic {
 
 export type ProjectStatus = "upcoming" | "active" | "ended";
 
+export interface ProjectCta {
+  label: string;
+  url: string;
+}
+
 export interface ProjectItem {
   id: string;
   slug: string;
@@ -169,8 +174,74 @@ export interface ProjectItem {
   category: string;
   highlights?: string[];
   body: string[];
-  cta?: { label: string; url: string };
+  cta?: ProjectCta;
+  ctas?: ProjectCta[];
   youtubeUrl?: string;
+}
+
+export interface CafePage {
+  title: string;
+  titleLocal?: string;
+  tagline: string;
+  status: ProjectStatus;
+  statusLabel?: string;
+  /** Broadsheet / dossier chrome */
+  edition?: {
+    masthead: string;
+    kicker?: string;
+    caseNo?: string;
+    dateline?: string;
+  };
+  heroImage: string;
+  heroAlt?: string;
+  /** Atmosphere / venue / sample art plates */
+  visuals?: Array<{
+    id: string;
+    src: string;
+    alt: string;
+    caption?: string;
+    kind?: "atmosphere" | "location" | "art" | "other";
+  }>;
+  schedule: { label: string; detail?: string };
+  location: {
+    label: string;
+    detail?: string;
+    mapUrl?: string;
+    image?: string;
+    imageAlt?: string;
+  };
+  daySchedule?: {
+    title: string;
+    titleLocal?: string;
+    dateLabel?: string;
+    items: Array<{
+      time: string;
+      title: string;
+      titleLocal?: string;
+      detail?: string;
+    }>;
+  };
+  highlights: string[];
+  menu: Array<{
+    id: string;
+    name: string;
+    nameLocal?: string;
+    description?: string;
+    priceLabel?: string;
+    image?: string;
+    imageAlt?: string;
+  }>;
+  goods?: Array<{
+    id: string;
+    name: string;
+    nameLocal?: string;
+    description?: string;
+    image?: string;
+    imageAlt?: string;
+  }>;
+  body: string[];
+  ctas: ProjectCta[];
+  disclaimer?: string;
 }
 
 export interface VtuberProfile {
@@ -187,6 +258,7 @@ export interface VtuberProfile {
   parallax_layers: ParallaxLayer[];
   projects: ProjectItem[];
   hbd: HbdPage;
+  cafe: CafePage;
 }
 ```
 
@@ -206,6 +278,7 @@ export interface VtuberProfile {
 | `gallery.json` | `GalleryItem[]` |
 | `fan-art.json` | `FanArtItem[]` |
 | `media.json` | `MediaClip[]` |
+| `cafe.json` | `CafePage` |
 | `hbd.json` | `HbdPage` |
 | `parallax-layers.json` | `ParallaxLayer[]` |
 | `projects.json` | `ProjectItem[]` |
