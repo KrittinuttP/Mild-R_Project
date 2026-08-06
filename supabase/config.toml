@@ -1,0 +1,14 @@
+# A string used to distinguish different Supabase projects on the same host
+project_id = "mild-r-hbd-2026"
+
+[api]
+enabled = true
+schemas = ["public", "mild_r", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+major_version = 15
+
+[functions.youtube-tracker]
+verify_jwt = true

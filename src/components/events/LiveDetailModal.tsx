@@ -148,7 +148,14 @@ export function LiveDetailModal({
               </div>
 
               {slot.note ? (
-                <p className="border-l-2 border-[#e85a7a]/40 pl-3 text-sm leading-relaxed text-[#f7d7de]/80">
+                <p
+                  className={cn(
+                    "border-l-2 pl-3 text-sm leading-relaxed",
+                    slot.note.startsWith("ช่อง ")
+                      ? "border-[#d4a574]/55 text-[#e8c49a]"
+                      : "border-[#e85a7a]/40 text-[#f7d7de]/80"
+                  )}
+                >
                   {slot.note}
                 </p>
               ) : null}

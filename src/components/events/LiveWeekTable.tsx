@@ -88,8 +88,16 @@ function SlotCard({
             {platform}
           </p>
         ) : null}
-        {slot.note && !compact ? (
-          <p className="mt-1 line-clamp-2 text-[0.65rem] text-[#f3b8c4]/45">
+        {slot.note ? (
+          <p
+            className={cn(
+              "mt-1 line-clamp-2 text-[0.65rem]",
+              slot.note.startsWith("ช่อง ")
+                ? "font-medium text-[#e8c49a]/90"
+                : "text-[#f3b8c4]/45",
+              compact && "line-clamp-1"
+            )}
+          >
             {slot.note}
           </p>
         ) : null}

@@ -8,14 +8,23 @@ import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { MediaProtection } from "@/components/media/MediaProtection";
 import { mildRData } from "@/data/vtuber-data";
+import {
+  loadLiveStreams,
+  mergeLiveWeeksWithStreams,
+} from "@/lib/live-streams";
 
 export const metadata: Metadata = {
   title: "Live Schedule | Mild-R Fanclub",
   description:
-    "ตารางไลฟ์ Mild-R — สัปดาห์นี้และปฏิทินรายเดือน ย้อนดูได้ เลือกปีได้",
+    "ตารางไลฟ์ Mild-R — สัปดาห์นี้และปฏิทินรายเดือน รวมคลิปจาก YouTube",
 };
 
-export default function LivePage() {
+export const revalidate = 300;
+
+export default async function LivePage() {
+  const streams = await loadLiveStreams();
+  const weeks = mergeLiveWeeksWithStreams([], streams);
+
   return (
     <>
       <MediaProtection />
@@ -32,11 +41,18 @@ export default function LivePage() {
               ตารางไลฟ์
             </h1>
             <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#f7d7de]/85 sm:text-base">
-              สัปดาห์ปัจจุบันด้านบน · ปฏิทินรายเดือนด้านล่างสำหรับย้อนดูและเลือกปี
+              ข้อมูลจาก YouTube ผ่าน Supabase — สัปดาห์ปัจจุบันด้านบน ·
+              ปฏิทินรายเดือนด้านล่าง · ช่องอื่นจะระบุชื่อช่อง
             </p>
 
             <div className="mt-12 sm:mt-16">
-              <LiveScheduleBoard weeks={mildRData.events.liveWeeks} />
+              {weeks.length > 0 ? (
+                <LiveScheduleBoard weeks={weeks} />
+              ) : (
+                <div className="border border-dashed border-[#f3b8c4]/20 bg-[#1a0d12]/35 px-5 py-10 text-sm text-[#f3b8c4]/70">
+                  ยังไม่มีข้อมูลไลฟ์จากฐานข้อมูล
+                </div>
+              )}
             </div>
 
             <Link

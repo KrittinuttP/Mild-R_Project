@@ -91,11 +91,25 @@
 
 ---
 
+## Phase 8 — YouTube Live → Supabase → /live ✅
+
+- [x] Schema `mild_r` + table `live_streams` + public view `mild_r_live_streams`
+- [x] Edge Function `youtube-tracker` (main / search + early return)
+- [x] Cron SQL template + backfill script
+- [x] Frontend `loadLiveStreams` + `YoutubeLiveArchive` บน `/live`
+- [x] เอกสาร `doc/ytData.md`
+
+ดูรายละเอียด: [`ytData.md`](./ytData.md)
+
+---
+
 ## ยังไม่ทำ (backlog)
 
 - [ ] หน้า HBD ดึงรูปจาก upload จริง (Supabase Storage)
 - [ ] รวม / โชว์ gallery art ของ Mild-R (ของจริงแทน placeholder)
-- [ ] เชื่อม Supabase จริง
+- [x] ใส่ `YOUTUBE_API_KEY` + deploy Edge Function + รัน Cron จริง
+- [x] รัน `npm run backfill:youtube` กวาดประวัติ
+- [ ] ตั้ง env บน Vercel (`NEXT_PUBLIC_SUPABASE_*`)
 
 ---
 

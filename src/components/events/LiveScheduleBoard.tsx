@@ -67,7 +67,16 @@ function SlotListItem({
             {slot.titleLocal ?? slot.title}
           </p>
           {slot.note ? (
-            <p className="mt-1 text-xs text-[#f3b8c4]/50">{slot.note}</p>
+            <p
+              className={cn(
+                "mt-1 text-xs",
+                slot.note.startsWith("ช่อง ")
+                  ? "font-medium text-[#e8c49a]/90"
+                  : "text-[#f3b8c4]/50"
+              )}
+            >
+              {slot.note}
+            </p>
           ) : null}
         </div>
         {slot.url ? (

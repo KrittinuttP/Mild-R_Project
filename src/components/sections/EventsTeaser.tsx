@@ -21,6 +21,8 @@ import type { CalendarEvent, LiveWeek, VtuberProfile } from "@/types/vtuber";
 
 type EventsTeaserProps = {
   data: VtuberProfile;
+  /** When provided, replaces JSON liveWeeks (e.g. Supabase streams). */
+  liveWeeks?: LiveWeek[];
 };
 
 function EventRow({
@@ -91,10 +93,10 @@ function buildTeaserWeeks(weeks: LiveWeek[]): LiveWeek[] {
   ].filter((week): week is LiveWeek => Boolean(week));
 }
 
-export function EventsTeaser({ data }: EventsTeaserProps) {
+export function EventsTeaser({ data, liveWeeks }: EventsTeaserProps) {
   const board = data.events;
   const upcoming = upcomingEvents(board, 3);
-  const weeks = sortLiveWeeks(board.liveWeeks);
+  const weeks = sortLiveWeeks(liveWeeks ?? board.liveWeeks);
   const teaserWeeks = buildTeaserWeeks(weeks);
   const [activeId, setActiveId] = useState<string | null>(null);
   const active = upcoming.find((event) => event.id === activeId) ?? null;
