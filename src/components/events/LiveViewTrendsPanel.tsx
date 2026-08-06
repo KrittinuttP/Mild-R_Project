@@ -458,14 +458,10 @@ export function LiveViewTrendsPanel({
 function trendItemToSlot(
   item: LiveTrendStreamItem | LiveViewPeakStream
 ): LiveSlot {
-  const viewsOnEnd =
-    "views_on_end" in item ? (item.views_on_end ?? null) : null;
+  const viewsOnEnd = item.views_on_end ?? null;
   const latestViews =
-    "latest_views" in item
-      ? (item.latest_views ?? null)
-      : "views" in item
-        ? item.views
-        : null;
+    item.latest_views ??
+    ("views" in item ? (item as LiveViewPeakStream).views : null);
   const isOwn =
     "is_own_channel" in item ? (item.is_own_channel ?? null) : null;
   const isCollab =
@@ -504,8 +500,6 @@ function trendItemToSlot(
   }
   if (latestViews != null) {
     viewBits.push(`ยอดรวม ${formatViews(latestViews)}`);
-  } else if ("views" in item) {
-    viewBits.push(`ยอดวิว ${formatViews(item.views)}`);
   }
 
   if (viewBits.length > 0) {

@@ -304,14 +304,7 @@ export function LiveViewTrendsChart({
                     showDots={showDots}
                   />
                 )}
-                activeDot={{
-                  r: 7,
-                  onClick: (_: unknown, event: { payload?: ChartPoint }) => {
-                    if (event?.payload?.bucket) {
-                      onSelectBucket(event.payload.bucket);
-                    }
-                  },
-                }}
+                activeDot={{ r: 7 }}
               />
             ) : (
               <>
@@ -331,17 +324,7 @@ export function LiveViewTrendsChart({
                         }
                       : false
                   }
-                  activeDot={{
-                    r: 6,
-                    onClick: (
-                      _: unknown,
-                      event: { payload?: ChartPoint }
-                    ) => {
-                      if (event?.payload?.bucket) {
-                        onSelectBucket(event.payload.bucket);
-                      }
-                    },
-                  }}
+                  activeDot={{ r: 6 }}
                 />
                 <Line
                   type="monotone"
@@ -377,17 +360,7 @@ export function LiveViewTrendsChart({
                         }
                       : false
                   }
-                  activeDot={{
-                    r: 6,
-                    onClick: (
-                      _: unknown,
-                      event: { payload?: ChartPoint }
-                    ) => {
-                      if (event?.payload?.bucket) {
-                        onSelectBucket(event.payload.bucket);
-                      }
-                    },
-                  }}
+                  activeDot={{ r: 6 }}
                 />
                 <Line
                   type="monotone"
@@ -405,17 +378,7 @@ export function LiveViewTrendsChart({
                         }
                       : false
                   }
-                  activeDot={{
-                    r: 6,
-                    onClick: (
-                      _: unknown,
-                      event: { payload?: ChartPoint }
-                    ) => {
-                      if (event?.payload?.bucket) {
-                        onSelectBucket(event.payload.bucket);
-                      }
-                    },
-                  }}
+                  activeDot={{ r: 6 }}
                 />
               </>
             )}
