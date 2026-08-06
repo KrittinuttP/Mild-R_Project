@@ -21,6 +21,8 @@ const NAV_LINKS: NavLink[] = [
   { kind: "page", href: "/gallery", homeHash: "#gallery", label: "Gallery" },
   { kind: "page", href: "/fan-art", homeHash: "#fan-art", label: "Fan art" },
   { kind: "section", hash: "#media", label: "Media" },
+  { kind: "page", href: "/events", homeHash: "#events", label: "Events" },
+  { kind: "page", href: "/live", homeHash: "#live", label: "Live" },
   { kind: "section", hash: "#socials", label: "Connect" },
   { kind: "page", href: "/projects", label: "Projects" },
 ];

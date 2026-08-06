@@ -12,6 +12,8 @@ const FOOTER_LINKS = [
   { href: "/gallery", label: "Gallery" },
   { href: "/fan-art", label: "Fan art" },
   { href: "/#media", label: "Media" },
+  { href: "/events", label: "Events" },
+  { href: "/live", label: "Live" },
   { href: "/projects", label: "Projects" },
   { href: "/#socials", label: "Connect" },
 ] as const;

@@ -1,0 +1,409 @@
+{
+  "events": [
+    {
+      "id": "honey-pulse-cafe",
+      "title": "Honey Pulse Cafe",
+      "titleLocal": "คาเฟ่ฮันนี่พัลส์",
+      "date": "2026-09-01",
+      "endDate": "2026-09-07",
+      "timeLabel": "รอบเข้าชม · TBA",
+      "venue": "TBA · Fan cafe",
+      "platform": "Honeycomb",
+      "url": "/cafe",
+      "status": "upcoming",
+      "summary": "คาเฟ่แฟนเมดธีมนักสืบหัวใจ — รายละเอียดติดตาม @Mild_Honeycomb",
+      "cover": "/assets/mild/kv/Mild-R_KV.png",
+      "coverAlt": "Honey Pulse Cafe cover"
+    },
+    {
+      "id": "august-collab-live",
+      "title": "Weekend Collab Live",
+      "titleLocal": "ไลฟ์คอลแลบสุดสัปดาห์",
+      "date": "2026-08-09",
+      "timeLabel": "20:00 ICT",
+      "platform": "YouTube",
+      "url": "https://www.youtube.com/@Mild_R_",
+      "status": "upcoming",
+      "summary": "ไลฟ์คอลแลบสั้นๆ (placeholder) — วันเวลาจริงอัปเดตทีหลัง",
+      "cover": "/assets/images/gallery-02.svg",
+      "coverAlt": "Weekend Collab Live cover"
+    },
+    {
+      "id": "july-karaoke-night",
+      "title": "Karaoke Night",
+      "titleLocal": "คืนคาราโอเกะ",
+      "date": "2026-07-26",
+      "timeLabel": "21:00 ICT",
+      "platform": "YouTube",
+      "url": "https://www.youtube.com/@Mild_R_",
+      "status": "ended",
+      "summary": "รวมเพลงฮิตและร้องเล่น — archive placeholder",
+      "cover": "/assets/images/gallery-01.svg",
+      "coverAlt": "Karaoke Night cover"
+    },
+    {
+      "id": "july-chill-talk",
+      "title": "Chill Talk Stream",
+      "titleLocal": "ไลฟ์คุยสบายๆ",
+      "date": "2026-07-19",
+      "timeLabel": "20:30 ICT",
+      "platform": "YouTube",
+      "status": "ended",
+      "summary": "อัปเดตสั้นๆ กับฮันนี่ — archive placeholder",
+      "cover": "/assets/images/gallery-04.svg",
+      "coverAlt": "Chill Talk Stream cover"
+    }
+  ],
+  "liveWeeks": [
+    {
+      "id": "2026-w32",
+      "weekStart": "2026-08-03",
+      "label": "สัปดาห์นี้",
+      "slots": [
+        {
+          "id": "2026-08-04-chill",
+          "date": "2026-08-04",
+          "time": "20:00",
+          "title": "Monday Chill",
+          "titleLocal": "จันทร์ชิล",
+          "platform": "youtube",
+          "url": "https://www.youtube.com/@Mild_R_",
+          "note": "placeholder",
+          "kind": "solo"
+        },
+        {
+          "id": "2026-08-06-amenti",
+          "date": "2026-08-06",
+          "time": "22:00",
+          "title": "【Amenti】มาลองดี เอ๊ย! มาทำงานวันแรกค่ะ",
+          "platform": "youtube",
+          "url": "https://www.youtube.com/live/OCXrHwR8xZk",
+          "kind": "solo"
+        },
+        {
+          "id": "2026-08-09-collab",
+          "date": "2026-08-09",
+          "time": "20:00",
+          "title": "Weekend Collab Live",
+          "titleLocal": "ไลฟ์คอลแลบ",
+          "platform": "youtube",
+          "url": "https://www.youtube.com/@Mild_R_",
+          "kind": "collab"
+        }
+      ],
+      "offlineDays": [
+        {
+          "date": "2026-08-03",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-08-05",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-08-07",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-08-08",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        }
+      ]
+    },
+    {
+      "id": "2026-w31",
+      "weekStart": "2026-07-27",
+      "label": "สัปดาห์ก่อน",
+      "slots": [
+        {
+          "id": "2026-07-28-talk",
+          "date": "2026-07-28",
+          "time": "20:30",
+          "title": "Midweek Talk",
+          "titleLocal": "คุยกลางสัปดาห์",
+          "platform": "youtube",
+          "kind": "solo"
+        },
+        {
+          "id": "2026-07-26-karaoke",
+          "date": "2026-07-26",
+          "time": "21:00",
+          "title": "Karaoke Night",
+          "titleLocal": "คืนคาราโอเกะ",
+          "platform": "youtube",
+          "url": "https://www.youtube.com/@Mild_R_",
+          "kind": "solo"
+        },
+        {
+          "id": "2026-08-01-zatsudan",
+          "date": "2026-08-01",
+          "time": "19:30",
+          "title": "Saturday Zatsudan",
+          "titleLocal": "เสาร์คุยเล่น",
+          "platform": "youtube",
+          "kind": "solo"
+        }
+      ],
+      "offlineDays": [
+        {
+          "date": "2026-07-27",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-07-29",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-07-30",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-07-31",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-08-02",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        }
+      ]
+    },
+    {
+      "id": "2026-w30",
+      "weekStart": "2026-07-20",
+      "label": "ย้อนหลัง 2 สัปดาห์",
+      "slots": [
+        {
+          "id": "2026-07-21-song",
+          "date": "2026-07-21",
+          "time": "20:00",
+          "title": "Song Practice",
+          "titleLocal": "ซ้อมเพลง",
+          "platform": "youtube",
+          "kind": "solo"
+        },
+        {
+          "id": "2026-07-23-chill",
+          "date": "2026-07-23",
+          "time": "21:00",
+          "title": "Chill & Chat",
+          "titleLocal": "ชิลแชท",
+          "platform": "x",
+          "note": "Spaces / X (placeholder)",
+          "kind": "solo"
+        },
+        {
+          "id": "2026-07-25-watchalong",
+          "date": "2026-07-25",
+          "time": "20:00",
+          "title": "Watchalong",
+          "titleLocal": "ดูด้วยกัน",
+          "platform": "youtube",
+          "kind": "solo"
+        }
+      ],
+      "offlineDays": [
+        {
+          "date": "2026-07-20",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-07-22",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-07-24",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-07-26",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        }
+      ]
+    },
+    {
+      "id": "2026-w33",
+      "weekStart": "2026-08-10",
+      "label": "สัปดาห์หน้า",
+      "slots": [
+        {
+          "id": "2026-08-11-tba",
+          "date": "2026-08-11",
+          "time": "TBA",
+          "title": "Schedule TBA",
+          "titleLocal": "รอปรับตาราง",
+          "platform": "youtube",
+          "note": "placeholder — จะอัปเดตก่อนวันจริง",
+          "kind": "solo"
+        }
+      ],
+      "offlineDays": [
+        {
+          "date": "2026-08-10",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-08-12",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-08-13",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-08-14",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-08-15",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-08-16",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        }
+      ]
+    },
+    {
+      "id": "2026-w24",
+      "weekStart": "2026-06-08",
+      "label": "มิ.ย.",
+      "slots": [
+        {
+          "id": "2026-06-10-chill",
+          "date": "2026-06-10",
+          "time": "20:00",
+          "title": "June Chill",
+          "titleLocal": "มิ.ย. ชิล",
+          "platform": "youtube",
+          "kind": "solo"
+        },
+        {
+          "id": "2026-06-13-collab",
+          "date": "2026-06-13",
+          "time": "21:00",
+          "title": "June Collab",
+          "titleLocal": "คอลแลบมิ.ย.",
+          "platform": "youtube",
+          "kind": "collab",
+          "url": "https://www.youtube.com/@Mild_R_"
+        }
+      ],
+      "offlineDays": [
+        {
+          "date": "2026-06-08",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-06-09",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-06-11",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-06-12",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-06-14",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        }
+      ]
+    },
+    {
+      "id": "2026-w26",
+      "weekStart": "2026-06-22",
+      "label": "มิ.ย. ปลายเดือน",
+      "slots": [
+        {
+          "id": "2026-06-24-song",
+          "date": "2026-06-24",
+          "time": "20:00",
+          "title": "Song Stream",
+          "titleLocal": "ไลฟ์เพลง",
+          "platform": "youtube",
+          "kind": "solo"
+        },
+        {
+          "id": "2026-06-27-game",
+          "date": "2026-06-27",
+          "time": "21:00",
+          "title": "Game Night",
+          "titleLocal": "เกมไนท์",
+          "platform": "youtube",
+          "kind": "solo"
+        }
+      ],
+      "offlineDays": [
+        {
+          "date": "2026-06-22",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-06-23",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-06-25",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-06-26",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2026-06-28",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        }
+      ]
+    },
+    {
+      "id": "2025-w50",
+      "weekStart": "2025-12-08",
+      "label": "ธ.ค. 2025",
+      "slots": [
+        {
+          "id": "2025-12-10-xmas",
+          "date": "2025-12-10",
+          "time": "20:00",
+          "title": "Winter Talk",
+          "titleLocal": "คุยฤดูหนาว",
+          "platform": "youtube",
+          "kind": "solo"
+        },
+        {
+          "id": "2025-12-13-collab",
+          "date": "2025-12-13",
+          "time": "19:30",
+          "title": "Year-end Collab",
+          "titleLocal": "คอลแลบส่งท้ายปี",
+          "platform": "youtube",
+          "kind": "collab"
+        }
+      ],
+      "offlineDays": [
+        {
+          "date": "2025-12-08",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2025-12-09",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2025-12-11",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2025-12-12",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        },
+        {
+          "date": "2025-12-14",
+          "note": "ไม่มีไลฟ์ (placeholder)"
+        }
+      ]
+    }
+  ]
+}

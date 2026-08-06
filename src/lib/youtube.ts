@@ -17,6 +17,8 @@ export function getYoutubeVideoId(url?: string): string | null {
       }
       const embed = parsed.pathname.match(/^\/embed\/([^/]+)/);
       if (embed?.[1]) return embed[1];
+      const live = parsed.pathname.match(/^\/live\/([^/]+)/);
+      if (live?.[1]) return live[1];
       const shorts = parsed.pathname.match(/^\/shorts\/([^/]+)/);
       if (shorts?.[1]) return shorts[1];
     }

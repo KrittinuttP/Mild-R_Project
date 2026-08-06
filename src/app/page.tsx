@@ -3,6 +3,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { HomeEntry } from "@/components/layout/HomeEntry";
 import { MediaProtection } from "@/components/media/MediaProtection";
+import { EventsTeaser } from "@/components/sections/EventsTeaser";
 import { Gallery } from "@/components/sections/Gallery";
 import { HeroProfileScroll } from "@/components/sections/HeroProfileScroll";
 import { Lore } from "@/components/sections/Lore";
@@ -24,6 +25,7 @@ export default function Home() {
         <Lore data={mildRData} />
         <Gallery data={mildRData} />
         <Media data={mildRData} />
+        <EventsTeaser data={mildRData} />
         <Socials data={mildRData} />
       </main>
       <Footer data={mildRData} />

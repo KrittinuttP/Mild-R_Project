@@ -128,6 +128,71 @@ export interface ProjectItem {
   youtubeUrl?: string;
 }
 
+/** Fan-facing calendar event (collab, cafe, stage, …) */
+export type CalendarEventStatus = "upcoming" | "ongoing" | "ended";
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  titleLocal?: string;
+  /** ISO date YYYY-MM-DD */
+  date: string;
+  endDate?: string;
+  timeLabel?: string;
+  venue?: string;
+  platform?: string;
+  url?: string;
+  status: CalendarEventStatus;
+  summary?: string;
+  /** Cover image path under /public */
+  cover: string;
+  coverAlt?: string;
+}
+
+export type LivePlatform = "youtube" | "x" | "other";
+
+/** Stream flavor for calendar accents */
+export type LiveSlotKind = "solo" | "collab" | "special";
+
+/** Single live/stream slot inside a week */
+export interface LiveSlot {
+  id: string;
+  /** ISO date YYYY-MM-DD */
+  date: string;
+  /** Display time, e.g. "20:00" or "TBA" */
+  time: string;
+  title: string;
+  titleLocal?: string;
+  platform?: LivePlatform;
+  url?: string;
+  note?: string;
+  /** Default solo — collab gets calendar accent */
+  kind?: LiveSlotKind;
+}
+
+/** Day intentionally marked offline (no stream) — driven by content JSON */
+export interface LiveOfflineDay {
+  /** ISO date YYYY-MM-DD */
+  date: string;
+  note?: string;
+}
+
+/** One calendar week of lives (Monday-start) */
+export interface LiveWeek {
+  id: string;
+  /** Monday of the week, ISO YYYY-MM-DD */
+  weekStart: string;
+  label?: string;
+  slots: LiveSlot[];
+  /** Explicit offline days — only these show the Offline badge */
+  offlineDays?: LiveOfflineDay[];
+}
+
+export interface EventsBoard {
+  events: CalendarEvent[];
+  liveWeeks: LiveWeek[];
+}
+
 /** Playlist group for home Media section */
 export type MediaCategory =
   | "original"
@@ -282,6 +347,7 @@ export interface VtuberProfile {
   media: MediaClip[];
   parallax_layers: ParallaxLayer[];
   projects: ProjectItem[];
+  events: EventsBoard;
   hbd: HbdPage;
   cafe: CafePage;
 }

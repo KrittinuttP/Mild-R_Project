@@ -10,6 +10,7 @@
 import type {
   CafePage,
   CharacterDesign,
+  EventsBoard,
   FanArtItem,
   FanIdentity,
   GalleryItem,
@@ -36,6 +37,7 @@ import fanArt from "./mild-r/fan-art.json";
 import media from "./mild-r/media.json";
 import parallaxLayers from "./mild-r/parallax-layers.json";
 import projects from "./mild-r/projects.json";
+import events from "./mild-r/events.json";
 import hbd from "./mild-r/hbd.json";
 import cafe from "./mild-r/cafe.json";
 
@@ -54,6 +56,7 @@ export function loadMildRProfile(): VtuberProfile {
     media: media as MediaClip[],
     parallax_layers: parallaxLayers as ParallaxLayer[],
     projects: projects as ProjectItem[],
+    events: events as EventsBoard,
     hbd: hbd as HbdPage,
     cafe: cafe as CafePage,
   };
@@ -79,7 +82,10 @@ export default mildRData;
 
 export type {
   CafePage,
+  CalendarEvent,
+  CalendarEventStatus,
   CharacterDesign,
+  EventsBoard,
   FanArtItem,
   FanIdentity,
   GalleryItem,
@@ -87,6 +93,9 @@ export type {
   HashtagGroup,
   HbdPage,
   HbdWish,
+  LivePlatform,
+  LiveSlot,
+  LiveWeek,
   LoreBlock,
   MediaCategory,
   MediaClip,
