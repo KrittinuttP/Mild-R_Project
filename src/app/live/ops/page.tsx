@@ -22,7 +22,7 @@ export default async function LiveOpsPage() {
     loadLiveStreams(48),
     loadSyncLogs(100),
   ]);
-  const { live, upcoming, ended } = partitionLiveStreams(streams);
+  const { live, upcoming, ended, cancelled } = partitionLiveStreams(streams);
 
   return (
     <main className="min-h-dvh bg-[#0c0709] px-4 py-10 text-[#fff5f7] sm:px-8">
@@ -58,7 +58,12 @@ export default async function LiveOpsPage() {
           <h2 className="text-[0.7rem] tracking-[0.22em] text-[#e85a7a] uppercase">
             YouTube streams
           </h2>
-          <YoutubeLiveArchive live={live} upcoming={upcoming} ended={ended} />
+          <YoutubeLiveArchive
+            live={live}
+            upcoming={upcoming}
+            ended={ended}
+            cancelled={cancelled}
+          />
         </section>
       </div>
     </main>

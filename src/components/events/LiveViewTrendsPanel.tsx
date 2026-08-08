@@ -1,14 +1,15 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition, type ReactNode } from "react";
 
 import { LiveDetailModal } from "@/components/events/LiveDetailModal";
 import { LiveViewTrendsChart } from "@/components/events/LiveViewTrendsChart";
 import { createClient } from "@/lib/supabase/client";
 import { liveStreamToSlot } from "@/lib/live-stream-utils";
 import {
+  countKindStats,
   defaultFromToYmd,
   grainRangesToSearchParams,
   loadStreamsInBucket,
@@ -18,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { getYoutubeThumbnailUrl } from "@/lib/youtube";
 import { ExternalLink } from "lucide-react";
 import type {
+  LiveKindStats,
   LiveTrendStreamItem,
   LiveViewPeaks,
   LiveViewPeakStream,
@@ -31,6 +33,7 @@ type LiveViewTrendsPanelProps = {
   rows: LiveViewTrendRow[];
   totals: LiveViewTrendTotals;
   peaks: LiveViewPeaks;
+  kindStats: LiveKindStats;
   grain: TrendGrain;
   ownOnly: boolean;
   ranges: TrendGrainRanges;
@@ -106,6 +109,7 @@ export function LiveViewTrendsPanel({
   rows,
   totals,
   peaks,
+  kindStats,
   grain,
   ownOnly,
   ranges,
@@ -201,6 +205,17 @@ export function LiveViewTrendsPanel({
   const peakScopeLabel = `${GRAIN_LABEL[grain]} · ${fromYmd} → ${toYmd}`;
   const selectedTrendRow =
     rows.find((r) => r.bucket === selectedBucket) ?? null;
+
+  const displayKindStats = useMemo(() => {
+    if (selectedBucket && !pending) {
+      return countKindStats(streams);
+    }
+    return kindStats;
+  }, [selectedBucket, pending, streams, kindStats]);
+
+  const kindStatsLabel = selectedBucket
+    ? `สรุป · ${formatBucket(selectedBucket, grain)}`
+    : "สรุปช่วงนี้";
 
   return (
     <div className="space-y-8">
@@ -341,6 +356,33 @@ export function LiveViewTrendsPanel({
         onSelectBucket={selectBucket}
       />
 
+      <div className="flex flex-wrap items-center justify-end gap-2 border border-[#f3b8c4]/12 bg-[#1a0d12]/35 px-3 py-2.5 sm:gap-3 sm:px-4">
+        <p className="text-[0.62rem] tracking-[0.16em] text-[#f3b8c4]/50 uppercase">
+          {kindStatsLabel}
+          <span className="ml-1.5 tabular-nums text-[#f3b8c4]/70">
+            {pending && selectedBucket ? "…" : displayKindStats.total}
+          </span>
+        </p>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#9b8cff]/45 bg-[#9b8cff]/12 px-2.5 py-0.5 text-[0.62rem] tracking-[0.12em] text-[#cfc6ff] uppercase">
+          Member
+          <span className="tabular-nums">
+            {pending && selectedBucket ? "…" : displayKindStats.member}
+          </span>
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#f3b8c4]/35 bg-[#e85a7a]/10 px-2.5 py-0.5 text-[0.62rem] tracking-[0.12em] text-[#f3b8c4] uppercase">
+          Solo
+          <span className="tabular-nums">
+            {pending && selectedBucket ? "…" : displayKindStats.solo}
+          </span>
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d4a574]/50 bg-[#d4a574]/12 px-2.5 py-0.5 text-[0.62rem] tracking-[0.12em] text-[#e8c49a] uppercase">
+          Collab
+          <span className="tabular-nums">
+            {pending && selectedBucket ? "…" : displayKindStats.collab}
+          </span>
+        </span>
+      </div>
+
       <section
         ref={detailRef}
         className="overflow-hidden border border-[#f3b8c4]/14 bg-[#1a0d12]/45"
@@ -470,15 +512,27 @@ function trendItemToSlot(
       : isOwn === false
         ? true
         : null;
+  const isMember =
+    "is_member" in item ? Boolean(item.is_member) : false;
 
+  const scheduled =
+    "scheduled_start" in item ? (item.scheduled_start ?? null) : null;
   const slot = liveStreamToSlot({
     video_id: item.video_id,
     channel_id: null,
     channel_name: item.channel_name,
     title: item.title,
     url: item.url,
-    scheduled_start:
-      "scheduled_start" in item ? (item.scheduled_start ?? null) : null,
+    source_title:
+      "source_title" in item
+        ? ((item as { source_title?: string | null }).source_title ?? null)
+        : null,
+    scheduled_start: scheduled,
+    scheduled_start_first:
+      "scheduled_start_first" in item
+        ? ((item as { scheduled_start_first?: string | null })
+            .scheduled_start_first ?? scheduled)
+        : scheduled,
     actual_start:
       "actual_start" in item
         ? (item.actual_start ?? item.actual_end)
@@ -486,11 +540,12 @@ function trendItemToSlot(
     actual_end: item.actual_end,
     thumbnail_url:
       "thumbnail_url" in item ? (item.thumbnail_url ?? null) : null,
+    thumbnail_cached_url: null,
     views_on_end: viewsOnEnd,
     latest_views: latestViews,
     is_own_channel: isOwn,
     is_collab: isCollab,
-    metadata: null,
+    metadata: isMember ? { member: true } : null,
     created_at: item.actual_end ?? new Date().toISOString(),
   });
 
@@ -980,9 +1035,6 @@ function PeakCard({
     );
   }
 
-  const url =
-    peak.url ?? `https://www.youtube.com/watch?v=${peak.video_id}`;
-
   return (
     <button
       type="button"
@@ -997,7 +1049,6 @@ function PeakCard({
           <p className="mt-2 text-xs text-[#f3b8c4]/70">
             {peak.channel_name || "—"}
           </p>
-          <p className="mt-2 truncate text-xs text-[#e85a7a]">{url}</p>
         </div>
         <div className="shrink-0 text-right">
           <p className="text-[0.6rem] tracking-[0.16em] text-[#f3b8c4]/55 uppercase">

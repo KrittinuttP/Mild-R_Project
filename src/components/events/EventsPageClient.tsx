@@ -113,7 +113,7 @@ export function EventsPageClient({ board }: EventsPageClientProps) {
         className="inline-flex items-center gap-2 text-sm text-[#f3b8c4]/75 transition hover:text-[#fff5f7]"
       >
         <ArrowLeft className="size-4" />
-        กลับไปสรุปบนหน้าหลัก
+        กลับหน้าแรก
       </Link>
 
       <EventDetailModal

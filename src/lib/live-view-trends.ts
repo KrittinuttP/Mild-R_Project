@@ -8,6 +8,7 @@ import type {
   LiveViewPeaks,
   LiveViewTrendRow,
   LiveViewTrendTotals,
+  LiveKindStats,
   TrendGrain,
 } from "@/types/live-view-trends";
 
@@ -357,6 +358,62 @@ export async function loadLiveViewPeaks(options: {
   }
 }
 
+/** Exclusive kind stats (Member > Collab > Solo) for streams ended in the calendar range. */
+export async function loadLiveKindStats(options: {
+  grain: TrendGrain;
+  ownOnly: boolean;
+  fromYmd?: string | null;
+  toYmd?: string | null;
+}): Promise<LiveKindStats> {
+  const empty: LiveKindStats = { member: 0, collab: 0, solo: 0, total: 0 };
+  if (!isSupabaseConfigured()) return empty;
+
+  const { from, to } = resolveDateRange(options);
+
+  try {
+    const supabase = createPublicClient();
+    let member = 0;
+    let collab = 0;
+    let solo = 0;
+    const page = 1000;
+    let fromIdx = 0;
+
+    for (;;) {
+      let q = supabase
+        .from("mild_r_live_streams")
+        .select("video_id, is_collab, metadata")
+        .not("actual_end", "is", null)
+        .gte("actual_end", from)
+        .lt("actual_end", to)
+        .order("actual_end", { ascending: false })
+        .range(fromIdx, fromIdx + page - 1);
+
+      if (options.ownOnly) q = q.eq("is_own_channel", true);
+
+      const { data, error } = await q;
+      if (error) {
+        console.error("[live_kind_stats]", error.message);
+        break;
+      }
+      const batch = data ?? [];
+      for (const row of batch) {
+        const meta = row.metadata as Record<string, unknown> | null;
+        const isMember = meta?.member === true;
+        if (isMember) member += 1;
+        else if (row.is_collab) collab += 1;
+        else solo += 1;
+      }
+      if (batch.length < page) break;
+      fromIdx += page;
+    }
+
+    return { member, collab, solo, total: member + collab + solo };
+  } catch (err) {
+    console.error("[live_kind_stats]", err);
+    return empty;
+  }
+}
+
 export async function loadStreamsInBucket(
   supabase: SupabaseClient,
   options: {
@@ -385,19 +442,38 @@ export async function loadStreamsInBucket(
     return [];
   }
 
-  return (data ?? []).map((row) => ({
-    video_id: row.video_id as string,
-    title: (row.title as string | null) ?? null,
-    url: (row.url as string | null) ?? null,
-    channel_name: (row.channel_name as string | null) ?? null,
-    scheduled_start: (row.scheduled_start as string | null) ?? null,
-    actual_start: (row.actual_start as string | null) ?? null,
-    actual_end: (row.actual_end as string | null) ?? null,
-    thumbnail_url: (row.thumbnail_url as string | null) ?? null,
-    views_on_end: row.views_on_end as number | null,
-    latest_views: row.latest_views as number | null,
-    is_own_channel: row.is_own_channel as boolean | null,
-    is_collab: row.is_collab as boolean | null,
-    likes: parseLikes(row.metadata),
-  }));
+  return (data ?? []).map((row) => {
+    const meta = row.metadata as Record<string, unknown> | null;
+    return {
+      video_id: row.video_id as string,
+      title: (row.title as string | null) ?? null,
+      url: (row.url as string | null) ?? null,
+      channel_name: (row.channel_name as string | null) ?? null,
+      scheduled_start: (row.scheduled_start as string | null) ?? null,
+      actual_start: (row.actual_start as string | null) ?? null,
+      actual_end: (row.actual_end as string | null) ?? null,
+      thumbnail_url: (row.thumbnail_url as string | null) ?? null,
+      views_on_end: row.views_on_end as number | null,
+      latest_views: row.latest_views as number | null,
+      is_own_channel: row.is_own_channel as boolean | null,
+      is_collab: row.is_collab as boolean | null,
+      is_member: meta?.member === true,
+      likes: parseLikes(row.metadata),
+    };
+  });
+}
+
+/** Exclusive: Member > Collab > Solo */
+export function countKindStats(
+  items: Array<{ is_member?: boolean | null; is_collab?: boolean | null }>
+): LiveKindStats {
+  let member = 0;
+  let collab = 0;
+  let solo = 0;
+  for (const item of items) {
+    if (item.is_member) member += 1;
+    else if (item.is_collab) collab += 1;
+    else solo += 1;
+  }
+  return { member, collab, solo, total: member + collab + solo };
 }

@@ -55,13 +55,22 @@ export default async function LivePage() {
               )}
             </div>
 
-            <Link
-              href="/#live"
-              className="mt-12 inline-flex items-center gap-2 text-sm text-[#f3b8c4]/75 transition hover:text-[#fff5f7] sm:mt-16"
-            >
-              <ArrowLeft className="size-4" />
-              กลับไปสรุปบนหน้าหลัก
-            </Link>
+            <div className="mt-12 flex flex-wrap items-center justify-between gap-4 sm:mt-16">
+              <Link
+                href="/#live"
+                className="inline-flex items-center gap-2 text-sm text-[#f3b8c4]/75 transition hover:text-[#fff5f7]"
+              >
+                <ArrowLeft className="size-4" />
+                กลับหน้าแรก
+              </Link>
+              <Link
+                href="/live/ops/trends"
+                className="text-[0.6rem] tracking-[0.28em] text-[#f3b8c4]/20 uppercase transition hover:text-[#f3b8c4]/45"
+                aria-label="Internal view trends"
+              >
+                trends
+              </Link>
+            </div>
           </div>
         </section>
       </main>

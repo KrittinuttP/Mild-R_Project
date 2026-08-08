@@ -98,6 +98,14 @@ Actions: `"main"` | `"search"`
 
 RPC `public.mild_r_live_view_trends(grain, own_only, from, to)` รวม `views_on_end` / `latest_views` / diff / `peak_views_on_end` ตามวัน·เดือน·ปี (Asia/Bangkok) — migration `20260807000000_live_view_trends.sql` + `20260807010000_live_view_trends_peak.sql` (tooltip รายเดือน/ปี โชว์ยอดไลฟ์สูงสุดในช่วง)
 
+`scheduled_start` อัปตาม YouTube เฉพาะตอนยังไม่มี `actual_start` (ทั้งใน DB และ payload); พอเริ่มแล้วล็อกไม่ทับ · `scheduled_start_first` = เวลานัดครั้งแรกที่เห็น (ไม่ทับ) — migration `20260808000000_scheduled_start_first.sql`
+
+`source_title` = ชื่อสั้นจาก master roster (`lumina-channels.ts` field `title`, เช่น Xonebu) บอกว่าไลฟ์มาจากช่องไหน — migration `20260808020000_source_title.sql`
+
+Thumbnail history: bucket `live-thumbs` + `mild_r.live_stream_thumbnails` + `thumbnail_cached_url` — เก็บทุกเวอร์ชันปกตอน sync; ล็อกเมื่อ ended/cancelled — migration `20260808030000_live_thumbnails_history.sql`
+
+สถานะ **cancelled** (คำนวณฝั่งแอป): ไม่มี `actual_start` และเลยเวลานัดเกิน 3 ชม.
+
 ### Related channel master (Step 2b)
 
 Playlist poll วนจาก master list ของช่อง Lumina (World End / Muse / First-Myth / Mutelu) — **ไม่รวม Mild-R**

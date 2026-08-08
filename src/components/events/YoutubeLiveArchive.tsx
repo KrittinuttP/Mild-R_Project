@@ -17,12 +17,14 @@ type YoutubeLiveArchiveProps = {
   live: LiveStreamRow[];
   upcoming: LiveStreamRow[];
   ended: LiveStreamRow[];
+  cancelled?: LiveStreamRow[];
 };
 
 function statusLabel(row: LiveStreamRow) {
   const status = getLiveStreamStatus(row);
   if (status === "live") return "Live now";
   if (status === "upcoming") return "Upcoming";
+  if (status === "cancelled") return "Cancelled";
   return "Ended";
 }
 
@@ -36,6 +38,8 @@ function StreamCard({
   const status = getLiveStreamStatus(row);
   const slot = liveStreamToSlot(row);
   const thumb =
+    slot.coverUrl ??
+    row.thumbnail_cached_url ??
     row.thumbnail_url ??
     `https://i.ytimg.com/vi/${row.video_id}/hqdefault.jpg`;
 
@@ -51,7 +55,10 @@ function StreamCard({
             src={thumb}
             alt={row.title ?? "Live stream"}
             wrapClassName="absolute inset-0 block"
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+            className={cn(
+              "h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]",
+              status === "cancelled" && "opacity-70 grayscale-[0.35]"
+            )}
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140a0d] via-transparent to-transparent" />
           <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5">
@@ -62,7 +69,9 @@ function StreamCard({
                   ? "border-red-400/40 bg-red-500/20 text-red-100"
                   : status === "upcoming"
                     ? "border-[#e85a7a]/35 bg-[#140a0d]/70 text-[#f3b8c4]"
-                    : "border-white/15 bg-[#140a0d]/70 text-[#f7d7de]/75"
+                    : status === "cancelled"
+                      ? "border-[#8a7f88]/40 bg-[#140a0d]/70 text-[#d8d0d4]"
+                      : "border-white/15 bg-[#140a0d]/70 text-[#f7d7de]/75"
               )}
             >
               {status === "live" ? (
@@ -133,13 +142,18 @@ export function YoutubeLiveArchive({
   live,
   upcoming,
   ended,
+  cancelled = [],
 }: YoutubeLiveArchiveProps) {
   const [activeSlot, setActiveSlot] = useState<LiveSlot | null>(null);
   const [open, setOpen] = useState(false);
 
   const recentEnded = useMemo(() => ended.slice(0, 12), [ended]);
+  const recentCancelled = useMemo(() => cancelled.slice(0, 12), [cancelled]);
   const empty =
-    live.length === 0 && upcoming.length === 0 && ended.length === 0;
+    live.length === 0 &&
+    upcoming.length === 0 &&
+    ended.length === 0 &&
+    cancelled.length === 0;
 
   function openSlot(slot: LiveSlot) {
     setActiveSlot(slot);
@@ -160,6 +174,7 @@ export function YoutubeLiveArchive({
       <div className="space-y-10">
         <Section title="Live now" rows={live} onOpen={openSlot} />
         <Section title="Upcoming" rows={upcoming} onOpen={openSlot} />
+        <Section title="Cancelled" rows={recentCancelled} onOpen={openSlot} />
         <Section title="Recent streams" rows={recentEnded} onOpen={openSlot} />
       </div>
 

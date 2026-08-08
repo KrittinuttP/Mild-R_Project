@@ -6,10 +6,12 @@
  */
 import { createClient } from "@supabase/supabase-js";
 
+import { getLuminaSourceTitle } from "../src/data/lumina-channels";
 import {
   classifyLiveOwnership,
   MILD_R_CHANNEL_ID,
 } from "../src/lib/live-stream-classify";
+import { removeMatchingPreviewsForReals } from "./lib/remove-matching-previews";
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY?.trim();
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
@@ -31,9 +33,11 @@ type StreamRow = {
   video_id: string;
   channel_id: string;
   channel_name: string;
+  source_title: string | null;
   title: string;
   url: string;
   scheduled_start: string | null;
+  scheduled_start_first: string | null;
   actual_start: string | null;
   actual_end: string | null;
   thumbnail_url: string | null;
@@ -41,6 +45,7 @@ type StreamRow = {
   latest_views: number;
   is_own_channel: boolean;
   is_collab: boolean;
+  project: "Lumina";
   metadata: Record<string, unknown>;
 };
 
@@ -120,9 +125,12 @@ async function scanHistoricalLives(searchQuery: string, sourceName: string) {
         video_id: item.id,
         channel_id: channelId,
         channel_name: item.snippet.channelTitle,
+        source_title: getLuminaSourceTitle(channelId),
         title: item.snippet.title,
         url: `https://www.youtube.com/watch?v=${item.id}`,
         scheduled_start: item.liveStreamingDetails.scheduledStartTime || null,
+        scheduled_start_first:
+          item.liveStreamingDetails.scheduledStartTime || null,
         actual_start: item.liveStreamingDetails.actualStartTime || null,
         actual_end: item.liveStreamingDetails.actualEndTime || null,
         thumbnail_url: item.snippet.thumbnails?.high?.url || null,
@@ -130,6 +138,7 @@ async function scanHistoricalLives(searchQuery: string, sourceName: string) {
         latest_views: viewCount,
         is_own_channel,
         is_collab,
+        project: "Lumina",
         metadata: {
           description: item.snippet.description,
           tags: item.snippet.tags || [],
@@ -142,19 +151,45 @@ async function scanHistoricalLives(searchQuery: string, sourceName: string) {
       const ids = streamsToSave.map((s) => s.video_id);
       const { data: existingRows } = await supabase
         .from("mild_r_live_streams")
-        .select("video_id, views_on_end")
+        .select(
+          "video_id, views_on_end, scheduled_start, scheduled_start_first, actual_start"
+        )
         .in("video_id", ids);
 
-      const keepOnEnd = new Map<string, number>();
-      for (const row of existingRows || []) {
-        if (row.views_on_end != null) {
-          keepOnEnd.set(row.video_id as string, row.views_on_end as number);
+      const existingById = new Map<
+        string,
+        {
+          views_on_end: number | null;
+          scheduled_start: string | null;
+          scheduled_start_first: string | null;
+          actual_start: string | null;
         }
+      >();
+      for (const row of existingRows || []) {
+        existingById.set(row.video_id as string, {
+          views_on_end: (row.views_on_end as number | null) ?? null,
+          scheduled_start: (row.scheduled_start as string | null) ?? null,
+          scheduled_start_first:
+            (row.scheduled_start_first as string | null) ?? null,
+          actual_start: (row.actual_start as string | null) ?? null,
+        });
       }
 
       const merged = streamsToSave.map((row) => {
-        const kept = keepOnEnd.get(row.video_id);
-        return kept != null ? { ...row, views_on_end: kept } : row;
+        const existing = existingById.get(row.video_id);
+        const started =
+          existing?.actual_start != null || row.actual_start != null;
+        return {
+          ...row,
+          views_on_end: existing?.views_on_end ?? row.views_on_end,
+          scheduled_start_first:
+            existing?.scheduled_start_first ??
+            row.scheduled_start ??
+            row.scheduled_start_first,
+          scheduled_start: started
+            ? (existing?.scheduled_start ?? row.scheduled_start)
+            : row.scheduled_start,
+        };
       });
 
       const { error } = await supabase
@@ -164,6 +199,7 @@ async function scanHistoricalLives(searchQuery: string, sourceName: string) {
       if (error) {
         console.error("❌ Database Error:", error.message);
       } else {
+        await removeMatchingPreviewsForReals(supabase, merged);
         totalSaved += merged.length;
         const own = merged.filter((s) => s.is_own_channel).length;
         const collab = merged.filter((s) => s.is_collab).length;

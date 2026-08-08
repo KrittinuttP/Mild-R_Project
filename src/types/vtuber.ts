@@ -159,15 +159,45 @@ export interface LiveSlot {
   id: string;
   /** ISO date YYYY-MM-DD */
   date: string;
-  /** Display time, e.g. "20:00" or "TBA" */
+  /** Display time, e.g. "20:00" or "LIVE" (primary / current) */
   time: string;
+  /** Previous scheduled time when rescheduled (strikethrough) */
+  timePrevious?: string;
+  /** New scheduled time when timePrevious is set */
+  timeUpdated?: string;
   title: string;
   titleLocal?: string;
   platform?: LivePlatform;
   url?: string;
   note?: string;
-  /** Default solo — collab gets calendar accent */
+  /** Manual preview placeholder until a real YouTube live is linked */
+  isPreview?: boolean;
+  /** Members-only stream (manual or tagged) */
+  isMember?: boolean;
+  /** Default solo — collab gets calendar accent when not own */
   kind?: LiveSlotKind;
+  isOwnChannel?: boolean;
+  /** Short roster title (e.g. Xonebu) for guest channel badge */
+  sourceTitle?: string | null;
+  /** Stream lifecycle for modal/detail */
+  status?: "live" | "upcoming" | "ended" | "cancelled";
+  /** Scheduled display (same style as table; may include reschedule) */
+  scheduledLabel?: string;
+  scheduledPrevious?: string;
+  scheduledUpdated?: string;
+  /** Actual start HH:mm Bangkok */
+  actualStartLabel?: string | null;
+  /** Actual end HH:mm Bangkok */
+  actualEndLabel?: string | null;
+  /** Human duration e.g. "2 ชม. 15 นาที" */
+  durationLabel?: string | null;
+  viewsOnEnd?: number | null;
+  latestViews?: number | null;
+  channelName?: string | null;
+  /** Best available cover (Storage current → YouTube → generated) */
+  coverUrl?: string | null;
+  /** Archived cover versions, newest first */
+  coverHistory?: { url: string; capturedAt: string }[];
 }
 
 /** Day intentionally marked offline (no stream) — driven by content JSON */
@@ -177,10 +207,10 @@ export interface LiveOfflineDay {
   note?: string;
 }
 
-/** One calendar week of lives (Monday-start) */
+/** One calendar week of lives (Sunday-start) */
 export interface LiveWeek {
   id: string;
-  /** Monday of the week, ISO YYYY-MM-DD */
+  /** Sunday of the week, ISO YYYY-MM-DD */
   weekStart: string;
   label?: string;
   slots: LiveSlot[];

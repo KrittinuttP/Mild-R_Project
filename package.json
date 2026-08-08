@@ -11,7 +11,14 @@
     "db:migrate:collab": "npx tsx --env-file=.env.local scripts/apply-sql.ts supabase/migrations/20260806010000_live_streams_collab_flags.sql",
     "db:migrate:trends": "npx tsx --env-file=.env.local scripts/apply-sql.ts supabase/migrations/20260807000000_live_view_trends.sql",
     "db:migrate:trends-peak": "npx tsx --env-file=.env.local scripts/apply-sql.ts supabase/migrations/20260807010000_live_view_trends_peak.sql",
-    "backfill:youtube": "npx tsx --env-file=.env.local scripts/backfill-youtube-lives.ts"
+    "db:migrate:scheduled-first": "npx tsx --env-file=.env.local scripts/apply-sql.ts supabase/migrations/20260808000000_scheduled_start_first.sql",
+    "db:migrate:source-title": "npx tsx --env-file=.env.local scripts/apply-sql.ts supabase/migrations/20260808020000_source_title.sql",
+    "db:migrate:project": "npx tsx --env-file=.env.local scripts/apply-sql.ts supabase/migrations/20260808040000_live_streams_project.sql",
+    "backfill:youtube": "npx tsx --env-file=.env.local scripts/backfill-youtube-lives.ts",
+    "backfill:pixela": "npx tsx --env-file=.env.local scripts/backfill-pixela-mild-r.ts",
+    "backfill:pixela:from-mild": "npx tsx --env-file=.env.local scripts/backfill-pixela-mild-r.ts --from-mild",
+    "backfill:lumina": "npx tsx --env-file=.env.local scripts/backfill-lumina-mild-r.ts",
+    "purge:preview-mocks": "npx tsx --env-file=.env.local scripts/purge-stale-preview-mocks.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

@@ -3,7 +3,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   LUMINA_RELATED_CHANNEL_IDS,
   MAIN_CHANNEL_ID,
+  getLuminaSourceTitle,
 } from "./lumina-master.ts";
+import { collectPreviewIdsToDelete, type PreviewLikeRow } from "./preview-match.ts";
 
 const YOUTUBE_API_KEY = Deno.env.get("YOUTUBE_API_KEY") || "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
@@ -31,9 +33,11 @@ type StreamRow = {
   video_id: string;
   channel_id: string;
   channel_name: string;
+  source_title: string | null;
   title: string;
   url: string;
   scheduled_start: string | null;
+  scheduled_start_first: string | null;
   actual_start: string | null;
   actual_end: string | null;
   thumbnail_url: string | null;
@@ -48,34 +52,59 @@ async function saveToDatabase(streams: StreamRow[]) {
   if (streams.length === 0) return;
 
   const videoIds = streams.map((s) => s.video_id);
-  const existingOnEnd = new Map<string, number>();
+  const existingById = new Map<
+    string,
+    {
+      views_on_end: number | null;
+      scheduled_start: string | null;
+      scheduled_start_first: string | null;
+      actual_start: string | null;
+    }
+  >();
 
   for (let i = 0; i < videoIds.length; i += 200) {
     const chunk = videoIds.slice(i, i + 200);
     const { data, error: lookupError } = await supabase
       .from("mild_r_live_streams")
-      .select("video_id, views_on_end")
+      .select(
+        "video_id, views_on_end, scheduled_start, scheduled_start_first, actual_start"
+      )
       .in("video_id", chunk);
 
     if (lookupError) {
-      console.error("❌ lookup views_on_end:", lookupError.message);
+      console.error("❌ lookup existing streams:", lookupError.message);
       throw lookupError;
     }
 
     for (const row of data || []) {
-      if (row.views_on_end != null) {
-        existingOnEnd.set(row.video_id as string, row.views_on_end as number);
-      }
+      existingById.set(row.video_id as string, {
+        views_on_end: (row.views_on_end as number | null) ?? null,
+        scheduled_start: (row.scheduled_start as string | null) ?? null,
+        scheduled_start_first:
+          (row.scheduled_start_first as string | null) ?? null,
+        actual_start: (row.actual_start as string | null) ?? null,
+      });
     }
   }
 
-  // Keep first-seen views_on_end; always refresh latest_views from YouTube
+  // - views_on_end / scheduled_start_first: first-seen lock
+  // - scheduled_start: refresh while not started; freeze once actual_start exists
   const merged = streams.map((row) => {
-    const kept = existingOnEnd.get(row.video_id);
-    if (kept != null) {
-      return { ...row, views_on_end: kept };
-    }
-    return row;
+    const existing = existingById.get(row.video_id);
+    const started =
+      existing?.actual_start != null || row.actual_start != null;
+
+    return {
+      ...row,
+      views_on_end: existing?.views_on_end ?? row.views_on_end,
+      scheduled_start_first:
+        existing?.scheduled_start_first ??
+        row.scheduled_start ??
+        row.scheduled_start_first,
+      scheduled_start: started
+        ? (existing?.scheduled_start ?? row.scheduled_start)
+        : row.scheduled_start,
+    };
   });
 
   const { error } = await supabase
@@ -88,6 +117,165 @@ async function saveToDatabase(streams: StreamRow[]) {
   }
 
   console.log(`💾 บันทึกสำเร็จ: ${merged.length} รายการ`);
+  await removeMatchingPreviews(merged);
+  await archiveThumbnails(merged);
+}
+
+/** When a real live matches a manual mock, keep the real row and delete the mock. */
+async function removeMatchingPreviews(reals: StreamRow[]) {
+  const realOnly = reals.filter((r) => !r.video_id.startsWith("manual-"));
+  if (realOnly.length === 0) return;
+
+  const { data, error } = await supabase
+    .from("mild_r_live_streams")
+    .select(
+      "video_id, channel_id, is_own_channel, scheduled_start, scheduled_start_first, actual_start, metadata"
+    )
+    .or("video_id.like.manual-%,metadata->>preview.eq.true");
+
+  if (error) {
+    console.error("❌ preview lookup:", error.message);
+    return;
+  }
+
+  const mocks = (data || []) as PreviewLikeRow[];
+  const toDelete = collectPreviewIdsToDelete(realOnly, mocks);
+  if (toDelete.length === 0) return;
+
+  const { error: delError } = await supabase
+    .from("mild_r_live_streams")
+    .delete()
+    .in("video_id", toDelete);
+
+  if (delError) {
+    console.error("❌ preview delete:", delError.message);
+    return;
+  }
+
+  console.log(
+    `🧹 ลบ mock ที่จับคู่ไลฟ์จริงแล้ว: ${toDelete.length} รายการ (${toDelete.join(", ")})`
+  );
+}
+
+const CANCEL_AFTER_MS = 3 * 60 * 60 * 1000;
+const BUCKET = "live-thumbs";
+
+function normalizeThumbSource(url: string | null | undefined) {
+  if (!url) return "";
+  try {
+    const u = new URL(url);
+    return `${u.origin}${u.pathname}`;
+  } catch {
+    return url;
+  }
+}
+
+function isThumbLocked(row: StreamRow) {
+  if (row.actual_end) return true;
+  if (row.actual_start) return false;
+  const scheduled = row.scheduled_start ?? row.scheduled_start_first;
+  if (!scheduled) return false;
+  const start = new Date(scheduled).getTime();
+  if (!Number.isFinite(start)) return false;
+  return Date.now() - start >= CANCEL_AFTER_MS;
+}
+
+/** Archive every cover version while upcoming/live; freeze after ended/cancelled. */
+async function archiveThumbnails(streams: StreamRow[]) {
+  for (const row of streams) {
+    const sourceUrl = row.thumbnail_url;
+    if (!sourceUrl) continue;
+
+    try {
+      const { data: current, error: curErr } = await supabase
+        .from("mild_r_live_stream_thumbnails")
+        .select("id, source_url")
+        .eq("video_id", row.video_id)
+        .eq("is_current", true)
+        .maybeSingle();
+
+      if (curErr) {
+        console.error("thumb current lookup:", curErr.message);
+        continue;
+      }
+
+      const locked = isThumbLocked(row);
+      if (locked && current) continue;
+
+      if (
+        current &&
+        normalizeThumbSource(current.source_url as string | null) ===
+          normalizeThumbSource(sourceUrl)
+      ) {
+        continue;
+      }
+
+      const imgRes = await fetch(sourceUrl);
+      if (!imgRes.ok) {
+        console.error(
+          `thumb fetch ${row.video_id}: HTTP ${imgRes.status}`
+        );
+        continue;
+      }
+      const contentType =
+        imgRes.headers.get("content-type")?.split(";")[0] || "image/jpeg";
+      const ext = contentType.includes("png")
+        ? "png"
+        : contentType.includes("webp")
+          ? "webp"
+          : "jpg";
+      const bytes = new Uint8Array(await imgRes.arrayBuffer());
+      const path = `${row.video_id}/${Date.now()}.${ext}`;
+
+      const { error: upErr } = await supabase.storage
+        .from(BUCKET)
+        .upload(path, bytes, {
+          contentType,
+          upsert: false,
+          cacheControl: "31536000",
+        });
+
+      if (upErr) {
+        console.error(`thumb upload ${row.video_id}:`, upErr.message);
+        continue;
+      }
+
+      const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
+      const publicUrl = pub.publicUrl;
+
+      if (current?.id) {
+        await supabase
+          .from("mild_r_live_stream_thumbnails")
+          .update({ is_current: false })
+          .eq("id", current.id);
+      }
+
+      const { error: insErr } = await supabase
+        .from("mild_r_live_stream_thumbnails")
+        .insert({
+          video_id: row.video_id,
+          storage_path: path,
+          public_url: publicUrl,
+          source_url: sourceUrl,
+          is_current: true,
+        });
+
+      if (insErr) {
+        console.error(`thumb insert ${row.video_id}:`, insErr.message);
+        continue;
+      }
+
+      await supabase
+        .from("mild_r_live_streams")
+        .update({ thumbnail_cached_url: publicUrl })
+        .eq("video_id", row.video_id);
+    } catch (err) {
+      console.error(
+        `thumb archive ${row.video_id}:`,
+        err instanceof Error ? err.message : err
+      );
+    }
+  }
 }
 
 async function getLiveDetails(videoIds: string[]): Promise<StreamRow[]> {
@@ -125,9 +313,12 @@ async function getLiveDetails(videoIds: string[]): Promise<StreamRow[]> {
         video_id: item.id,
         channel_id: channelId,
         channel_name: item.snippet.channelTitle,
+        source_title: getLuminaSourceTitle(channelId),
         title,
         url: `https://www.youtube.com/watch?v=${item.id}`,
         scheduled_start: item.liveStreamingDetails.scheduledStartTime || null,
+        scheduled_start_first:
+          item.liveStreamingDetails.scheduledStartTime || null,
         actual_start: item.liveStreamingDetails.actualStartTime || null,
         actual_end: item.liveStreamingDetails.actualEndTime || null,
         thumbnail_url: item.snippet.thumbnails?.high?.url || null,

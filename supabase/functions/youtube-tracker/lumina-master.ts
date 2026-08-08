@@ -30,3 +30,32 @@ export const LUMINA_RELATED_CHANNEL_IDS = [
   "UCgMHb11ydIWSAgvzrxOPjRg", // Arcanon
   "UCSlT8Mc_dty5c_cFmi1zz4Q", // Mikotomi
 ] as const;
+
+/** channelId → short master title (matches lumina-channels.ts `title`) */
+export const LUMINA_SOURCE_TITLE_BY_CHANNEL_ID: Record<string, string> = {
+  "UCknOyz3O0-G6w5SJNAgO7uQ": "Mild-R",
+  "UCGo7fnmWfGQewxZVDmC3iJQ": "Xonebu",
+  "UC3qnb4Sgo4QtiOi8iS7jOsQ": "Tsururu",
+  "UCZYTMrnVmu1iUVyGeqB6zJQ": "Ashyra",
+  "UCa8ILv94qHT6oar_jVzg9sQ": "AMI",
+  "UCot8DHNnZ2X0ARgaNYZopjw": "Debirun",
+  "UCiZyQDO7v9UY_-Q24VsSLlQ": "Antolnette",
+  "UC-KEm4E7Yp_t0Gzix4SwkwA": "Dëa",
+  "UC0sN779hXum_LluFaWfJjcw": "Hinaree",
+  "UCbypR_t0teWxIdrQ9i83XiQ": "Florynne",
+  "UCLNBff3KDEUxdfH_lkvyOKQ": "Reirin",
+  "UCuyrIzf_bCTnyJHktJVpe4g": "Sireen",
+  "UC2eai5waelgobAHgp20DEYg": "Lilibelle",
+  "UCgSsXxQ71nScJ-GIc90ZkYw": "Mikael",
+  "UCg53fzp6UNYvsyAg8UoNXCA": "Kona",
+  "UCIBdFlC2Fk3rID8CAETV35g": "Kryspeia",
+  "UCSoFIMz3y6jOVMg8nggpcMQ": "Meiyin",
+  "UCGtHn0fmqCAp_8AzV_PWd6A": "Eveshaiah",
+  "UCgMHb11ydIWSAgvzrxOPjRg": "Arcanon",
+  "UCSlT8Mc_dty5c_cFmi1zz4Q": "Maneneko",
+};
+
+export function getLuminaSourceTitle(channelId: string | null | undefined) {
+  if (!channelId) return null;
+  return LUMINA_SOURCE_TITLE_BY_CHANNEL_ID[channelId] ?? null;
+}

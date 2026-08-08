@@ -20,13 +20,12 @@ export function formatISODate(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
-/** Monday of the week containing `date` (local). */
-export function startOfWeekMonday(date: Date): Date {
+/** Sunday of the week containing `date` (local). */
+export function startOfWeekSunday(date: Date): Date {
   const copy = new Date(date);
   copy.setHours(12, 0, 0, 0);
   const day = copy.getDay(); // 0 Sun … 6 Sat
-  const diff = day === 0 ? -6 : 1 - day;
-  copy.setDate(copy.getDate() + diff);
+  copy.setDate(copy.getDate() - day);
   return copy;
 }
 
@@ -104,9 +103,9 @@ export function findDefaultWeekIndex(
   if (weeks.length === 0) return 0;
   const sorted = sortLiveWeeks(weeks);
   const todayIso = formatISODate(today);
-  const mondayIso = formatISODate(startOfWeekMonday(today));
+  const sundayIso = formatISODate(startOfWeekSunday(today));
 
-  const exact = sorted.findIndex((week) => week.weekStart === mondayIso);
+  const exact = sorted.findIndex((week) => week.weekStart === sundayIso);
   if (exact >= 0) return exact;
 
   let past = -1;
@@ -157,10 +156,10 @@ export function availableLiveYears(
   return [...years].sort((a, b) => a - b);
 }
 
-/** 42 cells (6 weeks) Monday-start month grid. */
+/** 42 cells (6 weeks) Sunday-start month grid. */
 export function monthGridDates(year: number, monthIndex: number): string[] {
   const first = new Date(year, monthIndex, 1, 12, 0, 0, 0);
-  const gridStart = startOfWeekMonday(first);
+  const gridStart = startOfWeekSunday(first);
   return Array.from({ length: 42 }, (_, i) =>
     formatISODate(addDays(gridStart, i))
   );
@@ -176,8 +175,8 @@ export function isSameMonth(
 }
 
 export function isInCurrentWeek(iso: string, today = new Date()): boolean {
-  const monday = formatISODate(startOfWeekMonday(today));
-  const days = weekDayDates(monday);
+  const sunday = formatISODate(startOfWeekSunday(today));
+  const days = weekDayDates(sunday);
   return days.includes(iso);
 }
 

@@ -7,12 +7,12 @@ type CollabBadgeProps = {
   size?: "sm" | "md";
 };
 
-/** Round collab pill — amber/copper vs rose solo / muted offline */
+/** Round collab pill — copper accent, distinct from Mild-R rose */
 export function CollabBadge({ className, size = "sm" }: CollabBadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border border-[#d4a574]/55 bg-[#d4a574]/12 tracking-[0.12em] text-[#e8c49a] uppercase",
+        "inline-flex items-center gap-1 rounded-full border border-[#d4a574]/55 bg-[#d4a574]/14 tracking-[0.12em] text-[#e8c49a] uppercase",
         size === "sm" && "px-2.5 py-1 text-[0.55rem]",
         size === "md" && "px-3 py-1.5 text-[0.6rem]",
         className

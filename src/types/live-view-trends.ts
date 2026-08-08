@@ -35,6 +35,14 @@ export type LiveViewPeaks = {
   byOnEnd: LiveViewPeakStream | null;
 };
 
+/** Exclusive kind counts: Member > Collab > Solo */
+export type LiveKindStats = {
+  member: number;
+  collab: number;
+  solo: number;
+  total: number;
+};
+
 export type LiveTrendStreamItem = {
   video_id: string;
   title: string | null;
@@ -48,5 +56,6 @@ export type LiveTrendStreamItem = {
   latest_views: number | null;
   is_own_channel: boolean | null;
   is_collab: boolean | null;
+  is_member: boolean | null;
   likes: number | null;
 };

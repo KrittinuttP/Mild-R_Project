@@ -5,7 +5,15 @@ import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 
 import { CollabBadge } from "@/components/events/CollabBadge";
 import { LiveDetailModal } from "@/components/events/LiveDetailModal";
+import {
+  LiveDayChannelBadges,
+  LiveSlotTime,
+  LiveSourceBadges,
+  preferOwnChannelSlots,
+} from "@/components/events/LiveSlotMeta";
 import { LiveWeekTable } from "@/components/events/LiveWeekTable";
+import { OfflineBadge } from "@/components/events/OfflineBadge";
+import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { buttonVariants } from "@/components/ui/button";
 import {
   availableLiveYears,
@@ -13,31 +21,48 @@ import {
   flattenLiveSlots,
   formatISODate,
   formatThaiDate,
+  formatThaiShortDate,
   isInCurrentWeek,
   isSameMonth,
   monthGridDates,
   parseISODate,
   slotsByDateMap,
   sortLiveWeeks,
-  startOfWeekMonday,
+  startOfWeekSunday,
   thaiMonthName,
   thaiWeekdayShort,
+  weekDayDates,
 } from "@/lib/events";
 import { cn } from "@/lib/utils";
+import {
+  getYoutubeThumbnailUrl,
+  getYoutubeVideoId,
+} from "@/lib/youtube";
 import type { LiveSlot, LiveWeek } from "@/types/vtuber";
 
 type LiveScheduleBoardProps = {
   weeks: LiveWeek[];
 };
 
-function SlotListItem({
+function slotCoverUrl(slot: LiveSlot) {
+  if (slot.coverUrl) return slot.coverUrl;
+  const videoId = getYoutubeVideoId(slot.url);
+  return videoId ? getYoutubeThumbnailUrl(videoId) : null;
+}
+
+function WeekSlotCard({
   slot,
   onOpen,
 }: {
   slot: LiveSlot;
   onOpen: () => void;
 }) {
+  const own = Boolean(slot.isOwnChannel);
   const collab = slot.kind === "collab";
+  const guestTone = !own && collab;
+  const cancelled = slot.status === "cancelled";
+  const cover = slotCoverUrl(slot);
+  const title = slot.titleLocal ?? slot.title;
 
   return (
     <li>
@@ -45,42 +70,73 @@ function SlotListItem({
         type="button"
         onClick={onOpen}
         className={cn(
-          "flex w-full items-start gap-3 border bg-[#1a0d12]/50 px-3 py-3 text-left transition",
-          collab
-            ? "border-[#d4a574]/30 hover:border-[#d4a574]/50 hover:bg-[#d4a574]/10"
-            : "border-[#f3b8c4]/12 hover:border-[#e85a7a]/35 hover:bg-[#e85a7a]/10"
+          "group flex w-full gap-3 overflow-hidden rounded-xl border bg-[#1a0d12]/55 p-2 text-left transition sm:gap-3.5 sm:p-2.5",
+          cancelled
+            ? "border-[#8a7f88]/30 opacity-85 hover:border-[#8a7f88]/50"
+            : guestTone
+              ? "border-[#d4a574]/30 hover:border-[#d4a574]/50 hover:bg-[#d4a574]/10"
+              : "border-[#f3b8c4]/14 hover:border-[#e85a7a]/40 hover:bg-[#e85a7a]/10"
         )}
       >
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span
+        <div className="relative aspect-video w-[6.5rem] shrink-0 overflow-hidden rounded-lg bg-[#10070b] sm:w-36">
+          {cover ? (
+            <ProtectedImage
+              src={cover}
+              alt=""
+              wrapClassName="absolute inset-0 block"
               className={cn(
-                "text-xs tabular-nums",
-                collab ? "text-[#e8c49a]" : "text-[#e85a7a]"
+                "h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]",
+                cancelled && "opacity-70 grayscale-[0.35]"
               )}
-            >
-              {slot.time}
-            </span>
-            {collab ? <CollabBadge /> : null}
+            />
+          ) : (
+            <div
+              className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(232,90,122,0.22),transparent_55%),linear-gradient(160deg,#1c0d12,#10070b)]"
+              aria-hidden
+            />
+          )}
+        </div>
+
+        <div className="flex min-w-0 flex-1 flex-col justify-center py-0.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <LiveSlotTime
+              time={slot.time}
+              timePrevious={slot.timePrevious}
+              timeUpdated={slot.timeUpdated}
+              className="text-xs"
+              accentClassName={
+                cancelled
+                  ? "text-[#d8d0d4]"
+                  : guestTone
+                    ? "text-[#e8c49a]"
+                    : "text-[#e85a7a]"
+              }
+            />
+            {cancelled ? (
+              <span className="rounded-full border border-[#8a7f88]/45 px-2 py-0.5 text-[0.55rem] tracking-[0.12em] text-[#d8d0d4] uppercase">
+                ยกเลิก
+              </span>
+            ) : collab || slot.isMember ? (
+              <LiveSourceBadges
+                isCollab={collab}
+                isMember={slot.isMember}
+                showChannel={false}
+                size="sm"
+              />
+            ) : null}
           </div>
-          <p className="mt-0.5 text-sm font-medium text-[#fff5f7]">
-            {slot.titleLocal ?? slot.title}
+          <p className="mt-1 text-sm leading-snug font-medium whitespace-normal break-words text-[#fff5f7]">
+            {title}
           </p>
-          {slot.note ? (
-            <p
-              className={cn(
-                "mt-1 text-xs",
-                slot.note.startsWith("ช่อง ")
-                  ? "font-medium text-[#e8c49a]/90"
-                  : "text-[#f3b8c4]/50"
-              )}
-            >
-              {slot.note}
+          {slot.titleLocal ? (
+            <p className="mt-0.5 line-clamp-1 text-xs text-[#f3b8c4]/55">
+              {slot.title}
             </p>
           ) : null}
         </div>
+
         {slot.url ? (
-          <ExternalLink className="size-3.5 shrink-0 opacity-40" />
+          <ExternalLink className="mt-1 size-3.5 shrink-0 self-start opacity-35" />
         ) : null}
       </button>
     </li>
@@ -94,7 +150,7 @@ export function LiveScheduleBoard({ weeks }: LiveScheduleBoardProps) {
 
   const today = useMemo(() => new Date(), []);
   const todayIso = formatISODate(today);
-  const thisWeekMondayIso = formatISODate(startOfWeekMonday(today));
+  const thisWeekSundayIso = formatISODate(startOfWeekSunday(today));
   const years = useMemo(
     () => availableLiveYears(allSlots, today.getFullYear()),
     [allSlots, today]
@@ -114,11 +170,55 @@ export function LiveScheduleBoard({ weeks }: LiveScheduleBoardProps) {
     [year, month]
   );
 
-  const selectedSlots = selectedDate
-    ? (byDate.get(selectedDate) ?? []).slice().sort((a, b) =>
-        a.time.localeCompare(b.time)
-      )
-    : [];
+  const selectedWeekDays = useMemo(() => {
+    if (!selectedDate) return [] as string[];
+    return weekDayDates(
+      formatISODate(startOfWeekSunday(parseISODate(selectedDate)))
+    );
+  }, [selectedDate]);
+
+  const selectedWeekRangeLabel =
+    selectedWeekDays.length === 7
+      ? `${formatThaiShortDate(selectedWeekDays[0])} – ${formatThaiShortDate(selectedWeekDays[6])}`
+      : null;
+
+  const selectedWeekSlotCount = useMemo(() => {
+    let n = 0;
+    for (const iso of selectedWeekDays) {
+      n += byDate.get(iso)?.length ?? 0;
+    }
+    return n;
+  }, [selectedWeekDays, byDate]);
+
+  /** End of week containing the latest live date — Offline only up through this day */
+  const offlineCutoffIso = useMemo(() => {
+    let latest: string | null = null;
+    for (const slot of allSlots) {
+      if (!latest || slot.date > latest) latest = slot.date;
+    }
+    if (!latest) return null;
+    const week = weekDayDates(
+      formatISODate(startOfWeekSunday(parseISODate(latest)))
+    );
+    return week[6] ?? latest;
+  }, [allSlots]);
+
+  const showOfflineForDay = (iso: string) =>
+    Boolean(offlineCutoffIso && iso <= offlineCutoffIso);
+
+  /** Exclusive kind counts for the visible calendar month: Member > Collab > Solo */
+  const monthKindStats = useMemo(() => {
+    let member = 0;
+    let collab = 0;
+    let solo = 0;
+    for (const slot of allSlots) {
+      if (!isSameMonth(slot.date, year, month)) continue;
+      if (slot.isMember) member += 1;
+      else if (slot.kind === "collab") collab += 1;
+      else solo += 1;
+    }
+    return { member, collab, solo, total: member + collab + solo };
+  }, [allSlots, year, month]);
 
   const goPrevMonth = () => {
     if (month === 0) {
@@ -154,10 +254,10 @@ export function LiveScheduleBoard({ weeks }: LiveScheduleBoardProps) {
   };
 
   const weekdayHeaders = useMemo(() => {
-    const monday = startOfWeekMonday(today);
+    const sunday = startOfWeekSunday(today);
     return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(monday);
-      d.setDate(monday.getDate() + i);
+      const d = new Date(sunday);
+      d.setDate(sunday.getDate() + i);
       return thaiWeekdayShort(d);
     });
   }, [today]);
@@ -298,6 +398,27 @@ export function LiveScheduleBoard({ weeks }: LiveScheduleBoardProps) {
           </p>
         </div>
 
+        <div className="mt-3 flex flex-wrap items-center justify-end gap-2 border border-[#f3b8c4]/12 bg-[#1a0d12]/35 px-3 py-2.5 sm:gap-3 sm:px-4">
+          <p className="text-[0.62rem] tracking-[0.16em] text-[#f3b8c4]/50 uppercase">
+            สถิติเดือนนี้
+            <span className="ml-1.5 tabular-nums text-[#f3b8c4]/70">
+              {monthKindStats.total}
+            </span>
+          </p>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#9b8cff]/45 bg-[#9b8cff]/12 px-2.5 py-0.5 text-[0.62rem] tracking-[0.12em] text-[#cfc6ff] uppercase">
+            Member
+            <span className="tabular-nums">{monthKindStats.member}</span>
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#f3b8c4]/35 bg-[#e85a7a]/10 px-2.5 py-0.5 text-[0.62rem] tracking-[0.12em] text-[#f3b8c4] uppercase">
+            Solo
+            <span className="tabular-nums">{monthKindStats.solo}</span>
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d4a574]/50 bg-[#d4a574]/12 px-2.5 py-0.5 text-[0.62rem] tracking-[0.12em] text-[#e8c49a] uppercase">
+            Collab
+            <span className="tabular-nums">{monthKindStats.collab}</span>
+          </span>
+        </div>
+
         <div className="mt-4 grid grid-cols-7 gap-px border border-[#f3b8c4]/12 bg-[#f3b8c4]/12">
           {weekdayHeaders.map((label) => (
             <div
@@ -310,16 +431,19 @@ export function LiveScheduleBoard({ weeks }: LiveScheduleBoardProps) {
 
           {grid.map((iso) => {
             const inMonth = isSameMonth(iso, year, month);
-            const daySlots = (byDate.get(iso) ?? [])
-              .slice()
-              .sort((a, b) => a.time.localeCompare(b.time));
+            const daySlots = preferOwnChannelSlots(
+              (byDate.get(iso) ?? [])
+                .slice()
+                .sort((a, b) => a.time.localeCompare(b.time))
+            );
             const isToday = iso === todayIso;
             const inWeek = isInCurrentWeek(iso, today);
-            const weekRowStart = iso === thisWeekMondayIso;
+            const weekRowStart = iso === thisWeekSundayIso;
             const selected = selectedDate === iso;
             const dayNum = parseISODate(iso).getDate();
             const visibleSlots = daySlots.slice(0, 2);
             const extraCount = Math.max(0, daySlots.length - visibleSlots.length);
+            const crowded = daySlots.length > 1;
 
             return (
               <div
@@ -334,7 +458,10 @@ export function LiveScheduleBoard({ weeks }: LiveScheduleBoardProps) {
                   }
                 }}
                 className={cn(
-                  "relative flex min-h-[5.5rem] cursor-pointer flex-col items-stretch gap-1 bg-[#140a0d] p-1 text-left transition sm:min-h-[7.5rem] sm:gap-1.5 sm:p-1.5 md:min-h-[8.5rem] md:p-2",
+                  "relative flex cursor-pointer flex-col items-stretch gap-1 bg-[#140a0d] p-1 text-left transition sm:gap-1.5 sm:p-1.5 md:p-2",
+                  crowded
+                    ? "h-[5.5rem] overflow-hidden sm:h-[7.5rem] md:h-[8.5rem]"
+                    : "min-h-[5.5rem] sm:min-h-[7.5rem] md:min-h-[8.5rem]",
                   !inMonth && "bg-[#10070b]/80 opacity-50",
                   inWeek && "border-y border-[#e85a7a]/30",
                   weekRowStart &&
@@ -344,21 +471,30 @@ export function LiveScheduleBoard({ weeks }: LiveScheduleBoardProps) {
                   "hover:bg-[#e85a7a]/08"
                 )}
               >
-                <span
-                  className={cn(
-                    "inline-flex size-5 shrink-0 items-center justify-center self-start text-[0.7rem] tabular-nums sm:size-6 sm:text-xs",
-                    isToday
-                      ? "rounded-md bg-[#e85a7a] font-semibold text-white"
-                      : "text-[#f7d7de]/85"
-                  )}
-                >
-                  {dayNum}
-                </span>
+                <div className="flex min-w-0 flex-wrap items-center gap-1 self-start">
+                  <span
+                    className={cn(
+                      "inline-flex size-5 shrink-0 items-center justify-center text-[0.7rem] tabular-nums sm:size-6 sm:text-xs",
+                      isToday
+                        ? "rounded-md bg-[#e85a7a] font-semibold text-white"
+                        : "text-[#f7d7de]/85"
+                    )}
+                  >
+                    {dayNum}
+                  </span>
+                  <LiveDayChannelBadges
+                    slots={daySlots}
+                    size="sm"
+                    className="justify-start"
+                  />
+                </div>
 
                 {daySlots.length > 0 ? (
-                  <div className="flex min-h-0 w-full flex-1 flex-col gap-0.5 sm:gap-1">
+                  <div className="flex min-h-0 w-full flex-1 flex-col gap-0.5 overflow-hidden sm:gap-1">
                     {visibleSlots.map((slot) => {
+                      const own = Boolean(slot.isOwnChannel);
                       const collab = slot.kind === "collab";
+                      const guestTone = !own && collab;
                       const label = slot.titleLocal ?? slot.title;
                       return (
                         <button
@@ -370,37 +506,55 @@ export function LiveScheduleBoard({ weeks }: LiveScheduleBoardProps) {
                             setActiveSlot(slot);
                           }}
                           className={cn(
-                            "block w-full truncate border-l-2 pl-1 text-left leading-tight transition hover:bg-white/5",
-                            collab
+                            "min-w-0 w-full border-l-2 pl-1 text-left leading-tight transition hover:bg-white/5",
+                            crowded && "overflow-hidden",
+                            guestTone
                               ? "border-[#d4a574] text-[#fff5f7]"
                               : "border-[#e85a7a]/55 text-[#f7d7de]/90"
                           )}
-                          title={`${slot.time} · ${label}`}
+                          title={`${slot.timePrevious ? `${slot.timePrevious}→` : ""}${slot.timeUpdated ?? slot.time} · ${label}`}
                         >
-                          <span className="flex flex-wrap items-center gap-1">
-                            <span
-                              className={cn(
-                                "text-[0.55rem] tabular-nums sm:text-[0.62rem]",
-                                collab ? "text-[#e8c49a]" : "text-[#e85a7a]"
-                              )}
-                            >
-                              {slot.time}
-                            </span>
-                            {collab ? (
-                              <CollabBadge className="hidden px-1 py-px text-[0.45rem] leading-none sm:inline-flex" />
+                          <div className="flex min-w-0 flex-wrap items-center gap-1">
+                            <LiveSlotTime
+                              time={slot.time}
+                              timePrevious={slot.timePrevious}
+                              timeUpdated={slot.timeUpdated}
+                              className="text-[0.55rem] sm:text-[0.62rem]"
+                              accentClassName={
+                                guestTone ? "text-[#e8c49a]" : "text-[#e85a7a]"
+                              }
+                            />
+                            {collab || slot.isMember ? (
+                              <LiveSourceBadges
+                                isCollab={collab}
+                                isMember={slot.isMember}
+                                showChannel={false}
+                                size="sm"
+                              />
                             ) : null}
-                          </span>
-                          <span className="mt-0.5 block truncate text-[0.58rem] sm:text-[0.68rem]">
+                          </div>
+                          <span
+                            className={cn(
+                              "mt-0.5 block text-[0.58rem] sm:text-[0.68rem]",
+                              crowded
+                                ? "truncate"
+                                : "whitespace-normal break-words line-clamp-3"
+                            )}
+                          >
                             {label}
                           </span>
                         </button>
                       );
                     })}
                     {extraCount > 0 ? (
-                      <span className="pl-1 text-[0.55rem] text-[#f3b8c4]/55 sm:text-[0.62rem]">
+                      <span className="shrink-0 pl-1 text-[0.55rem] text-[#f3b8c4]/55 sm:text-[0.62rem]">
                         +{extraCount} อีก
                       </span>
                     ) : null}
+                  </div>
+                ) : showOfflineForDay(iso) ? (
+                  <div className="flex w-full flex-col items-center pt-0.5">
+                    <OfflineBadge size="sm" />
                   </div>
                 ) : null}
               </div>
@@ -408,41 +562,124 @@ export function LiveScheduleBoard({ weeks }: LiveScheduleBoardProps) {
           })}
         </div>
 
-        <div className="mt-6 border border-[#f3b8c4]/12 bg-[#1a0d12]/35 p-4 sm:p-5">
+        <div className="mt-6 overflow-hidden rounded-2xl border border-[#f3b8c4]/12 bg-[#1a0d12]/40">
           {selectedDate ? (
             <>
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="text-sm text-[#fff5f7]">
-                  {formatThaiDate(selectedDate)}
-                </p>
-                {selectedDate === todayIso ? (
-                  <span className="border border-[#e85a7a]/40 px-2 py-0.5 text-[0.55rem] tracking-[0.14em] text-[#e85a7a] uppercase">
-                    วันนี้
-                  </span>
-                ) : null}
-                {isInCurrentWeek(selectedDate, today) ? (
-                  <span className="border border-[#f3b8c4]/25 px-2 py-0.5 text-[0.55rem] tracking-[0.14em] text-[#f3b8c4]/75 uppercase">
-                    สัปดาห์นี้
-                  </span>
-                ) : null}
+              <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[#f3b8c4]/12 px-4 py-4 sm:px-5">
+                <div>
+                  <p className="text-[0.62rem] tracking-[0.2em] text-[#f3b8c4]/55 uppercase">
+                    สัปดาห์ที่เลือก
+                  </p>
+                  <p className="mt-1 font-[family-name:var(--font-display)] text-lg font-semibold text-[#fff5f7]">
+                    {selectedWeekRangeLabel}
+                  </p>
+                  <p className="mt-1 text-xs text-[#f3b8c4]/60">
+                    วันโฟกัส {formatThaiDate(selectedDate)}
+                    {selectedWeekSlotCount > 0
+                      ? ` · ${selectedWeekSlotCount} ไลฟ์`
+                      : null}
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {selectedDate === todayIso ? (
+                    <span className="rounded-lg border border-[#e85a7a]/40 px-2 py-0.5 text-[0.55rem] tracking-[0.14em] text-[#e85a7a] uppercase">
+                      วันนี้
+                    </span>
+                  ) : null}
+                  {isInCurrentWeek(selectedDate, today) ? (
+                    <span className="rounded-lg border border-[#f3b8c4]/25 px-2 py-0.5 text-[0.55rem] tracking-[0.14em] text-[#f3b8c4]/75 uppercase">
+                      สัปดาห์นี้
+                    </span>
+                  ) : null}
+                </div>
               </div>
 
-              {selectedSlots.length > 0 ? (
-                <ul className="mt-4 space-y-2">
-                  {selectedSlots.map((slot) => (
-                    <SlotListItem
-                      key={slot.id}
-                      slot={slot}
-                      onOpen={() => setActiveSlot(slot)}
-                    />
-                  ))}
-                </ul>
-              ) : (
-                <p className="mt-3 text-sm text-[#f3b8c4]/55">ไม่มีไลฟ์วันนี้</p>
-              )}
+              <div className="divide-y divide-[#f3b8c4]/10">
+                {selectedWeekDays.map((iso) => {
+                  const daySlots = preferOwnChannelSlots(
+                    (byDate.get(iso) ?? [])
+                      .slice()
+                      .sort((a, b) => a.time.localeCompare(b.time))
+                  );
+                  const date = parseISODate(iso);
+                  const isFocus = iso === selectedDate;
+                  const isToday = iso === todayIso;
+
+                  return (
+                    <section
+                      key={iso}
+                      className={cn(
+                        "px-4 py-4 sm:px-5",
+                        isFocus && "bg-[#e85a7a]/06"
+                      )}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => selectDay(iso)}
+                        className="flex w-full flex-wrap items-center gap-2 text-left"
+                      >
+                        <span
+                          className={cn(
+                            "inline-flex min-w-[2.5rem] items-center justify-center rounded-md px-2 py-1 text-sm tabular-nums",
+                            isToday
+                              ? "bg-[#e85a7a] font-semibold text-white"
+                              : isFocus
+                                ? "bg-[#e85a7a]/20 text-[#fff5f7]"
+                                : "text-[#f7d7de]/90"
+                          )}
+                        >
+                          {date.getDate()}
+                        </span>
+                        <span className="text-[0.7rem] tracking-[0.16em] text-[#f3b8c4]/65 uppercase">
+                          {thaiWeekdayShort(date)}
+                        </span>
+                        <span className="text-xs text-[#f3b8c4]/50">
+                          {formatThaiShortDate(iso)}
+                        </span>
+                        <LiveDayChannelBadges
+                          slots={daySlots}
+                          size="sm"
+                          className="justify-start"
+                        />
+                        {isFocus ? (
+                          <span className="ml-auto text-[0.55rem] tracking-[0.14em] text-[#e85a7a]/90 uppercase">
+                            เลือกอยู่
+                          </span>
+                        ) : null}
+                      </button>
+
+                      {daySlots.length > 0 ? (
+                        <ul className="mt-3 space-y-2">
+                          {daySlots.map((slot) => (
+                            <WeekSlotCard
+                              key={slot.id}
+                              slot={slot}
+                              onOpen={() => {
+                                selectDay(iso);
+                                setActiveSlot(slot);
+                              }}
+                            />
+                          ))}
+                        </ul>
+                      ) : showOfflineForDay(iso) ? (
+                        <div className="mt-3 flex items-center gap-2 rounded-xl border border-dashed border-[#6ec9b0]/25 bg-[#6ec9b0]/06 px-3 py-3">
+                          <OfflineBadge size="sm" />
+                          <span className="text-xs text-[#a8e6d4]/75">
+                            ไม่มีไลฟ์วันนี้
+                          </span>
+                        </div>
+                      ) : (
+                        <p className="mt-2 text-xs text-[#f3b8c4]/35">—</p>
+                      )}
+                    </section>
+                  );
+                })}
+              </div>
             </>
           ) : (
-            <p className="text-sm text-[#f3b8c4]/55">เลือกวันในปฏิทิน</p>
+            <p className="px-4 py-8 text-sm text-[#f3b8c4]/55 sm:px-5">
+              เลือกวันในปฏิทินเพื่อดูไลฟ์ทั้งสัปดาห์
+            </p>
           )}
         </div>
       </section>
