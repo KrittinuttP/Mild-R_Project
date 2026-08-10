@@ -6,6 +6,10 @@ import { ChevronDown } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { HeartAtmosphere } from "@/components/animations/HeartAtmosphere";
+import {
+  DesignCredits,
+  type CreditZone,
+} from "@/components/sections/DesignCredits";
 import { gsap, registerGsapPlugins, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 import type { VtuberProfile } from "@/types/vtuber";
@@ -133,6 +137,17 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
         </>
       ),
     },
+  ];
+
+  const creditSteps: Array<{
+    key: string;
+    label: string;
+    zone: CreditZone;
+    side: "left" | "right";
+  }> = [
+    { key: "art", label: "Art", zone: "art", side: "left" },
+    { key: "audio", label: "Credits", zone: "audio", side: "right" },
+    { key: "loading", label: "Loading", zone: "loading", side: "left" },
   ];
 
   useGSAP(
@@ -307,6 +322,17 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
         const cycleRight = desktopRoot
           ? gsap.utils.toArray<HTMLElement>("[data-cycle-right]", desktopRoot)
           : [];
+        const creditCycles = desktopRoot
+          ? gsap.utils
+              .toArray<HTMLElement>("[data-credit-cycle]", desktopRoot)
+              .sort((a, b) => {
+                const order = ["art", "audio", "loading"];
+                return (
+                  order.indexOf(a.dataset.creditZone ?? "") -
+                  order.indexOf(b.dataset.creditZone ?? "")
+                );
+              })
+          : [];
 
         const playCycle = (
           tl: gsap.core.Timeline,
@@ -344,6 +370,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
             finaleRight,
             ...cycleLeft,
             ...cycleRight,
+            ...creditCycles,
           ].filter(Boolean),
           { autoAlpha: 0 }
         );
@@ -468,6 +495,34 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
         );
         cursor = cursor + ART_MOVE + ART_SETTLE;
         cursor = playCycle(tl, cycleRight, cursor, 72);
+
+        // Credits after Honey: Art → Audio → Loading (ordered)
+        creditCycles.forEach((el) => {
+          const side = el.dataset.creditSide === "right" ? "right" : "left";
+          const fromX = side === "left" ? -72 : 72;
+          const slot = side === "left" ? SLOT_RIGHT : SLOT_LEFT;
+
+          tl.to(character, { ...slot, duration: ART_MOVE }, cursor).to(
+            charInner,
+            { scale: SCALE_SIDE, duration: ART_MOVE },
+            cursor
+          );
+          cursor = cursor + ART_MOVE + ART_SETTLE;
+
+          tl.fromTo(
+            el,
+            { autoAlpha: 0, x: fromX },
+            { autoAlpha: 1, x: 0, duration: 0.12 },
+            cursor
+          );
+          cursor += 0.12 + 0.22;
+          tl.to(
+            el,
+            { autoAlpha: 0, x: fromX * 0.3, duration: 0.1 },
+            cursor
+          );
+          cursor += 0.06;
+        });
 
         tl.to(character, { ...SLOT_CENTER, duration: 0.22 }, cursor)
           .to(charInner, { scale: SCALE_LOCK, duration: 0.22 }, cursor)
@@ -620,12 +675,31 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
           className="relative border-t border-[#f3b8c4]/10 bg-[#12080c] px-5 py-16"
         >
           <div className="mx-auto max-w-lg space-y-16">
-            {cycleBlocks.map((block) => (
+            {cycleBlocks
+              .filter((block) => block.key !== "story")
+              .map((block) => (
               <article key={`m-${block.key}`} data-m-reveal>
                 <p className="text-[0.7rem] tracking-[0.28em] text-[#e85a7a] uppercase">
                   {block.label}
                 </p>
                 {block.bodyMobile}
+              </article>
+            ))}
+
+            {creditSteps.map((step) => (
+              <article key={`m-credit-${step.key}`} data-m-reveal>
+                <p className="text-[0.7rem] tracking-[0.28em] text-[#e85a7a] uppercase">
+                  {step.label}
+                </p>
+                <div className="mt-5">
+                  <DesignCredits
+                    design={characterDesign}
+                    zones={[step.zone]}
+                    variant="strip"
+                    size="lg"
+                    hideHeading
+                  />
+                </div>
               </article>
             ))}
           </div>
@@ -636,7 +710,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
           aria-label={`${basic.name} profile overview`}
           className="relative border-t border-[#f3b8c4]/10 bg-[#140a0d] px-5 py-16 pb-20"
         >
-          <div className="mx-auto max-w-lg space-y-12">
+          <div className="mx-auto max-w-lg space-y-8">
             <div data-m-reveal>
               <p className="text-[0.7rem] tracking-[0.35em] text-[#e85a7a] uppercase">
                 Profile
@@ -649,44 +723,73 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
                   {basic.nameLocal}
                 </p>
               ) : null}
-              <p className="mt-5 text-base leading-relaxed text-[#f7d7de]/88">
-                {lore.summary}
-              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {basic.species ? (
+                  <span className="border border-[#e85a7a]/40 bg-[#e85a7a]/10 px-2 py-0.5 text-[0.58rem] tracking-[0.16em] text-[#e85a7a] uppercase">
+                    {basic.species}
+                  </span>
+                ) : null}
+                {basic.agency ? (
+                  <span className="border border-[#f3b8c4]/20 px-2 py-0.5 text-[0.58rem] tracking-[0.14em] text-[#f3b8c4]/70 uppercase">
+                    {basic.agency}
+                  </span>
+                ) : null}
+              </div>
             </div>
 
-            <div data-m-reveal>
-              <p className="text-[0.7rem] tracking-[0.28em] text-[#e85a7a] uppercase">
+            <div
+              data-m-reveal
+              className="border border-[#f3b8c4]/15 bg-[#1a0d12]/55 px-5 py-4 text-[#fff5f7] backdrop-blur-[2px]"
+            >
+              <p className="text-[0.65rem] tracking-[0.28em] text-[#e85a7a] uppercase">
                 Details
               </p>
-              <ul className="mt-5 space-y-4 text-[#fff5f7]">
-                <li>
-                  <span className="block text-sm text-[#f3b8c4]/65">Unit</span>
-                  <span className="font-[family-name:var(--font-display)] text-xl">
-                    {basic.unit}
-                  </span>
-                </li>
-                <li>
-                  <span className="block text-sm text-[#f3b8c4]/65">Debut</span>
-                  <span className="font-[family-name:var(--font-display)] text-xl">
+              <dl className="mt-3 divide-y divide-[#f3b8c4]/12">
+                {basic.species ? (
+                  <div className="flex items-baseline justify-between gap-4 py-2">
+                    <dt className="text-xs text-[#f3b8c4]/55">Species</dt>
+                    <dd className="text-right font-[family-name:var(--font-display)] text-sm">
+                      {basic.species}
+                    </dd>
+                  </div>
+                ) : null}
+                <div className="flex items-baseline justify-between gap-4 py-2">
+                  <dt className="text-xs text-[#f3b8c4]/55">Debut</dt>
+                  <dd className="text-right font-[family-name:var(--font-display)] text-sm">
                     {formatDebutDate(basic.debutDate)}
-                  </span>
-                </li>
-                <li>
-                  <span className="block text-sm text-[#f3b8c4]/65">Fan</span>
-                  <span className="font-[family-name:var(--font-display)] text-xl">
+                  </dd>
+                </div>
+                {basic.heightCm ? (
+                  <div className="flex items-baseline justify-between gap-4 py-2">
+                    <dt className="text-xs text-[#f3b8c4]/55">Height</dt>
+                    <dd className="text-right font-[family-name:var(--font-display)] text-sm">
+                      {basic.heightCm} cm
+                    </dd>
+                  </div>
+                ) : null}
+                {basic.birthdayLabel || basic.birthday ? (
+                  <div className="flex items-baseline justify-between gap-4 py-2">
+                    <dt className="text-xs text-[#f3b8c4]/55">Birthday</dt>
+                    <dd className="text-right font-[family-name:var(--font-display)] text-sm">
+                      {basic.birthdayLabel ?? basic.birthday}
+                    </dd>
+                  </div>
+                ) : null}
+                <div className="flex items-baseline justify-between gap-4 py-2">
+                  <dt className="text-xs text-[#f3b8c4]/55">Fan</dt>
+                  <dd className="text-right font-[family-name:var(--font-display)] text-sm">
                     {fan.fanName} {fan.oshiMark}
-                  </span>
-                </li>
-                <li>
-                  <span className="block text-sm text-[#f3b8c4]/65">
-                    Art / Rig
-                  </span>
-                  <span className="font-[family-name:var(--font-display)] text-xl">
-                    {characterDesign.illustrator.name} ·{" "}
-                    {characterDesign.rigger.name}
-                  </span>
-                </li>
-              </ul>
+                  </dd>
+                </div>
+                {basic.agency ? (
+                  <div className="flex items-baseline justify-between gap-4 py-2">
+                    <dt className="text-xs text-[#f3b8c4]/55">Agency</dt>
+                    <dd className="text-right text-sm text-[#f7d7de]/90">
+                      {basic.agency}
+                    </dd>
+                  </div>
+                ) : null}
+              </dl>
             </div>
           </div>
         </section>
@@ -695,7 +798,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
       {/* ========== DESKTOP: sticky scrollytelling ========== */}
       <div
         data-desktop-root
-        className="relative hidden h-[480vh] bg-[#140a0d] md:block"
+        className="relative hidden h-[640vh] bg-[#140a0d] md:block"
       >
         <div className="sticky top-0 h-[100dvh] overflow-hidden">
           <div className="absolute inset-0 scale-110">
@@ -831,7 +934,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
             </div>
 
             <div className="absolute inset-y-0 left-0 flex w-1/2 items-center justify-center px-10 lg:px-14">
-              <div className="relative h-52 w-full max-w-[22rem] text-left">
+              <div className="relative h-[26rem] w-full max-w-[32rem] text-left">
                 {cycleBlocks
                   .filter((b) => b.side === "left")
                   .map((block) => (
@@ -847,11 +950,35 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
                       {block.bodyDesktop}
                     </div>
                   ))}
+                {creditSteps
+                  .filter((s) => s.side === "left")
+                  .map((step) => (
+                    <div
+                      key={step.key}
+                      data-credit-cycle
+                      data-credit-zone={step.zone}
+                      data-credit-side="left"
+                      className="absolute inset-0 flex flex-col justify-center"
+                    >
+                      <p className="text-sm tracking-[0.28em] text-[#e85a7a]/90 uppercase sm:text-base">
+                        {step.label}
+                      </p>
+                      <div className="pointer-events-auto mt-6">
+                        <DesignCredits
+                          design={characterDesign}
+                          zones={[step.zone]}
+                          variant="strip"
+                          size="lg"
+                          hideHeading
+                        />
+                      </div>
+                    </div>
+                  ))}
               </div>
             </div>
 
             <div className="absolute inset-y-0 right-0 flex w-1/2 items-center justify-center px-10 lg:px-14">
-              <div className="relative h-52 w-full max-w-[22rem] text-right">
+              <div className="relative h-[26rem] w-full max-w-[32rem] text-right">
                 {cycleBlocks
                   .filter((b) => b.side === "right")
                   .map((block) => (
@@ -867,6 +994,31 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
                       {block.bodyDesktop}
                     </div>
                   ))}
+                {creditSteps
+                  .filter((s) => s.side === "right")
+                  .map((step) => (
+                    <div
+                      key={step.key}
+                      data-credit-cycle
+                      data-credit-zone={step.zone}
+                      data-credit-side="right"
+                      className="absolute inset-0 flex flex-col justify-center"
+                    >
+                      <p className="text-sm tracking-[0.28em] text-[#e85a7a]/90 uppercase sm:text-base">
+                        {step.label}
+                      </p>
+                      <div className="pointer-events-auto mt-6">
+                        <DesignCredits
+                          design={characterDesign}
+                          zones={[step.zone]}
+                          variant="strip"
+                          size="lg"
+                          align="end"
+                          hideHeading
+                        />
+                      </div>
+                    </div>
+                  ))}
               </div>
             </div>
           </div>
@@ -875,59 +1027,108 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
             data-finale
             id="profile-desktop"
             aria-label={`${basic.name} profile overview`}
-            className="pointer-events-none absolute inset-0 z-20 flex items-center px-10 pt-28 pb-16 lg:px-16"
+            className="pointer-events-none absolute inset-0 z-20 flex px-8 pt-16 pb-7 lg:px-12 lg:pt-16 lg:pb-8"
           >
-            <div className="mx-auto grid w-full max-w-6xl grid-cols-2 items-center gap-10">
-              <div data-finale-left className="max-w-md">
-                <p className="text-sm tracking-[0.35em] text-[#e85a7a] uppercase">
-                  Profile
-                </p>
-                <h2 className="mt-4 font-[family-name:var(--font-display)] text-5xl font-bold tracking-tight text-[#fff5f7]">
-                  {basic.name}
-                </h2>
-                {basic.nameLocal ? (
-                  <p className="mt-2 text-xl text-[#f3b8c4]/85">
-                    {basic.nameLocal}
+            <div className="mx-auto flex h-full w-full max-w-6xl flex-col">
+              <div className="flex min-h-0 flex-1 flex-col justify-center pb-2 pt-4 lg:pb-4 lg:pt-2">
+              <div className="grid shrink-0 grid-cols-2 items-stretch gap-6 lg:gap-10">
+                <div
+                  data-finale-left
+                  className="relative max-w-lg border-l-2 border-[#e85a7a]/55 pl-5 lg:pl-6"
+                >
+                  <p className="text-[0.65rem] tracking-[0.32em] text-[#e85a7a] uppercase lg:text-xs">
+                    Profile
                   </p>
-                ) : null}
-                <p className="mt-6 text-base leading-relaxed text-[#f7d7de]/88">
-                  {lore.summary}
-                </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    {basic.species ? (
+                      <span className="border border-[#e85a7a]/40 bg-[#e85a7a]/10 px-2 py-0.5 text-[0.58rem] tracking-[0.16em] text-[#e85a7a] uppercase">
+                        {basic.species}
+                      </span>
+                    ) : null}
+                    {basic.unit ? (
+                      <span className="border border-[#f3b8c4]/20 px-2 py-0.5 text-[0.58rem] tracking-[0.14em] text-[#f3b8c4]/70 uppercase">
+                        {basic.unit}
+                      </span>
+                    ) : null}
+                  </div>
+                  <h2 className="mt-3 font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight text-[#fff5f7] lg:text-[2.75rem] xl:text-5xl">
+                    {basic.name}
+                  </h2>
+                  {basic.nameLocal ? (
+                    <p className="mt-1.5 text-lg text-[#f3b8c4]/85 lg:text-xl">
+                      {basic.nameLocal}
+                    </p>
+                  ) : null}
+                  <p className="mt-4 max-w-md text-sm leading-relaxed text-[#f7d7de]/88 lg:text-[0.95rem]">
+                    {lore.summary}
+                  </p>
+                </div>
+
+                <div
+                  data-finale-right
+                  className="flex max-w-sm flex-col justify-center justify-self-end border border-[#f3b8c4]/15 bg-[#1a0d12]/55 px-5 py-4 text-[#fff5f7] backdrop-blur-[2px] lg:px-6 lg:py-5"
+                >
+                  <p className="text-[0.65rem] tracking-[0.28em] text-[#e85a7a] uppercase lg:text-xs">
+                    Details
+                  </p>
+                  <dl className="mt-3 divide-y divide-[#f3b8c4]/12">
+                    {basic.species ? (
+                      <div className="flex items-baseline justify-between gap-4 py-2">
+                        <dt className="text-xs text-[#f3b8c4]/55">Species</dt>
+                        <dd className="text-right font-[family-name:var(--font-display)] text-sm lg:text-base">
+                          {basic.species}
+                        </dd>
+                      </div>
+                    ) : null}
+                    <div className="flex items-baseline justify-between gap-4 py-2">
+                      <dt className="text-xs text-[#f3b8c4]/55">Debut</dt>
+                      <dd className="text-right font-[family-name:var(--font-display)] text-sm lg:text-base">
+                        {formatDebutDate(basic.debutDate)}
+                      </dd>
+                    </div>
+                    {basic.heightCm ? (
+                      <div className="flex items-baseline justify-between gap-4 py-2">
+                        <dt className="text-xs text-[#f3b8c4]/55">Height</dt>
+                        <dd className="text-right font-[family-name:var(--font-display)] text-sm lg:text-base">
+                          {basic.heightCm} cm
+                        </dd>
+                      </div>
+                    ) : null}
+                    {basic.birthdayLabel || basic.birthday ? (
+                      <div className="flex items-baseline justify-between gap-4 py-2">
+                        <dt className="text-xs text-[#f3b8c4]/55">Birthday</dt>
+                        <dd className="text-right font-[family-name:var(--font-display)] text-sm lg:text-base">
+                          {basic.birthdayLabel ?? basic.birthday}
+                        </dd>
+                      </div>
+                    ) : null}
+                    <div className="flex items-baseline justify-between gap-4 py-2">
+                      <dt className="text-xs text-[#f3b8c4]/55">Fan</dt>
+                      <dd className="text-right font-[family-name:var(--font-display)] text-sm lg:text-base">
+                        {fan.fanName} {fan.oshiMark}
+                      </dd>
+                    </div>
+                    {basic.agency ? (
+                      <div className="flex items-baseline justify-between gap-4 py-2">
+                        <dt className="text-xs text-[#f3b8c4]/55">Agency</dt>
+                        <dd className="text-right text-sm text-[#f7d7de]/90 lg:text-base">
+                          {basic.agency}
+                        </dd>
+                      </div>
+                    ) : null}
+                  </dl>
+                </div>
               </div>
-              <div
-                data-finale-right
-                className="max-w-sm justify-self-end text-right text-[#fff5f7]"
-              >
-                <p className="text-sm tracking-[0.28em] text-[#e85a7a] uppercase">
-                  Details
-                </p>
-                <ul className="mt-5 space-y-4 text-base">
-                  <li>
-                    <span className="block text-[#f3b8c4]/65">Unit</span>
-                    <span className="font-[family-name:var(--font-display)] text-xl">
-                      {basic.unit}
-                    </span>
-                  </li>
-                  <li>
-                    <span className="block text-[#f3b8c4]/65">Debut</span>
-                    <span className="font-[family-name:var(--font-display)] text-xl">
-                      {formatDebutDate(basic.debutDate)}
-                    </span>
-                  </li>
-                  <li>
-                    <span className="block text-[#f3b8c4]/65">Fan</span>
-                    <span className="font-[family-name:var(--font-display)] text-xl">
-                      {fan.fanName} {fan.oshiMark}
-                    </span>
-                  </li>
-                  <li>
-                    <span className="block text-[#f3b8c4]/65">Art / Rig</span>
-                    <span className="font-[family-name:var(--font-display)] text-xl">
-                      {characterDesign.illustrator.name} ·{" "}
-                      {characterDesign.rigger.name}
-                    </span>
-                  </li>
-                </ul>
+              </div>
+
+              <div className="pointer-events-auto shrink-0 border-t border-[#f3b8c4]/15 pt-4">
+                <DesignCredits
+                  design={characterDesign}
+                  variant="strip"
+                  size="sm"
+                  showHandle={false}
+                  layout="inline"
+                />
               </div>
             </div>
           </section>

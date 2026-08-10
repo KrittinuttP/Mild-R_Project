@@ -6,10 +6,28 @@
   "greeting": "マイ-R ใครแอบใจโยกน่ะ ฉันเห็นนะ 👀",
   "catchphrase": "ฮันนี่รายงานตัว~",
   "debutDate": "2024-05-23",
+  "species": "Mutant",
+  "heightCm": 155,
+  "birthday": "12-12",
+  "birthdayLabel": "12 Dec",
+  "likes": [
+    "ชานม",
+    "นมสด",
+    "แตงโม",
+    "บลูเบอร์รีชีสเค้ก",
+    "ไอติมช็อกโกแลต",
+    "บราวนี่",
+    "ดอกทิวลิป",
+    "หมีแพนด้า",
+    "อควาเรียม",
+    "โรงหนัง"
+  ],
+  "dislikes": ["ข้าวโพด", "งู", "ชาเขียว", "ความมืด", "คนใจโยก"],
   "originalSong": {
     "title": "รักษาหัวใจ",
     "titleEn": "Heart Cure",
     "url": "https://www.youtube.com/watch?v=-fxIAm8dozk",
-    "releasedAt": "2024-05-19"
+    "releasedAt": "2024-05-19",
+    "note": "คำว่า「เธอ」มี 44 คำ"
   }
 }

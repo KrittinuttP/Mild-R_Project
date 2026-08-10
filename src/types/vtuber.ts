@@ -17,17 +17,45 @@ export interface HashtagGroup {
   tags: string[];
 }
 
+/** Credited person (illustrator, rigger, BGM, etc.) */
+export interface CreditPerson {
+  name: string;
+  handle?: string;
+  url?: string;
+  /** Public URL path under /public */
+  image?: string;
+}
+
+/** Extra staff credit beyond mama/papa */
+export interface StaffCredit extends CreditPerson {
+  id: string;
+  /** Display role, e.g. "BGM1", "Logo & Overlay" */
+  role: string;
+  roleLocal?: string;
+}
+
+/** Eye companions (LoVe) */
+export interface CharacterCompanion {
+  id: string;
+  name: string;
+  nameLocal?: string;
+  /** From viewer's perspective of the character art */
+  side: "left" | "right";
+  personality?: string;
+  description?: string;
+}
+
 export interface CharacterDesign {
-  illustrator: {
-    name: string;
-    handle?: string;
-    url?: string;
-  };
-  rigger: {
-    name: string;
-    handle?: string;
-    url?: string;
-  };
+  illustrator: CreditPerson;
+  rigger: CreditPerson;
+  /** Mama / Papa nicknames (optional labels) */
+  illustratorLabel?: string;
+  riggerLabel?: string;
+  credits?: StaffCredit[];
+  /** Group label for eye companions */
+  companionGroupName?: string;
+  companionGroupNameLocal?: string;
+  companions?: CharacterCompanion[];
   notes?: string;
 }
 
@@ -93,11 +121,23 @@ export interface VtuberBasic {
   greeting: string;
   catchphrase?: string;
   debutDate: string;
+  /** Species / identity tag, e.g. "Mutant" */
+  species?: string;
+  /** Height in centimeters */
+  heightCm?: number;
+  /** Month-day without year, ISO-ish `MM-DD` */
+  birthday?: string;
+  /** Human label, e.g. "12 Dec" */
+  birthdayLabel?: string;
+  likes?: string[];
+  dislikes?: string[];
   originalSong?: {
     title: string;
     titleEn?: string;
     url?: string;
     releasedAt?: string;
+    /** Fun fact / lyric note */
+    note?: string;
   };
 }
 

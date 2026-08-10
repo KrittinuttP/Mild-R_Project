@@ -2,12 +2,83 @@
   "illustrator": {
     "name": "atwomaru",
     "handle": "@atwomaru",
-    "url": "https://x.com/atwomaru"
+    "url": "https://x.com/atwomaru",
+    "image": "/assets/image/profile/atwomaru.jpg"
   },
+  "illustratorLabel": "Mama",
   "rigger": {
-    "name": "Karamo Kitchen",
+    "name": "karamomokitchen",
     "handle": "@karamomokitchen",
-    "url": "https://x.com/karamomokitchen"
+    "url": "https://x.com/karamomokitchen",
+    "image": "/assets/image/profile/karamomokitchen.jpg"
   },
-  "notes": "Mama: illustrator · Papa: rigger (as credited on official socials)"
+  "riggerLabel": "Papa",
+  "companionGroupName": "LoVe",
+  "companionGroupNameLocal": "โลวี่",
+  "companions": [
+    {
+      "id": "lo",
+      "name": "Lo",
+      "nameLocal": "โล",
+      "side": "left",
+      "personality": "Introvert",
+      "description": "น้องลูกตาฝั่งซ้ายของภาพ · ส่วนหนึ่งของโลวี่ (LoVe)"
+    },
+    {
+      "id": "ve",
+      "name": "Ve",
+      "nameLocal": "วี่",
+      "side": "right",
+      "personality": "Extrovert",
+      "description": "น้องลูกตาฝั่งขวาของภาพ · ส่วนหนึ่งของโลวี่ (LoVe)"
+    }
+  ],
+  "credits": [
+    {
+      "id": "bgm-1",
+      "role": "BGM1",
+      "roleLocal": "BGM 1",
+      "name": "q07a_",
+      "handle": "@q07a_",
+      "url": "https://x.com/q07a_",
+      "image": "/assets/image/profile/q07a_.jpg"
+    },
+    {
+      "id": "bgm-loading",
+      "role": "BGM · Loading",
+      "roleLocal": "BGM · Loading",
+      "name": "Ha1uday0",
+      "handle": "@Ha1uday0",
+      "url": "https://x.com/Ha1uday0",
+      "image": "/assets/image/profile/Ha1uday0.jpg"
+    },
+    {
+      "id": "bgm-2",
+      "role": "BGM2",
+      "roleLocal": "BGM 2",
+      "name": "Tanaka_Yana_",
+      "handle": "@Tanaka_Yana_",
+      "url": "https://x.com/Tanaka_Yana_",
+      "image": "/assets/image/profile/Tanaka_Yana_.jpg"
+    },
+    {
+      "id": "loading-screen",
+      "role": "Loading Screen",
+      "roleLocal": "Loading Screen",
+      "name": "k0ii81",
+      "handle": "@k0ii81",
+      "url": "https://x.com/k0ii81",
+      "image": "/assets/image/profile/k0ii81.jpg"
+    },
+    {
+      "id": "logo-overlay",
+      "role": "Logo & Overlay",
+      "roleLocal": "โลโก้ & Overlay",
+      "name": "Mymeluna",
+      "handle": "@Mymeluna",
+      "url": "https://x.com/Mymeluna",
+      "image": "/assets/image/profile/Mymeluna.jpg"
+    }
+  ],
+  "notes": "Mama: illustrator · Papa: rigger · LoVe = eye companions Lo + Ve"
 }

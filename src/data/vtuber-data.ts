@@ -84,7 +84,9 @@ export type {
   CafePage,
   CalendarEvent,
   CalendarEventStatus,
+  CharacterCompanion,
   CharacterDesign,
+  CreditPerson,
   EventsBoard,
   FanArtItem,
   FanIdentity,
@@ -104,6 +106,7 @@ export type {
   ProjectItem,
   ProjectStatus,
   SocialLink,
+  StaffCredit,
   VtuberBasic,
   VtuberProfile,
 } from "@/types/vtuber";
