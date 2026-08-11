@@ -336,26 +336,26 @@ export function LiveScheduleBoard({ weeks }: LiveScheduleBoardProps) {
           </button>
         </div>
 
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border border-[#f3b8c4]/12 bg-[#1a0d12]/40 px-3 py-3 sm:px-4">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="mt-8 flex items-center justify-between gap-2 border border-[#f3b8c4]/12 bg-[#1a0d12]/40 px-2 py-2 sm:gap-3 sm:px-4 sm:py-3">
+          <div className="flex min-w-0 flex-1 items-center gap-1 sm:gap-2">
             <button
               type="button"
               aria-label="เดือนก่อน"
               onClick={goPrevMonth}
               className={cn(
                 buttonVariants({ variant: "ghost", size: "icon" }),
-                "size-9 rounded-none text-[#fff5f7]"
+                "size-8 shrink-0 rounded-none text-[#fff5f7] sm:size-9"
               )}
             >
               <ChevronLeft className="size-4" />
             </button>
 
-            <label className="flex items-center gap-2 text-xs tracking-[0.14em] text-[#f3b8c4]/65 uppercase">
-              <span className="sr-only sm:not-sr-only">เดือน</span>
+            <label className="min-w-0 flex-1 sm:flex-none">
+              <span className="sr-only">เดือน</span>
               <select
                 value={month}
                 onChange={(event) => setMonth(Number(event.target.value))}
-                className="min-w-[7.5rem] rounded-lg border border-[#f3b8c4]/25 bg-[#140a0d] px-2 py-1.5 font-[family-name:var(--font-display)] text-sm tracking-normal text-[#fff5f7] outline-none focus:border-[#e85a7a]/50 sm:min-w-[8.5rem] sm:text-base"
+                className="w-full min-w-0 rounded-lg border border-[#f3b8c4]/25 bg-[#140a0d] px-1.5 py-1.5 font-[family-name:var(--font-display)] text-sm tracking-normal text-[#fff5f7] outline-none focus:border-[#e85a7a]/50 sm:min-w-[8.5rem] sm:px-2 sm:text-base"
               >
                 {Array.from({ length: 12 }, (_, index) => (
                   <option key={index} value={index}>
@@ -365,12 +365,12 @@ export function LiveScheduleBoard({ weeks }: LiveScheduleBoardProps) {
               </select>
             </label>
 
-            <label className="flex items-center gap-2 text-xs tracking-[0.14em] text-[#f3b8c4]/65 uppercase">
-              <span className="sr-only sm:not-sr-only">ปี</span>
+            <label className="shrink-0">
+              <span className="sr-only">ปี</span>
               <select
                 value={year}
                 onChange={(event) => setYear(Number(event.target.value))}
-                className="min-w-[6.5rem] rounded-lg border border-[#f3b8c4]/25 bg-[#140a0d] px-2 py-1.5 font-[family-name:var(--font-display)] text-sm tracking-normal text-[#fff5f7] outline-none focus:border-[#e85a7a]/50 sm:text-base"
+                className="w-[4.75rem] rounded-lg border border-[#f3b8c4]/25 bg-[#140a0d] px-1.5 py-1.5 font-[family-name:var(--font-display)] text-sm tracking-normal text-[#fff5f7] outline-none focus:border-[#e85a7a]/50 sm:w-auto sm:min-w-[6.5rem] sm:px-2 sm:text-base"
               >
                 {years.map((value) => (
                   <option key={value} value={value}>
@@ -386,14 +386,14 @@ export function LiveScheduleBoard({ weeks }: LiveScheduleBoardProps) {
               onClick={goNextMonth}
               className={cn(
                 buttonVariants({ variant: "ghost", size: "icon" }),
-                "size-9 rounded-none text-[#fff5f7]"
+                "size-8 shrink-0 rounded-none text-[#fff5f7] sm:size-9"
               )}
             >
               <ChevronRight className="size-4" />
             </button>
           </div>
 
-          <p className="hidden text-sm text-[#f3b8c4]/55 md:block">
+          <p className="hidden shrink-0 text-sm text-[#f3b8c4]/55 md:block">
             {thaiMonthName(month)} {year}
           </p>
         </div>
@@ -458,10 +458,14 @@ export function LiveScheduleBoard({ weeks }: LiveScheduleBoardProps) {
                   }
                 }}
                 className={cn(
-                  "relative flex cursor-pointer flex-col items-stretch gap-1 bg-[#140a0d] p-1 text-left transition sm:gap-1.5 sm:p-1.5 md:p-2",
+                  "relative flex cursor-pointer flex-col items-stretch bg-[#140a0d] text-left transition",
+                  // Mobile: square cells
+                  "aspect-square gap-0.5 overflow-hidden p-1",
+                  // Desktop: prior height rules
+                  "sm:aspect-auto sm:gap-1.5 sm:p-1.5 md:p-2",
                   crowded
-                    ? "h-[5.5rem] overflow-hidden sm:h-[7.5rem] md:h-[8.5rem]"
-                    : "min-h-[5.5rem] sm:min-h-[7.5rem] md:min-h-[8.5rem]",
+                    ? "sm:h-[7.5rem] sm:overflow-hidden md:h-[8.5rem]"
+                    : "sm:min-h-[7.5rem] md:min-h-[8.5rem]",
                   !inMonth && "bg-[#10070b]/80 opacity-50",
                   inWeek && "border-y border-[#e85a7a]/30",
                   weekRowStart &&
@@ -471,10 +475,11 @@ export function LiveScheduleBoard({ weeks }: LiveScheduleBoardProps) {
                   "hover:bg-[#e85a7a]/08"
                 )}
               >
-                <div className="flex min-w-0 flex-wrap items-center gap-1 self-start">
+                {/* —— Mobile compact —— */}
+                <div className="flex h-full min-h-0 flex-col sm:hidden">
                   <span
                     className={cn(
-                      "inline-flex size-5 shrink-0 items-center justify-center text-[0.7rem] tabular-nums sm:size-6 sm:text-xs",
+                      "inline-flex size-5 shrink-0 items-center justify-center self-start text-[0.7rem] tabular-nums",
                       isToday
                         ? "rounded-md bg-[#e85a7a] font-semibold text-white"
                         : "text-[#f7d7de]/85"
@@ -482,81 +487,147 @@ export function LiveScheduleBoard({ weeks }: LiveScheduleBoardProps) {
                   >
                     {dayNum}
                   </span>
-                  <LiveDayChannelBadges
-                    slots={daySlots}
-                    size="sm"
-                    className="justify-start"
-                  />
+
+                  {daySlots.length > 0 ? (
+                    <div className="mt-auto flex min-h-0 flex-col gap-0.5">
+                      {visibleSlots.map((slot) => {
+                        const own = Boolean(slot.isOwnChannel);
+                        const collab = slot.kind === "collab";
+                        const guestTone = !own && collab;
+                        const time = slot.timeUpdated ?? slot.time;
+                        const label = slot.titleLocal ?? slot.title;
+                        return (
+                          <button
+                            key={slot.id}
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              selectDay(iso);
+                              setActiveSlot(slot);
+                            }}
+                            className={cn(
+                              "flex min-w-0 items-center border-l-2 py-px pl-1 text-left",
+                              guestTone
+                                ? "border-[#d4a574]"
+                                : "border-[#e85a7a]/70"
+                            )}
+                            title={`${time} · ${label}`}
+                          >
+                            <span
+                              className={cn(
+                                "truncate text-[0.55rem] tabular-nums leading-none",
+                                guestTone ? "text-[#e8c49a]" : "text-[#e85a7a]"
+                              )}
+                            >
+                              {time}
+                            </span>
+                          </button>
+                        );
+                      })}
+                      {extraCount > 0 ? (
+                        <span className="pl-1 text-[0.5rem] leading-none text-[#f3b8c4]/50">
+                          +{extraCount}
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : showOfflineForDay(iso) ? (
+                    <div className="mt-auto border-l-2 border-[#6ec9b0]/70 py-px pl-1">
+                      <span className="text-[0.5rem] tracking-[0.1em] text-[#6ec9b0]/85 uppercase">
+                        Off
+                      </span>
+                    </div>
+                  ) : null}
                 </div>
 
-                {daySlots.length > 0 ? (
-                  <div className="flex min-h-0 w-full flex-1 flex-col gap-0.5 overflow-hidden sm:gap-1">
-                    {visibleSlots.map((slot) => {
-                      const own = Boolean(slot.isOwnChannel);
-                      const collab = slot.kind === "collab";
-                      const guestTone = !own && collab;
-                      const label = slot.titleLocal ?? slot.title;
-                      return (
-                        <button
-                          key={slot.id}
-                          type="button"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            selectDay(iso);
-                            setActiveSlot(slot);
-                          }}
-                          className={cn(
-                            "min-w-0 w-full border-l-2 pl-1 text-left leading-tight transition hover:bg-white/5",
-                            crowded && "overflow-hidden",
-                            guestTone
-                              ? "border-[#d4a574] text-[#fff5f7]"
-                              : "border-[#e85a7a]/55 text-[#f7d7de]/90"
-                          )}
-                          title={`${slot.timePrevious ? `${slot.timePrevious}→` : ""}${slot.timeUpdated ?? slot.time} · ${label}`}
-                        >
-                          <div className="flex min-w-0 flex-wrap items-center gap-1">
-                            <LiveSlotTime
-                              time={slot.time}
-                              timePrevious={slot.timePrevious}
-                              timeUpdated={slot.timeUpdated}
-                              className="text-[0.55rem] sm:text-[0.62rem]"
-                              accentClassName={
-                                guestTone ? "text-[#e8c49a]" : "text-[#e85a7a]"
-                              }
-                            />
-                            {collab || slot.isMember ? (
-                              <LiveSourceBadges
-                                isCollab={collab}
-                                isMember={slot.isMember}
-                                showChannel={false}
-                                size="sm"
-                              />
-                            ) : null}
-                          </div>
-                          <span
+                {/* —— Desktop / tablet —— */}
+                <div className="hidden h-full min-h-0 flex-col gap-1 sm:flex sm:gap-1.5">
+                  <div className="flex min-w-0 flex-wrap items-center gap-1 self-start">
+                    <span
+                      className={cn(
+                        "inline-flex size-5 shrink-0 items-center justify-center text-[0.7rem] tabular-nums sm:size-6 sm:text-xs",
+                        isToday
+                          ? "rounded-md bg-[#e85a7a] font-semibold text-white"
+                          : "text-[#f7d7de]/85"
+                      )}
+                    >
+                      {dayNum}
+                    </span>
+                    <LiveDayChannelBadges
+                      slots={daySlots}
+                      size="sm"
+                      className="justify-start"
+                    />
+                  </div>
+
+                  {daySlots.length > 0 ? (
+                    <div className="flex min-h-0 w-full flex-1 flex-col gap-0.5 overflow-hidden sm:gap-1">
+                      {visibleSlots.map((slot) => {
+                        const own = Boolean(slot.isOwnChannel);
+                        const collab = slot.kind === "collab";
+                        const guestTone = !own && collab;
+                        const label = slot.titleLocal ?? slot.title;
+                        return (
+                          <button
+                            key={slot.id}
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              selectDay(iso);
+                              setActiveSlot(slot);
+                            }}
                             className={cn(
-                              "mt-0.5 block text-[0.58rem] sm:text-[0.68rem]",
-                              crowded
-                                ? "truncate"
-                                : "whitespace-normal break-words line-clamp-3"
+                              "min-w-0 w-full border-l-2 pl-1 text-left leading-tight transition hover:bg-white/5",
+                              crowded && "overflow-hidden",
+                              guestTone
+                                ? "border-[#d4a574] text-[#fff5f7]"
+                                : "border-[#e85a7a]/55 text-[#f7d7de]/90"
                             )}
+                            title={`${slot.timePrevious ? `${slot.timePrevious}→` : ""}${slot.timeUpdated ?? slot.time} · ${label}`}
                           >
-                            {label}
-                          </span>
-                        </button>
-                      );
-                    })}
-                    {extraCount > 0 ? (
-                      <span className="shrink-0 pl-1 text-[0.55rem] text-[#f3b8c4]/55 sm:text-[0.62rem]">
-                        +{extraCount} อีก
-                      </span>
-                    ) : null}
-                  </div>
-                ) : showOfflineForDay(iso) ? (
-                  <div className="flex w-full flex-col items-center pt-0.5">
-                    <OfflineBadge size="sm" />
-                  </div>
-                ) : null}
+                            <div className="flex min-w-0 flex-wrap items-center gap-1">
+                              <LiveSlotTime
+                                time={slot.time}
+                                timePrevious={slot.timePrevious}
+                                timeUpdated={slot.timeUpdated}
+                                className="text-[0.55rem] sm:text-[0.62rem]"
+                                accentClassName={
+                                  guestTone ? "text-[#e8c49a]" : "text-[#e85a7a]"
+                                }
+                              />
+                              {collab || slot.isMember ? (
+                                <LiveSourceBadges
+                                  isCollab={collab}
+                                  isMember={slot.isMember}
+                                  showChannel={false}
+                                  size="sm"
+                                />
+                              ) : null}
+                            </div>
+                            <span
+                              className={cn(
+                                "mt-0.5 block text-[0.58rem] sm:text-[0.68rem]",
+                                crowded
+                                  ? "truncate"
+                                  : "line-clamp-3 whitespace-normal break-words"
+                              )}
+                            >
+                              {label}
+                            </span>
+                          </button>
+                        );
+                      })}
+                      {extraCount > 0 ? (
+                        <span className="shrink-0 pl-1 text-[0.55rem] text-[#f3b8c4]/55 sm:text-[0.62rem]">
+                          +{extraCount} อีก
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : showOfflineForDay(iso) ? (
+                    <div className="flex w-full flex-col items-center pt-0.5">
+                      <OfflineBadge size="sm" />
+                    </div>
+                  ) : null}
+                </div>
               </div>
             );
           })}
