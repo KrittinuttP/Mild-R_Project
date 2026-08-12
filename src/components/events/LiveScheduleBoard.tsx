@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 
 import { CollabBadge } from "@/components/events/CollabBadge";
@@ -43,6 +43,21 @@ import type { LiveSlot, LiveWeek } from "@/types/vtuber";
 type LiveScheduleBoardProps = {
   weeks: LiveWeek[];
 };
+
+function isBrowserReload(): boolean {
+  if (typeof performance === "undefined") return false;
+  const nav = performance.getEntriesByType(
+    "navigation"
+  )[0] as PerformanceNavigationTiming | undefined;
+  if (nav?.type === "reload") return true;
+  // Legacy fallback (Safari / older browsers)
+  const legacy = (
+    performance as Performance & {
+      navigation?: { type?: number };
+    }
+  ).navigation;
+  return legacy?.type === 1;
+}
 
 function slotCoverUrl(slot: LiveSlot) {
   if (slot.coverUrl) return slot.coverUrl;
@@ -143,7 +158,36 @@ function WeekSlotCard({
   );
 }
 
-export function LiveScheduleBoard({ weeks }: LiveScheduleBoardProps) {
+export function LiveScheduleBoard({ weeks: initialWeeks }: LiveScheduleBoardProps) {
+  const [weeks, setWeeks] = useState(initialWeeks);
+
+  // Soft nav / ISR HTML may be stale up to revalidate — F5 forces a fresh fetch.
+  useEffect(() => {
+    setWeeks(initialWeeks);
+  }, [initialWeeks]);
+
+  useEffect(() => {
+    if (!isBrowserReload()) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/live/schedule", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = (await res.json()) as { weeks?: LiveWeek[] };
+        if (!cancelled && Array.isArray(data.weeks)) {
+          setWeeks(data.weeks);
+        }
+      } catch (err) {
+        console.error("[LiveScheduleBoard] reload refresh", err);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const sortedWeeks = useMemo(() => sortLiveWeeks(weeks), [weeks]);
   const allSlots = useMemo(() => flattenLiveSlots(weeks), [weeks]);
   const byDate = useMemo(() => slotsByDateMap(allSlots), [allSlots]);

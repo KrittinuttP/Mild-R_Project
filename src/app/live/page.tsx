@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     "ตารางไลฟ์ Mild-R — สัปดาห์นี้และปฏิทินรายเดือน รวมคลิปจาก YouTube",
 };
 
-export const revalidate = 300;
+export const revalidate = 300; // soft nav / ISR · F5 → client refetch /api/live/schedule
 
 export default async function LivePage() {
   const streams = await loadLiveStreams();
