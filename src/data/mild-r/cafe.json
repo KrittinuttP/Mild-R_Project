@@ -10,7 +10,7 @@
     "caseNo": "CASE · MR-HP-001",
     "dateline": "Vol. I · No. 1 · Mild-R Fanclub"
   },
-  "heroImage": "/assets/mild/kv/Mild-R_KV.png",
+  "heroImage": "/assets/mild/kv/Mild-R_Name_Art.png",
   "heroAlt": "Mild-R key visual — Honey Pulse Cafe sample art",
   "visuals": [
     {
@@ -36,7 +36,7 @@
     },
     {
       "id": "art-sample",
-      "src": "/assets/mild/kv/Mild-R_KV.png",
+      "src": "/assets/mild/kv/Mild-R_Name_Art.png",
       "alt": "Sample art จาก Mild-R KV",
       "caption": "Art · Mild-R KV sample",
       "kind": "art"
@@ -143,7 +143,7 @@
       "name": "Photo Card Set",
       "nameLocal": "ชุดโฟโต้การ์ด",
       "description": "ชุดรูปที่ระลึกสำหรับฮันนี่ที่ร่วมเปิดเคส",
-      "image": "/assets/mild/kv/Mild-R_KV.png",
+      "image": "/assets/mild/kv/Mild-R_Name_Art.png",
       "imageAlt": "Photo card set sample from Mild-R KV"
     }
   ],

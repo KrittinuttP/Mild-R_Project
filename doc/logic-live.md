@@ -60,7 +60,10 @@
     ถ้ามีไลฟ์จริงจับคู่ได้แล้ว → ไม่สร้าง mock ซ้ำ
 
 8.3 เมื่อ sync YouTube ได้ไลฟ์จริงที่จับคู่ mock → **ใช้แถวจริง แล้วลบ mock**  
-    เงื่อนไขจับคู่: วันเดียวกัน (Bangkok) + ช่องตรงกัน (own↔Mild-R หรือ `channel_id` เดียวกัน) + `|Δscheduled| ≤ 3 ชม.` (เลือกตัวที่เวลานัดใกล้สุด)
+    เงื่อนไขจับคู่ (เรียงลำดับ):  
+    1) วันเดียวกัน (Bangkok) + ช่องตรงกัน (own↔Mild-R หรือ `channel_id` เดียวกัน) + `|Δscheduled| ≤ 3 ชม.` (เลือกตัวใกล้สุด)  
+    2) fallback (เฉพาะ mock): ช่องตรงกัน + เวลา mock ทับช่วงไลฟ์จริง (`actual_start`…`actual_end` หรือนัด ±3 ชม.) — ไม่บังคับวันเดียวกัน  
+    Auto tracker / backfill / `purge:preview-mocks` ใช้กติกาเดียวกันหลัง upsert
 
 8.5 ไลฟ์ **Member** — ใส่แค่ลิงก์ YouTube (`url`)  
     ดึงจาก Data API: ชื่อ · ปก · เวลาไลฟ์ · ช่อง · สถิติ · เก็บ `video_id` จริง + `metadata.member = true`  

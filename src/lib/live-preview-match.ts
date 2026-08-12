@@ -2,25 +2,39 @@
  * Manual preview mocks vs real YouTube lives — match & replace rules.
  *
  * Overwrite (JSON save): replace unlinked previews for the same Bangkok date only.
- * Real live wins: same Bangkok date + same channel ownership + |Δscheduled| ≤ 3h
- * → keep real row, delete the closest matching mock.
+ * Real live wins:
+ *   1) same Bangkok date + same channel + |Δscheduled| ≤ 3h (closest)
+ *   2) fallback (mocks only): same channel + schedule time overlaps real window
+ * → keep real row, delete the matching mock.
  */
 
 export const PREVIEW_MATCH_WINDOW_MS = 3 * 60 * 60 * 1000;
 
 const BANGKOK = "Asia/Bangkok";
 
+/** Parse timestamptz from Supabase / Postgres-style strings. */
+export function parseScheduleMs(iso: string | null | undefined): number {
+  if (!iso) return NaN;
+  const direct = new Date(iso).getTime();
+  if (Number.isFinite(direct)) return direct;
+  // "2026-08-12 14:00:00+00" → ISO-ish
+  const normalized = iso
+    .trim()
+    .replace(" ", "T")
+    .replace(/([+-]\d{2})$/, "$1:00");
+  return new Date(normalized).getTime();
+}
+
 export function bangkokDateFromIso(iso: string | null | undefined): string | null {
-  if (!iso) return null;
-  const t = new Date(iso).getTime();
-  if (!Number.isFinite(t)) return null;
+  const ms = parseScheduleMs(iso);
+  if (!Number.isFinite(ms)) return null;
   const dtf = new Intl.DateTimeFormat("en-CA", {
     timeZone: BANGKOK,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
   });
-  return dtf.format(new Date(iso)); // YYYY-MM-DD
+  return dtf.format(new Date(ms)); // YYYY-MM-DD
 }
 
 export type PreviewLikeRow = {
@@ -30,6 +44,7 @@ export type PreviewLikeRow = {
   scheduled_start?: string | null;
   scheduled_start_first?: string | null;
   actual_start?: string | null;
+  actual_end?: string | null;
   metadata?: Record<string, unknown> | null;
 };
 
@@ -72,21 +87,28 @@ export function channelsMatchForPreview(
   return a.channel_id === b.channel_id;
 }
 
-/**
- * Pick one unlinked mock to delete for this real live.
- * Criteria: same Bangkok date, channel match, within ±3h; closest time wins.
- */
-export function pickMatchingPreviewVideoId(
-  real: PreviewLikeRow,
-  mocks: PreviewLikeRow[]
-): string | null {
-  if (real.video_id.startsWith("manual-")) return null;
-  const realIso = rowScheduleIso(real);
-  const realDate = bangkokDateFromIso(realIso);
-  if (!realIso || !realDate) return null;
-  const realMs = new Date(realIso).getTime();
-  if (!Number.isFinite(realMs)) return null;
+/** Real live time window for overlap checks (mocks only). */
+export function realLiveWindowMs(
+  real: PreviewLikeRow
+): { start: number; end: number } | null {
+  const startIso = real.actual_start ?? rowScheduleIso(real);
+  if (!startIso) return null;
+  const start = parseScheduleMs(startIso);
+  if (!Number.isFinite(start)) return null;
 
+  if (real.actual_end) {
+    const end = parseScheduleMs(real.actual_end);
+    if (Number.isFinite(end) && end >= start) return { start, end };
+  }
+  return { start, end: start + PREVIEW_MATCH_WINDOW_MS };
+}
+
+function pickBySameDate(
+  real: PreviewLikeRow,
+  mocks: PreviewLikeRow[],
+  realMs: number,
+  realDate: string
+): string | null {
   let bestId: string | null = null;
   let bestDelta = Number.POSITIVE_INFINITY;
 
@@ -97,7 +119,7 @@ export function pickMatchingPreviewVideoId(
     if (mockDate !== realDate) continue;
     const mockIso = rowScheduleIso(mock);
     if (!mockIso) continue;
-    const mockMs = new Date(mockIso).getTime();
+    const mockMs = parseScheduleMs(mockIso);
     if (!Number.isFinite(mockMs)) continue;
     const delta = Math.abs(realMs - mockMs);
     if (delta > PREVIEW_MATCH_WINDOW_MS) continue;
@@ -108,6 +130,67 @@ export function pickMatchingPreviewVideoId(
   }
 
   return bestId;
+}
+
+/**
+ * Fallback for mocks only: same channel + mock schedule inside real window
+ * (or within ±3h of real start). Does not require the same Bangkok date —
+ * covers reschedule / cross-midnight cases.
+ */
+function pickByTimeOverlap(
+  real: PreviewLikeRow,
+  mocks: PreviewLikeRow[]
+): string | null {
+  const window = realLiveWindowMs(real);
+  if (!window) return null;
+
+  let bestId: string | null = null;
+  let bestDelta = Number.POSITIVE_INFINITY;
+
+  for (const mock of mocks) {
+    if (!isUnlinkedPreview(mock)) continue;
+    if (!channelsMatchForPreview(real, mock)) continue;
+    const mockIso = rowScheduleIso(mock);
+    if (!mockIso) continue;
+    const mockMs = parseScheduleMs(mockIso);
+    if (!Number.isFinite(mockMs)) continue;
+
+    const inWindow = mockMs >= window.start && mockMs <= window.end;
+    const nearStart = Math.abs(mockMs - window.start) <= PREVIEW_MATCH_WINDOW_MS;
+    if (!inWindow && !nearStart) continue;
+
+    const delta = Math.abs(mockMs - window.start);
+    if (delta < bestDelta) {
+      bestDelta = delta;
+      bestId = mock.video_id;
+    }
+  }
+
+  return bestId;
+}
+
+/**
+ * Pick one unlinked mock to delete for this real live.
+ * 1) same Bangkok date + channel + ±3h
+ * 2) else same channel + time overlap (mocks only)
+ */
+export function pickMatchingPreviewVideoId(
+  real: PreviewLikeRow,
+  mocks: PreviewLikeRow[]
+): string | null {
+  if (real.video_id.startsWith("manual-")) return null;
+  const realIso = rowScheduleIso(real);
+  if (!realIso) return null;
+  const realMs = parseScheduleMs(realIso);
+  if (!Number.isFinite(realMs)) return null;
+  const realDate = bangkokDateFromIso(realIso);
+
+  if (realDate) {
+    const byDate = pickBySameDate(real, mocks, realMs, realDate);
+    if (byDate) return byDate;
+  }
+
+  return pickByTimeOverlap(real, mocks);
 }
 
 /** Collect mock video_ids that should be removed given newly saved real lives. */

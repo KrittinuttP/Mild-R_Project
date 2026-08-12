@@ -129,7 +129,7 @@ async function removeMatchingPreviews(reals: StreamRow[]) {
   const { data, error } = await supabase
     .from("mild_r_live_streams")
     .select(
-      "video_id, channel_id, is_own_channel, scheduled_start, scheduled_start_first, actual_start, metadata"
+      "video_id, channel_id, is_own_channel, scheduled_start, scheduled_start_first, actual_start, actual_end, metadata"
     )
     .or("video_id.like.manual-%,metadata->>preview.eq.true");
 

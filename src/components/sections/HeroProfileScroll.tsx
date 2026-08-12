@@ -54,7 +54,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
 
   const { basic, fan, characterDesign, lore } = data;
   const characterSrc =
-    characterLayer?.src ?? "/assets/mild/kv/Mild-R_KV.png";
+    characterLayer?.src ?? "/assets/mild/kv/Mild-R_Name_Art.png";
   const characterAlt =
     characterLayer?.alt ?? `${basic.name} character`;
 
