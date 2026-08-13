@@ -324,6 +324,23 @@ export interface CafeMenuItem {
   imageAlt?: string;
 }
 
+/** Venue / house menu plates (SOCIEFEE × CHOUXSTORY), separate from signature drinks */
+export interface CafeOtherMenuItem {
+  id: string;
+  image: string;
+  imageAlt?: string;
+  caption?: string;
+  captionLocal?: string;
+}
+
+export interface CafeOtherMenu {
+  title: string;
+  titleLocal?: string;
+  stamp?: string;
+  note?: string;
+  items: CafeOtherMenuItem[];
+}
+
 export interface CafeGoodsItem {
   id: string;
   name: string;
@@ -386,6 +403,10 @@ export interface CafePage {
   schedule: {
     label: string;
     detail?: string;
+    /** ISO datetime for countdown (doors open), e.g. 2026-11-29T10:00:00+07:00 */
+    startsAt?: string;
+    /** ISO datetime when the case day ends */
+    endsAt?: string;
   };
   location: {
     label: string;
@@ -398,6 +419,8 @@ export interface CafePage {
   daySchedule?: CafeDaySchedule;
   highlights: string[];
   menu: CafeMenuItem[];
+  /** House menu booklet (photos), opened as a detective dossier */
+  otherMenu?: CafeOtherMenu;
   goods?: CafeGoodsItem[];
   body: string[];
   ctas: ProjectCta[];

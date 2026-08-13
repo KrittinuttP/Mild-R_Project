@@ -114,9 +114,14 @@ export function CafeHeader({
           >
             {masthead}
           </Link>
-          <div className="mt-0.5 flex items-center gap-2 sm:flex">
+          <div className="mt-0.5 flex min-w-0 items-center gap-2 sm:flex">
+            {cafe.schedule.label ? (
+              <span className="shrink-0 text-[0.55rem] tracking-[0.14em] text-[#c46a7a] uppercase sm:text-[0.58rem] sm:tracking-[0.18em]">
+                {cafe.schedule.label}
+              </span>
+            ) : null}
             {cafe.edition?.caseNo ? (
-              <span className="truncate text-[0.55rem] tracking-[0.14em] text-[#9a7b5a]/90 uppercase sm:text-[0.58rem] sm:tracking-[0.18em]">
+              <span className="hidden truncate text-[0.55rem] tracking-[0.14em] text-[#9a7b5a]/90 uppercase sm:inline sm:text-[0.58rem] sm:tracking-[0.18em]">
                 {cafe.edition.caseNo}
               </span>
             ) : null}

@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
-import { ExternalLink, MapPin, Clock } from "lucide-react";
+import { ChevronDown, ExternalLink, MapPin, Clock } from "lucide-react";
 
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { HeartAtmosphere } from "@/components/animations/HeartAtmosphere";
@@ -10,6 +10,8 @@ import {
   CafeImageLightbox,
   type CafeLightboxItem,
 } from "@/components/cafe/CafeImageLightbox";
+import { CafeCountdown } from "@/components/cafe/CafeCountdown";
+import { CafeVenueMenuBook } from "@/components/cafe/CafeVenueMenuBook";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { buttonVariants } from "@/components/ui/button";
 import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
@@ -31,6 +33,49 @@ const VISUAL_KIND_LABEL: Record<CafeVisualKind, string> = {
   art: "Art",
   other: "Plate",
 };
+
+function splitCaseDate(label?: string) {
+  if (!label) return [];
+  return label.split(/\s*·\s*/).filter(Boolean);
+}
+
+function CaseEcg({ className }: { className?: string }) {
+  const d =
+    "M0 28 H28 L36 28 L42 18 L48 38 L56 28 H92 L100 28 L106 8 L114 48 L122 28 H168 L176 28 L182 16 L188 40 L196 28 H320";
+
+  return (
+    <svg
+      viewBox="0 0 320 56"
+      preserveAspectRatio="none"
+      aria-hidden
+      className={cn("text-[#e85a7a]", className)}
+    >
+      <path
+        d={d}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.38"
+      />
+      <path
+        d={d}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="4.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="animate-ecg-trace"
+        pathLength={1000}
+        style={{
+          strokeDasharray: "160 840",
+          filter: "drop-shadow(0 0 6px rgba(232, 90, 122, 0.85))",
+        }}
+      />
+    </svg>
+  );
+}
 
 function CtaLink({
   cta,
@@ -177,7 +222,7 @@ function CafeThumb({
   );
 }
 
-type CafeLightboxSection = "venue" | "plates" | "menu" | "goods";
+type CafeLightboxSection = "venue" | "plates" | "menu" | "goods" | "otherMenu";
 
 function buildCafeLightboxGroups(cafe: CafePage): Record<
   CafeLightboxSection,
@@ -224,6 +269,15 @@ function buildCafeLightboxGroups(cafe: CafePage): Record<
           : item.name,
         group: "Recovered Property · Goods",
       })),
+    otherMenu: (cafe.otherMenu?.items ?? []).map((item, index) => ({
+      id: item.id,
+      src: item.image,
+      alt: item.imageAlt ?? item.caption ?? `เมนูร้าน แผ่น ${index + 1}`,
+      caption: item.captionLocal
+        ? `${item.caption ?? `Plate ${String(index + 1).padStart(2, "0")}`} · ${item.captionLocal}`
+        : item.caption,
+      group: "Evidence Ledger · Venue Menu",
+    })),
   };
 }
 
@@ -256,6 +310,7 @@ export function CafePromo({ cafe }: CafePromoProps) {
   const heroCopyRef = useRef<HTMLDivElement>(null);
   const [primaryCta, ...restCtas] = cafe.ctas;
   const edition = cafe.edition;
+  const dateParts = splitCaseDate(cafe.schedule.label);
   const lightboxGroups = useMemo(() => buildCafeLightboxGroups(cafe), [cafe]);
   const [lightbox, setLightbox] = useState<{
     section: CafeLightboxSection;
@@ -298,29 +353,91 @@ export function CafePromo({ cafe }: CafePromoProps) {
         }
       );
 
-      const copyTargets =
-        copy.querySelector(":scope > div")?.children ?? copy.children;
-      gsap.from(copyTargets, {
-        autoAlpha: 0,
-        y: 28,
-        duration: 0.9,
-        stagger: 0.08,
-        ease: "power3.out",
-        delay: 0.15,
-      });
+      const kicker = copy.querySelector<HTMLElement>("[data-hero-kicker]");
+      const title = copy.querySelector<HTMLElement>("[data-hero-title]");
+      const tagline = copy.querySelector<HTMLElement>("[data-hero-tagline]");
+      const date = copy.querySelector<HTMLElement>("[data-hero-date]");
+      const cta = copy.querySelector<HTMLElement>("[data-hero-cta]");
+      const scrollHint = copy.querySelector<HTMLElement>("[data-hero-scroll]");
+      const redact = copy.querySelectorAll<HTMLElement>("[data-date-redact]");
+      const textEls = [kicker, title, tagline, date, cta, scrollHint].filter(
+        Boolean
+      ) as HTMLElement[];
+
+      gsap.set(textEls, { autoAlpha: 0 });
+      if (redact.length) {
+        gsap.set(redact, { scaleX: 1, transformOrigin: "left center" });
+      }
+
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      if (kicker) {
+        tl.fromTo(
+          kicker,
+          { x: -40, autoAlpha: 0 },
+          { x: 0, autoAlpha: 1, duration: 0.65 },
+          0.12
+        );
+      }
+      if (title) {
+        tl.fromTo(
+          title,
+          { x: -90, autoAlpha: 0 },
+          { x: 0, autoAlpha: 1, duration: 1 },
+          0.26
+        );
+      }
+      if (tagline) {
+        tl.fromTo(
+          tagline,
+          { y: 18, autoAlpha: 0 },
+          { y: 0, autoAlpha: 1, duration: 0.7 },
+          0.46
+        );
+      }
+      if (date) {
+        tl.fromTo(
+          date,
+          { x: 56, autoAlpha: 0 },
+          { x: 0, autoAlpha: 1, duration: 0.85 },
+          0.58
+        );
+      }
+      if (redact.length) {
+        tl.to(
+          redact,
+          { scaleX: 0, duration: 0.38, stagger: 0.08, ease: "power2.in" },
+          0.78
+        );
+      }
+      if (cta) {
+        tl.fromTo(
+          cta,
+          { y: 24, autoAlpha: 0 },
+          { y: 0, autoAlpha: 1, duration: 0.7 },
+          1.02
+        );
+      }
+      if (scrollHint) {
+        tl.fromTo(
+          scrollHint,
+          { y: 10, autoAlpha: 0 },
+          { y: 0, autoAlpha: 1, duration: 0.55 },
+          1.18
+        );
+      }
 
       if (kv) {
         const mobile = window.matchMedia("(max-width: 639px)").matches;
         gsap.from(kv, {
           autoAlpha: 0,
-          y: mobile ? 20 : 36,
+          y: mobile ? 10 : 36,
           duration: 1.1,
           ease: "power3.out",
           delay: 0.2,
         });
         gsap.to(kv, {
-          y: mobile ? -8 : -14,
-          rotate: mobile ? 0.35 : 0.6,
+          y: mobile ? -4 : -14,
+          rotate: mobile ? 0.2 : 0.6,
           duration: 2.8,
           ease: "sine.inOut",
           yoyo: true,
@@ -355,68 +472,54 @@ export function CafePromo({ cafe }: CafePromoProps) {
         <div ref={heroBgRef} className="pointer-events-none absolute inset-0">
           <div className="absolute inset-0 bg-[#0a0c0e]" />
 
-          {/* KV / art panel — bottom-right on mobile (under copy), right column on desktop */}
-          <div className="absolute inset-x-0 bottom-0 h-[52svh] translate-x-[8%] sm:inset-y-0 sm:left-auto sm:right-0 sm:h-auto sm:w-[58%] sm:translate-x-0 lg:w-[54%]">
+          {/* KV — mobile top-right behind copy; desktop right column */}
+          <div className="absolute top-[3.9rem] right-[-10%] z-[1] h-[62svh] w-[72%] sm:inset-y-0 sm:top-0 sm:right-0 sm:left-auto sm:h-auto sm:w-[64%] lg:w-[60%]">
             <HeartAtmosphere
               soft
-              className="z-[1] opacity-70 sm:opacity-90"
+              className="z-[1] opacity-30 sm:opacity-70"
             />
             <div
               ref={kvFloatRef}
-              className="absolute inset-0 z-[2] flex items-end justify-end will-change-transform pr-1 sm:items-center sm:pr-2 lg:pr-8"
+              className="absolute inset-0 z-[2] flex items-start justify-end will-change-transform sm:items-center sm:pr-4 lg:pr-10"
             >
               <ProtectedImage
                 src={cafe.heroImage}
                 alt={cafe.heroAlt ?? ""}
-                className="h-[94%] max-h-[26rem] w-auto max-w-[92%] object-contain object-bottom opacity-95 saturate-[0.9] contrast-110 sm:h-[78%] sm:max-h-[min(88vh,46rem)] sm:max-w-[min(100%,34rem)] sm:-translate-x-[10%] sm:translate-y-[8%] sm:object-center lg:max-h-[min(90vh,50rem)]"
+                className="h-[92%] max-h-[22rem] w-auto max-w-none object-contain object-top opacity-[0.96] saturate-[0.92] contrast-110 sm:h-[84%] sm:max-h-[min(92vh,52rem)] sm:max-w-[min(100%,40rem)] sm:object-center lg:max-h-[min(94vh,56rem)]"
               />
             </div>
           </div>
 
-          {/* Separation gradients — left/top ink for overlapping mobile copy */}
-          <div className="absolute inset-0 z-[3] bg-gradient-to-b from-[#0a0c0e] from-[8%] via-[#0a0c0e]/55 via-[42%] to-transparent to-[78%] sm:bg-gradient-to-r sm:from-[#0a0c0e] sm:from-[20%] sm:via-[#0a0c0e]/70 sm:via-[44%] sm:to-transparent sm:to-[80%]" />
-          <div className="absolute inset-0 z-[3] bg-gradient-to-r from-[#0a0c0e]/80 from-[0%] via-[#0a0c0e]/25 via-[48%] to-transparent to-[72%] sm:hidden" />
-          <div className="absolute inset-0 z-[3] bg-[radial-gradient(ellipse_at_78%_88%,rgba(168,77,95,0.12),transparent_42%)] sm:bg-[radial-gradient(ellipse_at_18%_40%,rgba(168,77,95,0.1),transparent_40%)]" />
+          <div className="absolute inset-0 z-[3] bg-gradient-to-r from-[#0a0c0e] from-[6%] via-[#0a0c0e]/65 via-[38%] to-transparent to-[88%] sm:from-[16%] sm:via-[#0a0c0e]/50 sm:via-[38%] sm:to-[76%]" />
+          <div className="absolute inset-0 z-[3] bg-gradient-to-t from-[#0a0c0e] from-[0%] via-[#0a0c0e]/80 via-[30%] to-transparent to-[58%] sm:hidden" />
+          <div className="absolute inset-0 z-[3] bg-[radial-gradient(ellipse_at_18%_28%,rgba(168,77,95,0.1),transparent_42%)] sm:bg-[radial-gradient(ellipse_at_14%_42%,rgba(168,77,95,0.08),transparent_42%)]" />
         </div>
 
         <div
           ref={heroCopyRef}
-          className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-6xl flex-col justify-start px-5 pb-10 pt-[calc(4.75rem+env(safe-area-inset-top))] sm:px-10 sm:pt-32 sm:pb-20 lg:px-16"
+          className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-6xl flex-col justify-start px-5 pb-16 pt-[calc(4.5rem+env(safe-area-inset-top))] sm:px-10 sm:pt-[5.25rem] sm:pb-20 lg:px-16"
         >
-          <div className="w-full sm:max-w-md lg:max-w-lg">
-            <p className="w-full text-[0.62rem] tracking-[0.26em] text-[#c46a7a] uppercase sm:text-[0.65rem] sm:tracking-[0.3em]">
-              {edition?.kicker ?? "SPECIAL EDITION"}
-              {edition?.caseNo ? (
-                <span className="text-[#9a7b5a]">
-                  {" "}
-                  · {edition.caseNo}
-                </span>
-              ) : null}
-            </p>
-
+          <div className="w-[58%] max-w-[13.75rem] sm:w-full sm:max-w-md lg:max-w-lg">
             <p
-              className={cn(
-                SERIF,
-                "mt-2 w-[70%] text-base tracking-[0.02em] text-[#f4ebe3]/90 italic sm:mt-3 sm:w-full sm:text-xl"
-              )}
+              data-hero-kicker
+              className="text-[0.62rem] tracking-[0.3em] text-[#c46a7a] uppercase sm:text-[0.7rem] sm:tracking-[0.34em]"
             >
-              {edition?.masthead ?? "The Honey Pulse Gazette"}
+              {edition?.kicker ?? "DETECTIVE CAFE"}
             </p>
-
-            <DoubleRule className="mt-4 max-w-[12rem] sm:mt-5" />
 
             <h1
+              data-hero-title
               className={cn(
-                SERIF,
-                "mt-5 w-full text-[clamp(2.35rem,10vw,3.4rem)] leading-[0.95] font-semibold tracking-tight text-[#f4ebe3] sm:mt-6 sm:text-5xl md:text-6xl lg:text-[4.25rem]"
+                DISPLAY,
+                "mt-2 text-[clamp(1.9rem,8.4vw,2.55rem)] leading-[0.9] font-bold tracking-tight text-[#f4ebe3] sm:mt-3 sm:text-6xl md:text-7xl lg:text-[4.5rem]"
               )}
             >
               {cafe.title}
               {cafe.titleLocal ? (
                 <span
                   className={cn(
-                    DISPLAY,
-                    "mt-2 block text-base font-medium tracking-normal text-[#c4b8a8] sm:mt-2.5 sm:text-xl"
+                    SERIF,
+                    "mt-1.5 block text-sm font-medium tracking-normal text-[#c4b8a8] sm:mt-2 sm:text-xl"
                   )}
                 >
                   {cafe.titleLocal}
@@ -424,33 +527,126 @@ export function CafePromo({ cafe }: CafePromoProps) {
               ) : null}
             </h1>
 
-            <div className="mt-4 w-[70%] sm:mt-5 sm:w-full">
-              <p
+            <p
+              data-hero-tagline
+              className={cn(
+                SERIF,
+                "mt-2.5 line-clamp-2 text-[0.82rem] leading-relaxed text-[#c4b8a8] sm:mt-4 sm:max-w-sm sm:text-base"
+              )}
+            >
+              {cafe.tagline}
+            </p>
+          </div>
+
+          <div className="mt-auto mb-8 w-full sm:mt-6 sm:mb-0 sm:max-w-md lg:max-w-lg">
+            {cafe.schedule.label ? (
+              <div data-hero-date>
+                <div className="relative overflow-hidden border border-[#9a7b5a]/35 bg-[#14100c]/92 backdrop-blur-sm">
+                  <div
+                    className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-[repeating-linear-gradient(180deg,#9a7b5a_0_8px,transparent_8px_14px)] opacity-50"
+                    aria-hidden
+                  />
+                  <p className="px-3 py-2 pl-4 text-[0.52rem] tracking-[0.22em] text-[#9a7b5a] uppercase sm:px-4 sm:pl-5">
+                    T-Minus · Case Open
+                  </p>
+
+                  {dateParts.length > 1 ? (
+                    <div className="grid grid-cols-3 gap-px border-y border-[#9a7b5a]/30 bg-[#9a7b5a]/30">
+                      {dateParts.map((part, index) => (
+                        <div
+                          key={`${part}-${index}`}
+                          className="bg-[#12100e] px-1 py-2.5 text-center sm:px-2 sm:py-3.5"
+                        >
+                          <p
+                            className={cn(
+                              DISPLAY,
+                              "relative text-[clamp(1.55rem,7vw,2.55rem)] leading-none font-bold tracking-tight text-[#fff8f4] tabular-nums"
+                            )}
+                          >
+                            <span
+                              data-date-redact
+                              className="pointer-events-none absolute inset-y-[12%] -inset-x-[8%] origin-left scale-x-0 bg-[#12100e]"
+                              aria-hidden
+                            />
+                            {part}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p
+                      className={cn(
+                        DISPLAY,
+                        "border-y border-[#9a7b5a]/30 px-4 py-3 pl-5 text-[clamp(1.55rem,7vw,2.55rem)] font-bold tracking-tight text-[#fff8f4] tabular-nums"
+                      )}
+                    >
+                      {cafe.schedule.label}
+                    </p>
+                  )}
+
+                  {cafe.schedule.startsAt ? (
+                    <CafeCountdown
+                      startsAt={cafe.schedule.startsAt}
+                      endsAt={cafe.schedule.endsAt}
+                      embedded
+                    />
+                  ) : null}
+
+                  <div className="bg-[#0c0a09] px-3 py-2 pl-4 sm:px-4 sm:pl-5">
+                    <p className="mb-1 text-[0.5rem] tracking-[0.2em] text-[#c46a7a] uppercase sm:text-[0.55rem]">
+                      Sip Pulse
+                    </p>
+                    <CaseEcg className="h-8 w-full sm:h-10" />
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+            <div
+              data-hero-cta
+              className="mt-3 flex flex-wrap gap-2.5 sm:mt-6 sm:gap-3"
+            >
+              <Link
+                href="#dispatch"
                 className={cn(
-                  SERIF,
-                  "max-w-[18rem] text-[0.95rem] leading-relaxed text-[#c4b8a8] sm:max-w-sm sm:text-lg"
+                  buttonVariants({ size: "lg" }),
+                  "rounded-none border-transparent bg-[#a84d5f] text-[#f4ebe3] hover:bg-[#c46a7a]"
                 )}
               >
-                {cafe.tagline}
-              </p>
-
-              <div className="mt-6 flex flex-wrap gap-2.5 sm:mt-8 sm:gap-3">
-                {primaryCta ? <CtaLink cta={primaryCta} /> : null}
-                {restCtas.map((cta) => (
-                  <CtaLink
-                    key={cta.url + cta.label}
-                    cta={cta}
-                    variant="outline"
-                  />
-                ))}
-              </div>
+                เปิดเคส
+              </Link>
+              {primaryCta ? (
+                <CtaLink cta={primaryCta} variant="outline" />
+              ) : null}
+              {restCtas.map((cta) => (
+                <CtaLink
+                  key={cta.url + cta.label}
+                  cta={cta}
+                  variant="outline"
+                />
+              ))}
             </div>
           </div>
+
+          <a
+            data-hero-scroll
+            href="#dispatch"
+            className="absolute bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-0.5 text-[#c4b8a8]/65 transition hover:text-[#f4ebe3]"
+            aria-label="เลื่อนไปดูวันเวลาและพิกัด"
+          >
+            <span className="text-[0.55rem] tracking-[0.22em] uppercase">
+              Scroll
+            </span>
+            <ChevronDown className="size-4 animate-bounce sm:size-5" />
+          </a>
         </div>
       </section>
 
       {/* ── 2. Dispatch ── */}
-      <Shell className="border-y border-[#9a7b5a]/20 bg-[#0d1013] py-14 sm:py-16">
+      <Shell
+        id="dispatch"
+        className="border-y border-[#9a7b5a]/20 bg-[#0d1013] py-14 sm:py-16"
+      >
         <SectionHead
           eyebrow="Dispatch"
           stamp="CONFIDENTIAL"
@@ -757,6 +953,15 @@ export function CafePromo({ cafe }: CafePromoProps) {
             </ScrollReveal>
           ))}
         </ul>
+        {cafe.otherMenu && cafe.otherMenu.items.length > 0 ? (
+          <CafeVenueMenuBook
+            menu={cafe.otherMenu}
+            venueLabel={cafe.location.label}
+            venueImage={cafe.location.image}
+            venueImageAlt={cafe.location.imageAlt}
+            onZoom={(index) => openLightbox("otherMenu", index)}
+          />
+        ) : null}
       </Shell>
 
       {/* ── 7. Goods — mixed proportions ── */}
