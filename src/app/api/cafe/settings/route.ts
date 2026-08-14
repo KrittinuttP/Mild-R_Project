@@ -54,7 +54,7 @@ export async function PUT(request: Request) {
 
   try {
     const visibility = await saveCafeVisibility(updates);
-    revalidatePath("/cafe");
+    revalidatePath("/cafe", "layout");
     return NextResponse.json({ visibility });
   } catch (error) {
     const message =

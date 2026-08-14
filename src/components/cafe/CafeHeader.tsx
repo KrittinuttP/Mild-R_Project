@@ -27,14 +27,19 @@ const CAFE_NAV: CafeNavLink[] = [
 type CafeHeaderProps = {
   cafe: CafePage;
   mildRHomeHref?: string;
+  showMainSiteLink?: boolean;
 };
 
 export function CafeHeader({
   cafe,
   mildRHomeHref = "/",
+  showMainSiteLink = true,
 }: CafeHeaderProps) {
   const pathname = usePathname();
   const onCafeRoot = pathname === "/cafe" || pathname === "/cafe/";
+  const onSecretPreview =
+    pathname === "/cafe/secret" || pathname === "/cafe/secret/";
+  const showHomeLink = showMainSiteLink || onSecretPreview;
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const masthead = cafe.edition?.masthead ?? cafe.title;
@@ -125,12 +130,14 @@ export function CafeHeader({
                 {cafe.edition.caseNo}
               </span>
             ) : null}
-            <Link
-              href={mildRHomeHref}
-              className="hidden text-[0.65rem] tracking-[0.18em] text-[#a84d5f] uppercase transition hover:text-[#c46a7a] sm:inline"
-            >
-              เว็บหลัก →
-            </Link>
+            {showHomeLink ? (
+              <Link
+                href={mildRHomeHref}
+                className="hidden text-[0.65rem] tracking-[0.18em] text-[#a84d5f] uppercase transition hover:text-[#c46a7a] sm:inline"
+              >
+                เว็บหลัก →
+              </Link>
+            ) : null}
           </div>
         </div>
 
@@ -209,13 +216,15 @@ export function CafeHeader({
               </Link>
             );
           })}
-          <Link
-            href={mildRHomeHref}
-            className="min-h-12 border-t border-[#9a7b5a]/20 py-3.5 text-sm tracking-wide text-[#a84d5f] transition hover:text-[#c46a7a]"
-            onClick={() => setOpen(false)}
-          >
-            เว็บหลัก →
-          </Link>
+          {showHomeLink ? (
+            <Link
+              href={mildRHomeHref}
+              className="min-h-12 border-t border-[#9a7b5a]/20 py-3.5 text-sm tracking-wide text-[#a84d5f] transition hover:text-[#c46a7a]"
+              onClick={() => setOpen(false)}
+            >
+              เว็บหลัก →
+            </Link>
+          ) : null}
         </nav>
       </div>
     </header>

@@ -1,4 +1,5 @@
 export const CAFE_SECTION_KEYS = [
+  "mainSiteLink",
   "dispatch",
   "plates",
   "daySchedule",
@@ -11,12 +12,21 @@ export const CAFE_SECTION_KEYS = [
 
 export type CafeSectionKey = (typeof CAFE_SECTION_KEYS)[number];
 
+/** Content blocks on `/cafe` (excludes chrome / nav toggles). */
+export const CAFE_CONTENT_SECTION_KEYS = CAFE_SECTION_KEYS.filter(
+  (key) => key !== "mainSiteLink"
+) as Exclude<CafeSectionKey, "mainSiteLink">[];
+
 export type CafeSectionVisibilityMap = Record<CafeSectionKey, boolean>;
 
 export const CAFE_SECTION_META: Record<
   CafeSectionKey,
   { label: string; labelLocal: string }
 > = {
+  mainSiteLink: {
+    label: "Main Site Link",
+    labelLocal: "ปุ่มกลับเว็บหลัก · เว็บหลัก →",
+  },
   dispatch: {
     label: "Window & Location",
     labelLocal: "กรอบเวลาและพิกัด",
@@ -53,6 +63,7 @@ export const CAFE_SECTION_META: Record<
 
 export function defaultCafeVisibility(): CafeSectionVisibilityMap {
   return {
+    mainSiteLink: true,
     dispatch: true,
     plates: true,
     daySchedule: true,

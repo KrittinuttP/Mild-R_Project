@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Lock, Unlock, Eye, EyeOff, ArrowLeft, FileLock2 } from "lucide-react";
+import { Lock, Unlock, Eye, EyeOff, ArrowLeft, FileLock2, Home } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import {
-  CAFE_SECTION_KEYS,
+  CAFE_CONTENT_SECTION_KEYS,
   CAFE_SECTION_META,
   defaultCafeVisibility,
   type CafeSectionKey,
@@ -135,9 +135,13 @@ export function CafeSettingsClient() {
       }
       if (data.visibility) setVisibility(data.visibility);
       setStatus(
-        nextValue
-          ? `${CAFE_SECTION_META[key].label} · Declassified`
-          : `${CAFE_SECTION_META[key].label} · Top Secret`
+        key === "mainSiteLink"
+          ? nextValue
+            ? "Main Site Link · แสดงบน header"
+            : "Main Site Link · ซ่อนจาก header"
+          : nextValue
+            ? `${CAFE_SECTION_META[key].label} · Declassified`
+            : `${CAFE_SECTION_META[key].label} · Top Secret`
       );
       if (flashTimer.current) window.clearTimeout(flashTimer.current);
       flashTimer.current = window.setTimeout(() => setStatus(null), 1800);
@@ -220,7 +224,8 @@ export function CafeSettingsClient() {
     );
   }
 
-  const sections: SectionRow[] = CAFE_SECTION_KEYS.map((key) => ({
+  const mainSiteVisible = visibility.mainSiteLink;
+  const contentSections: SectionRow[] = CAFE_CONTENT_SECTION_KEYS.map((key) => ({
     key,
     visible: visibility[key],
     label: CAFE_SECTION_META[key].label,
@@ -254,8 +259,56 @@ export function CafeSettingsClient() {
         </button>
       </div>
 
-      <ul className="mt-8 space-y-2">
-        {sections.map((section) => (
+      <div className="relative mt-8 overflow-hidden border-2 border-[#a84d5f]/55 bg-gradient-to-br from-[#1a1218] via-[#12161a] to-[#0a0c0e] px-5 py-5 sm:px-6 sm:py-6">
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(168,77,95,0.12),transparent_55%)]"
+          aria-hidden
+        />
+        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-start gap-4">
+            <div className="flex size-11 shrink-0 items-center justify-center border border-[#a84d5f]/45 bg-[#a84d5f]/15">
+              <Home className="size-5 text-[#c46a7a]" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[0.62rem] tracking-[0.28em] text-[#c46a7a] uppercase">
+                Navigation control
+              </p>
+              <p className={cn(SERIF, "mt-1 text-lg text-[#f4ebe3] sm:text-xl")}>
+                {CAFE_SECTION_META.mainSiteLink.label}
+              </p>
+              <p className="mt-1 text-sm text-[#c4b8a8]">
+                {CAFE_SECTION_META.mainSiteLink.labelLocal}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={mainSiteVisible}
+            disabled={loadingSections || savingKey === "mainSiteLink"}
+            onClick={() => onToggle("mainSiteLink")}
+            className={cn(
+              "relative shrink-0 border-2 px-5 py-2.5 text-[0.7rem] font-medium tracking-[0.2em] uppercase transition disabled:opacity-50 sm:min-w-[9.5rem]",
+              mainSiteVisible
+                ? "border-[#6b9a7a]/70 bg-[#6b9a7a]/20 text-[#d4ede0] shadow-[0_0_24px_rgba(107,154,122,0.15)]"
+                : "border-[#a84d5f]/70 bg-[#a84d5f]/20 text-[#f4c4cc] shadow-[0_0_24px_rgba(168,77,95,0.2)]"
+            )}
+          >
+            {savingKey === "mainSiteLink"
+              ? "Saving…"
+              : mainSiteVisible
+                ? "แสดง"
+                : "ซ่อน"}
+          </button>
+        </div>
+      </div>
+
+      <p className="mt-6 text-[0.62rem] tracking-[0.22em] text-[#9a7b5a] uppercase">
+        Content sections
+      </p>
+
+      <ul className="mt-3 space-y-2">
+        {contentSections.map((section) => (
           <li
             key={section.key}
             className="flex items-center justify-between gap-4 border border-[#9a7b5a]/30 bg-[#12161a] px-4 py-3.5 sm:px-5"

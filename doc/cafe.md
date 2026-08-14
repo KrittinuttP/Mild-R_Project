@@ -176,7 +176,7 @@ disclaimer : คาเฟ่และเว็บโปรโมทนี้เ�
 หน้า settings: `/cafe/settings` (noindex) · รหัสใน env `CAFE_SETTINGS_PASSWORD` (ค่าเริ่มต้น MILDRCAFE)
 หน้า secret: `/cafe/secret` · ใส่รหัสแล้วเข้า full reveal ได้เลย · ไม่กระทบ visibility จริง
   (`/cafe/lab` redirect ไป `/cafe/secret`)
-ส่วนที่ปิด → โชว์ TOP SECRET บน `/cafe`
+ส่วนที่ปิด → โชว์ TOP SECRET บน `/cafe` · ปิด `mainSiteLink` → ซ่อนลิงก์ 「เว็บหลัก →」ใน header
 
 section keys:
-  dispatch · plates · daySchedule · highlights · signatureMenu · venueMenu · goods · closing
+  mainSiteLink · dispatch · plates · daySchedule · highlights · signatureMenu · venueMenu · goods · closing

@@ -7,6 +7,7 @@ import { CafeHeader } from "@/components/cafe/CafeHeader";
 import { BackToTop } from "@/components/layout/BackToTop";
 import { MediaProtection } from "@/components/media/MediaProtection";
 import { mildRData } from "@/data/vtuber-data";
+import { loadCafeVisibility } from "@/lib/cafe-visibility-store";
 
 const newsreader = Newsreader({
   subsets: ["latin"],
@@ -15,14 +16,19 @@ const newsreader = Newsreader({
   style: ["normal", "italic"],
 });
 
-export default function CafeLayout({ children }: { children: ReactNode }) {
+export default async function CafeLayout({ children }: { children: ReactNode }) {
+  const visibility = await loadCafeVisibility();
+
   return (
     <div
       className={`${newsreader.variable} flex min-h-full flex-col bg-[#0a0c0e] text-[#d8d0c4]`}
     >
       <MediaProtection />
       <CafeEntry cafe={mildRData.cafe} />
-      <CafeHeader cafe={mildRData.cafe} />
+      <CafeHeader
+        cafe={mildRData.cafe}
+        showMainSiteLink={visibility.mainSiteLink}
+      />
       <main className="flex-1">{children}</main>
       <CafeFooter cafe={mildRData.cafe} />
       <BackToTop />
