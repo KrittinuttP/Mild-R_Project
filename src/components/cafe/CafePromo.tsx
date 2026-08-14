@@ -2,7 +2,12 @@
 
 import { useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
-import { ChevronDown, ExternalLink, MapPin, Clock } from "lucide-react";
+import {
+  ChevronDown,
+  Clock,
+  ExternalLink,
+  MapPin,
+} from "lucide-react";
 
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { HeartAtmosphere } from "@/components/animations/HeartAtmosphere";
@@ -11,10 +16,15 @@ import {
   type CafeLightboxItem,
 } from "@/components/cafe/CafeImageLightbox";
 import { CafeCountdown } from "@/components/cafe/CafeCountdown";
+import { CafeTopSecret } from "@/components/cafe/CafeTopSecret";
 import { CafeVenueMenuBook } from "@/components/cafe/CafeVenueMenuBook";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { buttonVariants } from "@/components/ui/button";
 import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
+import {
+  defaultCafeVisibility,
+  type CafeSectionVisibilityMap,
+} from "@/lib/cafe-visibility";
 import { cn } from "@/lib/utils";
 import type { CafePage, CafeVisualKind, ProjectCta } from "@/types/vtuber";
 
@@ -22,6 +32,7 @@ registerGsapPlugins();
 
 type CafePromoProps = {
   cafe: CafePage;
+  visibility?: CafeSectionVisibilityMap;
 };
 
 const SERIF = "font-[family-name:var(--font-cafe-serif)]";
@@ -303,7 +314,8 @@ function Shell({
   );
 }
 
-export function CafePromo({ cafe }: CafePromoProps) {
+export function CafePromo({ cafe, visibility }: CafePromoProps) {
+  const show = visibility ?? defaultCafeVisibility();
   const rootRef = useRef<HTMLElement>(null);
   const heroBgRef = useRef<HTMLDivElement>(null);
   const kvFloatRef = useRef<HTMLDivElement>(null);
@@ -653,6 +665,7 @@ export function CafePromo({ cafe }: CafePromoProps) {
           title="Window & Location"
           titleLocal="กรอบเวลาและพิกัดเคส"
         />
+        {show.dispatch ? (
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-start lg:gap-8">
           <ScrollReveal variant="soft">
             <div className="grid gap-0 border border-[#9a7b5a]/25 bg-[#12161a]/80 sm:grid-cols-2">
@@ -724,6 +737,11 @@ export function CafePromo({ cafe }: CafePromoProps) {
             </ScrollReveal>
           ) : null}
         </div>
+        ) : (
+          <div className="mt-8">
+            <CafeTopSecret titleLocal="พิกัดและเวลา · ยังไม่เปิดเผย" />
+          </div>
+        )}
       </Shell>
 
       {/* ── 3. Photographic plates — compact contact sheet ── */}
@@ -734,6 +752,7 @@ export function CafePromo({ cafe }: CafePromoProps) {
             stamp="SAMPLE ART"
             title="บรรยากาศ · สถานที่ · งานศิลป์"
           />
+          {show.plates ? (
           <div className="mt-7 grid grid-cols-2 gap-2 sm:mt-8 sm:grid-cols-3 sm:gap-3">
             {cafe.visuals.map((visual, index) => (
               <ScrollReveal
@@ -778,6 +797,11 @@ export function CafePromo({ cafe }: CafePromoProps) {
               </ScrollReveal>
             ))}
           </div>
+          ) : (
+            <div className="mt-7">
+              <CafeTopSecret titleLocal="แผ่นภาพ · ยังไม่เปิดเผย" />
+            </div>
+          )}
         </Shell>
       ) : null}
 
@@ -793,7 +817,7 @@ export function CafePromo({ cafe }: CafePromoProps) {
             title={cafe.daySchedule.title}
             titleLocal={cafe.daySchedule.titleLocal}
           />
-          {cafe.daySchedule.dateLabel ? (
+          {cafe.daySchedule.dateLabel && show.daySchedule ? (
             <ScrollReveal variant="editorial" delay={0.05}>
               <p className="mt-4 text-sm tracking-[0.16em] text-[#9a7b5a] uppercase">
                 {cafe.daySchedule.dateLabel}
@@ -801,6 +825,7 @@ export function CafePromo({ cafe }: CafePromoProps) {
             </ScrollReveal>
           ) : null}
 
+          {show.daySchedule ? (
           <ol className="mt-10 border border-[#9a7b5a]/25">
             {cafe.daySchedule.items.map((item, index) => (
               <ScrollReveal
@@ -846,6 +871,11 @@ export function CafePromo({ cafe }: CafePromoProps) {
               </ScrollReveal>
             ))}
           </ol>
+          ) : (
+            <div className="mt-10">
+              <CafeTopSecret titleLocal="ตารางกิจกรรม · ยังไม่เปิดเผย" />
+            </div>
+          )}
         </Shell>
       ) : null}
 
@@ -856,6 +886,7 @@ export function CafePromo({ cafe }: CafePromoProps) {
           stamp="CLUES"
           title="จุดสังเกตของเคส"
         />
+        {show.highlights ? (
         <div
           className="mt-10 grid gap-px border border-[#9a7b5a]/25 bg-[#9a7b5a]/25 sm:grid-cols-3"
           role="list"
@@ -885,6 +916,11 @@ export function CafePromo({ cafe }: CafePromoProps) {
             </ScrollReveal>
           ))}
         </div>
+        ) : (
+          <div className="mt-10">
+            <CafeTopSecret titleLocal="เบาะแส · ยังไม่เปิดเผย" />
+          </div>
+        )}
       </Shell>
 
       {/* ── 6. Menu ledger — portrait plates ready for photos ── */}
@@ -897,6 +933,7 @@ export function CafePromo({ cafe }: CafePromoProps) {
           stamp="EXHIBIT A"
           title="บันทึกเมนู"
         />
+        {show.signatureMenu ? (
         <ul className="mt-8 space-y-2.5 sm:mt-10 sm:space-y-3">
           {cafe.menu.map((item, index) => (
             <ScrollReveal
@@ -953,14 +990,28 @@ export function CafePromo({ cafe }: CafePromoProps) {
             </ScrollReveal>
           ))}
         </ul>
+        ) : (
+          <div className="mt-8">
+            <CafeTopSecret
+              compact
+              titleLocal="เมนูซิกเนเจอร์ · ยังไม่เปิดเผย"
+            />
+          </div>
+        )}
         {cafe.otherMenu && cafe.otherMenu.items.length > 0 ? (
-          <CafeVenueMenuBook
-            menu={cafe.otherMenu}
-            venueLabel={cafe.location.label}
-            venueImage={cafe.location.image}
-            venueImageAlt={cafe.location.imageAlt}
-            onZoom={(index) => openLightbox("otherMenu", index)}
-          />
+          show.venueMenu ? (
+            <CafeVenueMenuBook
+              menu={cafe.otherMenu}
+              venueLabel={cafe.location.label}
+              venueImage={cafe.location.image}
+              venueImageAlt={cafe.location.imageAlt}
+              onZoom={(index) => openLightbox("otherMenu", index)}
+            />
+          ) : (
+            <div className="mt-12 sm:mt-16">
+              <CafeTopSecret titleLocal="เมนูร้าน · ยังไม่เปิดเผย" />
+            </div>
+          )
         ) : null}
       </Shell>
 
@@ -972,6 +1023,7 @@ export function CafePromo({ cafe }: CafePromoProps) {
             stamp="FOR HONEY ONLY"
             title="ของที่ระลึก"
           />
+          {show.goods ? (
           <ul className="mt-7 grid grid-cols-2 gap-2 sm:mt-8 sm:gap-3 lg:grid-cols-3">
             {cafe.goods.map((item, index) => (
               <ScrollReveal
@@ -1043,6 +1095,11 @@ export function CafePromo({ cafe }: CafePromoProps) {
               </ScrollReveal>
             ))}
           </ul>
+          ) : (
+            <div className="mt-7">
+              <CafeTopSecret titleLocal="ของที่ระลึก · ยังไม่เปิดเผย" />
+            </div>
+          )}
         </Shell>
       ) : null}
 
@@ -1054,6 +1111,8 @@ export function CafePromo({ cafe }: CafePromoProps) {
             stamp="END OF EDITION"
             title="สรุปฉบับนี้"
           />
+          {show.closing ? (
+            <>
           {cafe.body.map((paragraph, index) => (
             <ScrollReveal
               key={paragraph.slice(0, 32)}
@@ -1090,6 +1149,12 @@ export function CafePromo({ cafe }: CafePromoProps) {
               </p>
             </ScrollReveal>
           ) : null}
+            </>
+          ) : (
+            <div className="mt-8">
+              <CafeTopSecret titleLocal="บันทึกปิดท้าย · ยังไม่เปิดเผย" />
+            </div>
+          )}
         </div>
       </Shell>
 

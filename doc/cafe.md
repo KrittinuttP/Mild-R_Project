@@ -121,13 +121,13 @@ Honey Pulse Parfait / ฮันนี่พัลส์พาเฟต์
 ## เมนูร้าน (Exhibit B · เปิดแฟ้ม)
 
 otherMenu ใน JSON · UI เป็นแฟ้มคดี / เปิดเมนู
-  หน้าปก: แปะชื่อร้าน (SOCIEFEE × CHOUXSTORY) ก่อนเปิดแผ่นเมนู
-  มือถือ: พลิกทีละแผ่นรอบสันหนังสือ
-  เว็บ: เปิดหน้าคู่ (ซ้าย–ขวา) พลิกทีละคู่รอบสัน
+  แอนิเมชันพลิกหน้าเดียวกันทั้งมือถือและเว็บ (rotateY รอบสัน)
+  หน้าปกเว็บ: ซ้ายโล่ง · ขวาแปะชื่อร้าน (SOCIEFEE × CHOUXSTORY)
+  มือถือ: ปกเต็มจอ แล้วพลิกทีละแผ่น
+  เว็บ: เปิดแล้วเป็นหน้าคู่ พลิกทีละคู่
 
 title : Venue Menu
 titleLocal : เมนูร้าน
-stamp : EXHIBIT B
 note : เมนูปกติของ SOCIEFEE × CHOUXSTORY — นอกเหนือซิกเนเจอร์ Mild-R
 
 1. Drink Menu / เมนูเครื่องดื่ม
@@ -167,3 +167,15 @@ url : https://x.com/Mild_Honeycomb
 
 disclaimer : คาเฟ่และเว็บโปรโมทนี้เป็นงานแฟนเมดที่แฟนคลับจัดทำเอง — ไม่ใช่ประกาศทางการของ Mild-R / เอเจนซี · รายละเอียดอีเวนต์อาจเปลี่ยน · รูปบางส่วนเป็น placeholder / sample art
   → ข้อความด้านล่างสุดของหน้า
+
+---
+
+## Visibility (เปิด/ปิดส่วน · Supabase)
+
+ตาราง: `mild_r.cafe_section_visibility` · view: `public.mild_r_cafe_section_visibility`
+หน้า settings: `/cafe/settings` (noindex) · รหัสใน env `CAFE_SETTINGS_PASSWORD` (ค่าเริ่มต้น MILDRCAFE)
+หน้า lab: `/cafe/lab` · เปิดทุกส่วนเพื่อเทส (ต้องปลดล็อก settings ก่อน) · ไม่กระทบ visibility จริง
+ส่วนที่ปิด → โชว์ TOP SECRET บน `/cafe`
+
+section keys:
+  dispatch · plates · daySchedule · highlights · signatureMenu · venueMenu · goods · closing

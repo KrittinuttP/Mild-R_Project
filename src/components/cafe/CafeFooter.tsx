@@ -78,6 +78,13 @@ export function CafeFooter({ cafe }: CafeFooterProps) {
             ) : null}
             <p className="text-[0.65rem] tracking-[0.14em] text-[#9a7b5a]/70 uppercase sm:text-xs sm:tracking-[0.16em]">
               © {year} · Honey Pulse Cafe · Fan-made
+              <Link
+                href="/cafe/settings"
+                aria-label="Cafe settings"
+                className="ml-1 inline-block text-[#9a7b5a]/25 transition hover:text-[#9a7b5a]/70"
+              >
+                ·
+              </Link>
             </p>
             <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs tracking-wide text-[#9a7b5a]/70 md:justify-end">
               <span>Made with 🩷 by</span>

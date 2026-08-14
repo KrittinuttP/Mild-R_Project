@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 
 import { CafeSplash } from "@/components/cafe/CafeSplash";
 import { SectionScrollRestore } from "@/components/layout/SectionScrollRestore";
@@ -12,8 +13,15 @@ type CafeEntryProps = {
 
 /** Cafe splash + section scroll restore (gated until splash finishes). */
 export function CafeEntry({ cafe }: CafeEntryProps) {
-  const [ready, setReady] = useState(false);
+  const pathname = usePathname();
+  const skipSplash =
+    pathname.startsWith("/cafe/settings") || pathname.startsWith("/cafe/lab");
+  const [ready, setReady] = useState(skipSplash);
   const edition = cafe.edition;
+
+  if (skipSplash) {
+    return <SectionScrollRestore ready />;
+  }
 
   return (
     <>

@@ -46,6 +46,10 @@ function snapToStep(index: number, step: number) {
   return index - (index % step);
 }
 
+function prefersReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 function useMdUp() {
   const [md, setMd] = useState(false);
 
@@ -126,7 +130,20 @@ function BookSpine() {
   );
 }
 
-function BlankPlate() {
+/** Empty open flap — cover spread left side */
+function EmptyLeaf({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "flex h-full min-h-[52dvh] flex-1 bg-[#0e0b09] md:min-h-[56dvh]",
+        className
+      )}
+      aria-hidden
+    />
+  );
+}
+
+function OddBlankPlate() {
   return (
     <div className="flex h-full min-h-[52dvh] flex-1 flex-col items-center justify-center border border-dashed border-[#9a7b5a]/30 bg-[#14100c] md:min-h-[56dvh]">
       <p className="text-[0.65rem] tracking-[0.22em] text-[#9a7b5a] uppercase">
@@ -140,20 +157,23 @@ function MenuCover({
   label,
   image,
   imageAlt,
-  stamp,
   onOpen,
+  className,
 }: {
   label: string;
   image?: string;
   imageAlt?: string;
-  stamp?: string;
   onOpen: () => void;
+  className?: string;
 }) {
   return (
     <button
       type="button"
       onClick={onOpen}
-      className="relative flex h-full min-h-[58dvh] w-full flex-col items-center justify-center overflow-hidden border border-[#9a7b5a]/35 bg-[#14100c] text-left md:min-h-[64dvh]"
+      className={cn(
+        "relative flex h-full min-h-[52dvh] w-full flex-col items-center justify-center overflow-hidden border border-[#9a7b5a]/35 bg-[#14100c] text-left md:min-h-[56dvh]",
+        className
+      )}
     >
       {image ? (
         <ProtectedImage
@@ -168,31 +188,56 @@ function MenuCover({
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute inset-y-0 left-0 w-3 bg-[repeating-linear-gradient(180deg,#9a7b5a_0_10px,transparent_10px_18px)] opacity-50 sm:w-4"
-        aria-hidden
-      />
-      <div
         className={cn(
-          "relative z-10 mx-6 max-w-sm rotate-[-3.5deg] border-[3px] border-[#a84d5f]/55 bg-[#f4ebe3] px-5 py-4 shadow-[6px_10px_0_rgba(0,0,0,0.28)] sm:px-7 sm:py-5"
+          "relative z-10 mx-5 max-w-sm rotate-[-3.5deg] border-[3px] border-[#a84d5f]/55 bg-[#f4ebe3] px-5 py-4 shadow-[6px_10px_0_rgba(0,0,0,0.28)] sm:px-7 sm:py-5"
         )}
       >
         <p className="text-[0.58rem] tracking-[0.22em] text-[#a84d5f] uppercase">
-          {stamp ?? "EXHIBIT B"} · Venue Menu
+          Venue Menu
         </p>
         <p
           className={cn(
             SERIF,
-            "mt-2 text-xl font-semibold leading-tight text-[#1a1410] sm:text-3xl"
+            "mt-2 text-xl font-semibold leading-tight text-[#1a1410] sm:text-2xl md:text-3xl"
           )}
         >
           {prettyVenueName(label)}
         </p>
         <p className={cn(DISPLAY, "mt-2 text-sm text-[#6b5340]")}>
-          แตะหรือพลิกเพื่อเปิดแฟ้ม
+          พลิกเพื่อเปิดเมนู
         </p>
       </div>
     </button>
   );
+}
+
+function flipPage(
+  el: HTMLElement,
+  dir: 1 | -1,
+  hinge: "left" | "right",
+  onSwap: () => void,
+  onDone: () => void
+) {
+  const origin = hinge === "left" ? "0% 50%" : "100% 50%";
+  // Negative close for forward (dir=1): page lifts toward camera, right → left
+  gsap
+    .timeline({ onComplete: onDone })
+    .to(el, {
+      rotateY: dir * -90,
+      duration: 0.52,
+      ease: "power2.in",
+      transformOrigin: origin,
+    })
+    .add(onSwap)
+    .set(el, {
+      rotateY: dir * 84,
+      transformOrigin: origin,
+    })
+    .to(el, {
+      rotateY: 0,
+      duration: 0.64,
+      ease: "power2.out",
+    });
 }
 
 export function CafeVenueMenuBook({
@@ -207,14 +252,15 @@ export function CafeVenueMenuBook({
   const step = spread ? 2 : 1;
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(COVER_INDEX);
-  const pagesRef = useRef<HTMLDivElement>(null);
   const leftLeafRef = useRef<HTMLDivElement>(null);
   const rightLeafRef = useRef<HTMLDivElement>(null);
+  const mobileLeafRef = useRef<HTMLDivElement>(null);
   const coverRef = useRef<HTMLDivElement>(null);
   const touchX = useRef<number | null>(null);
   const turningRef = useRef(false);
   const indexRef = useRef(COVER_INDEX);
   const stepRef = useRef(step);
+  const spreadRef = useRef(spread);
 
   const onCover = index <= COVER_INDEX;
   const maxIndex = Math.max(0, items.length - 1);
@@ -231,17 +277,15 @@ export function CafeVenueMenuBook({
 
   useEffect(() => {
     stepRef.current = step;
+    spreadRef.current = spread;
     setIndex((current) => snapToStep(current, step));
-  }, [step]);
+  }, [step, spread]);
 
   useGSAP(
     () => {
       const cover = coverRef.current;
       if (!cover) return;
-      const reduce = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
-      if (reduce) return;
+      if (prefersReducedMotion()) return;
       gsap.from(cover, {
         autoAlpha: 0,
         y: 18,
@@ -253,29 +297,28 @@ export function CafeVenueMenuBook({
     { scope: coverRef }
   );
 
+  /** First open: same hinge open as a page turn (right / mobile leaf) */
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
     const frame = window.requestAnimationFrame(() => {
       if (cancelled) return;
-      const el = pagesRef.current;
+      const el = spreadRef.current
+        ? rightLeafRef.current
+        : mobileLeafRef.current;
       if (!el) return;
-      const reduce = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
-      if (reduce) {
-        gsap.set(el, { rotateY: 0, autoAlpha: 1, y: 0 });
+      if (prefersReducedMotion()) {
+        gsap.set(el, { rotateY: 0, autoAlpha: 1 });
         return;
       }
       gsap.fromTo(
         el,
-        { autoAlpha: 0, y: 14, rotateX: 5 },
+        { rotateY: 78, autoAlpha: 1 },
         {
-          autoAlpha: 1,
-          y: 0,
-          rotateX: 0,
-          duration: 0.62,
+          rotateY: 0,
+          duration: 1.05,
           ease: "power2.out",
+          transformOrigin: "0% 50%",
         }
       );
     });
@@ -289,68 +332,37 @@ export function CafeVenueMenuBook({
     (target: number) => {
       const current = indexRef.current;
       const stepNow = stepRef.current;
+      const spreadNow = spreadRef.current;
       const next = snapToStep(
         Math.min(maxIndex, Math.max(COVER_INDEX, target)),
         stepNow
       );
       if (next === current || turningRef.current) return;
       const dir = (next > current ? 1 : -1) as 1 | -1;
-      const spreadNow = stepNow === 2;
-      const coverMove = current <= COVER_INDEX || next <= COVER_INDEX;
-      const el = coverMove
-        ? pagesRef.current
-        : spreadNow
-          ? dir === 1
-            ? rightLeafRef.current
-            : leftLeafRef.current
-          : pagesRef.current;
-      const reduce = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
+      const coverInvolved = current <= COVER_INDEX || next <= COVER_INDEX;
+      const useRightLeaf = !spreadNow || coverInvolved || dir === 1;
+      const el = spreadNow
+        ? useRightLeaf
+          ? rightLeafRef.current
+          : leftLeafRef.current
+        : mobileLeafRef.current;
+      const hinge: "left" | "right" = useRightLeaf ? "left" : "right";
 
-      if (!el || reduce) {
+      if (!el || prefersReducedMotion()) {
         setIndex(next);
         return;
       }
 
       turningRef.current = true;
-      const closeOrigin =
-        coverMove || !spreadNow
-          ? dir === 1
-            ? "0% 50%"
-            : "100% 50%"
-          : dir === 1
-            ? "0% 50%"
-            : "100% 50%";
-      const openOrigin =
-        coverMove || !spreadNow
-          ? dir === 1
-            ? "100% 50%"
-            : "0% 50%"
-          : closeOrigin;
-
-      gsap
-        .timeline({
-          onComplete: () => {
-            turningRef.current = false;
-          },
-        })
-        .to(el, {
-          rotateY: dir * 90,
-          duration: 0.52,
-          ease: "power2.in",
-          transformOrigin: closeOrigin,
-        })
-        .add(() => setIndex(next))
-        .set(el, {
-          rotateY: dir * -84,
-          transformOrigin: openOrigin,
-        })
-        .to(el, {
-          rotateY: 0,
-          duration: 0.64,
-          ease: "power2.out",
-        });
+      flipPage(
+        el,
+        dir,
+        hinge,
+        () => setIndex(next),
+        () => {
+          turningRef.current = false;
+        }
+      );
     },
     [maxIndex]
   );
@@ -400,11 +412,6 @@ export function CafeVenueMenuBook({
           <p className="text-[0.65rem] tracking-[0.28em] text-[#9a7b5a] uppercase sm:text-[0.68rem]">
             Evidence Ledger · House Menu
           </p>
-          {menu.stamp ? (
-            <span className="border border-[#a84d5f]/40 px-2 py-0.5 text-[0.58rem] tracking-[0.2em] text-[#c46a7a] uppercase">
-              {menu.stamp}
-            </span>
-          ) : null}
         </div>
         <h3
           className={cn(
@@ -480,17 +487,12 @@ export function CafeVenueMenuBook({
               {menu.titleLocal ? ` · ${menu.titleLocal}` : ""}
             </DialogTitle>
             <DialogDescription className="text-[0.65rem] tracking-[0.2em] text-[#9a7b5a] uppercase">
-              {menu.stamp ?? "EXHIBIT B"}
-              <span className="md:hidden"> · พลิกทีละหน้าเหมือนเปิดหนังสือ</span>
-              <span className="hidden md:inline">
-                {" "}
-                · เปิดแฟ้มหน้าคู่ · พลิกรอบสันหนังสือ
-              </span>
+              พลิกรอบสันหนังสือแบบเดียวกัน
             </DialogDescription>
           </DialogHeader>
 
           <div
-            className="mt-1 flex items-stretch gap-0"
+            className="mt-1"
             style={{ perspective: "1800px" }}
             onTouchStart={(event) => {
               touchX.current = event.touches[0]?.clientX ?? null;
@@ -505,74 +507,88 @@ export function CafeVenueMenuBook({
               if (dx < -48) turn(1);
             }}
           >
-            <div
-              ref={pagesRef}
-              className="min-h-[58dvh] min-w-0 flex-1 will-change-transform md:min-h-[64dvh]"
-              style={{ transformStyle: "preserve-3d" }}
-            >
-              {onCover ? (
-                <MenuCover
-                  label={venueLabel}
-                  image={venueImage}
-                  imageAlt={venueImageAlt}
-                  stamp={menu.stamp}
-                  onOpen={() => turn(1)}
-                />
-              ) : spread ? (
-                <div className="flex h-full min-h-[64dvh] w-full items-stretch overflow-hidden bg-[#100c0a] shadow-[inset_0_0_90px_rgba(0,0,0,0.35)]">
-                  <div
-                    ref={leftLeafRef}
-                    className="flex min-h-0 min-w-0 flex-1 will-change-transform"
-                    style={{ transformStyle: "preserve-3d" }}
-                  >
-                    {leftPage ? (
-                      <MenuPlate
-                        item={leftPage}
-                        index={index}
-                        onZoom={onZoom}
-                        className="h-full w-full border-r-0"
-                      />
-                    ) : null}
-                  </div>
-                  <BookSpine />
-                  <div
-                    ref={rightLeafRef}
-                    className="flex min-h-0 min-w-0 flex-1 will-change-transform"
-                    style={{ transformStyle: "preserve-3d" }}
-                  >
-                    {rightPage ? (
-                      <MenuPlate
-                        item={rightPage}
-                        index={index + 1}
-                        onZoom={onZoom}
-                        className="h-full w-full border-l-0"
-                      />
-                    ) : (
-                      <BlankPlate />
-                    )}
-                  </div>
+            {spread ? (
+              <div className="flex h-full min-h-[64dvh] w-full items-stretch overflow-hidden bg-[#100c0a] shadow-[inset_0_0_90px_rgba(0,0,0,0.35)]">
+                <div
+                  ref={leftLeafRef}
+                  className="flex min-h-0 min-w-0 flex-1 will-change-transform"
+                  style={{ transformStyle: "preserve-3d" }}
+                >
+                  {onCover ? (
+                    <EmptyLeaf className="border-r-0" />
+                  ) : leftPage ? (
+                    <MenuPlate
+                      item={leftPage}
+                      index={index}
+                      onZoom={onZoom}
+                      className="h-full w-full border-r-0"
+                    />
+                  ) : null}
                 </div>
-              ) : leftPage ? (
-                <div className="flex h-full min-h-[58dvh] w-full items-stretch overflow-hidden bg-[#100c0a] shadow-[inset_0_0_70px_rgba(0,0,0,0.3)]">
-                  <div
-                    className="w-2 shrink-0 bg-[repeating-linear-gradient(180deg,#9a7b5a_0_10px,transparent_10px_18px)] opacity-50"
-                    aria-hidden
-                  />
-                  <MenuPlate
-                    item={leftPage}
-                    index={index}
-                    onZoom={onZoom}
-                    className="h-full min-w-0 flex-1 border-l-0"
-                  />
+                <BookSpine />
+                <div
+                  ref={rightLeafRef}
+                  className="flex min-h-0 min-w-0 flex-1 will-change-transform"
+                  style={{ transformStyle: "preserve-3d" }}
+                >
+                  {onCover ? (
+                    <MenuCover
+                      label={venueLabel}
+                      image={venueImage}
+                      imageAlt={venueImageAlt}
+                      onOpen={() => turn(1)}
+                      className="h-full w-full border-l-0"
+                    />
+                  ) : rightPage ? (
+                    <MenuPlate
+                      item={rightPage}
+                      index={index + 1}
+                      onZoom={onZoom}
+                      className="h-full w-full border-l-0"
+                    />
+                  ) : (
+                    <OddBlankPlate />
+                  )}
                 </div>
-              ) : null}
-            </div>
+              </div>
+            ) : (
+              <div
+                ref={mobileLeafRef}
+                className="flex min-h-[58dvh] w-full will-change-transform overflow-hidden bg-[#100c0a] shadow-[inset_0_0_70px_rgba(0,0,0,0.3)]"
+                style={{ transformStyle: "preserve-3d" }}
+              >
+                {onCover ? (
+                  <MenuCover
+                    label={venueLabel}
+                    image={venueImage}
+                    imageAlt={venueImageAlt}
+                    onOpen={() => turn(1)}
+                    className="min-h-[58dvh]"
+                  />
+                ) : leftPage ? (
+                  <>
+                    <div
+                      className="w-2 shrink-0 bg-[repeating-linear-gradient(180deg,#9a7b5a_0_10px,transparent_10px_18px)] opacity-50"
+                      aria-hidden
+                    />
+                    <MenuPlate
+                      item={leftPage}
+                      index={index}
+                      onZoom={onZoom}
+                      className="h-full min-w-0 flex-1 border-l-0"
+                    />
+                  </>
+                ) : null}
+              </div>
+            )}
           </div>
 
           <div className="mt-3 flex items-center justify-between gap-3">
             <button
               type="button"
-              aria-label={onCover ? "หน้าปก" : spread ? "คู่หน้าก่อน" : "แผ่นก่อนหน้า"}
+              aria-label={
+                onCover ? "หน้าปก" : spread ? "คู่หน้าก่อน" : "แผ่นก่อนหน้า"
+              }
               onClick={() => turn(-1)}
               disabled={onCover}
               className={cn(
@@ -596,9 +612,17 @@ export function CafeVenueMenuBook({
                   const target = i === 0 ? COVER_INDEX : (i - 1) * step;
                   return (
                     <button
-                      key={i === 0 ? "cover" : (items[target]?.id ?? `spread-${i}`)}
+                      key={
+                        i === 0 ? "cover" : (items[target]?.id ?? `spread-${i}`)
+                      }
                       type="button"
-                      aria-label={i === 0 ? "ไปหน้าปก" : spread ? `ไปคู่หน้า ${i}` : `ไปแผ่น ${i}`}
+                      aria-label={
+                        i === 0
+                          ? "ไปหน้าปก"
+                          : spread
+                            ? `ไปคู่หน้า ${i}`
+                            : `ไปแผ่น ${i}`
+                      }
                       onClick={() => goTo(target)}
                       className={cn(
                         "rounded-full transition",
@@ -613,7 +637,9 @@ export function CafeVenueMenuBook({
 
             <button
               type="button"
-              aria-label={onCover ? "เปิดแฟ้ม" : spread ? "คู่หน้าถัดไป" : "แผ่นถัดไป"}
+              aria-label={
+                onCover ? "เปิดแฟ้ม" : spread ? "คู่หน้าถัดไป" : "แผ่นถัดไป"
+              }
               onClick={() => turn(1)}
               disabled={!onCover && index >= lastStart}
               className={cn(

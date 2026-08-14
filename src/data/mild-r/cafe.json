@@ -134,8 +134,7 @@
   "otherMenu": {
     "title": "Venue Menu",
     "titleLocal": "เมนูร้าน",
-    "stamp": "EXHIBIT B",
-    "note": "เมนูปกติของ SOCIEFEE × CHOUXSTORY — นอกเหนือซิกเนเจอร์ Mild-R · เปิดแฟ้มเพื่อพลิกดูแผ่น",
+    "note": "เมนูปกติของ SOCIEFEE × CHOUXSTORY — นอกเหนือซิกเนเจอร์ Mild-R · เปิดแฟ้มเพื่อพลิกดูเมนู",
     "items": [
       {
         "id": "menu-1",
