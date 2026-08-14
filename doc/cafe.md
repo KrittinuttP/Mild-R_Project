@@ -174,7 +174,8 @@ disclaimer : คาเฟ่และเว็บโปรโมทนี้เ�
 
 ตาราง: `mild_r.cafe_section_visibility` · view: `public.mild_r_cafe_section_visibility`
 หน้า settings: `/cafe/settings` (noindex) · รหัสใน env `CAFE_SETTINGS_PASSWORD` (ค่าเริ่มต้น MILDRCAFE)
-หน้า lab: `/cafe/lab` · เปิดทุกส่วนเพื่อเทส (ต้องปลดล็อก settings ก่อน) · ไม่กระทบ visibility จริง
+หน้า secret: `/cafe/secret` · ใส่รหัสแล้วเข้า full reveal ได้เลย · ไม่กระทบ visibility จริง
+  (`/cafe/lab` redirect ไป `/cafe/secret`)
 ส่วนที่ปิด → โชว์ TOP SECRET บน `/cafe`
 
 section keys:

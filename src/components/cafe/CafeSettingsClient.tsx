@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Lock, Unlock, Eye, EyeOff, ArrowLeft, FlaskConical } from "lucide-react";
+import { Lock, Unlock, Eye, EyeOff, ArrowLeft, FileLock2 } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -294,14 +294,14 @@ export function CafeSettingsClient() {
 
       <div className="mt-8 flex flex-wrap gap-3">
         <Link
-          href="/cafe/lab"
+          href="/cafe/secret"
           className={cn(
             buttonVariants({ size: "lg" }),
             "rounded-none border-transparent bg-[#a84d5f] text-[#f4ebe3] hover:bg-[#c46a7a]"
           )}
         >
-          <FlaskConical className="size-4" />
-          Lab · เปิดทุกอย่าง
+          <FileLock2 className="size-4" />
+          Secret · เปิดทุกอย่าง
         </Link>
         <Link
           href="/cafe"
