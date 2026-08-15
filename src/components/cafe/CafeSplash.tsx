@@ -19,6 +19,8 @@ type CafeSplashProps = {
   onFinished?: () => void;
 };
 
+type BarFill = "idle" | "short" | "long" | "static";
+
 export function CafeSplash({
   masthead,
   kicker = "SPECIAL EDITION",
@@ -26,10 +28,10 @@ export function CafeSplash({
   heroImage,
   onFinished,
 }: CafeSplashProps) {
-  const [phase, setPhase] = useState<"boot" | "hold" | "exit" | "done" | null>(
-    null
-  );
-  const [isFirstVisit, setIsFirstVisit] = useState(true);
+  // Start covered — avoid one-frame flash of cafe content before mount effect.
+  const [phase, setPhase] = useState<"hold" | "exit" | "done">("hold");
+  const [barFill, setBarFill] = useState<BarFill>("idle");
+  const [pulseHeart, setPulseHeart] = useState(false);
 
   useEffect(() => {
     if (wasSoftNavigation() && !isReloadNavigation()) {
@@ -45,8 +47,7 @@ export function CafeSplash({
       /* ignore */
     }
     const first = !visited;
-    setIsFirstVisit(first);
-    setPhase("boot");
+    setPhase("hold");
 
     if (heroImage) {
       const img = new Image();
@@ -57,10 +58,12 @@ export function CafeSplash({
       "(prefers-reduced-motion: reduce)"
     ).matches;
 
+    setPulseHeart(first && !reduced);
+    setBarFill(reduced ? "static" : first ? "long" : "short");
+
     const holdMs = reduced ? 350 : first ? 1200 : 800;
     const exitMs = reduced ? 180 : 500;
 
-    const holdTimer = window.setTimeout(() => setPhase("hold"), 30);
     const exitTimer = window.setTimeout(() => setPhase("exit"), holdMs);
     const doneTimer = window.setTimeout(() => {
       setPhase("done");
@@ -73,7 +76,6 @@ export function CafeSplash({
     }, holdMs + exitMs);
 
     return () => {
-      window.clearTimeout(holdTimer);
       window.clearTimeout(exitTimer);
       window.clearTimeout(doneTimer);
     };
@@ -81,7 +83,7 @@ export function CafeSplash({
   }, []);
 
   useEffect(() => {
-    if (phase === null || phase === "done") return;
+    if (phase === "done") return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
@@ -89,9 +91,7 @@ export function CafeSplash({
     };
   }, [phase]);
 
-  if (phase === null || phase === "done") return null;
-
-  const revealed = phase === "hold" || phase === "exit";
+  if (phase === "done") return null;
 
   return (
     <div
@@ -110,15 +110,7 @@ export function CafeSplash({
         aria-hidden
       />
 
-      <div
-        className={cn(
-          "relative flex max-w-md flex-col items-center px-6 text-center",
-          "transition-all duration-500 ease-out",
-          revealed
-            ? "translate-y-0 scale-100 opacity-100"
-            : "translate-y-3 scale-95 opacity-0"
-        )}
-      >
+      <div className="relative flex max-w-md flex-col items-center px-6 text-center">
         <div className="w-full max-w-xs space-y-1" aria-hidden>
           <div className="border-t-2 border-[#9a7b5a]/45" />
           <div className="border-t border-[#9a7b5a]/30" />
@@ -141,10 +133,7 @@ export function CafeSplash({
         <span
           className={cn(
             "mt-6 block text-[#a84d5f]/80",
-            isFirstVisit &&
-              revealed &&
-              phase !== "exit" &&
-              "animate-heart-pulse-soft"
+            pulseHeart && phase !== "exit" && "animate-heart-pulse-soft"
           )}
           aria-hidden
         >
@@ -165,12 +154,13 @@ export function CafeSplash({
           aria-hidden
         >
           <div
+            key={barFill}
             className={cn(
               "h-full bg-[#a84d5f]",
-              revealed &&
-                (isFirstVisit
-                  ? "animate-splash-bar-long"
-                  : "animate-splash-bar")
+              barFill === "long" && "animate-splash-bar-long",
+              barFill === "short" && "animate-splash-bar",
+              barFill === "static" && "w-full",
+              barFill === "idle" && "w-0"
             )}
           />
         </div>
