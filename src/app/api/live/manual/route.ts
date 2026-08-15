@@ -34,7 +34,7 @@ type ManualLiveInput = {
   member?: unknown;
   isMember?: unknown;
   is_member?: unknown;
-  /** YouTube watch / live URL (required when member) */
+  /** YouTube watch / live URL (optional when member — without url = preview mock) */
   url?: unknown;
   youtubeUrl?: unknown;
   link?: unknown;
@@ -293,77 +293,81 @@ export async function POST(request: Request) {
     if (is_member) {
       const link = youtubeLinkFromItem(raw);
       const videoId = resolveVideoId(link);
-      if (!videoId) {
-        errors.push(`[${i}] Member ต้องใส่ลิงก์ YouTube ที่ถูกต้อง`);
+
+      // Member + YouTube link → real row from Data API
+      if (videoId) {
+        const yt = ytById.get(videoId);
+        if (!yt) {
+          errors.push(`[${i}] YouTube ไม่พบวิดีโอ ${videoId}`);
+          continue;
+        }
+
+        const auto = classifyLiveOwnership(yt.channelId, yt.title);
+        const is_own_channel = ownFlag != null ? ownFlag : auto.is_own_channel;
+        const is_collab = collabFlag != null ? collabFlag : auto.is_collab;
+        const scheduledRaw =
+          yt.scheduledStart ?? yt.actualStart ?? new Date().toISOString();
+        const scheduled = snapScheduledToHalfHour(scheduledRaw) ?? scheduledRaw;
+        const scheduledFirst =
+          snapScheduledToHalfHour(yt.scheduledStart ?? yt.actualStart) ??
+          scheduled;
+        const localDate = bangkokDateFromIso(scheduled);
+        if (localDate) touchedDates.add(localDate);
+
+        const sourceTitle = is_own_channel
+          ? "Mild-R"
+          : (getLuminaSourceTitle(yt.channelId) ??
+            resolveLuminaChannel(yt.channelId)?.title ??
+            null);
+
+        rows.push({
+          video_id: videoId,
+          channel_id:
+            yt.channelId || (is_own_channel ? MILD_R_CHANNEL_ID : null),
+          channel_name: yt.channelTitle || null,
+          source_title: sourceTitle,
+          title: yt.title || "Untitled live",
+          url: `https://www.youtube.com/watch?v=${videoId}`,
+          scheduled_start: yt.scheduledStart
+            ? (snapScheduledToHalfHour(yt.scheduledStart) ?? yt.scheduledStart)
+            : yt.actualStart,
+          scheduled_start_first: scheduledFirst,
+          actual_start: yt.actualStart,
+          actual_end: yt.actualEnd,
+          thumbnail_url: yt.thumbnailUrl,
+          thumbnail_cached_url: null,
+          views_on_end: yt.actualEnd ? yt.viewCount || null : null,
+          latest_views: yt.viewCount,
+          is_own_channel,
+          is_collab,
+          project: "Lumina",
+          metadata: {
+            source: "manual_member_link",
+            preview: false,
+            member: true,
+            linked_video_id: videoId,
+            privacy_status: yt.privacyStatus,
+            live_broadcast_content: yt.liveBroadcastContent,
+            description: yt.description,
+            tags: yt.tags,
+            likes: yt.likeCount,
+            local_date: localDate,
+            timezone: "Asia/Bangkok",
+            imported_from: link,
+            scheduled_raw: yt.scheduledStart,
+            scheduled_snapped:
+              Boolean(yt.scheduledStart) &&
+              snapScheduledToHalfHour(yt.scheduledStart) !== yt.scheduledStart,
+          },
+        });
         continue;
       }
-      const yt = ytById.get(videoId);
-      if (!yt) {
-        errors.push(`[${i}] YouTube ไม่พบวิดีโอ ${videoId}`);
-        continue;
-      }
 
-      const auto = classifyLiveOwnership(yt.channelId, yt.title);
-      const is_own_channel = ownFlag != null ? ownFlag : auto.is_own_channel;
-      const is_collab = collabFlag != null ? collabFlag : auto.is_collab;
-      const scheduledRaw =
-        yt.scheduledStart ?? yt.actualStart ?? new Date().toISOString();
-      const scheduled = snapScheduledToHalfHour(scheduledRaw) ?? scheduledRaw;
-      const scheduledFirst =
-        snapScheduledToHalfHour(yt.scheduledStart ?? yt.actualStart) ??
-        scheduled;
-      const localDate = bangkokDateFromIso(scheduled);
-      if (localDate) touchedDates.add(localDate);
-
-      const sourceTitle = is_own_channel
-        ? "Mild-R"
-        : (getLuminaSourceTitle(yt.channelId) ??
-          resolveLuminaChannel(yt.channelId)?.title ??
-          null);
-
-      rows.push({
-        video_id: videoId,
-        channel_id: yt.channelId || (is_own_channel ? MILD_R_CHANNEL_ID : null),
-        channel_name: yt.channelTitle || null,
-        source_title: sourceTitle,
-        title: yt.title || "Untitled live",
-        url: `https://www.youtube.com/watch?v=${videoId}`,
-        scheduled_start: yt.scheduledStart
-          ? (snapScheduledToHalfHour(yt.scheduledStart) ?? yt.scheduledStart)
-          : yt.actualStart,
-        scheduled_start_first: scheduledFirst,
-        actual_start: yt.actualStart,
-        actual_end: yt.actualEnd,
-        thumbnail_url: yt.thumbnailUrl,
-        thumbnail_cached_url: null,
-        views_on_end: yt.actualEnd ? yt.viewCount || null : null,
-        latest_views: yt.viewCount,
-        is_own_channel,
-        is_collab,
-        project: "Lumina",
-        metadata: {
-          source: "manual_member_link",
-          preview: false,
-          member: true,
-          linked_video_id: videoId,
-          privacy_status: yt.privacyStatus,
-          live_broadcast_content: yt.liveBroadcastContent,
-          description: yt.description,
-          tags: yt.tags,
-          likes: yt.likeCount,
-          local_date: localDate,
-          timezone: "Asia/Bangkok",
-          imported_from: link,
-          scheduled_raw: yt.scheduledStart,
-          scheduled_snapped:
-            Boolean(yt.scheduledStart) &&
-            snapScheduledToHalfHour(yt.scheduledStart) !== yt.scheduledStart,
-        },
-      });
-      continue;
+      // Member without URL → fall through to preview mock (badge Member)
+      // (title / date / time required like normal mock)
     }
 
-    // ——— Non-member manual preview mock ———
+    // ——— Manual preview mock (optional member badge) ———
     const title = typeof raw.title === "string" ? raw.title.trim() : "";
     const channelKey =
       typeof raw.channel === "string" && raw.channel.trim()
@@ -378,7 +382,9 @@ export async function POST(request: Request) {
         : "20:00";
 
     if (!title) {
-      errors.push(`[${i}] ต้องมี title`);
+      errors.push(
+        `[${i}] ต้องมี title${is_member ? " (Member ที่ไม่มี url)" : ""}`
+      );
       continue;
     }
     if (ownFlag !== true && !channelKey) {
@@ -449,7 +455,7 @@ export async function POST(request: Request) {
         source: "manual_preview",
         preview: true,
         linked_video_id: null,
-        member: false,
+        member: is_member,
         local_date: date,
         local_time: time,
         timezone: "Asia/Bangkok",

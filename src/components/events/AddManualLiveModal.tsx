@@ -52,6 +52,15 @@ const SAMPLE_JSON = `[
     "collab": false
   },
   {
+    "title": "Q&A สุดเอ็กซ์คลูซีฟกับมายด์",
+    "channel": "mild-r",
+    "date": "2026-08-16",
+    "time": "20:30",
+    "member": true,
+    "own": true,
+    "collab": false
+  },
+  {
     "member": true,
     "url": "https://www.youtube.com/live/XZcXaFlzJzc"
   }
@@ -161,17 +170,64 @@ function parseJsonToRows(text: string): { rows: DraftRow[]; error?: string } {
               : "";
 
       if (member) {
-        if (!resolveIdFromLink(youtubeUrl)) {
-          errors.push(`[${i}] Member ต้องใส่ลิงก์ YouTube ที่ถูกต้อง`);
+        const hasLink = Boolean(resolveIdFromLink(youtubeUrl));
+        if (hasLink) {
+          rows.push({
+            ...emptyRow(),
+            key: crypto.randomUUID(),
+            member: true,
+            youtubeUrl,
+            own: parseBool(o.own, o.isOwn) ?? true,
+            collab: parseBool(o.collab, o.isCollab) ?? false,
+          });
+          continue;
+        }
+
+        // Member preview mock (no URL yet)
+        const channelRaw =
+          typeof o.channel === "string"
+            ? o.channel
+            : typeof o.channelId === "string"
+              ? o.channelId
+              : "";
+        const resolved = resolveLuminaChannel(channelRaw);
+        const own =
+          parseBool(o.own, o.isOwn) ?? Boolean(resolved?.isMain ?? true);
+        if (!own && !channelRaw.trim()) {
+          errors.push(`[${i}] ถ้าไม่ใช่ช่องตัวเอง ต้องใส่ channel`);
+          continue;
+        }
+        if (!own && !resolved) {
+          errors.push(`[${i}] channel ไม่รู้จัก (“${channelRaw}”)`);
+          continue;
+        }
+        const mild = LUMINA_CHANNELS.find((c) => c.isMain);
+        const title = typeof o.title === "string" ? o.title : "";
+        const date = typeof o.date === "string" ? o.date : "";
+        if (!title.trim()) {
+          errors.push(
+            `[${i}] Member ที่ไม่มี url ต้องมี title (หรือใส่ url แทน)`
+          );
+          continue;
+        }
+        if (!date.trim()) {
+          errors.push(
+            `[${i}] Member ที่ไม่มี url ต้องมี date (หรือใส่ url แทน)`
+          );
           continue;
         }
         rows.push({
-          ...emptyRow(),
           key: crypto.randomUUID(),
+          title,
+          channelId: own
+            ? (mild?.channelId ?? resolved?.channelId ?? "")
+            : (resolved?.channelId ?? ""),
+          date,
+          time: typeof o.time === "string" && o.time ? o.time : "20:00",
+          own,
+          collab: parseBool(o.collab, o.isCollab) ?? !own,
           member: true,
-          youtubeUrl,
-          own: parseBool(o.own, o.isOwn) ?? true,
-          collab: parseBool(o.collab, o.isCollab) ?? false,
+          youtubeUrl: "",
         });
         continue;
       }
@@ -222,7 +278,7 @@ function parseJsonToRows(text: string): { rows: DraftRow[]; error?: string } {
 
 function toSubmitItems(rows: DraftRow[]): SubmitItem[] {
   return rows.map((row) => {
-    if (row.member) {
+    if (row.member && resolveIdFromLink(row.youtubeUrl)) {
       return {
         member: true,
         url: row.youtubeUrl.trim(),
@@ -241,7 +297,7 @@ function toSubmitItems(rows: DraftRow[]): SubmitItem[] {
       time: row.time,
       own: row.own,
       collab: row.collab,
-      member: false,
+      member: row.member,
     };
   });
 }
@@ -249,13 +305,15 @@ function toSubmitItems(rows: DraftRow[]): SubmitItem[] {
 function validateRows(rows: DraftRow[]): string | null {
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
-    if (row.member) {
-      if (!resolveIdFromLink(row.youtubeUrl)) {
-        return `รายการ ${i + 1}: Member ต้องใส่ลิงก์ YouTube`;
-      }
+    if (row.member && resolveIdFromLink(row.youtubeUrl)) {
       continue;
     }
-    if (!row.title.trim()) return `รายการ ${i + 1}: ต้องมีชื่อไลฟ์`;
+    if (row.member && row.youtubeUrl.trim() && !resolveIdFromLink(row.youtubeUrl)) {
+      return `รายการ ${i + 1}: ลิงก์ YouTube ไม่ถูกต้อง`;
+    }
+    if (!row.title.trim()) {
+      return `รายการ ${i + 1}: ต้องมีชื่อไลฟ์${row.member ? " (หรือใส่ลิงก์ Member)" : ""}`;
+    }
     if (!row.date) return `รายการ ${i + 1}: ต้องมีวันที่`;
     if (!row.own && !row.channelId) {
       return `รายการ ${i + 1}: ถ้าไม่ใช่ช่องตัวเอง ต้องเลือกช่อง`;
@@ -449,9 +507,9 @@ export function AddManualLiveButton() {
                         }
                         className="size-3.5 accent-[#9b8cff]"
                       />
-                      Member (ใส่ลิงก์ YouTube)
+                      Member
                     </label>
-                    {!row.member ? (
+                    {!(row.member && resolveIdFromLink(row.youtubeUrl)) ? (
                       <>
                         <label className="inline-flex items-center gap-2 text-xs text-[#f3b8c4]">
                           <input
@@ -503,7 +561,7 @@ export function AddManualLiveButton() {
 
                   {row.member ? (
                     <label className="block space-y-1 text-xs text-[#cfc6ff]/85">
-                      ลิงก์ YouTube *
+                      ลิงก์ YouTube (ถ้ามี)
                       <input
                         type="url"
                         value={row.youtubeUrl}
@@ -516,14 +574,16 @@ export function AddManualLiveButton() {
                             )
                           )
                         }
-                        placeholder="https://www.youtube.com/live/…"
+                        placeholder="https://www.youtube.com/live/… (ว่าง = mock)"
                         className="w-full border border-[#9b8cff]/30 bg-[#10070b] px-2.5 py-2 text-sm text-[#fff5f7] outline-none focus:border-[#9b8cff]/55"
                       />
                       <span className="block text-[0.65rem] text-[#cfc6ff]/55">
-                        หรือใช้แท็บ Member เพื่อวางหลายลิงก์พร้อมกัน
+                        มีลิงก์ = ดึงจาก YouTube · ไม่มี = จองตารางด้วยชื่อ/วัน/เวลา
                       </span>
                     </label>
-                  ) : (
+                  ) : null}
+
+                  {row.member && resolveIdFromLink(row.youtubeUrl) ? null : (
                     <>
                       <label className="block space-y-1 text-xs text-[#f3b8c4]/70">
                         ชื่อไลฟ์
@@ -704,9 +764,11 @@ export function AddManualLiveButton() {
           ) : (
             <div className="mt-4 space-y-3">
               <p className="text-xs text-[#f3b8c4]/60">
-                Mock: title / channel / date / time / own / collab · Member:{" "}
+                Mock: title / channel / date / time / own / collab · Member mock:{" "}
+                <code className="text-[#cfc6ff]/90">member: true</code> +
+                title/date (ไม่มี url) · Member จริง:{" "}
                 <code className="text-[#cfc6ff]/90">member: true</code> +{" "}
-                <code className="text-[#cfc6ff]/90">url</code> (ลิงก์ YouTube)
+                <code className="text-[#cfc6ff]/90">url</code>
               </p>
               <textarea
                 value={jsonText}

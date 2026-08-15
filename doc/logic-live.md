@@ -65,8 +65,7 @@
     2) fallback (เฉพาะ mock): ช่องตรงกัน + เวลา mock ทับช่วงไลฟ์จริง (`actual_start`…`actual_end` หรือนัด ±3 ชม.) — ไม่บังคับวันเดียวกัน  
     Auto tracker / backfill / `purge:preview-mocks` ใช้กติกาเดียวกันหลัง upsert
 
-8.5 ไลฟ์ **Member** — ใส่แค่ลิงก์ YouTube (`url`)  
-    ดึงจาก Data API: ชื่อ · ปก · เวลาไลฟ์ · ช่อง · สถิติ · เก็บ `video_id` จริง + `metadata.member = true`  
-    UI แสดง badge **Member** · ไม่ต้องอัปโหลดปกเอง  
-    `scheduled_start` / `scheduled_start_first` ใช้ logic snap ครึ่งชั่วโมง (±5 นาที → :00/:30) · ไม่แตะ actual_*  
-    ส่งลิงก์ซ้ำ → **ทับแถว `video_id` เดิมทั้งก้อน** ด้วยข้อมูลใหม่จาก YouTube
+8.5 ไลฟ์ **Member**  
+    - มี `url` → ดึงจาก Data API (ชื่อ · ปก · เวลา · ช่อง · สถิติ) · `video_id` จริง + `metadata.member = true` · ทับแถวเดิมถ้าส่งลิงก์ซ้ำ  
+    - ไม่มี `url` → mock เหมือน 8.1 แต่ `metadata.member = true` (จองตารางก่อน) · พอมีลิงก์ทีหลัง / sync จับคู่ได้ → ลบ mock ตาม 8.3  
+    UI แสดง badge **Member** · `scheduled_*` snap ครึ่งชั่วโมง เมื่อมาจากลิงก์ YouTube
