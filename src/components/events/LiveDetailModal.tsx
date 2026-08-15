@@ -213,11 +213,17 @@ export function LiveDetailModal({
 
             <div className="relative space-y-4 px-5 pt-4 pb-5 sm:px-6 sm:pb-6">
               <DialogHeader className="gap-1.5 pr-6 text-left">
-                <DialogTitle className="font-[family-name:var(--font-display)] text-[1.35rem] leading-snug font-bold tracking-tight text-[#fff5f7] sm:text-xl">
+                <DialogTitle
+                  className="line-clamp-2 font-[family-name:var(--font-display)] text-[1.35rem] leading-snug font-bold tracking-tight break-words text-[#fff5f7] sm:text-xl"
+                  title={displayTitle}
+                >
                   {displayTitle}
                 </DialogTitle>
                 {slot.titleLocal ? (
-                  <DialogDescription className="text-sm text-[#f3b8c4]/70">
+                  <DialogDescription
+                    className="line-clamp-2 text-sm break-words text-[#f3b8c4]/70"
+                    title={slot.title}
+                  >
                     {slot.title}
                   </DialogDescription>
                 ) : (
