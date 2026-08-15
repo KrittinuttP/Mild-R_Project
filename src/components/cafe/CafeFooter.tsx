@@ -61,12 +61,6 @@ export function CafeFooter({ cafe }: CafeFooterProps) {
                 <span className="text-[#c4b8a8]">({CAFE_X.handle})</span>
                 <ExternalLink className="size-3.5 opacity-70" />
               </Link>
-              <Link
-                href="/projects/cafe"
-                className="text-sm text-[#d8d0c4] transition hover:text-[#c46a7a]"
-              >
-                Case file
-              </Link>
             </div>
           </div>
 

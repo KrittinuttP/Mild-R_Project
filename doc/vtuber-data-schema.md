@@ -23,7 +23,7 @@ Schema สำหรับเก็บข้อมูลแนะนำตัว 
 /** Social / streaming platform link */
 export interface SocialLink {
   id: string;
-  platform: "youtube" | "x" | "tiktok" | "facebook" | "twitch" | "other";
+  platform: "youtube" | "x" | "tiktok" | "facebook" | "discord" | "twitch" | "other";
   label: string;
   url: string;
   handle?: string;

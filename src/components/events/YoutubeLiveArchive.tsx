@@ -18,6 +18,8 @@ type YoutubeLiveArchiveProps = {
   upcoming: LiveStreamRow[];
   ended: LiveStreamRow[];
   cancelled?: LiveStreamRow[];
+  /** When true, show every ended/cancelled row (date-filtered ops). */
+  showAll?: boolean;
 };
 
 function statusLabel(row: LiveStreamRow) {
@@ -143,12 +145,19 @@ export function YoutubeLiveArchive({
   upcoming,
   ended,
   cancelled = [],
+  showAll = false,
 }: YoutubeLiveArchiveProps) {
   const [activeSlot, setActiveSlot] = useState<LiveSlot | null>(null);
   const [open, setOpen] = useState(false);
 
-  const recentEnded = useMemo(() => ended.slice(0, 12), [ended]);
-  const recentCancelled = useMemo(() => cancelled.slice(0, 12), [cancelled]);
+  const recentEnded = useMemo(
+    () => (showAll ? ended : ended.slice(0, 12)),
+    [ended, showAll]
+  );
+  const recentCancelled = useMemo(
+    () => (showAll ? cancelled : cancelled.slice(0, 12)),
+    [cancelled, showAll]
+  );
   const empty =
     live.length === 0 &&
     upcoming.length === 0 &&
@@ -163,8 +172,7 @@ export function YoutubeLiveArchive({
   if (empty) {
     return (
       <div className="border border-dashed border-[#f3b8c4]/20 bg-[#1a0d12]/35 px-5 py-8 text-sm text-[#f3b8c4]/70">
-        ยังไม่มีข้อมูลจาก YouTube ในฐานข้อมูล — รัน migration / backfill
-        หรือรอ Edge Function sync
+        ยังไม่มีไลฟ์ในช่วงวันที่เลือก
       </div>
     );
   }

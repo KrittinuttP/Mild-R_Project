@@ -543,7 +543,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
               data-hero-tagline
               className={cn(
                 SERIF,
-                "mt-2.5 line-clamp-2 text-[0.82rem] leading-relaxed text-[#c4b8a8] sm:mt-4 sm:max-w-sm sm:text-base"
+                "mt-2.5 line-clamp-4 text-[0.82rem] leading-relaxed text-[#c4b8a8] sm:mt-4 sm:max-w-md sm:text-base"
               )}
             >
               {cafe.tagline}

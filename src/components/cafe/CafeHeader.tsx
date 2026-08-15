@@ -21,7 +21,6 @@ const CAFE_NAV: CafeNavLink[] = [
   { kind: "section", hash: "#day-schedule", label: "Schedule" },
   { kind: "section", hash: "#menu", label: "Menu" },
   { kind: "section", hash: "#goods", label: "Goods" },
-  { kind: "page", href: "/projects/cafe", label: "Case file" },
 ];
 
 type CafeHeaderProps = {

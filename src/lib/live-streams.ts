@@ -1,6 +1,7 @@
 import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { liveStreamSortKey } from "@/lib/live-stream-utils";
+import { bangkokInclusiveToUtcRange } from "@/lib/live-view-trends";
 import type {
   LiveStreamRow,
   LiveStreamThumbnail,
@@ -102,6 +103,93 @@ export async function loadLiveStreams(
     );
   } catch (err) {
     console.error("[live_streams]", err);
+    return [];
+  }
+}
+
+const STREAM_SELECT =
+  "video_id, channel_id, channel_name, source_title, title, url, scheduled_start, scheduled_start_first, actual_start, actual_end, thumbnail_url, thumbnail_cached_url, views_on_end, latest_views, is_own_channel, is_collab, metadata, created_at";
+
+function streamAnchorIso(row: LiveStreamRow): string | null {
+  return (
+    row.actual_start ??
+    row.scheduled_start ??
+    row.scheduled_start_first ??
+    row.created_at ??
+    null
+  );
+}
+
+/**
+ * Streams whose anchor time (actual → scheduled → first) falls in the
+ * inclusive Bangkok calendar range [fromYmd, toYmd].
+ */
+export async function loadLiveStreamsInRange(
+  fromYmd: string,
+  toYmd: string,
+  limit = 500
+): Promise<LiveStreamRow[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  const { from, to } = bangkokInclusiveToUtcRange(fromYmd, toYmd);
+  const cap = Math.min(Math.max(limit, 1), 1000);
+
+  try {
+    const supabase = createPublicClient();
+    // Broad overlap queries — merge + filter by anchor time client-side
+    const [byActual, byScheduled, byFirst] = await Promise.all([
+      supabase
+        .from("mild_r_live_streams")
+        .select(STREAM_SELECT)
+        .gte("actual_start", from)
+        .lt("actual_start", to)
+        .order("actual_start", { ascending: false })
+        .limit(cap),
+      supabase
+        .from("mild_r_live_streams")
+        .select(STREAM_SELECT)
+        .gte("scheduled_start", from)
+        .lt("scheduled_start", to)
+        .order("scheduled_start", { ascending: false })
+        .limit(cap),
+      supabase
+        .from("mild_r_live_streams")
+        .select(STREAM_SELECT)
+        .gte("scheduled_start_first", from)
+        .lt("scheduled_start_first", to)
+        .order("scheduled_start_first", { ascending: false })
+        .limit(cap),
+    ]);
+
+    for (const res of [byActual, byScheduled, byFirst]) {
+      if (res.error) {
+        console.error("[live_streams_range]", res.error.message);
+      }
+    }
+
+    const fromMs = new Date(from).getTime();
+    const toMs = new Date(to).getTime();
+    const byId = new Map<string, LiveStreamRow>();
+
+    for (const batch of [
+      byActual.data,
+      byScheduled.data,
+      byFirst.data,
+    ] as (LiveStreamRow[] | null)[]) {
+      for (const row of batch ?? []) {
+        const iso = streamAnchorIso(row);
+        if (!iso) continue;
+        const t = new Date(iso).getTime();
+        if (!Number.isFinite(t) || t < fromMs || t >= toMs) continue;
+        byId.set(row.video_id, row);
+      }
+    }
+
+    return [...byId.values()].sort(
+      (a, b) => liveStreamSortKey(b) - liveStreamSortKey(a)
+    );
+  } catch (err) {
+    console.error("[live_streams_range]", err);
     return [];
   }
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ExternalLink, Play, X } from "lucide-react";
+import { X } from "lucide-react";
 
+import { SocialPlatformIcon } from "@/components/icons/SocialPlatformIcon";
 import type { VtuberProfile } from "@/types/vtuber";
 
 type FooterProps = {
@@ -23,20 +24,10 @@ const DEVELOPER = {
   xUrl: "https://x.com/ZAYZHIK_KungV2",
 } as const;
 
-function SocialIcon({ platform }: { platform: string }) {
-  if (platform === "youtube") {
-    return <Play className="size-3.5" aria-hidden />;
-  }
-  if (platform === "x") {
-    return <X className="size-3.5" aria-hidden />;
-  }
-  return <ExternalLink className="size-3.5" aria-hidden />;
-}
-
 export function Footer({ data }: FooterProps) {
   const year = new Date().getFullYear();
-  const primarySocials = data.socials.filter(
-    (social) => social.platform === "youtube" || social.platform === "x"
+  const footerSocials = data.socials.filter(
+    (social) => social.id !== "lumina-project"
   );
 
   return (
@@ -50,9 +41,9 @@ export function Footer({ data }: FooterProps) {
             {data.basic.unit} · {data.basic.agency}
           </p>
 
-          {primarySocials.length > 0 ? (
-            <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm">
-              {primarySocials.map((social) => (
+          {footerSocials.length > 0 ? (
+            <ul className="mt-4 flex max-w-xl flex-wrap gap-x-5 gap-y-2.5 text-sm">
+              {footerSocials.map((social) => (
                 <li key={social.id}>
                   <Link
                     href={social.url}
@@ -60,7 +51,10 @@ export function Footer({ data }: FooterProps) {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-[#f7d7de]/85 transition hover:text-[#e85a7a]"
                   >
-                    <SocialIcon platform={social.platform} />
+                    <SocialPlatformIcon
+                      platform={social.platform}
+                      className="size-3.5"
+                    />
                     {social.label}
                   </Link>
                 </li>

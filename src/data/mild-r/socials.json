@@ -12,5 +12,33 @@
     "label": "X (Twitter)",
     "handle": "@MildRWorldEnd",
     "url": "https://x.com/MildRWorldEnd"
+  },
+  {
+    "id": "facebook",
+    "platform": "facebook",
+    "label": "Facebook",
+    "handle": "MildRWorldEnd",
+    "url": "https://www.facebook.com/MildRWorldEnd"
+  },
+  {
+    "id": "discord",
+    "platform": "discord",
+    "label": "Discord",
+    "handle": "discord.gg/hvE8FhJbju",
+    "url": "https://discord.gg/hvE8FhJbju"
+  },
+  {
+    "id": "lumina-project",
+    "platform": "facebook",
+    "label": "Lumina Project",
+    "handle": "LuminaVProject",
+    "url": "https://www.facebook.com/LuminaVProject"
+  },
+  {
+    "id": "tiktok",
+    "platform": "tiktok",
+    "label": "TikTok",
+    "handle": "@mildrworldend",
+    "url": "https://www.tiktok.com/@mildrworldend"
   }
 ]

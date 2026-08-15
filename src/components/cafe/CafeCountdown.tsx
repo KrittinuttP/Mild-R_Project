@@ -11,6 +11,7 @@ const SERIF = "font-[family-name:var(--font-cafe-serif)]";
 const DISPLAY = "font-[family-name:var(--font-display)]";
 
 type Remain = {
+  months: number;
   days: number;
   hours: number;
   minutes: number;
@@ -23,9 +24,35 @@ function pad(value: number, size: number) {
   return String(Math.max(0, value)).padStart(size, "0");
 }
 
-function diffTo(target: number, now: number): Remain {
-  const total = Math.max(0, Math.floor((target - now) / 1000));
+/** Calendar months, then remaining days / clock from the leftover ms. */
+function diffTo(targetMs: number, nowMs: number): Remain {
+  if (targetMs <= nowMs) {
+    return { months: 0, days: 0, hours: 0, minutes: 0, seconds: 0 };
+  }
+
+  const target = new Date(targetMs);
+  const now = new Date(nowMs);
+
+  let months =
+    (target.getFullYear() - now.getFullYear()) * 12 +
+    (target.getMonth() - now.getMonth());
+
+  const afterMonths = new Date(now);
+  afterMonths.setMonth(afterMonths.getMonth() + months);
+
+  if (afterMonths.getTime() > targetMs) {
+    months -= 1;
+    afterMonths.setTime(now.getTime());
+    afterMonths.setMonth(afterMonths.getMonth() + months);
+  }
+
+  const total = Math.max(
+    0,
+    Math.floor((targetMs - afterMonths.getTime()) / 1000)
+  );
+
   return {
+    months: Math.max(0, months),
     days: Math.floor(total / 86400),
     hours: Math.floor((total % 86400) / 3600),
     minutes: Math.floor((total % 3600) / 60),
@@ -104,6 +131,25 @@ function FlipCard({ value, label }: { value: string; label: string }) {
   );
 }
 
+function UnitCell({
+  label,
+  value,
+  live,
+}: {
+  label: string;
+  value: string;
+  live: boolean;
+}) {
+  return (
+    <div className="bg-[#14100c] px-1 py-2 sm:px-2 sm:py-2.5">
+      <FlipCard
+        value={live ? value : pad(0, value.length)}
+        label={label}
+      />
+    </div>
+  );
+}
+
 type CafeCountdownProps = {
   startsAt: string;
   endsAt?: string;
@@ -139,8 +185,11 @@ export function CafeCountdown({
   const remain = diffTo(startMs, current);
   const live = now !== null;
 
-  const units = [
-    { label: "Days", value: pad(remain.days, 3) },
+  const span = [
+    { label: "Months", value: pad(remain.months, 2) },
+    { label: "Days", value: pad(remain.days, 2) },
+  ];
+  const clockUnits = [
     { label: "Hours", value: pad(remain.hours, 2) },
     { label: "Mins", value: pad(remain.minutes, 2) },
     { label: "Secs", value: pad(remain.seconds, 2) },
@@ -149,24 +198,30 @@ export function CafeCountdown({
   const clock =
     phase === "pending" ? (
       <div
-        className={cn(
-          "grid grid-cols-4 gap-px bg-[#9a7b5a]/30",
-          embedded ? "border-t border-[#9a7b5a]/30" : "border-t border-[#9a7b5a]/30"
-        )}
+        className="border-t border-[#9a7b5a]/30"
         aria-live="polite"
         aria-label="นับถอยหลังถึงเวลาเปิดเคส"
       >
-        {units.map((unit) => (
-          <div
-            key={unit.label}
-            className="bg-[#14100c] px-1 py-2 sm:px-2 sm:py-2.5"
-          >
-            <FlipCard
-              value={live ? unit.value : pad(0, unit.value.length)}
+        <div className="grid grid-cols-2 gap-px bg-[#9a7b5a]/30">
+          {span.map((unit) => (
+            <UnitCell
+              key={unit.label}
               label={unit.label}
+              value={unit.value}
+              live={live}
             />
-          </div>
-        ))}
+          ))}
+        </div>
+        <div className="grid grid-cols-3 gap-px border-t border-[#9a7b5a]/30 bg-[#9a7b5a]/30">
+          {clockUnits.map((unit) => (
+            <UnitCell
+              key={unit.label}
+              label={unit.label}
+              value={unit.value}
+              live={live}
+            />
+          ))}
+        </div>
       </div>
     ) : (
       <div className="border-t border-[#9a7b5a]/30 px-4 py-4 text-center">

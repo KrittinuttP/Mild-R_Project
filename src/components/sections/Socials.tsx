@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ExternalLink, Music2, Play, X } from "lucide-react";
+import { ExternalLink, Music2 } from "lucide-react";
 
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
+import { SocialPlatformIcon } from "@/components/icons/SocialPlatformIcon";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { VtuberProfile } from "@/types/vtuber";
@@ -9,18 +10,6 @@ import type { VtuberProfile } from "@/types/vtuber";
 type SocialsProps = {
   data: VtuberProfile;
 };
-
-function PlatformIcon({ platform }: { platform: string }) {
-  if (platform === "youtube") {
-    return <Play className="size-5" aria-hidden />;
-  }
-
-  if (platform === "x") {
-    return <X className="size-5" aria-hidden />;
-  }
-
-  return <ExternalLink className="size-5" aria-hidden />;
-}
 
 function getXHashtagUrl(tag: string) {
   const slug = tag.replace(/^#/, "").trim();
@@ -66,7 +55,7 @@ export function Socials({ data }: SocialsProps) {
                     className="group flex min-h-14 items-center justify-between gap-4 py-4 transition hover:text-[#e85a7a] sm:py-5"
                   >
                     <span className="flex items-center gap-3">
-                      <PlatformIcon platform={social.platform} />
+                      <SocialPlatformIcon platform={social.platform} />
                       <span>
                         <span className="block font-medium">{social.label}</span>
                         {social.handle ? (

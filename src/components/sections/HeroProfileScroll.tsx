@@ -61,7 +61,6 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
   const cycleBlocks = [
     {
       key: "greeting",
-      side: "left" as const,
       label: "Greeting",
       bodyDesktop: (
         <p className="mt-2 font-[family-name:var(--font-display)] text-xl leading-snug text-[#fff5f7] sm:mt-3 sm:text-2xl md:text-3xl">
@@ -76,7 +75,6 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
     },
     {
       key: "story",
-      side: "left" as const,
       label: "Story",
       bodyDesktop: (
         <p className="mt-2 text-sm leading-relaxed text-[#f7d7de]/90 sm:mt-3 sm:text-base md:text-lg">
@@ -91,7 +89,6 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
     },
     {
       key: "debut",
-      side: "right" as const,
       label: "Debut",
       bodyDesktop: (
         <>
@@ -116,7 +113,6 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
     },
     {
       key: "honey",
-      side: "right" as const,
       label: "Honey",
       bodyDesktop: (
         <>
@@ -143,17 +139,20 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
     key: string;
     label: string;
     zone: CreditZone;
-    side: "left" | "right";
   }> = [
-    { key: "art", label: "Art", zone: "art", side: "left" },
-    { key: "audio", label: "Credits", zone: "audio", side: "right" },
-    { key: "loading", label: "Loading", zone: "loading", side: "left" },
+    { key: "art", label: "Art", zone: "art" },
+    { key: "audio", label: "Credits", zone: "audio" },
+    { key: "loading", label: "Loading", zone: "loading" },
   ];
 
   useGSAP(
     () => {
       const root = rootRef.current;
       if (!root) return;
+
+      const markReady = () => root.setAttribute("data-hero-ready", "");
+      const clearReady = () => root.removeAttribute("data-hero-ready");
+      clearReady();
 
       const reduceMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)"
@@ -166,6 +165,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
           ),
           { clearProps: "all", autoAlpha: 1 }
         );
+        markReady();
         return;
       }
 
@@ -195,6 +195,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
         if (charFloat) {
           gsap.set(charFloat, { y: 0, rotation: 0, transformOrigin: "55% 45%" });
         }
+        markReady();
 
         const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
         if (heroArt) {
@@ -391,6 +392,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
         if (charFloat) {
           gsap.set(charFloat, { y: 0, rotate: 0, transformOrigin: "50% 55%" });
         }
+        markReady();
 
         const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
         if (charInner) {
@@ -486,43 +488,30 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
           0.34
         );
         let cursor = 0.34 + ART_MOVE + ART_SETTLE;
+        // Greeting → Honey: copy left, character right
         cursor = playCycle(tl, cycleLeft, cursor, -72);
 
-        tl.to(character, { ...SLOT_LEFT, duration: ART_MOVE }, cursor).to(
-          charInner,
-          { scale: SCALE_SIDE, duration: ART_MOVE },
-          cursor
-        );
-        cursor = cursor + ART_MOVE + ART_SETTLE;
-        cursor = playCycle(tl, cycleRight, cursor, 72);
-
-        // Credits after Honey: Art → Audio → Loading (ordered)
-        creditCycles.forEach((el) => {
-          const side = el.dataset.creditSide === "right" ? "right" : "left";
-          const fromX = side === "left" ? -72 : 72;
-          const slot = side === "left" ? SLOT_RIGHT : SLOT_LEFT;
-
-          tl.to(character, { ...slot, duration: ART_MOVE }, cursor).to(
+        // Credits (Art → Audio → Loading): copy right, character left
+        if (creditCycles.length > 0) {
+          tl.to(character, { ...SLOT_LEFT, duration: ART_MOVE }, cursor).to(
             charInner,
             { scale: SCALE_SIDE, duration: ART_MOVE },
             cursor
           );
           cursor = cursor + ART_MOVE + ART_SETTLE;
 
-          tl.fromTo(
-            el,
-            { autoAlpha: 0, x: fromX },
-            { autoAlpha: 1, x: 0, duration: 0.12 },
-            cursor
-          );
-          cursor += 0.12 + 0.22;
-          tl.to(
-            el,
-            { autoAlpha: 0, x: fromX * 0.3, duration: 0.1 },
-            cursor
-          );
-          cursor += 0.06;
-        });
+          creditCycles.forEach((el) => {
+            tl.fromTo(
+              el,
+              { autoAlpha: 0, x: 72 },
+              { autoAlpha: 1, x: 0, duration: 0.12 },
+              cursor
+            );
+            cursor += 0.12 + 0.22;
+            tl.to(el, { autoAlpha: 0, x: 72 * 0.3, duration: 0.1 }, cursor);
+            cursor += 0.06;
+          });
+        }
 
         tl.to(character, { ...SLOT_CENTER, duration: 0.22 }, cursor)
           .to(charInner, { scale: SCALE_LOCK, duration: 0.22 }, cursor)
@@ -555,13 +544,16 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
         };
       });
 
-      return () => mm.revert();
+      return () => {
+        clearReady();
+        mm.revert();
+      };
     },
     { scope: rootRef }
   );
 
   return (
-    <div ref={rootRef} id="top" className="bg-[#140a0d]">
+    <div ref={rootRef} id="top" data-hero-root className="bg-[#140a0d]">
       {/* ========== MOBILE: vertical stack ========== */}
       <div data-mobile-root className="md:hidden">
         <section
@@ -591,6 +583,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
           {/* Art: right-side panel — figure always visible, half-cropped by edge */}
           <div
             data-m-hero-art
+            data-hero-intro
             className="pointer-events-none absolute inset-0 z-[2] overflow-hidden"
           >
             <div
@@ -609,7 +602,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
 
           {/* Copy: lower-left block with room above for art */}
           <div className="relative z-[3] flex min-h-[100dvh] flex-col justify-end px-5 pt-28 pb-[max(5.25rem,calc(env(safe-area-inset-bottom)+3.25rem))]">
-            <div data-hero-copy className="w-[min(100%,19.5rem)]">
+            <div data-hero-copy data-hero-intro className="w-[min(100%,19.5rem)]">
               <p
                 data-hero-unit
                 className="mb-2.5 text-[0.65rem] tracking-[0.3em] text-[#f3b8c4]/85 uppercase"
@@ -659,6 +652,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
 
             <div
               data-hero-scroll
+              data-hero-intro
               className="absolute bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 flex -translate-x-1/2 flex-col items-center gap-0.5 text-[#f3b8c4]/65"
               aria-hidden
             >
@@ -829,6 +823,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
           >
             <div
               data-scroll-char-inner
+              data-hero-intro
               className="relative h-[85%] w-[min(92%,520px)] will-change-transform"
             >
               <div
@@ -853,7 +848,11 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
             aria-label={`${basic.name} hero`}
             className="relative z-10 flex h-full flex-col justify-end px-10 pb-16 lg:px-16"
           >
-            <div data-hero-copy className="relative mx-auto w-full max-w-6xl">
+            <div
+              data-hero-copy
+              data-hero-intro
+              className="relative mx-auto w-full max-w-6xl"
+            >
               <p
                 data-hero-unit
                 className="mb-3 text-sm tracking-[0.28em] text-[#f3b8c4]/80 uppercase"
@@ -900,6 +899,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
 
             <div
               data-hero-scroll
+              data-hero-intro
               className="absolute bottom-6 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1 text-[#f3b8c4]/70"
               aria-hidden
             >
@@ -916,6 +916,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
           >
             <div
               data-phase-name
+              data-hero-intro
               className="absolute inset-y-0 left-0 flex w-1/2 items-center px-10 lg:px-14"
             >
               <div>
@@ -935,96 +936,56 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
 
             <div className="absolute inset-y-0 left-0 flex w-1/2 items-center justify-center px-10 lg:px-14">
               <div className="relative h-[26rem] w-full max-w-[32rem] text-left">
-                {cycleBlocks
-                  .filter((b) => b.side === "left")
-                  .map((block) => (
-                    <div
-                      key={block.key}
-                      data-cycle
-                      data-cycle-left
-                      className="absolute inset-0 flex flex-col justify-center"
-                    >
-                      <p className="text-sm tracking-[0.28em] text-[#e85a7a]/90 uppercase">
-                        {block.label}
-                      </p>
-                      {block.bodyDesktop}
-                    </div>
-                  ))}
-                {creditSteps
-                  .filter((s) => s.side === "left")
-                  .map((step) => (
-                    <div
-                      key={step.key}
-                      data-credit-cycle
-                      data-credit-zone={step.zone}
-                      data-credit-side="left"
-                      className="absolute inset-0 flex flex-col justify-center"
-                    >
-                      <p className="text-sm tracking-[0.28em] text-[#e85a7a]/90 uppercase sm:text-base">
-                        {step.label}
-                      </p>
-                      <div className="pointer-events-auto mt-6">
-                        <DesignCredits
-                          design={characterDesign}
-                          zones={[step.zone]}
-                          variant="strip"
-                          size="lg"
-                          hideHeading
-                        />
-                      </div>
-                    </div>
-                  ))}
+                {cycleBlocks.map((block) => (
+                  <div
+                    key={block.key}
+                    data-cycle
+                    data-cycle-left
+                    data-hero-intro
+                    className="absolute inset-0 flex flex-col justify-center"
+                  >
+                    <p className="text-sm tracking-[0.28em] text-[#e85a7a]/90 uppercase">
+                      {block.label}
+                    </p>
+                    {block.bodyDesktop}
+                  </div>
+                ))}
               </div>
             </div>
 
             <div className="absolute inset-y-0 right-0 flex w-1/2 items-center justify-center px-10 lg:px-14">
               <div className="relative h-[26rem] w-full max-w-[32rem] text-right">
-                {cycleBlocks
-                  .filter((b) => b.side === "right")
-                  .map((block) => (
-                    <div
-                      key={block.key}
-                      data-cycle
-                      data-cycle-right
-                      className="absolute inset-0 flex flex-col justify-center"
-                    >
-                      <p className="text-sm tracking-[0.28em] text-[#e85a7a]/90 uppercase">
-                        {block.label}
-                      </p>
-                      {block.bodyDesktop}
+                {creditSteps.map((step) => (
+                  <div
+                    key={step.key}
+                    data-credit-cycle
+                    data-credit-zone={step.zone}
+                    data-credit-side="right"
+                    data-hero-intro
+                    className="absolute inset-0 flex flex-col justify-center"
+                  >
+                    <p className="text-sm tracking-[0.28em] text-[#e85a7a]/90 uppercase sm:text-base">
+                      {step.label}
+                    </p>
+                    <div className="pointer-events-auto mt-6">
+                      <DesignCredits
+                        design={characterDesign}
+                        zones={[step.zone]}
+                        variant="strip"
+                        size="lg"
+                        align="end"
+                        hideHeading
+                      />
                     </div>
-                  ))}
-                {creditSteps
-                  .filter((s) => s.side === "right")
-                  .map((step) => (
-                    <div
-                      key={step.key}
-                      data-credit-cycle
-                      data-credit-zone={step.zone}
-                      data-credit-side="right"
-                      className="absolute inset-0 flex flex-col justify-center"
-                    >
-                      <p className="text-sm tracking-[0.28em] text-[#e85a7a]/90 uppercase sm:text-base">
-                        {step.label}
-                      </p>
-                      <div className="pointer-events-auto mt-6">
-                        <DesignCredits
-                          design={characterDesign}
-                          zones={[step.zone]}
-                          variant="strip"
-                          size="lg"
-                          align="end"
-                          hideHeading
-                        />
-                      </div>
-                    </div>
-                  ))}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
 
           <section
             data-finale
+            data-hero-intro
             id="profile-desktop"
             aria-label={`${basic.name} profile overview`}
             className="pointer-events-none absolute inset-0 z-20 flex px-8 pt-16 pb-7 lg:px-12 lg:pt-16 lg:pb-8"
