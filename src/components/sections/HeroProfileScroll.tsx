@@ -11,6 +11,7 @@ import {
   type CreditZone,
 } from "@/components/sections/DesignCredits";
 import { gsap, registerGsapPlugins, ScrollTrigger, useGSAP } from "@/lib/gsap";
+import { formatEnglishDate } from "@/lib/events";
 import { cn } from "@/lib/utils";
 import type { VtuberProfile } from "@/types/vtuber";
 
@@ -19,14 +20,6 @@ registerGsapPlugins();
 type HeroProfileScrollProps = {
   data: VtuberProfile;
 };
-
-function formatDebutDate(iso: string) {
-  return new Intl.DateTimeFormat("th-TH", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(new Date(iso));
-}
 
 /** Locked visual scale (desktop sticky path) — tuned for portrait KV */
 const SCALE_HERO = 1.12;
@@ -93,7 +86,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
       bodyDesktop: (
         <>
           <p className="mt-2 font-[family-name:var(--font-display)] text-2xl text-[#fff5f7] sm:mt-3 sm:text-3xl">
-            {formatDebutDate(basic.debutDate)}
+            {formatEnglishDate(basic.debutDate)}
           </p>
           <p className="mt-1.5 text-xs text-[#f3b8c4]/80 sm:mt-2 sm:text-sm">
             {basic.agency} · {basic.unit}
@@ -103,7 +96,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
       bodyMobile: (
         <>
           <p className="mt-3 font-[family-name:var(--font-display)] text-3xl text-[#fff5f7]">
-            {formatDebutDate(basic.debutDate)}
+            {formatEnglishDate(basic.debutDate)}
           </p>
           <p className="mt-2 text-sm text-[#f3b8c4]/80">
             {basic.agency} · {basic.unit}
@@ -750,7 +743,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
                 <div className="flex items-baseline justify-between gap-4 py-2">
                   <dt className="text-xs text-[#f3b8c4]/55">Debut</dt>
                   <dd className="text-right font-[family-name:var(--font-display)] text-sm">
-                    {formatDebutDate(basic.debutDate)}
+                    {formatEnglishDate(basic.debutDate)}
                   </dd>
                 </div>
                 {basic.heightCm ? (
@@ -1044,7 +1037,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
                     <div className="flex items-baseline justify-between gap-4 py-2">
                       <dt className="text-xs text-[#f3b8c4]/55">Debut</dt>
                       <dd className="text-right font-[family-name:var(--font-display)] text-sm lg:text-base">
-                        {formatDebutDate(basic.debutDate)}
+                        {formatEnglishDate(basic.debutDate)}
                       </dd>
                     </div>
                     {basic.heightCm ? (

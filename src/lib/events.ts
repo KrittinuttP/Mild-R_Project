@@ -89,6 +89,16 @@ export function formatThaiDate(iso: string): string {
   });
 }
 
+/** English short date like birthday style + year, e.g. "23 May 2024" */
+export function formatEnglishDate(iso: string): string {
+  const date = parseISODate(iso);
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 export function sortLiveWeeks(weeks: LiveWeek[]): LiveWeek[] {
   return [...weeks].sort((a, b) =>
     a.weekStart < b.weekStart ? -1 : a.weekStart > b.weekStart ? 1 : 0

@@ -2,19 +2,12 @@ import Link from "next/link";
 
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { DesignCredits } from "@/components/sections/DesignCredits";
+import { formatEnglishDate } from "@/lib/events";
 import type { VtuberProfile } from "@/types/vtuber";
 
 type ProfileProps = {
   data: VtuberProfile;
 };
-
-function formatDebutDate(iso: string) {
-  return new Intl.DateTimeFormat("th-TH", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(new Date(iso));
-}
 
 export function Profile({ data }: ProfileProps) {
   const { basic, fan, characterDesign } = data;
@@ -84,7 +77,7 @@ export function Profile({ data }: ProfileProps) {
             </div>
             <div className="flex justify-between gap-6">
               <dt className="text-[#f3b8c4]/65">Debut</dt>
-              <dd className="text-right">{formatDebutDate(basic.debutDate)}</dd>
+              <dd className="text-right">{formatEnglishDate(basic.debutDate)}</dd>
             </div>
             {basic.heightCm ? (
               <div className="flex justify-between gap-6">
