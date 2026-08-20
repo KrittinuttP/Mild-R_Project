@@ -21,7 +21,8 @@ type CafeFooterProps = {
 export function CafeFooter({ cafe }: CafeFooterProps) {
   const year = new Date().getFullYear();
   const masthead = cafe.edition?.masthead ?? cafe.title;
-  const xFromData = cafe.ctas.find((cta) => cta.url.includes("x.com"));
+  const closingCtas = cafe.closing.ctas ?? [];
+  const xFromData = closingCtas.find((cta) => cta.url.includes("x.com"));
   const followUrl = xFromData?.url ?? CAFE_X.url;
   const followLabel = xFromData?.label ?? CAFE_X.label;
 
@@ -65,13 +66,13 @@ export function CafeFooter({ cafe }: CafeFooterProps) {
           </div>
 
           <div className="space-y-3 border-t border-[#9a7b5a]/20 pt-6 md:border-t-0 md:pt-0 md:text-right">
-            {cafe.disclaimer ? (
+            {cafe.closing.disclaimer ? (
               <p className="max-w-md text-xs leading-relaxed text-[#9a7b5a]/85 md:ml-auto">
-                {cafe.disclaimer}
+                {cafe.closing.disclaimer}
               </p>
             ) : null}
             <p className="text-[0.65rem] tracking-[0.14em] text-[#9a7b5a]/70 uppercase sm:text-xs sm:tracking-[0.16em]">
-              © {year} · Honey Pulse Cafe · Fan-made
+              © {year} · {cafe.title.split(": ", 2)[0] ?? cafe.title} · Fan-made
               <Link
                 href="/cafe/settings"
                 aria-label="Cafe settings"

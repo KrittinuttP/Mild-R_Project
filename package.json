@@ -16,6 +16,7 @@
     "db:migrate:project": "npx tsx --env-file=.env.local scripts/apply-sql.ts supabase/migrations/20260808040000_live_streams_project.sql",
     "db:migrate:cafe-visibility": "npx tsx --env-file=.env scripts/apply-sql.ts supabase/migrations/20260814000000_cafe_section_visibility.sql",
     "db:migrate:cafe-main-site-link": "npx tsx --env-file=.env scripts/apply-sql.ts supabase/migrations/20260814100000_cafe_main_site_link_visibility.sql",
+    "db:migrate:cafe-operations": "npx tsx --env-file=.env scripts/apply-sql.ts supabase/migrations/20260820100000_cafe_operations_visibility.sql",
     "backfill:youtube": "npx tsx --env-file=.env.local scripts/backfill-youtube-lives.ts",
     "backfill:pixela": "npx tsx --env-file=.env.local scripts/backfill-pixela-mild-r.ts",
     "backfill:pixela:from-mild": "npx tsx --env-file=.env.local scripts/backfill-pixela-mild-r.ts --from-mild",

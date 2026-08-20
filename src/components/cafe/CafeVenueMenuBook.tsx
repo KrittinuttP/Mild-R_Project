@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
-import type { CafeOtherMenu, CafeOtherMenuItem } from "@/types/vtuber";
+import type { CafeVenueMenuSection, CafeVenueMenuItem } from "@/types/vtuber";
 
 registerGsapPlugins();
 
@@ -25,7 +25,7 @@ const MD_QUERY = "(min-width: 768px)";
 const COVER_INDEX = -1;
 
 type CafeVenueMenuBookProps = {
-  menu: CafeOtherMenu;
+  menu: CafeVenueMenuSection;
   venueLabel?: string;
   venueImage?: string;
   venueImageAlt?: string;
@@ -70,7 +70,7 @@ function MenuPlate({
   onZoom,
   className,
 }: {
-  item: CafeOtherMenuItem;
+  item: CafeVenueMenuItem;
   index: number;
   onZoom?: (index: number) => void;
   className?: string;

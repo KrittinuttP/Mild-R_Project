@@ -26,7 +26,11 @@ import {
   type CafeSectionVisibilityMap,
 } from "@/lib/cafe-visibility";
 import { cn } from "@/lib/utils";
-import type { CafePage, CafeVisualKind, ProjectCta } from "@/types/vtuber";
+import type {
+  CafeOperationsItem,
+  CafePage,
+  ProjectCta,
+} from "@/types/vtuber";
 
 registerGsapPlugins();
 
@@ -35,15 +39,9 @@ type CafePromoProps = {
   visibility?: CafeSectionVisibilityMap;
 };
 
+const MENU_EXHIBIT_LETTERS = ["A", "B", "C"] as const;
 const SERIF = "font-[family-name:var(--font-cafe-serif)]";
 const DISPLAY = "font-[family-name:var(--font-display)]";
-
-const VISUAL_KIND_LABEL: Record<CafeVisualKind, string> = {
-  atmosphere: "Atmosphere",
-  location: "Location",
-  art: "Art",
-  other: "Plate",
-};
 
 function splitCaseDate(label?: string) {
   if (!label) return [];
@@ -233,32 +231,43 @@ function CafeThumb({
   );
 }
 
-type CafeLightboxSection = "venue" | "plates" | "menu" | "goods" | "otherMenu";
+type CafeLightboxSection = "venue" | "menu" | "goods" | "otherMenu" | "operations";
 
 function buildCafeLightboxGroups(cafe: CafePage): Record<
   CafeLightboxSection,
   CafeLightboxItem[]
 > {
+  const location = cafe.dispatch.location;
+  const operationPlates = (cafe.operations?.groups ?? []).flatMap((group) =>
+    group.items
+      .filter((item) => Boolean(item.image))
+      .map((item) => ({
+        id: `ops-${item.id}`,
+        src: item.image as string,
+        alt: item.imageAlt ?? item.name,
+        caption: item.nameLocal
+          ? `${item.name} · ${item.nameLocal}`
+          : item.caption ?? item.name,
+        group: group.titleLocal
+          ? `${group.title} · ${group.titleLocal}`
+          : group.title,
+      }))
+  );
+
   return {
-    venue: cafe.location.image
+    venue: location.image
       ? [
           {
             id: "location",
-            src: cafe.location.image,
-            alt: cafe.location.imageAlt ?? cafe.location.label,
-            caption: cafe.location.detail ?? cafe.location.label,
+            src: location.image,
+            alt: location.imageAlt ?? location.label,
+            caption: location.detail ?? location.label,
             group: "Dispatch · Venue",
           },
         ]
       : [],
-    plates: (cafe.visuals ?? []).map((visual) => ({
-      id: visual.id,
-      src: visual.src,
-      alt: visual.alt,
-      caption: visual.caption ?? visual.alt,
-      group: `Photographic Plates · ${VISUAL_KIND_LABEL[visual.kind ?? "other"]}`,
-    })),
-    menu: cafe.menu
+    operations: operationPlates,
+    menu: cafe.signatureMenu.items
       .filter((item) => Boolean(item.image))
       .map((item) => ({
         id: `menu-${item.id}`,
@@ -267,9 +276,9 @@ function buildCafeLightboxGroups(cafe: CafePage): Record<
         caption: item.nameLocal
           ? `${item.name} · ${item.nameLocal}`
           : item.name,
-        group: "Evidence Ledger · Menu",
+        group: "Investigator's Provisions",
       })),
-    goods: (cafe.goods ?? [])
+    goods: (cafe.goods?.items ?? [])
       .filter((item) => Boolean(item.image))
       .map((item) => ({
         id: `goods-${item.id}`,
@@ -278,9 +287,9 @@ function buildCafeLightboxGroups(cafe: CafePage): Record<
         caption: item.nameLocal
           ? `${item.name} · ${item.nameLocal}`
           : item.name,
-        group: "Recovered Property · Goods",
+        group: "The Clue Dossier",
       })),
-    otherMenu: (cafe.otherMenu?.items ?? []).map((item, index) => ({
+    otherMenu: (cafe.venueMenu?.items ?? []).map((item, index) => ({
       id: item.id,
       src: item.image,
       alt: item.imageAlt ?? item.caption ?? `เมนูร้าน แผ่น ${index + 1}`,
@@ -290,6 +299,65 @@ function buildCafeLightboxGroups(cafe: CafePage): Record<
       group: "Evidence Ledger · Venue Menu",
     })),
   };
+}
+
+function OpsPromoMedia({
+  item,
+  onOpen,
+  aspectClassName = "aspect-[4/5] sm:aspect-[3/4]",
+}: {
+  item: CafeOperationsItem;
+  onOpen?: () => void;
+  aspectClassName?: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  const hasImage = Boolean(item.image) && !failed;
+
+  const frame = cn(
+    "relative w-full overflow-hidden border border-[#9a7b5a]/30 bg-[#0d1013]",
+    aspectClassName
+  );
+
+  if (!hasImage) {
+    return (
+      <div className={cn(frame, "flex flex-col items-center justify-center gap-2 px-4")} aria-hidden>
+        <span className="text-[0.58rem] tracking-[0.2em] text-[#9a7b5a]/85 uppercase">
+          Promo TBA
+        </span>
+        <span className="max-w-[12rem] text-center text-[0.65rem] leading-snug text-[#9a7b5a]/65">
+          ใส่ไฟล์ที่ {item.image ?? "/assets/cafe/operations/…"}
+        </span>
+      </div>
+    );
+  }
+
+  const media = (
+    <ProtectedImage
+      src={item.image}
+      alt={item.imageAlt ?? item.name}
+      wrapClassName="absolute inset-0 block"
+      className="h-full w-full object-cover"
+      onError={() => setFailed(true)}
+    />
+  );
+
+  if (!onOpen) {
+    return <div className={frame}>{media}</div>;
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={`ดูรูปโปรโมท: ${item.imageAlt ?? item.name}`}
+      className={cn(
+        frame,
+        "cursor-zoom-in text-left transition hover:border-[#c46a7a]/45"
+      )}
+    >
+      {media}
+    </button>
+  );
 }
 
 function Shell({
@@ -320,9 +388,21 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
   const heroBgRef = useRef<HTMLDivElement>(null);
   const kvFloatRef = useRef<HTMLDivElement>(null);
   const heroCopyRef = useRef<HTMLDivElement>(null);
-  const [primaryCta, ...restCtas] = cafe.ctas;
   const edition = cafe.edition;
-  const dateParts = splitCaseDate(cafe.schedule.label);
+  const schedule = cafe.dispatch.schedule;
+  const location = cafe.dispatch.location;
+  const daySchedule = cafe.daySchedule;
+  const operations = cafe.operations;
+  const signatureMenu = cafe.signatureMenu;
+  const venueMenu = cafe.venueMenu;
+  const goods = cafe.goods;
+  const closing = cafe.closing;
+  const heroCtas = closing.ctas ?? [];
+  const [primaryCta, ...restCtas] = heroCtas;
+  const dateParts = splitCaseDate(schedule.label);
+  const titleParts = cafe.title.includes(": ")
+    ? (cafe.title.split(": ", 2) as [string, string])
+    : null;
   const lightboxGroups = useMemo(() => buildCafeLightboxGroups(cafe), [cafe]);
   const [lightbox, setLightbox] = useState<{
     section: CafeLightboxSection;
@@ -366,13 +446,14 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
       );
 
       const kicker = copy.querySelector<HTMLElement>("[data-hero-kicker]");
+      const status = copy.querySelector<HTMLElement>("[data-hero-status]");
       const title = copy.querySelector<HTMLElement>("[data-hero-title]");
       const tagline = copy.querySelector<HTMLElement>("[data-hero-tagline]");
       const date = copy.querySelector<HTMLElement>("[data-hero-date]");
       const cta = copy.querySelector<HTMLElement>("[data-hero-cta]");
       const scrollHint = copy.querySelector<HTMLElement>("[data-hero-scroll]");
       const redact = copy.querySelectorAll<HTMLElement>("[data-date-redact]");
-      const textEls = [kicker, title, tagline, date, cta, scrollHint].filter(
+      const textEls = [kicker, status, title, tagline, date, cta, scrollHint].filter(
         Boolean
       ) as HTMLElement[];
 
@@ -388,6 +469,14 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
           { x: -40, autoAlpha: 0 },
           { x: 0, autoAlpha: 1, duration: 0.65 },
           0.12
+        );
+      }
+      if (status) {
+        tl.fromTo(
+          status,
+          { y: 10, autoAlpha: 0 },
+          { y: 0, autoAlpha: 1, duration: 0.55 },
+          0.2
         );
       }
       if (title) {
@@ -511,22 +600,54 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
           ref={heroCopyRef}
           className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-6xl flex-col justify-start px-5 pb-16 pt-[calc(4.5rem+env(safe-area-inset-top))] sm:px-10 sm:pt-[5.25rem] sm:pb-20 lg:px-16"
         >
-          <div className="w-[58%] max-w-[13.75rem] sm:w-full sm:max-w-md lg:max-w-lg">
+          <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl">
             <p
               data-hero-kicker
               className="text-[0.62rem] tracking-[0.3em] text-[#c46a7a] uppercase sm:text-[0.7rem] sm:tracking-[0.34em]"
             >
               {edition?.kicker ?? "DETECTIVE CAFE"}
+              {edition?.kickerLocal ? (
+                <span className="mt-1 block text-[0.62rem] tracking-[0.12em] text-[#c4b8a8] normal-case sm:text-[0.68rem]">
+                  {edition.kickerLocal}
+                </span>
+              ) : null}
             </p>
+
+            {cafe.statusLabel || cafe.statusLabelLocal ? (
+              <div
+                data-hero-status
+                className="mt-2.5 inline-flex max-w-full flex-col gap-0.5 border border-[#9a7b5a]/45 bg-[#12161a]/90 px-2.5 py-1.5 sm:flex-row sm:items-center sm:gap-2 sm:px-3"
+              >
+                {cafe.statusLabel ? (
+                  <span className="text-[0.52rem] tracking-[0.2em] text-[#c46a7a] uppercase sm:text-[0.55rem]">
+                    {cafe.statusLabel}
+                  </span>
+                ) : null}
+                {cafe.statusLabelLocal ? (
+                  <span className="text-[0.68rem] text-[#c4b8a8] sm:text-xs">
+                    {cafe.statusLabelLocal}
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
 
             <h1
               data-hero-title
               className={cn(
                 DISPLAY,
-                "mt-2 text-[clamp(1.9rem,8.4vw,2.55rem)] leading-[0.9] font-bold tracking-tight text-[#f4ebe3] sm:mt-3 sm:text-6xl md:text-7xl lg:text-[4.5rem]"
+                "mt-2.5 text-[clamp(1.55rem,7.2vw,2.35rem)] leading-[0.92] font-bold tracking-tight text-[#f4ebe3] sm:mt-3 sm:text-5xl md:text-6xl lg:text-[3.75rem]"
               )}
             >
-              {cafe.title}
+              {titleParts ? (
+                <>
+                  <span className="block text-[clamp(1.15rem,5.2vw,1.65rem)] font-semibold text-[#c4b8a8] sm:text-3xl md:text-4xl">
+                    {titleParts[0]}:
+                  </span>
+                  <span className="mt-0.5 block sm:mt-1">{titleParts[1]}</span>
+                </>
+              ) : (
+                cafe.title
+              )}
               {cafe.titleLocal ? (
                 <span
                   className={cn(
@@ -543,7 +664,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
               data-hero-tagline
               className={cn(
                 SERIF,
-                "mt-2.5 line-clamp-4 text-[0.82rem] leading-relaxed text-[#c4b8a8] sm:mt-4 sm:max-w-md sm:text-base"
+                "mt-2.5 text-[0.82rem] leading-relaxed text-[#c4b8a8] sm:mt-4 sm:max-w-lg sm:text-base"
               )}
             >
               {cafe.tagline}
@@ -551,7 +672,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
           </div>
 
           <div className="mt-auto mb-8 w-full sm:mt-6 sm:mb-0 sm:max-w-md lg:max-w-lg">
-            {cafe.schedule.label ? (
+            {schedule.label ? (
               <div data-hero-date>
                 <div className="relative overflow-hidden border border-[#9a7b5a]/35 bg-[#14100c]/92 backdrop-blur-sm">
                   <div
@@ -592,21 +713,21 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
                         "border-y border-[#9a7b5a]/30 px-4 py-3 pl-5 text-[clamp(1.55rem,7vw,2.55rem)] font-bold tracking-tight text-[#fff8f4] tabular-nums"
                       )}
                     >
-                      {cafe.schedule.label}
+                      {schedule.label}
                     </p>
                   )}
 
-                  {cafe.schedule.startsAt ? (
+                  {schedule.startsAt ? (
                     <CafeCountdown
-                      startsAt={cafe.schedule.startsAt}
-                      endsAt={cafe.schedule.endsAt}
+                      startsAt={schedule.startsAt}
+                      endsAt={schedule.endsAt}
                       embedded
                     />
                   ) : null}
 
                   <div className="bg-[#0c0a09] px-3 py-2 pl-4 sm:px-4 sm:pl-5">
                     <p className="mb-1 text-[0.5rem] tracking-[0.2em] text-[#c46a7a] uppercase sm:text-[0.55rem]">
-                      Sip Pulse
+                      Case Trace
                     </p>
                     <CaseEcg className="h-8 w-full sm:h-10" />
                   </div>
@@ -618,15 +739,6 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
               data-hero-cta
               className="mt-3 flex flex-wrap gap-2.5 sm:mt-6 sm:gap-3"
             >
-              <Link
-                href="#dispatch"
-                className={cn(
-                  buttonVariants({ size: "lg" }),
-                  "rounded-none border-transparent bg-[#a84d5f] text-[#f4ebe3] hover:bg-[#c46a7a]"
-                )}
-              >
-                เปิดเคส
-              </Link>
               {primaryCta ? (
                 <CtaLink cta={primaryCta} variant="outline" />
               ) : null}
@@ -660,10 +772,10 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
         className="border-y border-[#9a7b5a]/20 bg-[#0d1013] py-14 sm:py-16"
       >
         <SectionHead
-          eyebrow="Dispatch"
-          stamp="CONFIDENTIAL"
-          title="Window & Location"
-          titleLocal="กรอบเวลาและพิกัดเคส"
+          eyebrow={cafe.dispatch.eyebrow ?? "Dispatch"}
+          stamp={cafe.dispatch.stamp ?? "CONFIDENTIAL"}
+          title={cafe.dispatch.title}
+          titleLocal={cafe.dispatch.titleLocal}
         />
         {show.dispatch ? (
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-start lg:gap-8">
@@ -673,7 +785,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
                 <Clock className="mt-0.5 size-5 shrink-0 text-[#a84d5f]" />
                 <div>
                   <p className="text-[0.65rem] tracking-[0.24em] text-[#9a7b5a] uppercase">
-                    {cafe.schedule.label}
+                    {schedule.label}
                   </p>
                   <p
                     className={cn(
@@ -681,7 +793,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
                       "mt-2 text-base leading-snug text-[#f4ebe3] sm:text-lg"
                     )}
                   >
-                    {cafe.schedule.detail ?? "TBA"}
+                    {schedule.detail ?? "TBA"}
                   </p>
                 </div>
               </div>
@@ -689,7 +801,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
                 <MapPin className="mt-0.5 size-5 shrink-0 text-[#a84d5f]" />
                 <div>
                   <p className="text-[0.65rem] tracking-[0.24em] text-[#9a7b5a] uppercase">
-                    {cafe.location.label}
+                    {location.label}
                   </p>
                   <p
                     className={cn(
@@ -697,11 +809,11 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
                       "mt-2 text-base leading-snug text-[#f4ebe3] sm:text-lg"
                     )}
                   >
-                    {cafe.location.detail ?? "TBA"}
+                    {location.detail ?? "TBA"}
                   </p>
-                  {cafe.location.mapUrl ? (
+                  {location.mapUrl ? (
                     <Link
-                      href={cafe.location.mapUrl}
+                      href={location.mapUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="mt-3 inline-flex items-center gap-1.5 text-sm text-[#c46a7a] transition hover:text-[#f4ebe3]"
@@ -715,18 +827,18 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
             </div>
           </ScrollReveal>
 
-          {cafe.location.image ? (
+          {location.image ? (
             <ScrollReveal variant="soft" delay={0.06}>
               <figure className="mx-auto w-full max-w-[14rem] overflow-hidden border border-[#9a7b5a]/25 bg-[#12161a] lg:mx-0">
                 <button
                   type="button"
                   onClick={() => openLightbox("venue", 0)}
-                  aria-label={`ดูรูป: ${cafe.location.imageAlt ?? cafe.location.label}`}
+                  aria-label={`ดูรูป: ${location.imageAlt ?? location.label}`}
                   className="block w-full cursor-zoom-in text-left transition hover:opacity-95"
                 >
                   <ProtectedImage
-                    src={cafe.location.image}
-                    alt={cafe.location.imageAlt ?? cafe.location.label}
+                    src={location.image}
+                    alt={location.imageAlt ?? location.label}
                     className="aspect-[4/3] w-full object-cover opacity-90"
                   />
                 </button>
@@ -744,90 +856,29 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
         )}
       </Shell>
 
-      {/* ── 3. Photographic plates — compact contact sheet ── */}
-      {cafe.visuals && cafe.visuals.length > 0 ? (
-        <Shell id="plates" className="py-14 sm:py-16">
-          <SectionHead
-            eyebrow="Photographic Plates"
-            stamp="SAMPLE ART"
-            title="บรรยากาศ · สถานที่ · งานศิลป์"
-          />
-          {show.plates ? (
-          <div className="mt-7 grid grid-cols-2 gap-2 sm:mt-8 sm:grid-cols-3 sm:gap-3">
-            {cafe.visuals.map((visual, index) => (
-              <ScrollReveal
-                key={visual.id}
-                delay={Math.min(index * 0.04, 0.28)}
-                variant="soft"
-                className="min-w-0"
-              >
-                <figure className="group overflow-hidden border border-[#9a7b5a]/25 bg-[#12161a]">
-                  <button
-                    type="button"
-                    onClick={() => openLightbox("plates", index)}
-                    aria-label={`ดูรูป: ${visual.alt}`}
-                    className="relative block aspect-[4/3] w-full cursor-zoom-in overflow-hidden text-left"
-                  >
-                    <ProtectedImage
-                      src={visual.src}
-                      alt={visual.alt}
-                      className={cn(
-                        "h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]",
-                        visual.kind === "art" && "object-[center_18%]"
-                      )}
-                    />
-                  </button>
-                  <figcaption className="space-y-0.5 border-t border-[#9a7b5a]/20 px-2.5 py-2 sm:px-3">
-                    <span className="block text-[0.58rem] tracking-[0.16em] text-[#a84d5f] uppercase">
-                      {VISUAL_KIND_LABEL[visual.kind ?? "other"]} ·{" "}
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    {visual.caption ? (
-                      <span
-                        className={cn(
-                          SERIF,
-                          "line-clamp-1 text-xs text-[#c4b8a8]"
-                        )}
-                      >
-                        {visual.caption}
-                      </span>
-                    ) : null}
-                  </figcaption>
-                </figure>
-              </ScrollReveal>
-            ))}
-          </div>
-          ) : (
-            <div className="mt-7">
-              <CafeTopSecret titleLocal="แผ่นภาพ · ยังไม่เปิดเผย" />
-            </div>
-          )}
-        </Shell>
-      ) : null}
-
-      {/* ── 4. Day schedule ── */}
-      {cafe.daySchedule && cafe.daySchedule.items.length > 0 ? (
+      {/* ── 3. Day schedule ── */}
+      {daySchedule && daySchedule.items.length > 0 ? (
         <Shell
           id="day-schedule"
           className="border-y border-[#9a7b5a]/20 bg-[#0d1013]"
         >
           <SectionHead
-            eyebrow="Dossier · Timeline"
-            stamp="RESTRICTED"
-            title={cafe.daySchedule.title}
-            titleLocal={cafe.daySchedule.titleLocal}
+            eyebrow={daySchedule.eyebrow ?? "Dossier · Timeline"}
+            stamp={daySchedule.stamp ?? "RESTRICTED"}
+            title={daySchedule.title}
+            titleLocal={daySchedule.titleLocal}
           />
-          {cafe.daySchedule.dateLabel && show.daySchedule ? (
+          {daySchedule.dateLabel && show.daySchedule ? (
             <ScrollReveal variant="editorial" delay={0.05}>
               <p className="mt-4 text-sm tracking-[0.16em] text-[#9a7b5a] uppercase">
-                {cafe.daySchedule.dateLabel}
+                {daySchedule.dateLabel}
               </p>
             </ScrollReveal>
           ) : null}
 
           {show.daySchedule ? (
           <ol className="mt-10 border border-[#9a7b5a]/25">
-            {cafe.daySchedule.items.map((item, index) => (
+            {daySchedule.items.map((item, index) => (
               <ScrollReveal
                 key={`${item.time}-${item.title}`}
                 as="li"
@@ -879,63 +930,223 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
         </Shell>
       ) : null}
 
-      {/* ── 5. Clues ── */}
-      <Shell>
-        <SectionHead
-          eyebrow="Intelligence Brief"
-          stamp="CLUES"
-          title="จุดสังเกตของเคส"
-        />
-        {show.highlights ? (
-        <div
-          className="mt-10 grid gap-px border border-[#9a7b5a]/25 bg-[#9a7b5a]/25 sm:grid-cols-3"
-          role="list"
-        >
-          {cafe.highlights.map((item, index) => (
-            <ScrollReveal
-              key={item}
-              delay={index * 0.08}
-              variant="float"
-            >
-              <div
-                role="listitem"
-                className="h-full bg-[#12161a] px-5 py-8 sm:px-6"
-              >
-                <span className="text-[0.65rem] tracking-[0.24em] text-[#a84d5f] uppercase">
-                  Clue {String(index + 1).padStart(2, "0")}
-                </span>
-                <p
-                  className={cn(
-                    SERIF,
-                    "mt-4 text-base leading-relaxed text-[#d8d0c4] sm:text-lg"
-                  )}
-                >
-                  {item}
-                </p>
-              </div>
-            </ScrollReveal>
-          ))}
-        </div>
-        ) : (
-          <div className="mt-10">
-            <CafeTopSecret titleLocal="เบาะแส · ยังไม่เปิดเผย" />
-          </div>
-        )}
-      </Shell>
+      {/* ── 4. Operations briefing (doc §8) — promo images primary ── */}
+      {operations && operations.groups.length > 0 ? (
+        <Shell id="operations" className="py-14 sm:py-16">
+          <SectionHead
+            eyebrow={operations.eyebrow ?? "HQ Directive"}
+            stamp={operations.stamp ?? "BRIEFING 08"}
+            title={operations.title}
+            titleLocal={operations.titleLocal}
+          />
+          {show.operations ? (
+            <>
+              {operations.intro ? (
+                <ScrollReveal variant="editorial" delay={0.04}>
+                  <p
+                    className={cn(
+                      SERIF,
+                      "mt-5 max-w-3xl text-sm leading-relaxed text-[#c4b8a8] sm:text-base"
+                    )}
+                  >
+                    {operations.intro}
+                  </p>
+                </ScrollReveal>
+              ) : null}
+              <div className="mt-10 space-y-12 sm:space-y-14">
+                {operations.groups.map((group, groupIndex) => {
+                  const layout = group.layout ?? "promo";
+                  return (
+                    <ScrollReveal
+                      key={group.id}
+                      delay={Math.min(groupIndex * 0.05, 0.2)}
+                      variant="soft"
+                    >
+                      <section className="space-y-5">
+                        <header className="flex flex-wrap items-end justify-between gap-3 border-b border-[#9a7b5a]/25 pb-4">
+                          <div className="min-w-0">
+                            {group.code ? (
+                              <p className="text-[0.62rem] tracking-[0.22em] text-[#a84d5f] uppercase">
+                                Directive {group.code}
+                              </p>
+                            ) : null}
+                            <h3
+                              className={cn(
+                                SERIF,
+                                "mt-1 text-xl font-semibold text-[#f4ebe3] sm:text-2xl"
+                              )}
+                            >
+                              {group.title}
+                            </h3>
+                            {group.titleLocal ? (
+                              <p className="mt-1 text-sm text-[#c4b8a8]">
+                                {group.titleLocal}
+                              </p>
+                            ) : null}
+                          </div>
+                          <span className="text-[0.58rem] tracking-[0.16em] text-[#9a7b5a] uppercase">
+                            {group.items.length} plate
+                            {group.items.length === 1 ? "" : "s"}
+                          </span>
+                        </header>
+                        {group.detail ? (
+                          <p className="max-w-3xl text-sm leading-relaxed text-[#c4b8a8]/90 sm:text-base">
+                            {group.detail}
+                          </p>
+                        ) : null}
 
-      {/* ── 6. Menu ledger — portrait plates ready for photos ── */}
+                        {layout === "brief" ? (
+                          <ul className="space-y-3">
+                            {group.items.map((item, itemIndex) => {
+                              const lightboxIndex =
+                                lightboxGroups.operations.findIndex(
+                                  (entry) => entry.id === `ops-${item.id}`
+                                );
+                              return (
+                                <li
+                                  key={item.id}
+                                  className="grid gap-4 border border-[#9a7b5a]/30 bg-[#12161a]/70 p-3 sm:grid-cols-[7.5rem_1fr] sm:gap-5 sm:p-4"
+                                >
+                                  <OpsPromoMedia
+                                    item={item}
+                                    aspectClassName="aspect-[4/5]"
+                                    onOpen={
+                                      lightboxIndex >= 0
+                                        ? () =>
+                                            openLightbox(
+                                              "operations",
+                                              lightboxIndex
+                                            )
+                                        : undefined
+                                    }
+                                  />
+                                  <div className="min-w-0 self-center">
+                                    <span className="text-[0.58rem] tracking-[0.18em] text-[#9a7b5a] uppercase">
+                                      Lead{" "}
+                                      {String(itemIndex + 1).padStart(2, "0")}
+                                    </span>
+                                    <p
+                                      className={cn(
+                                        SERIF,
+                                        "mt-1 text-lg font-semibold text-[#f4ebe3]"
+                                      )}
+                                    >
+                                      {item.name}
+                                    </p>
+                                    {item.nameLocal ? (
+                                      <p className="mt-0.5 text-sm text-[#c4b8a8]">
+                                        {item.nameLocal}
+                                      </p>
+                                    ) : null}
+                                    {item.detail ? (
+                                      <p className="mt-2 text-sm leading-relaxed text-[#c4b8a8]/95">
+                                        {item.detail}
+                                      </p>
+                                    ) : null}
+                                  </div>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        ) : (
+                          <ul
+                            className={cn(
+                              "grid gap-3 sm:gap-4",
+                              group.items.length === 1
+                                ? "max-w-xl sm:grid-cols-1"
+                                : "sm:grid-cols-2"
+                            )}
+                          >
+                            {group.items.map((item, itemIndex) => {
+                              const lightboxIndex =
+                                lightboxGroups.operations.findIndex(
+                                  (entry) => entry.id === `ops-${item.id}`
+                                );
+                              return (
+                                <li
+                                  key={item.id}
+                                  className="flex list-none flex-col overflow-hidden border border-[#9a7b5a]/30 bg-[#12161a]"
+                                >
+                                  <OpsPromoMedia
+                                    item={item}
+                                    aspectClassName="aspect-[4/5] sm:aspect-[3/4]"
+                                    onOpen={
+                                      lightboxIndex >= 0
+                                        ? () =>
+                                            openLightbox(
+                                              "operations",
+                                              lightboxIndex
+                                            )
+                                        : undefined
+                                    }
+                                  />
+                                  <div className="flex flex-1 flex-col border-t border-[#9a7b5a]/20 px-3.5 py-3.5 sm:px-4 sm:py-4">
+                                    <div className="flex items-center justify-between gap-2">
+                                      <span className="text-[0.58rem] tracking-[0.18em] text-[#a84d5f] uppercase">
+                                        Plate{" "}
+                                        {String(itemIndex + 1).padStart(
+                                          2,
+                                          "0"
+                                        )}
+                                      </span>
+                                      {item.caption ? (
+                                        <span className="truncate text-[0.55rem] tracking-[0.12em] text-[#9a7b5a]/85 uppercase">
+                                          {item.caption}
+                                        </span>
+                                      ) : null}
+                                    </div>
+                                    <h4
+                                      className={cn(
+                                        SERIF,
+                                        "mt-2 text-lg font-semibold text-[#f4ebe3] sm:text-xl"
+                                      )}
+                                    >
+                                      {item.name}
+                                    </h4>
+                                    {item.nameLocal ? (
+                                      <p className="mt-0.5 text-sm text-[#c4b8a8]">
+                                        {item.nameLocal}
+                                      </p>
+                                    ) : null}
+                                    {item.detail ? (
+                                      <p className="mt-2 text-xs leading-relaxed text-[#c4b8a8]/90 sm:text-sm">
+                                        {item.detail}
+                                      </p>
+                                    ) : null}
+                                  </div>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        )}
+                      </section>
+                    </ScrollReveal>
+                  );
+                })}
+              </div>
+            </>
+          ) : (
+            <div className="mt-10">
+              <CafeTopSecret titleLocal="ประกาศจากกองอำนวยการ · ยังไม่เปิดเผย" />
+            </div>
+          )}
+        </Shell>
+      ) : null}
+
+      {/* ── 5. Menu ledger ── */}
       <Shell
         id="menu"
         className="border-y border-[#9a7b5a]/20 bg-[#0d1013]"
       >
         <SectionHead
-          eyebrow="Evidence Ledger · Menu"
-          stamp="EXHIBIT A"
-          title="บันทึกเมนู"
+          eyebrow={signatureMenu.eyebrow ?? "Evidence Ledger"}
+          stamp={signatureMenu.stamp ?? "EXHIBITS A–C"}
+          title={signatureMenu.title}
+          titleLocal={signatureMenu.titleLocal}
         />
         {show.signatureMenu ? (
         <ul className="mt-8 space-y-2.5 sm:mt-10 sm:space-y-3">
-          {cafe.menu.map((item, index) => (
+          {signatureMenu.items.map((item, index) => (
             <ScrollReveal
               key={item.id}
               as="li"
@@ -944,7 +1155,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
               className="grid list-none gap-4 border border-[#9a7b5a]/25 bg-[#12161a]/60 p-3.5 sm:grid-cols-[5.5rem_8.5rem_1fr_auto] sm:items-center sm:gap-7 sm:p-5"
             >
               <p className="text-[0.62rem] tracking-[0.18em] text-[#9a7b5a] uppercase sm:text-[0.65rem] sm:tracking-[0.2em]">
-                Ex. {String(index + 1).padStart(2, "0")}
+                Ex. {MENU_EXHIBIT_LETTERS[index] ?? String(index + 1)}
               </p>
               <CafeThumb
                 src={item.image}
@@ -998,13 +1209,13 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
             />
           </div>
         )}
-        {cafe.otherMenu && cafe.otherMenu.items.length > 0 ? (
+        {venueMenu && venueMenu.items.length > 0 ? (
           show.venueMenu ? (
             <CafeVenueMenuBook
-              menu={cafe.otherMenu}
-              venueLabel={cafe.location.label}
-              venueImage={cafe.location.image}
-              venueImageAlt={cafe.location.imageAlt}
+              menu={venueMenu}
+              venueLabel={location.label}
+              venueImage={location.image}
+              venueImageAlt={location.imageAlt}
               onZoom={(index) => openLightbox("otherMenu", index)}
             />
           ) : (
@@ -1016,16 +1227,17 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
       </Shell>
 
       {/* ── 7. Goods — mixed proportions ── */}
-      {cafe.goods && cafe.goods.length > 0 ? (
+      {goods && goods.items.length > 0 ? (
         <Shell id="goods">
           <SectionHead
-            eyebrow="Recovered Property"
-            stamp="FOR HONEY ONLY"
-            title="ของที่ระลึก"
+            eyebrow={goods.eyebrow ?? "Recovered Property"}
+            stamp={goods.stamp ?? "CLUE DOSSIER"}
+            title={goods.title}
+            titleLocal={goods.titleLocal}
           />
           {show.goods ? (
           <ul className="mt-7 grid grid-cols-2 gap-2 sm:mt-8 sm:gap-3 lg:grid-cols-3">
-            {cafe.goods.map((item, index) => (
+            {goods.items.map((item, index) => (
               <ScrollReveal
                 key={item.id}
                 as="li"
@@ -1070,7 +1282,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
                       Item {String(index + 1).padStart(2, "0")}
                     </span>
                     <span className="text-[0.55rem] tracking-[0.14em] text-[#9a7b5a]/80 uppercase">
-                      Recovered
+                      {index === 0 ? "Key Clue" : "Clue"}
                     </span>
                   </div>
                   <h3
@@ -1107,13 +1319,14 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
       <Shell className="border-t border-[#9a7b5a]/20 bg-[#0d1013]">
         <div className="mx-auto max-w-2xl">
           <SectionHead
-            eyebrow="Closing Note"
-            stamp="END OF EDITION"
-            title="สรุปฉบับนี้"
+            eyebrow={closing.eyebrow ?? "Closing Note"}
+            stamp={closing.stamp ?? "END OF EDITION"}
+            title={closing.title}
+            titleLocal={closing.titleLocal}
           />
           {show.closing ? (
             <>
-          {cafe.body.map((paragraph, index) => (
+          {closing.body.map((paragraph, index) => (
             <ScrollReveal
               key={paragraph.slice(0, 32)}
               delay={index * 0.06}
@@ -1132,7 +1345,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
 
           <ScrollReveal variant="float" delay={0.1}>
             <div className="mt-10 flex flex-wrap gap-3">
-              {cafe.ctas.map((cta, index) => (
+              {(closing.ctas ?? []).map((cta, index) => (
                 <CtaLink
                   key={cta.url + cta.label}
                   cta={cta}
@@ -1142,10 +1355,10 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
             </div>
           </ScrollReveal>
 
-          {cafe.disclaimer ? (
+          {closing.disclaimer ? (
             <ScrollReveal variant="editorial" delay={0.12}>
               <p className="mt-10 border-t border-[#9a7b5a]/25 pt-5 text-xs leading-relaxed text-[#9a7b5a]/85">
-                {cafe.disclaimer}
+                {closing.disclaimer}
               </p>
             </ScrollReveal>
           ) : null}

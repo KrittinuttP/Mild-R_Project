@@ -332,7 +332,7 @@ export interface CafeMenuItem {
 }
 
 /** Venue / house menu plates (SOCIEFEE × CHOUXSTORY), separate from signature drinks */
-export interface CafeOtherMenuItem {
+export interface CafeVenueMenuItem {
   id: string;
   image: string;
   imageAlt?: string;
@@ -340,13 +340,8 @@ export interface CafeOtherMenuItem {
   captionLocal?: string;
 }
 
-export interface CafeOtherMenu {
-  title: string;
-  titleLocal?: string;
-  stamp?: string;
-  note?: string;
-  items: CafeOtherMenuItem[];
-}
+/** @deprecated Use CafeVenueMenuItem */
+export type CafeOtherMenuItem = CafeVenueMenuItem;
 
 export interface CafeGoodsItem {
   id: string;
@@ -364,23 +359,34 @@ export interface CafeScheduleItem {
   detail?: string;
 }
 
-export interface CafeDaySchedule {
+/** Section heading chrome on `/cafe` (eyebrow, stamp, bilingual title) */
+export interface CafeSectionHead {
+  eyebrow?: string;
+  stamp?: string;
   title: string;
   titleLocal?: string;
-  dateLabel?: string;
-  items: CafeScheduleItem[];
 }
 
-/** Broadsheet / dossier chrome for `/cafe` */
-export interface CafeEdition {
-  /** e.g. "The Honey Pulse Gazette" */
-  masthead: string;
-  /** e.g. "SPECIAL EDITION" */
-  kicker?: string;
-  /** e.g. "CASE · MR-HP-001" */
-  caseNo?: string;
-  /** e.g. "Vol. I · No. 1 · Mild-R Fanclub" */
-  dateline?: string;
+export interface CafeScheduleWindow {
+  label: string;
+  detail?: string;
+  /** ISO datetime for countdown (doors open), e.g. 2026-11-29T10:00:00+07:00 */
+  startsAt?: string;
+  /** ISO datetime when the case day ends */
+  endsAt?: string;
+}
+
+export interface CafeLocation {
+  label: string;
+  detail?: string;
+  mapUrl?: string;
+  image?: string;
+  imageAlt?: string;
+}
+
+export interface CafeDispatchSection extends CafeSectionHead {
+  schedule: CafeScheduleWindow;
+  location: CafeLocation;
 }
 
 export type CafeVisualKind = "atmosphere" | "location" | "art" | "other";
@@ -394,44 +400,109 @@ export interface CafeVisual {
   kind?: CafeVisualKind;
 }
 
-/** Dedicated cafe promo page (`/cafe`) */
+export interface CafePlatesSection extends CafeSectionHead {
+  items: CafeVisual[];
+}
+
+export interface CafeDayScheduleSection extends CafeSectionHead {
+  dateLabel?: string;
+  items: CafeScheduleItem[];
+}
+
+/** @deprecated Use CafeDayScheduleSection */
+export type CafeDaySchedule = CafeDayScheduleSection;
+
+export interface CafeOperationsItem {
+  id: string;
+  name: string;
+  nameLocal?: string;
+  detail?: string;
+  /** Promo art path under /public — primary visual for HQ */
+  image?: string;
+  imageAlt?: string;
+  /** Short label under the image (optional) */
+  caption?: string;
+}
+
+export interface CafeOperationsGroup {
+  id: string;
+  code?: string;
+  title: string;
+  titleLocal?: string;
+  detail?: string;
+  /**
+   * promo = image-first cards (default for teaser groups)
+   * brief = compact rows with optional thumbnail
+   */
+  layout?: "promo" | "brief";
+  items: CafeOperationsItem[];
+}
+
+/** Doc §8 — HQ briefing; promo images are the primary content */
+export interface CafeOperationsSection extends CafeSectionHead {
+  intro?: string;
+  groups: CafeOperationsGroup[];
+}
+
+export interface CafeSignatureMenuSection extends CafeSectionHead {
+  items: CafeMenuItem[];
+}
+
+export interface CafeVenueMenuSection extends CafeSectionHead {
+  note?: string;
+  items: CafeVenueMenuItem[];
+}
+
+/** @deprecated Use CafeVenueMenuSection */
+export type CafeOtherMenu = CafeVenueMenuSection;
+
+export interface CafeGoodsSection extends CafeSectionHead {
+  items: CafeGoodsItem[];
+}
+
+export interface CafeClosingSection extends CafeSectionHead {
+  body: string[];
+  ctas?: ProjectCta[];
+  disclaimer?: string;
+}
+
+/** Broadsheet / dossier chrome for `/cafe` */
+export interface CafeEdition {
+  /** e.g. "The Honey Pulse Gazette" */
+  masthead: string;
+  /** e.g. "SPECIAL EDITION" */
+  kicker?: string;
+  kickerLocal?: string;
+  /** e.g. "CASE · MR-HP-001" */
+  caseNo?: string;
+  /** e.g. "Vol. I · No. 1 · Mild-R Fanclub" */
+  dateline?: string;
+}
+
+/**
+ * Dedicated cafe promo page (`/cafe`).
+ * Content sections mirror Supabase visibility keys:
+ * dispatch · daySchedule · operations · signatureMenu · venueMenu · goods · closing
+ */
 export interface CafePage {
   title: string;
   titleLocal?: string;
   tagline: string;
   status: ProjectStatus;
   statusLabel?: string;
+  statusLabelLocal?: string;
   /** Newspaper / Sherlock editorial frame */
   edition?: CafeEdition;
   heroImage: string;
   heroAlt?: string;
-  /** Atmosphere, venue, sample art (not the home Gallery board) */
-  visuals?: CafeVisual[];
-  schedule: {
-    label: string;
-    detail?: string;
-    /** ISO datetime for countdown (doors open), e.g. 2026-11-29T10:00:00+07:00 */
-    startsAt?: string;
-    /** ISO datetime when the case day ends */
-    endsAt?: string;
-  };
-  location: {
-    label: string;
-    detail?: string;
-    mapUrl?: string;
-    image?: string;
-    imageAlt?: string;
-  };
-  /** In-day activity timeline */
-  daySchedule?: CafeDaySchedule;
-  highlights: string[];
-  menu: CafeMenuItem[];
-  /** House menu booklet (photos), opened as a detective dossier */
-  otherMenu?: CafeOtherMenu;
-  goods?: CafeGoodsItem[];
-  body: string[];
-  ctas: ProjectCta[];
-  disclaimer?: string;
+  dispatch: CafeDispatchSection;
+  daySchedule?: CafeDayScheduleSection;
+  /** HQ briefing (doc §8) — replaces plates + highlights */
+  operations?: CafeOperationsSection;
+  signatureMenu: CafeSignatureMenuSection;
+  venueMenu?: CafeVenueMenuSection;
+  goods?: CafeGoodsSection;
+  closing: CafeClosingSection;
 }
 
 export interface VtuberProfile {

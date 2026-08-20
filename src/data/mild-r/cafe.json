@@ -1,140 +1,235 @@
 {
-  "title": "Honey Cafe",
-  "titleLocal": "คาเฟ่ฮันนี่",
-  "tagline": "รายงานพิเศษจากห้องเคสของ Mild-R — คาเฟ่ลึกลับธีม *** พร้อมเมนูพิเศษ โซนถ่ายรูป และของที่ระลึกสำหรับฮันนี่ที่มาร่วมงาน",
+  "title": "Mild-R: The Unsolved Mystery Cafe",
+  "titleLocal": "คาเฟ่ปริศนาที่ยังไม่คลี่คลาย",
+  "tagline": "รายงานพิเศษจากสถานที่เกิดเหตุ: คาเฟ่ลึกลับแห่งนี้ เชิญชวนนักสืบฮันนี่ทุกท่าน มาร่วมไขปริศนาจากหลากหลายเมนูในงาน พร้อมช่วยกันคลี่คลายคดีต่างๆ และเก็บกู้หลักฐานจากสถานที่เกิดเหตุนี้",
   "status": "upcoming",
-  "statusLabel": "CASE DATE SET",
+  "statusLabel": "CRIME SCENE SECURED",
+  "statusLabelLocal": "พื้นที่เกิดเหตุถูกควบคุม",
   "edition": {
     "masthead": "The Honey Pulse Gazette",
-    "kicker": "Detective Cafe",
+    "kicker": "Unsolved Mystery Cafe",
+    "kickerLocal": "คาเฟ่ลึกลับ",
     "caseNo": "CASE · MR-HP-001",
     "dateline": "Vol. I · No. 1 · Mild-R Fanclub"
   },
   "heroImage": "/assets/mild/kv/Mild-R_Name_Art.png",
-  "heroAlt": "Mild-R key visual — Honey Pulse Cafe sample art",
-  "visuals": [
-    {
-      "id": "atmosphere-floor",
-      "src": "/assets/images/gallery-01.svg",
-      "alt": "บรรยากาศร้าน (placeholder)",
-      "caption": "Atmosphere · cafe floor",
-      "kind": "atmosphere"
+  "heroAlt": "Mild-R key visual — The Unsolved Mystery Cafe",
+  "dispatch": {
+    "eyebrow": "Dispatch",
+    "stamp": "CONFIDENTIAL",
+    "title": "Crime Scene Details & Timeframe",
+    "titleLocal": "ข้อมูลสถานที่และเวลาเกิดเหตุ",
+    "schedule": {
+      "label": "2026 · 11 · 29",
+      "detail": "10:00 – 18:00",
+      "startsAt": "2026-11-29T10:00:00+07:00",
+      "endsAt": "2026-11-29T18:00:00+07:00"
     },
-    {
-      "id": "atmosphere-photo-zone",
-      "src": "/assets/images/gallery-02.svg",
-      "alt": "โซนถ่ายรูป (placeholder)",
-      "caption": "Atmosphere · photo zone",
-      "kind": "atmosphere"
-    },
-    {
-      "id": "location-exterior",
-      "src": "/assets/images/gallery-03.svg",
-      "alt": "หน้าตาสถานที่ (placeholder)",
-      "caption": "Location · venue plate",
-      "kind": "location"
-    },
-    {
-      "id": "art-sample",
-      "src": "/assets/mild/kv/Mild-R_Name_Art.png",
-      "alt": "Sample art จาก Mild-R KV",
-      "caption": "Art · Mild-R KV sample",
-      "kind": "art"
+    "location": {
+      "label": "SOCIEFEE X CHOUXSTORY",
+      "detail": "MRT หัวลำโพง (Exit 2)",
+      "image": "/assets/cafe/location/CHOUXSTORY.jpg",
+      "imageAlt": "SOCIEFEE × CHOUXSTORY"
     }
-  ],
-  "schedule": {
-    "label": "2026 · 11 · 29",
-    "detail": "10:00 – 18:00",
-    "startsAt": "2026-11-29T10:00:00+07:00",
-    "endsAt": "2026-11-29T18:00:00+07:00"
-  },
-  "location": {
-    "label": "SOCIEFEE X CHOUXSTORY",
-    "detail": "MRT หัวลำโพง (Exit 2)",
-    "image": "/assets/cafe/location/CHOUXSTORY.jpg",
-    "imageAlt": "SOCIEFEE × CHOUXSTORY"
   },
   "daySchedule": {
-    "title": "Daily Schedule",
-    "titleLocal": "ตารางกิจกรรมในวัน",
+    "eyebrow": "Dossier · Timeline",
+    "stamp": "RESTRICTED",
+    "title": "Case Incident Log",
+    "titleLocal": "บันทึกลำดับเหตุการณ์",
     "dateLabel": "2026 · 11 · 29",
     "items": [
       {
         "time": "10:00",
-        "title": "Doors open",
-        "titleLocal": "เปิดประตู",
-        "detail": "เช็กอินและรับแผนที่เคสย่อ"
+        "title": "Investigation Commences",
+        "titleLocal": "เริ่มต้นการสืบสวน",
+        "detail": "อนุญาตให้นักสืบฮันนี่เข้าสู่พื้นที่เกิดเหตุอย่างเป็นทางการ เพื่อรับแฟ้มคดีลับและเตรียมความพร้อมสำหรับปฏิบัติการ"
       },
       {
         "time": "10:30",
-        "title": "First pour",
-        "titleLocal": "รอบเครื่องดื่มแรก",
-        "detail": "เปิดเมนูซิกเนเจอร์ Heart Cure Latte"
+        "title": "Evidence & Menu Analysis",
+        "titleLocal": "ตรวจสอบวัตถุพยานและไขปริศนา",
+        "detail": "เปิดพื้นที่ให้ทีมนักสืบร่วมกันตรวจสอบและไขปริศนาจากหลากหลายเมนูที่ซ่อนเบาะแสสำคัญของคดีเอาไว้"
+      },
+      {
+        "time": "12:00",
+        "title": "Clue Tracking & Decryption",
+        "titleLocal": "แกะรอยและถอดรหัสเบาะแส",
+        "detail": "ช่วงเวลาสำหรับการวิเคราะห์ข้อมูล ชิ้นส่วนปริศนา และเชื่อมโยงหลักฐานต่างๆ ที่ถูกค้นพบภายในสถานที่เกิดเหตุ"
       },
       {
         "time": "13:00",
-        "title": "Photo zone",
-        "titleLocal": "โซนถ่ายรูป",
-        "detail": "พร็อพนักสืบ / มุมหลักฐานหัวใจ"
+        "title": "Scene Reconstruction",
+        "titleLocal": "ลงพื้นที่จำลองเหตุการณ์",
+        "detail": "เปิดโซนบันทึกภาพ พร้อมจุดทำเครื่องหมายหลักฐาน (Evidence Markers) เพื่อให้นักสืบฮันนี่ได้บันทึกภาพสถานที่เกิดเหตุและร่องรอยคดี"
       },
       {
         "time": "15:00",
-        "title": "Goods drop",
-        "titleLocal": "ปล่อยของที่ระลึก",
-        "detail": "อะคริลิกและโฟโต้การ์ด (จำนวนจำกัด)"
-      },
-      {
-        "time": "17:30",
-        "title": "Last order",
-        "titleLocal": "ออเดอร์สุดท้าย",
-        "detail": "รับเครื่องดื่มและของหวานรอบท้าย"
+        "title": "Case Review & Evidence Recovery",
+        "titleLocal": "สรุปผลคดีและเก็บกู้หลักฐาน",
+        "detail": "สรุปผลการสืบสวนประจำวัน และเปิดให้นักสืบทุกท่านดำเนินการเก็บกู้หลักฐาน (แฟ้มรวบรวมเบาะแส) กลับไปเพื่อใช้ประกอบแฟ้มคดีส่วนตัว"
       },
       {
         "time": "18:00",
-        "title": "Case closed",
-        "titleLocal": "ปิดเคส",
-        "detail": "ปิดร้านและเก็บหลักฐานประจำวัน"
+        "title": "Case Closed",
+        "titleLocal": "ปิดแฟ้มคดี",
+        "detail": "เคลียร์พื้นที่เกิดเหตุ เก็บกู้แนวเทปเตือนภัย และยุติภารกิจการสืบสวนอย่างเป็นทางการ"
       }
     ]
   },
-  "highlights": [
-    "ซิกเนเจอร์ดริ้งก์ธีมหัวใจ · รักษาหัวใจ",
-    "โซนถ่ายรูปพร็อพบรรยากาศนักสืบ",
-    "Goods ชิ้นพิเศษเฉพาะช่วงอีเวนต์"
-  ],
-  "menu": [
-    {
-      "id": "heart-cure-latte",
-      "name": "Heart Cure Latte",
-      "nameLocal": "ลาเต้น้ำตาฮันนี่",
-      "description": "ซิกเนเจอร์โทนกุหลาบหม่น — รายละเอียดรสชาติจะถูกเปิดเผยใกล้เปิดงาน",
-      "priceLabel": "CLASSIFIED",
-      "image": "/assets/images/gallery-01.svg",
-      "imageAlt": "Heart Cure Latte (placeholder)"
-    },
-    {
-      "id": "pulse-soda",
-      "name": "Pulse Soda",
-      "nameLocal": "พัลส์โซดา",
-      "description": "เครื่องดื่มซ่าเบาๆ จังหวะหัวใจใต้แสงไฟคาเฟ่",
-      "priceLabel": "CLASSIFIED",
-      "image": "/assets/images/gallery-02.svg",
-      "imageAlt": "Pulse Soda (placeholder)"
-    },
-    {
-      "id": "honey-parfait",
-      "name": "Honey Pulse Parfait",
-      "nameLocal": "ฮันนี่พัลส์พาเฟต์",
-      "description": "ของหวานโทนครีมหม่น ถ่ายรูปแล้วเหมือนหลักฐานชิ้นสวย",
-      "priceLabel": "CLASSIFIED",
-      "image": "/assets/images/gallery-04.svg",
-      "imageAlt": "Honey Pulse Parfait (placeholder)"
-    }
-  ],
-  "otherMenu": {
+  "operations": {
+    "eyebrow": "HQ Directive",
+    "stamp": "BRIEFING 08",
+    "title": "Operations Briefing",
+    "titleLocal": "ประกาศจากกองอำนวยการสืบสวน",
+    "intro": "สรุปแนวทางการประยุกต์ใช้แผ่นภาพสถานที่เกิดเหตุและจุดสังเกตของเคส เพื่อขับเคลื่อนแคมเปญและกิจกรรมสำหรับทีมนักสืบฮันนี่",
+    "groups": [
+      {
+        "id": "teasers",
+        "code": "8.1",
+        "title": "Leaked Evidence Teasers",
+        "titleLocal": "แฟ้มภาพหลุดเรียกน้ำย่อย",
+        "detail": "ใช้คอนเซปต์ภาพเพื่อโปรโมตล่วงหน้าโดยไม่ต้องรอภาพสถานที่จริง",
+        "layout": "promo",
+        "items": [
+          {
+            "id": "caution-tape",
+            "name": "The Caution Tape",
+            "nameLocal": "ประกาศควบคุมพื้นที่",
+            "detail": "ปล่อยภาพกราฟิกขึงเทปเตือนภัยคาดทับอาร์ตเวิร์ก เพื่อแจ้งเตือนพิกัดและเวลาเปิดแฟ้มคดี",
+            "image": "/assets/cafe/operations/caution-tape.jpg",
+            "imageAlt": "The Caution Tape · ประกาศควบคุมพื้นที่",
+            "caption": "Teaser · Caution Tape"
+          },
+          {
+            "id": "evidence-board",
+            "name": "The Evidence Board",
+            "nameLocal": "สปอยล์เบาะแส",
+            "detail": "ปล่อยภาพจำลองกระดานโยงเส้นด้ายเพื่อสปอยล์เงาเสบียงและของแจก กระตุ้นการทายปริศนาก่อนลงพื้นที่",
+            "image": "/assets/cafe/operations/evidence-board.jpg",
+            "imageAlt": "The Evidence Board · สปอยล์เบาะแส",
+            "caption": "Teaser · Evidence Board"
+          }
+        ]
+      },
+      {
+        "id": "field-ops",
+        "code": "8.2",
+        "title": "Field Operations",
+        "titleLocal": "ภารกิจสืบสวนหน้างาน",
+        "detail": "เปลี่ยนพร็อพตกแต่งให้เป็นกิจกรรมที่ผู้เข้าร่วมมีส่วนร่วมได้",
+        "layout": "promo",
+        "items": [
+          {
+            "id": "evidence-board-mission",
+            "name": "Evidence Board Mission",
+            "nameLocal": "ภารกิจกระดานเบาะแส",
+            "detail": "เปิดพื้นที่ให้นักสืบเขียนโพสต์อิตข้อความถึงเป้าหมาย (Mild-R) แล้วนำมาแปะเชื่อมโยงเส้นด้ายบนกระดาน",
+            "image": "/assets/cafe/operations/field-evidence-board.jpg",
+            "imageAlt": "ภารกิจกระดานเบาะแส",
+            "caption": "Field · Evidence Board"
+          },
+          {
+            "id": "case-file-stamp-rally",
+            "name": "Secret Case File Rally",
+            "nameLocal": "แฟ้มคดีลับนำทาง",
+            "detail": "เปลี่ยนแฟ้มคดีหน้างานให้เป็นใบสะสมตราประทับ (Stamp Rally) เพื่อทำภารกิจชิมเสบียงหรือถ่ายภาพแลกของรางวัล",
+            "image": "/assets/cafe/operations/field-stamp-rally.jpg",
+            "imageAlt": "แฟ้มคดีลับ Stamp Rally",
+            "caption": "Field · Stamp Rally"
+          }
+        ]
+      },
+      {
+        "id": "bounties",
+        "code": "8.3",
+        "title": "Investigator Bounties",
+        "titleLocal": "สิทธิพิเศษและเสบียงสนับสนุน",
+        "detail": "ใช้กิมมิกสืบสวนกระตุ้นยอดขายและการเตรียมตัว",
+        "layout": "promo",
+        "items": [
+          {
+            "id": "costume-clearance",
+            "name": "Disguise Privilege",
+            "nameLocal": "สิทธิพิเศษจากการพรางตัว",
+            "detail": "แต่งกายเข้าธีม (เช่น เสื้อโค้ท หมวกนักสืบ แว่นขยาย) เช็กอินเพื่อรับเบาะแสชิ้นลับหรืออัปเกรดเสบียง",
+            "image": "/assets/cafe/operations/bounty-disguise.jpg",
+            "imageAlt": "สิทธิพิเศษจากการพรางตัว",
+            "caption": "Bounty · Disguise"
+          },
+          {
+            "id": "preorder-provisions",
+            "name": "Pre-order Provisions",
+            "nameLocal": "สั่งจองเสบียงล่วงหน้า",
+            "detail": "จองชุดเสบียงล่วงหน้าเพื่อการันตีสิทธิ์รับแฟ้มคดีลับและตราประทับพิเศษทันทีที่รายงานตัว",
+            "image": "/assets/cafe/operations/bounty-preorder.jpg",
+            "imageAlt": "สั่งจองเสบียงล่วงหน้า",
+            "caption": "Bounty · Pre-order"
+          }
+        ]
+      },
+      {
+        "id": "social",
+        "code": "8.4",
+        "title": "Social Intelligence",
+        "titleLocal": "รหัสลับเครือข่ายสังคม",
+        "detail": "ภารกิจออนไลน์เชื่อมโยงพื้นที่เกิดเหตุกับเครือข่ายนักสืบฮันนี่",
+        "layout": "promo",
+        "items": [
+          {
+            "id": "case-hashtag",
+            "name": "Case Hashtag Mission",
+            "nameLocal": "ภารกิจแฮชแท็กประจำคดี",
+            "detail": "ถ่ายภาพจุดต่างๆ ในงานโพสต์ลง X พร้อมติดแฮชแท็กเพื่อปลดล็อกแฟ้มภาพดิจิทัล (Digital Wallpaper) หรือลุ้นรับของกลางหลังปิดคดี",
+            "image": "/assets/cafe/operations/social-hashtag.jpg",
+            "imageAlt": "ภารกิจแฮชแท็กประจำคดี",
+            "caption": "Social · Hashtag"
+          }
+        ]
+      }
+    ]
+  },
+  "signatureMenu": {
+    "eyebrow": "Evidence Ledger",
+    "stamp": "EXHIBITS A–C",
+    "title": "Investigator's Provisions",
+    "titleLocal": "แฟ้มรายการเสบียงนักสืบ",
+    "items": [
+      {
+        "id": "unsolved-latte",
+        "name": "The Unsolved Latte",
+        "nameLocal": "ลาเต้แฟ้มปริศนา",
+        "description": "เสบียงเครื่องดื่มซิกเนเจอร์ประจำคดีที่รอให้นักสืบฮันนี่มาวิเคราะห์รสสัมผัสที่ซ่อนเร้น",
+        "priceLabel": "CLASSIFIED",
+        "image": "/assets/images/gallery-01.svg",
+        "imageAlt": "The Unsolved Latte (placeholder)"
+      },
+      {
+        "id": "alibi-soda",
+        "name": "Alibi Soda",
+        "nameLocal": "โซดาคำให้การ",
+        "description": "เสบียงเครื่องดื่มเติมความสดชื่น จำลองขึ้นเพื่อสนับสนุนการแกะรอยและอำนวยความสะดวกในการคลี่คลายคดี",
+        "priceLabel": "CLASSIFIED",
+        "image": "/assets/images/gallery-02.svg",
+        "imageAlt": "Alibi Soda (placeholder)"
+      },
+      {
+        "id": "investigator-parfait",
+        "name": "The Investigator's Parfait",
+        "nameLocal": "พาเฟต์นักสืบฮันนี่",
+        "description": "เสบียงของหวานซึ่งเป็นเป้าหมายชิ้นสุดท้าย ที่นักสืบทุกท่านต้องร่วมกันพิสูจน์รสชาติก่อนปิดแฟ้มคดี",
+        "priceLabel": "CLASSIFIED",
+        "image": "/assets/images/gallery-04.svg",
+        "imageAlt": "The Investigator's Parfait (placeholder)"
+      }
+    ]
+  },
+  "venueMenu": {
+    "eyebrow": "Venue Menu",
+    "stamp": "HOUSE MENU",
     "title": "Venue Menu",
     "titleLocal": "เมนูร้าน",
-    "note": "เมนูปกติของ SOCIEFEE × CHOUXSTORY — นอกเหนือซิกเนเจอร์ Mild-R · เปิดแฟ้มเพื่อพลิกดูเมนู",
+    "note": "เมนูปกติของ SOCIEFEE × CHOUXSTORY — นอกเหนือเสบียงนักสืบ Mild-R · เปิดแฟ้มเพื่อพลิกดูเมนู",
     "items": [
       {
         "id": "menu-1",
@@ -180,33 +275,45 @@
       }
     ]
   },
-  "goods": [
-    {
-      "id": "acrylic-stand",
-      "name": "Acrylic Stand",
-      "nameLocal": "อะคริลิกสแตนด์",
-      "description": "วัตถุพยานสะสมธีมคาเฟ่ — รายการจริงประกาศก่อนขาย",
-      "image": "/assets/images/gallery-04.svg",
-      "imageAlt": "Acrylic stand (placeholder)"
-    },
-    {
-      "id": "photo-card",
-      "name": "Photo Card Set",
-      "nameLocal": "ชุดโฟโต้การ์ด",
-      "description": "ชุดรูปที่ระลึกสำหรับฮันนี่ที่ร่วมเปิดเคส",
-      "image": "/assets/mild/kv/Mild-R_Name_Art.png",
-      "imageAlt": "Photo card set sample from Mild-R KV"
-    }
-  ],
-  "body": [
-    "Honey Pulse Cafe คือโปรเจกต์คาเฟ่ที่แฟนคลับ Honeycomb จัดทำเองภายใต้ธีม Mild-R — บรรยากาศนักสืบในห้องเคส แต่ยังคงหัวใจของฮันนี่ไว้",
-    "เคสถูกกำหนดเปิดวันที่ 2026 · 11 · 29 เวลา 10:00–18:00 ที่ SOCIEFEE × CHOUXSTORY (MRT หัวลำโพง Exit 2) · ติดตามประกาศเพิ่มเติมได้ที่ @Mild_Honeycomb"
-  ],
-  "ctas": [
-    {
-      "label": "ติดตามข่าวคาเฟ่บน X",
-      "url": "https://x.com/Mild_Honeycomb"
-    }
-  ],
-  "disclaimer": "คาเฟ่และเว็บโปรโมทนี้เป็นงานแฟนเมดที่แฟนคลับจัดทำเอง — ไม่ใช่ประกาศทางการของ Mild-R / เอเจนซี · รายละเอียดอีเวนต์อาจเปลี่ยน · รูปบางส่วนเป็น placeholder / sample art"
+  "goods": {
+    "eyebrow": "Recovered Property",
+    "stamp": "CLUE DOSSIER",
+    "title": "The Clue Dossier",
+    "titleLocal": "แฟ้มรวบรวมเบาะแส",
+    "items": [
+      {
+        "id": "acrylic-stand",
+        "name": "Acrylic Stand",
+        "nameLocal": "อะคริลิกสแตนด์",
+        "description": "เบาะแสชิ้นเอกที่ถูกค้นพบ ณ สถานที่เกิดเหตุ — เก็บกู้กลับไปตั้งไว้บนโต๊ะทำงานเพื่อวิเคราะห์และไขปริศนาต่อไป · สถานะ: เบาะแสสำคัญ",
+        "image": "/assets/images/gallery-04.svg",
+        "imageAlt": "Acrylic stand (placeholder)"
+      },
+      {
+        "id": "photo-card",
+        "name": "Photo Card Set",
+        "nameLocal": "ชุดโฟโตการ์ด",
+        "description": "ภาพถ่ายบันทึกร่องรอยและเหตุการณ์จากสถานที่เกิดเหตุ — รวบรวมไว้เป็นเบาะแสในแฟ้มคดีส่วนตัว · สถานะ: เบาะแส",
+        "image": "/assets/mild/kv/Mild-R_Name_Art.png",
+        "imageAlt": "Photo card set sample from Mild-R KV"
+      }
+    ]
+  },
+  "closing": {
+    "eyebrow": "Closing Note",
+    "stamp": "END OF EDITION",
+    "title": "Closing Note",
+    "titleLocal": "สรุปฉบับนี้",
+    "body": [
+      "Mild-R: The Unsolved Mystery Cafe คือโปรเจกต์คาเฟ่ที่แฟนคลับ Honeycomb จัดทำเอง — จำลองพื้นที่คาเฟ่ให้กลายเป็นสถานที่เกิดเหตุลึกลับ เชิญชวนนักสืบฮันนี่มาร่วมไขปริศนา คลี่คลายคดี และเก็บกู้หลักฐาน",
+      "เคสถูกกำหนดเปิดวันที่ 2026 · 11 · 29 เวลา 10:00–18:00 ที่ SOCIEFEE × CHOUXSTORY (MRT หัวลำโพง Exit 2) · ติดตามประกาศเพิ่มเติมได้ที่ @Mild_Honeycomb"
+    ],
+    "ctas": [
+      {
+        "label": "ติดตามข่าวคาเฟ่บน X",
+        "url": "https://x.com/Mild_Honeycomb"
+      }
+    ],
+    "disclaimer": "คาเฟ่และเว็บโปรโมทนี้เป็นงานแฟนเมดที่แฟนคลับจัดทำเอง — ไม่ใช่ประกาศทางการของ Mild-R / เอเจนซี · รายละเอียดอีเวนต์อาจเปลี่ยน · รูปบางส่วนเป็น placeholder / sample art"
+  }
 }

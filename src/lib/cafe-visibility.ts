@@ -1,9 +1,8 @@
 export const CAFE_SECTION_KEYS = [
   "mainSiteLink",
   "dispatch",
-  "plates",
   "daySchedule",
-  "highlights",
+  "operations",
   "signatureMenu",
   "venueMenu",
   "goods",
@@ -28,32 +27,28 @@ export const CAFE_SECTION_META: Record<
     labelLocal: "ปุ่มกลับเว็บหลัก · เว็บหลัก →",
   },
   dispatch: {
-    label: "Window & Location",
-    labelLocal: "กรอบเวลาและพิกัด",
-  },
-  plates: {
-    label: "Photographic Plates",
-    labelLocal: "บรรยากาศ · สถานที่ · อาร์ต",
+    label: "Crime Scene Details",
+    labelLocal: "ข้อมูลสถานที่และเวลาเกิดเหตุ",
   },
   daySchedule: {
-    label: "Daily Schedule",
-    labelLocal: "ตารางกิจกรรมในวัน",
+    label: "Case Incident Log",
+    labelLocal: "บันทึกลำดับเหตุการณ์",
   },
-  highlights: {
-    label: "Intelligence Brief",
-    labelLocal: "จุดสังเกตของเคส",
+  operations: {
+    label: "Operations Briefing",
+    labelLocal: "ประกาศจากกองอำนวยการสืบสวน",
   },
   signatureMenu: {
-    label: "Signature Menu",
-    labelLocal: "เมนูซิกเนเจอร์",
+    label: "Investigator's Provisions",
+    labelLocal: "แฟ้มรายการเสบียงนักสืบ",
   },
   venueMenu: {
     label: "Venue Menu",
     labelLocal: "เมนูร้าน",
   },
   goods: {
-    label: "Goods",
-    labelLocal: "ของที่ระลึก",
+    label: "The Clue Dossier",
+    labelLocal: "แฟ้มรวบรวมเบาะแส",
   },
   closing: {
     label: "Closing Note",
@@ -65,9 +60,8 @@ export function defaultCafeVisibility(): CafeSectionVisibilityMap {
   return {
     mainSiteLink: true,
     dispatch: true,
-    plates: true,
     daySchedule: true,
-    highlights: true,
+    operations: true,
     signatureMenu: true,
     venueMenu: true,
     goods: true,

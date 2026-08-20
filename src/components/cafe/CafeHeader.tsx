@@ -17,8 +17,8 @@ type CafeNavLink =
 
 const CAFE_NAV: CafeNavLink[] = [
   { kind: "section", hash: "#overview", label: "Overview" },
-  { kind: "section", hash: "#plates", label: "Plates" },
   { kind: "section", hash: "#day-schedule", label: "Schedule" },
+  { kind: "section", hash: "#operations", label: "Ops" },
   { kind: "section", hash: "#menu", label: "Menu" },
   { kind: "section", hash: "#goods", label: "Goods" },
 ];
@@ -119,9 +119,9 @@ export function CafeHeader({
             {masthead}
           </Link>
           <div className="mt-0.5 flex min-w-0 items-center gap-2 sm:flex">
-            {cafe.schedule.label ? (
+            {cafe.dispatch.schedule.label ? (
               <span className="shrink-0 text-[0.55rem] tracking-[0.14em] text-[#c46a7a] uppercase sm:text-[0.58rem] sm:tracking-[0.18em]">
-                {cafe.schedule.label}
+                {cafe.dispatch.schedule.label}
               </span>
             ) : null}
             {cafe.edition?.caseNo ? (
