@@ -3,11 +3,12 @@
  *
  * Modes:
  *   (default) Scan each pixela-master channel uploads playlist;
- *             keep lives whose title mentions Mild-R.
+ *             keep lives that mention Mild-R in title, description, or tags.
  *   --from-mild  Scan Mild-R uploads playlist; keep lives whose title
  *                mentions a pixela-master talent name/handle.
  *
  * Discovery uses uploads playlist (not search.list).
+ * Keeps only videos with liveStreamingDetails (live / live archive).
  *
  *   npm run backfill:pixela
  *   npx tsx --env-file=.env.local scripts/backfill-pixela-mild-r.ts --from-mild
@@ -25,6 +26,7 @@ import {
   MILD_R_CHANNEL_ID,
 } from "../src/lib/live-stream-classify";
 import { snapScheduledToHalfHour } from "../src/lib/snap-scheduled";
+import { videoMentionsMildR } from "./lib/mild-r-mention";
 import { removeMatchingPreviewsForReals } from "./lib/remove-matching-previews";
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY?.trim();
@@ -32,9 +34,6 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 const DRY_RUN = process.argv.includes("--dry-run");
 const FROM_MILD = process.argv.includes("--from-mild");
-
-/** Title-only match for Mild-R mentions (guest hosted on Pixela channel) */
-const MILD_R_TITLE_RE = /mild[\s\-_.]*r|@mildr|mildrworldend/i;
 
 const NEEDLE_STOP = new Set([
   "world",
@@ -55,10 +54,6 @@ function normalizeNeedle(input: string) {
     .toLowerCase()
     .replace(/^@/, "")
     .replace(/[^a-z0-9]+/g, "");
-}
-
-function titleMentionsMildR(title: string) {
-  return MILD_R_TITLE_RE.test(title);
 }
 
 /** Build match needles for a Pixela talent (longest-first matching). */
@@ -182,8 +177,8 @@ async function resolveChannelId(
   return id;
 }
 
-async function listMildRTitleVideoIds(channelId: string): Promise<string[]> {
-  /** Walk uploads playlist; filter Mild-R in title only (cheap + complete). */
+async function listUploadVideoIds(channelId: string): Promise<string[]> {
+  /** Walk uploads playlist; Mild-R filter happens after videos.list. */
   const playlistId = channelId.replace(/^UC/, "UU");
   const ids: string[] = [];
   let pageToken = "";
@@ -213,10 +208,7 @@ async function listMildRTitleVideoIds(channelId: string): Promise<string[]> {
     }
     for (const item of data.items ?? []) {
       const videoId = item.snippet?.resourceId?.videoId;
-      const title = item.snippet?.title ?? "";
-      if (videoId && titleMentionsMildR(title)) {
-        ids.push(videoId);
-      }
+      if (videoId) ids.push(videoId);
     }
     pages += 1;
     if (!data.nextPageToken) break;
@@ -268,11 +260,12 @@ async function fetchVideoDetails(ids: string[]) {
 function buildRow(
   item: Awaited<ReturnType<typeof fetchVideoDetails>>[number],
   talent: PixelaTalent,
-  opts?: { requireMildRInTitle?: boolean; hostedOnMildR?: boolean }
+  opts?: { requireMildRMention?: boolean; hostedOnMildR?: boolean }
 ): StreamRow | null {
   if (!item.liveStreamingDetails) return null;
-  const requireMildR = opts?.requireMildRInTitle !== false;
-  if (requireMildR && !titleMentionsMildR(item.snippet.title)) return null;
+  const requireMildR = opts?.requireMildRMention !== false;
+  const mention = videoMentionsMildR(item.snippet);
+  if (requireMildR && !mention) return null;
 
   const viewCount = item.statistics?.viewCount
     ? parseInt(item.statistics.viewCount, 10)
@@ -331,6 +324,7 @@ function buildRow(
       pixela_unit: talent.unit,
       pixela_source_label: talent.sourceLabel,
       pixela_hosted_on_mild: hostedOnMildR,
+      mild_r_mention: mention,
       description: item.snippet.description,
       tags: item.snippet.tags || [],
       likes: item.statistics?.likeCount || null,
@@ -460,9 +454,9 @@ async function main() {
     }
     console.log(`  channelId=${channelId}`);
 
-    let liveIds: string[];
+    let uploadIds: string[];
     try {
-      liveIds = await listMildRTitleVideoIds(channelId);
+      uploadIds = await listUploadVideoIds(channelId);
     } catch (err) {
       console.error(
         `  ✗ playlist:`,
@@ -472,16 +466,18 @@ async function main() {
       continue;
     }
 
-    console.log(`  title-match Mild-R: ${liveIds.length}`);
-    if (liveIds.length === 0) {
+    console.log(`  uploads scanned: ${uploadIds.length}`);
+    if (uploadIds.length === 0) {
       perTalent[talent.title] = 0;
       continue;
     }
 
-    const details = await fetchVideoDetails(liveIds);
+    const details = await fetchVideoDetails(uploadIds);
     const rows = details
       .map((item) => buildRow(item, talent))
       .filter((r): r is StreamRow => r != null);
+
+    console.log(`  live + Mild-R mention: ${rows.length}`);
 
     totalFound += rows.length;
     const saved = await upsertRows(rows);
@@ -494,7 +490,7 @@ async function main() {
     await supabase.from("mild_r_sync_logs").insert({
       source: "backfill-pixela",
       status: "success",
-      message: `Pixela channel Mild-R title backfill · found ${totalFound} · saved ${totalSaved}`,
+      message: `Pixela channel Mild-R mention backfill · found ${totalFound} · saved ${totalSaved}`,
       saved_count: totalSaved,
       meta: { perTalent, totalFound, onlyTitle: onlyTitle || null },
     });
@@ -561,7 +557,7 @@ async function runFromMildChannel(talents: PixelaTalent[]) {
       const talent = byId.get(item.id);
       if (!talent) return null;
       return buildRow(item, talent, {
-        requireMildRInTitle: false,
+        requireMildRMention: false,
         hostedOnMildR: true,
       });
     })

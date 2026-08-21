@@ -1,9 +1,10 @@
 /**
  * One-shot: scan LUMINA_CHANNELS (except Mild-R main) uploads playlists
- * for lives whose title mentions Mild-R → project=Lumina.
+ * for lives that mention Mild-R in title, description, or tags → project=Lumina.
  *
  * Skips Debirun (covered by pixela-master backfill → project=Pixela).
  * Does not use search.list (incomplete).
+ * Keeps only videos with liveStreamingDetails (live / live archive).
  *
  *   npm run backfill:lumina
  *   npx tsx --env-file=.env.local scripts/backfill-lumina-mild-r.ts --dry-run
@@ -17,14 +18,13 @@ import {
 } from "../src/data/lumina-channels";
 import { classifyLiveOwnership } from "../src/lib/live-stream-classify";
 import { snapScheduledToHalfHour } from "../src/lib/snap-scheduled";
+import { videoMentionsMildR } from "./lib/mild-r-mention";
 import { removeMatchingPreviewsForReals } from "./lib/remove-matching-previews";
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY?.trim();
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 const DRY_RUN = process.argv.includes("--dry-run");
-
-const MILD_R_TITLE_RE = /mild[\s\-_.]*r|@mildr|mildrworldend/i;
 
 /** Pixela-roster channel already backfilled separately */
 const SKIP_TITLES = new Set(["debirun", "mild-r", "mildr"]);
@@ -58,11 +58,8 @@ type StreamRow = {
   metadata: Record<string, unknown>;
 };
 
-function titleMentionsMildR(title: string) {
-  return MILD_R_TITLE_RE.test(title);
-}
-
-async function listMildRTitleVideoIds(channelId: string): Promise<string[]> {
+/** Uploads playlist video IDs (all titles — Mild-R filter happens after videos.list). */
+async function listUploadVideoIds(channelId: string): Promise<string[]> {
   const playlistId = channelId.replace(/^UC/, "UU");
   const ids: string[] = [];
   let pageToken = "";
@@ -92,8 +89,7 @@ async function listMildRTitleVideoIds(channelId: string): Promise<string[]> {
     }
     for (const item of data.items ?? []) {
       const videoId = item.snippet?.resourceId?.videoId;
-      const title = item.snippet?.title ?? "";
-      if (videoId && titleMentionsMildR(title)) ids.push(videoId);
+      if (videoId) ids.push(videoId);
     }
     pages += 1;
     if (!data.nextPageToken) break;
@@ -146,8 +142,11 @@ function buildRow(
   item: Awaited<ReturnType<typeof fetchVideoDetails>>[number],
   channel: LuminaChannel
 ): StreamRow | null {
+  // Live / live archive only — skip regular VODs & clips
   if (!item.liveStreamingDetails) return null;
-  if (!titleMentionsMildR(item.snippet.title)) return null;
+
+  const mention = videoMentionsMildR(item.snippet);
+  if (!mention) return null;
 
   const viewCount = item.statistics?.viewCount
     ? parseInt(item.statistics.viewCount, 10)
@@ -201,6 +200,7 @@ function buildRow(
       lumina: true,
       lumina_talent: channel.title,
       lumina_unit: channel.unit,
+      mild_r_mention: mention,
       description: item.snippet.description,
       tags: item.snippet.tags || [],
       likes: item.statistics?.likeCount || null,
@@ -320,7 +320,7 @@ async function main() {
   }
 
   console.log(
-    `🌟 Lumina→Mild-R title backfill (${channels.length} channels)${DRY_RUN ? " [DRY RUN]" : ""}`
+    `🌟 Lumina→Mild-R mention backfill (${channels.length} channels)${DRY_RUN ? " [DRY RUN]" : ""}`
   );
 
   let totalSaved = 0;
@@ -332,9 +332,9 @@ async function main() {
     const channelId = channel.channelId!;
     console.log(`  channelId=${channelId}`);
 
-    let liveIds: string[];
+    let uploadIds: string[];
     try {
-      liveIds = await listMildRTitleVideoIds(channelId);
+      uploadIds = await listUploadVideoIds(channelId);
     } catch (err) {
       console.error(
         `  ✗ playlist:`,
@@ -344,16 +344,29 @@ async function main() {
       continue;
     }
 
-    console.log(`  title-match Mild-R: ${liveIds.length}`);
-    if (liveIds.length === 0) {
+    console.log(`  uploads scanned: ${uploadIds.length}`);
+    if (uploadIds.length === 0) {
       perChannel[channel.title] = 0;
       continue;
     }
 
-    const details = await fetchVideoDetails(liveIds);
+    const details = await fetchVideoDetails(uploadIds);
     const rows = details
       .map((item) => buildRow(item, channel))
       .filter((r): r is StreamRow => r != null);
+
+    const byMention = rows.reduce(
+      (acc, row) => {
+        const key = String(row.metadata.mild_r_mention ?? "unknown");
+        acc[key] = (acc[key] ?? 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+    console.log(
+      `  live + Mild-R mention: ${rows.length}`,
+      Object.keys(byMention).length ? byMention : ""
+    );
 
     totalFound += rows.length;
     const saved = await upsertRows(rows);
@@ -366,7 +379,7 @@ async function main() {
     await supabase.from("mild_r_sync_logs").insert({
       source: "backfill-lumina",
       status: "success",
-      message: `Lumina Mild-R title backfill · found ${totalFound} · saved ${totalSaved}`,
+      message: `Lumina Mild-R mention backfill · found ${totalFound} · saved ${totalSaved}`,
       saved_count: totalSaved,
       meta: { perChannel, totalFound, onlyTitle: onlyTitle || null },
     });
