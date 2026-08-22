@@ -543,6 +543,11 @@ function trendItemToSlot(
     thumbnail_cached_url: null,
     views_on_end: viewsOnEnd,
     latest_views: latestViews,
+    likes_on_end:
+      "likes_on_end" in item ? (item.likes_on_end ?? null) : null,
+    latest_likes:
+      ("latest_likes" in item ? item.latest_likes : null) ??
+      ("likes" in item ? item.likes : null),
     is_own_channel: isOwn,
     is_collab: isCollab,
     metadata: isMember ? { member: true } : null,
@@ -555,6 +560,20 @@ function trendItemToSlot(
   }
   if (latestViews != null) {
     viewBits.push(`ยอดรวม ${formatViews(latestViews)}`);
+  }
+  const likesOnEnd =
+    "likes_on_end" in item ? (item.likes_on_end ?? null) : null;
+  const latestLikes =
+    ("latest_likes" in item ? item.latest_likes : null) ??
+    ("likes" in item ? item.likes : null);
+  if (likesOnEnd != null) {
+    viewBits.push(`ไลก์หลังไลฟ์ ${formatViews(likesOnEnd)}`);
+  }
+  if (latestLikes != null) {
+    viewBits.push(`ไลก์ล่าสุด ${formatViews(latestLikes)}`);
+  }
+  if ("updated_at" in item && item.updated_at) {
+    viewBits.push(`อัปเดตล่าสุด ${formatWhen(item.updated_at)}`);
   }
 
   if (viewBits.length > 0) {
@@ -771,10 +790,29 @@ function BucketPeriodDetail({
                 value={formatDuration(hero.actual_start, hero.actual_end)}
               />
               <MetaCell
-                label="ไลก์"
-                value={hero.likes != null ? formatViews(hero.likes) : "—"}
+                label="ไลก์หลังไลฟ์"
+                value={
+                  hero.likes_on_end != null
+                    ? formatViews(hero.likes_on_end)
+                    : "—"
+                }
+              />
+              <MetaCell
+                label="ไลก์ล่าสุด"
+                value={
+                  hero.latest_likes != null
+                    ? formatViews(hero.latest_likes)
+                    : hero.likes != null
+                      ? formatViews(hero.likes)
+                      : "—"
+                }
+                accent
               />
               <MetaCell label="Video ID" value={hero.video_id} />
+              <MetaCell
+                label="อัปเดตล่าสุด"
+                value={formatWhen(hero.updated_at)}
+              />
             </div>
           </div>
 
@@ -920,10 +958,27 @@ function TrendStreamCard({
               <MetaCell label="ยอดรวม" value={formatViews(latest)} accent />
               <MetaCell label="Diff" value={formatViews(diff)} accent />
               <MetaCell
-                label="ไลก์"
+                label="ไลก์หลังไลฟ์"
                 value={
-                  stream.likes != null ? formatViews(stream.likes) : "—"
+                  stream.likes_on_end != null
+                    ? formatViews(stream.likes_on_end)
+                    : "—"
                 }
+              />
+              <MetaCell
+                label="ไลก์ล่าสุด"
+                value={
+                  stream.latest_likes != null
+                    ? formatViews(stream.latest_likes)
+                    : stream.likes != null
+                      ? formatViews(stream.likes)
+                      : "—"
+                }
+                accent
+              />
+              <MetaCell
+                label="อัปเดตล่าสุด"
+                value={formatWhen(stream.updated_at)}
               />
             </div>
           </div>

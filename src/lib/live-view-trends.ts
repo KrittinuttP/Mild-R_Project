@@ -13,13 +13,13 @@ import type {
 } from "@/types/live-view-trends";
 
 export const RANGE_DAYS: Record<TrendGrain, number> = {
-  day: 90,
+  day: 30,
   month: 730,
   year: 1826,
 };
 
 const STREAM_SELECT =
-  "video_id, title, url, channel_name, scheduled_start, actual_start, actual_end, thumbnail_url, views_on_end, latest_views, is_own_channel, is_collab, metadata";
+  "video_id, title, url, channel_name, scheduled_start, actual_start, actual_end, thumbnail_url, views_on_end, latest_views, likes_on_end, latest_likes, is_own_channel, is_collab, metadata, updated_at";
 
 const YMD_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -455,10 +455,16 @@ export async function loadStreamsInBucket(
       thumbnail_url: (row.thumbnail_url as string | null) ?? null,
       views_on_end: row.views_on_end as number | null,
       latest_views: row.latest_views as number | null,
+      likes_on_end: row.likes_on_end as number | null,
+      latest_likes: row.latest_likes as number | null,
       is_own_channel: row.is_own_channel as boolean | null,
       is_collab: row.is_collab as boolean | null,
       is_member: meta?.member === true,
-      likes: parseLikes(row.metadata),
+      likes:
+        (row.latest_likes as number | null) ??
+        (row.likes_on_end as number | null) ??
+        parseLikes(row.metadata),
+      updated_at: (row.updated_at as string | null) ?? null,
     };
   });
 }

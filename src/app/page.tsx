@@ -10,17 +10,10 @@ import { Lore } from "@/components/sections/Lore";
 import { Media } from "@/components/sections/Media";
 import { Socials } from "@/components/sections/Socials";
 import { mildRData } from "@/data/vtuber-data";
-import {
-  loadLiveStreams,
-  mergeLiveWeeksWithStreams,
-} from "@/lib/live-streams";
 
 export const revalidate = 300;
 
-export default async function Home() {
-  const streams = await loadLiveStreams();
-  const liveWeeks = mergeLiveWeeksWithStreams([], streams);
-
+export default function Home() {
   return (
     <>
       <MediaProtection />
@@ -34,7 +27,7 @@ export default async function Home() {
         <Lore data={mildRData} />
         <Gallery data={mildRData} />
         <Media data={mildRData} />
-        <EventsTeaser data={mildRData} liveWeeks={liveWeeks} />
+        <EventsTeaser data={mildRData} />
         <Socials data={mildRData} />
       </main>
       <Footer data={mildRData} />

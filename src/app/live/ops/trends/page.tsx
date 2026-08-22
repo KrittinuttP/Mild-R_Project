@@ -43,7 +43,7 @@ function parseGrain(value: string | undefined): TrendGrain {
 export default async function LiveOpsTrendsPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const grain = parseGrain(params.grain);
-  const ownOnly = params.own !== "0";
+  const ownOnly = params.own === "1";
   const ranges = parseGrainRanges(params, grain);
   const { from: fromYmd, to: toYmd } = ranges[grain];
 

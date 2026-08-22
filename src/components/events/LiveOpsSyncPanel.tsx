@@ -54,6 +54,7 @@ const TABS: { id: SyncLogSourceTab; label: string; hint: string }[] = [
   { id: "all", label: "ทั้งหมด", hint: "ทุกแหล่ง sync" },
   { id: "main", label: "Main", hint: "ช่อง Mild-R · ทุก 30 นาที" },
   { id: "search", label: "Search", hint: "Related / search · ทุก 6 ชม." },
+  { id: "refresh", label: "Refresh", hint: "อัปยอดวิว/ไลก์ · ทุก 6 ชม." },
   { id: "other", label: "อื่น ๆ", hint: "Backfill · manual · error" },
 ];
 
@@ -106,6 +107,9 @@ function sourceBadgeClass(source: string) {
   }
   if (source === "edge-search") {
     return "border-[#7eb6d4]/45 bg-[#7eb6d4]/12 text-[#b8d9ec]";
+  }
+  if (source === "edge-refresh") {
+    return "border-[#7dd3c0]/45 bg-[#7dd3c0]/12 text-[#b8ede0]";
   }
   return "border-[#d4a574]/40 bg-[#d4a574]/12 text-[#e8c49a]";
 }

@@ -15,6 +15,7 @@ const SUPABASE_SERVICE_ROLE_KEY =
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 const SEARCH_KEYWORD = "@MildRWorldEnd";
+const REFRESH_LOOKBACK_DAYS = 30;
 const COLLAB_TITLE_RE =
   /\bft\.?\b|\bfeat\.?\b|featuring|collab|コラボ|คอลาบ|ร่วมกับ/i;
 const MILD_MENTION_RE = /@?MildRWorldEnd|Mild-?R\b|MildR\b/i;
@@ -27,6 +28,12 @@ function classifyLiveOwnership(channelId: string, title: string) {
 
 function mentionsMildR(title: string) {
   return MILD_MENTION_RE.test(title);
+}
+
+function parseLikeCount(raw: string | undefined | null): number | null {
+  if (raw == null || raw === "") return null;
+  const n = parseInt(String(raw), 10);
+  return Number.isFinite(n) ? n : null;
 }
 
 type StreamRow = {
@@ -43,6 +50,8 @@ type StreamRow = {
   thumbnail_url: string | null;
   views_on_end: number | null;
   latest_views: number;
+  likes_on_end: number | null;
+  latest_likes: number | null;
   is_own_channel: boolean;
   is_collab: boolean;
   metadata: Record<string, unknown>;
@@ -56,6 +65,8 @@ async function saveToDatabase(streams: StreamRow[]) {
     string,
     {
       views_on_end: number | null;
+      likes_on_end: number | null;
+      latest_likes: number | null;
       scheduled_start: string | null;
       scheduled_start_first: string | null;
       actual_start: string | null;
@@ -67,7 +78,7 @@ async function saveToDatabase(streams: StreamRow[]) {
     const { data, error: lookupError } = await supabase
       .from("mild_r_live_streams")
       .select(
-        "video_id, views_on_end, scheduled_start, scheduled_start_first, actual_start"
+        "video_id, views_on_end, likes_on_end, latest_likes, scheduled_start, scheduled_start_first, actual_start"
       )
       .in("video_id", chunk);
 
@@ -79,6 +90,8 @@ async function saveToDatabase(streams: StreamRow[]) {
     for (const row of data || []) {
       existingById.set(row.video_id as string, {
         views_on_end: (row.views_on_end as number | null) ?? null,
+        likes_on_end: (row.likes_on_end as number | null) ?? null,
+        latest_likes: (row.latest_likes as number | null) ?? null,
         scheduled_start: (row.scheduled_start as string | null) ?? null,
         scheduled_start_first:
           (row.scheduled_start_first as string | null) ?? null,
@@ -87,7 +100,7 @@ async function saveToDatabase(streams: StreamRow[]) {
     }
   }
 
-  // - views_on_end / scheduled_start_first: first-seen lock
+  // - views_on_end / likes_on_end / scheduled_start_first: first-seen lock
   // - scheduled_start: refresh while not started; freeze once actual_start exists
   const merged = streams.map((row) => {
     const existing = existingById.get(row.video_id);
@@ -97,6 +110,11 @@ async function saveToDatabase(streams: StreamRow[]) {
     return {
       ...row,
       views_on_end: existing?.views_on_end ?? row.views_on_end,
+      likes_on_end: existing?.likes_on_end ?? row.likes_on_end,
+      latest_likes:
+        row.latest_likes != null
+          ? row.latest_likes
+          : (existing?.latest_likes ?? row.latest_likes),
       scheduled_start_first:
         existing?.scheduled_start_first ??
         row.scheduled_start ??
@@ -302,6 +320,8 @@ async function getLiveDetails(videoIds: string[]): Promise<StreamRow[]> {
       const viewCount = item.statistics?.viewCount
         ? parseInt(item.statistics.viewCount, 10)
         : 0;
+      const likeCount = parseLikeCount(item.statistics?.likeCount);
+      const ended = Boolean(item.liveStreamingDetails.actualEndTime);
       const channelId = item.snippet.channelId as string;
       const title = item.snippet.title as string;
       const { is_own_channel, is_collab } = classifyLiveOwnership(
@@ -322,16 +342,16 @@ async function getLiveDetails(videoIds: string[]): Promise<StreamRow[]> {
         actual_start: item.liveStreamingDetails.actualStartTime || null,
         actual_end: item.liveStreamingDetails.actualEndTime || null,
         thumbnail_url: item.snippet.thumbnails?.high?.url || null,
-        views_on_end: item.liveStreamingDetails.actualEndTime
-          ? viewCount
-          : null,
+        views_on_end: ended ? viewCount : null,
         latest_views: viewCount,
+        likes_on_end: ended ? likeCount : null,
+        latest_likes: likeCount,
         is_own_channel,
         is_collab,
         metadata: {
           description: item.snippet.description,
           tags: item.snippet.tags || [],
-          likes: item.statistics?.likeCount || "0",
+          likes: item.statistics?.likeCount ?? null,
         },
       });
     }
@@ -545,6 +565,64 @@ async function searchRelatedChannels() {
   };
 }
 
+/** Step 3: refresh views/likes for DB streams in the last N days (cheap videos.list). */
+async function loadRecentVideoIds(): Promise<string[]> {
+  const since = new Date(
+    Date.now() - REFRESH_LOOKBACK_DAYS * 24 * 60 * 60 * 1000
+  ).toISOString();
+  const ids = new Set<string>();
+  const pageSize = 500;
+  let offset = 0;
+
+  for (;;) {
+    const { data, error } = await supabase
+      .from("mild_r_live_streams")
+      .select("video_id")
+      .not("video_id", "like", "manual-%")
+      .or(
+        `actual_end.gte.${since},scheduled_start.gte.${since},actual_start.gte.${since}`
+      )
+      .range(offset, offset + pageSize - 1);
+
+    if (error) {
+      throw new Error(`refresh lookup: ${error.message}`);
+    }
+
+    const batch = data ?? [];
+    for (const row of batch) {
+      if (row.video_id) ids.add(row.video_id as string);
+    }
+    if (batch.length < pageSize) break;
+    offset += pageSize;
+  }
+
+  return [...ids];
+}
+
+async function refreshRecentStreams() {
+  console.log(
+    `▶️ [Step 3] Refresh streams ย้อนหลัง ${REFRESH_LOOKBACK_DAYS} วัน (DB → videos.list)...`
+  );
+  const videoIds = await loadRecentVideoIds();
+  if (videoIds.length === 0) {
+    return {
+      lookbackDays: REFRESH_LOOKBACK_DAYS,
+      scanned: 0,
+      saved: 0,
+      skipped: true,
+    };
+  }
+
+  const results = await getLiveDetails(videoIds);
+  await saveToDatabase(results);
+  return {
+    lookbackDays: REFRESH_LOOKBACK_DAYS,
+    scanned: videoIds.length,
+    saved: results.length,
+    skipped: results.length === 0,
+  };
+}
+
 async function writeSyncLog(entry: {
   source: string;
   status: "success" | "error" | "skipped";
@@ -607,14 +685,33 @@ Deno.serve(async (req) => {
       );
     }
 
+    if (action === "refresh") {
+      const result = await refreshRecentStreams();
+      await writeSyncLog({
+        source: "edge-refresh",
+        status: result.skipped ? "skipped" : "success",
+        message: result.skipped
+          ? `No streams refreshed in last ${result.lookbackDays} days`
+          : `Refreshed ${result.saved}/${result.scanned} streams (${result.lookbackDays}d)`,
+        saved_count: result.saved,
+        meta: result,
+      });
+      return new Response(
+        JSON.stringify({ success: true, task: "refresh", ...result }),
+        { headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     await writeSyncLog({
       source: "edge-unknown",
       status: "error",
-      message: 'Invalid action. Use "main" or "search".',
+      message: 'Invalid action. Use "main", "search", or "refresh".',
     });
 
     return new Response(
-      JSON.stringify({ error: 'Invalid action. Use "main" or "search".' }),
+      JSON.stringify({
+        error: 'Invalid action. Use "main", "search", or "refresh".',
+      }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
   } catch (err) {

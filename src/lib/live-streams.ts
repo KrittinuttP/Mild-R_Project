@@ -108,7 +108,7 @@ export async function loadLiveStreams(
 }
 
 const STREAM_SELECT =
-  "video_id, channel_id, channel_name, source_title, title, url, scheduled_start, scheduled_start_first, actual_start, actual_end, thumbnail_url, thumbnail_cached_url, views_on_end, latest_views, is_own_channel, is_collab, metadata, created_at";
+  "video_id, channel_id, channel_name, source_title, title, url, scheduled_start, scheduled_start_first, actual_start, actual_end, thumbnail_url, thumbnail_cached_url, views_on_end, latest_views, likes_on_end, latest_likes, is_own_channel, is_collab, metadata, created_at, updated_at";
 
 function streamAnchorIso(row: LiveStreamRow): string | null {
   return (

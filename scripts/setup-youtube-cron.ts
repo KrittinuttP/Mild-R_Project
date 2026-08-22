@@ -37,6 +37,13 @@ exception when others then
   null;
 end $$;
 
+do $$
+begin
+  perform cron.unschedule('run-youtube-step3-refresh');
+exception when others then
+  null;
+end $$;
+
 select cron.schedule(
   'run-youtube-step1-main',
   '*/30 * * * *',
@@ -63,6 +70,21 @@ select cron.schedule(
       'Authorization', ${pgClientLiteral(authHeader)}
     ),
     body := '{"action":"search"}'::jsonb
+  ) as request_id;
+  $cron$
+);
+
+select cron.schedule(
+  'run-youtube-step3-refresh',
+  '0 */6 * * *',
+  $cron$
+  select net.http_post(
+    url := ${pgClientLiteral(fnUrl)},
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'Authorization', ${pgClientLiteral(authHeader)}
+    ),
+    body := '{"action":"refresh"}'::jsonb
   ) as request_id;
   $cron$
 );

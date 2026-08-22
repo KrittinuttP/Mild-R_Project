@@ -2,16 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-import { LiveScheduleBoard } from "@/components/events/LiveScheduleBoard";
+import { LiveSchedulePanel } from "@/components/events/LiveSchedulePanel";
 import { BackToTop } from "@/components/layout/BackToTop";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { MediaProtection } from "@/components/media/MediaProtection";
 import { mildRData } from "@/data/vtuber-data";
-import {
-  loadLiveStreams,
-  mergeLiveWeeksWithStreams,
-} from "@/lib/live-streams";
 
 export const metadata: Metadata = {
   title: "Live Schedule | Mild-R Fanclub",
@@ -19,12 +15,10 @@ export const metadata: Metadata = {
     "ตารางไลฟ์ Mild-R — สัปดาห์นี้และปฏิทินรายเดือน รวมคลิปจาก YouTube",
 };
 
-export const revalidate = 300; // soft nav / ISR · F5 → client refetch /api/live/schedule
+/** Live data loads client-side via /api/live/schedule (always fresh). */
+export const dynamic = "force-dynamic";
 
-export default async function LivePage() {
-  const streams = await loadLiveStreams();
-  const weeks = mergeLiveWeeksWithStreams([], streams);
-
+export default function LivePage() {
   return (
     <>
       <MediaProtection />
@@ -46,13 +40,7 @@ export default async function LivePage() {
             </p>
 
             <div className="mt-12 sm:mt-16">
-              {weeks.length > 0 ? (
-                <LiveScheduleBoard weeks={weeks} />
-              ) : (
-                <div className="border border-dashed border-[#f3b8c4]/20 bg-[#1a0d12]/35 px-5 py-10 text-sm text-[#f3b8c4]/70">
-                  ยังไม่มีข้อมูลไลฟ์จากฐานข้อมูล
-                </div>
-              )}
+              <LiveSchedulePanel />
             </div>
 
             <div className="mt-12 flex flex-wrap items-center justify-between gap-4 sm:mt-16">

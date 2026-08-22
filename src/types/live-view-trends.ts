@@ -54,8 +54,12 @@ export type LiveTrendStreamItem = {
   thumbnail_url: string | null;
   views_on_end: number | null;
   latest_views: number | null;
+  likes_on_end: number | null;
+  latest_likes: number | null;
   is_own_channel: boolean | null;
   is_collab: boolean | null;
   is_member: boolean | null;
+  /** @deprecated prefer likes_on_end / latest_likes columns */
   likes: number | null;
+  updated_at: string | null;
 };

@@ -245,6 +245,8 @@ export interface LiveSlot {
   coverUrl?: string | null;
   /** Archived cover versions, newest first */
   coverHistory?: { url: string; capturedAt: string }[];
+  /** DB row created_at — tie-break when same calendar time */
+  createdAt?: string;
 }
 
 /** Day intentionally marked offline (no stream) — driven by content JSON */

@@ -2,7 +2,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import type { SyncLogRow } from "@/types/sync-log";
 
-export type SyncLogSourceTab = "all" | "main" | "search" | "other";
+export type SyncLogSourceTab = "all" | "main" | "search" | "refresh" | "other";
 
 export type LoadSyncLogsOptions = {
   limit?: number;
@@ -25,7 +25,10 @@ function applySourceFilter(
   if (tab === "search") {
     return query.eq("source", "edge-search");
   }
-  return query.not("source", "in", "(edge-main,edge-search)");
+  if (tab === "refresh") {
+    return query.eq("source", "edge-refresh");
+  }
+  return query.not("source", "in", "(edge-main,edge-search,edge-refresh)");
 }
 
 export async function loadSyncLogs(

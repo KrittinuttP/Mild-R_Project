@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 function parseTab(value: string | null): SyncLogSourceTab {
-  if (value === "main" || value === "search" || value === "other") return value;
+  if (value === "main" || value === "search" || value === "refresh" || value === "other") return value;
   return "all";
 }
 

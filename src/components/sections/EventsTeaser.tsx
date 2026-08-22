@@ -6,9 +6,14 @@ import { ArrowUpRight, CalendarDays, Radio } from "lucide-react";
 
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { EventDetailModal } from "@/components/events/EventDetailModal";
+import {
+  LiveScheduleError,
+  LiveScheduleSkeleton,
+} from "@/components/events/LiveScheduleSkeleton";
 import { LiveWeekTable } from "@/components/events/LiveWeekTable";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { buttonVariants } from "@/components/ui/button";
+import { useLiveSchedule } from "@/hooks/useLiveSchedule";
 import {
   eventStatusLabel,
   findDefaultWeekIndex,
@@ -21,8 +26,6 @@ import type { CalendarEvent, LiveWeek, VtuberProfile } from "@/types/vtuber";
 
 type EventsTeaserProps = {
   data: VtuberProfile;
-  /** When provided, replaces JSON liveWeeks (e.g. Supabase streams). */
-  liveWeeks?: LiveWeek[];
 };
 
 function EventRow({
@@ -93,15 +96,20 @@ function buildTeaserWeeks(weeks: LiveWeek[]): LiveWeek[] {
   ].filter((week): week is LiveWeek => Boolean(week));
 }
 
-export function EventsTeaser({ data, liveWeeks }: EventsTeaserProps) {
+export function EventsTeaser({ data }: EventsTeaserProps) {
   const board = data.events;
   const upcoming = upcomingEvents(board, 3);
-  const weeks = sortLiveWeeks(liveWeeks ?? board.liveWeeks);
+  const { weeks: liveWeeks, status, error, retry } = useLiveSchedule();
+  const weeks = sortLiveWeeks(liveWeeks);
   const teaserWeeks = buildTeaserWeeks(weeks);
   const [activeId, setActiveId] = useState<string | null>(null);
   const active = upcoming.find((event) => event.id === activeId) ?? null;
 
-  if (upcoming.length === 0 && weeks.length === 0) return null;
+  const showEvents = upcoming.length > 0;
+  const showLive =
+    status === "loading" || status === "error" || weeks.length > 0;
+
+  if (!showEvents && !showLive && status === "ready") return null;
 
   return (
     <>
@@ -155,7 +163,7 @@ export function EventsTeaser({ data, liveWeeks }: EventsTeaserProps) {
         </section>
       ) : null}
 
-      {weeks.length > 0 ? (
+      {showLive ? (
         <section
           id="live"
           className="relative scroll-mt-20 bg-[#140a0d] px-5 py-20 text-[#fff5f7] sm:scroll-mt-24 sm:px-10 sm:py-24 lg:px-16"
@@ -178,7 +186,19 @@ export function EventsTeaser({ data, liveWeeks }: EventsTeaserProps) {
             </ScrollReveal>
 
             <ScrollReveal delay={0.06} className="mt-8 sm:mt-10">
-              <LiveWeekTable weeks={teaserWeeks} compact />
+              {status === "loading" ? (
+                <LiveScheduleSkeleton variant="compact" />
+              ) : status === "error" ? (
+                <LiveScheduleError message={error} onRetry={retry} />
+              ) : teaserWeeks.length > 0 ? (
+                <div className="transition-opacity duration-500 ease-out">
+                  <LiveWeekTable weeks={teaserWeeks} compact />
+                </div>
+              ) : (
+                <p className="text-sm text-[#f3b8c4]/65">
+                  ยังไม่มีตารางไลฟ์ในช่วงนี้
+                </p>
+              )}
             </ScrollReveal>
 
             <ScrollReveal delay={0.1} className="mt-8 sm:mt-10">

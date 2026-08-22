@@ -215,7 +215,34 @@ export function liveStreamToSlot(row: LiveStreamRow): LiveSlot {
     channelName: row.channel_name,
     coverUrl,
     coverHistory,
+    createdAt: row.created_at,
   };
+}
+
+/** Sort key for calendar day columns (HH:mm); LIVE first, TBA last. */
+function calendarSortTime(slot: LiveSlot): string {
+  const t = slot.timeUpdated ?? slot.time;
+  if (t === "LIVE") return "00:00";
+  if (t === "TBA") return "99:99";
+  return t;
+}
+
+/** Same calendar day: time ascending, then createdAt descending (newest on top). */
+export function compareLiveSlots(a: LiveSlot, b: LiveSlot): number {
+  const ta = calendarSortTime(a);
+  const tb = calendarSortTime(b);
+  const byTime = ta.localeCompare(tb, "en", { numeric: true });
+  if (byTime !== 0) return byTime;
+
+  const ca = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+  const cb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+  if (ca !== cb) return cb - ca;
+
+  return a.id.localeCompare(b.id);
+}
+
+export function sortLiveSlotsForCalendar(slots: LiveSlot[]): LiveSlot[] {
+  return [...slots].sort(compareLiveSlots);
 }
 
 /** Merge Supabase streams into JSON live weeks (all history that loads). */

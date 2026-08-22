@@ -29,12 +29,15 @@ export type LiveStreamRow = {
   thumbnails?: LiveStreamThumbnail[];
   views_on_end: number | null;
   latest_views: number | null;
+  likes_on_end: number | null;
+  latest_likes: number | null;
   is_own_channel: boolean | null;
   is_collab: boolean | null;
   /** Agency project: Pixela (guest roster) | Lumina (default / Mild-R orbit) */
   project?: "Pixela" | "Lumina" | null;
   metadata: Record<string, unknown> | null;
   created_at: string;
+  updated_at?: string;
 };
 
 export type LiveStreamStatus = "live" | "upcoming" | "ended" | "cancelled";
