@@ -1315,6 +1315,41 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
         </Shell>
       ) : null}
 
+      {/* ── Story entry · webtoon ── */}
+      <Shell className="border-t border-[#9a7b5a]/20">
+        <div className="mx-auto max-w-2xl text-center">
+          <SectionHead
+            eyebrow="Case File"
+            stamp="WEBTOON"
+            title="Opening Act"
+            titleLocal="แฟ้มคดี · อ่านแบบเว็บตูน"
+          />
+          <ScrollReveal variant="soft" delay={0.06}>
+            <p
+              className={cn(
+                SERIF,
+                "mt-5 text-base leading-relaxed text-[#d8d0c4] sm:text-lg"
+              )}
+            >
+              เลื่อนลงทีละแผ่น — ปก · เทป · กระดานเบาะแส · โปรดติดตาม
+            </p>
+          </ScrollReveal>
+          <ScrollReveal variant="float" delay={0.1}>
+            <div className="mt-8 flex justify-center">
+              <Link
+                href="/cafe/event"
+                className={cn(
+                  buttonVariants({ size: "lg", variant: "default" }),
+                  "rounded-none border-transparent bg-[#a84d5f] text-[#f4ebe3] hover:bg-[#c46a7a]"
+                )}
+              >
+                อ่านแฟ้มคดี
+              </Link>
+            </div>
+          </ScrollReveal>
+        </div>
+      </Shell>
+
       {/* ── 8. Closing ── */}
       <Shell className="border-t border-[#9a7b5a]/20 bg-[#0d1013]">
         <div className="mx-auto max-w-2xl">

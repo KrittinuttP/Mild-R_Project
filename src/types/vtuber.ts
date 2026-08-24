@@ -468,6 +468,32 @@ export interface CafeClosingSection extends CafeSectionHead {
   disclaimer?: string;
 }
 
+/** Webtoon / manhwa-style scrollytelling under `/cafe/event` */
+export type CafeEventPanelKind = "cover" | "scene" | "closing";
+
+export interface CafeEventPanel {
+  id: string;
+  kind?: CafeEventPanelKind;
+  /** Panel art under /public — TBA frame if missing */
+  image?: string;
+  imageAlt?: string;
+  caption?: string;
+  captionLocal?: string;
+  /** Optional short blurb under the panel (legacy / secondary) */
+  body?: string;
+  /** Narration lines overlaid on the art — float up on scroll (≈5–6) */
+  lines?: string[];
+}
+
+export interface CafeEventPage {
+  title: string;
+  titleLocal?: string;
+  tagline?: string;
+  status?: ProjectStatus;
+  panels: CafeEventPanel[];
+  ctaBack?: ProjectCta;
+}
+
 /** Broadsheet / dossier chrome for `/cafe` */
 export interface CafeEdition {
   /** e.g. "The Honey Pulse Gazette" */
@@ -523,4 +549,6 @@ export interface VtuberProfile {
   events: EventsBoard;
   hbd: HbdPage;
   cafe: CafePage;
+  /** Comic / webtoon scrollytelling for cafe event */
+  cafeEvent: CafeEventPage;
 }

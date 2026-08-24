@@ -8,6 +8,7 @@
  */
 
 import type {
+  CafeEventPage,
   CafePage,
   CharacterDesign,
   EventsBoard,
@@ -40,6 +41,7 @@ import projects from "./mild-r/projects.json";
 import events from "./mild-r/events.json";
 import hbd from "./mild-r/hbd.json";
 import cafe from "./mild-r/cafe.json";
+import cafeEvent from "./mild-r/cafe-event.json";
 
 /** Merge category JSON into a single profile document. */
 export function loadMildRProfile(): VtuberProfile {
@@ -59,6 +61,7 @@ export function loadMildRProfile(): VtuberProfile {
     events: events as EventsBoard,
     hbd: hbd as HbdPage,
     cafe: cafe as CafePage,
+    cafeEvent: cafeEvent as CafeEventPage,
   };
 }
 
@@ -81,6 +84,8 @@ export function hasProjectCategory(category: string): boolean {
 export default mildRData;
 
 export type {
+  CafeEventPage,
+  CafeEventPanel,
   CafePage,
   CalendarEvent,
   CalendarEventStatus,

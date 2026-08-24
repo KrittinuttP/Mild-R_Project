@@ -21,6 +21,7 @@ const CAFE_NAV: CafeNavLink[] = [
   { kind: "section", hash: "#operations", label: "Ops" },
   { kind: "section", hash: "#menu", label: "Menu" },
   { kind: "section", hash: "#goods", label: "Goods" },
+  { kind: "page", href: "/cafe/event", label: "Story" },
 ];
 
 type CafeHeaderProps = {
@@ -36,6 +37,8 @@ export function CafeHeader({
 }: CafeHeaderProps) {
   const pathname = usePathname();
   const onCafeRoot = pathname === "/cafe" || pathname === "/cafe/";
+  const onEventPage =
+    pathname === "/cafe/event" || pathname === "/cafe/event/";
   const onSecretPreview =
     pathname === "/cafe/secret" || pathname === "/cafe/secret/";
   const showHomeLink = showMainSiteLink || onSecretPreview;
@@ -146,6 +149,10 @@ export function CafeHeader({
         >
           {CAFE_NAV.map((link, index) => {
             const href = resolveHref(link);
+            const active =
+              link.kind === "page" &&
+              (link.href === pathname ||
+                (link.href === "/cafe/event" && onEventPage));
             return (
               <span key={link.label} className="flex items-center">
                 {index > 0 ? (
@@ -163,7 +170,13 @@ export function CafeHeader({
                     link.kind === "external" ? "noopener noreferrer" : undefined
                   }
                   onClick={(event) => handleNavClick(event, href)}
-                  className="text-[0.8rem] tracking-[0.14em] text-[#c4b8a8] uppercase transition hover:text-[#f4ebe3]"
+                  className={cn(
+                    "text-[0.8rem] tracking-[0.14em] uppercase transition",
+                    active
+                      ? "text-[#f4ebe3]"
+                      : "text-[#c4b8a8] hover:text-[#f4ebe3]"
+                  )}
+                  aria-current={active ? "page" : undefined}
                 >
                   {link.label}
                 </Link>
@@ -200,6 +213,10 @@ export function CafeHeader({
         >
           {CAFE_NAV.map((link) => {
             const href = resolveHref(link);
+            const active =
+              link.kind === "page" &&
+              (link.href === pathname ||
+                (link.href === "/cafe/event" && onEventPage));
             return (
               <Link
                 key={link.label}
@@ -208,7 +225,13 @@ export function CafeHeader({
                 rel={
                   link.kind === "external" ? "noopener noreferrer" : undefined
                 }
-                className="min-h-12 py-3.5 text-base tracking-wide text-[#d8d0c4] uppercase transition hover:text-[#f4ebe3]"
+                className={cn(
+                  "min-h-12 py-3.5 text-base tracking-wide uppercase transition",
+                  active
+                    ? "text-[#f4ebe3]"
+                    : "text-[#d8d0c4] hover:text-[#f4ebe3]"
+                )}
+                aria-current={active ? "page" : undefined}
                 onClick={(event) => handleNavClick(event, href)}
               >
                 {link.label}
