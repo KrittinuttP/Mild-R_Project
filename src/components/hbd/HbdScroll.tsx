@@ -151,6 +151,13 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
             สำหรับ {data.basic.name} {data.fan.oshiMark} · จาก{data.fan.fanName}
           </p>
 
+          <Link
+            href="/hbd/upload"
+            className="mt-8 inline-flex items-center gap-2 border border-[#e85a7a]/45 bg-[#e85a7a]/15 px-5 py-3 text-sm tracking-wide text-[#f7d7de] transition hover:bg-[#e85a7a]/25"
+          >
+            ส่งการ์ดอวยพร · 12.12.2026
+          </Link>
+
           <div className="mt-14 flex flex-col items-start gap-2 text-[#f3b8c4]/70">
             <span className="text-xs tracking-[0.2em] uppercase">
               Scroll to open wishes

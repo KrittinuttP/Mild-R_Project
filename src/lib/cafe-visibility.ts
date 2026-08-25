@@ -73,4 +73,4 @@ export function isCafeSectionKey(value: string): value is CafeSectionKey {
   return (CAFE_SECTION_KEYS as readonly string[]).includes(value);
 }
 
-export const CAFE_SETTINGS_COOKIE = "mild_r_cafe_settings";
+export const CAFE_SETTINGS_COOKIE = "mild_r_site_admin";

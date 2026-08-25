@@ -347,6 +347,15 @@ export function CafeSettingsClient() {
 
       <div className="mt-8 flex flex-wrap gap-3">
         <Link
+          href="/admin"
+          className={cn(
+            buttonVariants({ variant: "outline", size: "lg" }),
+            "rounded-none border-[#9a7b5a]/45"
+          )}
+        >
+          Control desk
+        </Link>
+        <Link
           href="/cafe/secret"
           className={cn(
             buttonVariants({ size: "lg" }),

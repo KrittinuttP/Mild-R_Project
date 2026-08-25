@@ -1,17 +1,16 @@
 import { NextResponse } from "next/server";
 
 import {
-  clearCafeSettingsCookie,
-  isCafeSettingsUnlocked,
-  setCafeSettingsCookie,
-  verifyCafeSettingsPassword,
-} from "@/lib/cafe-settings-auth";
+  clearSiteAdminCookie,
+  isSiteAdminUnlocked,
+  setSiteAdminCookie,
+  verifySiteAdminPassword,
+} from "@/lib/site-admin-auth";
 
 export const runtime = "nodejs";
 
-/** @deprecated Prefer `/api/admin/unlock` — kept for cafe settings / secret clients */
 export async function GET() {
-  return NextResponse.json({ unlocked: await isCafeSettingsUnlocked() });
+  return NextResponse.json({ unlocked: await isSiteAdminUnlocked() });
 }
 
 export async function POST(request: Request) {
@@ -23,15 +22,15 @@ export async function POST(request: Request) {
   }
 
   if (body.action === "lock") {
-    await clearCafeSettingsCookie();
+    await clearSiteAdminCookie();
     return NextResponse.json({ unlocked: false });
   }
 
   const password = typeof body.password === "string" ? body.password : "";
-  if (!verifyCafeSettingsPassword(password)) {
+  if (!verifySiteAdminPassword(password)) {
     return NextResponse.json({ error: "รหัสไม่ถูกต้อง" }, { status: 401 });
   }
 
-  await setCafeSettingsCookie();
+  await setSiteAdminCookie();
   return NextResponse.json({ unlocked: true });
 }

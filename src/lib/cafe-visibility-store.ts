@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { getSiteAdminPassword } from "@/lib/site-admin-auth";
 import {
   CAFE_SECTION_KEYS,
   CAFE_SECTION_META,
@@ -114,5 +115,5 @@ export async function saveCafeVisibility(
 }
 
 export function getCafeSettingsPassword() {
-  return process.env.CAFE_SETTINGS_PASSWORD?.trim() || "MILDRCAFE";
+  return getSiteAdminPassword();
 }
