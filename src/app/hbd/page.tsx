@@ -4,14 +4,15 @@ import { HbdScroll } from "@/components/hbd/HbdScroll";
 import { BackToTop } from "@/components/layout/BackToTop";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
+import { SectionScrollRestore } from "@/components/layout/SectionScrollRestore";
 import { MediaProtection } from "@/components/media/MediaProtection";
 import { mildRData } from "@/data/vtuber-data";
 import { loadApprovedHbdWishes } from "@/lib/hbd-submissions-store";
 
 export const metadata: Metadata = {
-  title: "Birthday Wishes | Mild-R Fanclub",
+  title: "คำอวยพรวันเกิด | Mild-R Fanclub",
   description:
-    "แกลเลอรีอวยพรวันเกิด Mild-R จากฮันนี่ — เลื่อนดูคำอวยพรทีละใบ",
+    "คำอวยพรวันเกิด Mild-R จากฮันนี่ — สุขสันต์วันเกิดในโอกาส 12.12.2026",
 };
 
 export const revalidate = 30;
@@ -28,6 +29,7 @@ export default async function HbdPage() {
 
   return (
     <>
+      <SectionScrollRestore />
       <MediaProtection />
       <Header data={mildRData} />
       <main className="flex-1 bg-[#140a0d]">

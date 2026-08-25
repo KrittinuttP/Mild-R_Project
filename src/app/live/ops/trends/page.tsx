@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
 import { AddManualLiveButton } from "@/components/events/AddManualLiveModal";
 import { LiveViewTrendsPanel } from "@/components/events/LiveViewTrendsPanel";
+import { BackLink } from "@/components/layout/BackLink";
 import {
   loadLiveKindStats,
   loadLiveViewPeaks,
@@ -58,7 +58,10 @@ export default async function LiveOpsTrendsPage({ searchParams }: PageProps) {
     <main className="min-h-dvh bg-[#0c0709] px-4 py-10 text-[#fff5f7] sm:px-8">
       <div className="mx-auto max-w-6xl space-y-10">
         <header className="border-b border-[#f3b8c4]/12 pb-6">
-          <p className="text-[0.65rem] tracking-[0.28em] text-[#f3b8c4]/60 uppercase">
+          <BackLink href="/live" className="mb-6">
+            กลับหน้าหลัก
+          </BackLink>
+          <p className="mt-6 text-[0.65rem] tracking-[0.28em] text-[#f3b8c4]/60 uppercase">
             Internal · noindex
           </p>
           <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
@@ -66,13 +69,6 @@ export default async function LiveOpsTrendsPage({ searchParams }: PageProps) {
               View trends
             </h1>
             <div className="flex flex-wrap items-center gap-2">
-              <Link
-                href="/live"
-                className="inline-flex items-center gap-1.5 border border-[#f3b8c4]/20 bg-[#1a0d12]/50 px-3 py-1.5 text-[0.7rem] tracking-[0.16em] text-[#f3b8c4]/80 uppercase transition hover:border-[#e85a7a]/40 hover:text-[#fff5f7]"
-              >
-                <ArrowLeft className="size-3.5" />
-                กลับหน้าหลัก
-              </Link>
               <AddManualLiveButton />
               <Link
                 href="/live/ops"

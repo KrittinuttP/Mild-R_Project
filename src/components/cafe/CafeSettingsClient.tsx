@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Lock, Unlock, Eye, EyeOff, ArrowLeft, FileLock2, Home } from "lucide-react";
+import { Lock, Unlock, Eye, EyeOff, FileLock2, Home } from "lucide-react";
+
+import { BackLink } from "@/components/layout/BackLink";
 
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -234,7 +236,11 @@ export function CafeSettingsClient() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <BackLink href="/cafe" className="mb-6">
+        กลับหน้าคาเฟ่
+      </BackLink>
+
+      <div className="mt-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-[0.62rem] tracking-[0.24em] text-[#9a7b5a] uppercase">
             Case control · Visibility
@@ -364,16 +370,6 @@ export function CafeSettingsClient() {
         >
           <FileLock2 className="size-4" />
           Secret · เปิดทุกอย่าง
-        </Link>
-        <Link
-          href="/cafe"
-          className={cn(
-            buttonVariants({ variant: "outline", size: "lg" }),
-            "rounded-none border-[#9a7b5a]/45"
-          )}
-        >
-          <ArrowLeft className="size-4" />
-          กลับหน้าคาเฟ่
         </Link>
       </div>
     </div>

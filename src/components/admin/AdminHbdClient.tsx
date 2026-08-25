@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Cake, Check, Lock, X } from "lucide-react";
+import { Cake, Check, Lock, X } from "lucide-react";
+
+import { BackLink } from "@/components/layout/BackLink";
 
 import { buttonVariants } from "@/components/ui/button";
 import type { HbdSubmissionRow } from "@/lib/hbd-submissions-store";
@@ -132,13 +134,9 @@ export function AdminHbdClient() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <Link
-        href="/admin"
-        className="inline-flex items-center gap-2 text-sm text-[#9a7b5a] hover:text-[#c4b8a8]"
-      >
-        <ArrowLeft className="size-3.5" />
+      <BackLink href="/admin" className="mb-6">
         Control desk
-      </Link>
+      </BackLink>
 
       <div className="mt-6 flex items-center gap-3">
         <Cake className="size-6 text-[#c46a7a]" />

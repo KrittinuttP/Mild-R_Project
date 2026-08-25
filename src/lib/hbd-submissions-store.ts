@@ -2,6 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import type { HbdContactChannel } from "@/lib/hbd-upload";
+import { HBD_AVATAR_DEFAULT } from "@/lib/hbd-upload";
 import type { HbdWish } from "@/types/vtuber";
 
 export const HBD_STORAGE_BUCKET = "hbd-uploads";
@@ -60,6 +61,7 @@ export function submissionToWish(row: HbdSubmissionRow): HbdWish {
     message: row.message?.trim() || "สุขสันต์วันเกิด Mild-R 🎂",
     image: row.card_url,
     alt: `Wish from ${row.display_name}`,
+    avatar: row.avatar_url?.trim() || HBD_AVATAR_DEFAULT,
     fromUpload: true,
     loadOnDemand: true,
   };
@@ -74,7 +76,7 @@ export async function loadApprovedHbdWishes(): Promise<HbdWish[]> {
     const { data, error } = await supabase
       .from("mild_r_hbd_wishes_public")
       .select(
-        "id, display_name, message, card_url, status, created_at, approved_at"
+        "id, display_name, message, card_url, avatar_url, status, created_at, approved_at"
       )
       .order("approved_at", { ascending: false });
 
@@ -90,7 +92,7 @@ export async function loadApprovedHbdWishes(): Promise<HbdWish[]> {
         card_path: "",
         card_url: String(row.card_url),
         avatar_path: null,
-        avatar_url: null,
+        avatar_url: (row.avatar_url as string | null) ?? null,
         status: "approved",
         created_at: String(row.created_at),
         approved_at: (row.approved_at as string | null) ?? null,

@@ -7,6 +7,7 @@
     "summary": "คาเฟ่ธีมสถานที่เกิดเหตุลึกลับที่แฟนคลับ Honeycomb จัดทำเอง — ไขปริศนาจากเมนู เก็บกู้เบาะแส และโซนถ่ายรูป",
     "cover": "/assets/images/gallery-02.svg",
     "status": "upcoming",
+    "year": 2026,
     "category": "cafe",
     "highlights": [
       "Caution Tape · เทปเตือนภัยรอบเขตหวงห้าม",
@@ -36,6 +37,7 @@
     "summary": "Fansong ต้นฉบับของ Mild-R — รวมลิงก์รับชมและไฮไลต์ของมิวสิควิดีโอ",
     "cover": "/assets/images/gallery-03.svg",
     "status": "active",
+    "year": 2024,
     "category": "fansong",
     "highlights": [
       "เพลงต้นฉบับ「รักษาหัวใจ」",
@@ -55,24 +57,31 @@
   {
     "id": "hbd",
     "slug": "hbd",
-    "title": "Birthday Wishes",
-    "titleLocal": "แกลเลอรีอวยพรวันเกิด",
-    "summary": "รวมคำอวยพรจากฮันนี่ในรูปแบบเลื่อนดูทีละการ์ด — พร้อมเตรียมรองรับรูปอัปโหลดในอนาคต",
-    "cover": "/assets/images/gallery-01.svg",
+    "title": "คำอวยพรวันเกิด",
+    "titleLocal": "สุขสันต์วันเกิด Mild-R",
+    "summary": "รวมคำอวยพรวันเกิดจากฮันนี่ถึง Mild-R ในโอกาส 12.12.2026",
+    "cover": "/assets/hbd/template/hbd-card-template.png",
     "status": "active",
+    "year": 2026,
     "category": "hbd",
     "highlights": [
-      "Scrollytelling ทีละคำอวยพร",
-      "รองรับรูปประกอบ + credit",
-      "เตรียม flag fromUpload สำหรับ Storage"
+      "จากฮันนี่",
+      "ความทรงจำปีนี้",
+      "วันเกิด 2026"
     ],
     "body": [
-      "โปรเจกต์ HBD รวมคำอวยพรวันเกิดของ Mild-R ไว้ในหน้าประสบการณ์เลื่อนยาว ให้อ่านทีละใบแบบแกลเลอรี",
-      "ตอนนี้ใช้ข้อมูล mock จาก JSON — ภายหลังสามารถดึงรูปจากการอัปโหลดผ่าน Supabase ได้โดยไม่ต้องเปลี่ยนโครงหน้า"
+      "คำอวยพรวันเกิด คือพื้นที่รวมหัวใจจากฮันนี่ ในโอกาสวันเกิด Mild-R ปี 2026",
+      "รวมความรู้สึกที่แฟนๆ ตั้งใจส่งถึง mutant สาวของเรา"
     ],
     "cta": {
-      "label": "เปิดแกลเลอรีอวยพร",
+      "label": "เปิดดูคำอวยพร",
       "url": "/hbd"
-    }
+    },
+    "ctas": [
+      {
+        "label": "ส่งการ์ดอวยพร",
+        "url": "/hbd/upload"
+      }
+    ]
   }
 ]

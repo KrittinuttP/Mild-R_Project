@@ -1,9 +1,7 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-
 import { GalleryBoard } from "@/components/gallery/GalleryBoard";
 import type { GalleryBoardMode, GalleryVariant } from "@/components/gallery/gallery-utils";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
+import { BackLink } from "@/components/layout/BackLink";
 import { cn } from "@/lib/utils";
 import type { GalleryItem } from "@/types/vtuber";
 
@@ -56,13 +54,9 @@ export function GallerySection({
 
       <div className="relative mx-auto max-w-6xl">
         {backHref ? (
-          <Link
-            href={backHref}
-            className="mb-8 inline-flex items-center gap-2 text-sm tracking-wide text-[#f3b8c4]/75 transition hover:text-[#fff5f7]"
-          >
-            <ArrowLeft className="size-4" />
+          <BackLink href={backHref} className="mb-8">
             {backLabel}
-          </Link>
+          </BackLink>
         ) : null}
 
         <ScrollReveal>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { BackLink } from "@/components/layout/BackLink";
 
 import { BackToTop } from "@/components/layout/BackToTop";
 import { Footer } from "@/components/layout/Footer";
@@ -72,17 +72,12 @@ export default async function ProjectsPage({
 
           <div className="relative mx-auto max-w-6xl">
             {category ? (
-              <Link
-                href="/projects"
-                className="text-sm tracking-wide text-[#f3b8c4]/75 transition hover:text-[#fff5f7]"
-              >
-                ← โปรเจกต์ทั้งหมด
-              </Link>
+              <BackLink href="/projects" className="mb-8">
+                โปรเจกต์ทั้งหมด
+              </BackLink>
             ) : null}
 
-            <p
-              className={`text-[0.7rem] tracking-[0.28em] text-[#f3b8c4]/75 uppercase sm:text-sm ${category ? "mt-4" : ""}`}
-            >
+            <p className="text-[0.7rem] tracking-[0.28em] text-[#f3b8c4]/75 uppercase sm:text-sm">
               {eyebrow}
             </p>
             <h1 className="mt-4 max-w-2xl font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">

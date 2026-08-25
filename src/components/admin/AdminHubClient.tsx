@@ -14,6 +14,8 @@ import {
   Unlock,
 } from "lucide-react";
 
+import { BackLink } from "@/components/layout/BackLink";
+
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -200,13 +202,9 @@ export function AdminHubClient() {
           <Unlock className="size-4" />
           Unlock
         </button>
-        <Link
-          href="/"
-          className="mt-4 flex items-center justify-center gap-2 text-sm text-[#9a7b5a] hover:text-[#c4b8a8]"
-        >
-          <Home className="size-3.5" />
+        <BackLink href="/" className="mt-4">
           กลับหน้าหลัก
-        </Link>
+        </BackLink>
       </form>
     );
   }
@@ -277,13 +275,7 @@ export function AdminHubClient() {
       </ul>
 
       <div className="mt-8 flex flex-wrap gap-4 text-sm">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-[#9a7b5a] hover:text-[#c4b8a8]"
-        >
-          <Home className="size-3.5" />
-          หน้าหลัก
-        </Link>
+        <BackLink href="/">หน้าหลัก</BackLink>
         <Link
           href="/hbd/upload"
           className="inline-flex items-center gap-2 text-[#9a7b5a] hover:text-[#c4b8a8]"

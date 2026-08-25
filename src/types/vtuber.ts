@@ -164,6 +164,8 @@ export interface ProjectItem {
   summary: string;
   cover: string;
   status: ProjectStatus;
+  /** Campaign / release year shown on project cards */
+  year?: number;
   category: string;
   highlights?: string[];
   body: string[];
@@ -306,6 +308,8 @@ export interface HbdWish {
   message: string;
   image?: string;
   alt?: string;
+  /** Optional uploader avatar (defaults on UI if missing) */
+  avatar?: string;
   /** Future: sourced from Supabase Storage upload */
   fromUpload?: boolean;
   loadOnDemand?: boolean;

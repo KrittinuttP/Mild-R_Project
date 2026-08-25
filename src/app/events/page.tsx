@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { EventsPageClient } from "@/components/events/EventsPageClient";
+import { BackLink } from "@/components/layout/BackLink";
 import { BackToTop } from "@/components/layout/BackToTop";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
@@ -23,6 +24,9 @@ export default function EventsPage() {
           <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(ellipse_at_20%_0%,rgba(232,90,122,0.18),transparent_55%)]" />
 
           <div className="relative mx-auto max-w-6xl">
+            <BackLink href="/#events" className="mb-8">
+              กลับหน้าแรก
+            </BackLink>
             <p className="text-[0.7rem] tracking-[0.28em] text-[#f3b8c4]/75 uppercase sm:text-sm">
               Events
             </p>

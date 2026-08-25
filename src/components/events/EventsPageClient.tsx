@@ -1,8 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
 import { EventDetailModal } from "@/components/events/EventDetailModal";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
@@ -107,14 +105,6 @@ export function EventsPageClient({ board }: EventsPageClientProps) {
       ) : (
         <p className="text-sm text-[#f3b8c4]/65">ยังไม่มีอีเวนต์</p>
       )}
-
-      <Link
-        href="/#events"
-        className="inline-flex items-center gap-2 text-sm text-[#f3b8c4]/75 transition hover:text-[#fff5f7]"
-      >
-        <ArrowLeft className="size-4" />
-        กลับหน้าแรก
-      </Link>
 
       <EventDetailModal
         event={active}

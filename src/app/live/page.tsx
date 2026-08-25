@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
 import { LiveSchedulePanel } from "@/components/events/LiveSchedulePanel";
+import { BackLink } from "@/components/layout/BackLink";
 import { BackToTop } from "@/components/layout/BackToTop";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
@@ -28,6 +28,9 @@ export default function LivePage() {
           <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(ellipse_at_75%_0%,rgba(232,90,122,0.16),transparent_55%)]" />
 
           <div className="relative mx-auto max-w-6xl">
+            <BackLink href="/#live" className="mb-8">
+              กลับหน้าแรก
+            </BackLink>
             <p className="text-[0.7rem] tracking-[0.28em] text-[#f3b8c4]/75 uppercase sm:text-sm">
               Live
             </p>
@@ -43,14 +46,7 @@ export default function LivePage() {
               <LiveSchedulePanel />
             </div>
 
-            <div className="mt-12 flex flex-wrap items-center justify-between gap-4 sm:mt-16">
-              <Link
-                href="/#live"
-                className="inline-flex items-center gap-2 text-sm text-[#f3b8c4]/75 transition hover:text-[#fff5f7]"
-              >
-                <ArrowLeft className="size-4" />
-                กลับหน้าแรก
-              </Link>
+            <div className="mt-12 flex justify-end sm:mt-16">
               <Link
                 href="/live/ops/trends"
                 className="text-[0.6rem] tracking-[0.28em] text-[#f3b8c4]/20 uppercase transition hover:text-[#f3b8c4]/45"

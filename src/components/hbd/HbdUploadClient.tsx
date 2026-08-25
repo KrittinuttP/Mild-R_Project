@@ -8,7 +8,9 @@ import {
   type FormEvent,
 } from "react";
 import Link from "next/link";
-import { ArrowLeft, Download, Eraser, Loader2, Pencil, Sparkles, Upload, X } from "lucide-react";
+import { Download, Eraser, Loader2, Pencil, Sparkles, Upload, X } from "lucide-react";
+
+import { BackLink } from "@/components/layout/BackLink";
 
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -71,11 +73,14 @@ function clearFormCache() {
 }
 
 const fieldClass =
-  "mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-[#f7d7de] outline-none transition placeholder:text-[#f3b8c4]/35 focus:border-[#e85a7a]/55 focus:bg-white/[0.06] focus:ring-2 focus:ring-[#e85a7a]/20";
+  "mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm leading-normal text-[#f7d7de] outline-none transition placeholder:text-[#f3b8c4]/35 focus:border-[#e85a7a]/55 focus:bg-white/[0.06] focus:ring-2 focus:ring-[#e85a7a]/20";
 
-const labelClass = "text-sm font-medium text-[#f7d7de]/90";
+const labelClass = "text-sm font-medium tracking-wide text-[#f7d7de]/90";
 
 const hintClass = "mt-1.5 text-xs leading-relaxed text-[#f3b8c4]/55";
+
+const softBtnClass =
+  "inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs text-[#f3b8c4]/80 ring-1 ring-white/15 transition hover:bg-white/5 hover:text-[#f7d7de]";
 
 function revokeUrl(url?: string) {
   if (url?.startsWith("blob:")) URL.revokeObjectURL(url);
@@ -309,7 +314,7 @@ export function HbdUploadClient() {
         aria-hidden
       />
 
-      <div className="relative mx-auto max-w-lg px-4 py-10 sm:px-6 sm:py-14">
+      <div className="relative mx-auto max-w-6xl px-5 pb-24 pt-28 sm:px-10 sm:pt-32 lg:px-16">
         {clearConfirmOpen ? (
           <div
             className="fixed inset-0 z-[80] flex items-center justify-center bg-[#140a0d]/75 p-4 backdrop-blur-sm"
@@ -353,16 +358,13 @@ export function HbdUploadClient() {
           </div>
         ) : null}
 
-        <Link
-          href="/hbd"
-          className="inline-flex items-center gap-2 rounded-full px-1 py-1 text-sm text-[#f3b8c4]/70 transition hover:text-[#f7d7de]"
-        >
-          <ArrowLeft className="size-3.5" />
-          กลับแกลเลอรี HBD
-        </Link>
+        <BackLink href="/hbd" className="mb-8">
+          กลับไปดูคำอวยพร
+        </BackLink>
 
+        <div className="mx-auto max-w-lg">
         {/* 1. Hero */}
-        <header className="mt-8 text-center">
+        <header className="text-center">
           <p className="inline-flex rounded-full bg-[#e85a7a]/15 px-3 py-1 text-[0.7rem] tracking-[0.2em] text-[#f3b8c4] uppercase">
             Birthday · 12.12.2026
           </p>
@@ -382,13 +384,13 @@ export function HbdUploadClient() {
         {/* 2. Template + download */}
         {phase === "form" ? (
           <section className="mt-10 flex flex-col items-center">
-            <p className="mb-3 text-xs tracking-[0.16em] text-[#f3b8c4]/55 uppercase">
+            <p className="mb-3 text-xs tracking-[0.18em] text-[#f3b8c4]/60 uppercase">
               ตัวอย่างการ์ด
             </p>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={HBD_CARD_TEMPLATE.path}
-              alt="ตัวอย่าง template การ์ดอวยพร"
+              alt="ตัวอย่างเทมเพลตการ์ดอวยพร"
               className="h-auto w-full max-w-[13rem] rounded-2xl object-contain shadow-[0_20px_50px_rgba(0,0,0,0.45)] ring-1 ring-white/10 sm:max-w-[14.5rem]"
             />
             <a
@@ -396,11 +398,11 @@ export function HbdUploadClient() {
               download={HBD_CARD_TEMPLATE.filename}
               className={cn(
                 buttonVariants({ size: "lg" }),
-                "mt-5 w-full max-w-xs rounded-2xl border-transparent bg-[#e85a7a] text-base font-semibold text-[#140a0d] shadow-[0_8px_24px_rgba(232,90,122,0.35)] hover:bg-[#f3b8c4]"
+                "mt-5 w-full max-w-xs rounded-2xl border-transparent bg-[#e85a7a] text-sm font-semibold text-[#140a0d] shadow-[0_8px_24px_rgba(232,90,122,0.35)] hover:bg-[#f3b8c4]"
               )}
             >
-              <Download className="size-5" />
-              โหลด template
+              <Download className="size-4" />
+              โหลดเทมเพลต
             </a>
           </section>
         ) : null}
@@ -419,19 +421,33 @@ export function HbdUploadClient() {
             {/* 3. Card upload */}
             <section className="rounded-3xl bg-white/[0.03] p-5 ring-1 ring-white/10 sm:p-6">
               <div className="flex items-center gap-2">
-                <Upload className="size-4 text-[#e85a7a]" />
+                <Upload className="size-4 shrink-0 text-[#e85a7a]" />
                 <h2 className={labelClass}>อัปโหลดการ์ด *</h2>
               </div>
               <p className={hintClass}>
-                ใช้ไฟล์ที่แก้จาก template · สูงสุด 5 MB
+                ใช้ไฟล์ที่แก้จากเทมเพลต · สูงสุด 5 MB
               </p>
               <input
                 ref={cardInputRef}
                 type="file"
                 accept={HBD_CARD_TEMPLATE.accept}
                 onChange={onCardChange}
-                className="mt-4 block w-full text-sm text-[#f3b8c4] file:mr-3 file:rounded-xl file:border-0 file:bg-[#e85a7a]/25 file:px-4 file:py-2.5 file:font-medium file:text-[#f7d7de] hover:file:bg-[#e85a7a]/35"
+                className="sr-only"
               />
+              <button
+                type="button"
+                onClick={() => cardInputRef.current?.click()}
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "lg" }),
+                  "mt-4 w-full rounded-2xl border-white/15 bg-white/[0.03] text-sm text-[#f7d7de] hover:border-[#e85a7a]/40 hover:bg-[#e85a7a]/10 hover:text-[#fff5f7]"
+                )}
+              >
+                <Upload className="size-4" />
+                เลือกไฟล์การ์ด
+              </button>
+              <p className="mt-2 truncate text-xs text-[#f3b8c4]/60">
+                {cardFile ? cardFile.name : "ยังไม่ได้เลือกไฟล์"}
+              </p>
               {cardPreviewUrl ? (
                 <div className="mt-4 flex flex-col items-start gap-2">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -440,11 +456,7 @@ export function HbdUploadClient() {
                     alt="พรีวิวการ์ดที่อัปโหลด"
                     className="h-auto w-full max-w-[12rem] rounded-2xl object-contain ring-1 ring-white/10"
                   />
-                  <button
-                    type="button"
-                    onClick={clearCard}
-                    className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs text-[#f3b8c4]/80 ring-1 ring-white/15 transition hover:bg-white/5 hover:text-[#f7d7de]"
-                  >
+                  <button type="button" onClick={clearCard} className={softBtnClass}>
                     <X className="size-3.5" />
                     ล้างรูปการ์ด
                   </button>
@@ -454,17 +466,17 @@ export function HbdUploadClient() {
 
             {/* 4. Name + avatar */}
             <section className="rounded-3xl bg-white/[0.03] p-5 ring-1 ring-white/10 sm:p-6">
-              <h2 className={labelClass}>Avatar</h2>
+              <h2 className={labelClass}>ชื่อและรูปโปรไฟล์</h2>
               <div className="mt-4 flex items-start gap-4">
                 <div className="shrink-0 text-center">
                   <label className="cursor-pointer">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={avatarSrc}
-                      alt="Avatar"
+                      alt="รูปโปรไฟล์"
                       className="size-[4.5rem] rounded-full object-cover ring-2 ring-[#e85a7a]/35"
                     />
-                    <span className="mt-2 block text-[0.65rem] text-[#e85a7a]">
+                    <span className="mt-2 block text-xs text-[#e85a7a]">
                       เปลี่ยนรูป
                     </span>
                     <input
@@ -479,17 +491,15 @@ export function HbdUploadClient() {
                     <button
                       type="button"
                       onClick={clearAvatar}
-                      className="mt-2 inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[0.65rem] text-[#f3b8c4]/75 ring-1 ring-white/12 transition hover:bg-white/5 hover:text-[#f7d7de]"
+                      className={cn(softBtnClass, "mt-2")}
                     >
-                      <X className="size-3" />
+                      <X className="size-3.5" />
                       ล้าง
                     </button>
                   ) : null}
                 </div>
                 <label className="min-w-0 flex-1">
-                  <span className="text-xs text-[#f3b8c4]/70">
-                    ชื่อที่แสดง *
-                  </span>
+                  <span className={labelClass}>ชื่อที่แสดง *</span>
                   <input
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
@@ -498,16 +508,16 @@ export function HbdUploadClient() {
                     required
                   />
                   <p className={hintClass}>
-                    Avatar ไม่บังคับ · ไม่ใส่ใช้รูป default · สูงสุด 2 MB
+                    รูปโปรไฟล์ไม่บังคับ · ไม่ใส่ใช้รูปเริ่มต้น · สูงสุด 2 MB
                   </p>
                 </label>
               </div>
             </section>
 
             {/* 5. Message */}
-            <label className="block">
+            <label className="block rounded-3xl bg-white/[0.03] p-5 ring-1 ring-white/10 sm:p-6">
               <span className={labelClass}>ข้อความอวยพร</span>
-              <span className="ml-2 text-xs text-[#f3b8c4]/45">(ไม่บังคับ)</span>
+              <span className="ml-2 text-xs text-[#f3b8c4]/50">ไม่บังคับ</span>
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
@@ -518,10 +528,8 @@ export function HbdUploadClient() {
             </label>
 
             {/* 6. Contact last */}
-            <fieldset className="rounded-3xl bg-white/[0.03] p-5 ring-1 ring-white/10 sm:p-6">
-              <legend className={cn(labelClass, "px-0")}>
-                ช่องทางติดต่อ *
-              </legend>
+            <section className="rounded-3xl bg-white/[0.03] p-5 ring-1 ring-white/10 sm:p-6">
+              <h2 className={labelClass}>ช่องทางติดต่อ *</h2>
               <p className={hintClass}>
                 ไม่แสดงบนเว็บ — ใช้ติดต่อเมื่อมีปัญหาเท่านั้น
               </p>
@@ -532,7 +540,7 @@ export function HbdUploadClient() {
                     type="button"
                     onClick={() => setContactChannel(channel)}
                     className={cn(
-                      "flex-1 rounded-xl px-3 py-2.5 text-sm font-medium tracking-wide transition",
+                      "flex-1 rounded-xl px-3 py-2.5 text-sm font-medium transition",
                       contactChannel === channel
                         ? "bg-[#e85a7a] text-[#140a0d] shadow-sm"
                         : "text-[#f3b8c4]/70 hover:text-[#f7d7de]"
@@ -542,16 +550,23 @@ export function HbdUploadClient() {
                   </button>
                 ))}
               </div>
-              <input
-                value={contactHandle}
-                onChange={(e) => setContactHandle(e.target.value)}
-                className={fieldClass}
-                placeholder={
-                  contactChannel === "x" ? "@handle" : "username หรือ user#0000"
-                }
-                required
-              />
-            </fieldset>
+              <label className="mt-1 block">
+                <span className="sr-only">
+                  {contactChannel === "x" ? "X handle" : "Discord"}
+                </span>
+                <input
+                  value={contactHandle}
+                  onChange={(e) => setContactHandle(e.target.value)}
+                  className={fieldClass}
+                  placeholder={
+                    contactChannel === "x"
+                      ? "@handle"
+                      : "username หรือ user#0000"
+                  }
+                  required
+                />
+              </label>
+            </section>
 
             {error ? (
               <p
@@ -568,7 +583,7 @@ export function HbdUploadClient() {
                 disabled={loading}
                 className={cn(
                   buttonVariants({ size: "lg" }),
-                  "h-12 w-full rounded-2xl border-transparent bg-[#e85a7a] text-base font-semibold text-[#140a0d] shadow-[0_8px_24px_rgba(232,90,122,0.3)] hover:bg-[#f3b8c4]"
+                  "h-12 w-full rounded-2xl border-transparent bg-[#e85a7a] text-sm font-semibold text-[#140a0d] shadow-[0_8px_24px_rgba(232,90,122,0.3)] hover:bg-[#f3b8c4]"
                 )}
               >
                 {loading ? (
@@ -584,7 +599,7 @@ export function HbdUploadClient() {
                 disabled={loading}
                 className={cn(
                   buttonVariants({ variant: "outline", size: "lg" }),
-                  "h-11 w-full rounded-2xl border-white/15 bg-transparent text-[#f3b8c4] hover:bg-white/5 hover:text-[#f7d7de]"
+                  "h-11 w-full rounded-2xl border-white/15 bg-transparent text-sm text-[#f3b8c4] hover:bg-white/5 hover:text-[#f7d7de]"
                 )}
               >
                 <Eraser className="size-4" />
@@ -624,7 +639,7 @@ export function HbdUploadClient() {
                     >
                       จาก {preview.displayName}
                     </p>
-                    <p className="text-xs text-[#f3b8c4]/50">
+                    <p className="mt-1 text-xs leading-relaxed text-[#f3b8c4]/55">
                       ช่องทางติดต่อเก็บไว้กับทีม · ไม่แสดงบนเว็บ
                     </p>
                   </div>
@@ -634,8 +649,8 @@ export function HbdUploadClient() {
                     {preview.message}
                   </p>
                 ) : (
-                  <p className="mt-4 text-sm text-[#f3b8c4]/40 italic">
-                    (ไม่มีข้อความอวยพร)
+                  <p className="mt-4 text-sm text-[#f3b8c4]/45">
+                    ไม่มีข้อความอวยพร
                   </p>
                 )}
               </div>
@@ -683,8 +698,8 @@ export function HbdUploadClient() {
             <p className={cn(DISPLAY, "text-2xl font-bold text-[#fff5f7]")}>
               ขอบคุณนะฮันนี่
             </p>
-            <p className="mt-3 text-sm text-[#f3b8c4]/80">
-              การ์ดจะขึ้นบนหน้า HBD หลังทีมอนุมัติ
+            <p className="mt-3 text-sm leading-relaxed text-[#f3b8c4]/80">
+              การ์ดจะขึ้นในหน้าคำอวยพรหลังทีมอนุมัติ
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link
@@ -694,7 +709,7 @@ export function HbdUploadClient() {
                   "rounded-2xl border-transparent bg-[#e85a7a] font-semibold text-[#140a0d] hover:bg-[#f3b8c4]"
                 )}
               >
-                ไปแกลเลอรี HBD
+                ไปดูคำอวยพร
               </Link>
               <button
                 type="button"
@@ -709,6 +724,7 @@ export function HbdUploadClient() {
             </div>
           </div>
         ) : null}
+        </div>
       </div>
     </div>
   );
