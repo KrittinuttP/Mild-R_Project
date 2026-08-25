@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { FileJson, Link2, Plus, Trash2 } from "lucide-react";
+import { Eraser, FileJson, Link2, Plus, Trash2, Users } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -97,8 +97,14 @@ function resolveIdFromLink(input: string): string | null {
 const SAMPLE_MEMBER_LINKS = `https://www.youtube.com/live/XZcXaFlzJzc
 `;
 
-/** One YouTube link (or bare id) per line → member draft rows */
-function parseMemberLinksText(text: string): {
+const SAMPLE_COLLAB_LINKS = `https://www.youtube.com/live/
+`;
+
+/** One YouTube link (or bare id) per line → draft rows for Member or Collab import */
+function parseYoutubeLinksText(
+  text: string,
+  mode: "member" | "collab"
+): {
   rows: DraftRow[];
   error?: string;
 } {
@@ -107,7 +113,13 @@ function parseMemberLinksText(text: string): {
     .map((l) => l.trim())
     .filter(Boolean);
   if (lines.length === 0) {
-    return { rows: [], error: "วางลิงก์ YouTube อย่างน้อย 1 บรรทัด" };
+    return {
+      rows: [],
+      error:
+        mode === "member"
+          ? "วางลิงก์ YouTube Member อย่างน้อย 1 บรรทัด"
+          : "วางลิงก์ YouTube Collab อย่างน้อย 1 บรรทัด",
+    };
   }
   const rows: DraftRow[] = [];
   const errors: string[] = [];
@@ -124,12 +136,12 @@ function parseMemberLinksText(text: string): {
     rows.push({
       ...emptyRow(),
       key: crypto.randomUUID(),
-      member: true,
+      member: mode === "member",
+      collab: mode === "collab",
+      own: mode === "member",
       youtubeUrl: line.startsWith("http")
         ? line
         : `https://www.youtube.com/watch?v=${id}`,
-      own: true,
-      collab: false,
     });
   }
   if (rows.length === 0) {
@@ -282,8 +294,15 @@ function toSubmitItems(rows: DraftRow[]): SubmitItem[] {
       return {
         member: true,
         url: row.youtubeUrl.trim(),
-        own: row.own,
+        own: true,
         collab: row.collab,
+      };
+    }
+    if (!row.member && row.collab && resolveIdFromLink(row.youtubeUrl)) {
+      return {
+        member: false,
+        collab: true,
+        url: row.youtubeUrl.trim(),
       };
     }
     const mild = LUMINA_CHANNELS.find((c) => c.isMain);
@@ -308,7 +327,14 @@ function validateRows(rows: DraftRow[]): string | null {
     if (row.member && resolveIdFromLink(row.youtubeUrl)) {
       continue;
     }
-    if (row.member && row.youtubeUrl.trim() && !resolveIdFromLink(row.youtubeUrl)) {
+    if (!row.member && row.collab && resolveIdFromLink(row.youtubeUrl)) {
+      continue;
+    }
+    if (
+      (row.member || row.collab) &&
+      row.youtubeUrl.trim() &&
+      !resolveIdFromLink(row.youtubeUrl)
+    ) {
       return `รายการ ${i + 1}: ลิงก์ YouTube ไม่ถูกต้อง`;
     }
     if (!row.title.trim()) {
@@ -326,11 +352,12 @@ export function AddManualLiveButton() {
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<DraftRow[]>([emptyRow()]);
   const [jsonText, setJsonText] = useState(SAMPLE_JSON);
-  const [tab, setTab] = useState<"form" | "json" | "member">("form");
+  const [tab, setTab] = useState<"form" | "json" | "member" | "collab">("form");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [memberLinksText, setMemberLinksText] = useState(SAMPLE_MEMBER_LINKS);
+  const [collabLinksText, setCollabLinksText] = useState(SAMPLE_COLLAB_LINKS);
 
   const channelOptions = useMemo(
     () =>
@@ -358,6 +385,7 @@ export function AddManualLiveButton() {
         replaced?: number;
         skippedMatchedReal?: number;
         memberImported?: number;
+        collabImported?: number;
         skippedErrors?: string[];
       };
       if (!res.ok) {
@@ -374,6 +402,9 @@ export function AddManualLiveButton() {
         `บันทึกแล้ว ${data.saved ?? items.length} รายการ` +
           (typeof data.memberImported === "number" && data.memberImported > 0
             ? ` · Member จากลิงก์ ${data.memberImported}`
+            : "") +
+          (typeof data.collabImported === "number" && data.collabImported > 0
+            ? ` · Collab จากลิงก์ ${data.collabImported}`
             : "") +
           (typeof data.replaced === "number" && data.replaced > 0
             ? ` · ทับ mock เดิม ${data.replaced} แถว`
@@ -417,8 +448,8 @@ export function AddManualLiveButton() {
               เพิ่มตัวอย่างไลฟ์ล่วงหน้า
             </DialogTitle>
             <DialogDescription className="text-[#f3b8c4]/70">
-              Mock ใส่รายละเอียดเอง · Member ใส่แค่ลิงก์ YouTube แล้วดึงทุกอย่างจาก
-              API
+              Mock ใส่รายละเอียดเอง · Member = ลิงก์ช่อง Mild-R เท่านั้น · Collab =
+              ลิงก์ช่องอื่น
             </DialogDescription>
           </DialogHeader>
 
@@ -447,6 +478,19 @@ export function AddManualLiveButton() {
             >
               <Link2 className="size-3.5" />
               Member
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab("collab")}
+              className={cn(
+                "inline-flex items-center gap-1.5 px-3 py-1.5 text-[0.65rem] tracking-[0.16em] uppercase",
+                tab === "collab"
+                  ? "border border-[#d4a574]/50 bg-[#d4a574]/12 text-[#e8c49a]"
+                  : "border border-[#f3b8c4]/15 text-[#f3b8c4]/65"
+              )}
+            >
+              <Users className="size-3.5" />
+              Collab
             </button>
             <button
               type="button"
@@ -578,7 +622,8 @@ export function AddManualLiveButton() {
                         className="w-full border border-[#9b8cff]/30 bg-[#10070b] px-2.5 py-2 text-sm text-[#fff5f7] outline-none focus:border-[#9b8cff]/55"
                       />
                       <span className="block text-[0.65rem] text-[#cfc6ff]/55">
-                        มีลิงก์ = ดึงจาก YouTube · ไม่มี = จองตารางด้วยชื่อ/วัน/เวลา
+                        มีลิงก์ = ดึงจาก YouTube (รับเฉพาะช่อง Mild-R) · ไม่มี =
+                        จองตารางด้วยชื่อ/วัน/เวลา
                       </span>
                     </label>
                   ) : null}
@@ -718,33 +763,56 @@ export function AddManualLiveButton() {
           ) : tab === "member" ? (
             <div className="mt-4 space-y-3">
               <p className="text-xs text-[#cfc6ff]/75">
-                วางลิงก์ YouTube Member ทีละบรรทัด · ดึงชื่อ ปก เวลา ช่อง
-                สถิติจาก API อัตโนมัติ
+                วางลิงก์ YouTube Member ทีละบรรทัด ·{" "}
+                <span className="text-[#cfc6ff]">รับเฉพาะช่อง Mild-R</span> ·
+                ดึงชื่อ ปก เวลา สถิติจาก API
               </p>
-              <textarea
-                value={memberLinksText}
-                onChange={(e) => setMemberLinksText(e.target.value)}
-                rows={12}
-                placeholder={
-                  "https://www.youtube.com/live/…\nhttps://www.youtube.com/watch?v=…"
-                }
-                className="w-full resize-y border border-[#9b8cff]/30 bg-[#10070b] px-3 py-2 font-mono text-xs text-[#f7d7de] outline-none focus:border-[#9b8cff]/55"
-                spellCheck={false}
-              />
-              <p className="text-[0.65rem] text-[#cfc6ff]/50">
-                {
-                  memberLinksText
-                    .split(/\r?\n/)
-                    .map((l) => l.trim())
-                    .filter(Boolean).length
-                }{" "}
-                บรรทัด
-              </p>
+              <div className="relative">
+                <textarea
+                  value={memberLinksText}
+                  onChange={(e) => setMemberLinksText(e.target.value)}
+                  rows={12}
+                  placeholder={
+                    "https://www.youtube.com/live/…\nhttps://www.youtube.com/watch?v=…"
+                  }
+                  className="w-full resize-y border border-[#9b8cff]/30 bg-[#10070b] px-3 py-2 font-mono text-xs text-[#f7d7de] outline-none focus:border-[#9b8cff]/55"
+                  spellCheck={false}
+                />
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-[0.65rem] text-[#cfc6ff]/50">
+                  {
+                    memberLinksText
+                      .split(/\r?\n/)
+                      .map((l) => l.trim())
+                      .filter(Boolean).length
+                  }{" "}
+                  บรรทัด
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMemberLinksText("");
+                    setError(null);
+                    setMessage(null);
+                  }}
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "sm" }),
+                    "inline-flex items-center gap-1.5 rounded-none border-[#9b8cff]/30 bg-transparent text-[#cfc6ff]"
+                  )}
+                >
+                  <Eraser className="size-3.5" />
+                  เคลียร์
+                </button>
+              </div>
               <button
                 type="button"
                 disabled={busy}
                 onClick={() => {
-                  const parsed = parseMemberLinksText(memberLinksText);
+                  const parsed = parseYoutubeLinksText(
+                    memberLinksText,
+                    "member"
+                  );
                   if (parsed.error && parsed.rows.length === 0) {
                     setError(parsed.error);
                     return;
@@ -761,6 +829,72 @@ export function AddManualLiveButton() {
                 {busy ? "กำลังดึงจาก YouTube…" : "บันทึก Member จากลิงก์"}
               </button>
             </div>
+          ) : tab === "collab" ? (
+            <div className="mt-4 space-y-3">
+              <p className="text-xs text-[#e8c49a]/85">
+                วางลิงก์ YouTube Collab ทีละบรรทัด · รับช่องอื่น (หรือ Mild-R
+                ที่มี ft.) · ดึงชื่อ ปก เวลา สถิติจาก API
+              </p>
+              <textarea
+                value={collabLinksText}
+                onChange={(e) => setCollabLinksText(e.target.value)}
+                rows={12}
+                placeholder={
+                  "https://www.youtube.com/live/…\nhttps://www.youtube.com/watch?v=…"
+                }
+                className="w-full resize-y border border-[#d4a574]/35 bg-[#10070b] px-3 py-2 font-mono text-xs text-[#f7d7de] outline-none focus:border-[#d4a574]/55"
+                spellCheck={false}
+              />
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-[0.65rem] text-[#e8c49a]/55">
+                  {
+                    collabLinksText
+                      .split(/\r?\n/)
+                      .map((l) => l.trim())
+                      .filter(Boolean).length
+                  }{" "}
+                  บรรทัด
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCollabLinksText("");
+                    setError(null);
+                    setMessage(null);
+                  }}
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "sm" }),
+                    "inline-flex items-center gap-1.5 rounded-none border-[#d4a574]/35 bg-transparent text-[#e8c49a]"
+                  )}
+                >
+                  <Eraser className="size-3.5" />
+                  เคลียร์
+                </button>
+              </div>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => {
+                  const parsed = parseYoutubeLinksText(
+                    collabLinksText,
+                    "collab"
+                  );
+                  if (parsed.error && parsed.rows.length === 0) {
+                    setError(parsed.error);
+                    return;
+                  }
+                  if (parsed.error) setError(parsed.error);
+                  else setError(null);
+                  void submit(parsed.rows);
+                }}
+                className={cn(
+                  buttonVariants({ size: "lg" }),
+                  "w-full rounded-xl border-transparent bg-[#d4a574] text-[#140a0d] hover:bg-[#e0b88a] disabled:opacity-50"
+                )}
+              >
+                {busy ? "กำลังดึงจาก YouTube…" : "บันทึก Collab จากลิงก์"}
+              </button>
+            </div>
           ) : (
             <div className="mt-4 space-y-3">
               <p className="text-xs text-[#f3b8c4]/60">
@@ -768,7 +902,10 @@ export function AddManualLiveButton() {
                 <code className="text-[#cfc6ff]/90">member: true</code> +
                 title/date (ไม่มี url) · Member จริง:{" "}
                 <code className="text-[#cfc6ff]/90">member: true</code> +{" "}
-                <code className="text-[#cfc6ff]/90">url</code>
+                <code className="text-[#cfc6ff]/90">url</code> (Mild-R เท่านั้น)
+                · Collab จริง:{" "}
+                <code className="text-[#e8c49a]/90">collab: true</code> +{" "}
+                <code className="text-[#e8c49a]/90">url</code>
               </p>
               <textarea
                 value={jsonText}
@@ -778,6 +915,21 @@ export function AddManualLiveButton() {
                 spellCheck={false}
               />
               <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setJsonText("");
+                    setError(null);
+                    setMessage(null);
+                  }}
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "sm" }),
+                    "inline-flex items-center gap-1.5 rounded-none border-[#f3b8c4]/25 bg-transparent"
+                  )}
+                >
+                  <Eraser className="size-3.5" />
+                  เคลียร์
+                </button>
                 <button
                   type="button"
                   onClick={() => {

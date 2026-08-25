@@ -259,18 +259,22 @@ export async function POST(request: Request) {
     );
   }
 
-  const memberVideoIds: string[] = [];
+  /** Member or Collab paste-links that need YouTube Data API */
+  const linkVideoIds: string[] = [];
   for (let i = 0; i < items.length; i++) {
-    if (!parseMemberFlag(items[i])) continue;
-    const link = youtubeLinkFromItem(items[i]);
+    const raw = items[i];
+    const link = youtubeLinkFromItem(raw);
     const id = resolveVideoId(link);
-    if (id) memberVideoIds.push(id);
+    if (!id) continue;
+    const isMember = parseMemberFlag(raw);
+    const isCollab = parseCollabFlag(raw) === true;
+    if (isMember || isCollab) linkVideoIds.push(id);
   }
 
   let ytById = new Map<string, YtVideoPayload>();
-  if (memberVideoIds.length > 0) {
+  if (linkVideoIds.length > 0) {
     try {
-      ytById = await fetchYoutubeVideos(memberVideoIds);
+      ytById = await fetchYoutubeVideos([...new Set(linkVideoIds)]);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       return NextResponse.json(
@@ -284,88 +288,128 @@ export async function POST(request: Request) {
   const errors: string[] = [];
   const touchedDates = new Set<string>();
 
+  function buildYtImportRow(options: {
+    yt: YtVideoPayload;
+    link: string;
+    is_member: boolean;
+    is_own_channel: boolean;
+    is_collab: boolean;
+    source: string;
+  }): BuiltRow {
+    const { yt, link, is_member, is_own_channel, is_collab, source } = options;
+    const scheduledRaw =
+      yt.scheduledStart ?? yt.actualStart ?? new Date().toISOString();
+    const scheduled = snapScheduledToHalfHour(scheduledRaw) ?? scheduledRaw;
+    const scheduledFirst =
+      snapScheduledToHalfHour(yt.scheduledStart ?? yt.actualStart) ?? scheduled;
+    const localDate = bangkokDateFromIso(scheduled);
+    if (localDate) touchedDates.add(localDate);
+
+    const sourceTitle = is_own_channel
+      ? "Mild-R"
+      : (getLuminaSourceTitle(yt.channelId) ??
+        resolveLuminaChannel(yt.channelId)?.title ??
+        null);
+
+    return {
+      video_id: yt.id,
+      channel_id: yt.channelId || (is_own_channel ? MILD_R_CHANNEL_ID : null),
+      channel_name: yt.channelTitle || null,
+      source_title: sourceTitle,
+      title: yt.title || "Untitled live",
+      url: `https://www.youtube.com/watch?v=${yt.id}`,
+      scheduled_start: yt.scheduledStart
+        ? (snapScheduledToHalfHour(yt.scheduledStart) ?? yt.scheduledStart)
+        : yt.actualStart,
+      scheduled_start_first: scheduledFirst,
+      actual_start: yt.actualStart,
+      actual_end: yt.actualEnd,
+      thumbnail_url: yt.thumbnailUrl,
+      thumbnail_cached_url: null,
+      views_on_end: yt.actualEnd ? yt.viewCount || null : null,
+      latest_views: yt.viewCount,
+      is_own_channel,
+      is_collab,
+      project: "Lumina",
+      metadata: {
+        source,
+        preview: false,
+        member: is_member,
+        linked_video_id: yt.id,
+        privacy_status: yt.privacyStatus,
+        live_broadcast_content: yt.liveBroadcastContent,
+        description: yt.description,
+        tags: yt.tags,
+        likes: yt.likeCount,
+        local_date: localDate,
+        timezone: "Asia/Bangkok",
+        imported_from: link,
+        scheduled_raw: yt.scheduledStart,
+        scheduled_snapped:
+          Boolean(yt.scheduledStart) &&
+          snapScheduledToHalfHour(yt.scheduledStart) !== yt.scheduledStart,
+      },
+    };
+  }
+
   for (let i = 0; i < items.length; i++) {
     const raw = items[i] as ManualLiveInput;
     const is_member = parseMemberFlag(raw);
     const collabFlag = parseCollabFlag(raw);
     const ownFlag = parseOwnFlag(raw);
+    const link = youtubeLinkFromItem(raw);
+    const ytVideoId = resolveVideoId(link);
 
-    if (is_member) {
-      const link = youtubeLinkFromItem(raw);
-      const videoId = resolveVideoId(link);
-
-      // Member + YouTube link → real row from Data API
-      if (videoId) {
-        const yt = ytById.get(videoId);
-        if (!yt) {
-          errors.push(`[${i}] YouTube ไม่พบวิดีโอ ${videoId}`);
-          continue;
-        }
-
-        const auto = classifyLiveOwnership(yt.channelId, yt.title);
-        const is_own_channel = ownFlag != null ? ownFlag : auto.is_own_channel;
-        const is_collab = collabFlag != null ? collabFlag : auto.is_collab;
-        const scheduledRaw =
-          yt.scheduledStart ?? yt.actualStart ?? new Date().toISOString();
-        const scheduled = snapScheduledToHalfHour(scheduledRaw) ?? scheduledRaw;
-        const scheduledFirst =
-          snapScheduledToHalfHour(yt.scheduledStart ?? yt.actualStart) ??
-          scheduled;
-        const localDate = bangkokDateFromIso(scheduled);
-        if (localDate) touchedDates.add(localDate);
-
-        const sourceTitle = is_own_channel
-          ? "Mild-R"
-          : (getLuminaSourceTitle(yt.channelId) ??
-            resolveLuminaChannel(yt.channelId)?.title ??
-            null);
-
-        rows.push({
-          video_id: videoId,
-          channel_id:
-            yt.channelId || (is_own_channel ? MILD_R_CHANNEL_ID : null),
-          channel_name: yt.channelTitle || null,
-          source_title: sourceTitle,
-          title: yt.title || "Untitled live",
-          url: `https://www.youtube.com/watch?v=${videoId}`,
-          scheduled_start: yt.scheduledStart
-            ? (snapScheduledToHalfHour(yt.scheduledStart) ?? yt.scheduledStart)
-            : yt.actualStart,
-          scheduled_start_first: scheduledFirst,
-          actual_start: yt.actualStart,
-          actual_end: yt.actualEnd,
-          thumbnail_url: yt.thumbnailUrl,
-          thumbnail_cached_url: null,
-          views_on_end: yt.actualEnd ? yt.viewCount || null : null,
-          latest_views: yt.viewCount,
-          is_own_channel,
-          is_collab,
-          project: "Lumina",
-          metadata: {
-            source: "manual_member_link",
-            preview: false,
-            member: true,
-            linked_video_id: videoId,
-            privacy_status: yt.privacyStatus,
-            live_broadcast_content: yt.liveBroadcastContent,
-            description: yt.description,
-            tags: yt.tags,
-            likes: yt.likeCount,
-            local_date: localDate,
-            timezone: "Asia/Bangkok",
-            imported_from: link,
-            scheduled_raw: yt.scheduledStart,
-            scheduled_snapped:
-              Boolean(yt.scheduledStart) &&
-              snapScheduledToHalfHour(yt.scheduledStart) !== yt.scheduledStart,
-          },
-        });
+    // Member + YouTube link → real row (Mild-R channel only)
+    if (is_member && ytVideoId) {
+      const yt = ytById.get(ytVideoId);
+      if (!yt) {
+        errors.push(`[${i}] YouTube ไม่พบวิดีโอ ${ytVideoId}`);
         continue;
       }
-
-      // Member without URL → fall through to preview mock (badge Member)
-      // (title / date / time required like normal mock)
+      if (yt.channelId !== MILD_R_CHANNEL_ID) {
+        errors.push(
+          `[${i}] Member ต้องเป็นช่อง Mild-R เท่านั้น (พบ: ${yt.channelTitle || yt.channelId})`
+        );
+        continue;
+      }
+      const auto = classifyLiveOwnership(yt.channelId, yt.title);
+      rows.push(
+        buildYtImportRow({
+          yt,
+          link,
+          is_member: true,
+          is_own_channel: true,
+          is_collab: collabFlag != null ? collabFlag : auto.is_collab,
+          source: "manual_member_link",
+        })
+      );
+      continue;
     }
+
+    // Collab + YouTube link (not member) → real row from any channel
+    if (!is_member && collabFlag === true && ytVideoId) {
+      const yt = ytById.get(ytVideoId);
+      if (!yt) {
+        errors.push(`[${i}] YouTube ไม่พบวิดีโอ ${ytVideoId}`);
+        continue;
+      }
+      const auto = classifyLiveOwnership(yt.channelId, yt.title);
+      rows.push(
+        buildYtImportRow({
+          yt,
+          link,
+          is_member: false,
+          is_own_channel:
+            ownFlag != null ? ownFlag : auto.is_own_channel,
+          is_collab: true,
+          source: "manual_collab_link",
+        })
+      );
+      continue;
+    }
+
+    // Member without URL → fall through to preview mock (badge Member)
 
     // ——— Manual preview mock (optional member badge) ———
     const title = typeof raw.title === "string" ? raw.title.trim() : "";
@@ -433,7 +477,9 @@ export async function POST(request: Request) {
 
     rows.push({
       video_id: videoId,
-      channel_id: is_own_channel ? MILD_R_CHANNEL_ID : channel.channelId,
+      channel_id: is_own_channel
+        ? MILD_R_CHANNEL_ID
+        : (channel.channelId as string),
       channel_name: is_own_channel
         ? (resolveLuminaChannel("mild-r")?.channelTitle ?? channel.channelTitle)
         : channel.channelTitle,
@@ -522,12 +568,13 @@ export async function POST(request: Request) {
       }
     }
 
-    // Preserve first-seen locks for non-member real upserts only
+    // Preserve first-seen locks for non-link real upserts only
     const realIds = rows
       .filter(
         (r) =>
           !r.video_id.startsWith("manual-") &&
-          r.metadata?.source !== "manual_member_link"
+          r.metadata?.source !== "manual_member_link" &&
+          r.metadata?.source !== "manual_collab_link"
       )
       .map((r) => r.video_id);
     const existingById = new Map<
@@ -557,11 +604,16 @@ export async function POST(request: Request) {
       }
     }
 
-    // Member link re-import: overwrite the video_id row with fresh YouTube data.
+    // Member/Collab link re-import: overwrite the video_id row with fresh YouTube data.
     // (Do not freeze scheduled_* / views from a previous sync.)
     const toInsert = rows.map((row) => {
       if (row.video_id.startsWith("manual-")) return row;
-      if (row.metadata?.source === "manual_member_link") return row;
+      if (
+        row.metadata?.source === "manual_member_link" ||
+        row.metadata?.source === "manual_collab_link"
+      ) {
+        return row;
+      }
       const existing = existingById.get(row.video_id);
       const started =
         existing?.actual_start != null || row.actual_start != null;
@@ -628,6 +680,9 @@ export async function POST(request: Request) {
       skippedMatchedReal,
       memberImported: finalInsert.filter(
         (r) => r.metadata?.member === true && r.metadata?.preview === false
+      ).length,
+      collabImported: finalInsert.filter(
+        (r) => r.metadata?.source === "manual_collab_link"
       ).length,
       touchedDates: [...touchedDates],
       skippedErrors: errors,
