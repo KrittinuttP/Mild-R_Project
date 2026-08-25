@@ -70,14 +70,14 @@ const AVATAR_SIZE: Record<AvatarSize, string> = {
 };
 
 const ROLE_TEXT: Record<AvatarSize, string> = {
-  sm: "text-[0.55rem] sm:text-[0.6rem]",
-  md: "text-[0.65rem] sm:text-xs",
+  sm: "text-[0.6rem] sm:text-xs",
+  md: "text-xs sm:text-sm",
   lg: "text-xs sm:text-sm",
 };
 
 const NAME_TEXT: Record<AvatarSize, string> = {
-  sm: "text-[0.65rem] sm:text-xs",
-  md: "text-xs sm:text-sm",
+  sm: "text-xs sm:text-sm",
+  md: "text-sm sm:text-base",
   lg: "text-sm sm:text-base",
 };
 
@@ -232,8 +232,8 @@ export function DesignCredits({
             {!hideHeading ? (
               <p
                 className={cn(
-                  "tracking-[0.2em] text-[#e85a7a] uppercase",
-                  compact ? "text-[0.58rem]" : "text-[0.7rem] sm:text-xs"
+                  "tracking-[0.18em] text-[#e85a7a] uppercase",
+                  compact ? "text-xs" : "text-xs sm:text-sm"
                 )}
               >
                 {ZONE_LABEL[zone]}

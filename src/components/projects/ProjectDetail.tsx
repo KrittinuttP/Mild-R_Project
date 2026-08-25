@@ -4,6 +4,13 @@ import { ExternalLink } from "lucide-react";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { BackLink } from "@/components/layout/BackLink";
 import { buttonVariants } from "@/components/ui/button";
+import {
+  BADGE_ACCENT_CLASS,
+  BADGE_SOFT_CLASS,
+  CTA_OUTLINE_CLASS,
+  CTA_PRIMARY_CLASS,
+  META_CLASS,
+} from "@/lib/site-ui";
 import { getYoutubeEmbedUrl, getYoutubeVideoId } from "@/lib/youtube";
 import { cn } from "@/lib/utils";
 import type { ProjectItem, ProjectStatus } from "@/types/vtuber";
@@ -20,12 +27,6 @@ const CATEGORY_LABEL: Record<string, string> = {
   hbd: "Birthday",
   mv: "Fansong",
 };
-
-const META_CLASS =
-  "text-xs tracking-[0.18em] text-[#f3b8c4]/75 uppercase sm:text-sm";
-
-const BADGE_CLASS =
-  "rounded-full border px-3 py-1 text-xs tracking-wide sm:text-sm";
 
 type ProjectDetailProps = {
   project: ProjectItem;
@@ -58,21 +59,13 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
             <p className={META_CLASS}>{categoryLabel}</p>
             <span
               className={cn(
-                BADGE_CLASS,
-                isHbd
-                  ? "border-[#e85a7a]/35 bg-[#e85a7a]/15 text-[#f3b8c4]"
-                  : "border-[#f3b8c4]/20 text-[#f3b8c4]/80"
+                isHbd ? BADGE_ACCENT_CLASS : BADGE_SOFT_CLASS
               )}
             >
               {STATUS_LABEL[project.status]}
             </span>
             {project.year ? (
-              <span
-                className={cn(
-                  BADGE_CLASS,
-                  "border-[#f3b8c4]/15 bg-white/[0.03] tabular-nums text-[#f3b8c4]/80"
-                )}
-              >
+              <span className={cn(BADGE_SOFT_CLASS, "tabular-nums")}>
                 {project.year}
               </span>
             ) : null}
@@ -106,10 +99,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
                         size: "lg",
                         variant: index === 0 ? "default" : "outline",
                       }),
-                      "rounded-2xl",
-                      index === 0
-                        ? "border-transparent bg-[#e85a7a] text-[#140a0d] shadow-[0_10px_30px_rgba(232,90,122,0.35)] hover:bg-[#f3b8c4]"
-                        : "border-[#f3b8c4]/30 bg-transparent text-[#fff5f7] hover:border-[#e85a7a]/50 hover:bg-[#e85a7a]/15 hover:text-[#fff5f7]"
+                      index === 0 ? CTA_PRIMARY_CLASS : CTA_OUTLINE_CLASS
                     )}
                   >
                     {action.label}
@@ -146,7 +136,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
               key={item}
               className="rounded-2xl bg-white/[0.03] px-4 py-4 text-sm leading-relaxed text-[#f7d7de]/85 ring-1 ring-white/5 sm:px-5 sm:text-base"
             >
-              <span className="mb-2 block text-xs tracking-[0.18em] text-[#e85a7a] uppercase sm:text-sm">
+              <span className={cn(META_CLASS, "mb-2 block text-[#e85a7a]")}>
                 Highlight
               </span>
               {item}
@@ -168,9 +158,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
 
       {videoId ? (
         <div className="mt-16">
-          <p className="text-xs tracking-[0.18em] text-[#f3b8c4]/75 uppercase sm:text-sm">
-            Watch
-          </p>
+          <p className={META_CLASS}>Watch</p>
           <h2 className="mt-3 font-[family-name:var(--font-display)] text-2xl font-bold sm:text-3xl">
             คลิปที่เกี่ยวข้อง
           </h2>

@@ -4,6 +4,11 @@ import { ExternalLink, Music2 } from "lucide-react";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { SocialPlatformIcon } from "@/components/icons/SocialPlatformIcon";
 import { buttonVariants } from "@/components/ui/button";
+import {
+  CTA_PRIMARY_CLASS,
+  META_CLASS,
+  META_MUTED_CLASS,
+} from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { VtuberProfile } from "@/types/vtuber";
 
@@ -29,9 +34,7 @@ export function Socials({ data }: SocialsProps) {
 
       <div className="relative mx-auto max-w-6xl">
         <ScrollReveal>
-          <p className="text-[0.7rem] tracking-[0.28em] text-[#f3b8c4]/75 uppercase sm:text-sm">
-            Connect
-          </p>
+          <p className={META_CLASS}>Connect</p>
           <h2 className="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
             ติดตาม Mild-R
           </h2>
@@ -42,17 +45,15 @@ export function Socials({ data }: SocialsProps) {
 
         <div className="mt-10 grid gap-12 sm:mt-14 lg:grid-cols-2 lg:gap-16">
           <ScrollReveal className="space-y-4">
-            <h3 className="text-[0.7rem] tracking-[0.2em] text-[#f3b8c4]/65 uppercase sm:text-sm">
-              Platforms
-            </h3>
-            <ul className="divide-y divide-[#f3b8c4]/15 border-y border-[#f3b8c4]/15">
+            <h3 className={META_MUTED_CLASS}>Platforms</h3>
+            <ul className="space-y-3">
               {data.socials.map((social) => (
                 <li key={social.id}>
                   <Link
                     href={social.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group flex min-h-14 items-center justify-between gap-4 py-4 transition hover:text-[#e85a7a] sm:py-5"
+                    className="group flex min-h-14 items-center justify-between gap-4 rounded-3xl border border-[#f3b8c4]/12 bg-[#1a0c12]/60 px-4 py-4 transition hover:border-[#e85a7a]/40 hover:bg-[#1a0c12] sm:px-5 sm:py-5"
                   >
                     <span className="flex items-center gap-3">
                       <SocialPlatformIcon platform={social.platform} />
@@ -73,16 +74,15 @@ export function Socials({ data }: SocialsProps) {
 
             {song ? (
               <div className="pt-6">
-                <p className="text-sm tracking-[0.2em] text-[#f3b8c4]/65 uppercase">
-                  Original song
-                </p>
+                <p className={META_MUTED_CLASS}>Original song</p>
                 <Link
                   href={song.url ?? data.socials[0]?.url ?? "#"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={cn(
                     buttonVariants({ size: "lg" }),
-                    "mt-4 h-auto min-h-11 w-full rounded-full bg-[#e85a7a] px-5 py-3 text-white hover:bg-[#d44868] sm:w-auto"
+                    CTA_PRIMARY_CLASS,
+                    "mt-4 h-auto min-h-11 w-full px-5 py-3 sm:w-auto"
                   )}
                 >
                   <Music2 data-icon="inline-start" />
@@ -96,9 +96,7 @@ export function Socials({ data }: SocialsProps) {
           </ScrollReveal>
 
           <ScrollReveal delay={0.1}>
-            <h3 className="text-[0.7rem] tracking-[0.2em] text-[#f3b8c4]/65 uppercase sm:text-sm">
-              Hashtags
-            </h3>
+            <h3 className={META_MUTED_CLASS}>Hashtags</h3>
             <ul className="mt-6 space-y-3 sm:mt-8">
               {tags.map((tag) => (
                 <li key={tag}>
@@ -106,7 +104,7 @@ export function Socials({ data }: SocialsProps) {
                     href={getXHashtagUrl(tag)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group flex items-center justify-between gap-3 border-l border-[#e85a7a]/60 pl-4 font-[family-name:var(--font-display)] text-lg text-[#fff5f7] transition hover:text-[#e85a7a] sm:text-xl md:text-2xl"
+                    className="group flex items-center justify-between gap-3 rounded-2xl border border-[#f3b8c4]/10 bg-white/[0.03] px-4 py-3 font-[family-name:var(--font-display)] text-lg text-[#fff5f7] transition hover:border-[#e85a7a]/40 hover:text-[#e85a7a] sm:px-5 sm:text-xl md:text-2xl"
                   >
                     <span>{tag}</span>
                     <ExternalLink className="size-4 shrink-0 opacity-40 transition group-hover:opacity-100" />

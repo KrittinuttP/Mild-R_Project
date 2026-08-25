@@ -21,6 +21,12 @@ import {
   sortLiveWeeks,
   upcomingEvents,
 } from "@/lib/events";
+import {
+  BADGE_ACCENT_CLASS,
+  CTA_OUTLINE_CLASS,
+  CTA_PRIMARY_CLASS,
+  META_CLASS,
+} from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { CalendarEvent, LiveWeek, VtuberProfile } from "@/types/vtuber";
 
@@ -40,9 +46,9 @@ function EventRow({
       <button
         type="button"
         onClick={onOpen}
-        className="group flex w-full items-start gap-4 py-5 text-left transition first:pt-0 last:pb-0 hover:text-[#e85a7a]"
+        className="group flex w-full items-start gap-4 rounded-3xl border border-[#f3b8c4]/12 bg-[#1a0c12]/60 p-4 text-left transition hover:border-[#e85a7a]/40 hover:bg-[#1a0c12] sm:gap-5 sm:p-5"
       >
-        <div className="relative size-20 shrink-0 overflow-hidden border border-[#f3b8c4]/15 bg-[#10070b] sm:size-24">
+        <div className="relative size-20 shrink-0 overflow-hidden rounded-2xl border border-[#f3b8c4]/15 bg-[#10070b] sm:size-24">
           <ProtectedImage
             src={event.cover}
             alt={event.coverAlt ?? event.title}
@@ -52,10 +58,10 @@ function EventRow({
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="border border-[#e85a7a]/35 px-2 py-0.5 text-[0.58rem] tracking-[0.16em] text-[#e85a7a] uppercase">
+            <span className={cn(BADGE_ACCENT_CLASS, "uppercase")}>
               {eventStatusLabel(event.status)}
             </span>
-            <span className="text-xs tabular-nums text-[#f3b8c4]/70">
+            <span className="text-xs tabular-nums text-[#f3b8c4]/70 sm:text-sm">
               {formatThaiDate(event.date)}
               {event.endDate ? ` – ${formatThaiDate(event.endDate)}` : null}
             </span>
@@ -71,7 +77,7 @@ function EventRow({
               {event.summary}
             </p>
           ) : null}
-          <p className="mt-2 text-xs text-[#f3b8c4]/55">
+          <p className="mt-2 text-xs text-[#f3b8c4]/55 sm:text-sm">
             {[event.timeLabel, event.venue ?? event.platform]
               .filter(Boolean)
               .join(" · ")}
@@ -123,9 +129,7 @@ export function EventsTeaser({ data }: EventsTeaserProps) {
             <ScrollReveal>
               <div className="flex items-center gap-2">
                 <CalendarDays className="size-4 text-[#e85a7a]" aria-hidden />
-                <p className="text-[0.7rem] tracking-[0.28em] text-[#f3b8c4]/75 uppercase sm:text-sm">
-                  Events
-                </p>
+                <p className={META_CLASS}>Events</p>
               </div>
               <h2 className="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
                 อีเวนต์
@@ -136,7 +140,7 @@ export function EventsTeaser({ data }: EventsTeaserProps) {
             </ScrollReveal>
 
             <ScrollReveal className="mt-8 sm:mt-10">
-              <ul className="divide-y divide-[#f3b8c4]/12 border-y border-[#f3b8c4]/15">
+              <ul className="space-y-3 sm:space-y-4">
                 {upcoming.map((event) => (
                   <EventRow
                     key={event.id}
@@ -152,7 +156,7 @@ export function EventsTeaser({ data }: EventsTeaserProps) {
                 href="/events"
                 className={cn(
                   buttonVariants({ size: "lg" }),
-                  "rounded-none border-transparent bg-[#e85a7a] text-white hover:bg-[#f06b88]"
+                  CTA_PRIMARY_CLASS
                 )}
               >
                 ดูอีเวนต์ทั้งหมด
@@ -173,9 +177,7 @@ export function EventsTeaser({ data }: EventsTeaserProps) {
             <ScrollReveal>
               <div className="flex items-center gap-2">
                 <Radio className="size-4 text-[#e85a7a]" aria-hidden />
-                <p className="text-[0.7rem] tracking-[0.28em] text-[#f3b8c4]/75 uppercase sm:text-sm">
-                  Live
-                </p>
+                <p className={META_CLASS}>Live</p>
               </div>
               <h2 className="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
                 ตารางไลฟ์
@@ -206,7 +208,7 @@ export function EventsTeaser({ data }: EventsTeaserProps) {
                 href="/live"
                 className={cn(
                   buttonVariants({ size: "lg", variant: "outline" }),
-                  "rounded-none border-[#f3b8c4]/35 bg-transparent text-[#fff5f7] hover:border-[#e85a7a]/55 hover:bg-[#e85a7a]/10 hover:text-white"
+                  CTA_OUTLINE_CLASS
                 )}
               >
                 ดูตารางไลฟ์ทั้งหมด

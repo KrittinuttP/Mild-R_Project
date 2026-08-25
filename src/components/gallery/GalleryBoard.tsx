@@ -26,6 +26,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
+import { CTA_OUTLINE_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { GalleryItem } from "@/types/vtuber";
 
@@ -329,7 +330,8 @@ export function GalleryBoard({
             href={viewAllHref}
             className={cn(
               buttonVariants({ variant: "outline", size: "lg" }),
-              "border-[#f3b8c4]/30 bg-transparent px-6 text-[#fff5f7] transition hover:border-[#e85a7a]/50 hover:bg-[#e85a7a]/15 hover:text-[#fff5f7]"
+              CTA_OUTLINE_CLASS,
+              "px-6"
             )}
           >
             View all
@@ -350,7 +352,8 @@ export function GalleryBoard({
             }
             className={cn(
               buttonVariants({ variant: "outline", size: "lg" }),
-              "border-[#f3b8c4]/30 bg-transparent px-6 text-[#fff5f7] transition hover:border-[#e85a7a]/50 hover:bg-[#e85a7a]/15 hover:text-[#fff5f7] motion-safe:hover:scale-[1.03]"
+              CTA_OUTLINE_CLASS,
+              "px-6 motion-safe:hover:scale-[1.03]"
             )}
           >
             โหลดเพิ่ม

@@ -2,6 +2,7 @@ import { GalleryBoard } from "@/components/gallery/GalleryBoard";
 import type { GalleryBoardMode, GalleryVariant } from "@/components/gallery/gallery-utils";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { BackLink } from "@/components/layout/BackLink";
+import { META_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { GalleryItem } from "@/types/vtuber";
 
@@ -60,9 +61,7 @@ export function GallerySection({
         ) : null}
 
         <ScrollReveal>
-          <p className="text-[0.7rem] tracking-[0.28em] text-[#f3b8c4]/75 uppercase sm:text-sm">
-            {eyebrow}
-          </p>
+          <p className={META_CLASS}>{eyebrow}</p>
           <h2
             className={cn(
               "mt-3 font-[family-name:var(--font-display)] font-bold tracking-tight",

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { DesignCredits } from "@/components/sections/DesignCredits";
 import { formatEnglishDate } from "@/lib/events";
+import { META_MUTED_CLASS } from "@/lib/site-ui";
 import type { VtuberProfile } from "@/types/vtuber";
 
 type ProfileProps = {
@@ -43,9 +44,7 @@ export function Profile({ data }: ProfileProps) {
             <div className="mt-8 space-y-4 text-sm sm:text-base">
               {basic.likes?.length ? (
                 <div>
-                  <p className="text-[0.7rem] tracking-[0.2em] text-[#f3b8c4]/65 uppercase">
-                    Likes
-                  </p>
+                  <p className={META_MUTED_CLASS}>Likes</p>
                   <p className="mt-2 leading-relaxed text-[#f7d7de]/90">
                     {basic.likes.join(" · ")}
                   </p>
@@ -53,9 +52,7 @@ export function Profile({ data }: ProfileProps) {
               ) : null}
               {basic.dislikes?.length ? (
                 <div>
-                  <p className="text-[0.7rem] tracking-[0.2em] text-[#f3b8c4]/65 uppercase">
-                    Dislikes
-                  </p>
+                  <p className={META_MUTED_CLASS}>Dislikes</p>
                   <p className="mt-2 leading-relaxed text-[#f7d7de]/90">
                     {basic.dislikes.join(" · ")}
                   </p>
@@ -129,7 +126,7 @@ export function Profile({ data }: ProfileProps) {
           <DesignCredits
             design={characterDesign}
             variant="strip"
-            size="sm"
+            size="md"
             showHandle={false}
             layout="inline"
           />

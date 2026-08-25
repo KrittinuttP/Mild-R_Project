@@ -7,6 +7,7 @@ import { Header } from "@/components/layout/Header";
 import { MediaProtection } from "@/components/media/MediaProtection";
 import { ProjectList } from "@/components/projects/ProjectList";
 import { getProjectsByCategory, mildRData } from "@/data/vtuber-data";
+import { META_CLASS } from "@/lib/site-ui";
 
 const CATEGORY_COPY: Record<
   string,
@@ -77,7 +78,7 @@ export default async function ProjectsPage({
               </BackLink>
             ) : null}
 
-            <p className="text-[0.7rem] tracking-[0.28em] text-[#f3b8c4]/75 uppercase sm:text-sm">
+            <p className={META_CLASS}>
               {eyebrow}
             </p>
             <h1 className="mt-4 max-w-2xl font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">

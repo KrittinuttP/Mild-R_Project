@@ -8,6 +8,11 @@ import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { buttonVariants } from "@/components/ui/button";
 import { groupMediaByCategory } from "@/lib/media";
 import {
+  CTA_OUTLINE_CLASS,
+  META_CLASS,
+  META_MUTED_CLASS,
+} from "@/lib/site-ui";
+import {
   getYoutubeEmbedUrl,
   getYoutubeThumbnailUrl,
   getYoutubeVideoId,
@@ -66,9 +71,7 @@ export function Media({ data }: MediaProps) {
 
       <div className="relative mx-auto max-w-6xl">
         <ScrollReveal>
-          <p className="text-[0.7rem] tracking-[0.28em] text-[#f3b8c4]/75 uppercase sm:text-sm">
-            Media
-          </p>
+          <p className={META_CLASS}>Media</p>
           <h2 className="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
             รับชมคลิป
           </h2>
@@ -81,7 +84,7 @@ export function Media({ data }: MediaProps) {
           <div
             role="tablist"
             aria-label="หมวดคลิป"
-            className="flex gap-1 overflow-x-auto border-b border-[#f3b8c4]/20 pb-px [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-2"
+            className="flex gap-1 overflow-x-auto rounded-2xl bg-black/25 p-1 ring-1 ring-white/10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-1.5"
           >
             {groups.map((group) => {
               const selected = group.id === activeGroup?.id;
@@ -94,25 +97,30 @@ export function Media({ data }: MediaProps) {
                   aria-selected={selected}
                   onClick={() => selectCategory(group.id)}
                   className={cn(
-                    "shrink-0 border-b-2 px-4 py-3 text-left transition sm:min-w-[7.5rem] sm:px-5",
+                    "shrink-0 rounded-xl px-3 py-2.5 text-left transition sm:min-w-[7rem] sm:px-4",
                     selected
-                      ? "border-[#e85a7a] bg-[#e85a7a]/10 text-[#fff5f7]"
-                      : "border-transparent text-[#f3b8c4]/65 hover:bg-[#f3b8c4]/5 hover:text-[#fff5f7]"
+                      ? "bg-[#e85a7a] text-[#140a0d] shadow-sm"
+                      : "text-[#f3b8c4]/70 hover:bg-white/5 hover:text-[#f7d7de]"
                   )}
                 >
                   <span className="flex items-center gap-2">
                     <Icon
                       className={cn(
-                        "size-4 shrink-0 sm:size-[1.125rem]",
-                        selected ? "text-[#e85a7a]" : "text-[#f3b8c4]/55"
+                        "size-4 shrink-0",
+                        selected ? "text-[#140a0d]" : "text-[#f3b8c4]/55"
                       )}
                       aria-hidden
                     />
-                    <span className="text-sm font-medium tracking-wide sm:text-base">
+                    <span className="text-sm font-medium tracking-wide">
                       {group.label}
                     </span>
                   </span>
-                  <span className="mt-1 block pl-6 text-xs text-[#f3b8c4]/50 sm:pl-7">
+                  <span
+                    className={cn(
+                      "mt-0.5 block pl-6 text-xs",
+                      selected ? "text-[#140a0d]/70" : "text-[#f3b8c4]/50"
+                    )}
+                  >
                     {group.labelLocal
                       ? `${group.labelLocal} · ${group.clips.length}`
                       : `${group.clips.length} คลิป`}
@@ -125,7 +133,7 @@ export function Media({ data }: MediaProps) {
 
         <div className="mt-8 grid gap-8 lg:mt-10 lg:grid-cols-[1.35fr_0.65fr] lg:gap-10">
           <ScrollReveal>
-            <div className="relative aspect-video overflow-hidden bg-[#0e0609] ring-1 ring-[#f3b8c4]/15">
+            <div className="relative aspect-video overflow-hidden rounded-3xl bg-[#0e0609] ring-1 ring-[#f3b8c4]/15">
               {canEmbed && videoId ? (
                 <iframe
                   key={videoId}
@@ -195,7 +203,7 @@ export function Media({ data }: MediaProps) {
 
           <div className="flex flex-col gap-6">
             <ScrollReveal>
-              <h3 className="text-[0.7rem] tracking-[0.2em] text-[#f3b8c4]/65 uppercase sm:text-sm">
+              <h3 className={META_MUTED_CLASS}>
                 Playlist
                 {activeGroup ? (
                   <span className="ml-2 tracking-normal text-[#f3b8c4]/50 normal-case">
@@ -204,7 +212,7 @@ export function Media({ data }: MediaProps) {
                 ) : null}
               </h3>
 
-              <ul className="mt-4 max-h-[min(28rem,55vh)] divide-y divide-[#f3b8c4]/12 overflow-y-auto border-y border-[#f3b8c4]/15 [scrollbar-color:rgba(243,184,196,0.35)_transparent] [scrollbar-width:thin]">
+              <ul className="mt-4 max-h-[min(28rem,55vh)] space-y-2 overflow-y-auto rounded-3xl border border-[#f3b8c4]/12 bg-[#1a0c12]/40 p-2 [scrollbar-color:rgba(243,184,196,0.35)_transparent] [scrollbar-width:thin]">
                 {visibleClips.map((clip) => {
                   const selected = clip.id === active?.id;
                   return (
@@ -213,10 +221,10 @@ export function Media({ data }: MediaProps) {
                         type="button"
                         onClick={() => setActiveId(clip.id)}
                         className={cn(
-                          "flex w-full min-h-14 items-start gap-3 py-3 text-left transition",
+                          "flex w-full min-h-14 items-start gap-3 rounded-2xl px-3 py-3 text-left transition",
                           selected
-                            ? "bg-[#e85a7a]/10 text-[#fff5f7]"
-                            : "text-[#f7d7de]/80 hover:text-[#fff5f7]"
+                            ? "bg-[#e85a7a]/15 text-[#fff5f7]"
+                            : "text-[#f7d7de]/80 hover:bg-white/[0.04] hover:text-[#fff5f7]"
                         )}
                       >
                         <Play
@@ -250,7 +258,8 @@ export function Media({ data }: MediaProps) {
                   rel="noopener noreferrer"
                   className={cn(
                     buttonVariants({ variant: "outline", size: "lg" }),
-                    "w-full justify-between border-[#f3b8c4]/30 bg-transparent text-[#fff5f7] hover:border-[#e85a7a]/50 hover:bg-[#e85a7a]/15 hover:text-[#fff5f7]"
+                    CTA_OUTLINE_CLASS,
+                    "w-full justify-between"
                   )}
                 >
                   เปิดคลิปนี้บน YouTube

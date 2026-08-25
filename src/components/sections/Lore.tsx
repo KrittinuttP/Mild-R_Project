@@ -3,6 +3,7 @@
 import { useRef } from "react";
 
 import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
+import { META_CLASS } from "@/lib/site-ui";
 import type { VtuberProfile } from "@/types/vtuber";
 
 registerGsapPlugins();
@@ -33,8 +34,8 @@ export function Lore({ data }: LoreProps) {
             transformOrigin: "top center",
             scrollTrigger: {
               trigger: track,
-              start: "top 55%",
-              end: "bottom 45%",
+              start: "top 60%",
+              end: "bottom 40%",
               scrub: true,
             },
           }
@@ -107,9 +108,7 @@ export function Lore({ data }: LoreProps) {
 
       <div className="relative mx-auto max-w-6xl">
         <div className="max-w-2xl">
-          <p className="text-[0.7rem] tracking-[0.28em] text-[#f3b8c4]/75 uppercase sm:text-sm">
-            Lore
-          </p>
+          <p className={META_CLASS}>Lore</p>
           <h2 className="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
             เรื่องราวหลังภัย
           </h2>
@@ -138,21 +137,20 @@ export function Lore({ data }: LoreProps) {
             className="relative mt-16 grid gap-0 sm:mt-24 lg:grid-cols-[4rem_1fr]"
           >
             <div className="relative hidden lg:block" aria-hidden>
-              <div className="sticky top-28 h-[50vh]">
-                <div className="absolute top-0 bottom-0 left-1/2 w-px -translate-x-1/2 bg-[#f3b8c4]/15" />
-                <div
-                  data-lore-progress
-                  className="absolute top-0 bottom-0 left-1/2 w-px origin-top -translate-x-1/2 bg-[#e85a7a]"
-                />
-              </div>
+              {/* Full-height timeline — spans every chapter to the last */}
+              <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-[#f3b8c4]/15" />
+              <div
+                data-lore-progress
+                className="absolute inset-y-0 left-1/2 w-px origin-top -translate-x-1/2 bg-[#e85a7a]"
+              />
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-5 sm:space-y-6">
               {chapters.map((chapter, index) => (
                 <article
                   key={chapter.id}
                   data-lore-chapter
-                  className="min-h-0 border-t border-[#f3b8c4]/15 py-12 sm:min-h-[60vh] sm:py-16 lg:min-h-[80vh] lg:py-24"
+                  className="min-h-0 rounded-3xl border border-[#f3b8c4]/12 bg-[#1a0c12]/60 px-5 py-10 sm:min-h-[50vh] sm:px-8 sm:py-14 lg:min-h-[70vh] lg:py-20"
                 >
                   <div
                     data-lore-chapter-inner

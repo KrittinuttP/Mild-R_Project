@@ -12,6 +12,13 @@ import {
 } from "@/components/sections/DesignCredits";
 import { gsap, registerGsapPlugins, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { formatEnglishDate } from "@/lib/events";
+import {
+  BADGE_ACCENT_CLASS,
+  BADGE_SOFT_CLASS,
+  CTA_OUTLINE_CLASS,
+  CTA_PRIMARY_CLASS,
+  META_CLASS,
+} from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { VtuberProfile } from "@/types/vtuber";
 
@@ -596,10 +603,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
           {/* Copy: lower-left block with room above for art */}
           <div className="relative z-[3] flex min-h-[100dvh] flex-col justify-end px-5 pt-28 pb-[max(5.25rem,calc(env(safe-area-inset-bottom)+3.25rem))]">
             <div data-hero-copy data-hero-intro className="w-[min(100%,19.5rem)]">
-              <p
-                data-hero-unit
-                className="mb-2.5 text-[0.65rem] tracking-[0.3em] text-[#f3b8c4]/85 uppercase"
-              >
+              <p data-hero-unit className={cn(META_CLASS, "mb-2.5 text-[#f3b8c4]/85")}>
                 {basic.unit}
               </p>
               <h1
@@ -625,7 +629,8 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
                     rel="noopener noreferrer"
                     className={cn(
                       buttonVariants({ size: "lg" }),
-                      "min-h-11 rounded-full bg-[#e85a7a] px-5 text-white hover:bg-[#d44868]"
+                      CTA_PRIMARY_CLASS,
+                      "min-h-11 px-5"
                     )}
                   >
                     Watch on YouTube
@@ -635,7 +640,8 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
                   href="#profile"
                   className={cn(
                     buttonVariants({ variant: "outline", size: "lg" }),
-                    "min-h-11 rounded-full border-[#f3b8c4]/45 bg-transparent px-5 text-[#fff5f7] hover:bg-[#fff5f7]/10"
+                    CTA_OUTLINE_CLASS,
+                    "min-h-11 px-5"
                   )}
                 >
                   Meet {basic.name}
@@ -649,7 +655,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
               className="absolute bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 flex -translate-x-1/2 flex-col items-center gap-0.5 text-[#f3b8c4]/65"
               aria-hidden
             >
-              <span className="text-[0.58rem] tracking-[0.22em] uppercase">
+              <span className="text-xs tracking-[0.18em] uppercase sm:text-sm">
                 Scroll
               </span>
               <ChevronDown className="size-4 animate-bounce" />
@@ -666,18 +672,14 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
               .filter((block) => block.key !== "story")
               .map((block) => (
               <article key={`m-${block.key}`} data-m-reveal>
-                <p className="text-[0.7rem] tracking-[0.28em] text-[#e85a7a] uppercase">
-                  {block.label}
-                </p>
+                <p className={cn(META_CLASS, "text-[#e85a7a]")}>{block.label}</p>
                 {block.bodyMobile}
               </article>
             ))}
 
             {creditSteps.map((step) => (
               <article key={`m-credit-${step.key}`} data-m-reveal>
-                <p className="text-[0.7rem] tracking-[0.28em] text-[#e85a7a] uppercase">
-                  {step.label}
-                </p>
+                <p className={cn(META_CLASS, "text-[#e85a7a]")}>{step.label}</p>
                 <div className="mt-5">
                   <DesignCredits
                     design={characterDesign}
@@ -699,9 +701,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
         >
           <div className="mx-auto max-w-lg space-y-8">
             <div data-m-reveal>
-              <p className="text-[0.7rem] tracking-[0.35em] text-[#e85a7a] uppercase">
-                Profile
-              </p>
+              <p className={cn(META_CLASS, "text-[#e85a7a]")}>Profile</p>
               <h2 className="mt-3 font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight text-[#fff5f7]">
                 {basic.name}
               </h2>
@@ -712,12 +712,12 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
               ) : null}
               <div className="mt-4 flex flex-wrap gap-2">
                 {basic.species ? (
-                  <span className="border border-[#e85a7a]/40 bg-[#e85a7a]/10 px-2 py-0.5 text-[0.58rem] tracking-[0.16em] text-[#e85a7a] uppercase">
+                  <span className={cn(BADGE_ACCENT_CLASS, "uppercase")}>
                     {basic.species}
                   </span>
                 ) : null}
                 {basic.agency ? (
-                  <span className="border border-[#f3b8c4]/20 px-2 py-0.5 text-[0.58rem] tracking-[0.14em] text-[#f3b8c4]/70 uppercase">
+                  <span className={cn(BADGE_SOFT_CLASS, "uppercase")}>
                     {basic.agency}
                   </span>
                 ) : null}
@@ -726,11 +726,9 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
 
             <div
               data-m-reveal
-              className="border border-[#f3b8c4]/15 bg-[#1a0d12]/55 px-5 py-4 text-[#fff5f7] backdrop-blur-[2px]"
+              className="rounded-3xl border border-[#f3b8c4]/15 bg-[#1a0d12]/55 px-5 py-4 text-[#fff5f7] backdrop-blur-[2px]"
             >
-              <p className="text-[0.65rem] tracking-[0.28em] text-[#e85a7a] uppercase">
-                Details
-              </p>
+              <p className={cn(META_CLASS, "text-[#e85a7a]")}>Details</p>
               <dl className="mt-3 divide-y divide-[#f3b8c4]/12">
                 {basic.species ? (
                   <div className="flex items-baseline justify-between gap-4 py-2">
@@ -848,7 +846,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
             >
               <p
                 data-hero-unit
-                className="mb-3 text-sm tracking-[0.28em] text-[#f3b8c4]/80 uppercase"
+                className={cn(META_CLASS, "mb-3 text-[#f3b8c4]/80")}
               >
                 {basic.unit}
               </p>
@@ -872,7 +870,8 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
                     rel="noopener noreferrer"
                     className={cn(
                       buttonVariants({ size: "lg" }),
-                      "rounded-full bg-[#e85a7a] px-6 text-white hover:bg-[#d44868]"
+                      CTA_PRIMARY_CLASS,
+                      "px-6"
                     )}
                   >
                     Watch on YouTube
@@ -882,7 +881,8 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
                   href="#profile-desktop"
                   className={cn(
                     buttonVariants({ variant: "outline", size: "lg" }),
-                    "rounded-full border-[#f3b8c4]/40 bg-transparent px-5 text-[#fff5f7] hover:bg-[#fff5f7]/10"
+                    CTA_OUTLINE_CLASS,
+                    "px-5"
                   )}
                 >
                   Meet {basic.name}
@@ -990,17 +990,15 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
                   data-finale-left
                   className="relative max-w-lg border-l-2 border-[#e85a7a]/55 pl-5 lg:pl-6"
                 >
-                  <p className="text-[0.65rem] tracking-[0.32em] text-[#e85a7a] uppercase lg:text-xs">
-                    Profile
-                  </p>
+                  <p className={cn(META_CLASS, "text-[#e85a7a]")}>Profile</p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     {basic.species ? (
-                      <span className="border border-[#e85a7a]/40 bg-[#e85a7a]/10 px-2 py-0.5 text-[0.58rem] tracking-[0.16em] text-[#e85a7a] uppercase">
+                      <span className={cn(BADGE_ACCENT_CLASS, "uppercase")}>
                         {basic.species}
                       </span>
                     ) : null}
                     {basic.unit ? (
-                      <span className="border border-[#f3b8c4]/20 px-2 py-0.5 text-[0.58rem] tracking-[0.14em] text-[#f3b8c4]/70 uppercase">
+                      <span className={cn(BADGE_SOFT_CLASS, "uppercase")}>
                         {basic.unit}
                       </span>
                     ) : null}
@@ -1020,11 +1018,9 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
 
                 <div
                   data-finale-right
-                  className="flex max-w-sm flex-col justify-center justify-self-end border border-[#f3b8c4]/15 bg-[#1a0d12]/55 px-5 py-4 text-[#fff5f7] backdrop-blur-[2px] lg:px-6 lg:py-5"
+                  className="flex max-w-sm flex-col justify-center justify-self-end rounded-3xl border border-[#f3b8c4]/15 bg-[#1a0d12]/55 px-5 py-4 text-[#fff5f7] backdrop-blur-[2px] lg:px-6 lg:py-5"
                 >
-                  <p className="text-[0.65rem] tracking-[0.28em] text-[#e85a7a] uppercase lg:text-xs">
-                    Details
-                  </p>
+                  <p className={cn(META_CLASS, "text-[#e85a7a]")}>Details</p>
                   <dl className="mt-3 divide-y divide-[#f3b8c4]/12">
                     {basic.species ? (
                       <div className="flex items-baseline justify-between gap-4 py-2">
@@ -1079,7 +1075,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
                 <DesignCredits
                   design={characterDesign}
                   variant="strip"
-                  size="sm"
+                  size="md"
                   showHandle={false}
                   layout="inline"
                 />

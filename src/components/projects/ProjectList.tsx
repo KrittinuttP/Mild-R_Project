@@ -2,6 +2,12 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
 import { ProtectedImage } from "@/components/media/ProtectedImage";
+import {
+  BADGE_ACCENT_CLASS,
+  BADGE_CLASS,
+  BADGE_SOFT_CLASS,
+  META_CLASS,
+} from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { ProjectItem, ProjectStatus } from "@/types/vtuber";
 
@@ -17,12 +23,6 @@ const CATEGORY_LABEL: Record<string, string> = {
   hbd: "Birthday",
   mv: "Fansong",
 };
-
-const META_CLASS =
-  "text-xs tracking-[0.18em] text-[#f3b8c4]/70 uppercase sm:text-sm";
-
-const BADGE_CLASS =
-  "rounded-full border px-3 py-1 text-xs tracking-wide sm:text-sm";
 
 type ProjectListProps = {
   projects: ProjectItem[];
@@ -76,23 +76,14 @@ export function ProjectList({ projects, emptyLabel }: ProjectListProps) {
                   </span>
                   <span
                     className={cn(
-                      BADGE_CLASS,
-                      isHbd
-                        ? "border-[#e85a7a]/35 bg-[#e85a7a]/15 text-[#f3b8c4]"
-                        : "border-[#f3b8c4]/20 text-[#f3b8c4]/80"
+                      isHbd ? BADGE_ACCENT_CLASS : BADGE_CLASS,
+                      !isHbd && "border-[#f3b8c4]/20 text-[#f3b8c4]/80"
                     )}
                   >
                     {STATUS_LABEL[project.status]}
                   </span>
                   {project.year ? (
-                    <span
-                      className={cn(
-                        BADGE_CLASS,
-                        "border-[#f3b8c4]/15 bg-white/[0.03] tabular-nums text-[#f3b8c4]/80"
-                      )}
-                    >
-                      {project.year}
-                    </span>
+                    <span className={BADGE_SOFT_CLASS}>{project.year}</span>
                   ) : null}
                 </div>
 
