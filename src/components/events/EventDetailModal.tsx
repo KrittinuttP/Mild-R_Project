@@ -13,6 +13,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { eventStatusLabel, formatThaiDate } from "@/lib/events";
+import {
+  MODAL_CLOSE_BUTTON_CLASS,
+} from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { CalendarEvent } from "@/types/vtuber";
 
@@ -34,6 +37,7 @@ export function EventDetailModal({
       <DialogContent
         className="max-h-[92dvh] w-[min(100%,calc(100vw-1rem))] max-w-lg overflow-hidden rounded-2xl border-[#f3b8c4]/25 bg-[#140a0d] p-0 text-[#fff5f7] sm:max-w-lg"
         showCloseButton
+        closeButtonClassName={MODAL_CLOSE_BUTTON_CLASS}
       >
         {event ? (
           <div className="max-h-[92dvh] overflow-y-auto">
@@ -59,7 +63,7 @@ export function EventDetailModal({
 
             <div className="space-y-4 px-5 pt-1 pb-5 sm:px-6 sm:pb-6">
               <DialogHeader className="gap-2 pr-8 text-left">
-                <DialogTitle className="font-[family-name:var(--font-display)] text-2xl font-bold tracking-tight text-[#fff5f7]">
+                <DialogTitle className="font-[family-name:var(--font-display)] text-2xl font-normal tracking-normal text-[#fff5f7]">
                   {event.titleLocal ?? event.title}
                 </DialogTitle>
                 {event.titleLocal ? (

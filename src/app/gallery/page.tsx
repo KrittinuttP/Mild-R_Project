@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Gallery Archive | Mild-R Fanclub",
-  description: "คลังภาพ Archive เต็มของ Mild-R — เลื่อนดูและเปิดรูปใหญ่ได้",
+  description: "คลังภาพ Archive ของ Mild-R",
 };
 
 export default function GalleryArchivePage() {
@@ -25,12 +25,11 @@ export default function GalleryArchivePage() {
           id="gallery"
           eyebrow="Archive"
           title="Visual archive"
-          description="คลังภาพเต็ม — กดดูรูปใหญ่ โหลดเพิ่มได้เรื่อยๆ"
           items={mildRData.gallery}
           variant="archive"
           mode="full"
           backHref="/#gallery"
-          backLabel="กลับตัวอย่างบนหน้าแรก"
+          backLabel="กลับหน้าแรก"
           className="pt-28 sm:pt-32"
         />
         <div className="flex justify-center pb-20">

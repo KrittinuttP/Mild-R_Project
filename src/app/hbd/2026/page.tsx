@@ -15,16 +15,14 @@ export const metadata: Metadata = {
     "คำอวยพรวันเกิด Mild-R จากฮันนี่ — สุขสันต์วันเกิดในโอกาส 12.12.2026",
 };
 
-export const revalidate = 30;
+/** Always fetch approved wishes fresh — avoid stale ISR after admin approve */
+export const dynamic = "force-dynamic";
 
-export default async function HbdPage() {
+export default async function Hbd2026Page() {
   const approved = await loadApprovedHbdWishes();
   const hbd = {
     ...mildRData.hbd,
-    wishes: [
-      ...mildRData.hbd.wishes.filter((wish) => !wish.fromUpload),
-      ...approved,
-    ],
+    wishes: approved,
   };
 
   return (

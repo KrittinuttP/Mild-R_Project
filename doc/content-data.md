@@ -84,7 +84,7 @@ Hash บนหน้าแรก: `#gallery` · `#fan-art` (โซนพรี�
 | `fromUpload` | เตรียมไว้ต่อ Storage ทีหลัง |
 | `loadOnDemand` | lazy รูปตอนเลื่อนถึง |
 
-Routes: `/hbd` (ประสบการณ์) · `/projects/hbd` (หน้าโปรเจกต์ + CTA)
+Routes: `/HBD/2026` (ประสบการณ์) · `/projects/hbd` (หน้าโปรเจกต์ + CTA)
 
 ### Media (หน้าแรก)
 

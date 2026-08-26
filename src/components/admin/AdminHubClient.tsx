@@ -49,7 +49,7 @@ const TOOLS: AdminTool[] = [
     href: "/admin/hbd",
     title: "HBD submissions",
     titleLocal: "อนุมัติคำอวยพร",
-    description: "รายการอัปโหลดจาก /hbd/upload",
+    description: "รายการอัปโหลดจาก /HBD/2026/upload",
     icon: Cake,
   },
 ];
@@ -155,7 +155,7 @@ export function AdminHubClient() {
             <p className="text-[0.62rem] tracking-[0.24em] text-[#9a7b5a] uppercase">
               Site admin
             </p>
-            <h1 className={cn(DISPLAY, "text-xl font-bold text-[#f4ebe3] sm:text-2xl")}>
+            <h1 className={cn(DISPLAY, "text-xl font-normal text-[#f4ebe3] sm:text-2xl")}>
               Control desk
             </h1>
           </div>
@@ -216,7 +216,7 @@ export function AdminHubClient() {
           <p className="text-[0.62rem] tracking-[0.24em] text-[#9a7b5a] uppercase">
             Site admin
           </p>
-          <h1 className={cn(DISPLAY, "mt-1 text-2xl font-bold text-[#f4ebe3] sm:text-3xl")}>
+          <h1 className={cn(DISPLAY, "mt-1 text-2xl font-normal text-[#f4ebe3] sm:text-3xl")}>
             Control desk
           </h1>
           <p className="mt-2 text-sm text-[#c4b8a8]">
@@ -252,7 +252,7 @@ export function AdminHubClient() {
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="flex flex-wrap items-center gap-2">
-                    <span className={cn(DISPLAY, "font-semibold text-[#f4ebe3]")}>
+                    <span className={cn(DISPLAY, "font-normal text-[#f4ebe3]")}>
                       {tool.title}
                     </span>
                     {badge > 0 ? (
@@ -277,7 +277,7 @@ export function AdminHubClient() {
       <div className="mt-8 flex flex-wrap gap-4 text-sm">
         <BackLink href="/">หน้าหลัก</BackLink>
         <Link
-          href="/hbd/upload"
+          href="/HBD/2026/upload"
           className="inline-flex items-center gap-2 text-[#9a7b5a] hover:text-[#c4b8a8]"
         >
           <ArrowLeft className="size-3.5 rotate-180" />

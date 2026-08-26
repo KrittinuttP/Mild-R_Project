@@ -27,14 +27,14 @@ export function CafeFooter({ cafe }: CafeFooterProps) {
   const followLabel = xFromData?.label ?? CAFE_X.label;
 
   return (
-    <footer className="border-t border-[#9a7b5a]/25 bg-[#07090b] px-5 py-12 text-[#d8d0c4] sm:px-10 sm:py-14 lg:px-16">
+    <footer className="border-t border-[#9a7b5a]/20 bg-[#07090b] px-5 py-12 text-[#d8d0c4] sm:px-10 sm:py-14 lg:px-16">
       <div className="mx-auto max-w-6xl">
-        <div className="space-y-1" aria-hidden>
-          <div className="border-t-2 border-[#9a7b5a]/35" />
-          <div className="border-t border-[#9a7b5a]/25" />
-        </div>
+        <div
+          className="h-px bg-gradient-to-r from-transparent via-[#9a7b5a]/40 to-transparent"
+          aria-hidden
+        />
 
-        <div className="mt-7 flex flex-col gap-8 sm:mt-8 md:flex-row md:items-end md:justify-between md:gap-10">
+        <div className="mt-8 flex flex-col gap-8 md:flex-row md:items-end md:justify-between md:gap-10">
           <div className="min-w-0">
             <p className="text-[0.58rem] tracking-[0.24em] text-[#9a7b5a] uppercase sm:text-[0.62rem] sm:tracking-[0.28em]">
               Fan project · Not official
@@ -56,7 +56,7 @@ export function CafeFooter({ cafe }: CafeFooterProps) {
                 href={followUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex w-fit items-center gap-1.5 border border-[#a84d5f]/45 bg-[#a84d5f]/15 px-3 py-2 text-sm text-[#f4ebe3] transition hover:border-[#c46a7a]/60 hover:bg-[#a84d5f]/25"
+                className="inline-flex w-fit items-center gap-1.5 rounded-2xl border border-[#a84d5f]/45 bg-[#a84d5f]/15 px-3.5 py-2 text-sm text-[#f4ebe3] transition hover:border-[#c46a7a]/60 hover:bg-[#a84d5f]/25"
               >
                 {followLabel}
                 <span className="text-[#c4b8a8]">({CAFE_X.handle})</span>
@@ -65,7 +65,7 @@ export function CafeFooter({ cafe }: CafeFooterProps) {
             </div>
           </div>
 
-          <div className="space-y-3 border-t border-[#9a7b5a]/20 pt-6 md:border-t-0 md:pt-0 md:text-right">
+          <div className="space-y-3 border-t border-[#9a7b5a]/15 pt-6 md:border-t-0 md:pt-0 md:text-right">
             {cafe.closing.disclaimer ? (
               <p className="max-w-md text-xs leading-relaxed text-[#9a7b5a]/85 md:ml-auto">
                 {cafe.closing.disclaimer}
@@ -91,7 +91,7 @@ export function CafeFooter({ cafe }: CafeFooterProps) {
               >
                 <span>{DEVELOPER.name}</span>
                 <span
-                  className="inline-flex size-6 items-center justify-center border border-[#9a7b5a]/40 text-[#d8d0c4] transition group-hover:border-[#c46a7a]/55 group-hover:text-[#c46a7a]"
+                  className="inline-flex size-6 items-center justify-center rounded-full border border-[#9a7b5a]/40 text-[#d8d0c4] transition group-hover:border-[#c46a7a]/55 group-hover:text-[#c46a7a]"
                   aria-hidden
                 >
                   <X className="size-3.5" />

@@ -26,6 +26,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { formatThaiDate } from "@/lib/events";
+import { CTA_PRIMARY_CLASS, MODAL_CLOSE_BUTTON_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import {
   getYoutubeThumbnailUrl,
@@ -64,7 +65,7 @@ function MetaPill({
   return (
     <span
       className={cn(
-        "inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-[0.65rem] leading-none tracking-[0.12em]",
+        "inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-xs leading-none tracking-wide",
         className
       )}
     >
@@ -91,7 +92,7 @@ function TimeCell({
         accent && "bg-[#e85a7a]/06"
       )}
     >
-      <p className="flex items-center gap-1.5 text-[0.62rem] tracking-[0.14em] text-[#f3b8c4]/60 uppercase">
+      <p className="flex items-center gap-1.5 text-xs tracking-[0.14em] text-[#f3b8c4]/60 uppercase">
         <span className="opacity-80" aria-hidden>
           {icon}
         </span>
@@ -160,6 +161,7 @@ export function LiveDetailModal({
       <DialogContent
         className="max-h-[92dvh] w-[min(100%,calc(100vw-1rem))] max-w-md overflow-hidden rounded-2xl border-[#e85a7a]/25 bg-[#140a0d] p-0 text-[#fff5f7] shadow-[0_0_0_1px_rgba(232,90,122,0.08),0_24px_64px_rgba(8,2,4,0.65)] sm:max-w-md"
         showCloseButton
+        closeButtonClassName={MODAL_CLOSE_BUTTON_CLASS}
       >
         {slot ? (
           <div className="relative max-h-[92dvh] overflow-y-auto">
@@ -214,7 +216,7 @@ export function LiveDetailModal({
             <div className="relative space-y-4 px-5 pt-4 pb-5 sm:px-6 sm:pb-6">
               <DialogHeader className="gap-1.5 pr-6 text-left">
                 <DialogTitle
-                  className="line-clamp-2 font-[family-name:var(--font-display)] text-[1.35rem] leading-snug font-bold tracking-tight break-words text-[#fff5f7] sm:text-xl"
+                  className="line-clamp-2 font-[family-name:var(--font-display)] text-[1.35rem] leading-snug font-normal tracking-normal break-words text-[#fff5f7] sm:text-xl"
                   title={displayTitle}
                 >
                   {displayTitle}
@@ -258,7 +260,7 @@ export function LiveDetailModal({
                 ) : null}
                 {!own && slot.sourceTitle ? (
                   <MetaPill className="normal-case tracking-[0.08em] border-[#7eb6d4]/50 bg-[#7eb6d4]/14 text-[#b8d9ec]">
-                    ไปช่อง {slot.sourceTitle}
+                    {slot.sourceTitle}
                   </MetaPill>
                 ) : null}
                 {slot.isMember ? (
@@ -274,7 +276,7 @@ export function LiveDetailModal({
               </div>
 
               {hasScheduleBlock ? (
-                <div className="overflow-hidden rounded-xl border border-[#f3b8c4]/15 bg-[#1a0d12]/55">
+                <div className="overflow-hidden rounded-2xl border border-[#f3b8c4]/15 bg-[#1a0c12]/55">
                   <div className="border-b border-[#f3b8c4]/12 px-3 py-2 sm:px-3.5">
                     <p className="text-[0.62rem] tracking-[0.18em] text-[#f3b8c4]/55 uppercase">
                       ตารางเวลา
@@ -369,7 +371,8 @@ export function LiveDetailModal({
                   rel={external ? "noopener noreferrer" : undefined}
                   className={cn(
                     buttonVariants({ size: "lg" }),
-                    "group relative w-full overflow-hidden rounded-xl border-transparent bg-[#e85a7a] text-white shadow-[0_0_24px_rgba(232,90,122,0.2)] transition hover:bg-[#f06b88]"
+                    CTA_PRIMARY_CLASS,
+                    "group relative w-full overflow-hidden"
                   )}
                 >
                   <Play className="size-4 fill-current" aria-hidden />

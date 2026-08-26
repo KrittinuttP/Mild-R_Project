@@ -60,7 +60,7 @@ export function CafeTopSecret({
         <p
           className={cn(
             SERIF,
-            "mt-6 text-xl font-semibold text-[#f4ebe3] sm:text-2xl"
+            "mt-6 text-xl font-normal text-[#f4ebe3] sm:text-2xl"
           )}
         >
           {title}

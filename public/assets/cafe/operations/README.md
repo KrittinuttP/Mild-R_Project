@@ -2,15 +2,15 @@
 
 Referenced from `src/data/mild-r/cafe.json` → `operations.groups[].items[].image`
 
-Drop files here (filenames match JSON):
+When `image` is omitted (or the file fails to load), the cafe page shows a
+**Waiting / ยังไม่มีภาพ** placeholder plate — not an error state.
 
-- caution-tape.jpg
-- evidence-board.jpg
-- field-evidence-board.jpg
-- field-stamp-rally.jpg
-- bounty-disguise.jpg
-- bounty-preorder.jpg
-- social-hashtag.jpg
+To publish art later, add files here and set matching paths in JSON, e.g.:
 
-Public URL path: `/assets/cafe/operations/<filename>`
-Until a file exists, the cafe page shows a Promo TBA plate for that item.
+- `/assets/cafe/operations/caution-tape.jpg`
+- `/assets/cafe/operations/evidence-board.jpg`
+- `/assets/cafe/operations/field-evidence-board.jpg`
+- `/assets/cafe/operations/field-stamp-rally.jpg`
+- `/assets/cafe/operations/bounty-disguise.jpg`
+- `/assets/cafe/operations/bounty-preorder.jpg`
+- `/assets/cafe/operations/social-hashtag.jpg`

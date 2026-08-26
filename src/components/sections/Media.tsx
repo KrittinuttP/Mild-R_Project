@@ -9,6 +9,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { groupMediaByCategory } from "@/lib/media";
 import {
   CTA_OUTLINE_CLASS,
+  DISPLAY_H2_CLASS,
+  DISPLAY_H3_CLASS,
   META_CLASS,
   META_MUTED_CLASS,
 } from "@/lib/site-ui";
@@ -72,12 +74,9 @@ export function Media({ data }: MediaProps) {
       <div className="relative mx-auto max-w-6xl">
         <ScrollReveal>
           <p className={META_CLASS}>Media</p>
-          <h2 className="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+          <h2 className={cn("mt-3", DISPLAY_H2_CLASS)}>
             รับชมคลิป
           </h2>
-          <p className="mt-4 max-w-xl text-sm text-[#f7d7de]/85 sm:text-base">
-            เลือกหมวดด้านล่าง แล้วเปิดจากรายการ
-          </p>
         </ScrollReveal>
 
         <ScrollReveal className="mt-8 sm:mt-10">
@@ -184,7 +183,7 @@ export function Media({ data }: MediaProps) {
 
             {active ? (
               <div className="mt-5 border-t border-[#f3b8c4]/15 pt-5">
-                <h3 className="font-[family-name:var(--font-display)] text-xl font-bold sm:text-2xl">
+                <h3 className={DISPLAY_H3_CLASS}>
                   {active.title}
                   {active.titleLocal ? (
                     <span className="mt-1 block text-base font-medium text-[#f3b8c4]/75">

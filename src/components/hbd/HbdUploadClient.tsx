@@ -75,7 +75,7 @@ function clearFormCache() {
 const fieldClass =
   "mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm leading-normal text-[#f7d7de] outline-none transition placeholder:text-[#f3b8c4]/35 focus:border-[#e85a7a]/55 focus:bg-white/[0.06] focus:ring-2 focus:ring-[#e85a7a]/20";
 
-const labelClass = "text-sm font-medium tracking-wide text-[#f7d7de]/90";
+const labelClass = "text-sm font-normal tracking-wide text-[#f7d7de]/90";
 
 const hintClass = "mt-1.5 text-xs leading-relaxed text-[#f3b8c4]/55";
 
@@ -106,6 +106,11 @@ export function HbdUploadClient() {
 
   const cardInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+  /** Live blob URLs — revoke only on replace / explicit clear / unmount (not Strict Mode re-run). */
+  const cardUrlRef = useRef<string | undefined>(undefined);
+  const avatarUrlRef = useRef<string | undefined>(undefined);
+  const cardFileRef = useRef<File | null>(null);
+  const avatarFileRef = useRef<File | null>(null);
 
   useEffect(() => {
     const cached = readFormCache();
@@ -130,10 +135,37 @@ export function HbdUploadClient() {
 
   useEffect(() => {
     return () => {
-      revokeUrl(cardPreviewUrl);
-      revokeUrl(avatarPreviewUrl);
+      revokeUrl(cardUrlRef.current);
+      revokeUrl(avatarUrlRef.current);
     };
-  }, [cardPreviewUrl, avatarPreviewUrl]);
+  }, []);
+
+  function setCardMedia(file: File | null, previewUrl?: string) {
+    if (cardUrlRef.current && cardUrlRef.current !== previewUrl) {
+      revokeUrl(cardUrlRef.current);
+    }
+    cardUrlRef.current = previewUrl;
+    cardFileRef.current = file;
+    setCardFile(file);
+    setCardPreviewUrl(previewUrl);
+  }
+
+  function setAvatarMedia(file: File | null, previewUrl?: string) {
+    if (avatarUrlRef.current && avatarUrlRef.current !== previewUrl) {
+      revokeUrl(avatarUrlRef.current);
+    }
+    avatarUrlRef.current = previewUrl;
+    avatarFileRef.current = file;
+    setAvatarFile(file);
+    setAvatarPreviewUrl(previewUrl);
+  }
+
+  function clearMedia() {
+    setCardMedia(null, undefined);
+    setAvatarMedia(null, undefined);
+    if (cardInputRef.current) cardInputRef.current.value = "";
+    if (avatarInputRef.current) avatarInputRef.current.value = "";
+  }
 
   function draft(): HbdUploadDraft {
     return {
@@ -159,9 +191,7 @@ export function HbdUploadClient() {
       return;
     }
 
-    revokeUrl(cardPreviewUrl);
-    setCardFile(file);
-    setCardPreviewUrl(URL.createObjectURL(file));
+    setCardMedia(file, URL.createObjectURL(file));
   }
 
   function onAvatarChange(event: ChangeEvent<HTMLInputElement>) {
@@ -175,29 +205,25 @@ export function HbdUploadClient() {
       return;
     }
 
-    revokeUrl(avatarPreviewUrl);
-    setAvatarFile(file);
-    setAvatarPreviewUrl(URL.createObjectURL(file));
+    setAvatarMedia(file, URL.createObjectURL(file));
   }
 
   function clearCard() {
     setError(null);
-    setCardFile(null);
-    revokeUrl(cardPreviewUrl);
-    setCardPreviewUrl(undefined);
+    setCardMedia(null, undefined);
     if (cardInputRef.current) cardInputRef.current.value = "";
   }
 
   function clearAvatar() {
     setError(null);
-    setAvatarFile(null);
-    revokeUrl(avatarPreviewUrl);
-    setAvatarPreviewUrl(undefined);
+    setAvatarMedia(null, undefined);
     if (avatarInputRef.current) avatarInputRef.current.value = "";
   }
 
   function validateForm(): string | null {
-    if (!cardFile || !cardPreviewUrl) {
+    const file = cardFileRef.current ?? cardFile;
+    const url = cardUrlRef.current ?? cardPreviewUrl;
+    if (!file || !url) {
       return "กรุณาอัปโหลดรูปการ์ดจาก template";
     }
     if (!displayName.trim()) return "กรุณากรอกชื่อที่จะแสดงบนเว็บ";
@@ -222,7 +248,8 @@ export function HbdUploadClient() {
   }
 
   async function onConfirm() {
-    if (!cardFile) {
+    const file = cardFileRef.current ?? cardFile;
+    if (!file) {
       setError("ไม่พบไฟล์การ์ด — กรุณาแก้ไขแล้วอัปโหลดใหม่");
       return;
     }
@@ -236,8 +263,9 @@ export function HbdUploadClient() {
       body.set("message", message.trim());
       body.set("contactChannel", contactChannel);
       body.set("contactHandle", contactHandle.trim());
-      body.set("card", cardFile);
-      if (avatarFile) body.set("avatar", avatarFile);
+      body.set("card", file);
+      const avatar = avatarFileRef.current ?? avatarFile;
+      if (avatar) body.set("avatar", avatar);
 
       const res = await fetch("/api/hbd/submit", {
         method: "POST",
@@ -259,14 +287,7 @@ export function HbdUploadClient() {
       setMessage("");
       setContactHandle("");
       setContactChannel("x");
-      setCardFile(null);
-      revokeUrl(cardPreviewUrl);
-      setCardPreviewUrl(undefined);
-      setAvatarFile(null);
-      revokeUrl(avatarPreviewUrl);
-      setAvatarPreviewUrl(undefined);
-      if (cardInputRef.current) cardInputRef.current.value = "";
-      if (avatarInputRef.current) avatarInputRef.current.value = "";
+      clearMedia();
 
       setPhase("done");
       setNotify("ส่งเข้าคิวอนุมัติแล้ว — ทีมจะตรวจก่อนขึ้นหน้า HBD");
@@ -287,14 +308,7 @@ export function HbdUploadClient() {
     setMessage("");
     setContactHandle("");
     setContactChannel("x");
-    setCardFile(null);
-    revokeUrl(cardPreviewUrl);
-    setCardPreviewUrl(undefined);
-    setAvatarFile(null);
-    revokeUrl(avatarPreviewUrl);
-    setAvatarPreviewUrl(undefined);
-    if (cardInputRef.current) cardInputRef.current.value = "";
-    if (avatarInputRef.current) avatarInputRef.current.value = "";
+    clearMedia();
   }
 
   function clearFormData() {
@@ -306,6 +320,8 @@ export function HbdUploadClient() {
 
   const preview = draft();
   const avatarSrc = preview.avatarPreviewUrl ?? HBD_AVATAR_DEFAULT;
+  const showFormChrome = phase === "form";
+  const showFormFields = phase === "form" || phase === "preview";
 
   return (
     <div className="relative overflow-hidden">
@@ -325,7 +341,7 @@ export function HbdUploadClient() {
             <div className="w-full max-w-sm rounded-3xl bg-[#1a0c12] p-6 ring-1 ring-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
               <h2
                 id="hbd-clear-title"
-                className={cn(DISPLAY, "text-xl font-bold text-[#fff5f7]")}
+                className={cn(DISPLAY, "text-xl font-normal text-[#fff5f7]")}
               >
                 ล้างข้อมูลฟอร์ม?
               </h2>
@@ -338,7 +354,7 @@ export function HbdUploadClient() {
                   onClick={clearFormData}
                   className={cn(
                     buttonVariants({ size: "lg" }),
-                    "flex-1 rounded-2xl border-transparent bg-[#e85a7a] font-semibold text-[#140a0d] hover:bg-[#f3b8c4]"
+                    "flex-1 rounded-2xl border-transparent bg-[#e85a7a] font-normal text-[#140a0d] hover:bg-[#f3b8c4]"
                   )}
                 >
                   ยืนยันล้าง
@@ -358,7 +374,7 @@ export function HbdUploadClient() {
           </div>
         ) : null}
 
-        <BackLink href="/hbd" className="mb-8">
+        <BackLink href="/HBD/2026" className="mb-8">
           กลับไปดูคำอวยพร
         </BackLink>
 
@@ -371,7 +387,7 @@ export function HbdUploadClient() {
           <h1
             className={cn(
               DISPLAY,
-              "mt-4 text-3xl font-bold tracking-tight text-[#fff5f7] sm:text-4xl"
+              "mt-4 text-3xl font-normal tracking-tight text-[#fff5f7] sm:text-4xl"
             )}
           >
             ส่งการ์ดอวยพร
@@ -381,31 +397,36 @@ export function HbdUploadClient() {
           </p>
         </header>
 
-        {/* 2. Template + download */}
-        {phase === "form" ? (
-          <section className="mt-10 flex flex-col items-center">
-            <p className="mb-3 text-xs tracking-[0.18em] text-[#f3b8c4]/60 uppercase">
-              ตัวอย่างการ์ด
-            </p>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={HBD_CARD_TEMPLATE.path}
-              alt="ตัวอย่างเทมเพลตการ์ดอวยพร"
-              className="h-auto w-full max-w-[13rem] rounded-2xl object-contain shadow-[0_20px_50px_rgba(0,0,0,0.45)] ring-1 ring-white/10 sm:max-w-[14.5rem]"
-            />
-            <a
-              href={HBD_CARD_TEMPLATE.path}
-              download={HBD_CARD_TEMPLATE.filename}
-              className={cn(
-                buttonVariants({ size: "lg" }),
-                "mt-5 w-full max-w-xs rounded-2xl border-transparent bg-[#e85a7a] text-sm font-semibold text-[#140a0d] shadow-[0_8px_24px_rgba(232,90,122,0.35)] hover:bg-[#f3b8c4]"
-              )}
-            >
-              <Download className="size-4" />
-              โหลดเทมเพลต
-            </a>
-          </section>
-        ) : null}
+        {/* 2. Template + download — keep mounted while preview so uploads stay */}
+        <section
+          className={cn(
+            "mt-10 flex flex-col items-center",
+            !showFormChrome && "hidden"
+          )}
+          aria-hidden={!showFormChrome}
+        >
+          <p className="mb-3 text-xs tracking-[0.18em] text-[#f3b8c4]/60 uppercase">
+            ตัวอย่างการ์ด
+          </p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={HBD_CARD_TEMPLATE.path}
+            alt="ตัวอย่างเทมเพลตการ์ดอวยพร"
+            className="h-auto w-full max-w-[13rem] rounded-2xl object-contain shadow-[0_20px_50px_rgba(0,0,0,0.45)] ring-1 ring-white/10 sm:max-w-[14.5rem]"
+          />
+          <a
+            href={HBD_CARD_TEMPLATE.path}
+            download={HBD_CARD_TEMPLATE.filename}
+            className={cn(
+              buttonVariants({ size: "lg" }),
+              "mt-5 w-full max-w-xs rounded-2xl border-transparent bg-[#e85a7a] text-sm font-normal text-[#140a0d] shadow-[0_8px_24px_rgba(232,90,122,0.35)] hover:bg-[#f3b8c4]"
+            )}
+            tabIndex={showFormChrome ? undefined : -1}
+          >
+            <Download className="size-4" />
+            โหลดเทมเพลต
+          </a>
+        </section>
 
         {notify ? (
           <p
@@ -416,8 +437,13 @@ export function HbdUploadClient() {
           </p>
         ) : null}
 
-        {phase === "form" ? (
-          <form onSubmit={onSubmitForm} className="mt-10 space-y-7">
+        {showFormFields ? (
+          <form
+            onSubmit={onSubmitForm}
+            className={cn("mt-10 space-y-7", !showFormChrome && "hidden")}
+            aria-hidden={!showFormChrome}
+            inert={!showFormChrome ? true : undefined}
+          >
             {/* 3. Card upload */}
             <section className="rounded-3xl bg-white/[0.03] p-5 ring-1 ring-white/10 sm:p-6">
               <div className="flex items-center gap-2">
@@ -540,7 +566,7 @@ export function HbdUploadClient() {
                     type="button"
                     onClick={() => setContactChannel(channel)}
                     className={cn(
-                      "flex-1 rounded-xl px-3 py-2.5 text-sm font-medium transition",
+                      "flex-1 rounded-xl px-3 py-2.5 text-sm font-normal transition",
                       contactChannel === channel
                         ? "bg-[#e85a7a] text-[#140a0d] shadow-sm"
                         : "text-[#f3b8c4]/70 hover:text-[#f7d7de]"
@@ -583,7 +609,7 @@ export function HbdUploadClient() {
                 disabled={loading}
                 className={cn(
                   buttonVariants({ size: "lg" }),
-                  "h-12 w-full rounded-2xl border-transparent bg-[#e85a7a] text-sm font-semibold text-[#140a0d] shadow-[0_8px_24px_rgba(232,90,122,0.3)] hover:bg-[#f3b8c4]"
+                  "h-12 w-full rounded-2xl border-transparent bg-[#e85a7a] text-sm font-normal text-[#140a0d] shadow-[0_8px_24px_rgba(232,90,122,0.3)] hover:bg-[#f3b8c4]"
                 )}
               >
                 {loading ? (
@@ -634,7 +660,7 @@ export function HbdUploadClient() {
                     <p
                       className={cn(
                         DISPLAY,
-                        "text-lg font-bold text-[#fff5f7]"
+                        "text-lg font-normal text-[#fff5f7]"
                       )}
                     >
                       จาก {preview.displayName}
@@ -668,6 +694,8 @@ export function HbdUploadClient() {
                 onClick={() => {
                   setPhase("form");
                   setNotify(null);
+                  setError(null);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
                 className={cn(
                   buttonVariants({ variant: "outline", size: "lg" }),
@@ -683,7 +711,7 @@ export function HbdUploadClient() {
                 onClick={onConfirm}
                 className={cn(
                   buttonVariants({ size: "lg" }),
-                  "flex-1 rounded-2xl border-transparent bg-[#e85a7a] font-semibold text-[#140a0d] hover:bg-[#f3b8c4] sm:flex-none"
+                  "flex-1 rounded-2xl border-transparent bg-[#e85a7a] font-normal text-[#140a0d] hover:bg-[#f3b8c4] sm:flex-none"
                 )}
               >
                 {loading ? <Loader2 className="size-4 animate-spin" /> : null}
@@ -695,7 +723,7 @@ export function HbdUploadClient() {
 
         {phase === "done" ? (
           <div className="mt-10 rounded-3xl bg-white/[0.04] px-6 py-12 text-center ring-1 ring-white/10">
-            <p className={cn(DISPLAY, "text-2xl font-bold text-[#fff5f7]")}>
+            <p className={cn(DISPLAY, "text-2xl font-normal text-[#fff5f7]")}>
               ขอบคุณนะฮันนี่
             </p>
             <p className="mt-3 text-sm leading-relaxed text-[#f3b8c4]/80">
@@ -703,10 +731,10 @@ export function HbdUploadClient() {
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link
-                href="/hbd"
+                href="/HBD/2026"
                 className={cn(
                   buttonVariants({ size: "lg" }),
-                  "rounded-2xl border-transparent bg-[#e85a7a] font-semibold text-[#140a0d] hover:bg-[#f3b8c4]"
+                  "rounded-2xl border-transparent bg-[#e85a7a] font-normal text-[#140a0d] hover:bg-[#f3b8c4]"
                 )}
               >
                 ไปดูคำอวยพร

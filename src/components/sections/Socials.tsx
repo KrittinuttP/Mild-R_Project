@@ -5,7 +5,9 @@ import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { SocialPlatformIcon } from "@/components/icons/SocialPlatformIcon";
 import { buttonVariants } from "@/components/ui/button";
 import {
+  BODY_CLASS,
   CTA_PRIMARY_CLASS,
+  DISPLAY_H2_CLASS,
   META_CLASS,
   META_MUTED_CLASS,
 } from "@/lib/site-ui";
@@ -35,10 +37,10 @@ export function Socials({ data }: SocialsProps) {
       <div className="relative mx-auto max-w-6xl">
         <ScrollReveal>
           <p className={META_CLASS}>Connect</p>
-          <h2 className="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+          <h2 className={cn("mt-3", DISPLAY_H2_CLASS)}>
             ติดตาม Mild-R
           </h2>
-          <p className="mt-4 max-w-xl text-sm text-[#f7d7de]/85 sm:text-base">
+          <p className={cn("mt-4 max-w-xl", BODY_CLASS)}>
             {data.fan.greetingToFans ?? `${data.fan.fanName} ${data.fan.oshiMark}`}
           </p>
         </ScrollReveal>

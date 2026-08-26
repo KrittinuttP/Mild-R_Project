@@ -63,11 +63,10 @@ export function submissionToWish(row: HbdSubmissionRow): HbdWish {
     alt: `Wish from ${row.display_name}`,
     avatar: row.avatar_url?.trim() || HBD_AVATAR_DEFAULT,
     fromUpload: true,
-    loadOnDemand: true,
   };
 }
 
-/** Public: approved wishes for /hbd */
+/** Public: approved wishes for /HBD/2026 */
 export async function loadApprovedHbdWishes(): Promise<HbdWish[]> {
   if (!isSupabaseConfigured()) return [];
 
@@ -78,7 +77,7 @@ export async function loadApprovedHbdWishes(): Promise<HbdWish[]> {
       .select(
         "id, display_name, message, card_url, avatar_url, status, created_at, approved_at"
       )
-      .order("approved_at", { ascending: false });
+      .order("approved_at", { ascending: true });
 
     if (error || !data) return [];
 

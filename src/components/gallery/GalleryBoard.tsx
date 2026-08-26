@@ -234,7 +234,7 @@ export function GalleryBoard({
   if (items.length === 0) {
     return (
       <p className="mt-10 text-sm text-[#f3b8c4]/70">
-        ยังไม่มีผลงานในหมวดนี้ — เพิ่มได้ในไฟล์ JSON
+        ยังไม่มีผลงานในหมวดนี้
       </p>
     );
   }

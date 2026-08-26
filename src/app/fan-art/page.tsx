@@ -12,8 +12,7 @@ import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Fan Art | Mild-R Fanclub",
-  description:
-    "คลังแฟนอาร์ตของ Mild-R จากฮันนี่ — ดูผลงานพร้อมเครดิตศิลปิน",
+  description: "คลังแฟนอาร์ตของ Mild-R จากฮันนี่",
 };
 
 export default function FanArtPage() {
@@ -26,12 +25,11 @@ export default function FanArtPage() {
           id="fan-art"
           eyebrow="Fan art"
           title="จากฮันนี่"
-          description="คลังแฟนอาร์ตเต็ม — เครดิตศิลปินชัดเจน กดดูรูปใหญ่และโหลดเพิ่มได้"
           items={mildRData.fanArt}
           variant="fan-art"
           mode="full"
           backHref="/#fan-art"
-          backLabel="กลับตัวอย่างบนหน้าแรก"
+          backLabel="กลับหน้าแรก"
           className="pt-28 sm:pt-32"
         />
         <div className="flex justify-center pb-20">

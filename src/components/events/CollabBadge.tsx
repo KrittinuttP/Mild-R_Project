@@ -1,5 +1,10 @@
 import { Users } from "lucide-react";
 
+import {
+  LIVE_BADGE_COLLAB,
+  LIVE_BADGE_PILL_MD,
+  LIVE_BADGE_PILL_SM,
+} from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 
 type CollabBadgeProps = {
@@ -7,14 +12,14 @@ type CollabBadgeProps = {
   size?: "sm" | "md";
 };
 
-/** Round collab pill — copper accent, distinct from Mild-R rose */
+/** Round collab pill — same size as Mild-R / Member */
 export function CollabBadge({ className, size = "sm" }: CollabBadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border border-[#d4a574]/55 bg-[#d4a574]/14 tracking-[0.12em] text-[#e8c49a] uppercase",
-        size === "sm" && "px-2.5 py-1 text-[0.55rem]",
-        size === "md" && "px-3 py-1.5 text-[0.6rem]",
+        size === "md" ? LIVE_BADGE_PILL_MD : LIVE_BADGE_PILL_SM,
+        LIVE_BADGE_COLLAB,
+        "gap-1",
         className
       )}
     >

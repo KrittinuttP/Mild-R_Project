@@ -8,6 +8,13 @@ const nextConfig: NextConfig = {
     "192.168.100.110",
     "localhost",
   ],
+  async redirects() {
+    return [
+      { source: "/hbd", destination: "/HBD/2026", permanent: true },
+      { source: "/hbd/upload", destination: "/HBD/2026/upload", permanent: true },
+      { source: "/HBD", destination: "/HBD/2026", permanent: false },
+    ];
+  },
 };
 
 export default nextConfig;

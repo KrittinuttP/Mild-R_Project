@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { LiveDetailModal } from "@/components/events/LiveDetailModal";
 import {
+  LiveCancelledBadge,
   LiveDayChannelBadges,
   LiveSlotTime,
   LiveSourceBadges,
@@ -14,12 +15,18 @@ import { OfflineBadge } from "@/components/events/OfflineBadge";
 import { buttonVariants } from "@/components/ui/button";
 import {
   findDefaultWeekIndex,
+  formatISODate,
   formatThaiShortDate,
   parseISODate,
   sortLiveWeeks,
   thaiWeekdayShort,
   weekDayDates,
 } from "@/lib/events";
+import {
+  BADGE_SOFT_CLASS,
+  CTA_OUTLINE_CLASS,
+  META_MUTED_CLASS,
+} from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type {
   LiveOfflineDay,
@@ -67,7 +74,7 @@ function SlotCard({
       onClick={onOpen}
       title={`${slot.timePrevious ? `${slot.timePrevious}→` : ""}${slot.timeUpdated ?? slot.time} · ${label}`}
       className={cn(
-        "group flex w-full flex-col rounded-sm border bg-[#1a0d12]/80 p-2.5 text-left transition sm:p-3",
+        "group flex w-full flex-col rounded-2xl border bg-[#1a0c12]/60 p-2.5 text-left transition sm:p-3",
         crowded
           ? cn(
               "h-full min-h-0 overflow-hidden",
@@ -81,7 +88,7 @@ function SlotCard({
           ? "border-[#8a7f88]/30 opacity-80 hover:border-[#8a7f88]/50 hover:bg-[#8a7f88]/10"
           : guestTone
             ? "border-[#d4a574]/35 hover:border-[#d4a574]/55 hover:bg-[#d4a574]/10"
-            : "border-[#f3b8c4]/15 hover:border-[#e85a7a]/45 hover:bg-[#e85a7a]/10"
+            : "border-[#f3b8c4]/12 hover:border-[#e85a7a]/40 hover:bg-[#1a0c12]"
       )}
     >
       <div className="flex min-w-0 flex-wrap items-center gap-1.5">
@@ -89,7 +96,7 @@ function SlotCard({
           time={slot.time}
           timePrevious={slot.timePrevious}
           timeUpdated={slot.timeUpdated}
-          className="text-[0.65rem]"
+          className="text-xs"
           accentClassName={
             cancelled
               ? "text-[#d8d0d4]"
@@ -99,9 +106,7 @@ function SlotCard({
           }
         />
         {cancelled ? (
-          <span className="rounded-full border border-[#8a7f88]/45 px-2 py-0.5 text-[0.55rem] tracking-[0.12em] text-[#d8d0d4] uppercase">
-            ยกเลิก
-          </span>
+          <LiveCancelledBadge />
         ) : collab || slot.isMember ? (
           <LiveSourceBadges
             isCollab={collab}
@@ -126,7 +131,7 @@ function SlotCard({
         </p>
       ) : null}
       {platform && !crowded ? (
-        <p className="mt-auto pt-2 text-[0.6rem] tracking-[0.16em] text-[#f3b8c4]/55 uppercase">
+        <p className="mt-auto pt-2 text-xs tracking-[0.14em] text-[#f3b8c4]/55 uppercase">
           {platform}
         </p>
       ) : null}
@@ -138,8 +143,8 @@ function OfflineDaySlot({ compact }: { compact?: boolean }) {
   return (
     <div
       className={cn(
-        "flex h-full items-center justify-center rounded-sm border border-[#6ec9b0]/25 bg-[#6ec9b0]/06",
-        compact ? "min-h-[5.75rem]" : "min-h-[7.25rem] sm:min-h-[8rem]"
+        "flex h-full items-center justify-center border border-dashed border-[#6ec9b0]/25 bg-[#6ec9b0]/05",
+        compact ? "min-h-[5.75rem] rounded-xl" : "min-h-[7.25rem] rounded-2xl sm:min-h-[8rem]"
       )}
     >
       <OfflineBadge size={compact ? "sm" : "md"} />
@@ -151,8 +156,8 @@ function EmptyDaySlot({ compact }: { compact?: boolean }) {
   return (
     <div
       className={cn(
-        "flex h-full min-h-[7.25rem] items-center justify-center rounded-sm border border-dashed border-[#6ec9b0]/25 bg-[#6ec9b0]/05 sm:min-h-[8rem]",
-        compact && "min-h-[5.5rem] sm:min-h-[5.5rem]"
+        "flex h-full min-h-[7.25rem] items-center justify-center border border-dashed border-[#6ec9b0]/20 bg-transparent sm:min-h-[8rem]",
+        compact ? "min-h-[5.5rem] rounded-xl sm:min-h-[5.5rem]" : "rounded-2xl"
       )}
     >
       <OfflineBadge size={compact ? "sm" : "md"} />
@@ -203,6 +208,7 @@ export function LiveWeekTable({
   }
 
   const rangeLabel = `${formatThaiShortDate(dayIsos[0] ?? week.weekStart)} – ${formatThaiShortDate(dayIsos[6] ?? week.weekStart)}`;
+  const todayIso = formatISODate(new Date());
 
   const renderDayBody = (iso: string, forceCompact?: boolean) => {
     const daySlots = preferOwnChannelSlots(slotsByDate.get(iso) ?? []);
@@ -257,10 +263,10 @@ export function LiveWeekTable({
     <div className={cn("space-y-4", className)}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-[0.65rem] tracking-[0.22em] text-[#f3b8c4]/65 uppercase">
-            {week.label ?? "ตารางไลฟ์รายสัปดาห์"}
+          <p className={META_MUTED_CLASS}>
+            {week.label ?? "สัปดาห์นี้"}
           </p>
-          <p className="mt-1 font-[family-name:var(--font-display)] text-lg font-semibold text-[#fff5f7] sm:text-xl">
+          <p className="mt-1 font-[family-name:var(--font-display)] text-lg font-normal text-[#fff5f7] sm:text-xl">
             {rangeLabel}
           </p>
         </div>
@@ -274,12 +280,13 @@ export function LiveWeekTable({
               onClick={() => setIndex((value) => Math.max(0, value - 1))}
               className={cn(
                 buttonVariants({ variant: "outline", size: "icon" }),
-                "size-9 rounded-none border-[#f3b8c4]/25 bg-transparent text-[#fff5f7] disabled:opacity-35"
+                CTA_OUTLINE_CLASS,
+                "size-9 disabled:opacity-35"
               )}
             >
               <ChevronLeft className="size-4" />
             </button>
-            <span className="min-w-[4.5rem] text-center text-xs tabular-nums text-[#f3b8c4]/70">
+            <span className="min-w-[4.5rem] text-center text-xs tabular-nums text-[#f3b8c4]/70 sm:text-sm">
               {safeIndex + 1} / {sorted.length}
             </span>
             <button
@@ -291,7 +298,8 @@ export function LiveWeekTable({
               }
               className={cn(
                 buttonVariants({ variant: "outline", size: "icon" }),
-                "size-9 rounded-none border-[#f3b8c4]/25 bg-transparent text-[#fff5f7] disabled:opacity-35"
+                CTA_OUTLINE_CLASS,
+                "size-9 disabled:opacity-35"
               )}
             >
               <ChevronRight className="size-4" />
@@ -306,20 +314,38 @@ export function LiveWeekTable({
           compact && "sm:block"
         )}
       >
-        <div className="grid min-w-[44rem] grid-cols-7 items-stretch gap-2">
+        <div className="grid min-w-[44rem] grid-cols-7 items-stretch gap-2.5">
           {dayIsos.map((iso) => {
             const date = parseISODate(iso);
             const daySlots = preferOwnChannelSlots(slotsByDate.get(iso) ?? []);
+            const isToday = iso === todayIso;
             return (
               <div key={iso} className="flex min-w-0 flex-col">
-                <div className="shrink-0 border-b border-[#f3b8c4]/20 pb-2 text-center">
-                  <p className="text-[0.65rem] tracking-[0.18em] text-[#f3b8c4]/65 uppercase">
+                <div
+                  className={cn(
+                    "shrink-0 border-b pb-2 text-center",
+                    isToday ? "border-[#f3b8c4]/45" : "border-[#f3b8c4]/15"
+                  )}
+                >
+                  <p
+                    className={cn(
+                      "text-xs tracking-[0.14em] uppercase sm:text-sm",
+                      isToday ? "font-medium text-[#f3b8c4]" : "text-[#f3b8c4]/65"
+                    )}
+                  >
                     {thaiWeekdayShort(date)}
                   </p>
-                  <div className="mt-0.5 flex flex-wrap items-center justify-center gap-1">
-                    <p className="text-xs tabular-nums text-[#f7d7de]/80">
+                  <div className="mt-1 flex flex-wrap items-center justify-center gap-1">
+                    <span
+                      className={cn(
+                        "inline-flex items-center justify-center px-2 py-0.5 text-xs tabular-nums sm:text-sm",
+                        isToday
+                          ? "rounded-full border border-[#f3b8c4]/45 bg-[#f3b8c4]/15 font-medium text-[#fff5f7]"
+                          : "text-[#f7d7de]/80"
+                      )}
+                    >
                       {formatThaiShortDate(iso)}
-                    </p>
+                    </span>
                     <LiveDayChannelBadges slots={daySlots} size="sm" />
                   </div>
                 </div>
@@ -332,27 +358,48 @@ export function LiveWeekTable({
         </div>
       </div>
 
-      <ul className="divide-y divide-[#f3b8c4]/12 border-y border-[#f3b8c4]/15 sm:hidden">
+      <ul className="divide-y divide-[#f3b8c4]/10 sm:hidden">
         {dayIsos.map((iso) => {
           const date = parseISODate(iso);
           const daySlots = preferOwnChannelSlots(slotsByDate.get(iso) ?? []);
           const offline = offlineByDate.get(iso);
+          const isToday = iso === todayIso;
           return (
-            <li key={iso} className="py-3">
+            <li key={iso} className="py-4 first:pt-0 last:pb-0">
               <div className="flex flex-wrap items-center gap-1.5">
-                <p className="text-[0.65rem] tracking-[0.18em] text-[#f3b8c4]/65 uppercase">
-                  {thaiWeekdayShort(date)} · {formatThaiShortDate(iso)}
+                <p
+                  className={cn(
+                    "text-xs tracking-[0.14em] uppercase sm:text-sm",
+                    isToday ? "font-medium text-[#f3b8c4]" : "text-[#f3b8c4]/65"
+                  )}
+                >
+                  {thaiWeekdayShort(date)}
                 </p>
+                <span
+                  className={cn(
+                    "inline-flex items-center justify-center px-2 py-0.5 text-xs tabular-nums sm:text-sm",
+                    isToday
+                      ? "rounded-full border border-[#f3b8c4]/45 bg-[#f3b8c4]/15 font-medium text-[#fff5f7]"
+                      : "text-[#f7d7de]/80"
+                  )}
+                >
+                  {formatThaiShortDate(iso)}
+                </span>
+                {isToday ? (
+                  <span className={cn(BADGE_SOFT_CLASS, "px-2 py-0.5 text-[0.65rem] uppercase")}>
+                    วันนี้
+                  </span>
+                ) : null}
                 <LiveDayChannelBadges slots={daySlots} size="sm" />
               </div>
-              <div className="mt-2 flex flex-col gap-2">
+              <div className="mt-2.5 flex flex-col gap-2">
                 {daySlots.length > 0 || offline ? (
                   renderDayBody(iso, true)
                 ) : (
-                  <div className="flex items-center gap-2 rounded-lg border border-dashed border-[#6ec9b0]/25 bg-[#6ec9b0]/06 px-3 py-2.5">
+                  <div className="flex items-center gap-2 border-l-2 border-dashed border-[#6ec9b0]/40 px-3 py-2">
                     <OfflineBadge size="sm" />
                     <span className="text-xs text-[#a8e6d4]/75">
-                      ไม่มีไลฟ์วันนี้
+                      ไม่มีไลฟ์
                     </span>
                   </div>
                 )}

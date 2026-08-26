@@ -9,9 +9,9 @@
 
 3.1 ตารางไลฟ์รายสัปดาห์ — badge ช่องอยู่หลังเลขวันที่
 
-3.1.1 ไม่ใช่ช่องตัวเอง → แสดง `ไปช่อง {source_title}` (โทนฟ้า/สเลท แยกจาก rose / copper)
+3.1.1 ไม่ใช่ช่องตัวเอง → แสดง `{source_title}` (โทนฟ้า/สเลท แยกจาก rose / copper)
 
-3.2 Collab → Badge **Collab** บนการ์ดสล็อต · ใน modal รวมแถว meta บน (วันที่ / Mild-R / Collab / platform / ไปช่อง)
+3.2 Collab → Badge **Collab** บนการ์ดสล็อต · ใน modal รวมแถว meta บน (วันที่ / Mild-R / Collab / platform / ชื่อช่อง)
 
 4. ตาราง / ปฏิทินเริ่มสัปดาห์ที่ **วันอาทิตย์** (อา–ส)
 
@@ -21,17 +21,17 @@
 5.1 **Scheduled** — แบบตาราง (ขีดฆ่า→ใหม่ถ้าเลื่อน)
 
 5.2 **Start Live** + **End Live** — บรรทัดเดียวกัน คนละคอลัมน์  
-3.1.1 ไม่ใช่ช่องตัวเอง → แสดง `ไปช่อง {source_title}` (โทนฟ้า)
+3.1.1 ไม่ใช่ช่องตัวเอง → แสดง `{source_title}` (โทนฟ้า)
 
 
 
 3.2 Collab → Badge **Collab** (โทน copper) บนการ์ดสล็อต  
 
-    ใน modal แถว meta เรียง: **วันที่ → YouTube → Mild-R/ไปช่อง → Collab ท้ายสุด**  
+    ใน modal แถว meta เรียง: **วันที่ → YouTube → Mild-R/ชื่อช่อง → Collab ท้ายสุด**  
 
     แต่ละ badge มีสีต่างกัน:  
 
-    วันที่ = blush · YouTube = แดงอมชมพู · Mild-R = rose · ไปช่อง = ฟ้า · Collab = copper
+    วันที่ = blush · YouTube = แดงอมชมพู · Mild-R = rose · ชื่อช่อง = ฟ้า · Collab = copper
 5.4 ไม่โชว์ยอดวิวใน modal · สถานะอยู่บนปก
 
 6. สถานะ **cancelled**  

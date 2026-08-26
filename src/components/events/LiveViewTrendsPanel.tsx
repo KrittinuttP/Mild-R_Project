@@ -16,6 +16,12 @@ import {
   type TrendGrainRanges,
 } from "@/lib/live-view-trends";
 import { cn } from "@/lib/utils";
+import {
+  LIVE_BADGE_COLLAB,
+  LIVE_BADGE_MEMBER,
+  LIVE_BADGE_MILD,
+  LIVE_BADGE_PILL_SM,
+} from "@/lib/site-ui";
 import { getYoutubeThumbnailUrl } from "@/lib/youtube";
 import { ExternalLink } from "lucide-react";
 import type {
@@ -363,19 +369,19 @@ export function LiveViewTrendsPanel({
             {pending && selectedBucket ? "…" : displayKindStats.total}
           </span>
         </p>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#9b8cff]/45 bg-[#9b8cff]/12 px-2.5 py-0.5 text-[0.62rem] tracking-[0.12em] text-[#cfc6ff] uppercase">
+        <span className={cn(LIVE_BADGE_PILL_SM, LIVE_BADGE_MEMBER, "gap-1.5")}>
           Member
           <span className="tabular-nums">
             {pending && selectedBucket ? "…" : displayKindStats.member}
           </span>
         </span>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#f3b8c4]/35 bg-[#e85a7a]/10 px-2.5 py-0.5 text-[0.62rem] tracking-[0.12em] text-[#f3b8c4] uppercase">
+        <span className={cn(LIVE_BADGE_PILL_SM, LIVE_BADGE_MILD, "gap-1.5")}>
           Solo
           <span className="tabular-nums">
             {pending && selectedBucket ? "…" : displayKindStats.solo}
           </span>
         </span>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d4a574]/50 bg-[#d4a574]/12 px-2.5 py-0.5 text-[0.62rem] tracking-[0.12em] text-[#e8c49a] uppercase">
+        <span className={cn(LIVE_BADGE_PILL_SM, LIVE_BADGE_COLLAB, "gap-1.5")}>
           Collab
           <span className="tabular-nums">
             {pending && selectedBucket ? "…" : displayKindStats.collab}
@@ -734,7 +740,7 @@ function BucketPeriodDetail({
                   </span>
                 ) : null}
               </div>
-              <p className="font-[family-name:var(--font-display)] text-xl leading-snug tracking-tight text-[#fff5f7] sm:text-2xl">
+              <p className="font-[family-name:var(--font-display)] text-xl leading-snug tracking-normal text-[#fff5f7] sm:text-2xl">
                 {hero.title || hero.video_id}
               </p>
               <p className="text-xs text-[#f3b8c4]/75">
@@ -1109,7 +1115,7 @@ function PeakCard({
           <p className="text-[0.6rem] tracking-[0.16em] text-[#f3b8c4]/55 uppercase">
             {label}
           </p>
-          <p className="mt-1 font-[family-name:var(--font-display)] text-2xl tracking-tight tabular-nums text-[#fff5f7] sm:text-3xl">
+          <p className="mt-1 font-[family-name:var(--font-display)] text-2xl tracking-normal tabular-nums text-[#fff5f7] sm:text-3xl">
             {formatViews(peak.views)}
           </p>
         </div>
@@ -1134,7 +1140,7 @@ function StatCard({
       </p>
       <p
         className={cn(
-          "mt-2 font-[family-name:var(--font-display)] text-2xl tracking-tight tabular-nums",
+          "mt-2 font-[family-name:var(--font-display)] text-2xl tracking-normal tabular-nums",
           accent ? "text-[#7dd3c0]" : "text-[#fff5f7]"
         )}
       >

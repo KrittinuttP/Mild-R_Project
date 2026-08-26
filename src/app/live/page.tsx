@@ -8,11 +8,12 @@ import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { MediaProtection } from "@/components/media/MediaProtection";
 import { mildRData } from "@/data/vtuber-data";
+import { META_CLASS, DISPLAY_H1_CLASS } from "@/lib/site-ui";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Live Schedule | Mild-R Fanclub",
-  description:
-    "ตารางไลฟ์ Mild-R — สัปดาห์นี้และปฏิทินรายเดือน รวมคลิปจาก YouTube",
+  description: "ตารางไลฟ์ Mild-R",
 };
 
 /** Live data loads client-side via /api/live/schedule (always fresh). */
@@ -31,16 +32,10 @@ export default function LivePage() {
             <BackLink href="/#live" className="mb-8">
               กลับหน้าแรก
             </BackLink>
-            <p className="text-[0.7rem] tracking-[0.28em] text-[#f3b8c4]/75 uppercase sm:text-sm">
-              Live
-            </p>
-            <h1 className="mt-4 max-w-2xl font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+            <p className={META_CLASS}>Live</p>
+            <h1 className={cn("mt-4 max-w-2xl", DISPLAY_H1_CLASS)}>
               ตารางไลฟ์
             </h1>
-            <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#f7d7de]/85 sm:text-base">
-              ข้อมูลจาก YouTube ผ่าน Supabase — สัปดาห์ปัจจุบันด้านบน ·
-              ปฏิทินรายเดือนด้านล่าง · ช่องอื่นจะระบุชื่อช่อง
-            </p>
 
             <div className="mt-12 sm:mt-16">
               <LiveSchedulePanel />

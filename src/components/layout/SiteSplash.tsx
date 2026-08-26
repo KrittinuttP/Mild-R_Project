@@ -158,7 +158,7 @@ export function SiteSplash({ name, oshiMark, onFinished }: SiteSplashProps) {
           {oshiMark}
         </span>
 
-        <p className="mt-5 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight text-[#fff5f7] sm:text-4xl">
+        <p className="mt-5 font-[family-name:var(--font-display)] text-3xl font-normal tracking-normal text-[#fff5f7] sm:text-4xl">
           {name}
         </p>
 

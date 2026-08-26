@@ -108,7 +108,7 @@ export function Header({ data }: HeaderProps) {
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5 pt-[env(safe-area-inset-top)] sm:h-16 sm:px-10 lg:px-16">
         <Link
           href={onHome ? "#top" : "/"}
-          className="font-[family-name:var(--font-display)] text-base font-bold tracking-tight text-[#fff5f7] sm:text-lg"
+          className="font-[family-name:var(--font-display)] text-base font-normal tracking-normal text-[#fff5f7] sm:text-lg"
           onClick={(event) => {
             if (onHome) {
               event.preventDefault();

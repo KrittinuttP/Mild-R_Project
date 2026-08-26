@@ -7,6 +7,7 @@ import { ChevronDown } from "lucide-react";
 import { ParallaxScene } from "@/components/animations/ParallaxScene";
 import { buttonVariants } from "@/components/ui/button";
 import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
+import { LEAD_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { VtuberProfile } from "@/types/vtuber";
 
@@ -176,14 +177,14 @@ export function Hero({ data }: HeroProps) {
 
             <h1
               data-hero-title
-              className="font-[family-name:var(--font-display)] text-[clamp(3.5rem,14vw,9rem)] leading-[0.88] font-bold tracking-tight text-[#fff5f7]"
+              className="font-[family-name:var(--font-display)] text-[clamp(3.5rem,14vw,9rem)] leading-tight font-normal tracking-normal text-[#fff5f7]"
             >
               {data.basic.name}
             </h1>
 
             <p
               data-hero-greet
-              className="mt-5 max-w-xl text-base text-[#f7d7de]/90 sm:text-lg"
+              className={cn("mt-4 max-w-xl", LEAD_CLASS, "text-[#f7d7de]/90")}
             >
               {data.basic.greeting}
             </p>

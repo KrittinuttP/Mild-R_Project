@@ -97,8 +97,6 @@
             "name": "The Caution Tape",
             "nameLocal": "ประกาศควบคุมพื้นที่",
             "detail": "ปล่อยภาพกราฟิกขึงเทปเตือนภัยคาดทับอาร์ตเวิร์ก เพื่อแจ้งเตือนพิกัดและเวลาเปิดแฟ้มคดี",
-            "image": "/assets/cafe/operations/caution-tape.jpg",
-            "imageAlt": "The Caution Tape · ประกาศควบคุมพื้นที่",
             "caption": "Teaser · Caution Tape"
           },
           {
@@ -106,8 +104,6 @@
             "name": "The Evidence Board",
             "nameLocal": "สปอยล์เบาะแส",
             "detail": "ปล่อยภาพจำลองกระดานโยงเส้นด้ายเพื่อสปอยล์เงาเสบียงและของแจก กระตุ้นการทายปริศนาก่อนลงพื้นที่",
-            "image": "/assets/cafe/operations/evidence-board.jpg",
-            "imageAlt": "The Evidence Board · สปอยล์เบาะแส",
             "caption": "Teaser · Evidence Board"
           }
         ]
@@ -125,8 +121,6 @@
             "name": "Evidence Board Mission",
             "nameLocal": "ภารกิจกระดานเบาะแส",
             "detail": "เปิดพื้นที่ให้นักสืบเขียนโพสต์อิตข้อความถึงเป้าหมาย (Mild-R) แล้วนำมาแปะเชื่อมโยงเส้นด้ายบนกระดาน",
-            "image": "/assets/cafe/operations/field-evidence-board.jpg",
-            "imageAlt": "ภารกิจกระดานเบาะแส",
             "caption": "Field · Evidence Board"
           },
           {
@@ -134,8 +128,6 @@
             "name": "Secret Case File Rally",
             "nameLocal": "แฟ้มคดีลับนำทาง",
             "detail": "เปลี่ยนแฟ้มคดีหน้างานให้เป็นใบสะสมตราประทับ (Stamp Rally) เพื่อทำภารกิจชิมเสบียงหรือถ่ายภาพแลกของรางวัล",
-            "image": "/assets/cafe/operations/field-stamp-rally.jpg",
-            "imageAlt": "แฟ้มคดีลับ Stamp Rally",
             "caption": "Field · Stamp Rally"
           }
         ]
@@ -153,8 +145,6 @@
             "name": "Disguise Privilege",
             "nameLocal": "สิทธิพิเศษจากการพรางตัว",
             "detail": "แต่งกายเข้าธีม (เช่น เสื้อโค้ท หมวกนักสืบ แว่นขยาย) เช็กอินเพื่อรับเบาะแสชิ้นลับหรืออัปเกรดเสบียง",
-            "image": "/assets/cafe/operations/bounty-disguise.jpg",
-            "imageAlt": "สิทธิพิเศษจากการพรางตัว",
             "caption": "Bounty · Disguise"
           },
           {
@@ -162,8 +152,6 @@
             "name": "Pre-order Provisions",
             "nameLocal": "สั่งจองเสบียงล่วงหน้า",
             "detail": "จองชุดเสบียงล่วงหน้าเพื่อการันตีสิทธิ์รับแฟ้มคดีลับและตราประทับพิเศษทันทีที่รายงานตัว",
-            "image": "/assets/cafe/operations/bounty-preorder.jpg",
-            "imageAlt": "สั่งจองเสบียงล่วงหน้า",
             "caption": "Bounty · Pre-order"
           }
         ]
@@ -181,8 +169,6 @@
             "name": "Case Hashtag Mission",
             "nameLocal": "ภารกิจแฮชแท็กประจำคดี",
             "detail": "ถ่ายภาพจุดต่างๆ ในงานโพสต์ลง X พร้อมติดแฮชแท็กเพื่อปลดล็อกแฟ้มภาพดิจิทัล (Digital Wallpaper) หรือลุ้นรับของกลางหลังปิดคดี",
-            "image": "/assets/cafe/operations/social-hashtag.jpg",
-            "imageAlt": "ภารกิจแฮชแท็กประจำคดี",
             "caption": "Social · Hashtag"
           }
         ]

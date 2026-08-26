@@ -6,6 +6,7 @@ import {
   ChevronDown,
   Clock,
   ExternalLink,
+  ImageOff,
   MapPin,
 } from "lucide-react";
 
@@ -42,6 +43,18 @@ type CafePromoProps = {
 const MENU_EXHIBIT_LETTERS = ["A", "B", "C"] as const;
 const SERIF = "font-[family-name:var(--font-cafe-serif)]";
 const DISPLAY = "font-[family-name:var(--font-display)]";
+
+/** Soft-luxury cafe surfaces — keep dossier palette, modern radii */
+const CAFE_GLASS =
+  "overflow-hidden rounded-3xl border border-[#9a7b5a]/25 bg-[#12161a]/75";
+const CAFE_GLASS_SOFT =
+  "overflow-hidden rounded-3xl border border-[#9a7b5a]/20 bg-[#12161a]/60";
+const CAFE_BADGE =
+  "inline-flex items-center rounded-full border border-[#a84d5f]/40 bg-[#a84d5f]/15 px-2.5 py-1 text-[0.58rem] tracking-[0.18em] text-[#c46a7a] uppercase backdrop-blur-sm";
+const CAFE_BTN =
+  "rounded-2xl border-transparent bg-[#a84d5f] text-[#f4ebe3] shadow-[0_10px_28px_rgba(168,77,95,0.28)] hover:bg-[#c46a7a]";
+const CAFE_BTN_OUTLINE =
+  "rounded-2xl border-[#9a7b5a]/45 bg-transparent text-[#d8d0c4] hover:border-[#c46a7a]/55 hover:bg-[#a84d5f]/12 hover:text-[#f4ebe3]";
 
 function splitCaseDate(label?: string) {
   if (!label) return [];
@@ -101,10 +114,7 @@ function CtaLink({
       rel={external ? "noopener noreferrer" : undefined}
       className={cn(
         buttonVariants({ size: "lg", variant }),
-        "rounded-none",
-        variant === "default"
-          ? "border-transparent bg-[#a84d5f] text-[#f4ebe3] hover:bg-[#c46a7a]"
-          : "border-[#9a7b5a]/45 bg-transparent text-[#d8d0c4] hover:border-[#c46a7a]/55 hover:bg-[#a84d5f]/12 hover:text-[#f4ebe3]"
+        variant === "default" ? CAFE_BTN : CAFE_BTN_OUTLINE
       )}
     >
       {cta.label}
@@ -115,10 +125,13 @@ function CtaLink({
 
 function DoubleRule({ className }: { className?: string }) {
   return (
-    <div className={cn("space-y-1", className)} aria-hidden>
-      <div className="border-t-2 border-[#9a7b5a]/45" />
-      <div className="border-t border-[#9a7b5a]/30" />
-    </div>
+    <div
+      className={cn(
+        "h-px max-w-sm bg-gradient-to-r from-[#9a7b5a]/55 via-[#9a7b5a]/25 to-transparent",
+        className
+      )}
+      aria-hidden
+    />
   );
 }
 
@@ -142,15 +155,13 @@ function SectionHead({
           {eyebrow}
         </p>
         {stamp ? (
-          <span className="border border-[#a84d5f]/40 px-2 py-0.5 text-[0.58rem] tracking-[0.2em] text-[#c46a7a] uppercase sm:text-[0.6rem] sm:tracking-[0.22em]">
-            {stamp}
-          </span>
+          <span className={CAFE_BADGE}>{stamp}</span>
         ) : null}
       </div>
       <h2
         className={cn(
           SERIF,
-          "mt-3 text-[1.75rem] leading-tight font-semibold text-[#f4ebe3] sm:mt-4 sm:text-3xl md:text-4xl"
+          "mt-3 text-[1.75rem] leading-tight font-normal text-[#f4ebe3] sm:mt-4 sm:text-3xl md:text-4xl"
         )}
       >
         {title}
@@ -158,7 +169,7 @@ function SectionHead({
           <span
             className={cn(
               DISPLAY,
-              "mt-1.5 block text-base font-medium text-[#c4b8a8] sm:mt-2 sm:text-lg md:text-xl"
+              "mt-1.5 block text-base font-normal text-[#c4b8a8] sm:mt-2 sm:text-lg md:text-xl"
             )}
           >
             {titleLocal}
@@ -187,7 +198,7 @@ function CafeThumb({
     return (
       <div
         className={cn(
-          "flex aspect-[3/4] items-center justify-center border border-dashed border-[#9a7b5a]/30 bg-[#0d1013]",
+          "flex aspect-[3/4] items-center justify-center rounded-2xl border border-dashed border-[#9a7b5a]/30 bg-[#0d1013]",
           frameClassName
         )}
         aria-hidden
@@ -200,7 +211,7 @@ function CafeThumb({
   }
 
   const frame = cn(
-    "relative aspect-[3/4] overflow-hidden border border-[#9a7b5a]/30 bg-[#0d1013]",
+    "relative aspect-[3/4] overflow-hidden rounded-2xl border border-[#9a7b5a]/30 bg-[#0d1013]",
     frameClassName
   );
   const image = (
@@ -304,29 +315,70 @@ function buildCafeLightboxGroups(cafe: CafePage): Record<
 function OpsPromoMedia({
   item,
   onOpen,
-  aspectClassName = "aspect-[4/5] sm:aspect-[3/4]",
+  /** A4 portrait ≈ 210×297 */
+  aspectClassName = "aspect-[210/297]",
+  /** Flush to parent card — no nested radius/border (avoids corner gaps). */
+  flush = false,
 }: {
   item: CafeOperationsItem;
   onOpen?: () => void;
   aspectClassName?: string;
+  flush?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
   const hasImage = Boolean(item.image) && !failed;
 
   const frame = cn(
-    "relative w-full overflow-hidden border border-[#9a7b5a]/30 bg-[#0d1013]",
+    "relative w-full overflow-hidden bg-[#0d1013]",
+    flush
+      ? "rounded-none border-0"
+      : "rounded-2xl border border-[#9a7b5a]/30",
     aspectClassName
   );
 
   if (!hasImage) {
     return (
-      <div className={cn(frame, "flex flex-col items-center justify-center gap-2 px-4")} aria-hidden>
-        <span className="text-[0.58rem] tracking-[0.2em] text-[#9a7b5a]/85 uppercase">
-          Promo TBA
-        </span>
-        <span className="max-w-[12rem] text-center text-[0.65rem] leading-snug text-[#9a7b5a]/65">
-          ใส่ไฟล์ที่ {item.image ?? "/assets/cafe/operations/…"}
-        </span>
+      <div
+        className={cn(
+          frame,
+          "relative flex flex-col items-center justify-center px-5"
+        )}
+        aria-hidden
+      >
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_28%,rgba(168,77,95,0.16),transparent_52%),linear-gradient(165deg,#161a1e_0%,#0d1013_55%,#0a0c0e_100%)]"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute inset-4 rounded-sm border border-dashed border-[#9a7b5a]/35 sm:inset-5"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute top-3 right-3 rotate-6 border border-[#a84d5f]/45 bg-[#a84d5f]/10 px-2 py-1 text-[0.55rem] tracking-[0.18em] text-[#c46a7a] uppercase sm:top-4 sm:right-4"
+          aria-hidden
+        >
+          Classified
+        </div>
+
+        <div className="relative z-[1] flex flex-col items-center gap-3 text-center">
+          <span className="inline-flex size-12 items-center justify-center rounded-full border border-[#9a7b5a]/40 bg-[#12161a]/80 text-[#9a7b5a]">
+            <ImageOff className="size-5 opacity-80" strokeWidth={1.5} />
+          </span>
+          <p className="text-[0.68rem] tracking-[0.28em] text-[#c46a7a] uppercase">
+            Waiting
+          </p>
+          <p
+            className={cn(
+              SERIF,
+              "max-w-[12rem] text-sm leading-snug text-[#f4ebe3]/90"
+            )}
+          >
+            ยังไม่มีภาพ
+          </p>
+          <p className="max-w-[13rem] text-[0.7rem] leading-relaxed text-[#c4b8a8]/70">
+            แฟ้มนี้รอหลักฐานภาพ · {item.nameLocal ?? item.name}
+          </p>
+        </div>
       </div>
     );
   }
@@ -335,8 +387,8 @@ function OpsPromoMedia({
     <ProtectedImage
       src={item.image}
       alt={item.imageAlt ?? item.name}
-      wrapClassName="absolute inset-0 block"
-      className="h-full w-full object-cover"
+      wrapClassName="absolute inset-0 block size-full overflow-hidden"
+      className="size-full object-cover object-center"
       onError={() => setFailed(true)}
     />
   );
@@ -352,7 +404,8 @@ function OpsPromoMedia({
       aria-label={`ดูรูปโปรโมท: ${item.imageAlt ?? item.name}`}
       className={cn(
         frame,
-        "cursor-zoom-in text-left transition hover:border-[#c46a7a]/45"
+        "cursor-zoom-in text-left transition",
+        !flush && "hover:border-[#c46a7a]/45"
       )}
     >
       {media}
@@ -616,7 +669,10 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
             {cafe.statusLabel || cafe.statusLabelLocal ? (
               <div
                 data-hero-status
-                className="mt-2.5 inline-flex max-w-full flex-col gap-0.5 border border-[#9a7b5a]/45 bg-[#12161a]/90 px-2.5 py-1.5 sm:flex-row sm:items-center sm:gap-2 sm:px-3"
+                className={cn(
+                  CAFE_BADGE,
+                  "mt-3 max-w-full flex-col gap-0.5 normal-case tracking-normal sm:mt-2.5 sm:flex-row sm:items-center sm:gap-2"
+                )}
               >
                 {cafe.statusLabel ? (
                   <span className="text-[0.52rem] tracking-[0.2em] text-[#c46a7a] uppercase sm:text-[0.55rem]">
@@ -635,12 +691,12 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
               data-hero-title
               className={cn(
                 DISPLAY,
-                "mt-2.5 text-[clamp(1.55rem,7.2vw,2.35rem)] leading-[0.92] font-bold tracking-tight text-[#f4ebe3] sm:mt-3 sm:text-5xl md:text-6xl lg:text-[3.75rem]"
+                "mt-2.5 text-[clamp(1.55rem,7.2vw,2.35rem)] leading-[0.92] font-normal tracking-tight text-[#f4ebe3] sm:mt-3 sm:text-5xl md:text-6xl lg:text-[3.75rem]"
               )}
             >
               {titleParts ? (
                 <>
-                  <span className="block text-[clamp(1.15rem,5.2vw,1.65rem)] font-semibold text-[#c4b8a8] sm:text-3xl md:text-4xl">
+                  <span className="block text-[clamp(1.15rem,5.2vw,1.65rem)] font-normal text-[#c4b8a8] sm:text-3xl md:text-4xl">
                     {titleParts[0]}:
                   </span>
                   <span className="mt-0.5 block sm:mt-1">{titleParts[1]}</span>
@@ -652,7 +708,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
                 <span
                   className={cn(
                     SERIF,
-                    "mt-1.5 block text-sm font-medium tracking-normal text-[#c4b8a8] sm:mt-2 sm:text-xl"
+                    "mt-1.5 block text-sm font-normal tracking-normal text-[#c4b8a8] sm:mt-2 sm:text-xl"
                   )}
                 >
                   {cafe.titleLocal}
@@ -674,9 +730,9 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
           <div className="mt-auto mb-8 w-full sm:mt-6 sm:mb-0 sm:max-w-md lg:max-w-lg">
             {schedule.label ? (
               <div data-hero-date>
-                <div className="relative overflow-hidden border border-[#9a7b5a]/35 bg-[#14100c]/92 backdrop-blur-sm">
+                <div className={cn(CAFE_GLASS, "relative bg-[#14100c]/92 backdrop-blur-md")}>
                   <div
-                    className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-[repeating-linear-gradient(180deg,#9a7b5a_0_8px,transparent_8px_14px)] opacity-50"
+                    className="pointer-events-none absolute inset-y-3 left-0 w-1 rounded-full bg-[repeating-linear-gradient(180deg,#9a7b5a_0_8px,transparent_8px_14px)] opacity-50"
                     aria-hidden
                   />
                   <p className="px-3 py-2 pl-4 text-[0.52rem] tracking-[0.22em] text-[#9a7b5a] uppercase sm:px-4 sm:pl-5">
@@ -693,7 +749,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
                           <p
                             className={cn(
                               DISPLAY,
-                              "relative text-[clamp(1.55rem,7vw,2.55rem)] leading-none font-bold tracking-tight text-[#fff8f4] tabular-nums"
+                              "relative text-[clamp(1.55rem,7vw,2.55rem)] leading-none font-normal tracking-tight text-[#fff8f4] tabular-nums"
                             )}
                           >
                             <span
@@ -710,7 +766,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
                     <p
                       className={cn(
                         DISPLAY,
-                        "border-y border-[#9a7b5a]/30 px-4 py-3 pl-5 text-[clamp(1.55rem,7vw,2.55rem)] font-bold tracking-tight text-[#fff8f4] tabular-nums"
+                        "border-y border-[#9a7b5a]/30 px-4 py-3 pl-5 text-[clamp(1.55rem,7vw,2.55rem)] font-normal tracking-tight text-[#fff8f4] tabular-nums"
                       )}
                     >
                       {schedule.label}
@@ -780,7 +836,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
         {show.dispatch ? (
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-start lg:gap-8">
           <ScrollReveal variant="soft">
-            <div className="grid gap-0 border border-[#9a7b5a]/25 bg-[#12161a]/80 sm:grid-cols-2">
+            <div className={cn(CAFE_GLASS, "grid gap-0 sm:grid-cols-2")}>
               <div className="flex gap-4 border-b border-[#9a7b5a]/20 px-5 py-6 sm:border-r sm:border-b-0 sm:px-6">
                 <Clock className="mt-0.5 size-5 shrink-0 text-[#a84d5f]" />
                 <div>
@@ -829,7 +885,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
 
           {location.image ? (
             <ScrollReveal variant="soft" delay={0.06}>
-              <figure className="mx-auto w-full max-w-[14rem] overflow-hidden border border-[#9a7b5a]/25 bg-[#12161a] lg:mx-0">
+              <figure className={cn(CAFE_GLASS_SOFT, "mx-auto w-full max-w-[14rem] lg:mx-0")}>
                 <button
                   type="button"
                   onClick={() => openLightbox("venue", 0)}
@@ -877,7 +933,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
           ) : null}
 
           {show.daySchedule ? (
-          <ol className="mt-10 border border-[#9a7b5a]/25">
+          <ol className={cn(CAFE_GLASS, "mt-10")}>
             {daySchedule.items.map((item, index) => (
               <ScrollReveal
                 key={`${item.time}-${item.title}`}
@@ -893,7 +949,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
                   <p
                     className={cn(
                       SERIF,
-                      "mt-1 text-xl font-semibold tracking-wide text-[#c46a7a] tabular-nums sm:text-2xl"
+                      "mt-1 text-xl font-normal tracking-wide text-[#c46a7a] tabular-nums sm:text-2xl"
                     )}
                   >
                     {item.time}
@@ -903,7 +959,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
                   <h3
                     className={cn(
                       SERIF,
-                      "text-xl font-semibold text-[#f4ebe3] sm:text-2xl"
+                      "text-xl font-normal text-[#f4ebe3] sm:text-2xl"
                     )}
                   >
                     {item.title}
@@ -973,7 +1029,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
                             <h3
                               className={cn(
                                 SERIF,
-                                "mt-1 text-xl font-semibold text-[#f4ebe3] sm:text-2xl"
+                                "mt-1 text-xl font-normal text-[#f4ebe3] sm:text-2xl"
                               )}
                             >
                               {group.title}
@@ -1005,11 +1061,14 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
                               return (
                                 <li
                                   key={item.id}
-                                  className="grid gap-4 border border-[#9a7b5a]/30 bg-[#12161a]/70 p-3 sm:grid-cols-[7.5rem_1fr] sm:gap-5 sm:p-4"
+                                  className={cn(
+                                    CAFE_GLASS_SOFT,
+                                    "grid gap-4 p-3 sm:grid-cols-[7.5rem_1fr] sm:gap-5 sm:p-4"
+                                  )}
                                 >
                                   <OpsPromoMedia
                                     item={item}
-                                    aspectClassName="aspect-[4/5]"
+                                    aspectClassName="aspect-[210/297]"
                                     onOpen={
                                       lightboxIndex >= 0
                                         ? () =>
@@ -1028,7 +1087,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
                                     <p
                                       className={cn(
                                         SERIF,
-                                        "mt-1 text-lg font-semibold text-[#f4ebe3]"
+                                        "mt-1 text-lg font-normal text-[#f4ebe3]"
                                       )}
                                     >
                                       {item.name}
@@ -1051,10 +1110,10 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
                         ) : (
                           <ul
                             className={cn(
-                              "grid gap-3 sm:gap-4",
+                              "mx-auto grid w-full gap-4 sm:gap-5",
                               group.items.length === 1
-                                ? "max-w-xl sm:grid-cols-1"
-                                : "sm:grid-cols-2"
+                                ? "max-w-[22rem] sm:grid-cols-1"
+                                : "max-w-4xl sm:grid-cols-2"
                             )}
                           >
                             {group.items.map((item, itemIndex) => {
@@ -1065,11 +1124,15 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
                               return (
                                 <li
                                   key={item.id}
-                                  className="flex list-none flex-col overflow-hidden border border-[#9a7b5a]/30 bg-[#12161a]"
+                                  className={cn(
+                                    CAFE_GLASS_SOFT,
+                                    "flex list-none flex-col"
+                                  )}
                                 >
                                   <OpsPromoMedia
                                     item={item}
-                                    aspectClassName="aspect-[4/5] sm:aspect-[3/4]"
+                                    flush
+                                    aspectClassName="aspect-[210/297]"
                                     onOpen={
                                       lightboxIndex >= 0
                                         ? () =>
@@ -1098,7 +1161,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
                                     <h4
                                       className={cn(
                                         SERIF,
-                                        "mt-2 text-lg font-semibold text-[#f4ebe3] sm:text-xl"
+                                        "mt-2 text-lg font-normal text-[#f4ebe3] sm:text-xl"
                                       )}
                                     >
                                       {item.name}
@@ -1152,7 +1215,10 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
               as="li"
               delay={index * 0.06}
               variant="soft"
-              className="grid list-none gap-4 border border-[#9a7b5a]/25 bg-[#12161a]/60 p-3.5 sm:grid-cols-[5.5rem_8.5rem_1fr_auto] sm:items-center sm:gap-7 sm:p-5"
+              className={cn(
+                CAFE_GLASS_SOFT,
+                "grid list-none gap-4 p-3.5 sm:grid-cols-[5.5rem_8.5rem_1fr_auto] sm:items-center sm:gap-7 sm:p-5"
+              )}
             >
               <p className="text-[0.62rem] tracking-[0.18em] text-[#9a7b5a] uppercase sm:text-[0.65rem] sm:tracking-[0.2em]">
                 Ex. {MENU_EXHIBIT_LETTERS[index] ?? String(index + 1)}
@@ -1177,7 +1243,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
                 <h3
                   className={cn(
                     SERIF,
-                    "text-lg font-semibold text-[#f4ebe3] sm:text-2xl"
+                    "text-lg font-normal text-[#f4ebe3] sm:text-2xl"
                   )}
                 >
                   {item.name}
@@ -1243,7 +1309,10 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
                 as="li"
                 delay={Math.min(index * 0.05, 0.3)}
                 variant="soft"
-                className="flex list-none flex-col overflow-hidden border border-[#9a7b5a]/25 bg-[#12161a]"
+                className={cn(
+                  CAFE_GLASS_SOFT,
+                  "flex list-none flex-col"
+                )}
               >
                 {item.image ? (
                   <button
@@ -1288,7 +1357,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
                   <h3
                     className={cn(
                       SERIF,
-                      "mt-2 text-base font-semibold text-[#f4ebe3] sm:text-lg"
+                      "mt-2 text-base font-normal text-[#f4ebe3] sm:text-lg"
                     )}
                   >
                     {item.name}
@@ -1324,23 +1393,13 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
             title="Opening Act"
             titleLocal="แฟ้มคดี · อ่านแบบเว็บตูน"
           />
-          <ScrollReveal variant="soft" delay={0.06}>
-            <p
-              className={cn(
-                SERIF,
-                "mt-5 text-base leading-relaxed text-[#d8d0c4] sm:text-lg"
-              )}
-            >
-              เลื่อนลงทีละแผ่น — ปก · เทป · กระดานเบาะแส · โปรดติดตาม
-            </p>
-          </ScrollReveal>
           <ScrollReveal variant="float" delay={0.1}>
             <div className="mt-8 flex justify-center">
               <Link
                 href="/cafe/event"
                 className={cn(
                   buttonVariants({ size: "lg", variant: "default" }),
-                  "rounded-none border-transparent bg-[#a84d5f] text-[#f4ebe3] hover:bg-[#c46a7a]"
+                  CAFE_BTN
                 )}
               >
                 อ่านแฟ้มคดี

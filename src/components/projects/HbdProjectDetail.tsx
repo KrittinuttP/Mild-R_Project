@@ -28,7 +28,7 @@ type HbdProjectDetailProps = {
   project: ProjectItem;
 };
 
-/** Birthday project landing — intro + CTAs only; gallery lives on /hbd. */
+/** Birthday project landing — intro + CTAs only; gallery lives on /HBD/2026. */
 export function HbdProjectDetail({ project }: HbdProjectDetailProps) {
   return (
     <article className="relative overflow-hidden text-[#fff5f7]">
@@ -50,7 +50,7 @@ export function HbdProjectDetail({ project }: HbdProjectDetailProps) {
           <h1
             className={cn(
               DISPLAY,
-              "mt-5 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl"
+              "mt-5 text-4xl font-normal tracking-tight sm:text-5xl md:text-6xl"
             )}
           >
             {project.title}
@@ -68,16 +68,16 @@ export function HbdProjectDetail({ project }: HbdProjectDetailProps) {
 
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
             <Link
-              href="/hbd"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#e85a7a] px-6 py-3.5 text-sm font-semibold text-[#140a0d] shadow-[0_10px_30px_rgba(232,90,122,0.35)] transition hover:bg-[#f3b8c4] sm:w-auto"
+              href="/HBD/2026"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#e85a7a] px-6 py-3.5 text-sm font-normal text-[#140a0d] shadow-[0_10px_30px_rgba(232,90,122,0.35)] transition hover:bg-[#f3b8c4] sm:w-auto"
             >
               <Sparkles className="size-4" />
               เปิดดูคำอวยพร
               <ArrowUpRight className="size-4 opacity-80" />
             </Link>
             <Link
-              href="/hbd/upload"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[#f3b8c4]/30 bg-white/[0.04] px-6 py-3.5 text-sm font-semibold text-[#fff5f7] transition hover:border-[#e85a7a]/45 hover:bg-[#e85a7a]/15 sm:w-auto"
+              href="/HBD/2026/upload"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[#f3b8c4]/30 bg-white/[0.04] px-6 py-3.5 text-sm font-normal text-[#fff5f7] transition hover:border-[#e85a7a]/45 hover:bg-[#e85a7a]/15 sm:w-auto"
             >
               <Upload className="size-4" />
               ส่งการ์ดอวยพร
@@ -105,7 +105,7 @@ export function HbdProjectDetail({ project }: HbdProjectDetailProps) {
           <p className="text-xs tracking-[0.18em] text-[#f3b8c4]/75 uppercase sm:text-sm">
             Wish card
           </p>
-          <h2 className={cn(DISPLAY, "mt-3 text-2xl font-bold sm:text-3xl")}>
+          <h2 className={cn(DISPLAY, "mt-3 text-2xl font-normal sm:text-3xl")}>
             ตัวอย่างการ์ดอวยพร
           </h2>
           <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-[#f3b8c4]/80">
@@ -142,7 +142,7 @@ export function HbdProjectDetail({ project }: HbdProjectDetailProps) {
           <p
             className={cn(
               DISPLAY,
-              "mt-6 text-lg font-semibold text-[#f3b8c4]/90 sm:text-xl"
+              "mt-6 text-lg font-normal text-[#f3b8c4]/90 sm:text-xl"
             )}
           >
             เชิญชวนฮันนี่มาอวยพร mutant สาวของเรา · 12.12.2026

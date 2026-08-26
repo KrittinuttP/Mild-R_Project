@@ -3,7 +3,8 @@ import Link from "next/link";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { DesignCredits } from "@/components/sections/DesignCredits";
 import { formatEnglishDate } from "@/lib/events";
-import { META_MUTED_CLASS } from "@/lib/site-ui";
+import { BODY_CLASS, DISPLAY_H1_CLASS, META_MUTED_CLASS } from "@/lib/site-ui";
+import { cn } from "@/lib/utils";
 import type { VtuberProfile } from "@/types/vtuber";
 
 type ProfileProps = {
@@ -20,10 +21,8 @@ export function Profile({ data }: ProfileProps) {
     >
       <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
         <ScrollReveal>
-          <p className="text-sm tracking-[0.28em] text-[#f3b8c4]/75 uppercase">
-            Profile
-          </p>
-          <h2 className="mt-3 font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight sm:text-5xl">
+          <p className={META_MUTED_CLASS}>Profile</p>
+          <h2 className={cn("mt-3", DISPLAY_H1_CLASS)}>
             {basic.name}
             {basic.nameLocal ? (
               <span className="mt-2 block text-xl font-medium text-[#f3b8c4]/85">
@@ -32,16 +31,16 @@ export function Profile({ data }: ProfileProps) {
             ) : null}
           </h2>
           {basic.species ? (
-            <p className="mt-3 text-sm tracking-[0.18em] text-[#e85a7a] uppercase">
+            <p className="mt-3 text-sm tracking-[0.12em] text-[#e85a7a] uppercase">
               {basic.species}
             </p>
           ) : null}
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-[#f7d7de]/85">
+          <p className={cn("mt-4 max-w-xl", BODY_CLASS)}>
             {data.lore.summary}
           </p>
 
           {basic.likes?.length || basic.dislikes?.length ? (
-            <div className="mt-8 space-y-4 text-sm sm:text-base">
+            <div className="mt-8 space-y-4">
               {basic.likes?.length ? (
                 <div>
                   <p className={META_MUTED_CLASS}>Likes</p>

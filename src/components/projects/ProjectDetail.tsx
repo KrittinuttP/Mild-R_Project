@@ -7,8 +7,11 @@ import { buttonVariants } from "@/components/ui/button";
 import {
   BADGE_ACCENT_CLASS,
   BADGE_SOFT_CLASS,
+  BODY_CLASS,
   CTA_OUTLINE_CLASS,
   CTA_PRIMARY_CLASS,
+  DISPLAY_H1_CLASS,
+  DISPLAY_H2_CLASS,
   META_CLASS,
 } from "@/lib/site-ui";
 import { getYoutubeEmbedUrl, getYoutubeVideoId } from "@/lib/youtube";
@@ -71,7 +74,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
             ) : null}
           </div>
 
-          <h1 className="mt-4 font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight text-[#fff5f7] sm:text-5xl md:text-6xl">
+          <h1 className={cn("mt-4", DISPLAY_H1_CLASS)}>
             {project.title}
           </h1>
           {project.titleLocal ? (
@@ -80,7 +83,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
             </p>
           ) : null}
 
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-[#f7d7de]/85 sm:text-lg">
+          <p className={cn("mt-4 max-w-xl", BODY_CLASS, "sm:text-lg")}>
             {project.summary}
           </p>
 
@@ -159,7 +162,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
       {videoId ? (
         <div className="mt-16">
           <p className={META_CLASS}>Watch</p>
-          <h2 className="mt-3 font-[family-name:var(--font-display)] text-2xl font-bold sm:text-3xl">
+          <h2 className={cn("mt-3", DISPLAY_H2_CLASS)}>
             คลิปที่เกี่ยวข้อง
           </h2>
           <div className="relative mt-6 aspect-video overflow-hidden rounded-3xl bg-[#0e0609] ring-1 ring-[#f3b8c4]/15">

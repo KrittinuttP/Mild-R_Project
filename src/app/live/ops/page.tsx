@@ -57,7 +57,7 @@ export default async function LiveOpsPage() {
             Internal · noindex
           </p>
           <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
-            <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight sm:text-4xl">
+            <h1 className="font-[family-name:var(--font-display)] text-3xl font-normal tracking-normal sm:text-4xl">
               YouTube Sync Monitor
             </h1>
             <Link

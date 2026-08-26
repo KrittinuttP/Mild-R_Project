@@ -198,7 +198,7 @@ function MenuCover({
         <p
           className={cn(
             SERIF,
-            "mt-2 text-xl font-semibold leading-tight text-[#1a1410] sm:text-2xl md:text-3xl"
+            "mt-2 text-xl font-normal leading-tight text-[#1a1410] sm:text-2xl md:text-3xl"
           )}
         >
           {prettyVenueName(label)}
@@ -416,7 +416,7 @@ export function CafeVenueMenuBook({
         <h3
           className={cn(
             SERIF,
-            "mt-3 text-[1.5rem] font-semibold text-[#f4ebe3] sm:text-3xl"
+            "mt-3 text-[1.5rem] font-normal text-[#f4ebe3] sm:text-3xl"
           )}
         >
           {menu.title}
@@ -424,7 +424,7 @@ export function CafeVenueMenuBook({
             <span
               className={cn(
                 DISPLAY,
-                "mt-1.5 block text-base font-medium text-[#c4b8a8] sm:text-lg"
+                "mt-1.5 block text-base font-normal text-[#c4b8a8] sm:text-lg"
               )}
             >
               {menu.titleLocal}

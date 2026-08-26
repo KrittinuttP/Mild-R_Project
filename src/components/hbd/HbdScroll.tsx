@@ -41,13 +41,7 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
   const rootRef = useRef<HTMLElement>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
-  const wishes = useMemo(() => {
-    return [...hbd.wishes].sort((a, b) => {
-      const aLazy = a.loadOnDemand ? 1 : 0;
-      const bLazy = b.loadOnDemand ? 1 : 0;
-      return aLazy - bLazy;
-    });
-  }, [hbd.wishes]);
+  const wishes = useMemo(() => hbd.wishes, [hbd.wishes]);
 
   const lightboxItems = useMemo(
     () =>
@@ -284,7 +278,7 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
             data-hbd-anim
             className={cn(
               DISPLAY,
-              "mt-5 text-4xl font-bold tracking-tight sm:text-6xl md:text-7xl"
+              "mt-5 text-4xl font-normal tracking-tight sm:text-6xl md:text-7xl"
             )}
           >
             {hbd.title}
@@ -321,8 +315,8 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
 
           <div data-hbd-anim className="mt-10 flex justify-center">
             <Link
-              href="/hbd/upload"
-              className="inline-flex items-center gap-2 rounded-2xl bg-[#e85a7a] px-6 py-3.5 text-sm font-semibold text-[#140a0d] shadow-[0_10px_30px_rgba(232,90,122,0.35)] transition hover:bg-[#f3b8c4]"
+              href="/HBD/2026/upload"
+              className="inline-flex items-center gap-2 rounded-2xl bg-[#e85a7a] px-6 py-3.5 text-sm font-normal text-[#140a0d] shadow-[0_10px_30px_rgba(232,90,122,0.35)] transition hover:bg-[#f3b8c4]"
             >
               <Sparkles className="size-4" />
               ส่งการ์ดอวยพร · 12.12.2026
@@ -383,7 +377,7 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
                 <h2
                   className={cn(
                     DISPLAY,
-                    "text-left text-2xl font-bold sm:text-3xl"
+                    "text-left text-2xl font-normal sm:text-3xl"
                   )}
                 >
                   จาก {wish.from}
@@ -427,7 +421,7 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
                   <p
                     data-hbd-anim
                     data-hbd-close-headline
-                    className="text-3xl font-bold tracking-tight text-[#fff5f7] sm:text-5xl"
+                    className="text-3xl font-normal tracking-tight text-[#fff5f7] sm:text-5xl"
                   >
                     {hbd.closingMessage.split(/\s*[—–]\s*/)[0]}
                   </p>
@@ -438,7 +432,7 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
                   />
                   <p
                     data-hbd-anim
-                    className="max-w-md text-lg font-semibold leading-relaxed text-[#f3b8c4]/90 sm:text-2xl"
+                    className="max-w-md text-lg font-normal leading-relaxed text-[#f3b8c4]/90 sm:text-2xl"
                   >
                     {hbd.closingMessage
                       .split(/\s*[—–]\s*/)
@@ -450,7 +444,7 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
                 <p
                   data-hbd-anim
                   data-hbd-close-headline
-                  className="text-3xl font-bold tracking-tight text-[#fff5f7] sm:text-5xl"
+                  className="text-3xl font-normal tracking-tight text-[#fff5f7] sm:text-5xl"
                 >
                   {hbd.closingMessage}
                 </p>

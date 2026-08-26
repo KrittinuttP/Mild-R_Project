@@ -608,7 +608,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
               </p>
               <h1
                 data-hero-title
-                className="font-[family-name:var(--font-display)] text-[clamp(3.25rem,16vw,4.75rem)] leading-[0.88] font-bold tracking-tight text-[#fff5f7]"
+                className="font-[family-name:var(--font-display)] text-[clamp(3.25rem,16vw,4.75rem)] leading-tight font-normal tracking-normal text-[#fff5f7]"
               >
                 {basic.name}
               </h1>
@@ -702,7 +702,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
           <div className="mx-auto max-w-lg space-y-8">
             <div data-m-reveal>
               <p className={cn(META_CLASS, "text-[#e85a7a]")}>Profile</p>
-              <h2 className="mt-3 font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight text-[#fff5f7]">
+              <h2 className="mt-3 font-[family-name:var(--font-display)] text-4xl font-normal tracking-normal text-[#fff5f7]">
                 {basic.name}
               </h2>
               {basic.nameLocal ? (
@@ -852,7 +852,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
               </p>
               <h1
                 data-hero-title
-                className="font-[family-name:var(--font-display)] text-[clamp(3.5rem,8vw,8.5rem)] leading-[0.9] font-bold tracking-tight text-[#fff5f7]"
+                className="font-[family-name:var(--font-display)] text-[clamp(3.5rem,8vw,8.5rem)] leading-tight font-normal tracking-normal text-[#fff5f7]"
               >
                 {basic.name}
               </h1>
@@ -916,7 +916,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
                 <p className="text-sm tracking-[0.35em] text-[#e85a7a] uppercase">
                   {basic.unit}
                 </p>
-                <p className="mt-3 font-[family-name:var(--font-display)] text-[clamp(2.8rem,7vw,5.2rem)] leading-[0.9] font-bold tracking-tight text-[#fff5f7]">
+                <p className="mt-3 font-[family-name:var(--font-display)] text-[clamp(2.8rem,7vw,5.2rem)] leading-tight font-normal tracking-normal text-[#fff5f7]">
                   {basic.name}
                 </p>
                 {basic.nameLocal ? (
@@ -1003,7 +1003,7 @@ export function HeroProfileScroll({ data }: HeroProfileScrollProps) {
                       </span>
                     ) : null}
                   </div>
-                  <h2 className="mt-3 font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight text-[#fff5f7] lg:text-[2.75rem] xl:text-5xl">
+                  <h2 className="mt-3 font-[family-name:var(--font-display)] text-4xl font-normal tracking-normal text-[#fff5f7] lg:text-[2.75rem] xl:text-5xl">
                     {basic.name}
                   </h2>
                   {basic.nameLocal ? (

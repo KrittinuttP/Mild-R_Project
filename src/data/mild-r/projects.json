@@ -75,12 +75,12 @@
     ],
     "cta": {
       "label": "เปิดดูคำอวยพร",
-      "url": "/hbd"
+      "url": "/HBD/2026"
     },
     "ctas": [
       {
         "label": "ส่งการ์ดอวยพร",
-        "url": "/hbd/upload"
+        "url": "/HBD/2026/upload"
       }
     ]
   }

@@ -7,7 +7,8 @@ import { Header } from "@/components/layout/Header";
 import { MediaProtection } from "@/components/media/MediaProtection";
 import { ProjectList } from "@/components/projects/ProjectList";
 import { getProjectsByCategory, mildRData } from "@/data/vtuber-data";
-import { META_CLASS } from "@/lib/site-ui";
+import { META_CLASS, DISPLAY_H1_CLASS, BODY_CLASS } from "@/lib/site-ui";
+import { cn } from "@/lib/utils";
 
 const CATEGORY_COPY: Record<
   string,
@@ -16,8 +17,7 @@ const CATEGORY_COPY: Record<
   fansong: {
     eyebrow: "Fansong",
     title: "Fansong",
-    description:
-      "รวมเพลง / MV ของ Mild-R — เลือกจากรายการเพื่อดูรายละเอียดและรับชม",
+    description: "เพลง / MV ของ Mild-R",
   },
 };
 
@@ -41,8 +41,7 @@ export async function generateMetadata({
 
   return {
     title: "Projects | Mild-R Fanclub",
-    description:
-      "รวมโปรเจกต์โปรโมทของ Mild-R เช่น Cafe และ Fansong — ดูรายการและเข้าดูรายละเอียดได้ที่นี่",
+    description: "โปรเจกต์ของ Mild-R เช่น Cafe และ Fansong",
   };
 }
 
@@ -60,8 +59,7 @@ export default async function ProjectsPage({
   const eyebrow = copy?.eyebrow ?? "Projects";
   const title = copy?.title ?? "รวมโปรเจกต์";
   const description =
-    copy?.description ??
-    "คาเฟ่ Fansong และแคมเปญอื่นๆ ของ Mild-R — เลือกจากรายการเพื่อดูรายละเอียด";
+    copy?.description ?? "โปรเจกต์ของ Mild-R เช่น Cafe และ Fansong";
 
   return (
     <>
@@ -81,10 +79,10 @@ export default async function ProjectsPage({
             <p className={META_CLASS}>
               {eyebrow}
             </p>
-            <h1 className="mt-4 max-w-2xl font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+            <h1 className={cn("mt-4 max-w-2xl", DISPLAY_H1_CLASS)}>
               {title}
             </h1>
-            <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#f7d7de]/85 sm:text-base">
+            <p className={cn("mt-4 max-w-xl", BODY_CLASS)}>
               {description}
             </p>
 

@@ -3,7 +3,8 @@
 import { useRef } from "react";
 
 import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
-import { META_CLASS } from "@/lib/site-ui";
+import { BODY_CLASS, DISPLAY_H2_CLASS, DISPLAY_H3_CLASS, META_CLASS } from "@/lib/site-ui";
+import { cn } from "@/lib/utils";
 import type { VtuberProfile } from "@/types/vtuber";
 
 registerGsapPlugins();
@@ -109,7 +110,7 @@ export function Lore({ data }: LoreProps) {
       <div className="relative mx-auto max-w-6xl">
         <div className="max-w-2xl">
           <p className={META_CLASS}>Lore</p>
-          <h2 className="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+          <h2 className={cn("mt-3", DISPLAY_H2_CLASS)}>
             เรื่องราวหลังภัย
           </h2>
           {data.lore.theme ? (
@@ -124,7 +125,7 @@ export function Lore({ data }: LoreProps) {
             <p
               key={paragraph}
               data-lore-paragraph
-              className="text-sm leading-relaxed text-[#f7d7de]/85 sm:text-base md:text-lg"
+              className={cn("max-w-xl", BODY_CLASS, "md:text-lg")}
             >
               {paragraph}
             </p>
@@ -158,15 +159,15 @@ export function Lore({ data }: LoreProps) {
                   >
                     <span
                       data-lore-index
-                      className="font-[family-name:var(--font-display)] text-3xl font-bold text-[#e85a7a]/80 sm:text-4xl"
+                      className="font-[family-name:var(--font-display)] text-3xl font-normal text-[#e85a7a]/80 sm:text-4xl"
                     >
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <div>
-                      <h3 className="font-[family-name:var(--font-display)] text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
+                      <h3 className={DISPLAY_H2_CLASS}>
                         {chapter.title}
                       </h3>
-                      <p className="mt-4 max-w-xl text-sm leading-relaxed text-[#f7d7de]/85 sm:mt-6 sm:text-base md:text-lg">
+                      <p className={cn("mt-4 max-w-xl sm:mt-6", BODY_CLASS, "md:text-lg")}>
                         {chapter.body}
                       </p>
                     </div>

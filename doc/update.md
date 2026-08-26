@@ -58,9 +58,9 @@
 
 ## Phase 6 — HBD scrollytelling ✅
 
-- [x] หน้า `/hbd` — เลื่อนดูคำอวยพรทีละการ์ด (GSAP)
+- [x] หน้า `/HBD/2026` — เลื่อนดูคำอวยพรทีละการ์ด (GSAP)
 - [x] ข้อมูล `hbd.json` + flag `fromUpload` / `loadOnDemand`
-- [x] โปรเจกต์ใน `/projects` slug `hbd` → CTA ไป `/hbd`
+- [x] โปรเจกต์ใน `/projects` slug `hbd` → CTA ไป `/HBD/2026`
 - [x] อัปเดตเอกสาร
 
 ## Phase 7 — Media / YouTube บนหน้าแรก ✅

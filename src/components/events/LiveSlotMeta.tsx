@@ -1,6 +1,16 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import {
+  LIVE_BADGE_CANCELLED,
+  LIVE_BADGE_CHANNEL,
+  LIVE_BADGE_COLLAB,
+  LIVE_BADGE_MEMBER,
+  LIVE_BADGE_MILD,
+  LIVE_BADGE_PILL_COMPACT,
+  LIVE_BADGE_PILL_MD,
+  LIVE_BADGE_PILL_SM,
+} from "@/lib/site-ui";
 
 /** Time label: optional strikethrough previous → updated, or LIVE / plain */
 export function LiveSlotTime({
@@ -60,6 +70,8 @@ export function LiveSourceBadges({
   showChannel = true,
   showCollab = true,
   showMember = true,
+  /** Smaller calendar pill size (channel name only, same as other compact badges). */
+  compactChannel = false,
 }: {
   isOwnChannel?: boolean;
   sourceTitle?: string | null;
@@ -70,55 +82,34 @@ export function LiveSourceBadges({
   showChannel?: boolean;
   showCollab?: boolean;
   showMember?: boolean;
+  compactChannel?: boolean;
 }) {
-  const pill =
-    size === "md"
-      ? "px-2.5 py-1 text-[0.58rem]"
-      : "px-2 py-0.5 text-[0.55rem]";
+  const pill = compactChannel
+    ? LIVE_BADGE_PILL_COMPACT
+    : size === "md"
+      ? LIVE_BADGE_PILL_MD
+      : LIVE_BADGE_PILL_SM;
 
   const channel =
     showChannel && isOwnChannel ? (
-      <span
-        className={cn(
-          "inline-flex items-center rounded-full border border-[#f3b8c4]/40 bg-[#e85a7a]/12 tracking-[0.12em] text-[#f3b8c4] uppercase",
-          pill
-        )}
-      >
-        Mild-R
-      </span>
+      <span className={cn(pill, LIVE_BADGE_MILD)}>Mild-R</span>
     ) : showChannel && sourceTitle ? (
       <span
-        className={cn(
-          "inline-flex items-center rounded-full border border-[#7eb6d4]/50 bg-[#7eb6d4]/14 tracking-[0.08em] text-[#b8d9ec]",
-          pill
-        )}
+        title={sourceTitle}
+        className={cn(pill, LIVE_BADGE_CHANNEL, "normal-case")}
       >
-        ไปช่อง {sourceTitle}
+        {sourceTitle}
       </span>
     ) : null;
 
   const memberBadge =
     showMember && isMember ? (
-      <span
-        className={cn(
-          "inline-flex items-center rounded-full border border-[#9b8cff]/55 bg-[#9b8cff]/14 tracking-[0.12em] text-[#cfc6ff] uppercase",
-          pill
-        )}
-      >
-        Member
-      </span>
+      <span className={cn(pill, LIVE_BADGE_MEMBER)}>Member</span>
     ) : null;
 
   const collabBadge =
     showCollab && isCollab ? (
-      <span
-        className={cn(
-          "inline-flex items-center rounded-full border border-[#d4a574]/55 bg-[#d4a574]/14 tracking-[0.12em] text-[#e8c49a] uppercase",
-          pill
-        )}
-      >
-        Collab
-      </span>
+      <span className={cn(pill, LIVE_BADGE_COLLAB)}>Collab</span>
     ) : null;
 
   if (!channel && !memberBadge && !collabBadge) return null;
@@ -129,6 +120,26 @@ export function LiveSourceBadges({
       {memberBadge}
       {collabBadge}
     </div>
+  );
+}
+
+export function LiveCancelledBadge({
+  className,
+  compact = false,
+}: {
+  className?: string;
+  compact?: boolean;
+}) {
+  return (
+    <span
+      className={cn(
+        compact ? LIVE_BADGE_PILL_COMPACT : LIVE_BADGE_PILL_SM,
+        LIVE_BADGE_CANCELLED,
+        className
+      )}
+    >
+      ยกเลิก
+    </span>
   );
 }
 
@@ -189,6 +200,8 @@ export function LiveDayChannelBadges({
   slots,
   className,
   size = "sm",
+  /** Calendar: sit beside day number; compact pill size. */
+  compact = false,
 }: {
   slots: {
     isOwnChannel?: boolean;
@@ -199,11 +212,12 @@ export function LiveDayChannelBadges({
   }[];
   className?: string;
   size?: "sm" | "md";
+  compact?: boolean;
 }) {
   const displaySlots = preferOwnChannelSlots(slots);
   const hasOwn = displaySlots.some((s) => s.isOwnChannel);
 
-  // Day has Mild-R: only show Mild-R badge (no "ไปช่อง" for concurrent guests)
+  // Day has Mild-R: only show Mild-R badge (hide concurrent guest channel badges)
   const guestTitles = hasOwn
     ? []
     : [
@@ -220,7 +234,8 @@ export function LiveDayChannelBadges({
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center justify-center gap-1",
+        "flex min-w-0 flex-wrap items-center gap-1",
+        compact ? "justify-start" : "justify-center",
         className
       )}
     >
@@ -229,6 +244,7 @@ export function LiveDayChannelBadges({
           isOwnChannel
           showCollab={false}
           size={size}
+          compactChannel={compact}
         />
       ) : null}
       {guestTitles.map((title) => (
@@ -237,6 +253,7 @@ export function LiveDayChannelBadges({
           sourceTitle={title}
           showCollab={false}
           size={size}
+          compactChannel={compact}
         />
       ))}
     </div>

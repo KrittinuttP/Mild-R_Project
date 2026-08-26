@@ -166,11 +166,111 @@ export function availableLiveYears(
   return [...years].sort((a, b) => a - b);
 }
 
-/** 42 cells (6 weeks) Sunday-start month grid. */
+/** Fixed year list for calendar picker (not derived from live data). */
+export function calendarYearOptions(
+  todayYear: number,
+  past = 5,
+  future = 1
+): number[] {
+  const years: number[] = [];
+  for (let y = todayYear - past; y <= todayYear + future; y++) years.push(y);
+  return years;
+}
+
+export function isYmd(value: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+/** Sunday–Saturday of the week containing `today`. */
+export function thisWeekRangeYmd(today = new Date()): {
+  from: string;
+  to: string;
+} {
+  const sunday = startOfWeekSunday(today);
+  return {
+    from: formatISODate(sunday),
+    to: formatISODate(addDays(sunday, 6)),
+  };
+}
+
+/** This week + next week (14 days), Sunday-start. */
+export function thisAndNextWeekRangeYmd(today = new Date()): {
+  from: string;
+  to: string;
+} {
+  const sunday = startOfWeekSunday(today);
+  return {
+    from: formatISODate(sunday),
+    to: formatISODate(addDays(sunday, 13)),
+  };
+}
+
+/**
+ * Data-fetch window for a selected calendar month (independent of grid UI).
+ * Inclusive Bangkok YMD: first of month − padDays … last of month + padDays.
+ */
+export function monthRangeWithPadYmd(
+  year: number,
+  monthIndex: number,
+  padDays = 7
+): { from: string; to: string } {
+  const start = new Date(year, monthIndex, 1, 12, 0, 0, 0);
+  const end = new Date(year, monthIndex + 1, 0, 12, 0, 0, 0);
+  return {
+    from: formatISODate(addDays(start, -padDays)),
+    to: formatISODate(addDays(end, padDays)),
+  };
+}
+
+/** Merge week lists by weekStart; dedupe slots by id. */
+export function mergeLiveWeekLists(...lists: LiveWeek[][]): LiveWeek[] {
+  const map = new Map<string, LiveWeek>();
+
+  for (const list of lists) {
+    for (const week of list) {
+      const existing = map.get(week.weekStart);
+      if (!existing) {
+        map.set(week.weekStart, {
+          ...week,
+          slots: [...week.slots],
+          offlineDays: week.offlineDays ? [...week.offlineDays] : undefined,
+        });
+        continue;
+      }
+
+      const ids = new Set(existing.slots.map((slot) => slot.id));
+      for (const slot of week.slots) {
+        if (ids.has(slot.id)) continue;
+        existing.slots.push(slot);
+        ids.add(slot.id);
+      }
+    }
+  }
+
+  for (const week of map.values()) {
+    week.slots.sort((a, b) => {
+      if (a.date !== b.date) return a.date < b.date ? -1 : 1;
+      return a.time.localeCompare(b.time);
+    });
+  }
+
+  return sortLiveWeeks([...map.values()]);
+}
+
+/**
+ * Calendar UI grid for a month (Sunday-start).
+ * Selected month only, plus adjacent-month days needed to complete the first/last weeks.
+ * Independent of live-data fetch range.
+ */
 export function monthGridDates(year: number, monthIndex: number): string[] {
   const first = new Date(year, monthIndex, 1, 12, 0, 0, 0);
+  const last = new Date(year, monthIndex + 1, 0, 12, 0, 0, 0);
   const gridStart = startOfWeekSunday(first);
-  return Array.from({ length: 42 }, (_, i) =>
+  const gridEnd = addDays(startOfWeekSunday(last), 6);
+  const days =
+    Math.round((gridEnd.getTime() - gridStart.getTime()) / (24 * 60 * 60 * 1000)) +
+    1;
+  return Array.from({ length: days }, (_, i) =>
     formatISODate(addDays(gridStart, i))
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, CalendarDays, Radio } from "lucide-react";
 
@@ -16,19 +16,20 @@ import { buttonVariants } from "@/components/ui/button";
 import { useLiveSchedule } from "@/hooks/useLiveSchedule";
 import {
   eventStatusLabel,
-  findDefaultWeekIndex,
   formatThaiDate,
-  sortLiveWeeks,
+  thisAndNextWeekRangeYmd,
   upcomingEvents,
 } from "@/lib/events";
 import {
   BADGE_ACCENT_CLASS,
   CTA_OUTLINE_CLASS,
   CTA_PRIMARY_CLASS,
+  DISPLAY_H2_CLASS,
+  DISPLAY_H3_CLASS,
   META_CLASS,
 } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
-import type { CalendarEvent, LiveWeek, VtuberProfile } from "@/types/vtuber";
+import type { CalendarEvent, VtuberProfile } from "@/types/vtuber";
 
 type EventsTeaserProps = {
   data: VtuberProfile;
@@ -66,7 +67,7 @@ function EventRow({
               {event.endDate ? ` – ${formatThaiDate(event.endDate)}` : null}
             </span>
           </div>
-          <p className="mt-2 font-[family-name:var(--font-display)] text-lg font-semibold text-[#fff5f7] sm:text-xl">
+          <p className={cn("mt-2", DISPLAY_H3_CLASS)}>
             {event.titleLocal ?? event.title}
           </p>
           {event.titleLocal ? (
@@ -92,28 +93,18 @@ function EventRow({
   );
 }
 
-function buildTeaserWeeks(weeks: LiveWeek[]): LiveWeek[] {
-  if (weeks.length === 0) return [];
-  const defaultIndex = findDefaultWeekIndex(weeks);
-  return [
-    weeks[defaultIndex - 1],
-    weeks[defaultIndex],
-    weeks[defaultIndex + 1],
-  ].filter((week): week is LiveWeek => Boolean(week));
-}
-
 export function EventsTeaser({ data }: EventsTeaserProps) {
   const board = data.events;
   const upcoming = upcomingEvents(board, 3);
-  const { weeks: liveWeeks, status, error, retry } = useLiveSchedule();
-  const weeks = sortLiveWeeks(liveWeeks);
-  const teaserWeeks = buildTeaserWeeks(weeks);
+  const teaserRange = useMemo(() => thisAndNextWeekRangeYmd(), []);
+  const { weeks: teaserWeeks, status, error, retry } =
+    useLiveSchedule(teaserRange);
   const [activeId, setActiveId] = useState<string | null>(null);
   const active = upcoming.find((event) => event.id === activeId) ?? null;
 
   const showEvents = upcoming.length > 0;
   const showLive =
-    status === "loading" || status === "error" || weeks.length > 0;
+    status === "loading" || status === "error" || teaserWeeks.length > 0;
 
   if (!showEvents && !showLive && status === "ready") return null;
 
@@ -131,11 +122,11 @@ export function EventsTeaser({ data }: EventsTeaserProps) {
                 <CalendarDays className="size-4 text-[#e85a7a]" aria-hidden />
                 <p className={META_CLASS}>Events</p>
               </div>
-              <h2 className="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+              <h2 className={cn("mt-3", DISPLAY_H2_CLASS)}>
                 อีเวนต์
               </h2>
               <p className="mt-4 max-w-xl text-sm text-[#f7d7de]/85 sm:text-base">
-                กิจกรรมพิเศษ คาเฟ่ และอีเวนต์อื่นๆ ที่กำลังมา
+                กิจกรรมและอีเวนต์ที่กำลังมา
               </p>
             </ScrollReveal>
 
@@ -179,12 +170,9 @@ export function EventsTeaser({ data }: EventsTeaserProps) {
                 <Radio className="size-4 text-[#e85a7a]" aria-hidden />
                 <p className={META_CLASS}>Live</p>
               </div>
-              <h2 className="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+              <h2 className={cn("mt-3", DISPLAY_H2_CLASS)}>
                 ตารางไลฟ์
               </h2>
-              <p className="mt-4 max-w-xl text-sm text-[#f7d7de]/85 sm:text-base">
-                สรุปไลฟ์สัปดาห์นี้ — ย้อนตารางเก่าได้ที่หน้าตารางเต็ม
-              </p>
             </ScrollReveal>
 
             <ScrollReveal delay={0.06} className="mt-8 sm:mt-10">

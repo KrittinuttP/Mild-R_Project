@@ -34,7 +34,7 @@ export function Footer({ data }: FooterProps) {
     <footer className="border-t border-[#f3b8c4]/10 bg-[#0e0609] px-6 py-16 text-[#fff5f7] sm:px-10 lg:px-16">
       <div className="mx-auto flex max-w-6xl flex-col gap-12 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight">
+          <p className="font-[family-name:var(--font-display)] text-3xl font-normal tracking-normal">
             {data.basic.name}
           </p>
           <p className="mt-2 text-sm text-[#f3b8c4]/70">

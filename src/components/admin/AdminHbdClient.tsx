@@ -113,7 +113,7 @@ export function AdminHbdClient() {
     return (
       <div className="mx-auto max-w-md border border-[#9a7b5a]/35 bg-[#12161a] p-6 text-center sm:p-8">
         <Lock className="mx-auto size-6 text-[#c46a7a]" />
-        <h1 className={cn(DISPLAY, "mt-4 text-xl font-bold text-[#f4ebe3]")}>
+        <h1 className={cn(DISPLAY, "mt-4 text-xl font-normal text-[#f4ebe3]")}>
           HBD approvals
         </h1>
         <p className="mt-3 text-sm text-[#c4b8a8]">
@@ -144,7 +144,7 @@ export function AdminHbdClient() {
           <p className="text-[0.62rem] tracking-[0.24em] text-[#9a7b5a] uppercase">
             Birthday · 12.12.2026
           </p>
-          <h1 className={cn(DISPLAY, "text-2xl font-bold text-[#f4ebe3]")}>
+          <h1 className={cn(DISPLAY, "text-2xl font-normal text-[#f4ebe3]")}>
             HBD submissions
           </h1>
         </div>
@@ -195,7 +195,7 @@ export function AdminHbdClient() {
           <p className={cn(DISPLAY, "text-lg text-[#f4ebe3]")}>ยังไม่มีรายการ</p>
           <p className="mt-2 text-sm text-[#c4b8a8]">
             {tab === "pending"
-              ? "รอฮันนี่ส่งการ์ดจาก /hbd/upload"
+              ? "รอฮันนี่ส่งการ์ดจาก /HBD/2026/upload"
               : "ยังไม่มีรายการที่อนุมัติ"}
           </p>
         </div>
@@ -222,7 +222,7 @@ export function AdminHbdClient() {
                       className="size-10 rounded-full object-cover"
                     />
                     <div>
-                      <p className={cn(DISPLAY, "font-semibold text-[#f4ebe3]")}>
+                      <p className={cn(DISPLAY, "font-normal text-[#f4ebe3]")}>
                         {item.display_name}
                       </p>
                       <p className="text-xs text-[#9a7b5a]">

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     "อัปโหลดการ์ดอวยพรวันเกิด Mild-R · 12.12.2026 — จากฮันนี่ถึง mutant สาวของเรา",
 };
 
-export default function HbdUploadPage() {
+export default function Hbd2026UploadPage() {
   return (
     <>
       <MediaProtection />

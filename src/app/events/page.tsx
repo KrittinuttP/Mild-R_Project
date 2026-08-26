@@ -7,11 +7,12 @@ import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { MediaProtection } from "@/components/media/MediaProtection";
 import { mildRData } from "@/data/vtuber-data";
+import { DISPLAY_H1_CLASS, META_CLASS } from "@/lib/site-ui";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Events | Mild-R Fanclub",
-  description:
-    "รายการอีเวนต์ของ Mild-R — กำลังมาและผ่านมาแล้ว",
+  description: "อีเวนต์ของ Mild-R",
 };
 
 export default function EventsPage() {
@@ -27,16 +28,10 @@ export default function EventsPage() {
             <BackLink href="/#events" className="mb-8">
               กลับหน้าแรก
             </BackLink>
-            <p className="text-[0.7rem] tracking-[0.28em] text-[#f3b8c4]/75 uppercase sm:text-sm">
-              Events
-            </p>
-            <h1 className="mt-4 max-w-2xl font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+            <p className={META_CLASS}>Events</p>
+            <h1 className={cn("mt-4 max-w-2xl", DISPLAY_H1_CLASS)}>
               อีเวนต์
             </h1>
-            <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#f7d7de]/85 sm:text-base">
-              รวมอีเวนต์พิเศษ คาเฟ่ คอลแลบ และกิจกรรมอื่นๆ ทั้งที่กำลังมาและผ่านมาแล้ว
-              — แยกจากตารางไลฟ์รายสัปดาห์
-            </p>
 
             <div className="mt-12 sm:mt-16">
               <EventsPageClient board={mildRData.events} />

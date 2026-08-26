@@ -2,7 +2,7 @@ import { GalleryBoard } from "@/components/gallery/GalleryBoard";
 import type { GalleryBoardMode, GalleryVariant } from "@/components/gallery/gallery-utils";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { BackLink } from "@/components/layout/BackLink";
-import { META_CLASS } from "@/lib/site-ui";
+import { BODY_CLASS, DISPLAY_H1_CLASS, DISPLAY_H2_CLASS, META_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { GalleryItem } from "@/types/vtuber";
 
@@ -10,7 +10,7 @@ type GallerySectionProps = {
   id: string;
   eyebrow: string;
   title: string;
-  description: string;
+  description?: string;
   items: GalleryItem[];
   variant: GalleryVariant;
   mode: GalleryBoardMode;
@@ -64,17 +64,15 @@ export function GallerySection({
           <p className={META_CLASS}>{eyebrow}</p>
           <h2
             className={cn(
-              "mt-3 font-[family-name:var(--font-display)] font-bold tracking-tight",
-              mode === "full"
-                ? "text-4xl sm:text-5xl md:text-6xl"
-                : "text-3xl sm:text-4xl md:text-5xl"
+              "mt-3",
+              mode === "full" ? DISPLAY_H1_CLASS : DISPLAY_H2_CLASS
             )}
           >
             {title}
           </h2>
-          <p className="mt-4 max-w-xl text-sm text-[#f7d7de]/85 sm:text-base">
-            {description}
-          </p>
+          {description ? (
+            <p className={cn("mt-4 max-w-xl", BODY_CLASS)}>{description}</p>
+          ) : null}
         </ScrollReveal>
 
         <GalleryBoard

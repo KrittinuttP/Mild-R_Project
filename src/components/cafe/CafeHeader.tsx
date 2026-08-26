@@ -93,16 +93,10 @@ export function CafeHeader({
       className={cn(
         "fixed inset-x-0 top-0 z-40 transition-[background-color,backdrop-filter,border-color] duration-300",
         scrolled || open
-          ? "border-b border-[#9a7b5a]/35 bg-[#0a0c0e]/92 backdrop-blur-md"
+          ? "border-b border-[#9a7b5a]/25 bg-[#0a0c0e]/88 backdrop-blur-md"
           : "border-b border-transparent bg-transparent"
       )}
     >
-      {(scrolled || open) && (
-        <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-[#9a7b5a]/20"
-          aria-hidden
-        />
-      )}
       <div className="mx-auto flex min-h-14 max-w-6xl items-center justify-between gap-3 px-5 pt-[env(safe-area-inset-top)] sm:h-16 sm:gap-4 sm:px-10 lg:px-16">
         <div className="min-w-0 flex-1">
           <Link
@@ -123,7 +117,7 @@ export function CafeHeader({
           </Link>
           <div className="mt-0.5 flex min-w-0 items-center gap-2 sm:flex">
             {cafe.dispatch.schedule.label ? (
-              <span className="shrink-0 text-[0.55rem] tracking-[0.14em] text-[#c46a7a] uppercase sm:text-[0.58rem] sm:tracking-[0.18em]">
+              <span className="shrink-0 rounded-full border border-[#a84d5f]/35 bg-[#a84d5f]/10 px-2 py-0.5 text-[0.55rem] tracking-[0.14em] text-[#c46a7a] uppercase sm:text-[0.58rem]">
                 {cafe.dispatch.schedule.label}
               </span>
             ) : null}
@@ -157,7 +151,7 @@ export function CafeHeader({
               <span key={link.label} className="flex items-center">
                 {index > 0 ? (
                   <span
-                    className="mx-2 text-[#9a7b5a]/50 select-none"
+                    className="mx-2 text-[#9a7b5a]/40 select-none"
                     aria-hidden
                   >
                     ·
@@ -171,10 +165,10 @@ export function CafeHeader({
                   }
                   onClick={(event) => handleNavClick(event, href)}
                   className={cn(
-                    "text-[0.8rem] tracking-[0.14em] uppercase transition",
+                    "rounded-full px-2.5 py-1 text-[0.8rem] tracking-[0.14em] uppercase transition",
                     active
-                      ? "text-[#f4ebe3]"
-                      : "text-[#c4b8a8] hover:text-[#f4ebe3]"
+                      ? "bg-[#a84d5f]/15 text-[#f4ebe3]"
+                      : "text-[#c4b8a8] hover:bg-white/[0.04] hover:text-[#f4ebe3]"
                   )}
                   aria-current={active ? "page" : undefined}
                 >
@@ -189,7 +183,7 @@ export function CafeHeader({
           type="button"
           className={cn(
             buttonVariants({ variant: "ghost", size: "icon" }),
-            "rounded-none text-[#f4ebe3] lg:hidden"
+            "rounded-full text-[#f4ebe3] lg:hidden"
           )}
           aria-expanded={open}
           aria-controls="cafe-mobile-nav"
@@ -203,7 +197,7 @@ export function CafeHeader({
       <div
         id="cafe-mobile-nav"
         className={cn(
-          "border-t border-[#9a7b5a]/25 bg-[#0a0c0e]/95 lg:hidden",
+          "border-t border-[#9a7b5a]/20 bg-[#0a0c0e]/95 backdrop-blur-md lg:hidden",
           open ? "block" : "hidden"
         )}
       >
@@ -226,10 +220,10 @@ export function CafeHeader({
                   link.kind === "external" ? "noopener noreferrer" : undefined
                 }
                 className={cn(
-                  "min-h-12 py-3.5 text-base tracking-wide uppercase transition",
+                  "min-h-12 rounded-2xl px-3 py-3.5 text-base tracking-wide uppercase transition",
                   active
-                    ? "text-[#f4ebe3]"
-                    : "text-[#d8d0c4] hover:text-[#f4ebe3]"
+                    ? "bg-[#a84d5f]/12 text-[#f4ebe3]"
+                    : "text-[#d8d0c4] hover:bg-white/[0.04] hover:text-[#f4ebe3]"
                 )}
                 aria-current={active ? "page" : undefined}
                 onClick={(event) => handleNavClick(event, href)}
@@ -241,7 +235,7 @@ export function CafeHeader({
           {showHomeLink ? (
             <Link
               href={mildRHomeHref}
-              className="min-h-12 border-t border-[#9a7b5a]/20 py-3.5 text-sm tracking-wide text-[#a84d5f] transition hover:text-[#c46a7a]"
+              className="min-h-12 border-t border-[#9a7b5a]/15 px-3 py-3.5 text-sm tracking-wide text-[#a84d5f] transition hover:text-[#c46a7a]"
               onClick={() => setOpen(false)}
             >
               เว็บหลัก →

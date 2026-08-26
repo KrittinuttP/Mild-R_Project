@@ -1,13 +1,13 @@
 # HBD Upload · ส่งการ์ดอวยพร
 
-หน้าสาธารณะให้ฮันนี่กรอกฟอร์ม + อัปโหลดการ์ด → พรีวิว → ส่งเข้าคิวอนุมัติ → ขึ้น `/hbd`
+หน้าสาธารณะให้ฮันนี่กรอกฟอร์ม + อัปโหลดการ์ด → พรีวิว → ส่งเข้าคิวอนุมัติ → ขึ้น `/HBD/2026`
 
 ## Routes
 
 | Path | งาน |
 |---|---|
-| `/hbd/upload` | ฟอร์ม · โหลด template · พรีวิว · ส่งจริง |
-| `/hbd` | แกลเลอรี (seed + approved จาก DB) |
+| `/HBD/2026/upload` | ฟอร์ม · โหลด template · พรีวิว · ส่งจริง |
+| `/HBD/2026` | แกลเลอรี (approved จาก DB) |
 | `/admin` | Control desk · badge pending |
 | `/admin/hbd` | Pending / Approved · Approve / Reject |
 
@@ -18,7 +18,7 @@
 3. ชื่อที่แสดง * + Avatar (ไม่บังคับ)
 4. ข้อความอวยพร (ไม่บังคับ)
 5. ช่องทางติดต่อ * · **ไม่แสดงบนเว็บ** (ใช้ติดต่อเมื่อมีปัญหา)
-6. พรีวิว → ตกลง → `POST /api/hbd/submit`
+6. พรีวิว ↔ แก้ไข (รูปไม่หาย) → ตกลง / ล้างฟอร์ม → `POST /api/hbd/submit`
 
 ## Backend
 
@@ -30,9 +30,9 @@
 ## Status
 
 - ✅ Auth รวม + `/admin` hub
-- ✅ `/hbd/upload` UI + submit API
+- ✅ `/HBD/2026/upload` UI + submit API
 - ✅ `/admin/hbd` approve/reject + badge pending
-- ✅ `/hbd` แสดง approved จาก Supabase
+- ✅ `/HBD/2026` แสดง approved จาก Supabase
 
 ## Theme
 

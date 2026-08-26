@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
-import { Figtree, Syne } from "next/font/google";
+import { IBM_Plex_Sans_Thai, Noto_Sans_Thai } from "next/font/google";
 
 import { SoftNavMarker } from "@/components/layout/SoftNavMarker";
 
 import "./globals.css";
 
-const figtree = Figtree({
+const notoSansThai = Noto_Sans_Thai({
   variable: "--font-sans",
-  subsets: ["latin"],
+  subsets: ["thai", "latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const syne = Syne({
+const ibmPlexSansThai = IBM_Plex_Sans_Thai({
   variable: "--font-display",
-  subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  subsets: ["thai", "latin"],
+  weight: ["300", "400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -26,9 +27,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="th"
-      className={`${figtree.variable} ${syne.variable} h-full antialiased`}
+      className={`${notoSansThai.variable} ${ibmPlexSansThai.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-[#140a0d] font-sans text-[#fff5f7]">
+      <body className="flex min-h-full flex-col bg-[#140a0d] font-sans text-base leading-relaxed text-[#fff5f7]">
         <SoftNavMarker />
         {children}
       </body>

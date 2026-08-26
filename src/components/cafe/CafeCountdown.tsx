@@ -121,7 +121,7 @@ function FlipCard({ value, label }: { value: string; label: string }) {
           ref={faceRef}
           className={cn(
             DISPLAY,
-            "px-0.5 py-2 text-[clamp(1.15rem,4.8vw,1.85rem)] leading-none font-bold tabular-nums text-[#fff8f4] will-change-transform sm:py-2.5"
+            "px-0.5 py-2 text-[clamp(1.15rem,4.8vw,1.85rem)] leading-none font-normal tabular-nums text-[#fff8f4] will-change-transform sm:py-2.5"
           )}
         >
           {shown}
@@ -228,7 +228,7 @@ export function CafeCountdown({
         <p
           className={cn(
             DISPLAY,
-            "text-lg font-bold tracking-tight text-[#f4ebe3] sm:text-xl"
+            "text-lg font-normal tracking-tight text-[#f4ebe3] sm:text-xl"
           )}
         >
           {phase === "open" ? "Case Open" : "Case Closed"}

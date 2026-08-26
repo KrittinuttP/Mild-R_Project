@@ -494,6 +494,10 @@ export interface CafeEventPage {
   titleLocal?: string;
   tagline?: string;
   status?: ProjectStatus;
+  /** Dark-screen cold open — mysterious lines before any panel art */
+  prologue?: {
+    lines: string[];
+  };
   panels: CafeEventPanel[];
   ctaBack?: ProjectCta;
 }
