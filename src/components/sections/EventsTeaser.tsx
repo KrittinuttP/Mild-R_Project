@@ -22,6 +22,7 @@ import {
 } from "@/lib/events";
 import {
   BADGE_ACCENT_CLASS,
+  BADGE_SOFT_CLASS,
   CTA_OUTLINE_CLASS,
   CTA_PRIMARY_CLASS,
   DISPLAY_H2_CLASS,
@@ -35,59 +36,79 @@ type EventsTeaserProps = {
   data: VtuberProfile;
 };
 
-function EventRow({
+function EventCard({
   event,
   onOpen,
 }: {
   event: CalendarEvent;
   onOpen: () => void;
 }) {
+  const ended = event.status === "ended";
+  const meta = [event.venue, event.platform].filter(Boolean).join(" · ");
+
   return (
-    <li>
+    <li className="h-full">
       <button
         type="button"
         onClick={onOpen}
-        className="group flex w-full items-start gap-4 rounded-3xl border border-[#f3b8c4]/12 bg-[#1a0c12]/60 p-4 text-left transition hover:border-[#e85a7a]/40 hover:bg-[#1a0c12] sm:gap-5 sm:p-5"
+        className={cn(
+          "group flex h-full w-full flex-col overflow-hidden rounded-3xl border bg-[#1a0c12]/60 text-left transition",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e85a7a]/60",
+          ended
+            ? "border-[#f3b8c4]/10 opacity-90 hover:border-[#f3b8c4]/25 hover:bg-[#1a0c12] hover:opacity-100"
+            : "border-[#f3b8c4]/12 hover:border-[#e85a7a]/40 hover:bg-[#1a0c12]"
+        )}
       >
-        <div className="relative size-20 shrink-0 overflow-hidden rounded-2xl border border-[#f3b8c4]/15 bg-[#10070b] sm:size-24">
+        <div className="relative aspect-[16/10] overflow-hidden bg-[#12080c]">
           <ProtectedImage
             src={event.cover}
             alt={event.coverAlt ?? event.title}
             wrapClassName="absolute inset-0 block"
-            className="h-full w-full object-cover object-top"
+            className={cn(
+              "h-full w-full object-cover object-top transition duration-700 group-hover:scale-[1.04]",
+              ended && "opacity-85"
+            )}
           />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#1a0c12] via-[#1a0c12]/40 to-transparent" />
+          <span
+            className={cn(
+              ended ? BADGE_SOFT_CLASS : BADGE_ACCENT_CLASS,
+              "absolute top-3 left-3 uppercase backdrop-blur-sm"
+            )}
+          >
+            {eventStatusLabel(event.status)}
+          </span>
         </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className={cn(BADGE_ACCENT_CLASS, "uppercase")}>
-              {eventStatusLabel(event.status)}
-            </span>
-            <span className="text-xs tabular-nums text-[#f3b8c4]/70 sm:text-sm">
-              {formatThaiDate(event.date)}
-              {event.endDate ? ` – ${formatThaiDate(event.endDate)}` : null}
-            </span>
-          </div>
-          <p className={cn("mt-2", DISPLAY_H3_CLASS)}>
-            {event.titleLocal ?? event.title}
+
+        <div className="flex flex-1 flex-col px-5 py-5 sm:px-6 sm:py-6">
+          <p className="text-xs tabular-nums text-[#f3b8c4]/70 sm:text-sm">
+            {formatThaiDate(event.date)}
+            {event.endDate ? ` – ${formatThaiDate(event.endDate)}` : null}
+            {event.timeLabel ? ` · ${event.timeLabel}` : null}
           </p>
+
+          <h3 className={cn("mt-2 transition group-hover:text-white", DISPLAY_H3_CLASS)}>
+            {event.titleLocal ?? event.title}
+          </h3>
           {event.titleLocal ? (
-            <p className="mt-0.5 text-sm text-[#f3b8c4]/65">{event.title}</p>
+            <p className="mt-1 text-sm text-[#f3b8c4]/65">{event.title}</p>
           ) : null}
+
           {event.summary ? (
-            <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-[#f7d7de]/75">
+            <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-[#f7d7de]/80">
               {event.summary}
             </p>
           ) : null}
-          <p className="mt-2 text-xs text-[#f3b8c4]/55 sm:text-sm">
-            {[event.timeLabel, event.venue ?? event.platform]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
-          <span className="mt-2 inline-block text-sm text-[#e85a7a]">
+
+          {meta ? (
+            <p className="mt-2 text-xs text-[#f3b8c4]/55">{meta}</p>
+          ) : null}
+
+          <span className="mt-auto inline-flex items-center gap-1.5 pt-5 text-sm tracking-wide text-[#e85a7a] transition group-hover:gap-2.5">
             ดูรายละเอียด
+            <ArrowUpRight className="size-4" />
           </span>
         </div>
-        <ArrowUpRight className="size-4 shrink-0 opacity-45 transition group-hover:opacity-100" />
       </button>
     </li>
   );
@@ -131,9 +152,9 @@ export function EventsTeaser({ data }: EventsTeaserProps) {
             </ScrollReveal>
 
             <ScrollReveal className="mt-8 sm:mt-10">
-              <ul className="space-y-3 sm:space-y-4">
+              <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
                 {upcoming.map((event) => (
-                  <EventRow
+                  <EventCard
                     key={event.id}
                     event={event}
                     onOpen={() => setActiveId(event.id)}
