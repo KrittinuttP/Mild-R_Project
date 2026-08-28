@@ -111,7 +111,10 @@ export function liveStreamToSlot(row: LiveStreamRow): LiveSlot {
   const own = Boolean(row.is_own_channel);
   const collab = Boolean(row.is_collab) || !own;
   const isPreview = isManualPreviewRow(row) && !linkedYoutubeVideoId(row);
-  const isMember = row.metadata?.member === true;
+  const isMember =
+    row.metadata?.member === true ||
+    (typeof row.title === "string" &&
+      /【?\s*membership\b/i.test(row.title));
 
   // Schedule display base: first-seen announce time
   const firstIso = row.scheduled_start_first ?? row.scheduled_start;

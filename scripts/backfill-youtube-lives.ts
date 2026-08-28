@@ -152,7 +152,7 @@ async function scanHistoricalLives(searchQuery: string, sourceName: string) {
       const { data: existingRows } = await supabase
         .from("mild_r_live_streams")
         .select(
-          "video_id, views_on_end, scheduled_start, scheduled_start_first, actual_start"
+          "video_id, views_on_end, scheduled_start, scheduled_start_first, actual_start, metadata"
         )
         .in("video_id", ids);
 
@@ -163,6 +163,7 @@ async function scanHistoricalLives(searchQuery: string, sourceName: string) {
           scheduled_start: string | null;
           scheduled_start_first: string | null;
           actual_start: string | null;
+          metadata: Record<string, unknown> | null;
         }
       >();
       for (const row of existingRows || []) {
@@ -172,6 +173,10 @@ async function scanHistoricalLives(searchQuery: string, sourceName: string) {
           scheduled_start_first:
             (row.scheduled_start_first as string | null) ?? null,
           actual_start: (row.actual_start as string | null) ?? null,
+          metadata:
+            row.metadata && typeof row.metadata === "object"
+              ? (row.metadata as Record<string, unknown>)
+              : null,
         });
       }
 
@@ -189,6 +194,10 @@ async function scanHistoricalLives(searchQuery: string, sourceName: string) {
           scheduled_start: started
             ? (existing?.scheduled_start ?? row.scheduled_start)
             : row.scheduled_start,
+          metadata: {
+            ...(existing?.metadata ?? {}),
+            ...(row.metadata ?? {}),
+          },
         };
       });
 

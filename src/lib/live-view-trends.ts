@@ -398,7 +398,10 @@ export async function loadLiveKindStats(options: {
       const batch = data ?? [];
       for (const row of batch) {
         const meta = row.metadata as Record<string, unknown> | null;
-        const isMember = meta?.member === true;
+        const isMember =
+          meta?.member === true ||
+          (typeof row.title === "string" &&
+            /【?\s*membership\b/i.test(row.title));
         if (isMember) member += 1;
         else if (row.is_collab) collab += 1;
         else solo += 1;
@@ -459,7 +462,10 @@ export async function loadStreamsInBucket(
       latest_likes: row.latest_likes as number | null,
       is_own_channel: row.is_own_channel as boolean | null,
       is_collab: row.is_collab as boolean | null,
-      is_member: meta?.member === true,
+      is_member:
+        meta?.member === true ||
+        (typeof row.title === "string" &&
+          /【?\s*membership\b/i.test(row.title)),
       likes:
         (row.latest_likes as number | null) ??
         (row.likes_on_end as number | null) ??

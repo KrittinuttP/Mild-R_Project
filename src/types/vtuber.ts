@@ -258,6 +258,16 @@ export interface LiveOfflineDay {
   note?: string;
 }
 
+export interface LiveWeekBanner {
+  title: string;
+  subtitle?: string;
+  badge?: string;
+  imageUrl?: string;
+  imageAlt?: string;
+  linkUrl?: string;
+  buttonLabel?: string;
+}
+
 /** One calendar week of lives (Sunday-start) */
 export interface LiveWeek {
   id: string;
@@ -267,6 +277,8 @@ export interface LiveWeek {
   slots: LiveSlot[];
   /** Explicit offline days — only these show the Offline badge */
   offlineDays?: LiveOfflineDay[];
+  /** Optional weekly highlight banner (Desktop split / Mobile stack) */
+  banner?: LiveWeekBanner;
 }
 
 export interface EventsBoard {

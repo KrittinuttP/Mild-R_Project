@@ -158,14 +158,27 @@ async function main() {
 
   const { data: existing } = await supabase
     .from("mild_r_live_streams")
-    .select("video_id, title")
+    .select("video_id, title, metadata")
     .eq("video_id", VIDEO_ID)
     .maybeSingle();
   console.log("existing before upsert:", existing);
 
+  const existingMeta =
+    existing?.metadata && typeof existing.metadata === "object"
+      ? (existing.metadata as Record<string, unknown>)
+      : {};
+
+  const mergedRow = {
+    ...row,
+    metadata: {
+      ...existingMeta,
+      ...row.metadata,
+    },
+  };
+
   const { error } = await supabase
     .from("mild_r_live_streams")
-    .upsert(row, { onConflict: "video_id" });
+    .upsert(mergedRow, { onConflict: "video_id" });
 
   if (error) {
     console.error("upsert error:", error.message);

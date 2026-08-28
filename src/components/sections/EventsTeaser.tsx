@@ -17,8 +17,8 @@ import { useLiveSchedule } from "@/hooks/useLiveSchedule";
 import {
   eventStatusLabel,
   formatThaiDate,
+  recentEvents,
   thisAndNextWeekRangeYmd,
-  upcomingEvents,
 } from "@/lib/events";
 import {
   BADGE_ACCENT_CLASS,
@@ -116,14 +116,14 @@ function EventCard({
 
 export function EventsTeaser({ data }: EventsTeaserProps) {
   const board = data.events;
-  const upcoming = upcomingEvents(board, 3);
+  const events = recentEvents(board, 3);
   const teaserRange = useMemo(() => thisAndNextWeekRangeYmd(), []);
   const { weeks: teaserWeeks, status, error, retry } =
     useLiveSchedule(teaserRange);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const active = upcoming.find((event) => event.id === activeId) ?? null;
+  const active = events.find((event) => event.id === activeId) ?? null;
 
-  const showEvents = upcoming.length > 0;
+  const showEvents = events.length > 0;
   const showLive =
     status === "loading" || status === "error" || teaserWeeks.length > 0;
 
@@ -131,7 +131,7 @@ export function EventsTeaser({ data }: EventsTeaserProps) {
 
   return (
     <>
-      {upcoming.length > 0 ? (
+      {events.length > 0 ? (
         <section
           id="events"
           className="relative scroll-mt-20 bg-[#12080c] px-5 py-20 text-[#fff5f7] sm:scroll-mt-24 sm:px-10 sm:py-24 lg:px-16"
@@ -147,13 +147,13 @@ export function EventsTeaser({ data }: EventsTeaserProps) {
                 อีเวนต์
               </h2>
               <p className="mt-4 max-w-xl text-sm text-[#f7d7de]/85 sm:text-base">
-                กิจกรรมและอีเวนต์ที่กำลังมา
+                กิจกรรมและอีเวนต์ล่าสุด
               </p>
             </ScrollReveal>
 
             <ScrollReveal className="mt-8 sm:mt-10">
-              <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-                {upcoming.map((event) => (
+              <ul className="grid grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-6">
+                {events.map((event) => (
                   <EventCard
                     key={event.id}
                     event={event}

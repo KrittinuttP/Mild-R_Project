@@ -3,7 +3,6 @@
 import { useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 
-import { CollabBadge } from "@/components/events/CollabBadge";
 import { LiveDetailModal } from "@/components/events/LiveDetailModal";
 import {
   LiveCancelledBadge,
@@ -478,19 +477,10 @@ export function LiveScheduleBoard() {
       <section className="relative">
         <div className="pointer-events-none absolute -top-10 right-0 size-44 bg-[radial-gradient(circle,rgba(232,90,122,0.14),transparent_65%)]" />
 
-        <div className="relative flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h2 className={DISPLAY_H2_CLASS}>
-              ไลฟ์สัปดาห์นี้
-            </h2>
-          </div>
-          <div className="flex items-center gap-3 text-xs text-[#f3b8c4]/55">
-            <span className="inline-flex items-center gap-1.5">
-              <span className="size-1.5 rounded-full bg-[#e85a7a]" />
-              <span className="text-[#e85a7a]/90">Solo</span>
-            </span>
-            <CollabBadge />
-          </div>
+        <div className="relative">
+          <h2 className={DISPLAY_H2_CLASS}>
+            ไลฟ์สัปดาห์นี้
+          </h2>
         </div>
 
         <div className="relative mt-8 sm:mt-10">

@@ -323,8 +323,19 @@ export function pastEvents(
   return typeof limit === "number" ? list.slice(0, limit) : list;
 }
 
+export function recentEvents(
+  board: EventsBoard,
+  limit?: number
+): CalendarEvent[] {
+  const list = [...board.events].sort((a, b) => {
+    if (a.date !== b.date) return a.date > b.date ? -1 : 1;
+    return a.title.localeCompare(b.title);
+  });
+  return typeof limit === "number" ? list.slice(0, limit) : list;
+}
+
 export function eventStatusLabel(status: CalendarEvent["status"]): string {
   if (status === "ongoing") return "กำลังจัด";
-  if (status === "ended") return "ผ่านมาแล้ว";
-  return "กำลังมา";
+  if (status === "ended") return "สิ้นสุดแล้ว";
+  return "เร็วๆ นี้";
 }

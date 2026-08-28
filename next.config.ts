@@ -1,13 +1,20 @@
 import type { NextConfig } from "next";
 
+const envOrigins = process.env.ALLOWED_DEV_ORIGINS
+  ? process.env.ALLOWED_DEV_ORIGINS.split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+  : [];
+
 const nextConfig: NextConfig = {
   // Allow LAN devices to load /_next/* assets during `next dev`
-  allowedDevOrigins: [
-    "192.168.100.103",
-    "192.168.100.112",
-    "192.168.100.110",
-    "localhost",
-  ],
+  allowedDevOrigins: Array.from(
+    new Set([
+      "localhost",
+      "127.0.0.1",
+      ...envOrigins,
+    ])
+  ),
   async redirects() {
     return [
       { source: "/hbd", destination: "/HBD/2026", permanent: true },

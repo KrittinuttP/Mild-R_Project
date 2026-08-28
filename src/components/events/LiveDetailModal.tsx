@@ -50,7 +50,7 @@ function platformLabel(platform?: LivePlatform) {
 function statusLabel(status?: LiveSlot["status"]) {
   if (status === "live") return "กำลังไลฟ์";
   if (status === "upcoming") return "รอไลฟ์";
-  if (status === "ended") return "จบแล้ว";
+  if (status === "ended") return "จบไลฟ์แล้ว";
   if (status === "cancelled") return "ยกเลิก";
   return null;
 }
