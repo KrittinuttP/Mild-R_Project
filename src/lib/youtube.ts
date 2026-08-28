@@ -29,9 +29,9 @@ export function getYoutubeVideoId(url?: string): string | null {
   return null;
 }
 
-/** HQ thumbnail (falls back gracefully in the browser if missing). */
+/** MQ thumbnail (clean 16:9 widescreen without letterbox black bars). */
 export function getYoutubeThumbnailUrl(videoId: string) {
-  return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+  return `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
 }
 
 /** Standard embed URL — prefer youtube.com over nocookie (fewer player config errors). */

@@ -381,7 +381,7 @@ export async function loadLiveKindStats(options: {
     for (;;) {
       let q = supabase
         .from("mild_r_live_streams")
-        .select("video_id, is_collab, metadata")
+        .select("video_id, title, is_collab, metadata")
         .not("actual_end", "is", null)
         .gte("actual_end", from)
         .lt("actual_end", to)

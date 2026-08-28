@@ -33,6 +33,7 @@ import {
   thaiWeekdayShort,
   weekDayDates,
 } from "@/lib/events";
+import { getYoutubeThumbnailUrl, getYoutubeVideoId } from "@/lib/youtube";
 import {
   BADGE_ACCENT_CLASS,
   BADGE_SOFT_CLASS,
@@ -89,7 +90,7 @@ function MobileSlotCard({
       onClick={onOpen}
       title={`${slot.timePrevious ? `${slot.timePrevious}→` : ""}${slot.timeUpdated ?? slot.time} · ${label}`}
       className={cn(
-        "group flex h-[5.75rem] w-full items-stretch overflow-hidden rounded-2xl border bg-[#1a0c12]/70 text-left transition",
+        "group flex h-[5.5rem] w-full items-stretch overflow-hidden rounded-2xl border bg-[#1a0c12]/70 text-left transition",
         cancelled
           ? "border-[#8a7f88]/30 opacity-80 hover:border-[#8a7f88]/50 hover:bg-[#8a7f88]/10"
           : guestTone
@@ -106,7 +107,7 @@ function MobileSlotCard({
             <ProtectedImage
               src={coverUrl}
               alt={label}
-              wrapClassName="absolute inset-0 block"
+              wrapClassName="absolute inset-0 block h-full w-full"
               className={cn(
                 "h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]",
                 cancelled && "opacity-60 grayscale-[0.35]"
@@ -168,10 +169,10 @@ function MobileSlotCard({
         ) : null}
       </div>
 
-      {/* 📝 Right: Content Details (Time + Title) */}
-      <div className="flex h-full min-w-0 flex-1 flex-col justify-center gap-1.5 p-2.5 sm:p-3">
+      {/* 📝 Right: Content Details (Strict 2-Line Clamp with ellipsis '...') */}
+      <div className="flex h-full min-w-0 flex-1 flex-col justify-center gap-1 overflow-hidden p-2.5 sm:p-3">
         {/* Time Bar */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-1.5">
           {isLive ? (
             <span className="inline-flex items-center gap-1 rounded-md bg-[#e85a7a] px-1.5 py-0.5 text-[0.65rem] font-bold tracking-wider text-white uppercase shadow-[0_0_8px_rgba(232,90,122,0.6)]">
               <span className="size-1.5 animate-ping rounded-full bg-white" />
@@ -210,17 +211,10 @@ function MobileSlotCard({
           )}
         </div>
 
-        {/* Title */}
-        <div className="min-w-0">
-          <p className="line-clamp-2 min-w-0 text-[0.8rem] font-medium leading-snug text-[#fff5f7]">
-            {label}
-          </p>
-          {slot.titleLocal ? (
-            <p className="mt-0.5 line-clamp-1 text-[0.65rem] text-[#f3b8c4]/60">
-              {slot.title}
-            </p>
-          ) : null}
-        </div>
+        {/* Title: บังคับตัดบรรทัดด้วย line-clamp-2 (เกินใส่ ...) */}
+        <p className="line-clamp-2 min-w-0 text-[0.8rem] font-medium leading-snug text-[#fff5f7]">
+          {label}
+        </p>
       </div>
     </button>
   );
@@ -282,9 +276,9 @@ function SlotCard({
             <ProtectedImage
               src={coverUrl}
               alt={label}
-              wrapClassName="absolute inset-0 block"
+              wrapClassName="absolute inset-0 block h-full w-full"
               className={cn(
-                "h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]",
+                "h-full w-full object-cover object-center transition duration-500 group-hover:scale-[1.04]",
                 cancelled && "opacity-60 grayscale-[0.35]"
               )}
             />
@@ -445,12 +439,33 @@ function EmptyDaySlot({ compact }: { compact?: boolean }) {
 }
 
 function getSlotCoverUrl(slot: LiveSlot): string | null {
-  if (slot.coverUrl) return slot.coverUrl;
+  const videoId =
+    getYoutubeVideoId(slot.url) ||
+    (slot.id?.startsWith("yt-") ? slot.id.replace("yt-", "") : null);
+
+  // If this stream is from YouTube, mqdefault.jpg is guaranteed to exist and is true 16:9 widescreen without any top/bottom letterbox black bars
+  if (videoId) {
+    return getYoutubeThumbnailUrl(videoId);
+  }
+
+  if (slot.coverUrl) {
+    let url = slot.coverUrl;
+    if (
+      url.includes("i.ytimg.com/vi/") &&
+      (url.includes("/hqdefault.jpg") ||
+        url.includes("/sddefault.jpg") ||
+        url.includes("/default.jpg"))
+    ) {
+      return url.replace(
+        /\/hqdefault\.jpg|\/sddefault\.jpg|\/default\.jpg/,
+        "/mqdefault.jpg"
+      );
+    }
+    return url;
+  }
   if (slot.coverHistory && slot.coverHistory.length > 0) {
     return slot.coverHistory[0].url;
   }
-  const videoId = getYoutubeVideoId(slot.url);
-  if (videoId) return getYoutubeThumbnailUrl(videoId);
   return null;
 }
 
@@ -688,8 +703,8 @@ function LiveSpotlightBanner({
             <ProtectedImage
               src={coverUrl}
               alt={label}
-              wrapClassName="absolute inset-0 block"
-              className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
+              wrapClassName="absolute inset-0 block h-full w-full"
+              className="h-full w-full object-cover object-center transition duration-700 group-hover:scale-[1.04]"
             />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140a0d]/70 via-transparent to-transparent" />
           </button>
@@ -707,8 +722,8 @@ function LiveSpotlightBanner({
             <ProtectedImage
               src={coverUrl}
               alt={label}
-              wrapClassName="absolute inset-0 block"
-              className="h-full w-full object-cover"
+              wrapClassName="absolute inset-0 block h-full w-full"
+              className="h-full w-full object-cover object-center"
             />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#1a0c12] to-transparent" />
             
@@ -1210,7 +1225,7 @@ export function LiveWeekTable({
         </div>
       </div>
 
-      <ul className="divide-y divide-[#f3b8c4]/10 sm:hidden">
+      <ul className="relative divide-y divide-[#f3b8c4]/10 sm:hidden -mx-2 px-2 py-1">
         {dayIsos.map((iso) => {
           const date = parseISODate(iso);
           const daySlots = preferOwnChannelSlots(slotsByDate.get(iso) ?? []);
@@ -1220,13 +1235,14 @@ export function LiveWeekTable({
           return (
             <li
               key={iso}
-              className={cn(
-                "py-4 first:pt-0 last:pb-0 transition-all",
-                isToday &&
-                  "my-3 rounded-2xl border-2 border-[#e85a7a]/60 bg-[#e85a7a]/08 p-3 shadow-[0_0_24px_rgba(232,90,122,0.18)]"
-              )}
+              className="relative py-4 first:pt-1.5 last:pb-1.5 transition-all"
             >
-              <div className="flex flex-wrap items-center gap-1.5">
+              {/* 🌟 Today Glow Overlay on Mobile (เหมือนบน Desktop ลอยครอบรอบด้าน ไม่บีบการ์ดด้านใน) */}
+              {isToday ? (
+                <div className="pointer-events-none absolute -inset-x-2 -inset-y-1.5 rounded-2xl border-2 border-[#e85a7a]/60 bg-[#e85a7a]/08 shadow-[0_0_24px_rgba(232,90,122,0.18)]" />
+              ) : null}
+
+              <div className="relative z-10 flex flex-wrap items-center gap-1.5">
                 <div className="flex items-center gap-1">
                   {isToday ? (
                     <span className="size-1.5 rounded-full bg-[#e85a7a] animate-ping" />
@@ -1257,7 +1273,7 @@ export function LiveWeekTable({
                 ) : null}
                 <LiveDayChannelBadges slots={daySlots} size="sm" />
               </div>
-              <div className="mt-2.5 flex flex-col gap-2">
+              <div className="relative z-10 mt-2.5 flex flex-col gap-2">
                 {daySlots.length > 0 || offline ? (
                   renderDayBody(iso, true)
                 ) : (
