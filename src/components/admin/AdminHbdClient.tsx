@@ -195,7 +195,7 @@ export function AdminHbdClient() {
           <p className={cn(DISPLAY, "text-lg text-[#f4ebe3]")}>ยังไม่มีรายการ</p>
           <p className="mt-2 text-sm text-[#c4b8a8]">
             {tab === "pending"
-              ? "รอฮันนี่ส่งการ์ดจาก /HBD/2026/upload"
+              ? "รอฮันนี่ส่งการ์ดจาก /hbd/2026/upload"
               : "ยังไม่มีรายการที่อนุมัติ"}
           </p>
         </div>

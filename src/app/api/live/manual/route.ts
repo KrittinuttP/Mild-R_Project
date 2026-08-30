@@ -34,6 +34,10 @@ type ManualLiveInput = {
   member?: unknown;
   isMember?: unknown;
   is_member?: unknown;
+  cancelled?: unknown;
+  isCancelled?: unknown;
+  is_cancelled?: unknown;
+  status?: unknown;
   /** YouTube watch / live URL (optional when member — without url = preview mock) */
   url?: unknown;
   youtubeUrl?: unknown;
@@ -110,6 +114,18 @@ function parseOwnFlag(raw: ManualLiveInput): boolean | null {
 
 function parseMemberFlag(raw: ManualLiveInput): boolean {
   return parseBoolFlag(raw.member, raw.isMember, raw.is_member) ?? false;
+}
+
+function parseCancelledFlag(raw: ManualLiveInput): boolean {
+  if (
+    typeof raw.status === "string" &&
+    raw.status.trim().toLowerCase() === "cancelled"
+  ) {
+    return true;
+  }
+  return (
+    parseBoolFlag(raw.cancelled, raw.isCancelled, raw.is_cancelled) ?? false
+  );
 }
 
 function youtubeLinkFromItem(raw: ManualLiveInput): string {
@@ -294,9 +310,18 @@ export async function POST(request: Request) {
     is_member: boolean;
     is_own_channel: boolean;
     is_collab: boolean;
+    is_cancelled?: boolean;
     source: string;
   }): BuiltRow {
-    const { yt, link, is_member, is_own_channel, is_collab, source } = options;
+    const {
+      yt,
+      link,
+      is_member,
+      is_own_channel,
+      is_collab,
+      is_cancelled,
+      source,
+    } = options;
     const scheduledRaw =
       yt.scheduledStart ?? yt.actualStart ?? new Date().toISOString();
     const scheduled = snapScheduledToHalfHour(scheduledRaw) ?? scheduledRaw;
@@ -335,6 +360,8 @@ export async function POST(request: Request) {
         source,
         preview: false,
         member: is_member,
+        cancelled: Boolean(is_cancelled),
+        status: is_cancelled ? "cancelled" : undefined,
         linked_video_id: yt.id,
         privacy_status: yt.privacyStatus,
         live_broadcast_content: yt.liveBroadcastContent,
@@ -355,6 +382,7 @@ export async function POST(request: Request) {
   for (let i = 0; i < items.length; i++) {
     const raw = items[i] as ManualLiveInput;
     const is_member = parseMemberFlag(raw);
+    const is_cancelled = parseCancelledFlag(raw);
     const collabFlag = parseCollabFlag(raw);
     const ownFlag = parseOwnFlag(raw);
     const link = youtubeLinkFromItem(raw);
@@ -381,6 +409,7 @@ export async function POST(request: Request) {
           is_member: true,
           is_own_channel: true,
           is_collab: collabFlag != null ? collabFlag : auto.is_collab,
+          is_cancelled,
           source: "manual_member_link",
         })
       );
@@ -403,6 +432,7 @@ export async function POST(request: Request) {
           is_own_channel:
             ownFlag != null ? ownFlag : auto.is_own_channel,
           is_collab: true,
+          is_cancelled,
           source: "manual_collab_link",
         })
       );
@@ -502,6 +532,8 @@ export async function POST(request: Request) {
         preview: true,
         linked_video_id: null,
         member: is_member,
+        cancelled: is_cancelled,
+        status: is_cancelled ? "cancelled" : undefined,
         local_date: date,
         local_time: time,
         timezone: "Asia/Bangkok",
@@ -525,7 +557,7 @@ export async function POST(request: Request) {
     const { data: existingPreviewRows, error: existingError } = await supabase
       .from("mild_r_live_streams")
       .select(
-        "video_id, channel_id, is_own_channel, scheduled_start, scheduled_start_first, actual_start, actual_end, metadata"
+        "video_id, channel_id, channel_name, source_title, is_own_channel, scheduled_start, scheduled_start_first, actual_start, actual_end, metadata"
       )
       .or("video_id.like.manual-%,metadata->>preview.eq.true");
 
@@ -634,7 +666,7 @@ export async function POST(request: Request) {
     const { data: allReals } = await supabase
       .from("mild_r_live_streams")
       .select(
-        "video_id, channel_id, is_own_channel, scheduled_start, scheduled_start_first, actual_start, actual_end, metadata"
+        "video_id, channel_id, channel_name, source_title, is_own_channel, scheduled_start, scheduled_start_first, actual_start, actual_end, metadata"
       )
       .not("video_id", "like", "manual-%");
 

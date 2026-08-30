@@ -28,7 +28,7 @@ type HbdProjectDetailProps = {
   project: ProjectItem;
 };
 
-/** Birthday project landing — intro + CTAs only; gallery lives on /HBD/2026. */
+/** Birthday project landing — intro + CTAs only; gallery lives on /hbd/2026. */
 export function HbdProjectDetail({ project }: HbdProjectDetailProps) {
   return (
     <article className="relative overflow-hidden text-[#fff5f7]">
@@ -68,7 +68,8 @@ export function HbdProjectDetail({ project }: HbdProjectDetailProps) {
 
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
             <Link
-              href="/HBD/2026"
+              href="/hbd/2026"
+              prefetch={false}
               className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#e85a7a] px-6 py-3.5 text-sm font-normal text-[#140a0d] shadow-[0_10px_30px_rgba(232,90,122,0.35)] transition hover:bg-[#f3b8c4] sm:w-auto"
             >
               <Sparkles className="size-4" />
@@ -76,7 +77,8 @@ export function HbdProjectDetail({ project }: HbdProjectDetailProps) {
               <ArrowUpRight className="size-4 opacity-80" />
             </Link>
             <Link
-              href="/HBD/2026/upload"
+              href="/hbd/2026/upload"
+              prefetch={false}
               className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[#f3b8c4]/30 bg-white/[0.04] px-6 py-3.5 text-sm font-normal text-[#fff5f7] transition hover:border-[#e85a7a]/45 hover:bg-[#e85a7a]/15 sm:w-auto"
             >
               <Upload className="size-4" />

@@ -315,7 +315,8 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
 
           <div data-hbd-anim className="mt-10 flex justify-center">
             <Link
-              href="/HBD/2026/upload"
+              href="/hbd/2026/upload"
+              prefetch={false}
               className="inline-flex items-center gap-2 rounded-2xl bg-[#e85a7a] px-6 py-3.5 text-sm font-normal text-[#140a0d] shadow-[0_10px_30px_rgba(232,90,122,0.35)] transition hover:bg-[#f3b8c4]"
             >
               <Sparkles className="size-4" />

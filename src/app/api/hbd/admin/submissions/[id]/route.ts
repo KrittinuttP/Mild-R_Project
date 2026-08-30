@@ -44,7 +44,7 @@ export async function POST(request: Request, context: RouteContext) {
         : await approveHbdSubmission(id);
 
     if (action === "approve") {
-      revalidatePath("/HBD/2026", "page");
+      revalidatePath("/hbd/2026", "page");
     }
 
     return NextResponse.json({ ok: true, submission: row });

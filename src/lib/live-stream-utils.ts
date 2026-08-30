@@ -37,6 +37,12 @@ function sameInstant(a: string | null, b: string | null) {
 }
 
 export function getLiveStreamStatus(row: LiveStreamRow): LiveStreamStatus {
+  if (
+    row.metadata?.cancelled === true ||
+    row.metadata?.status === "cancelled"
+  ) {
+    return "cancelled";
+  }
   if (row.actual_start && !row.actual_end) return "live";
   if (row.actual_end) return "ended";
   const scheduled = row.scheduled_start ?? row.scheduled_start_first;
@@ -222,7 +228,60 @@ export function liveStreamToSlot(row: LiveStreamRow): LiveSlot {
   };
 }
 
-/** Sort key for calendar day columns (HH:mm); LIVE first, TBA last. */
+/**
+ * Convert a stream row into one or two slots:
+ * 1) If rescheduled to a DIFFERENT calendar date:
+ *    - Produces a ghost/cancelled slot on the original date
+ *    - Produces an active/ended slot on the new date
+ * 2) Otherwise produces a single slot.
+ */
+export function liveStreamToSlots(row: LiveStreamRow): LiveSlot[] {
+  const baseSlot = liveStreamToSlot(row);
+  const firstIso = row.scheduled_start_first;
+  const latestIso = row.scheduled_start;
+
+  // Check if original date differs from latest date (rescheduled to another day)
+  if (firstIso && latestIso && !sameInstant(firstIso, latestIso)) {
+    const firstDate = bangkokParts(firstIso).date;
+    const latestDate = bangkokParts(latestIso).date;
+
+    if (firstDate !== latestDate) {
+      const firstTime = bangkokParts(firstIso).time;
+      const latestTime = bangkokParts(latestIso).time;
+
+      // Slot 1: Ghost log slot on the original date
+      const ghostSlot: LiveSlot = {
+        ...baseSlot,
+        id: `yt-${row.video_id}-orig-${firstDate}`,
+        date: firstDate,
+        time: firstTime,
+        timePrevious: undefined,
+        timeUpdated: undefined,
+        status: "cancelled",
+        scheduledLabel: firstTime,
+        scheduledPrevious: undefined,
+        scheduledUpdated: undefined,
+      };
+
+      // Slot 2: Active slot on the new date
+      const activeSlot: LiveSlot = {
+        ...baseSlot,
+        id: `yt-${row.video_id}`,
+        date: latestDate,
+        time: baseSlot.status === "live" ? "LIVE" : latestTime,
+        timePrevious: undefined,
+        timeUpdated: undefined,
+        scheduledLabel: latestTime,
+        scheduledPrevious: undefined,
+        scheduledUpdated: undefined,
+      };
+
+      return [ghostSlot, activeSlot];
+    }
+  }
+
+  return [baseSlot];
+}
 function calendarSortTime(slot: LiveSlot): string {
   const t = slot.timeUpdated ?? slot.time;
   if (t === "LIVE") return "00:00";
@@ -246,6 +305,52 @@ export function compareLiveSlots(a: LiveSlot, b: LiveSlot): number {
 
 export function sortLiveSlotsForCalendar(slots: LiveSlot[]): LiveSlot[] {
   return [...slots].sort(compareLiveSlots);
+}
+
+function deduplicateWeekSlots(slots: LiveSlot[]): LiveSlot[] {
+  const reals = slots.filter(
+    (s) => !s.isPreview && !s.id.startsWith("yt-manual-")
+  );
+  if (reals.length === 0) return slots;
+
+  return slots.filter((slot) => {
+    // Always keep real lives
+    if (!slot.isPreview && !slot.id.startsWith("yt-manual-")) return true;
+    // Always keep explicit cancelled ghost slots from another date
+    if (slot.status === "cancelled") return true;
+
+    // Check if any real live matches this preview mock on the same day & channel
+    const hasMatchingReal = reals.some((real) => {
+      if (real.date !== slot.date) return false;
+
+      const ownMatch =
+        Boolean(real.isOwnChannel) && Boolean(slot.isOwnChannel);
+      const titleMatch =
+        Boolean(real.sourceTitle) &&
+        Boolean(slot.sourceTitle) &&
+        real.sourceTitle?.trim().toLowerCase() ===
+          slot.sourceTitle?.trim().toLowerCase();
+
+      if (!ownMatch && !titleMatch) return false;
+
+      // Time proximity check (same time or within ±3 hours)
+      const realTime = real.timeUpdated ?? real.time;
+      const mockTime = slot.timeUpdated ?? slot.time;
+      if (realTime === mockTime || realTime === "LIVE") return true;
+
+      const [rh, rm] = realTime.split(":").map(Number);
+      const [mh, mm] = mockTime.split(":").map(Number);
+      if (Number.isFinite(rh) && Number.isFinite(mh)) {
+        const deltaMinutes = Math.abs(
+          rh * 60 + (rm || 0) - (mh * 60 + (mm || 0))
+        );
+        if (deltaMinutes <= 180) return true;
+      }
+      return false;
+    });
+
+    return !hasMatchingReal;
+  });
 }
 
 /** Merge Supabase streams into JSON live weeks (all history that loads). */
@@ -273,27 +378,30 @@ export function mergeLiveWeeksWithStreams(
   }
 
   for (const row of streams) {
-    const slot = liveStreamToSlot(row);
-    if (existingIds.has(slot.id)) continue;
+    const slots = liveStreamToSlots(row);
+    for (const slot of slots) {
+      if (existingIds.has(slot.id)) continue;
 
-    const weekStart = formatISODate(
-      startOfWeekSunday(parseISODate(slot.date))
-    );
-    let week = weekMap.get(weekStart);
-    if (!week) {
-      week = {
-        id: `yt-week-${weekStart}`,
-        weekStart,
-        slots: [],
-      };
-      weekMap.set(weekStart, week);
+      const weekStart = formatISODate(
+        startOfWeekSunday(parseISODate(slot.date))
+      );
+      let week = weekMap.get(weekStart);
+      if (!week) {
+        week = {
+          id: `yt-week-${weekStart}`,
+          weekStart,
+          slots: [],
+        };
+        weekMap.set(weekStart, week);
+      }
+
+      week.slots.push(slot);
+      existingIds.add(slot.id);
     }
-
-    week.slots.push(slot);
-    existingIds.add(slot.id);
   }
 
   for (const week of weekMap.values()) {
+    week.slots = deduplicateWeekSlots(week.slots);
     week.slots.sort((a, b) => {
       if (a.date !== b.date) return a.date < b.date ? -1 : 1;
       const ta = a.timePrevious ?? a.time;

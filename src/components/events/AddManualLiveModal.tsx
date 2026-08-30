@@ -27,6 +27,7 @@ type DraftRow = {
   own: boolean;
   collab: boolean;
   member: boolean;
+  cancelled: boolean;
   youtubeUrl: string;
 };
 
@@ -38,6 +39,7 @@ type SubmitItem = {
   own?: boolean;
   collab?: boolean;
   member: boolean;
+  cancelled?: boolean;
   url?: string;
 };
 
@@ -50,6 +52,14 @@ const SAMPLE_JSON = `[
     "member": false,
     "own": true,
     "collab": false
+  },
+  {
+    "title": "ไลฟ์ที่ยกเลิก (Ghost Slot)",
+    "channel": "mild-r",
+    "date": "2026-08-21",
+    "time": "21:00",
+    "cancelled": true,
+    "own": true
   },
   {
     "title": "Q&A สุดเอ็กซ์คลูซีฟกับมายด์",
@@ -77,6 +87,7 @@ function emptyRow(): DraftRow {
     own: true,
     collab: false,
     member: false,
+    cancelled: false,
     youtubeUrl: "",
   };
 }
@@ -172,6 +183,10 @@ function parseJsonToRows(text: string): { rows: DraftRow[]; error?: string } {
       const o = (list[i] ?? {}) as Record<string, unknown>;
       const member =
         parseBool(o.member, o.isMember, o.is_member) ?? false;
+      const cancelled =
+        parseBool(o.cancelled, o.isCancelled, o.is_cancelled) ??
+        (typeof o.status === "string" &&
+          o.status.trim().toLowerCase() === "cancelled");
       const youtubeUrl =
         typeof o.url === "string"
           ? o.url
@@ -188,6 +203,7 @@ function parseJsonToRows(text: string): { rows: DraftRow[]; error?: string } {
             ...emptyRow(),
             key: crypto.randomUUID(),
             member: true,
+            cancelled,
             youtubeUrl,
             own: parseBool(o.own, o.isOwn) ?? true,
             collab: parseBool(o.collab, o.isCollab) ?? false,
@@ -239,6 +255,7 @@ function parseJsonToRows(text: string): { rows: DraftRow[]; error?: string } {
           own,
           collab: parseBool(o.collab, o.isCollab) ?? !own,
           member: true,
+          cancelled,
           youtubeUrl: "",
         });
         continue;
@@ -273,6 +290,7 @@ function parseJsonToRows(text: string): { rows: DraftRow[]; error?: string } {
         own,
         collab: parseBool(o.collab, o.isCollab) ?? !own,
         member: false,
+        cancelled,
         youtubeUrl: "",
       });
     }
@@ -296,6 +314,7 @@ function toSubmitItems(rows: DraftRow[]): SubmitItem[] {
         url: row.youtubeUrl.trim(),
         own: true,
         collab: row.collab,
+        cancelled: row.cancelled || undefined,
       };
     }
     if (!row.member && row.collab && resolveIdFromLink(row.youtubeUrl)) {
@@ -303,6 +322,7 @@ function toSubmitItems(rows: DraftRow[]): SubmitItem[] {
         member: false,
         collab: true,
         url: row.youtubeUrl.trim(),
+        cancelled: row.cancelled || undefined,
       };
     }
     const mild = LUMINA_CHANNELS.find((c) => c.isMain);
@@ -317,6 +337,7 @@ function toSubmitItems(rows: DraftRow[]): SubmitItem[] {
       own: row.own,
       collab: row.collab,
       member: row.member,
+      cancelled: row.cancelled || undefined,
     };
   });
 }
@@ -601,6 +622,23 @@ export function AddManualLiveButton() {
                         </label>
                       </>
                     ) : null}
+                    <label className="inline-flex items-center gap-2 text-xs text-rose-300">
+                      <input
+                        type="checkbox"
+                        checked={row.cancelled}
+                        onChange={(e) =>
+                          setRows((prev) =>
+                            prev.map((r) =>
+                              r.key === row.key
+                                ? { ...r, cancelled: e.target.checked }
+                                : r
+                            )
+                          )
+                        }
+                        className="size-3.5 accent-rose-500"
+                      />
+                      ยกเลิก (Ghost slot)
+                    </label>
                   </div>
 
                   {row.member ? (

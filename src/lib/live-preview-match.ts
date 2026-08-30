@@ -40,6 +40,8 @@ export function bangkokDateFromIso(iso: string | null | undefined): string | nul
 export type PreviewLikeRow = {
   video_id: string;
   channel_id?: string | null;
+  source_title?: string | null;
+  channel_name?: string | null;
   is_own_channel?: boolean | null;
   scheduled_start?: string | null;
   scheduled_start_first?: string | null;
@@ -53,6 +55,12 @@ export function isUnlinkedPreview(row: PreviewLikeRow): boolean {
   if (typeof linked === "string" && linked.trim()) return false;
   if (row.metadata?.preview === true) return true;
   return row.video_id.startsWith("manual-");
+}
+
+export function isCancelledPreview(row: PreviewLikeRow): boolean {
+  return (
+    row.metadata?.cancelled === true || row.metadata?.status === "cancelled"
+  );
 }
 
 export function previewLocalDate(row: PreviewLikeRow): string | null {
@@ -74,17 +82,37 @@ export function rowScheduleIso(row: PreviewLikeRow): string | null {
   );
 }
 
-/** Own↔own or same YouTube channel_id. */
+function normalizeChannelKey(val: unknown): string {
+  if (typeof val !== "string") return "";
+  return val.trim().toLowerCase().replace(/[\s-_]+/g, "");
+}
+
+/** Own↔own, same YouTube channel_id, or same source_title/channel_key. */
 export function channelsMatchForPreview(
-  a: Pick<PreviewLikeRow, "channel_id" | "is_own_channel">,
-  b: Pick<PreviewLikeRow, "channel_id" | "is_own_channel">
+  a: PreviewLikeRow,
+  b: PreviewLikeRow
 ): boolean {
   const aOwn = Boolean(a.is_own_channel);
   const bOwn = Boolean(b.is_own_channel);
   if (aOwn && bOwn) return true;
   if (aOwn !== bOwn) return false;
-  if (!a.channel_id || !b.channel_id) return false;
-  return a.channel_id === b.channel_id;
+
+  if (a.channel_id && b.channel_id && a.channel_id === b.channel_id) {
+    return true;
+  }
+
+  // Fallback matching by source title or channel_key
+  const aKey =
+    normalizeChannelKey(a.source_title) ||
+    normalizeChannelKey(a.metadata?.channel_key) ||
+    normalizeChannelKey(a.channel_name);
+  const bKey =
+    normalizeChannelKey(b.source_title) ||
+    normalizeChannelKey(b.metadata?.channel_key) ||
+    normalizeChannelKey(b.channel_name);
+
+  if (aKey && bKey && aKey === bKey) return true;
+  return false;
 }
 
 /** Real live time window for overlap checks (mocks only). */
@@ -114,6 +142,7 @@ function pickBySameDate(
 
   for (const mock of mocks) {
     if (!isUnlinkedPreview(mock)) continue;
+    if (isCancelledPreview(mock)) continue;
     if (!channelsMatchForPreview(real, mock)) continue;
     const mockDate = previewLocalDate(mock);
     if (mockDate !== realDate) continue;
@@ -149,6 +178,7 @@ function pickByTimeOverlap(
 
   for (const mock of mocks) {
     if (!isUnlinkedPreview(mock)) continue;
+    if (isCancelledPreview(mock)) continue;
     if (!channelsMatchForPreview(real, mock)) continue;
     const mockIso = rowScheduleIso(mock);
     if (!mockIso) continue;
@@ -171,8 +201,8 @@ function pickByTimeOverlap(
 
 /**
  * Pick one unlinked mock to delete for this real live.
- * 1) same Bangkok date + channel + ±3h
- * 2) else same channel + time overlap (mocks only)
+ * ONLY matches on the SAME Bangkok calendar date.
+ * If a live was rescheduled to another day, the past mock is preserved as a ghost log.
  */
 export function pickMatchingPreviewVideoId(
   real: PreviewLikeRow,
@@ -186,11 +216,10 @@ export function pickMatchingPreviewVideoId(
   const realDate = bangkokDateFromIso(realIso);
 
   if (realDate) {
-    const byDate = pickBySameDate(real, mocks, realMs, realDate);
-    if (byDate) return byDate;
+    return pickBySameDate(real, mocks, realMs, realDate);
   }
 
-  return pickByTimeOverlap(real, mocks);
+  return null;
 }
 
 /** Collect mock video_ids that should be removed given newly saved real lives. */

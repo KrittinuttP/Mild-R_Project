@@ -374,7 +374,7 @@ export function HbdUploadClient() {
           </div>
         ) : null}
 
-        <BackLink href="/HBD/2026" className="mb-8">
+        <BackLink href="/hbd/2026" className="mb-8">
           กลับไปดูคำอวยพร
         </BackLink>
 
@@ -731,7 +731,8 @@ export function HbdUploadClient() {
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link
-                href="/HBD/2026"
+                href="/hbd/2026"
+                prefetch={false}
                 className={cn(
                   buttonVariants({ size: "lg" }),
                   "rounded-2xl border-transparent bg-[#e85a7a] font-normal text-[#140a0d] hover:bg-[#f3b8c4]"

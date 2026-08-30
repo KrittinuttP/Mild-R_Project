@@ -49,7 +49,7 @@ const TOOLS: AdminTool[] = [
     href: "/admin/hbd",
     title: "HBD submissions",
     titleLocal: "อนุมัติคำอวยพร",
-    description: "รายการอัปโหลดจาก /HBD/2026/upload",
+    description: "รายการอัปโหลดจาก /hbd/2026/upload",
     icon: Cake,
   },
 ];
@@ -277,7 +277,8 @@ export function AdminHubClient() {
       <div className="mt-8 flex flex-wrap gap-4 text-sm">
         <BackLink href="/">หน้าหลัก</BackLink>
         <Link
-          href="/HBD/2026/upload"
+          href="/hbd/2026/upload"
+          prefetch={false}
           className="inline-flex items-center gap-2 text-[#9a7b5a] hover:text-[#c4b8a8]"
         >
           <ArrowLeft className="size-3.5 rotate-180" />

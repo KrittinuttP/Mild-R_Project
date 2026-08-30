@@ -11,6 +11,7 @@ export {
   getLiveStreamStatus,
   liveStreamSortKey,
   liveStreamToSlot,
+  liveStreamToSlots,
   mergeLiveWeeksWithStreams,
   partitionLiveStreams,
 } from "@/lib/live-stream-utils";
@@ -178,9 +179,18 @@ export async function loadLiveStreamsInRange(
     ] as (LiveStreamRow[] | null)[]) {
       for (const row of batch ?? []) {
         const iso = streamAnchorIso(row);
-        if (!iso) continue;
-        const t = new Date(iso).getTime();
-        if (!Number.isFinite(t) || t < fromMs || t >= toMs) continue;
+        const firstIso = row.scheduled_start_first;
+        const latestIso = row.scheduled_start;
+        const actualIso = row.actual_start;
+
+        // Keep row if ANY of its anchor dates (actual, new schedule, or original first schedule) falls in range
+        const datesToCheck = [iso, firstIso, latestIso, actualIso].filter(Boolean) as string[];
+        const inRange = datesToCheck.some((d) => {
+          const t = new Date(d).getTime();
+          return Number.isFinite(t) && t >= fromMs && t < toMs;
+        });
+
+        if (!inRange) continue;
         byId.set(row.video_id, row);
       }
     }

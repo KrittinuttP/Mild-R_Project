@@ -11,17 +11,12 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: Array.from(
     new Set([
       "localhost",
+      "localhost:3000",
       "127.0.0.1",
+      "127.0.0.1:3000",
       ...envOrigins,
     ])
   ),
-  async redirects() {
-    return [
-      { source: "/hbd", destination: "/HBD/2026", permanent: true },
-      { source: "/hbd/upload", destination: "/HBD/2026/upload", permanent: true },
-      { source: "/HBD", destination: "/HBD/2026", permanent: false },
-    ];
-  },
 };
 
 export default nextConfig;
