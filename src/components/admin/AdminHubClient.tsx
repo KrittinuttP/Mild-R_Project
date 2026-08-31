@@ -3,20 +3,31 @@
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import {
+  Activity,
   ArrowLeft,
+  ArrowUpRight,
   Cake,
   Eye,
   EyeOff,
   FileLock2,
-  Home,
   Lock,
+  Radio,
   Settings2,
+  ShieldCheck,
+  Sparkles,
   Unlock,
 } from "lucide-react";
 
 import { BackLink } from "@/components/layout/BackLink";
-
 import { buttonVariants } from "@/components/ui/button";
+import {
+  CTA_OUTLINE_CLASS,
+  CTA_PRIMARY_CLASS,
+  DISPLAY_H1_CLASS,
+  GLASS_CARD_CLASS,
+  META_CLASS,
+  META_MUTED_CLASS,
+} from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 
 const DISPLAY = "font-[family-name:var(--font-display)]";
@@ -51,6 +62,20 @@ const TOOLS: AdminTool[] = [
     titleLocal: "อนุมัติคำอวยพร",
     description: "รายการอัปโหลดจาก /hbd/2026/upload",
     icon: Cake,
+  },
+  {
+    href: "/live/ops/trends",
+    title: "Live view trends",
+    titleLocal: "สถิติและเทรนด์สตรีม",
+    description: "วิเคราะห์ยอดวิว แยก Solo / Collab / Member",
+    icon: Activity,
+  },
+  {
+    href: "/live/ops",
+    title: "YouTube Sync Monitor",
+    titleLocal: "มอนิเตอร์ Sync",
+    description: "ตรวจสถานะการดึงข้อมูล YouTube และ Log การทำงาน",
+    icon: Radio,
   },
 ];
 
@@ -137,90 +162,106 @@ export function AdminHubClient() {
 
   if (checking) {
     return (
-      <p className="text-center text-sm tracking-[0.2em] text-[#9a7b5a] uppercase">
-        Checking clearance…
-      </p>
+      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 text-center">
+        <span className="size-3 rounded-full bg-[#e85a7a] animate-ping" />
+        <p className="text-sm font-medium tracking-[0.2em] text-[#f3b8c4]/70 uppercase">
+          Checking clearance…
+        </p>
+      </div>
     );
   }
 
   if (!unlocked) {
     return (
-      <form
-        onSubmit={unlock}
-        className="mx-auto max-w-md border border-[#9a7b5a]/35 bg-[#12161a] p-6 sm:p-8"
-      >
-        <div className="flex items-center gap-3">
-          <Lock className="size-5 text-[#c46a7a]" />
-          <div>
-            <p className="text-[0.62rem] tracking-[0.24em] text-[#9a7b5a] uppercase">
-              Site admin
-            </p>
-            <h1 className={cn(DISPLAY, "text-xl font-normal text-[#f4ebe3] sm:text-2xl")}>
-              Control desk
-            </h1>
-          </div>
-        </div>
-        <p className="mt-4 text-sm text-[#c4b8a8]">
-          รหัสทีมเดียวสำหรับคาเฟ่ · HBD · เครื่องมืออื่น
-        </p>
-        <label className="mt-6 block">
-          <span className="text-[0.62rem] tracking-[0.2em] text-[#9a7b5a] uppercase">
-            Clearance code
-          </span>
-          <div className="mt-2 flex gap-2">
-            <input
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              autoComplete="current-password"
-              className="min-w-0 flex-1 border border-[#9a7b5a]/40 bg-[#0a0c0e] px-3 py-2.5 text-[#f4ebe3] outline-none focus:border-[#c46a7a]"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              className="border border-[#9a7b5a]/40 px-3 text-[#c4b8a8] hover:text-[#f4ebe3]"
-              aria-label={showPassword ? "ซ่อนรหัส" : "แสดงรหัส"}
-            >
-              {showPassword ? (
-                <EyeOff className="size-4" />
-              ) : (
-                <Eye className="size-4" />
-              )}
-            </button>
-          </div>
-        </label>
-        {error ? (
-          <p className="mt-3 text-sm text-[#c46a7a]">{error}</p>
-        ) : null}
-        <button
-          type="submit"
-          className={cn(
-            buttonVariants({ size: "lg" }),
-            "mt-6 w-full rounded-none border-transparent bg-[#a84d5f] text-[#f4ebe3] hover:bg-[#c46a7a]"
-          )}
+      <div className="mx-auto max-w-md pt-8">
+        <form
+          onSubmit={unlock}
+          className="relative overflow-hidden rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#220e18]/95 via-[#1a0c12]/90 to-[#140a0d] p-7 shadow-[0_20px_50px_rgba(0,0,0,0.6)] sm:p-9"
         >
-          <Unlock className="size-4" />
-          Unlock
-        </button>
-        <BackLink href="/" className="mt-4">
-          กลับหน้าหลัก
-        </BackLink>
-      </form>
+          {/* Header */}
+          <div className="flex items-center gap-3.5">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-[#e85a7a]/40 bg-[#e85a7a]/15 text-[#e85a7a] shadow-[0_0_16px_rgba(232,90,122,0.3)]">
+              <Lock className="size-6" />
+            </div>
+            <div>
+              <p className={META_MUTED_CLASS}>Site Admin</p>
+              <h1 className={cn(DISPLAY, "text-2xl font-normal text-[#fff5f7]")}>
+                Control Desk
+              </h1>
+            </div>
+          </div>
+
+          <p className="mt-4 text-sm leading-relaxed text-[#f7d7de]/80">
+            ใส่รหัสทีมเพื่อเข้าถึงเครื่องมือจัดการคาเฟ่, คำอวยพรวันเกิด และระบบหลังบ้าน
+          </p>
+
+          <label className="mt-6 block">
+            <span className={META_CLASS}>Clearance code</span>
+            <div className="relative mt-2 flex items-center">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                autoComplete="current-password"
+                placeholder="ป้อนรหัสผ่านทีม…"
+                className="w-full rounded-2xl border border-[#f3b8c4]/20 bg-[#12070c]/90 px-4 py-3 text-sm text-[#fff5f7] placeholder-[#f3b8c4]/30 outline-none transition focus:border-[#e85a7a]/70 focus:ring-2 focus:ring-[#e85a7a]/20"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 p-1.5 text-[#f3b8c4]/60 transition hover:text-[#fff5f7]"
+                aria-label={showPassword ? "ซ่อนรหัส" : "แสดงรหัส"}
+              >
+                {showPassword ? (
+                  <EyeOff className="size-4" />
+                ) : (
+                  <Eye className="size-4" />
+                )}
+              </button>
+            </div>
+          </label>
+
+          {error ? (
+            <div className="mt-3.5 flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3.5 py-2 text-xs text-red-200">
+              <span className="size-1.5 rounded-full bg-red-400" />
+              {error}
+            </div>
+          ) : null}
+
+          <button
+            type="submit"
+            className={cn(
+              buttonVariants({ size: "lg" }),
+              CTA_PRIMARY_CLASS,
+              "mt-6 flex w-full items-center justify-center gap-2 font-semibold"
+            )}
+          >
+            <Unlock className="size-4" />
+            ปลดล็อกเข้าสู่ระบบ
+          </button>
+
+          <div className="mt-5 border-t border-[#f3b8c4]/10 pt-4 text-center">
+            <BackLink href="/">กลับหน้าหลัก</BackLink>
+          </div>
+        </form>
+      </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="mx-auto max-w-3xl">
+      {/* 🌟 Header */}
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#f3b8c4]/12 pb-6">
         <div>
-          <p className="text-[0.62rem] tracking-[0.24em] text-[#9a7b5a] uppercase">
-            Site admin
-          </p>
-          <h1 className={cn(DISPLAY, "mt-1 text-2xl font-normal text-[#f4ebe3] sm:text-3xl")}>
-            Control desk
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="size-4 text-[#e85a7a]" />
+            <p className={META_CLASS}>Site Admin Clearance</p>
+          </div>
+          <h1 className={cn(DISPLAY, "mt-1.5 text-3xl font-normal text-[#fff5f7] sm:text-4xl")}>
+            Control Desk
           </h1>
-          <p className="mt-2 text-sm text-[#c4b8a8]">
-            เลือกเครื่องมือ · session ใช้ร่วมกับคาเฟ่และ HBD
+          <p className="mt-2 text-sm leading-relaxed text-[#f7d7de]/80">
+            ศูนย์รวมเครื่องมือผู้ดูแลระบบ · เซสชันใช้งานร่วมกับคาเฟ่และ HBD
           </p>
         </div>
         <button
@@ -228,15 +269,17 @@ export function AdminHubClient() {
           onClick={lock}
           className={cn(
             buttonVariants({ variant: "outline", size: "sm" }),
-            "rounded-none border-[#9a7b5a]/45"
+            CTA_OUTLINE_CLASS,
+            "inline-flex items-center gap-1.5"
           )}
         >
           <Lock className="size-3.5" />
-          Lock
+          ล็อกเซสชัน
         </button>
       </div>
 
-      <ul className="mt-10 space-y-3">
+      {/* 🎛️ Tool Grid */}
+      <ul className="mt-8 grid gap-3.5 sm:grid-cols-2">
         {TOOLS.map((tool) => {
           const Icon = tool.icon;
           const badge =
@@ -245,44 +288,57 @@ export function AdminHubClient() {
             <li key={tool.href}>
               <Link
                 href={tool.href}
-                className="flex items-start gap-4 border border-[#9a7b5a]/30 bg-[#12161a] p-4 transition hover:border-[#c46a7a]/45 hover:bg-[#161b20] sm:p-5"
+                className={cn(
+                  "group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1f0d16]/80 to-[#14080e]/90 p-5 text-left transition duration-300 hover:-translate-y-0.5 hover:border-[#e85a7a]/50 hover:shadow-[0_12px_32px_rgba(232,90,122,0.18)]"
+                )}
               >
-                <span className="mt-0.5 flex size-10 shrink-0 items-center justify-center border border-[#9a7b5a]/35 text-[#c46a7a]">
-                  <Icon className="size-5" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="flex flex-wrap items-center gap-2">
-                    <span className={cn(DISPLAY, "font-normal text-[#f4ebe3]")}>
-                      {tool.title}
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="flex size-11 items-center justify-center rounded-2xl border border-[#e85a7a]/30 bg-[#e85a7a]/15 text-[#e85a7a] transition group-hover:scale-105 group-hover:bg-[#e85a7a]/25 group-hover:shadow-[0_0_16px_rgba(232,90,122,0.4)]">
+                      <Icon className="size-5" />
                     </span>
                     {badge > 0 ? (
-                      <span className="bg-[#a84d5f] px-2 py-0.5 text-[0.65rem] tracking-wide text-[#f4ebe3] uppercase">
-                        {badge} new
+                      <span className="inline-flex items-center gap-1 rounded-full border border-[#e85a7a] bg-[#e85a7a] px-2.5 py-0.5 text-[0.68rem] font-bold text-white shadow-[0_0_12px_rgba(232,90,122,0.6)]">
+                        <span className="size-1.5 rounded-full bg-white animate-ping" />
+                        {badge} รออนุมัติ
                       </span>
-                    ) : null}
-                  </span>
-                  <span className="mt-0.5 block text-sm text-[#c4b8a8]">
+                    ) : (
+                      <ArrowUpRight className="size-4 text-[#f3b8c4]/40 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-[#e85a7a]" />
+                    )}
+                  </div>
+
+                  <h3 className={cn(DISPLAY, "mt-4 text-lg font-normal text-[#fff5f7] group-hover:text-[#fff5f7]")}>
+                    {tool.title}
+                  </h3>
+                  <p className="mt-0.5 text-xs font-semibold text-[#e85a7a]">
                     {tool.titleLocal}
-                  </span>
-                  <span className="mt-1 block text-xs text-[#9a7b5a]">
+                  </p>
+                  <p className="mt-2 text-xs leading-relaxed text-[#f3b8c4]/65">
                     {tool.description}
-                  </span>
-                </span>
+                  </p>
+                </div>
+
+                <div className="mt-4 flex items-center gap-1 pt-2 text-[0.75rem] font-medium text-[#e85a7a] opacity-80 transition group-hover:opacity-100">
+                  <span>เปิดเครื่องมือ</span>
+                  <ArrowUpRight className="size-3.5" />
+                </div>
               </Link>
             </li>
           );
         })}
       </ul>
 
-      <div className="mt-8 flex flex-wrap gap-4 text-sm">
+      {/* 🔗 Footer Navigation */}
+      <div className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#f3b8c4]/10 bg-[#14080e]/60 p-4 text-xs sm:text-sm">
         <BackLink href="/">หน้าหลัก</BackLink>
         <Link
           href="/hbd/2026/upload"
           prefetch={false}
-          className="inline-flex items-center gap-2 text-[#9a7b5a] hover:text-[#c4b8a8]"
+          className="inline-flex items-center gap-1.5 text-[#f3b8c4]/70 transition hover:text-[#fff5f7]"
         >
-          <ArrowLeft className="size-3.5 rotate-180" />
-          หน้าอัปโหลด HBD (สาธารณะ)
+          <Cake className="size-3.5 text-[#e85a7a]" />
+          <span>หน้าอัปโหลดคำอวยพร HBD (สาธารณะ)</span>
+          <ArrowUpRight className="size-3.5" />
         </Link>
       </div>
     </div>

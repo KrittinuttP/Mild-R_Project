@@ -3,6 +3,25 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition, type ReactNode } from "react";
+import {
+  Activity,
+  ArrowUpRight,
+  Calendar,
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+  Eye,
+  Filter,
+  Flame,
+  Layers,
+  Radio,
+  RotateCcw,
+  Sparkles,
+  TrendingUp,
+  Tv,
+  Users,
+  Video,
+} from "lucide-react";
 
 import { LiveDetailModal } from "@/components/events/LiveDetailModal";
 import { LiveViewTrendsChart } from "@/components/events/LiveViewTrendsChart";
@@ -17,13 +36,18 @@ import {
 } from "@/lib/live-view-trends";
 import { cn } from "@/lib/utils";
 import {
+  CTA_OUTLINE_CLASS,
+  CTA_PRIMARY_CLASS,
+  DISPLAY_H2_CLASS,
+  GLASS_CARD_CLASS,
   LIVE_BADGE_COLLAB,
   LIVE_BADGE_MEMBER,
   LIVE_BADGE_MILD,
   LIVE_BADGE_PILL_SM,
+  META_CLASS,
+  META_MUTED_CLASS,
 } from "@/lib/site-ui";
 import { getYoutubeThumbnailUrl } from "@/lib/youtube";
-import { ExternalLink } from "lucide-react";
 import type {
   LiveKindStats,
   LiveTrendStreamItem,
@@ -109,7 +133,7 @@ const GRAINS: { id: TrendGrain; label: string }[] = [
 ];
 
 const dateInputClass =
-  "border border-[#f3b8c4]/25 bg-[#1a0d12] px-3 py-2 text-[#fff5f7] outline-none focus:border-[#e85a7a]/60 [color-scheme:dark]";
+  "rounded-2xl border border-[#f3b8c4]/20 bg-[#12070c]/90 px-3.5 py-2 text-sm text-[#fff5f7] outline-none transition focus:border-[#e85a7a] focus:ring-1 focus:ring-[#e85a7a]/40 [color-scheme:dark]";
 
 export function LiveViewTrendsPanel({
   rows,
@@ -225,8 +249,10 @@ export function LiveViewTrendsPanel({
 
   return (
     <div className="space-y-8">
+      {/* 🎛️ Navigation Filter Bars */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap gap-2">
+        {/* Grain Selector */}
+        <div className="flex items-center gap-1.5 rounded-full border border-[#f3b8c4]/15 bg-[#14080e]/90 p-1 shadow-inner">
           {GRAINS.map((g) => (
             <Link
               key={g.id}
@@ -236,24 +262,26 @@ export function LiveViewTrendsPanel({
                 ranges,
               })}
               className={cn(
-                "border px-3 py-1.5 text-[0.7rem] tracking-[0.16em] uppercase transition-colors",
+                "rounded-full px-4 py-1.5 text-xs font-semibold tracking-wider uppercase transition",
                 grain === g.id
-                  ? "border-[#e85a7a]/70 bg-[#e85a7a]/15 text-[#fff5f7]"
-                  : "border-[#f3b8c4]/20 text-[#f3b8c4]/75 hover:border-[#f3b8c4]/45"
+                  ? "border border-[#e85a7a]/60 bg-[#e85a7a]/25 text-[#fff5f7] shadow-[0_0_12px_rgba(232,90,122,0.35)]"
+                  : "text-[#f3b8c4]/65 hover:text-[#fff5f7]"
               )}
             >
               {g.label}
             </Link>
           ))}
         </div>
-        <div className="flex flex-wrap gap-2">
+
+        {/* Channel Selector */}
+        <div className="flex items-center gap-1.5 rounded-full border border-[#f3b8c4]/15 bg-[#14080e]/90 p-1 shadow-inner">
           <Link
             href={trendsHref({ grain, ownOnly: true, ranges })}
             className={cn(
-              "border px-3 py-1.5 text-[0.7rem] tracking-[0.16em] uppercase transition-colors",
+              "rounded-full px-4 py-1.5 text-xs font-semibold tracking-wider uppercase transition",
               ownOnly
-                ? "border-[#e85a7a]/70 bg-[#e85a7a]/15 text-[#fff5f7]"
-                : "border-[#f3b8c4]/20 text-[#f3b8c4]/75 hover:border-[#f3b8c4]/45"
+                ? "border border-[#e85a7a]/60 bg-[#e85a7a]/25 text-[#fff5f7] shadow-[0_0_12px_rgba(232,90,122,0.35)]"
+                : "text-[#f3b8c4]/65 hover:text-[#fff5f7]"
             )}
           >
             ช่อง Mild-R
@@ -261,10 +289,10 @@ export function LiveViewTrendsPanel({
           <Link
             href={trendsHref({ grain, ownOnly: false, ranges })}
             className={cn(
-              "border px-3 py-1.5 text-[0.7rem] tracking-[0.16em] uppercase transition-colors",
+              "rounded-full px-4 py-1.5 text-xs font-semibold tracking-wider uppercase transition",
               !ownOnly
-                ? "border-[#e85a7a]/70 bg-[#e85a7a]/15 text-[#fff5f7]"
-                : "border-[#f3b8c4]/20 text-[#f3b8c4]/75 hover:border-[#f3b8c4]/45"
+                ? "border border-[#e85a7a]/60 bg-[#e85a7a]/25 text-[#fff5f7] shadow-[0_0_12px_rgba(232,90,122,0.35)]"
+                : "text-[#f3b8c4]/65 hover:text-[#fff5f7]"
             )}
           >
             รวมทั้งหมด
@@ -272,16 +300,23 @@ export function LiveViewTrendsPanel({
         </div>
       </div>
 
-      <div className="border border-[#f3b8c4]/14 bg-[#1a0d12]/45 p-4">
-        <p className="text-[0.65rem] tracking-[0.18em] text-[#f3b8c4]/60 uppercase">
-          Period · {GRAIN_LABEL[grain]} · calendar start–end (Asia/Bangkok)
-        </p>
-        <p className="mt-1 text-xs text-[#f3b8c4]/45">
-          ช่วงวันที่นี้ใช้เฉพาะ {GRAIN_LABEL[grain]} — สลับโหมดแล้วช่วงไม่ทับกัน
-        </p>
-        <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+      {/* 📅 Date Range Filter Card */}
+      <div className="relative overflow-hidden rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1f0d16]/80 to-[#14080e]/90 p-5 shadow-lg sm:p-6">
+        <div className="flex items-center justify-between gap-2 border-b border-[#f3b8c4]/10 pb-3">
+          <div className="flex items-center gap-2">
+            <Calendar className="size-4 text-[#e85a7a]" />
+            <p className={META_CLASS}>
+              ช่วงเวลา · {GRAIN_LABEL[grain]} (Asia/Bangkok)
+            </p>
+          </div>
+          <span className="text-[0.68rem] text-[#f3b8c4]/50">
+            {fromYmd} → {toYmd}
+          </span>
+        </div>
+
+        <div className="mt-4 flex flex-col gap-3.5 sm:flex-row sm:flex-wrap sm:items-end">
           <label className="flex min-w-[10rem] flex-1 flex-col gap-1.5 text-sm">
-            <span className="text-xs text-[#f3b8c4]/70">Start</span>
+            <span className="text-xs font-medium text-[#f3b8c4]/70">วันที่เริ่มต้น (Start)</span>
             <input
               type="date"
               className={dateInputClass}
@@ -291,7 +326,7 @@ export function LiveViewTrendsPanel({
             />
           </label>
           <label className="flex min-w-[10rem] flex-1 flex-col gap-1.5 text-sm">
-            <span className="text-xs text-[#f3b8c4]/70">End</span>
+            <span className="text-xs font-medium text-[#f3b8c4]/70">วันที่สิ้นสุด (End)</span>
             <input
               type="date"
               className={dateInputClass}
@@ -300,61 +335,81 @@ export function LiveViewTrendsPanel({
               onChange={(e) => setDraftTo(e.target.value)}
             />
           </label>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 pt-1">
             <button
               type="button"
               onClick={applyDateRange}
-              className="border border-[#e85a7a]/55 bg-[#e85a7a]/15 px-4 py-2 text-[0.7rem] tracking-[0.16em] text-[#fff5f7] uppercase hover:bg-[#e85a7a]/25"
+              className={cn(
+                CTA_PRIMARY_CLASS,
+                "flex items-center gap-1.5 px-4 py-2 text-xs font-semibold"
+              )}
             >
-              ใช้ช่วงนี้
+              <Filter className="size-3.5" />
+              <span>ใช้ช่วงนี้</span>
             </button>
             <button
               type="button"
               onClick={resetDateRange}
-              className="border border-[#f3b8c4]/25 px-4 py-2 text-[0.7rem] tracking-[0.16em] text-[#f3b8c4]/80 uppercase hover:border-[#f3b8c4]/45"
+              className={cn(
+                CTA_OUTLINE_CLASS,
+                "flex items-center gap-1.5 px-4 py-2 text-xs font-semibold"
+              )}
             >
-              รีเซ็ต
+              <RotateCcw className="size-3.5" />
+              <span>รีเซ็ต</span>
             </button>
           </div>
         </div>
-        <p className="mt-2 text-xs text-[#f3b8c4]/50">
-          กำลังดู {GRAIN_LABEL[grain]} {fromYmd} → {toYmd} · คลิกกราฟเพื่อดูไลฟ์ด้านล่าง
-        </p>
-        <p className="mt-1 text-[0.65rem] text-[#f3b8c4]/40">
-          รายวัน {ranges.day.from}→{ranges.day.to} · รายเดือน{" "}
-          {ranges.month.from}→{ranges.month.to} · รายปี {ranges.year.from}→
-          {ranges.year.to}
-        </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <StatCard label="หลังไลฟ์ (รวม)" value={totals.views_on_end} />
-        <StatCard label="ยอดรวมไลฟ์" value={totals.latest_views} />
-        <StatCard label="Diff" value={totals.views_diff} accent />
+      {/* 📊 Metric Summary Cards */}
+      <div className="grid gap-3.5 sm:grid-cols-3">
+        <StatCard
+          label="หลังจบไลฟ์ (รวม)"
+          sublabel="Views on stream end"
+          value={totals.views_on_end}
+          icon={Radio}
+        />
+        <StatCard
+          label="ยอดสะสมล่าสุด"
+          sublabel="Latest accumulated views"
+          value={totals.latest_views}
+          icon={Flame}
+        />
+        <StatCard
+          label="วิวเพิ่มขึ้น (Diff)"
+          sublabel="Views after stream"
+          value={totals.views_diff}
+          accent
+          icon={TrendingUp}
+        />
       </div>
 
+      {/* 🏆 Peak Cards */}
       <div>
-        <p className="mb-2 text-[0.65rem] tracking-[0.18em] text-[#f3b8c4]/60 uppercase">
-          ยอดวิวสูงสุด · {peakScopeLabel}
-        </p>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="mb-3 flex items-center justify-between">
+          <p className={META_CLASS}>
+            ยอดวิวสูงสุด · {peakScopeLabel}
+          </p>
+          <p className="text-xs text-[#f3b8c4]/60">
+            {totals.stream_count.toLocaleString("th-TH")} ไลฟ์ในช่วงที่เลือก
+          </p>
+        </div>
+        <div className="grid gap-3.5 sm:grid-cols-2">
           <PeakCard
-            label="สูงสุดหลังไลฟ์"
+            label="สูงสุดหลังจบไลฟ์"
             peak={activePeaks.byOnEnd}
             onOpen={openLiveModal}
           />
           <PeakCard
-            label="สูงสุดยอดรวม"
+            label="สูงสุดยอดสะสมล่าสุด"
             peak={activePeaks.byLatest}
             onOpen={openLiveModal}
           />
         </div>
       </div>
 
-      <p className="text-xs text-[#f3b8c4]/55">
-        {totals.stream_count.toLocaleString("th-TH")} ไลฟ์ในช่วงที่เลือก
-      </p>
-
+      {/* 📈 Main Interactive Chart */}
       <LiveViewTrendsChart
         rows={rows}
         grain={grain}
@@ -362,47 +417,60 @@ export function LiveViewTrendsPanel({
         onSelectBucket={selectBucket}
       />
 
-      <div className="flex flex-wrap items-center justify-end gap-2 border border-[#f3b8c4]/12 bg-[#1a0d12]/35 px-3 py-2.5 sm:gap-3 sm:px-4">
-        <p className="text-[0.62rem] tracking-[0.16em] text-[#f3b8c4]/50 uppercase">
-          {kindStatsLabel}
-          <span className="ml-1.5 tabular-nums text-[#f3b8c4]/70">
-            {pending && selectedBucket ? "…" : displayKindStats.total}
+      {/* 🏷️ Stream Kind Breakdown Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#f3b8c4]/15 bg-[#14080e]/90 px-4 py-3 shadow-md sm:px-5">
+        <div className="flex items-center gap-2">
+          <Layers className="size-4 text-[#e85a7a]" />
+          <p className="text-xs font-medium text-[#f3b8c4]/80">
+            {kindStatsLabel}
+            <span className="ml-1.5 font-bold tabular-nums text-[#fff5f7]">
+              ({pending && selectedBucket ? "…" : displayKindStats.total} ไลฟ์)
+            </span>
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={cn(LIVE_BADGE_PILL_SM, LIVE_BADGE_MEMBER, "gap-1.5 shadow-sm")}>
+            Member
+            <span className="font-bold tabular-nums">
+              {pending && selectedBucket ? "…" : displayKindStats.member}
+            </span>
           </span>
-        </p>
-        <span className={cn(LIVE_BADGE_PILL_SM, LIVE_BADGE_MEMBER, "gap-1.5")}>
-          Member
-          <span className="tabular-nums">
-            {pending && selectedBucket ? "…" : displayKindStats.member}
+          <span className={cn(LIVE_BADGE_PILL_SM, LIVE_BADGE_MILD, "gap-1.5 shadow-sm")}>
+            Solo
+            <span className="font-bold tabular-nums">
+              {pending && selectedBucket ? "…" : displayKindStats.solo}
+            </span>
           </span>
-        </span>
-        <span className={cn(LIVE_BADGE_PILL_SM, LIVE_BADGE_MILD, "gap-1.5")}>
-          Solo
-          <span className="tabular-nums">
-            {pending && selectedBucket ? "…" : displayKindStats.solo}
+          <span className={cn(LIVE_BADGE_PILL_SM, LIVE_BADGE_COLLAB, "gap-1.5 shadow-sm")}>
+            Collab
+            <span className="font-bold tabular-nums">
+              {pending && selectedBucket ? "…" : displayKindStats.collab}
+            </span>
           </span>
-        </span>
-        <span className={cn(LIVE_BADGE_PILL_SM, LIVE_BADGE_COLLAB, "gap-1.5")}>
-          Collab
-          <span className="tabular-nums">
-            {pending && selectedBucket ? "…" : displayKindStats.collab}
-          </span>
-        </span>
+        </div>
       </div>
 
+      {/* 🔍 Selected Bucket Detail Section */}
       <section
         ref={detailRef}
-        className="overflow-hidden border border-[#f3b8c4]/14 bg-[#1a0d12]/45"
+        className="overflow-hidden rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1f0d16]/85 via-[#1a0c12]/80 to-[#14080e]/95 shadow-xl"
       >
         {!selectedBucket ? (
-          <p className="px-4 py-5 text-sm text-[#f3b8c4]/65">
-            คลิกจุดบนกราฟเพื่อดูรายละเอียดไลฟ์ของวัน/เดือนนั้นด้านล่างนี้
-          </p>
+          <div className="px-6 py-10 text-center">
+            <Activity className="mx-auto size-8 text-[#e85a7a]/60 animate-pulse" />
+            <p className="mt-3 text-sm font-medium text-[#f7d7de]/80">
+              คลิกจุดหรือแท่งบนกราฟ เพื่อดูรายละเอียดคลิปของวัน / เดือน นั้น
+            </p>
+          </div>
         ) : (
           <div className="space-y-0">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#f3b8c4]/12 px-4 py-3">
-              <h2 className="text-[0.7rem] tracking-[0.2em] text-[#e85a7a] uppercase">
-                รายละเอียด · {formatBucket(selectedBucket, grain)}
-              </h2>
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#f3b8c4]/15 bg-[#14080e]/90 px-5 py-3.5">
+              <div className="flex items-center gap-2">
+                <Sparkles className="size-4 text-[#e85a7a]" />
+                <h2 className="text-xs font-bold tracking-wider text-[#e85a7a] uppercase sm:text-sm">
+                  รายละเอียดสตรีม · {formatBucket(selectedBucket, grain)}
+                </h2>
+              </div>
               <button
                 type="button"
                 onClick={() => {
@@ -410,18 +478,21 @@ export function LiveViewTrendsPanel({
                   setStreams([]);
                   setBucketPeaks(null);
                 }}
-                className="text-xs text-[#f3b8c4]/70 underline-offset-4 hover:text-[#fff5f7] hover:underline"
+                className="rounded-full border border-[#f3b8c4]/20 bg-[#1f0d16] px-3 py-1 text-xs text-[#f3b8c4]/80 transition hover:border-[#e85a7a]/50 hover:text-[#fff5f7]"
               >
                 ล้างการเลือก
               </button>
             </div>
 
             {pending ? (
-              <p className="px-4 py-5 text-sm text-[#f3b8c4]/70">กำลังโหลด…</p>
+              <div className="flex min-h-[20vh] flex-col items-center justify-center gap-2 py-10">
+                <span className="size-2.5 rounded-full bg-[#e85a7a] animate-ping" />
+                <p className="text-xs text-[#f3b8c4]/60">กำลังโหลดข้อมูลไลฟ์…</p>
+              </div>
             ) : error ? (
-              <p className="px-4 py-5 text-sm text-red-300">{error}</p>
+              <p className="px-5 py-6 text-sm text-red-300">{error}</p>
             ) : streams.length === 0 ? (
-              <p className="px-4 py-5 text-sm text-[#f3b8c4]/70">
+              <p className="px-5 py-8 text-center text-sm text-[#f3b8c4]/70">
                 ไม่มีไลฟ์ในช่วงนี้
               </p>
             ) : (
@@ -436,29 +507,43 @@ export function LiveViewTrendsPanel({
         )}
       </section>
 
-      <div className="border border-[#f3b8c4]/14 bg-[#1a0d12]/45">
+      {/* 📑 Summary Table Dropdown */}
+      <div className="overflow-hidden rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1a0c12]/80 to-[#14080e]/90 shadow-lg">
         <button
           type="button"
           onClick={() => setTableOpen((v) => !v)}
-          className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-[#e85a7a]/08"
+          className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition hover:bg-[#e85a7a]/08"
         >
-          <span className="text-[0.7rem] tracking-[0.18em] text-[#f3b8c4]/75 uppercase">
-            ตารางสรุป ({rows.length} แถว)
-          </span>
-          <span className="text-xs text-[#e85a7a]">
-            {tableOpen ? "ซ่อน ▲" : "ดูตาราง ▼"}
+          <div className="flex items-center gap-2">
+            <Video className="size-4 text-[#e85a7a]" />
+            <span className="text-xs font-bold tracking-wider text-[#fff5f7] uppercase sm:text-sm">
+              ตารางสรุปข้อมูล ({rows.length} แถว)
+            </span>
+          </div>
+          <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#e85a7a]">
+            {tableOpen ? (
+              <>
+                <span>ซ่อนตาราง</span>
+                <ChevronUp className="size-4" />
+              </>
+            ) : (
+              <>
+                <span>เปิดดูตาราง</span>
+                <ChevronDown className="size-4" />
+              </>
+            )}
           </span>
         </button>
         {tableOpen ? (
           <div className="overflow-x-auto border-t border-[#f3b8c4]/12">
             <table className="min-w-full text-left text-sm">
-              <thead className="border-b border-[#f3b8c4]/12 text-[0.65rem] tracking-[0.18em] text-[#f3b8c4]/65 uppercase">
+              <thead className="border-b border-[#f3b8c4]/15 bg-[#14080e]/80 text-[0.68rem] tracking-wider text-[#f3b8c4]/70 uppercase">
                 <tr>
-                  <th className="px-4 py-3 font-medium">ช่วง</th>
-                  <th className="px-4 py-3 font-medium">หลังไลฟ์</th>
-                  <th className="px-4 py-3 font-medium">ยอดรวม</th>
-                  <th className="px-4 py-3 font-medium">Diff</th>
-                  <th className="px-4 py-3 font-medium">คลิป</th>
+                  <th className="px-5 py-3 font-semibold">ช่วงเวลา</th>
+                  <th className="px-5 py-3 font-semibold">หลังไลฟ์</th>
+                  <th className="px-5 py-3 font-semibold">ยอดรวมล่าสุด</th>
+                  <th className="px-5 py-3 font-semibold">Diff (เพิ่มขึ้น)</th>
+                  <th className="px-5 py-3 font-semibold">จำนวนคลิป</th>
                 </tr>
               </thead>
               <tbody>
@@ -467,23 +552,23 @@ export function LiveViewTrendsPanel({
                     key={row.bucket}
                     onClick={() => selectBucket(row.bucket)}
                     className={cn(
-                      "cursor-pointer border-b border-[#f3b8c4]/08 last:border-0 transition-colors hover:bg-[#e85a7a]/08",
-                      selectedBucket === row.bucket && "bg-[#e85a7a]/12"
+                      "cursor-pointer border-b border-[#f3b8c4]/08 last:border-0 transition-colors hover:bg-[#e85a7a]/12",
+                      selectedBucket === row.bucket && "bg-[#e85a7a]/20 font-semibold"
                     )}
                   >
-                    <td className="px-4 py-2.5 text-[#fff5f7]/90">
+                    <td className="px-5 py-3 text-[#fff5f7]">
                       {formatBucket(row.bucket, grain)}
                     </td>
-                    <td className="px-4 py-2.5 tabular-nums text-[#f7d7de]/85">
+                    <td className="px-5 py-3 tabular-nums text-[#f7d7de]/85">
                       {formatViews(row.views_on_end)}
                     </td>
-                    <td className="px-4 py-2.5 tabular-nums text-[#f7d7de]/85">
+                    <td className="px-5 py-3 tabular-nums text-[#fff5f7]">
                       {formatViews(row.latest_views)}
                     </td>
-                    <td className="px-4 py-2.5 tabular-nums text-[#7dd3c0]">
-                      {formatViews(row.views_diff)}
+                    <td className="px-5 py-3 font-semibold tabular-nums text-[#7dd3c0]">
+                      +{formatViews(row.views_diff)}
                     </td>
-                    <td className="px-4 py-2.5 tabular-nums text-[#f3b8c4]/70">
+                    <td className="px-5 py-3 tabular-nums text-[#f3b8c4]/80">
                       {row.stream_count}
                     </td>
                   </tr>
@@ -1087,37 +1172,57 @@ function PeakCard({
 }) {
   if (!peak) {
     return (
-      <div className="border border-[#f3b8c4]/14 bg-[#1a0d12]/45 px-4 py-4">
-        <p className="text-[0.65rem] tracking-[0.2em] text-[#f3b8c4]/60 uppercase">
+      <div className="rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1f0d16]/75 to-[#14080e]/90 p-5">
+        <p className={META_MUTED_CLASS}>
           {label}
         </p>
-        <p className="mt-2 text-sm text-[#f3b8c4]/60">ไม่มีข้อมูล</p>
+        <p className="mt-2 text-xs text-[#f3b8c4]/50">ไม่มีข้อมูลในช่วงนี้</p>
       </div>
     );
   }
+
+  const thumb = streamThumb(peak.video_id, peak.thumbnail_url);
 
   return (
     <button
       type="button"
       onClick={() => onOpen(peak)}
-      className="border border-[#f3b8c4]/14 bg-[#1a0d12]/45 px-4 py-4 text-left transition-colors hover:border-[#e85a7a]/45 hover:bg-[#e85a7a]/08"
+      className="group relative flex w-full flex-col justify-between overflow-hidden rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1f0d16]/85 to-[#14080e]/95 p-5 text-left transition duration-300 hover:border-[#e85a7a]/50 hover:shadow-[0_12px_32px_rgba(232,90,122,0.18)]"
     >
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex w-full items-start gap-4">
+        {/* 16:9 Thumbnail Mini Preview */}
+        <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-2xl border border-[#f3b8c4]/15 bg-[#12070c] sm:w-32">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={thumb}
+            alt=""
+            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+          />
+        </div>
+
         <div className="min-w-0 flex-1">
-          <p className="text-sm leading-snug text-[#fff5f7]">
+          <span className="inline-block rounded-full bg-[#e85a7a]/20 px-2.5 py-0.5 text-[0.65rem] font-bold tracking-wider text-[#e85a7a] uppercase">
+            {label}
+          </span>
+          <p className="mt-1.5 line-clamp-2 text-xs font-medium leading-relaxed text-[#fff5f7] group-hover:text-white sm:text-sm">
             {peak.title || peak.video_id}
           </p>
-          <p className="mt-2 text-xs text-[#f3b8c4]/70">
-            {peak.channel_name || "—"}
+          <p className="mt-1 text-[0.7rem] text-[#f3b8c4]/65">
+            {peak.channel_name || "Mild-R Channel"}
           </p>
         </div>
-        <div className="shrink-0 text-right">
-          <p className="text-[0.6rem] tracking-[0.16em] text-[#f3b8c4]/55 uppercase">
-            {label}
-          </p>
-          <p className="mt-1 font-[family-name:var(--font-display)] text-2xl tracking-normal tabular-nums text-[#fff5f7] sm:text-3xl">
+      </div>
+
+      <div className="mt-4 flex w-full items-end justify-between border-t border-[#f3b8c4]/10 pt-3">
+        <span className="inline-flex items-center gap-1 text-[0.72rem] font-medium text-[#e85a7a] opacity-80 group-hover:opacity-100">
+          <span>คลิกดูรายละเอียด</span>
+          <ArrowUpRight className="size-3.5" />
+        </span>
+        <div className="text-right">
+          <p className="font-[family-name:var(--font-display)] text-2xl font-normal tracking-tight tabular-nums text-[#fff5f7] sm:text-3xl">
             {formatViews(peak.views)}
           </p>
+          <p className="text-[0.62rem] text-[#f3b8c4]/50 uppercase">Views</p>
         </div>
       </div>
     </button>
@@ -1126,26 +1231,51 @@ function PeakCard({
 
 function StatCard({
   label,
+  sublabel,
   value,
   accent,
+  icon: Icon,
 }: {
   label: string;
+  sublabel?: string;
   value: number;
   accent?: boolean;
+  icon?: typeof Flame;
 }) {
   return (
-    <div className="border border-[#f3b8c4]/14 bg-[#1a0d12]/45 px-4 py-4">
-      <p className="text-[0.65rem] tracking-[0.2em] text-[#f3b8c4]/60 uppercase">
-        {label}
-      </p>
+    <div className="relative overflow-hidden rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1f0d16]/85 via-[#1a0c12]/80 to-[#14080e]/95 p-5 shadow-lg transition hover:border-[#e85a7a]/35">
+      <div className="flex items-center justify-between">
+        <p className={META_CLASS}>
+          {label}
+        </p>
+        {Icon ? (
+          <div
+            className={cn(
+              "flex size-9 items-center justify-center rounded-xl border",
+              accent
+                ? "border-emerald-500/30 bg-emerald-500/15 text-emerald-300"
+                : "border-[#e85a7a]/30 bg-[#e85a7a]/15 text-[#e85a7a]"
+            )}
+          >
+            <Icon className="size-4" />
+          </div>
+        ) : null}
+      </div>
+
       <p
         className={cn(
-          "mt-2 font-[family-name:var(--font-display)] text-2xl tracking-normal tabular-nums",
+          "mt-3 font-[family-name:var(--font-display)] text-3xl font-normal tracking-tight tabular-nums sm:text-4xl",
           accent ? "text-[#7dd3c0]" : "text-[#fff5f7]"
         )}
       >
-        {formatViews(value)}
+        {accent && value > 0 ? `+${formatViews(value)}` : formatViews(value)}
       </p>
+
+      {sublabel ? (
+        <p className="mt-1 text-[0.68rem] text-[#f3b8c4]/50">
+          {sublabel}
+        </p>
+      ) : null}
     </div>
   );
 }

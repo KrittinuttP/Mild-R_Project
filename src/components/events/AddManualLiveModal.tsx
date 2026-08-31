@@ -1,7 +1,21 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Eraser, FileJson, Link2, Plus, Trash2, Users } from "lucide-react";
+import {
+  AlertCircle,
+  Check,
+  CheckCircle2,
+  Copy,
+  Eraser,
+  FileJson,
+  FileText,
+  Link2,
+  Plus,
+  Sparkles,
+  Trash2,
+  Users,
+  Video,
+} from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -15,6 +29,13 @@ import {
   LUMINA_CHANNELS,
   resolveLuminaChannel,
 } from "@/data/lumina-channels";
+import {
+  CTA_OUTLINE_CLASS,
+  CTA_PRIMARY_CLASS,
+  GLASS_CARD_CLASS,
+  META_CLASS,
+  META_MUTED_CLASS,
+} from "@/lib/site-ui";
 import { getYoutubeVideoId } from "@/lib/youtube";
 import { cn } from "@/lib/utils";
 
@@ -45,30 +66,28 @@ type SubmitItem = {
 
 const SAMPLE_JSON = `[
   {
-    "title": "ตัวอย่างไลฟ์รอเปิด",
-    "channel": "mild-r",
-    "date": "2026-08-20",
+    "title": "【Mild-R】Free Talk ชวนคุยยามดึก",
+    "channel": "Mild-R",
+    "date": "2026-09-01",
     "time": "20:00",
     "member": false,
     "own": true,
     "collab": false
   },
   {
-    "title": "ไลฟ์ที่ยกเลิก (Ghost Slot)",
-    "channel": "mild-r",
-    "date": "2026-08-21",
+    "title": "【MEMBERSHIP】สตรีมพิเศษเฉพาะเมมเบอร์",
+    "channel": "Mild-R",
+    "date": "2026-09-02",
     "time": "21:00",
-    "cancelled": true,
+    "member": true,
     "own": true
   },
   {
-    "title": "Q&A สุดเอ็กซ์คลูซีฟกับมายด์",
-    "channel": "mild-r",
-    "date": "2026-08-16",
-    "time": "20:30",
-    "member": true,
-    "own": true,
-    "collab": false
+    "title": "Collab เล่นเกมกับเพื่อนๆ",
+    "channel": "Lumina",
+    "date": "2026-09-03",
+    "time": "19:30",
+    "collab": true
   },
   {
     "member": true,
@@ -76,10 +95,17 @@ const SAMPLE_JSON = `[
   }
 ]`;
 
+function generateRowKey(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `row-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
 function emptyRow(): DraftRow {
   const mild = LUMINA_CHANNELS.find((c) => c.isMain) ?? LUMINA_CHANNELS[0];
   return {
-    key: crypto.randomUUID(),
+    key: generateRowKey(),
     title: "",
     channelId: mild?.channelId ?? "",
     date: "",
@@ -105,11 +131,9 @@ function resolveIdFromLink(input: string): string | null {
   return getYoutubeVideoId(trimmed);
 }
 
-const SAMPLE_MEMBER_LINKS = `https://www.youtube.com/live/XZcXaFlzJzc
-`;
+const SAMPLE_MEMBER_LINKS = "";
 
-const SAMPLE_COLLAB_LINKS = `https://www.youtube.com/live/
-`;
+const SAMPLE_COLLAB_LINKS = "";
 
 /** One YouTube link (or bare id) per line → draft rows for Member or Collab import */
 function parseYoutubeLinksText(
@@ -146,7 +170,7 @@ function parseYoutubeLinksText(
     seen.add(id);
     rows.push({
       ...emptyRow(),
-      key: crypto.randomUUID(),
+      key: generateRowKey(),
       member: mode === "member",
       collab: mode === "collab",
       own: mode === "member",
@@ -201,7 +225,7 @@ function parseJsonToRows(text: string): { rows: DraftRow[]; error?: string } {
         if (hasLink) {
           rows.push({
             ...emptyRow(),
-            key: crypto.randomUUID(),
+            key: generateRowKey(),
             member: true,
             cancelled,
             youtubeUrl,
@@ -245,7 +269,7 @@ function parseJsonToRows(text: string): { rows: DraftRow[]; error?: string } {
           continue;
         }
         rows.push({
-          key: crypto.randomUUID(),
+          key: generateRowKey(),
           title,
           channelId: own
             ? (mild?.channelId ?? resolved?.channelId ?? "")
@@ -280,7 +304,7 @@ function parseJsonToRows(text: string): { rows: DraftRow[]; error?: string } {
       }
       const mild = LUMINA_CHANNELS.find((c) => c.isMain);
       rows.push({
-        key: crypto.randomUUID(),
+        key: generateRowKey(),
         title: typeof o.title === "string" ? o.title : "",
         channelId: own
           ? (mild?.channelId ?? resolved?.channelId ?? "")
@@ -372,13 +396,26 @@ function validateRows(rows: DraftRow[]): string | null {
 export function AddManualLiveButton() {
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<DraftRow[]>([emptyRow()]);
-  const [jsonText, setJsonText] = useState(SAMPLE_JSON);
+  const [jsonText, setJsonText] = useState("");
   const [tab, setTab] = useState<"form" | "json" | "member" | "collab">("form");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [memberLinksText, setMemberLinksText] = useState(SAMPLE_MEMBER_LINKS);
-  const [collabLinksText, setCollabLinksText] = useState(SAMPLE_COLLAB_LINKS);
+  const [memberLinksText, setMemberLinksText] = useState("");
+  const [collabLinksText, setCollabLinksText] = useState("");
+  const [copiedJson, setCopiedJson] = useState(false);
+
+  const handleCopyExampleJson = async () => {
+    try {
+      await navigator.clipboard.writeText(SAMPLE_JSON);
+      setCopiedJson(true);
+      setMessage("คัดลอก JSON ตัวอย่างลง Clipboard เรียบร้อยแล้ว");
+      setError(null);
+      setTimeout(() => setCopiedJson(false), 2500);
+    } catch {
+      setError("ไม่สามารถเข้าถึง Clipboard เพื่อคัดลอกได้");
+    }
+  };
 
   const channelOptions = useMemo(
     () =>
@@ -454,35 +491,40 @@ export function AddManualLiveButton() {
           setError(null);
         }}
         className={cn(
-          buttonVariants({ variant: "outline", size: "sm" }),
-          "rounded-none border-[#e85a7a]/35 bg-transparent text-[#e85a7a] hover:bg-[#e85a7a]/10"
+          buttonVariants({ size: "sm" }),
+          CTA_PRIMARY_CLASS,
+          "inline-flex items-center gap-1.5 font-semibold"
         )}
       >
-        <Plus className="size-3.5" />
-        เพิ่มตัวอย่างไลฟ์
+        <Plus className="size-4" />
+        <span>เพิ่มตัวอย่างไลฟ์</span>
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[90dvh] w-[min(100%,calc(100vw-1rem))] max-w-2xl overflow-y-auto border-[#f3b8c4]/20 bg-[#140a0d] text-[#fff5f7]">
-          <DialogHeader className="text-left">
-            <DialogTitle className="font-[family-name:var(--font-display)] text-xl">
+        <DialogContent className="max-h-[90dvh] w-[min(100%,calc(100vw-1rem))] max-w-2xl overflow-x-hidden overflow-y-auto rounded-3xl border border-[#f3b8c4]/20 bg-gradient-to-b from-[#220e18]/95 via-[#1a0c12]/95 to-[#12070c] p-4 text-[#fff5f7] shadow-[0_24px_60px_rgba(0,0,0,0.7)] backdrop-blur-xl sm:p-7 [scrollbar-color:rgba(232,90,122,0.3)_transparent] [scrollbar-width:thin]">
+          <DialogHeader className="pr-6 text-left">
+            <div className="flex items-center gap-2">
+              <Sparkles className="size-4 text-[#e85a7a]" />
+              <p className={META_CLASS}>Live Stream Operations</p>
+            </div>
+            <DialogTitle className="font-[family-name:var(--font-display)] text-xl font-normal break-words text-[#fff5f7] sm:text-2xl">
               เพิ่มตัวอย่างไลฟ์ล่วงหน้า
             </DialogTitle>
-            <DialogDescription className="text-[#f3b8c4]/70">
-              Mock ใส่รายละเอียดเอง · Member = ลิงก์ช่อง Mild-R เท่านั้น · Collab =
-              ลิงก์ช่องอื่น
+            <DialogDescription className="text-xs leading-relaxed break-words text-[#f7d7de]/75">
+              Mock ข้อมูลเอง · Member (ดึงเฉพาะช่อง Mild-R) · Collab (ดึงจากลิงก์ช่องอื่น)
             </DialogDescription>
           </DialogHeader>
 
-          <div className="mt-2 flex flex-wrap gap-2">
+          {/* 🏷️ Segmented Mode Navigation Pills */}
+          <div className="mt-4 flex items-center gap-1 rounded-full border border-[#f3b8c4]/15 bg-[#12070c]/90 p-1 shadow-inner">
             <button
               type="button"
               onClick={() => setTab("form")}
               className={cn(
-                "px-3 py-1.5 text-[0.65rem] tracking-[0.16em] uppercase",
+                "min-w-0 flex-1 rounded-full px-2 py-1.5 text-center text-[0.7rem] font-semibold tracking-wider uppercase transition sm:px-3 sm:text-xs",
                 tab === "form"
-                  ? "border border-[#e85a7a]/45 bg-[#e85a7a]/12 text-[#e85a7a]"
-                  : "border border-[#f3b8c4]/15 text-[#f3b8c4]/65"
+                  ? "border border-[#e85a7a]/60 bg-[#e85a7a]/25 text-[#fff5f7] shadow-[0_0_12px_rgba(232,90,122,0.3)]"
+                  : "text-[#f3b8c4]/65 hover:text-[#fff5f7]"
               )}
             >
               ฟอร์ม
@@ -491,54 +533,54 @@ export function AddManualLiveButton() {
               type="button"
               onClick={() => setTab("member")}
               className={cn(
-                "inline-flex items-center gap-1.5 px-3 py-1.5 text-[0.65rem] tracking-[0.16em] uppercase",
+                "inline-flex min-w-0 flex-1 items-center justify-center gap-1 rounded-full px-2 py-1.5 text-center text-[0.7rem] font-semibold tracking-wider uppercase transition sm:gap-1.5 sm:px-3 sm:text-xs",
                 tab === "member"
-                  ? "border border-[#9b8cff]/50 bg-[#9b8cff]/12 text-[#cfc6ff]"
-                  : "border border-[#f3b8c4]/15 text-[#f3b8c4]/65"
+                  ? "border border-[#9b8cff]/60 bg-[#9b8cff]/25 text-[#f0ecff] shadow-[0_0_12px_rgba(155,140,255,0.3)]"
+                  : "text-[#f3b8c4]/65 hover:text-[#cfc6ff]"
               )}
             >
-              <Link2 className="size-3.5" />
-              Member
+              <Link2 className="size-3 shrink-0 sm:size-3.5" />
+              <span>Member</span>
             </button>
             <button
               type="button"
               onClick={() => setTab("collab")}
               className={cn(
-                "inline-flex items-center gap-1.5 px-3 py-1.5 text-[0.65rem] tracking-[0.16em] uppercase",
+                "inline-flex min-w-0 flex-1 items-center justify-center gap-1 rounded-full px-2 py-1.5 text-center text-[0.7rem] font-semibold tracking-wider uppercase transition sm:gap-1.5 sm:px-3 sm:text-xs",
                 tab === "collab"
-                  ? "border border-[#d4a574]/50 bg-[#d4a574]/12 text-[#e8c49a]"
-                  : "border border-[#f3b8c4]/15 text-[#f3b8c4]/65"
+                  ? "border border-[#d4a574]/60 bg-[#d4a574]/25 text-[#ffeedb] shadow-[0_0_12px_rgba(212,165,116,0.3)]"
+                  : "text-[#f3b8c4]/65 hover:text-[#e8c49a]"
               )}
             >
-              <Users className="size-3.5" />
-              Collab
+              <Users className="size-3 shrink-0 sm:size-3.5" />
+              <span>Collab</span>
             </button>
             <button
               type="button"
               onClick={() => setTab("json")}
               className={cn(
-                "inline-flex items-center gap-1.5 px-3 py-1.5 text-[0.65rem] tracking-[0.16em] uppercase",
+                "inline-flex min-w-0 flex-1 items-center justify-center gap-1 rounded-full px-2 py-1.5 text-center text-[0.7rem] font-semibold tracking-wider uppercase transition sm:gap-1.5 sm:px-3 sm:text-xs",
                 tab === "json"
-                  ? "border border-[#e85a7a]/45 bg-[#e85a7a]/12 text-[#e85a7a]"
-                  : "border border-[#f3b8c4]/15 text-[#f3b8c4]/65"
+                  ? "border border-[#e85a7a]/60 bg-[#e85a7a]/25 text-[#fff5f7] shadow-[0_0_12px_rgba(232,90,122,0.3)]"
+                  : "text-[#f3b8c4]/65 hover:text-[#fff5f7]"
               )}
             >
-              <FileJson className="size-3.5" />
-              JSON
+              <FileJson className="size-3 shrink-0 sm:size-3.5" />
+              <span>JSON</span>
             </button>
           </div>
 
           {tab === "form" ? (
-            <div className="mt-4 space-y-4">
+            <div className="mt-5 space-y-4">
               {rows.map((row, index) => (
                 <div
                   key={row.key}
-                  className="space-y-3 border border-[#f3b8c4]/14 bg-[#1a0d12]/50 p-3"
+                  className="space-y-3.5 rounded-2xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1c0c14]/85 to-[#14080e]/95 p-3.5 shadow-md transition hover:border-[#e85a7a]/35 sm:p-4"
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-[0.62rem] tracking-[0.16em] text-[#f3b8c4]/55 uppercase">
-                      รายการ {index + 1}
-                      {row.member ? " · Member" : ""}
+                  <div className="flex items-center justify-between gap-2 border-b border-[#f3b8c4]/10 pb-2.5">
+                    <p className="text-xs font-semibold text-[#f3b8c4]">
+                      รายการที่ {index + 1}
+                      {row.member ? " · (Member Slot)" : ""}
                     </p>
                     {rows.length > 1 ? (
                       <button
@@ -549,15 +591,15 @@ export function AddManualLiveButton() {
                             prev.filter((r) => r.key !== row.key)
                           )
                         }
-                        className="text-[#f3b8c4]/50 hover:text-[#e85a7a]"
+                        className="rounded-lg p-1 text-[#f3b8c4]/50 transition hover:bg-rose-500/10 hover:text-rose-400"
                       >
-                        <Trash2 className="size-3.5" />
+                        <Trash2 className="size-4" />
                       </button>
                     ) : null}
                   </div>
 
-                  <div className="flex flex-wrap gap-4">
-                    <label className="inline-flex items-center gap-2 text-xs text-[#b8d9ec]">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                    <label className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-medium text-[#cfc6ff]">
                       <input
                         type="checkbox"
                         checked={row.member}
@@ -570,13 +612,13 @@ export function AddManualLiveButton() {
                             )
                           )
                         }
-                        className="size-3.5 accent-[#9b8cff]"
+                        className="size-4 rounded accent-[#9b8cff]"
                       />
                       Member
                     </label>
                     {!(row.member && resolveIdFromLink(row.youtubeUrl)) ? (
                       <>
-                        <label className="inline-flex items-center gap-2 text-xs text-[#f3b8c4]">
+                        <label className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-medium text-[#f3b8c4]">
                           <input
                             type="checkbox"
                             checked={row.own}
@@ -599,11 +641,11 @@ export function AddManualLiveButton() {
                                 )
                               );
                             }}
-                            className="size-3.5 accent-[#e85a7a]"
+                            className="size-4 rounded accent-[#e85a7a]"
                           />
                           ช่องตัวเอง (Mild-R)
                         </label>
-                        <label className="inline-flex items-center gap-2 text-xs text-[#e8c49a]">
+                        <label className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-medium text-[#e8c49a]">
                           <input
                             type="checkbox"
                             checked={row.collab}
@@ -616,13 +658,13 @@ export function AddManualLiveButton() {
                                 )
                               )
                             }
-                            className="size-3.5 accent-[#d4a574]"
+                            className="size-4 rounded accent-[#d4a574]"
                           />
                           Collab
                         </label>
                       </>
                     ) : null}
-                    <label className="inline-flex items-center gap-2 text-xs text-rose-300">
+                    <label className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-medium text-rose-300">
                       <input
                         type="checkbox"
                         checked={row.cancelled}
@@ -635,15 +677,15 @@ export function AddManualLiveButton() {
                             )
                           )
                         }
-                        className="size-3.5 accent-rose-500"
+                        className="size-4 rounded accent-rose-500"
                       />
                       ยกเลิก (Ghost slot)
                     </label>
                   </div>
 
                   {row.member ? (
-                    <label className="block space-y-1 text-xs text-[#cfc6ff]/85">
-                      ลิงก์ YouTube (ถ้ามี)
+                    <label className="block space-y-1.5 text-xs text-[#cfc6ff]/90">
+                      <span>ลิงก์ YouTube Member (ถ้ามี)</span>
                       <input
                         type="url"
                         value={row.youtubeUrl}
@@ -656,20 +698,19 @@ export function AddManualLiveButton() {
                             )
                           )
                         }
-                        placeholder="https://www.youtube.com/live/… (ว่าง = mock)"
-                        className="w-full border border-[#9b8cff]/30 bg-[#10070b] px-2.5 py-2 text-sm text-[#fff5f7] outline-none focus:border-[#9b8cff]/55"
+                        placeholder="เช่น https://www.youtube.com/live/XZcXaFlzJzc (เว้นว่างเพื่อทำ Mock)"
+                        className="w-full min-w-0 rounded-xl border border-[#9b8cff]/30 bg-[#12070c]/90 px-3.5 py-2 text-sm text-[#fff5f7] placeholder-[#9b8cff]/40 outline-none transition focus:border-[#9b8cff] focus:ring-1 focus:ring-[#9b8cff]/40"
                       />
-                      <span className="block text-[0.65rem] text-[#cfc6ff]/55">
-                        มีลิงก์ = ดึงจาก YouTube (รับเฉพาะช่อง Mild-R) · ไม่มี =
-                        จองตารางด้วยชื่อ/วัน/เวลา
+                      <span className="block text-[0.68rem] text-[#cfc6ff]/60">
+                        มีลิงก์ = ดึงจาก YouTube (รับเฉพาะช่อง Mild-R) · ไม่มี = จองตารางด้วยชื่อ/วัน/เวลา
                       </span>
                     </label>
                   ) : null}
 
                   {row.member && resolveIdFromLink(row.youtubeUrl) ? null : (
                     <>
-                      <label className="block space-y-1 text-xs text-[#f3b8c4]/70">
-                        ชื่อไลฟ์
+                      <label className="block space-y-1.5 text-xs text-[#f3b8c4]/80">
+                        <span>ชื่อไลฟ์</span>
                         <input
                           value={row.title}
                           onChange={(e) =>
@@ -681,13 +722,13 @@ export function AddManualLiveButton() {
                               )
                             )
                           }
-                          className="w-full border border-[#f3b8c4]/20 bg-[#10070b] px-2.5 py-2 text-sm text-[#fff5f7] outline-none focus:border-[#e85a7a]/45"
-                          placeholder="ชื่อไลฟ์"
+                          className="w-full min-w-0 rounded-xl border border-[#f3b8c4]/20 bg-[#12070c]/90 px-3.5 py-2 text-sm text-[#fff5f7] placeholder-[#f3b8c4]/30 outline-none transition focus:border-[#e85a7a] focus:ring-1 focus:ring-[#e85a7a]/30"
+                          placeholder="เช่น 【Mild-R】Free Talk ชวนคุยยามดึก เล่นเกมชิลล์ๆ..."
                         />
                       </label>
 
-                      <label className="block space-y-1 text-xs text-[#f3b8c4]/70">
-                        ช่องไลฟ์{row.own ? "" : " *"}
+                      <label className="block space-y-1.5 text-xs text-[#f3b8c4]/80">
+                        <span>ช่องสตรีม{row.own ? "" : " *"}</span>
                         <select
                           value={row.channelId}
                           disabled={row.own}
@@ -709,7 +750,7 @@ export function AddManualLiveButton() {
                               )
                             );
                           }}
-                          className="w-full border border-[#f3b8c4]/20 bg-[#10070b] px-2.5 py-2 text-sm text-[#fff5f7] outline-none focus:border-[#e85a7a]/45 disabled:opacity-50"
+                          className="w-full min-w-0 rounded-xl border border-[#f3b8c4]/20 bg-[#12070c]/90 px-3.5 py-2 text-sm text-[#fff5f7] outline-none transition focus:border-[#e85a7a] disabled:opacity-50"
                         >
                           {!row.own ? (
                             <option value="" disabled>
@@ -717,16 +758,16 @@ export function AddManualLiveButton() {
                             </option>
                           ) : null}
                           {channelOptions.map((ch) => (
-                            <option key={ch.channelId} value={ch.channelId}>
+                            <option key={ch.channelId} value={ch.channelId} className="bg-[#1a0c12]">
                               {ch.title} — {ch.channelTitle}
                             </option>
                           ))}
                         </select>
                       </label>
 
-                      <div className="grid grid-cols-2 gap-2">
-                        <label className="block space-y-1 text-xs text-[#f3b8c4]/70">
-                          วันที่ (Bangkok)
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <label className="block min-w-0 space-y-1.5 text-xs text-[#f3b8c4]/80">
+                          <span>วันที่ (Bangkok)</span>
                           <input
                             type="date"
                             value={row.date}
@@ -739,11 +780,11 @@ export function AddManualLiveButton() {
                                 )
                               )
                             }
-                            className="w-full border border-[#f3b8c4]/20 bg-[#10070b] px-2.5 py-2 text-sm text-[#fff5f7] outline-none focus:border-[#e85a7a]/45"
+                            className="w-full min-w-0 rounded-xl border border-[#f3b8c4]/20 bg-[#12070c]/90 px-3 py-2 text-sm text-[#fff5f7] outline-none transition focus:border-[#e85a7a] [color-scheme:dark]"
                           />
                         </label>
-                        <label className="block space-y-1 text-xs text-[#f3b8c4]/70">
-                          เวลา
+                        <label className="block min-w-0 space-y-1.5 text-xs text-[#f3b8c4]/80">
+                          <span>เวลา</span>
                           <input
                             type="time"
                             value={row.time}
@@ -756,14 +797,14 @@ export function AddManualLiveButton() {
                                 )
                               )
                             }
-                            className="w-full border border-[#f3b8c4]/20 bg-[#10070b] px-2.5 py-2 text-sm text-[#fff5f7] outline-none focus:border-[#e85a7a]/45"
+                            className="w-full min-w-0 rounded-xl border border-[#f3b8c4]/20 bg-[#12070c]/90 px-3 py-2 text-sm text-[#fff5f7] outline-none transition focus:border-[#e85a7a] [color-scheme:dark]"
                           />
                         </label>
                       </div>
 
                       {!row.own && !row.channelId ? (
-                        <p className="text-[0.7rem] text-[#ffb3bc]">
-                          เลือกช่องไลฟ์เมื่อไม่ใช่ช่องตัวเอง
+                        <p className="text-xs text-rose-300">
+                          กรุณาเลือกช่องสตรีมเมื่อไม่ใช่ช่องตัวเอง
                         </p>
                       ) : null}
                     </>
@@ -774,9 +815,10 @@ export function AddManualLiveButton() {
               <button
                 type="button"
                 onClick={() => setRows((prev) => [...prev, emptyRow()])}
-                className="text-xs text-[#f3b8c4]/70 underline-offset-4 hover:text-[#fff5f7] hover:underline"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#e85a7a] transition hover:underline"
               >
-                + เพิ่มอีกวัน/รายการ
+                <Plus className="size-3.5" />
+                <span>เพิ่มอีกรายการ</span>
               </button>
 
               <button
@@ -792,33 +834,34 @@ export function AddManualLiveButton() {
                 }}
                 className={cn(
                   buttonVariants({ size: "lg" }),
-                  "w-full rounded-xl border-transparent bg-[#e85a7a] text-white hover:bg-[#f06b88] disabled:opacity-50"
+                  CTA_PRIMARY_CLASS,
+                  "mt-2 w-full font-semibold"
                 )}
               >
-                {busy ? "กำลังบันทึก…" : "บันทึกลง Supabase"}
+                {busy ? "กำลังบันทึก…" : "บันทึกลงระบบ (Save)"}
               </button>
             </div>
           ) : tab === "member" ? (
-            <div className="mt-4 space-y-3">
-              <p className="text-xs text-[#cfc6ff]/75">
+            <div className="mt-5 space-y-3.5">
+              <p className="text-xs leading-relaxed break-words text-[#cfc6ff]/85">
                 วางลิงก์ YouTube Member ทีละบรรทัด ·{" "}
-                <span className="text-[#cfc6ff]">รับเฉพาะช่อง Mild-R</span> ·
-                ดึงชื่อ ปก เวลา สถิติจาก API
+                <span className="font-semibold text-[#cfc6ff]">รับเฉพาะช่อง Mild-R</span> ·
+                ระบบจะดึงชื่อ, ปก, วันเวลา และสถิติจาก YouTube API อัตโนมัติ
               </p>
               <div className="relative">
                 <textarea
                   value={memberLinksText}
                   onChange={(e) => setMemberLinksText(e.target.value)}
-                  rows={12}
+                  rows={8}
                   placeholder={
-                    "https://www.youtube.com/live/…\nhttps://www.youtube.com/watch?v=…"
+                    "https://www.youtube.com/live/XZcXaFlzJzc\nhttps://www.youtube.com/watch?v=...\n(วางลิงก์ 1 บรรทัดต่อ 1 สตรีม)"
                   }
-                  className="w-full resize-y border border-[#9b8cff]/30 bg-[#10070b] px-3 py-2 font-mono text-xs text-[#f7d7de] outline-none focus:border-[#9b8cff]/55"
+                  className="w-full min-w-0 resize-y break-all rounded-2xl border border-[#9b8cff]/30 bg-[#12070c]/90 p-3.5 font-mono text-xs text-[#f7d7de] placeholder-[#9b8cff]/30 outline-none transition focus:border-[#9b8cff] focus:ring-1 focus:ring-[#9b8cff]/30"
                   spellCheck={false}
                 />
               </div>
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-[0.65rem] text-[#cfc6ff]/50">
+                <p className="text-xs text-[#cfc6ff]/60">
                   {
                     memberLinksText
                       .split(/\r?\n/)
@@ -834,13 +877,10 @@ export function AddManualLiveButton() {
                     setError(null);
                     setMessage(null);
                   }}
-                  className={cn(
-                    buttonVariants({ variant: "outline", size: "sm" }),
-                    "inline-flex items-center gap-1.5 rounded-none border-[#9b8cff]/30 bg-transparent text-[#cfc6ff]"
-                  )}
+                  className="inline-flex items-center gap-1.5 text-xs text-[#cfc6ff]/65 transition hover:text-[#cfc6ff]"
                 >
                   <Eraser className="size-3.5" />
-                  เคลียร์
+                  ล้างข้อความ
                 </button>
               </div>
               <button
@@ -861,30 +901,29 @@ export function AddManualLiveButton() {
                 }}
                 className={cn(
                   buttonVariants({ size: "lg" }),
-                  "w-full rounded-xl border-transparent bg-[#9b8cff] text-[#140a0d] hover:bg-[#b0a6ff] disabled:opacity-50"
+                  "w-full rounded-2xl border border-[#9b8cff]/60 bg-[#9b8cff] font-semibold text-[#140a0d] shadow-[0_10px_30px_rgba(155,140,255,0.35)] hover:bg-[#b5abff] disabled:opacity-50"
                 )}
               >
-                {busy ? "กำลังดึงจาก YouTube…" : "บันทึก Member จากลิงก์"}
+                {busy ? "กำลังดึงข้อมูล YouTube…" : "บันทึก Member จากลิงก์"}
               </button>
             </div>
           ) : tab === "collab" ? (
-            <div className="mt-4 space-y-3">
-              <p className="text-xs text-[#e8c49a]/85">
-                วางลิงก์ YouTube Collab ทีละบรรทัด · รับช่องอื่น (หรือ Mild-R
-                ที่มี ft.) · ดึงชื่อ ปก เวลา สถิติจาก API
+            <div className="mt-5 space-y-3.5">
+              <p className="text-xs leading-relaxed break-words text-[#e8c49a]/85">
+                วางลิงก์ YouTube Collab ทีละบรรทัด · รับช่องอื่น (หรือช่อง Mild-R ที่มี ft.) · ระบบจะดึงชื่อ ปก เวลา สถิติจาก API
               </p>
               <textarea
                 value={collabLinksText}
                 onChange={(e) => setCollabLinksText(e.target.value)}
-                rows={12}
+                rows={8}
                 placeholder={
-                  "https://www.youtube.com/live/…\nhttps://www.youtube.com/watch?v=…"
+                  "https://www.youtube.com/live/...\nhttps://www.youtube.com/watch?v=...\n(วางลิงก์ 1 บรรทัดต่อ 1 สตรีม)"
                 }
-                className="w-full resize-y border border-[#d4a574]/35 bg-[#10070b] px-3 py-2 font-mono text-xs text-[#f7d7de] outline-none focus:border-[#d4a574]/55"
+                className="w-full min-w-0 resize-y break-all rounded-2xl border border-[#d4a574]/35 bg-[#12070c]/90 p-3.5 font-mono text-xs text-[#f7d7de] placeholder-[#d4a574]/30 outline-none transition focus:border-[#d4a574] focus:ring-1 focus:ring-[#d4a574]/30"
                 spellCheck={false}
               />
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-[0.65rem] text-[#e8c49a]/55">
+                <p className="text-xs text-[#e8c49a]/60">
                   {
                     collabLinksText
                       .split(/\r?\n/)
@@ -900,13 +939,10 @@ export function AddManualLiveButton() {
                     setError(null);
                     setMessage(null);
                   }}
-                  className={cn(
-                    buttonVariants({ variant: "outline", size: "sm" }),
-                    "inline-flex items-center gap-1.5 rounded-none border-[#d4a574]/35 bg-transparent text-[#e8c49a]"
-                  )}
+                  className="inline-flex items-center gap-1.5 text-xs text-[#e8c49a]/65 transition hover:text-[#e8c49a]"
                 >
                   <Eraser className="size-3.5" />
-                  เคลียร์
+                  ล้างข้อความ
                 </button>
               </div>
               <button
@@ -927,32 +963,69 @@ export function AddManualLiveButton() {
                 }}
                 className={cn(
                   buttonVariants({ size: "lg" }),
-                  "w-full rounded-xl border-transparent bg-[#d4a574] text-[#140a0d] hover:bg-[#e0b88a] disabled:opacity-50"
+                  "w-full rounded-2xl border border-[#d4a574]/60 bg-[#d4a574] font-semibold text-[#140a0d] shadow-[0_10px_30px_rgba(212,165,116,0.35)] hover:bg-[#e4be95] disabled:opacity-50"
                 )}
               >
-                {busy ? "กำลังดึงจาก YouTube…" : "บันทึก Collab จากลิงก์"}
+                {busy ? "กำลังดึงข้อมูล YouTube…" : "บันทึก Collab จากลิงก์"}
               </button>
             </div>
           ) : (
-            <div className="mt-4 space-y-3">
-              <p className="text-xs text-[#f3b8c4]/60">
-                Mock: title / channel / date / time / own / collab · Member mock:{" "}
-                <code className="text-[#cfc6ff]/90">member: true</code> +
-                title/date (ไม่มี url) · Member จริง:{" "}
-                <code className="text-[#cfc6ff]/90">member: true</code> +{" "}
-                <code className="text-[#cfc6ff]/90">url</code> (Mild-R เท่านั้น)
-                · Collab จริง:{" "}
-                <code className="text-[#e8c49a]/90">collab: true</code> +{" "}
-                <code className="text-[#e8c49a]/90">url</code>
-              </p>
+            <div className="mt-5 space-y-3.5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs leading-relaxed break-words text-[#f3b8c4]/70">
+                  Mock: title / channel / date / time / own / collab · Member:{" "}
+                  <code className="text-[#cfc6ff]">member: true</code> · Collab:{" "}
+                  <code className="text-[#e8c49a]">collab: true</code>
+                </p>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={handleCopyExampleJson}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1 text-xs font-semibold transition",
+                      copiedJson
+                        ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-300"
+                        : "border-[#e85a7a]/40 bg-[#e85a7a]/15 text-[#f7d7de] hover:border-[#e85a7a] hover:bg-[#e85a7a]/25"
+                    )}
+                    title="คัดลอก JSON ตัวอย่างลง Clipboard"
+                  >
+                    {copiedJson ? (
+                      <>
+                        <Check className="size-3.5 text-emerald-400" />
+                        <span>คัดลอกแล้ว!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="size-3.5 text-[#e85a7a]" />
+                        <span>คัดลอก JSON ตัวอย่าง</span>
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setJsonText(SAMPLE_JSON);
+                      setError(null);
+                      setMessage("ใส่ JSON ตัวอย่างเรียบร้อยแล้ว");
+                    }}
+                    className="inline-flex items-center gap-1 rounded-xl border border-[#f3b8c4]/20 bg-[#12070c] px-2.5 py-1 text-xs text-[#f3b8c4]/70 transition hover:border-[#f3b8c4]/40 hover:text-[#fff5f7]"
+                    title="ใส่ JSON ตัวอย่างลงในช่อง"
+                  >
+                    <FileText className="size-3 text-[#f3b8c4]/60" />
+                    <span>ใส่ตัวอย่าง</span>
+                  </button>
+                </div>
+              </div>
+
               <textarea
                 value={jsonText}
                 onChange={(e) => setJsonText(e.target.value)}
-                rows={14}
-                className="w-full resize-y border border-[#f3b8c4]/20 bg-[#10070b] px-3 py-2 font-mono text-xs text-[#f7d7de] outline-none focus:border-[#e85a7a]/45"
+                placeholder={SAMPLE_JSON}
+                rows={10}
+                className="w-full min-w-0 resize-y break-all rounded-2xl border border-[#f3b8c4]/20 bg-[#12070c]/90 p-3.5 font-mono text-xs text-[#f7d7de] placeholder-[#f3b8c4]/25 outline-none transition focus:border-[#e85a7a] focus:ring-1 focus:ring-[#e85a7a]/30"
                 spellCheck={false}
               />
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <button
                   type="button"
                   onClick={() => {
@@ -960,66 +1033,78 @@ export function AddManualLiveButton() {
                     setError(null);
                     setMessage(null);
                   }}
-                  className={cn(
-                    buttonVariants({ variant: "outline", size: "sm" }),
-                    "inline-flex items-center gap-1.5 rounded-none border-[#f3b8c4]/25 bg-transparent"
-                  )}
+                  className="inline-flex items-center gap-1.5 text-xs text-[#f3b8c4]/60 transition hover:text-[#fff5f7]"
                 >
                   <Eraser className="size-3.5" />
-                  เคลียร์
+                  ล้างข้อความ
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const parsed = parseJsonToRows(jsonText);
-                    if (parsed.error && parsed.rows.length === 0) {
-                      setError(parsed.error);
-                      return;
-                    }
-                    setError(parsed.error ?? null);
-                    setRows(parsed.rows.length ? parsed.rows : [emptyRow()]);
-                    setTab("form");
-                    setMessage(`โหลดเข้าฟอร์มแล้ว ${parsed.rows.length} รายการ`);
-                  }}
-                  className={cn(
-                    buttonVariants({ variant: "outline", size: "sm" }),
-                    "rounded-none border-[#f3b8c4]/25 bg-transparent"
-                  )}
-                >
-                  โหลดเข้าฟอร์ม
-                </button>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => {
-                    const parsed = parseJsonToRows(jsonText);
-                    if (parsed.error && parsed.rows.length === 0) {
-                      setError(parsed.error);
-                      return;
-                    }
-                    const problem = validateRows(parsed.rows);
-                    if (problem) {
-                      setError(problem);
-                      return;
-                    }
-                    void submit(parsed.rows);
-                  }}
-                  className={cn(
-                    buttonVariants({ size: "sm" }),
-                    "rounded-none border-transparent bg-[#e85a7a] text-white hover:bg-[#f06b88] disabled:opacity-50"
-                  )}
-                >
-                  {busy ? "กำลังบันทึก…" : "บันทึกจาก JSON"}
-                </button>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const textToParse = jsonText.trim() || SAMPLE_JSON;
+                      const parsed = parseJsonToRows(textToParse);
+                      if (parsed.error && parsed.rows.length === 0) {
+                        setError(parsed.error);
+                        return;
+                      }
+                      setError(parsed.error ?? null);
+                      setRows(parsed.rows.length ? parsed.rows : [emptyRow()]);
+                      setTab("form");
+                      setMessage(`โหลดเข้าฟอร์มแล้ว ${parsed.rows.length} รายการ`);
+                    }}
+                    className={cn(
+                      buttonVariants({ variant: "outline", size: "sm" }),
+                      CTA_OUTLINE_CLASS,
+                      "text-xs"
+                    )}
+                  >
+                    โหลดเข้าฟอร์ม
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => {
+                      if (!jsonText.trim()) {
+                        setError("กรุณากรอก JSON หรือกด 'ใส่ตัวอย่าง' ก่อนบันทึก");
+                        return;
+                      }
+                      const parsed = parseJsonToRows(jsonText);
+                      if (parsed.error && parsed.rows.length === 0) {
+                        setError(parsed.error);
+                        return;
+                      }
+                      const problem = validateRows(parsed.rows);
+                      if (problem) {
+                        setError(problem);
+                        return;
+                      }
+                      void submit(parsed.rows);
+                    }}
+                    className={cn(
+                      buttonVariants({ size: "sm" }),
+                      CTA_PRIMARY_CLASS,
+                      "text-xs font-semibold"
+                    )}
+                  >
+                    {busy ? "กำลังบันทึก…" : "บันทึกจาก JSON"}
+                  </button>
+                </div>
               </div>
             </div>
           )}
 
           {message ? (
-            <p className="mt-3 text-sm text-[#a8e6d4]">{message}</p>
+            <div className="mt-4 flex items-center gap-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-200">
+              <CheckCircle2 className="size-4 shrink-0 text-emerald-400" />
+              <span>{message}</span>
+            </div>
           ) : null}
           {error ? (
-            <p className="mt-3 text-sm text-[#ffb3bc]">{error}</p>
+            <div className="mt-4 flex items-center gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-200">
+              <AlertCircle className="size-4 shrink-0 text-red-400" />
+              <span>{error}</span>
+            </div>
           ) : null}
         </DialogContent>
       </Dialog>

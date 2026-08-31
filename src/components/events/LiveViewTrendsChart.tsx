@@ -78,23 +78,29 @@ function TrendsTooltip({
   const showExtraPeak = grain !== "day" && !peakOnly && point;
 
   return (
-    <div className="border border-[#f3b8c4]/25 bg-[#1a0d12] px-3 py-2 text-xs text-[#fff5f7]">
-      <p className="mb-1.5 text-[#f3b8c4]/80">
+    <div className="rounded-2xl border border-[#f3b8c4]/20 bg-[#16080f]/95 px-3.5 py-2.5 text-xs text-[#fff5f7] shadow-[0_12px_32px_rgba(0,0,0,0.7)] backdrop-blur-md">
+      <p className="mb-2 font-medium text-[#f3b8c4]/80">
         {label} · คลิกดูรายละเอียด
       </p>
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         {payload.map((entry) => (
-          <p key={String(entry.name)} className="flex justify-between gap-4">
-            <span style={{ color: entry.color }}>{String(entry.name)}</span>
-            <span className="tabular-nums">
+          <p key={String(entry.name)} className="flex items-center justify-between gap-4">
+            <span className="flex items-center gap-1.5" style={{ color: entry.color }}>
+              <span className="size-1.5 rounded-full" style={{ backgroundColor: entry.color }} />
+              {String(entry.name)}
+            </span>
+            <span className="font-semibold tabular-nums text-white">
               {formatViews(Number(entry.value ?? 0))}
             </span>
           </p>
         ))}
         {showExtraPeak ? (
-          <p className="flex justify-between gap-4 border-t border-[#f3b8c4]/15 pt-1">
-            <span className="text-[#f7c98a]">สูงสุดไลฟ์</span>
-            <span className="tabular-nums text-[#f7c98a]">
+          <p className="flex items-center justify-between gap-4 border-t border-[#f3b8c4]/15 pt-1.5">
+            <span className="flex items-center gap-1.5 text-[#f7c98a]">
+              <span className="size-1.5 rounded-full bg-[#f7c98a]" />
+              สูงสุดไลฟ์
+            </span>
+            <span className="font-semibold tabular-nums text-[#f7c98a]">
               {formatViews(point.peak_views_on_end)}
             </span>
           </p>
@@ -183,7 +189,7 @@ export function LiveViewTrendsChart({
 
   if (rows.length === 0) {
     return (
-      <div className="flex h-72 items-center justify-center border border-dashed border-[#f3b8c4]/20 bg-[#1a0d12]/35 text-sm text-[#f3b8c4]/70">
+      <div className="flex h-72 items-center justify-center rounded-3xl border border-dashed border-[#f3b8c4]/20 bg-[#1a0c12]/40 text-sm text-[#f3b8c4]/70">
         ไม่มีข้อมูลในช่วงนี้
       </div>
     );
@@ -197,24 +203,24 @@ export function LiveViewTrendsChart({
   const showDots = data.length <= 60;
 
   return (
-    <div className="w-full border border-[#f3b8c4]/14 bg-[#1a0d12]/45 p-3 sm:p-4">
-      <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs text-[#f3b8c4]/55">
+    <div className="w-full overflow-hidden rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1f0d16]/75 via-[#1a0c12]/85 to-[#14080e]/95 p-4 shadow-xl sm:p-6">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs text-[#f3b8c4]/65">
           คลิกที่จุดหรือบริเวณกราฟเพื่อดูรายละเอียดด้านล่าง
           {peakOnly
             ? " · กำลังดูยอดไลฟ์สูงสุดต่อช่วง"
             : ""}
         </p>
         {canTogglePeak ? (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex items-center gap-1.5 rounded-full border border-[#f3b8c4]/15 bg-[#12070c]/80 p-1">
             <button
               type="button"
               onClick={() => setChartMode("totals")}
               className={cn(
-                "border px-2.5 py-1 text-[0.65rem] tracking-[0.14em] uppercase transition-colors",
+                "rounded-full px-3 py-1 text-[0.65rem] font-bold tracking-wider uppercase transition",
                 chartMode === "totals"
-                  ? "border-[#e85a7a]/70 bg-[#e85a7a]/15 text-[#fff5f7]"
-                  : "border-[#f3b8c4]/20 text-[#f3b8c4]/70 hover:border-[#f3b8c4]/40"
+                  ? "border border-[#e85a7a]/60 bg-[#e85a7a]/25 text-[#fff5f7] shadow-[0_0_12px_rgba(232,90,122,0.3)]"
+                  : "text-[#f3b8c4]/60 hover:text-[#fff5f7]"
               )}
             >
               ยอดรวมช่วง
@@ -223,10 +229,10 @@ export function LiveViewTrendsChart({
               type="button"
               onClick={() => setChartMode("peak")}
               className={cn(
-                "border px-2.5 py-1 text-[0.65rem] tracking-[0.14em] uppercase transition-colors",
+                "rounded-full px-3 py-1 text-[0.65rem] font-bold tracking-wider uppercase transition",
                 chartMode === "peak"
-                  ? "border-[#f7c98a]/70 bg-[#f7c98a]/12 text-[#fff5f7]"
-                  : "border-[#f3b8c4]/20 text-[#f3b8c4]/70 hover:border-[#f3b8c4]/40"
+                  ? "border border-[#f7c98a]/60 bg-[#f7c98a]/20 text-[#f7c98a] shadow-[0_0_12px_rgba(247,201,138,0.25)]"
+                  : "text-[#f3b8c4]/60 hover:text-[#fff5f7]"
               )}
             >
               สูงสุดต่อ{grain === "month" ? "เดือน" : "ปี"}
