@@ -203,7 +203,7 @@ export function EventsTeaser({ data }: EventsTeaserProps) {
                 <LiveScheduleError message={error} onRetry={retry} />
               ) : teaserWeeks.length > 0 ? (
                 <div className="transition-opacity duration-500 ease-out">
-                  <LiveWeekTable weeks={teaserWeeks} compact />
+                  <LiveWeekTable weeks={teaserWeeks} compact weekRange={teaserRange} />
                 </div>
               ) : (
                 <p className="text-sm text-[#f3b8c4]/65">

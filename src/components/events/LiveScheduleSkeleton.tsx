@@ -7,7 +7,7 @@ import {
 import { cn } from "@/lib/utils";
 
 type LiveScheduleSkeletonProps = {
-  variant?: "compact" | "full";
+  variant?: "compact" | "full" | "calendar";
   className?: string;
 };
 
@@ -42,6 +42,39 @@ function CompactSkeleton() {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+/** Month calendar card body — stats bar + weekday row + day cells */
+function CalendarMonthSkeleton() {
+  return (
+    <div aria-busy="true" aria-label="กำลังโหลดปฏิทินรายเดือน">
+      <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1.5 border-b border-[#f3b8c4]/10 px-3 py-2 sm:gap-3 sm:px-4 sm:py-2.5">
+        <Pulse className="mr-auto h-4 w-24 rounded-full" />
+        <Pulse className="h-6 w-16 rounded-full sm:w-20" />
+        <Pulse className="hidden h-6 w-16 rounded-full sm:block sm:w-20" />
+        <Pulse className="hidden h-6 w-14 rounded-full sm:block sm:w-16" />
+      </div>
+
+      <div className="grid grid-cols-7 gap-px bg-[#f3b8c4]/08 p-px">
+        {Array.from({ length: 7 }).map((_, i) => (
+          <Pulse
+            key={`wd-${i}`}
+            className="h-8 rounded-none bg-[#1a0c12]/80 sm:h-9"
+          />
+        ))}
+        {Array.from({ length: 42 }).map((_, i) => (
+          <Pulse
+            key={`day-${i}`}
+            className="aspect-square rounded-none bg-[#140a0d]/55 sm:aspect-auto sm:min-h-[7.5rem] md:min-h-[8.5rem]"
+          />
+        ))}
+      </div>
+
+      <p className={cn(META_CLASS, "py-4 text-center text-[#f3b8c4]/45")}>
+        กำลังโหลดปฏิทิน…
+      </p>
     </div>
   );
 }
@@ -98,7 +131,13 @@ export function LiveScheduleSkeleton({
 }: LiveScheduleSkeletonProps) {
   return (
     <div className={className}>
-      {variant === "full" ? <FullSkeleton /> : <CompactSkeleton />}
+      {variant === "full" ? (
+        <FullSkeleton />
+      ) : variant === "calendar" ? (
+        <CalendarMonthSkeleton />
+      ) : (
+        <CompactSkeleton />
+      )}
     </div>
   );
 }

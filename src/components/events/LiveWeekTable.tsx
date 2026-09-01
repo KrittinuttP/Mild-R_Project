@@ -8,11 +8,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-  Radio,
   Sparkles,
   Timer,
 } from "lucide-react";
 
+import { LiveCoverPlaceholder } from "@/components/events/LiveCoverPlaceholder";
 import { LiveDetailModal } from "@/components/events/LiveDetailModal";
 import {
   LiveCancelledBadge,
@@ -32,8 +32,9 @@ import {
   sortLiveWeeks,
   thaiWeekdayShort,
   weekDayDates,
+  weekOverlapsYmdRange,
 } from "@/lib/events";
-import { getYoutubeThumbnailUrl, getYoutubeVideoId } from "@/lib/youtube";
+import { getSlotCoverUrl } from "@/lib/live-cover";
 import {
   BADGE_ACCENT_CLASS,
   BADGE_SOFT_CLASS,
@@ -58,6 +59,10 @@ type LiveWeekTableProps = {
   weeks: LiveWeek[];
   className?: string;
   compact?: boolean;
+  /** All slots for reschedule banner navigation (defaults to slots in `weeks`). */
+  slotLookup?: LiveSlot[];
+  /** Clamp week picker to the loaded schedule window (e.g. homepage 2-week range). */
+  weekRange?: { from: string; to: string };
 };
 
 function platformLabel(platform?: LivePlatform) {
@@ -116,14 +121,7 @@ function MobileSlotCard({
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140a0d]/80 via-transparent to-transparent" />
           </>
         ) : (
-          <div className="relative flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-[#260f1c] via-[#1a0c13] to-[#12070c] p-2">
-            <div className="mb-0.5 flex size-6 items-center justify-center rounded-full bg-[#f3b8c4]/10 text-[#f3b8c4]/70">
-              <Radio className="size-3" />
-            </div>
-            <span className="max-w-full truncate px-1 text-[0.58rem] tracking-wider uppercase text-[#f3b8c4]/50">
-              {own ? "Mild-R" : (slot.sourceTitle ?? "Live")}
-            </span>
-          </div>
+          <LiveCoverPlaceholder className="relative" size="sm" />
         )}
 
         {/* Status badges on bottom-right of thumbnail */}
@@ -285,14 +283,7 @@ function SlotCard({
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140a0d]/80 via-transparent to-transparent" />
           </>
         ) : (
-          <div className="relative h-full w-full bg-gradient-to-br from-[#260f1c] via-[#1a0c13] to-[#12070c] p-2 flex flex-col items-center justify-center">
-            <div className="flex items-center justify-center size-7 rounded-full bg-[#f3b8c4]/10 text-[#f3b8c4]/70 mb-0.5">
-              <Radio className="size-3.5" />
-            </div>
-            <span className="text-[0.62rem] tracking-wider uppercase text-[#f3b8c4]/50 truncate max-w-full px-1">
-              {own ? "Mild-R Live" : (slot.sourceTitle ?? "Live Stream")}
-            </span>
-          </div>
+          <LiveCoverPlaceholder className="relative h-full w-full" size="md" />
         )}
 
         {/* 🏷️ Status Badges on Bottom-Right of Image with drop-shadow & backdrop blur */}
@@ -436,37 +427,6 @@ function EmptyDaySlot({ compact }: { compact?: boolean }) {
       <OfflineBadge size={compact ? "sm" : "md"} />
     </div>
   );
-}
-
-function getSlotCoverUrl(slot: LiveSlot): string | null {
-  const videoId =
-    getYoutubeVideoId(slot.url) ||
-    (slot.id?.startsWith("yt-") ? slot.id.replace("yt-", "") : null);
-
-  // If this stream is from YouTube, mqdefault.jpg is guaranteed to exist and is true 16:9 widescreen without any top/bottom letterbox black bars
-  if (videoId) {
-    return getYoutubeThumbnailUrl(videoId);
-  }
-
-  if (slot.coverUrl) {
-    let url = slot.coverUrl;
-    if (
-      url.includes("i.ytimg.com/vi/") &&
-      (url.includes("/hqdefault.jpg") ||
-        url.includes("/sddefault.jpg") ||
-        url.includes("/default.jpg"))
-    ) {
-      return url.replace(
-        /\/hqdefault\.jpg|\/sddefault\.jpg|\/default\.jpg/,
-        "/mqdefault.jpg"
-      );
-    }
-    return url;
-  }
-  if (slot.coverHistory && slot.coverHistory.length > 0) {
-    return slot.coverHistory[0].url;
-  }
-  return null;
 }
 
 function findHighlightSlot(week: LiveWeek): LiveSlot | null {
@@ -708,7 +668,15 @@ function LiveSpotlightBanner({
             />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140a0d]/70 via-transparent to-transparent" />
           </button>
-        ) : null}
+        ) : (
+          <button
+            type="button"
+            onClick={onOpenDetail}
+            className="relative aspect-[16/9] w-64 shrink-0 overflow-hidden rounded-2xl border border-[#f3b8c4]/20 bg-[#12080c] text-left transition hover:border-[#e85a7a]/50 lg:w-80"
+          >
+            <LiveCoverPlaceholder className="absolute inset-0" size="lg" />
+          </button>
+        )}
       </div>
 
       {/* 📱 Mobile: Vertical Stack Card */}
@@ -763,7 +731,15 @@ function LiveSpotlightBanner({
               />
             </div>
           </button>
-        ) : null}
+        ) : (
+          <button
+            type="button"
+            onClick={onOpenDetail}
+            className="relative aspect-[16/9] w-full overflow-hidden bg-[#12080c] text-left"
+          >
+            <LiveCoverPlaceholder className="absolute inset-0" size="lg" />
+          </button>
+        )}
 
         <div className="p-4">
           {!coverUrl ? (
@@ -992,17 +968,30 @@ export function LiveWeekTable({
   weeks,
   className,
   compact = false,
+  slotLookup,
+  weekRange,
 }: LiveWeekTableProps) {
   const nowMs = useLiveClock(30000);
   const sorted = useMemo(() => sortLiveWeeks(weeks), [weeks]);
-  const [index, setIndex] = useState(() => findDefaultWeekIndex(sorted));
+  const visibleWeeks = useMemo(() => {
+    if (!weekRange) return sorted;
+    return sorted.filter((week) =>
+      weekOverlapsYmdRange(week.weekStart, weekRange.from, weekRange.to)
+    );
+  }, [sorted, weekRange]);
+
+  const [index, setIndex] = useState(() => findDefaultWeekIndex(visibleWeeks));
   const [activeSlot, setActiveSlot] = useState<LiveSlot | null>(null);
+
+  useEffect(() => {
+    setIndex(findDefaultWeekIndex(visibleWeeks));
+  }, [visibleWeeks]);
 
   const safeIndex = Math.min(
     Math.max(index, 0),
-    Math.max(sorted.length - 1, 0)
+    Math.max(visibleWeeks.length - 1, 0)
   );
-  const week = sorted[safeIndex];
+  const week = visibleWeeks[safeIndex];
   const dayIsos = week ? weekDayDates(week.weekStart) : [];
 
   const slotsByDate = useMemo(() => {
@@ -1018,6 +1007,11 @@ export function LiveWeekTable({
     }
     return map;
   }, [week]);
+
+  const allSlots = useMemo(
+    () => slotLookup ?? sorted.flatMap((w) => w.slots),
+    [slotLookup, sorted]
+  );
 
   const offlineByDate = useMemo(() => {
     const map = new Map<string, LiveOfflineDay>();
@@ -1113,7 +1107,7 @@ export function LiveWeekTable({
           </p>
         </div>
 
-        {sorted.length > 1 ? (
+        {visibleWeeks.length > 1 ? (
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -1129,14 +1123,16 @@ export function LiveWeekTable({
               <ChevronLeft className="size-4" />
             </button>
             <span className="min-w-[4.5rem] text-center text-xs tabular-nums text-[#f3b8c4]/70 sm:text-sm">
-              {safeIndex + 1} / {sorted.length}
+              {safeIndex + 1} / {visibleWeeks.length}
             </span>
             <button
               type="button"
               aria-label="สัปดาห์ถัดไป"
-              disabled={safeIndex >= sorted.length - 1}
+              disabled={safeIndex >= visibleWeeks.length - 1}
               onClick={() =>
-                setIndex((value) => Math.min(sorted.length - 1, value + 1))
+                setIndex((value) =>
+                  Math.min(visibleWeeks.length - 1, value + 1)
+                )
               }
               className={cn(
                 buttonVariants({ variant: "outline", size: "icon" }),
@@ -1295,6 +1291,10 @@ export function LiveWeekTable({
         open={activeSlot !== null}
         onOpenChange={(open) => {
           if (!open) setActiveSlot(null);
+        }}
+        onSelectSlot={(slotId) => {
+          const related = allSlots.find((s) => s.id === slotId);
+          if (related) setActiveSlot(related);
         }}
       />
     </div>

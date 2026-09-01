@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, Loader2 } from "lucide-react";
 
+import { LiveCoverPlaceholder } from "@/components/events/LiveCoverPlaceholder";
 import { LiveDetailModal } from "@/components/events/LiveDetailModal";
 import {
   LiveCancelledBadge,
@@ -51,18 +52,9 @@ import {
   weekDayDates,
 } from "@/lib/events";
 import { sortLiveSlotsForCalendar } from "@/lib/live-stream-utils";
+import { getSlotCoverUrl } from "@/lib/live-cover";
 import { cn } from "@/lib/utils";
-import {
-  getYoutubeThumbnailUrl,
-  getYoutubeVideoId,
-} from "@/lib/youtube";
 import type { LiveSlot } from "@/types/vtuber";
-
-function slotCoverUrl(slot: LiveSlot) {
-  if (slot.coverUrl) return slot.coverUrl;
-  const videoId = getYoutubeVideoId(slot.url);
-  return videoId ? getYoutubeThumbnailUrl(videoId) : null;
-}
 
 function WeekSlotCard({
   slot,
@@ -75,7 +67,7 @@ function WeekSlotCard({
   const collab = slot.kind === "collab";
   const guestTone = !own && collab;
   const cancelled = slot.status === "cancelled";
-  const cover = slotCoverUrl(slot);
+  const cover = getSlotCoverUrl(slot);
   const title = slot.titleLocal ?? slot.title;
 
   return (
@@ -104,10 +96,7 @@ function WeekSlotCard({
               )}
             />
           ) : (
-            <div
-              className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(232,90,122,0.22),transparent_55%),linear-gradient(160deg,#1c0d12,#10070b)]"
-              aria-hidden
-            />
+            <LiveCoverPlaceholder className="absolute inset-0" size="sm" />
           )}
         </div>
 
@@ -332,8 +321,7 @@ export function LiveScheduleBoard() {
     thisWeekQuery.status === "error" &&
     monthQuery.status === "error";
 
-  const calendarLoading =
-    monthQuery.status === "loading" && monthQuery.weeks.length === 0;
+  const calendarLoading = monthQuery.status === "loading";
 
   // Calendar UI only: selected month + pad days to complete weeks
   const grid = useMemo(
@@ -420,13 +408,9 @@ export function LiveScheduleBoard() {
     setSelectedDate(iso);
   };
 
-  /** Calendar cell tap: select day; 1 slot → open detail; many → scroll to list (mobile). */
+  /** Calendar cell tap: select day only; slot detail opens from time/title click. */
   const selectCalendarDay = (iso: string, daySlots: LiveSlot[]) => {
     selectDay(iso);
-    if (daySlots.length === 1) {
-      setActiveSlot(daySlots[0]);
-      return;
-    }
     if (daySlots.length > 1 && typeof window !== "undefined") {
       const narrow = window.matchMedia("(max-width: 639px)").matches;
       if (narrow) {
@@ -487,7 +471,7 @@ export function LiveScheduleBoard() {
           {thisWeekQuery.status === "loading" && thisWeekOnly.length === 0 ? (
             <LiveScheduleSkeleton variant="compact" />
           ) : thisWeekOnly.length > 0 ? (
-            <LiveWeekTable weeks={thisWeekOnly} />
+            <LiveWeekTable weeks={thisWeekOnly} slotLookup={allSlots} />
           ) : (
             <p className="text-sm text-[#f3b8c4]/65">ยังไม่มีไลฟ์สัปดาห์นี้</p>
           )}
@@ -497,17 +481,17 @@ export function LiveScheduleBoard() {
       {/* ── Month calendar ── */}
       {/* ── Month calendar ── */}
       <section className="relative">
-        {calendarLoading ? (
-          <div
-            className="pointer-events-none absolute inset-0 z-10 animate-pulse rounded-3xl bg-[#140a0d]/35"
-            aria-hidden
-          />
-        ) : null}
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
+          <div className="flex flex-wrap items-center gap-3">
             <h2 className={DISPLAY_H2_CLASS}>
               ปฏิทินรายเดือน
             </h2>
+            {calendarLoading ? (
+              <span className="inline-flex items-center gap-1.5 text-xs text-[#e85a7a]/90">
+                <Loader2 className="size-3.5 animate-spin" aria-hidden />
+                กำลังโหลด…
+              </span>
+            ) : null}
           </div>
           <button
             type="button"
@@ -593,22 +577,22 @@ export function LiveScheduleBoard() {
             <p className="mr-auto text-xs tracking-[0.14em] text-[#f3b8c4]/55 uppercase sm:text-sm">
               เดือนนี้
               <span className="ml-1.5 tabular-nums text-[#f3b8c4]/75">
-                {monthKindStats.total}
+                {calendarLoading ? "—" : monthKindStats.total}
               </span>
             </p>
             {/* Mobile: compact counts — full pills from sm+ */}
             <div className="flex items-center gap-2.5 text-[0.65rem] tabular-nums tracking-wide sm:hidden">
               <span className="inline-flex items-center gap-1 text-[#cfc6ff]">
                 <span className="size-1.5 rounded-full bg-[#9b8cff]" aria-hidden />
-                {monthKindStats.member}
+                {calendarLoading ? "—" : monthKindStats.member}
               </span>
               <span className="inline-flex items-center gap-1 text-[#f3b8c4]/80">
                 <span className="size-1.5 rounded-full bg-[#e85a7a]" aria-hidden />
-                {monthKindStats.solo}
+                {calendarLoading ? "—" : monthKindStats.solo}
               </span>
               <span className="inline-flex items-center gap-1 text-[#e8c49a]">
                 <span className="size-1.5 rounded-full bg-[#d4a574]" aria-hidden />
-                {monthKindStats.collab}
+                {calendarLoading ? "—" : monthKindStats.collab}
               </span>
             </div>
             <span
@@ -619,7 +603,9 @@ export function LiveScheduleBoard() {
               )}
             >
               Member
-              <span className="tabular-nums">{monthKindStats.member}</span>
+              <span className="tabular-nums">
+                {calendarLoading ? "—" : monthKindStats.member}
+              </span>
             </span>
             <span
               className={cn(
@@ -629,7 +615,9 @@ export function LiveScheduleBoard() {
               )}
             >
               Solo
-              <span className="tabular-nums">{monthKindStats.solo}</span>
+              <span className="tabular-nums">
+                {calendarLoading ? "—" : monthKindStats.solo}
+              </span>
             </span>
             <span
               className={cn(
@@ -639,7 +627,9 @@ export function LiveScheduleBoard() {
               )}
             >
               Collab
-              <span className="tabular-nums">{monthKindStats.collab}</span>
+              <span className="tabular-nums">
+                {calendarLoading ? "—" : monthKindStats.collab}
+              </span>
             </span>
           </div>
 
@@ -711,7 +701,7 @@ export function LiveScheduleBoard() {
                     {dayNum}
                   </span>
 
-                  {daySlots.length > 0 ? (
+                  {!calendarLoading && daySlots.length > 0 ? (
                     <div className="mt-auto flex min-h-0 flex-col gap-0.5">
                       {visibleSlots.map((slot) => (
                         <MobileCalendarTimeSlot
@@ -729,7 +719,7 @@ export function LiveScheduleBoard() {
                         </span>
                       ) : null}
                     </div>
-                  ) : showOfflineForDay(iso) ? (
+                  ) : !calendarLoading && showOfflineForDay(iso) ? (
                     <div className="mt-auto border-l-2 border-[#6ec9b0]/70 py-px pl-1">
                       <span className="text-[0.5rem] tracking-[0.1em] text-[#6ec9b0]/85 uppercase">
                         Off
@@ -751,15 +741,17 @@ export function LiveScheduleBoard() {
                     >
                       {dayNum}
                     </span>
-                    <LiveDayChannelBadges
-                      slots={daySlots}
-                      size="sm"
-                      compact
-                      className="justify-start"
-                    />
+                    {!calendarLoading ? (
+                      <LiveDayChannelBadges
+                        slots={daySlots}
+                        size="sm"
+                        compact
+                        className="justify-start"
+                      />
+                    ) : null}
                   </div>
 
-                  {daySlots.length > 0 ? (
+                  {!calendarLoading && daySlots.length > 0 ? (
                     <div className="flex min-h-0 w-full flex-1 flex-col gap-0.5 overflow-hidden sm:gap-1">
                       {visibleSlots.map((slot) => (
                         <CalendarMonthSlot
@@ -778,7 +770,7 @@ export function LiveScheduleBoard() {
                         </span>
                       ) : null}
                     </div>
-                  ) : showOfflineForDay(iso) ? (
+                  ) : !calendarLoading && showOfflineForDay(iso) ? (
                     <div className="flex w-full flex-col items-center pt-0.5">
                       <OfflineBadge size="sm" />
                     </div>
@@ -924,6 +916,10 @@ export function LiveScheduleBoard() {
         open={activeSlot !== null}
         onOpenChange={(open) => {
           if (!open) setActiveSlot(null);
+        }}
+        onSelectSlot={(slotId) => {
+          const related = allSlots.find((s) => s.id === slotId);
+          if (related) setActiveSlot(related);
         }}
       />
     </div>

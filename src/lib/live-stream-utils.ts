@@ -1,8 +1,10 @@
 import {
   formatISODate,
+  isYmdInInclusiveRange,
   parseISODate,
   sortLiveWeeks,
   startOfWeekSunday,
+  weekOverlapsYmdRange,
 } from "@/lib/events";
 import type { LiveStreamRow, LiveStreamStatus } from "@/types/live-stream";
 import type { LiveSlot, LiveWeek } from "@/types/vtuber";
@@ -248,11 +250,18 @@ export function liveStreamToSlots(row: LiveStreamRow): LiveSlot[] {
     if (firstDate !== latestDate) {
       const firstTime = bangkokParts(firstIso).time;
       const latestTime = bangkokParts(latestIso).time;
+      const activeSlotId = `yt-${row.video_id}`;
+      const ghostSlotId = `yt-${row.video_id}-orig-${firstDate}`;
+      const history = baseSlot.coverHistory ?? [];
+      const ghostCoverUrl =
+        history.length > 0
+          ? history[history.length - 1]?.url
+          : baseSlot.coverUrl;
 
-      // Slot 1: Ghost log slot on the original date
+      // Slot 1: Ghost log slot on the original date (original schedule only)
       const ghostSlot: LiveSlot = {
         ...baseSlot,
-        id: `yt-${row.video_id}-orig-${firstDate}`,
+        id: ghostSlotId,
         date: firstDate,
         time: firstTime,
         timePrevious: undefined,
@@ -261,12 +270,24 @@ export function liveStreamToSlots(row: LiveStreamRow): LiveSlot[] {
         scheduledLabel: firstTime,
         scheduledPrevious: undefined,
         scheduledUpdated: undefined,
+        actualStartLabel: null,
+        actualEndLabel: null,
+        durationLabel: null,
+        viewsOnEnd: null,
+        latestViews: null,
+        coverUrl: ghostCoverUrl ?? baseSlot.coverUrl,
+        rescheduleLink: {
+          direction: "to",
+          date: latestDate,
+          time: latestTime,
+          slotId: activeSlotId,
+        },
       };
 
       // Slot 2: Active slot on the new date
       const activeSlot: LiveSlot = {
         ...baseSlot,
-        id: `yt-${row.video_id}`,
+        id: activeSlotId,
         date: latestDate,
         time: baseSlot.status === "live" ? "LIVE" : latestTime,
         timePrevious: undefined,
@@ -356,14 +377,21 @@ function deduplicateWeekSlots(slots: LiveSlot[]): LiveSlot[] {
 /** Merge Supabase streams into JSON live weeks (all history that loads). */
 export function mergeLiveWeeksWithStreams(
   baseWeeks: LiveWeek[],
-  streams: LiveStreamRow[]
+  streams: LiveStreamRow[],
+  range?: { from: string; to: string }
 ): LiveWeek[] {
   const weekMap = new Map<string, LiveWeek>();
 
+  const slotInRange = (slot: LiveSlot) =>
+    !range || isYmdInInclusiveRange(slot.date, range.from, range.to);
+
   for (const week of baseWeeks) {
+    if (range && !weekOverlapsYmdRange(week.weekStart, range.from, range.to)) {
+      continue;
+    }
     weekMap.set(week.weekStart, {
       ...week,
-      slots: [...week.slots],
+      slots: week.slots.filter(slotInRange),
       offlineDays: week.offlineDays ? [...week.offlineDays] : undefined,
     });
   }
@@ -381,10 +409,18 @@ export function mergeLiveWeeksWithStreams(
     const slots = liveStreamToSlots(row);
     for (const slot of slots) {
       if (existingIds.has(slot.id)) continue;
+      if (!slotInRange(slot)) continue;
 
       const weekStart = formatISODate(
         startOfWeekSunday(parseISODate(slot.date))
       );
+      if (
+        range &&
+        !weekOverlapsYmdRange(weekStart, range.from, range.to)
+      ) {
+        continue;
+      }
+
       let week = weekMap.get(weekStart);
       if (!week) {
         week = {
@@ -410,7 +446,17 @@ export function mergeLiveWeeksWithStreams(
     });
   }
 
-  return sortLiveWeeks([...weekMap.values()]);
+  let weeks = sortLiveWeeks([...weekMap.values()]);
+
+  if (range) {
+    weeks = weeks.filter(
+      (week) =>
+        weekOverlapsYmdRange(week.weekStart, range.from, range.to) &&
+        week.slots.length > 0
+    );
+  }
+
+  return weeks;
 }
 
 export function partitionLiveStreams(rows: LiveStreamRow[]) {

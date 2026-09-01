@@ -1,9 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
+  ArrowRight,
   CalendarDays,
   Clock,
   ExternalLink,
@@ -13,9 +14,8 @@ import {
   Timer,
 } from "lucide-react";
 
-import {
-  LiveSlotTime,
-} from "@/components/events/LiveSlotMeta";
+import { LiveSlotTime } from "@/components/events/LiveSlotMeta";
+import { LiveCoverPlaceholder } from "@/components/events/LiveCoverPlaceholder";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -25,19 +25,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { formatThaiDate } from "@/lib/events";
-import { CTA_PRIMARY_CLASS, MODAL_CLOSE_BUTTON_CLASS } from "@/lib/site-ui";
-import { cn } from "@/lib/utils";
+import { formatThaiDate, parseISODate, thaiWeekdayShort } from "@/lib/events";
+import { getSlotCoverUrl } from "@/lib/live-cover";
 import {
-  getYoutubeThumbnailUrl,
-  getYoutubeVideoId,
-} from "@/lib/youtube";
+  CTA_PRIMARY_CLASS,
+  MODAL_CLOSE_BUTTON_CLASS,
+} from "@/lib/site-ui";
+import { cn } from "@/lib/utils";
 import type { LivePlatform, LiveSlot } from "@/types/vtuber";
 
 type LiveDetailModalProps = {
   slot: LiveSlot | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Switch modal to a paired rescheduled slot (same video, different date). */
+  onSelectSlot?: (slotId: string) => void;
 };
 
 function platformLabel(platform?: LivePlatform) {
@@ -50,7 +52,7 @@ function platformLabel(platform?: LivePlatform) {
 function statusLabel(status?: LiveSlot["status"]) {
   if (status === "live") return "กำลังไลฟ์";
   if (status === "upcoming") return "รอไลฟ์";
-  if (status === "ended") return "จบไลฟ์แล้ว";
+  if (status === "ended") return "ไลฟ์จบแล้ว";
   if (status === "cancelled") return "ยกเลิก";
   return null;
 }
@@ -65,7 +67,7 @@ function MetaPill({
   return (
     <span
       className={cn(
-        "inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-xs leading-none tracking-wide",
+        "inline-flex h-7 items-center gap-1 rounded-full border px-2.5 text-[0.7rem] leading-none tracking-wide md:h-8 md:gap-1.5 md:px-3 md:text-xs",
         className
       )}
     >
@@ -88,20 +90,127 @@ function TimeCell({
   return (
     <div
       className={cn(
-        "min-w-0 px-3 py-2.5 sm:px-3.5",
+        "min-w-0 px-2.5 py-2 sm:px-3.5 sm:py-2.5",
         accent && "bg-[#e85a7a]/06"
       )}
     >
-      <p className="flex items-center gap-1.5 text-xs tracking-[0.14em] text-[#f3b8c4]/60 uppercase">
+      <p className="flex items-center gap-1 text-[0.65rem] tracking-[0.12em] text-[#f3b8c4]/60 uppercase sm:gap-1.5 sm:text-xs sm:tracking-[0.14em]">
         <span className="opacity-80" aria-hidden>
           {icon}
         </span>
         {label}
       </p>
-      <div className="mt-1 font-[family-name:var(--font-display)] text-sm tabular-nums text-[#fff5f7] sm:text-[0.95rem]">
+      <div className="mt-0.5 font-[family-name:var(--font-display)] text-[0.82rem] tabular-nums text-[#fff5f7] sm:mt-1 sm:text-sm md:text-[0.95rem]">
         {children}
       </div>
     </div>
+  );
+}
+
+function WatchLink({
+  slot,
+  external,
+  className,
+}: {
+  slot: LiveSlot;
+  external: boolean;
+  className?: string;
+}) {
+  if (!slot.url) return null;
+
+  return (
+    <Link
+      href={slot.url}
+      target={external ? "_blank" : undefined}
+      rel={external ? "noopener noreferrer" : undefined}
+      className={cn(
+        buttonVariants({ size: "lg" }),
+        CTA_PRIMARY_CLASS,
+        "group flex h-10 w-full items-center justify-center gap-2 font-semibold md:h-11",
+        className
+      )}
+    >
+      <Play className="size-4 fill-current" aria-hidden />
+      <span>ไปดูไลฟ์</span>
+      {external ? <ExternalLink className="size-3.5 opacity-75" /> : null}
+    </Link>
+  );
+}
+
+function formatNewLiveDateLine(iso: string, time?: string) {
+  const date = parseISODate(iso);
+  const shortMonth = date.toLocaleDateString("th-TH-u-ca-gregory", {
+    month: "short",
+  });
+  const label = `${thaiWeekdayShort(date)} ${date.getDate()} ${shortMonth}`;
+  return time ? `${label} · ${time}` : label;
+}
+
+/** Ghost slot: single card CTA to open the later live round in-app. */
+function NewLiveRoundCta({
+  link,
+  onSelectSlot,
+  className,
+}: {
+  link: NonNullable<LiveSlot["rescheduleLink"]>;
+  onSelectSlot: (slotId: string) => void;
+  className?: string;
+}) {
+  const dateLine = formatNewLiveDateLine(link.date, link.time);
+
+  return (
+    <button
+      type="button"
+      onClick={() => onSelectSlot(link.slotId)}
+      aria-label={`มีการไลฟ์ใหม่ ${dateLine} — เปิดไลฟ์รอบใหม่`}
+      className={cn(
+        "group w-full overflow-hidden rounded-xl border border-[#f3b8c4]/18 bg-gradient-to-br from-[#e85a7a]/12 via-[#1c0c14]/90 to-[#14080e]/95 p-2.5 text-left shadow-[0_8px_24px_rgba(0,0,0,0.22)] transition duration-200 sm:rounded-2xl sm:p-3.5",
+        "hover:border-[#e85a7a]/45 hover:from-[#e85a7a]/18 hover:shadow-[0_12px_28px_rgba(232,90,122,0.16)]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e85a7a]/55 focus-visible:ring-offset-2 focus-visible:ring-offset-[#14080e]",
+        className
+      )}
+    >
+      <div className="flex items-center gap-2 sm:gap-3">
+        <span
+          className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-[#e85a7a]/25 bg-[#e85a7a]/12 text-[#f3b8c4] transition group-hover:border-[#e85a7a]/40 group-hover:bg-[#e85a7a]/20 sm:size-10 sm:rounded-xl"
+          aria-hidden
+        >
+          <Radio className="size-3.5 sm:size-4" />
+        </span>
+
+        <div className="min-w-0 flex-1">
+          <p className="text-[0.62rem] font-semibold tracking-[0.1em] text-[#e85a7a] uppercase sm:text-[0.68rem] sm:tracking-[0.12em]">
+            มีการไลฟ์ใหม่
+          </p>
+          <p className="mt-px flex items-center gap-1 font-[family-name:var(--font-display)] text-xs leading-snug tabular-nums text-[#fff5f7] sm:mt-0.5 sm:gap-1.5 sm:text-sm">
+            <CalendarDays
+              className="size-3 shrink-0 text-[#f3b8c4]/55 sm:size-3.5"
+              aria-hidden
+            />
+            <span className="truncate">{dateLine}</span>
+          </p>
+        </div>
+
+        <span className="flex shrink-0 items-center gap-0.5 whitespace-nowrap text-[0.68rem] font-semibold text-[#f3b8c4] transition group-hover:text-[#fff5f7] sm:gap-1 sm:text-xs">
+          <span>ไลฟ์รอบใหม่</span>
+          <ArrowRight
+            className="size-3.5 shrink-0 transition group-hover:translate-x-0.5 sm:size-4"
+            aria-hidden
+          />
+        </span>
+      </div>
+    </button>
+  );
+}
+
+function isGhostNewLiveRound(
+  slot: LiveSlot,
+  onSelectSlot?: (slotId: string) => void
+) {
+  return (
+    slot.status === "cancelled" &&
+    slot.rescheduleLink?.direction === "to" &&
+    Boolean(onSelectSlot)
   );
 }
 
@@ -109,19 +218,22 @@ export function LiveDetailModal({
   slot,
   open,
   onOpenChange,
+  onSelectSlot,
 }: LiveDetailModalProps) {
   const external = Boolean(slot?.url?.startsWith("http"));
   const own = Boolean(slot?.isOwnChannel);
   const collab = slot?.kind === "collab";
   const cancelled = slot?.status === "cancelled";
   const platform = platformLabel(slot?.platform);
-  const videoId = getYoutubeVideoId(slot?.url);
-  const fallbackThumb = videoId ? getYoutubeThumbnailUrl(videoId) : null;
-  const coverCandidates = [
-    slot?.coverUrl,
-    ...(slot?.coverHistory?.map((h) => h.url) ?? []),
-    fallbackThumb,
-  ].filter((u): u is string => Boolean(u));
+  const coverCandidates = useMemo(() => {
+    const urls: string[] = [];
+    const primary = slot ? getSlotCoverUrl(slot) : null;
+    if (primary) urls.push(primary);
+    for (const item of slot?.coverHistory ?? []) {
+      if (item.url && !urls.includes(item.url)) urls.push(item.url);
+    }
+    return urls;
+  }, [slot]);
   const [activeCover, setActiveCover] = useState<string | null>(
     coverCandidates[0] ?? null
   );
@@ -149,7 +261,7 @@ export function LiveDetailModal({
 
   const startValue = slot?.actualStartLabel ?? (
     <span className="text-[#f3b8c4]/45">
-      {cancelled ? "ไม่ได้เริ่ม (ยกเลิก)" : "ยังไม่เริ่ม"}
+      {cancelled ? "ไม่ได้เริ่ม" : "ยังไม่เริ่ม"}
     </span>
   );
   const endValue = slot?.actualEndLabel ?? (
@@ -164,14 +276,14 @@ export function LiveDetailModal({
         closeButtonClassName={MODAL_CLOSE_BUTTON_CLASS}
       >
         {slot ? (
-          <div className="relative max-h-[92dvh] overflow-y-auto md:grid md:grid-cols-12 md:overflow-visible">
+          <div className="relative md:grid md:grid-cols-12 md:overflow-visible">
             <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-px bg-gradient-to-r from-transparent via-[#e85a7a]/80 to-transparent" />
 
             {/* 🖼️ Left Column: Media & Primary Action (md:col-span-5) */}
-            <div className="flex flex-col justify-between gap-4 border-b border-[#f3b8c4]/12 bg-[#10070b]/70 p-4 sm:p-5 md:col-span-5 md:border-b-0 md:border-r">
-              <div className="space-y-3.5">
+            <div className="flex flex-col justify-between gap-2 border-b border-[#f3b8c4]/12 bg-[#10070b]/70 p-3 sm:gap-4 sm:p-5 md:col-span-5 md:border-b-0 md:border-r">
+              <div className="space-y-2 sm:space-y-3.5">
                 {/* Main Thumbnail Container */}
-                <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-[#f3b8c4]/15 bg-[#12070c] shadow-md">
+                <div className="relative aspect-video max-h-[9.75rem] w-full overflow-hidden rounded-xl border border-[#f3b8c4]/15 bg-[#12070c] shadow-md sm:max-h-none sm:rounded-2xl">
                   {activeCover ? (
                     <ProtectedImage
                       src={activeCover}
@@ -183,10 +295,7 @@ export function LiveDetailModal({
                       )}
                     />
                   ) : (
-                    <div
-                      className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(232,90,122,0.28),transparent_55%),radial-gradient(ellipse_at_80%_80%,rgba(243,184,196,0.12),transparent_50%),linear-gradient(160deg,#1c0d12,#10070b)]"
-                      aria-hidden
-                    />
+                    <LiveCoverPlaceholder className="absolute inset-0" size="lg" />
                   )}
 
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140a0d]/80 via-transparent to-transparent" />
@@ -220,8 +329,8 @@ export function LiveDetailModal({
 
                 {/* 🎞️ Cover History (if more than 1) */}
                 {history.length > 1 ? (
-                  <div className="space-y-1.5">
-                    <p className="inline-flex items-center gap-1.5 text-[0.62rem] font-medium tracking-wider text-[#f3b8c4]/65 uppercase">
+                  <div className="space-y-1">
+                    <p className="inline-flex items-center gap-1 text-[0.58rem] font-medium tracking-wider text-[#f3b8c4]/65 uppercase sm:gap-1.5 sm:text-[0.62rem]">
                       <Images className="size-3 text-[#e85a7a]" aria-hidden />
                       ประวัติปก ({history.length})
                     </p>
@@ -234,7 +343,7 @@ export function LiveDetailModal({
                             type="button"
                             onClick={() => setActiveCover(item.url)}
                             className={cn(
-                              "relative h-11 w-16 shrink-0 overflow-hidden rounded-xl border transition",
+                              "relative h-9 w-14 shrink-0 overflow-hidden rounded-lg border transition sm:h-11 sm:w-16 sm:rounded-xl",
                               selected
                                 ? "border-[#e85a7a] ring-2 ring-[#e85a7a]/50"
                                 : "border-[#f3b8c4]/20 hover:border-[#e85a7a]/40"
@@ -254,42 +363,33 @@ export function LiveDetailModal({
                 ) : null}
               </div>
 
-              {/* 🎬 Desktop Watch Live Button */}
-              {slot.url && !cancelled ? (
+              {isGhostNewLiveRound(slot, onSelectSlot) ? (
                 <div className="hidden md:block">
-                  <Link
-                    href={slot.url}
-                    target={external ? "_blank" : undefined}
-                    rel={external ? "noopener noreferrer" : undefined}
-                    className={cn(
-                      buttonVariants({ size: "lg" }),
-                      CTA_PRIMARY_CLASS,
-                      "group flex w-full items-center justify-center gap-2 font-semibold"
-                    )}
-                  >
-                    <Play className="size-4 fill-current" aria-hidden />
-                    <span>ไปดูไลฟ์</span>
-                    {external ? (
-                      <ExternalLink className="size-3.5 opacity-75" />
-                    ) : null}
-                  </Link>
+                  <NewLiveRoundCta
+                    link={slot.rescheduleLink!}
+                    onSelectSlot={onSelectSlot!}
+                  />
+                </div>
+              ) : slot.url && !cancelled ? (
+                <div className="hidden md:block">
+                  <WatchLink slot={slot} external={external} />
                 </div>
               ) : null}
             </div>
 
             {/* 📝 Right Column: Details & Schedule (md:col-span-7) */}
-            <div className="flex flex-col justify-between gap-5 p-5 sm:p-6 md:col-span-7">
-              <div className="space-y-4">
+            <div className="flex flex-col justify-between gap-2.5 p-3 sm:gap-5 sm:p-6 md:col-span-7">
+              <div className="space-y-2.5 sm:space-y-4">
                 {/* Header & Titles (No line-clamp, full width & wrap) */}
-                <DialogHeader className="gap-1.5 pr-8 text-left">
+                <DialogHeader className="gap-0.5 pr-7 text-left sm:gap-1.5 sm:pr-8">
                   <DialogTitle
-                    className="font-[family-name:var(--font-display)] text-lg font-normal leading-snug break-words text-[#fff5f7] sm:text-xl"
+                    className="font-[family-name:var(--font-display)] text-base font-normal leading-snug break-words text-[#fff5f7] sm:text-lg md:text-xl"
                   >
                     {displayTitle}
                   </DialogTitle>
                   {slot.titleLocal ? (
                     <DialogDescription
-                      className="text-xs leading-relaxed break-words text-[#f3b8c4]/75 sm:text-sm"
+                      className="text-[0.7rem] leading-snug break-words text-[#f3b8c4]/75 sm:text-xs sm:leading-relaxed md:text-sm"
                     >
                       {slot.title}
                     </DialogDescription>
@@ -301,7 +401,7 @@ export function LiveDetailModal({
                 </DialogHeader>
 
                 {/* 🏷️ Meta Badges */}
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
                   <MetaPill className="border-[#f3b8c4]/30 bg-[#f3b8c4]/10 text-xs font-medium text-[#f7d7de]">
                     <CalendarDays
                       className="size-3.5 shrink-0 text-[#e85a7a]"
@@ -343,9 +443,9 @@ export function LiveDetailModal({
 
                 {/* ⏰ Schedule Timing Grid */}
                 {hasScheduleBlock ? (
-                  <div className="overflow-hidden rounded-2xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1c0c14]/80 to-[#14080e]/90 shadow-md">
-                    <div className="border-b border-[#f3b8c4]/12 px-3.5 py-2">
-                      <p className="text-[0.62rem] font-semibold tracking-wider text-[#e85a7a] uppercase">
+                  <div className="overflow-hidden rounded-xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1c0c14]/80 to-[#14080e]/90 shadow-md sm:rounded-2xl">
+                    <div className="border-b border-[#f3b8c4]/12 px-2.5 py-1 sm:px-3.5 sm:py-2">
+                      <p className="text-[0.58rem] font-semibold tracking-wider text-[#e85a7a] uppercase sm:text-[0.62rem]">
                         ตารางเวลาสตรีม
                       </p>
                     </div>
@@ -398,25 +498,16 @@ export function LiveDetailModal({
                 ) : null}
               </div>
 
-              {/* 🎬 Mobile Watch Live Button */}
-              {slot.url && !cancelled ? (
-                <div className="block pt-2 md:hidden">
-                  <Link
-                    href={slot.url}
-                    target={external ? "_blank" : undefined}
-                    rel={external ? "noopener noreferrer" : undefined}
-                    className={cn(
-                      buttonVariants({ size: "lg" }),
-                      CTA_PRIMARY_CLASS,
-                      "group flex w-full items-center justify-center gap-2 font-semibold"
-                    )}
-                  >
-                    <Play className="size-4 fill-current" aria-hidden />
-                    <span>ไปดูไลฟ์</span>
-                    {external ? (
-                      <ExternalLink className="size-3.5 opacity-75" />
-                    ) : null}
-                  </Link>
+              {isGhostNewLiveRound(slot, onSelectSlot) ? (
+                <div className="block md:hidden">
+                  <NewLiveRoundCta
+                    link={slot.rescheduleLink!}
+                    onSelectSlot={onSelectSlot!}
+                  />
+                </div>
+              ) : slot.url && !cancelled ? (
+                <div className="block md:hidden">
+                  <WatchLink slot={slot} external={external} />
                 </div>
               ) : null}
             </div>
