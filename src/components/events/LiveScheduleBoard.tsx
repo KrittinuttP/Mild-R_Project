@@ -26,8 +26,10 @@ import {
   CTA_OUTLINE_CLASS,
   DISPLAY_H2_CLASS,
   GLASS_CARD_CLASS,
+  LIVE_BADGE_CANCELLED,
   LIVE_BADGE_COLLAB,
   LIVE_BADGE_MEMBER,
+  LIVE_BADGE_PILL_COMPACT,
   LIVE_BADGE_PILL_SM,
   LIVE_BADGE_SOFT,
 } from "@/lib/site-ui";
@@ -67,16 +69,19 @@ function WeekSlotCard({
   const collab = slot.kind === "collab";
   const guestTone = !own && collab;
   const cancelled = slot.status === "cancelled";
+  const isMember = Boolean(slot.isMember);
   const cover = getSlotCoverUrl(slot);
   const title = slot.titleLocal ?? slot.title;
+  const hasBadges = cancelled || collab || isMember;
 
   return (
     <li>
       <button
         type="button"
         onClick={onOpen}
+        title={`${slot.timePrevious ? `${slot.timePrevious}→` : ""}${slot.timeUpdated ?? slot.time} · ${title}`}
         className={cn(
-          "group flex w-full cursor-pointer gap-3 overflow-hidden rounded-3xl border bg-[#1a0c12]/60 p-3 text-left transition sm:gap-4 sm:p-3.5",
+          "group flex min-h-[5.5rem] w-full cursor-pointer gap-3 overflow-hidden rounded-3xl border bg-[#1a0c12]/60 p-3 text-left transition sm:min-h-[6rem] sm:gap-4 sm:p-3.5",
           cancelled
             ? "border-[#8a7f88]/30 opacity-85 hover:border-[#8a7f88]/50"
             : guestTone
@@ -86,18 +91,62 @@ function WeekSlotCard({
       >
         <div className="relative aspect-video w-[6.5rem] shrink-0 overflow-hidden rounded-2xl bg-[#10070b] sm:w-36">
           {cover ? (
-            <ProtectedImage
-              src={cover}
-              alt=""
-              wrapClassName="absolute inset-0 block"
-              className={cn(
-                "h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]",
-                cancelled && "opacity-70 grayscale-[0.35]"
-              )}
-            />
+            <>
+              <ProtectedImage
+                src={cover}
+                alt=""
+                wrapClassName="absolute inset-0 block"
+                className={cn(
+                  "absolute inset-0 h-full w-full scale-[1.2] object-cover object-center transition duration-500 group-hover:scale-[1.25] sm:scale-100 sm:group-hover:scale-[1.03]",
+                  cancelled && "opacity-70 grayscale-[0.35]"
+                )}
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140a0d]/80 via-transparent to-transparent" />
+            </>
           ) : (
             <LiveCoverPlaceholder className="absolute inset-0" size="sm" />
           )}
+
+          {hasBadges ? (
+            <div className="absolute bottom-1 right-1 flex flex-wrap items-center justify-end gap-1 sm:bottom-1.5 sm:right-1.5">
+              {cancelled ? (
+                <span
+                  className={cn(
+                    LIVE_BADGE_PILL_COMPACT,
+                    LIVE_BADGE_CANCELLED,
+                    "h-4 bg-[#140a0d]/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
+                  )}
+                >
+                  ยกเลิก
+                </span>
+              ) : (
+                <>
+                  {isMember ? (
+                    <span
+                      className={cn(
+                        LIVE_BADGE_PILL_COMPACT,
+                        LIVE_BADGE_MEMBER,
+                        "h-4 bg-[#140a0d]/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
+                      )}
+                    >
+                      Member
+                    </span>
+                  ) : null}
+                  {collab ? (
+                    <span
+                      className={cn(
+                        LIVE_BADGE_PILL_COMPACT,
+                        LIVE_BADGE_COLLAB,
+                        "h-4 bg-[#140a0d]/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
+                      )}
+                    >
+                      Collab
+                    </span>
+                  ) : null}
+                </>
+              )}
+            </div>
+          ) : null}
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col justify-center py-0.5">
@@ -110,27 +159,19 @@ function WeekSlotCard({
               accentClassName={
                 cancelled
                   ? "text-[#d8d0d4]"
-                  : guestTone
-                    ? "text-[#e8c49a]"
-                    : "text-[#e85a7a]"
+                  : isMember
+                    ? "text-[#cfc6ff]"
+                    : guestTone
+                      ? "text-[#e8c49a]"
+                      : "text-[#e85a7a]"
               }
             />
-            {cancelled ? (
-              <LiveCancelledBadge />
-            ) : collab || slot.isMember ? (
-              <LiveSourceBadges
-                isCollab={collab}
-                isMember={slot.isMember}
-                showChannel={false}
-                size="sm"
-              />
-            ) : null}
           </div>
-          <p className="mt-1 text-sm leading-snug font-medium whitespace-normal break-words text-[#fff5f7]">
+          <p className="mt-1 line-clamp-2 min-w-0 text-sm leading-snug font-medium text-[#fff5f7]">
             {title}
           </p>
           {slot.titleLocal ? (
-            <p className="mt-0.5 line-clamp-1 text-xs text-[#f3b8c4]/55">
+            <p className="mt-0.5 line-clamp-1 min-w-0 text-xs text-[#f3b8c4]/55">
               {slot.title}
             </p>
           ) : null}

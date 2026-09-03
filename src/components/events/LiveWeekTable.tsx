@@ -113,9 +113,9 @@ function MobileSlotCard({
             <ProtectedImage
               src={coverUrl}
               alt={label}
-              wrapClassName="absolute inset-0 block h-full w-full"
+              wrapClassName="absolute inset-0 block"
               className={cn(
-                "h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]",
+                "absolute inset-0 h-full w-full scale-[1.25] object-cover object-center transition duration-500 group-hover:scale-[1.3]",
                 cancelled && "opacity-60 grayscale-[0.35]"
               )}
             />
@@ -275,9 +275,9 @@ function SlotCard({
             <ProtectedImage
               src={coverUrl}
               alt={label}
-              wrapClassName="absolute inset-0 block h-full w-full"
+              wrapClassName="absolute inset-0 block"
               className={cn(
-                "h-full w-full object-cover object-center transition duration-500 group-hover:scale-[1.04]",
+                "absolute inset-0 h-full w-full object-cover object-center transition duration-500 group-hover:scale-[1.04]",
                 cancelled && "opacity-60 grayscale-[0.35]"
               )}
             />
@@ -683,8 +683,8 @@ function LiveSpotlightBanner({
             <ProtectedImage
               src={coverUrl}
               alt={label}
-              wrapClassName="absolute inset-0 block h-full w-full"
-              className="h-full w-full object-cover object-center transition duration-700 group-hover:scale-[1.04]"
+              wrapClassName="absolute inset-0 block"
+              className="absolute inset-0 h-full w-full object-cover object-center transition duration-700 group-hover:scale-[1.04]"
             />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140a0d]/70 via-transparent to-transparent" />
           </button>
@@ -710,8 +710,8 @@ function LiveSpotlightBanner({
             <ProtectedImage
               src={coverUrl}
               alt={label}
-              wrapClassName="absolute inset-0 block h-full w-full"
-              className="h-full w-full object-cover object-center"
+              wrapClassName="absolute inset-0 block"
+              className="absolute inset-0 h-full w-full scale-[1.12] object-cover object-center"
             />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#1a0c12] to-transparent" />
             
@@ -891,8 +891,8 @@ function LiveTodayOfflineBanner({
           <ProtectedImage
             src={nextCoverUrl}
             alt={nextLabel ?? "ไลฟ์ถัดไป"}
-            wrapClassName="absolute inset-0 block h-full w-full"
-            className="h-full w-full object-cover object-center"
+            wrapClassName="absolute inset-0 block"
+            className="absolute inset-0 h-full w-full scale-[1.2] object-cover object-center"
           />
         ) : (
           <LiveCoverPlaceholder className="absolute inset-0" size="sm" />
@@ -1037,7 +1037,7 @@ function LiveWeekBannerCard({
               src={banner.imageUrl}
               alt={banner.imageAlt ?? banner.title}
               wrapClassName="absolute inset-0 block"
-              className="h-full w-full object-cover transition duration-500 hover:scale-[1.03]"
+              className="absolute inset-0 h-full w-full object-cover object-center transition duration-500 hover:scale-[1.03]"
             />
           </div>
         ) : null}
@@ -1051,7 +1051,7 @@ function LiveWeekBannerCard({
               src={banner.imageUrl}
               alt={banner.imageAlt ?? banner.title}
               wrapClassName="absolute inset-0 block"
-              className="h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover object-center"
             />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#1a0c12] to-transparent" />
             <span
