@@ -35,6 +35,7 @@ import {
   weekOverlapsYmdRange,
 } from "@/lib/events";
 import { getSlotCoverUrl } from "@/lib/live-cover";
+import { bangkokDateFromIso } from "@/lib/live-preview-match";
 import {
   BADGE_ACCENT_CLASS,
   BADGE_SOFT_CLASS,
@@ -429,26 +430,45 @@ function EmptyDaySlot({ compact }: { compact?: boolean }) {
   );
 }
 
-function findHighlightSlot(week: LiveWeek): LiveSlot | null {
-  if (!week || !week.slots || week.slots.length === 0) return null;
+/** Spotlight highlight: only slots on today's Bangkok date. */
+function findTodayHighlightSlot(
+  week: LiveWeek,
+  todayIso: string
+): LiveSlot | null {
+  if (!week?.slots?.length) return null;
 
-  // 1. Live right now
-  const liveSlot = week.slots.find((s) => s.status === "live");
-  if (liveSlot) return liveSlot;
+  const todaySlots = week.slots
+    .filter((s) => s.date === todayIso && s.status !== "cancelled")
+    .sort((a, b) => a.time.localeCompare(b.time));
 
-  // 2. Upcoming (earliest first)
-  const upcomingSlots = week.slots.filter((s) => s.status === "upcoming");
-  if (upcomingSlots.length > 0) {
-    return upcomingSlots[0];
-  }
+  if (todaySlots.length === 0) return null;
 
-  // 3. Most recent slot with cover or latest ended slot
-  const slotsWithCover = week.slots.filter((s) => Boolean(getSlotCoverUrl(s)));
-  if (slotsWithCover.length > 0) {
-    return slotsWithCover[slotsWithCover.length - 1];
-  }
+  return (
+    todaySlots.find((s) => s.status === "live") ??
+    todaySlots.find((s) => s.status === "upcoming") ??
+    [...todaySlots].reverse().find((s) => s.status === "ended") ??
+    todaySlots[0]
+  );
+}
 
-  return week.slots[week.slots.length - 1];
+/** Next upcoming/live slot after today (current week, then optional pool). */
+function findNextHighlightSlot(
+  week: LiveWeek,
+  todayIso: string,
+  allSlots?: LiveSlot[]
+): LiveSlot | null {
+  const pool = allSlots?.length ? allSlots : (week.slots ?? []);
+  const candidates = pool
+    .filter(
+      (s) =>
+        s.date > todayIso &&
+        s.status !== "cancelled" &&
+        (s.status === "upcoming" || s.status === "live")
+    )
+    .sort(
+      (a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time)
+    );
+  return candidates[0] ?? null;
 }
 
 function useLiveClock(intervalMs = 30000) {
@@ -527,10 +547,10 @@ function LiveSpotlightBanner({
   const badgeText = isLive
     ? "กำลังไลฟ์ (LIVE NOW)"
     : isUpcoming
-      ? "สตรีมรอบถัดไป"
+      ? "ไลฟ์วันนี้"
       : slot.status === "ended"
-        ? "ไฮไลต์สตรีมล่าสุด"
-        : "สตรีมประจำสัปดาห์";
+        ? "ไลฟ์วันนี้ (จบแล้ว)"
+        : "ไลฟ์วันนี้";
 
   const dateObj = parseISODate(slot.date);
   const dateFormatted = `${thaiWeekdayShort(dateObj)} ${formatThaiShortDate(slot.date)}`;
@@ -840,6 +860,125 @@ function LiveSpotlightBanner({
   );
 }
 
+function LiveTodayOfflineBanner({
+  todayIso,
+  nextSlot,
+  onOpenNext,
+}: {
+  todayIso: string;
+  nextSlot: LiveSlot | null;
+  onOpenNext?: () => void;
+}) {
+  const dateObj = parseISODate(todayIso);
+  const dateFormatted = `${thaiWeekdayShort(dateObj)} ${formatThaiShortDate(todayIso)}`;
+
+  const nextCoverUrl = nextSlot ? getSlotCoverUrl(nextSlot) : null;
+  const nextLabel = nextSlot
+    ? (nextSlot.titleLocal ?? nextSlot.title)
+    : null;
+  const nextDateFormatted = nextSlot
+    ? `${thaiWeekdayShort(parseISODate(nextSlot.date))} ${formatThaiShortDate(nextSlot.date)}`
+    : null;
+
+  const nextPreview = nextSlot ? (
+    <button
+      type="button"
+      onClick={onOpenNext}
+      className="group flex w-full items-center gap-3 rounded-2xl border border-[#f3b8c4]/20 bg-[#14080e]/90 p-2.5 text-left transition hover:border-[#e85a7a]/40 hover:bg-[#1a0c12] sm:w-auto sm:min-w-[18rem]"
+    >
+      <span className="relative aspect-video w-20 shrink-0 overflow-hidden rounded-xl border border-[#f3b8c4]/15 bg-[#12080c] sm:w-24">
+        {nextCoverUrl ? (
+          <ProtectedImage
+            src={nextCoverUrl}
+            alt={nextLabel ?? "ไลฟ์ถัดไป"}
+            wrapClassName="absolute inset-0 block h-full w-full"
+            className="h-full w-full object-cover object-center"
+          />
+        ) : (
+          <LiveCoverPlaceholder className="absolute inset-0" size="sm" />
+        )}
+      </span>
+      <span className="min-w-0 flex-1 space-y-0.5">
+        <span className="block text-[0.65rem] font-semibold tracking-[0.12em] text-[#e85a7a] uppercase">
+          ไลฟ์ถัดไป
+        </span>
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-[#f7d7de]/90">
+          <span className="inline-flex items-center gap-1">
+            <Calendar className="size-3 text-[#e85a7a]" />
+            {nextDateFormatted}
+          </span>
+          <span className="inline-flex items-center gap-1 tabular-nums">
+            <Clock className="size-3 text-[#e85a7a]" />
+            {nextSlot.time}
+          </span>
+        </span>
+        <span className="line-clamp-1 text-sm font-medium text-[#fff5f7] group-hover:text-white">
+          {nextLabel}
+        </span>
+      </span>
+    </button>
+  ) : null;
+
+  return (
+    <div className="relative overflow-hidden rounded-3xl border border-[#e85a7a]/35 bg-gradient-to-r from-[#220e18]/95 via-[#1a0c12]/90 to-[#140a0d] shadow-[0_16px_40px_rgba(232,90,122,0.16)]">
+      <div className="hidden sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-5 lg:gap-8 lg:p-6">
+        <div className="flex min-w-0 flex-1 flex-col justify-center">
+          <div className="flex flex-wrap items-center gap-2">
+            <OfflineBadge size="md" />
+          </div>
+
+          <div className="mt-3.5 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+            <div className="inline-flex items-center gap-1.5 rounded-xl border border-[#f3b8c4]/15 bg-[#14080e]/90 px-3 py-1.5 text-[#fff5f7] shadow-inner">
+              <Calendar className="size-3.5 text-[#e85a7a]" />
+              <span className="font-semibold">{dateFormatted}</span>
+            </div>
+          </div>
+
+          {/* Same slot as LiveSpotlight action buttons */}
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            {nextPreview}
+          </div>
+        </div>
+
+        <div className="relative aspect-[16/9] w-64 shrink-0 overflow-hidden rounded-2xl border border-[#f3b8c4]/20 bg-[#12080c] lg:w-80">
+          <LiveCoverPlaceholder
+            className="absolute inset-0"
+            size="lg"
+            variant="offline"
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:hidden">
+        <div className="relative aspect-[16/9] w-full overflow-hidden bg-[#12080c]">
+          <LiveCoverPlaceholder
+            className="absolute inset-0"
+            size="lg"
+            variant="offline"
+          />
+          <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-wrap items-center gap-1.5">
+            <OfflineBadge size="sm" />
+          </div>
+        </div>
+
+        <div className="p-4">
+          <div className="flex flex-wrap items-center gap-1.5 text-xs">
+            <div className="inline-flex items-center gap-1 rounded-lg border border-[#f3b8c4]/15 bg-[#14080e]/90 px-2.5 py-1 text-[#fff5f7]">
+              <Calendar className="size-3 text-[#e85a7a]" />
+              <span className="font-semibold">{dateFormatted}</span>
+            </div>
+          </div>
+
+          {/* Same slot as LiveSpotlight mobile action buttons */}
+          <div className="mt-4 flex flex-col gap-2">
+            {nextPreview}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function LiveWeekBannerCard({
   banner,
 }: {
@@ -1021,12 +1160,31 @@ export function LiveWeekTable({
     return map;
   }, [week]);
 
+  const todayIso =
+    bangkokDateFromIso(new Date().toISOString()) ?? formatISODate(new Date());
+  const weekIncludesToday = Boolean(week && dayIsos.includes(todayIso));
+
+  const highlightSlot = useMemo(
+    () =>
+      week && weekIncludesToday
+        ? findTodayHighlightSlot(week, todayIso)
+        : null,
+    [week, weekIncludesToday, todayIso]
+  );
+
+  const nextHighlightSlot = useMemo(
+    () =>
+      week && weekIncludesToday && !highlightSlot
+        ? findNextHighlightSlot(week, todayIso, allSlots)
+        : null,
+    [week, weekIncludesToday, highlightSlot, todayIso, allSlots]
+  );
+
   if (!week) {
     return <p className="text-sm text-[#f3b8c4]/70">ยังไม่มีตารางไลฟ์</p>;
   }
 
   const rangeLabel = `${formatThaiShortDate(dayIsos[0] ?? week.weekStart)} – ${formatThaiShortDate(dayIsos[6] ?? week.weekStart)}`;
-  const todayIso = formatISODate(new Date());
 
   const renderDayBody = (iso: string, isMobile?: boolean) => {
     const daySlots = preferOwnChannelSlots(slotsByDate.get(iso) ?? []);
@@ -1090,11 +1248,6 @@ export function LiveWeekTable({
     );
   };
 
-  const highlightSlot = useMemo(
-    () => findHighlightSlot(week),
-    [week]
-  );
-
   return (
     <div className={cn("space-y-5", className)}>
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -1146,7 +1299,7 @@ export function LiveWeekTable({
         ) : null}
       </div>
 
-      {/* 🌟 Top Spotlight Banner: Custom weekly banner or auto-derived live stream highlight */}
+      {/* 🌟 Top Spotlight Banner: Custom weekly banner or today's live highlight */}
       {week.banner ? (
         <LiveWeekBannerCard banner={week.banner} />
       ) : highlightSlot ? (
@@ -1154,6 +1307,16 @@ export function LiveWeekTable({
           slot={highlightSlot}
           nowMs={nowMs}
           onOpenDetail={() => setActiveSlot(highlightSlot)}
+        />
+      ) : weekIncludesToday ? (
+        <LiveTodayOfflineBanner
+          todayIso={todayIso}
+          nextSlot={nextHighlightSlot}
+          onOpenNext={
+            nextHighlightSlot
+              ? () => setActiveSlot(nextHighlightSlot)
+              : undefined
+          }
         />
       ) : null}
 
