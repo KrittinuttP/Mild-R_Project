@@ -501,7 +501,7 @@ export function AddManualLiveButton() {
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[90dvh] w-[min(100%,calc(100vw-1rem))] max-w-2xl overflow-x-hidden overflow-y-auto rounded-3xl border border-[#f3b8c4]/20 bg-gradient-to-b from-[#220e18]/95 via-[#1a0c12]/95 to-[#12070c] p-4 text-[#fff5f7] shadow-[0_24px_60px_rgba(0,0,0,0.7)] backdrop-blur-xl sm:p-7 [scrollbar-color:rgba(232,90,122,0.3)_transparent] [scrollbar-width:thin]">
+        <DialogContent className="max-h-[90dvh] w-[min(100%,calc(100vw-1rem))] max-w-2xl sm:w-[calc(100vw-3rem)] sm:max-w-3xl lg:max-w-4xl overflow-x-hidden overflow-y-auto rounded-3xl border border-[#f3b8c4]/20 bg-gradient-to-b from-[#220e18]/95 via-[#1a0c12]/95 to-[#12070c] p-4 text-[#fff5f7] shadow-[0_24px_60px_rgba(0,0,0,0.7)] backdrop-blur-xl sm:p-7 [scrollbar-color:rgba(232,90,122,0.3)_transparent] [scrollbar-width:thin]">
           <DialogHeader className="pr-6 text-left">
             <div className="flex items-center gap-2">
               <Sparkles className="size-4 text-[#e85a7a]" />
