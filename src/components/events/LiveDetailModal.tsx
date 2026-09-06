@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -234,10 +234,11 @@ export function LiveDetailModal({
     coverCandidates[0] ?? null
   );
 
-  useEffect(() => {
+  const [coverContext, setCoverContext] = useState({ id: slot?.id, open });
+  if (coverContext.id !== slot?.id || coverContext.open !== open) {
+    setCoverContext({ id: slot?.id, open });
     setActiveCover(coverCandidates[0] ?? null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset on slot change
-  }, [slot?.id, open]);
+  }
 
   const displayTitle = slot?.titleLocal ?? slot?.title ?? "";
   const statusText = statusLabel(slot?.status);
@@ -267,7 +268,8 @@ export function LiveDetailModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-h-[92dvh] w-[min(100%,calc(100vw-1rem))] max-w-lg overflow-hidden rounded-3xl border border-[#f3b8c4]/20 bg-gradient-to-b from-[#220e18]/95 via-[#1a0c12]/95 to-[#12070c] p-0 text-[#fff5f7] shadow-[0_24px_60px_rgba(0,0,0,0.7)] backdrop-blur-xl md:max-w-3xl"
+        className="max-h-[92dvh] w-[min(100%,calc(100vw-1rem))] max-w-lg overflow-hidden rounded-3xl border border-[#f3b8c4]/20 bg-gradient-to-b from-[#220e18]/95 via-[#1a0c12]/95 to-[#12070c] p-0 text-[#fff5f7] shadow-[0_24px_60px_rgba(0,0,0,0.7)] md:max-w-3xl data-open:zoom-in-100 data-closed:zoom-out-100 [animation-duration:100ms] motion-reduce:animate-none"
+        overlayClassName="bg-black/45 supports-backdrop-filter:backdrop-blur-none [animation-duration:100ms] motion-reduce:animate-none"
         showCloseButton
         closeButtonClassName={MODAL_CLOSE_BUTTON_CLASS}
       >

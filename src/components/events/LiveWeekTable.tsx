@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 import { LiveCoverPlaceholder } from "@/components/events/LiveCoverPlaceholder";
-import { LiveDetailModal } from "@/components/events/LiveDetailModal";
+import { LiveDetailHost, useLiveDetail } from "@/components/events/LiveDetailHost";
 import {
   LiveCancelledBadge,
   LiveDayChannelBadges,
@@ -1138,7 +1138,7 @@ export function LiveWeekTable({
   }, [sorted, weekRange]);
 
   const [index, setIndex] = useState(() => findDefaultWeekIndex(visibleWeeks));
-  const [activeSlot, setActiveSlot] = useState<LiveSlot | null>(null);
+  const { detailRef, openDetail } = useLiveDetail();
 
   useEffect(() => {
     setIndex(findDefaultWeekIndex(visibleWeeks));
@@ -1220,7 +1220,7 @@ export function LiveWeekTable({
               <MobileSlotCard
                 key={slot.id}
                 slot={slot}
-                onOpen={() => setActiveSlot(slot)}
+                onOpen={() => openDetail(slot)}
               />
             ))}
           </div>
@@ -1246,7 +1246,7 @@ export function LiveWeekTable({
             slot={slot}
                 compact={compact}
                 crowded={crowded}
-            onOpen={() => setActiveSlot(slot)}
+            onOpen={() => openDetail(slot)}
           />
             </div>
           ))}
@@ -1327,7 +1327,7 @@ export function LiveWeekTable({
         <LiveSpotlightBanner
           slot={highlightSlot}
           nowMs={nowMs}
-          onOpenDetail={() => setActiveSlot(highlightSlot)}
+          onOpenDetail={() => openDetail(highlightSlot)}
         />
       ) : weekIncludesToday ? (
         <LiveTodayOfflineBanner
@@ -1336,7 +1336,7 @@ export function LiveWeekTable({
           nextSlot={nextHighlightSlot}
           onOpenNext={
             nextHighlightSlot
-              ? () => setActiveSlot(nextHighlightSlot)
+              ? () => openDetail(nextHighlightSlot)
               : undefined
           }
         />
@@ -1479,17 +1479,7 @@ export function LiveWeekTable({
         })}
       </ul>
 
-      <LiveDetailModal
-        slot={activeSlot}
-        open={activeSlot !== null}
-        onOpenChange={(open) => {
-          if (!open) setActiveSlot(null);
-        }}
-        onSelectSlot={(slotId) => {
-          const related = allSlots.find((s) => s.id === slotId);
-          if (related) setActiveSlot(related);
-        }}
-      />
+      <LiveDetailHost ref={detailRef} slots={allSlots} />
     </div>
   );
 }

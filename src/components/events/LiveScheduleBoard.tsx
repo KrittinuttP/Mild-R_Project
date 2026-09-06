@@ -1,11 +1,11 @@
 "use client";
 import { englishWeekday, englishMonth, formatLiveShortDate, formatLiveDateRange } from "@/lib/live-date-format";
 
-import { useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, ExternalLink, Loader2 } from "lucide-react";
 
 import { LiveCoverPlaceholder } from "@/components/events/LiveCoverPlaceholder";
-import { LiveDetailModal } from "@/components/events/LiveDetailModal";
+import { LiveDetailHost, useLiveDetail } from "@/components/events/LiveDetailHost";
 import {
   LiveCancelledBadge,
   LiveDayChannelBadges,
@@ -319,21 +319,45 @@ export function LiveScheduleBoard() {
   const todayIso = formatISODate(today);
   const thisWeekSundayIso = formatISODate(startOfWeekSunday(today));
 
-  const [year, setYear] = useState(() => today.getFullYear());
-  const [month, setMonth] = useState(() => today.getMonth());
-  const [selectedDate, setSelectedDate] = useState<string | null>(todayIso);
-  const [activeSlot, setActiveSlot] = useState<LiveSlot | null>(null);
+  const [requestedYear, setYear] = useState(() => today.getFullYear());
+  const [requestedMonth, setMonth] = useState(() => today.getMonth());
+  const [requestedDate, setSelectedDate] = useState<string | null>(todayIso);
+  const [displayed, setDisplayed] = useState({
+    year: requestedYear, month: requestedMonth, selectedDate: requestedDate,
+  });
+  const { detailRef, openDetail } = useLiveDetail();
   const weekDetailRef = useRef<HTMLDivElement>(null);
+  const weekScrollAnchor = useRef<{ top: number; date: string } | null>(null);
 
   const thisWeekRange = useMemo(() => thisWeekRangeYmd(today), [today]);
   // Fetch only: selected month ± 7 days (not tied to grid shape)
   const monthRange = useMemo(
-    () => monthRangeWithPadYmd(year, month, 7),
-    [year, month]
+    () => monthRangeWithPadYmd(requestedYear, requestedMonth, 7),
+    [requestedYear, requestedMonth]
   );
 
   const thisWeekQuery = useLiveSchedule(thisWeekRange);
-  const monthQuery = useLiveSchedule(monthRange);
+  const monthQuery = useLiveSchedule(monthRange, { keepPreviousData: true });
+  const monthReady = monthQuery.resolvedKey === `${monthRange.from}:${monthRange.to}`;
+  const view = monthReady
+    ? { year: requestedYear, month: requestedMonth, selectedDate: requestedDate }
+    : displayed;
+  if (monthReady && (displayed.year !== requestedYear ||
+    displayed.month !== requestedMonth || displayed.selectedDate !== requestedDate)) {
+    setDisplayed(view);
+  }
+  const { year, month, selectedDate } = view;
+
+  useLayoutEffect(() => {
+    const anchor = weekScrollAnchor.current;
+    const panel = weekDetailRef.current;
+    if (!anchor || !panel || !monthReady || selectedDate !== anchor.date) return;
+    const offset = panel.getBoundingClientRect().top - anchor.top;
+    if (Math.abs(offset) > 0.5) {
+      window.scrollBy({ top: offset, behavior: "instant" });
+    }
+    weekScrollAnchor.current = null;
+  }, [monthReady, selectedDate, monthQuery.weeks]);
 
   const weeks = useMemo(
     () => mergeLiveWeekLists(thisWeekQuery.weeks, monthQuery.weeks),
@@ -353,6 +377,7 @@ export function LiveScheduleBoard() {
   const thisWeekOnly = thisWeek ? [thisWeek] : [];
 
   const initialLoading =
+    !monthQuery.hasLoaded &&
     (thisWeekQuery.status === "loading" || monthQuery.status === "loading") &&
     weeks.length === 0 &&
     thisWeekQuery.status !== "error" &&
@@ -363,7 +388,7 @@ export function LiveScheduleBoard() {
     thisWeekQuery.status === "error" &&
     monthQuery.status === "error";
 
-  const calendarLoading = monthQuery.status === "loading";
+  const calendarLoading = !monthReady || monthQuery.status === "loading";
 
   // Calendar UI only: selected month + pad days to complete weeks
   const grid = useMemo(
@@ -382,6 +407,29 @@ export function LiveScheduleBoard() {
     selectedWeekDays.length === 7
       ? formatLiveDateRange(selectedWeekDays[0], selectedWeekDays[6])
       : null;
+
+  const adjacentWeekDate = (direction: number) => {
+    const date = parseISODate(requestedDate ?? todayIso);
+    date.setDate(date.getDate() + direction * 7);
+    return date;
+  };
+  const canMoveWeek = (direction: number) =>
+    years.includes(adjacentWeekDate(direction).getFullYear());
+
+  const moveWeek = (direction: number) => {
+    if (!canMoveWeek(direction)) return;
+    const date = adjacentWeekDate(direction);
+    const targetDate = formatISODate(date);
+    if (weekDetailRef.current) {
+      weekScrollAnchor.current = {
+        top: weekDetailRef.current.getBoundingClientRect().top,
+        date: targetDate,
+      };
+    }
+    setSelectedDate(targetDate);
+    setYear(date.getFullYear());
+    setMonth(date.getMonth());
+  };
 
   const selectedWeekSlotCount = useMemo(() => {
     let n = 0;
@@ -554,20 +602,11 @@ export function LiveScheduleBoard() {
             "mt-8 overflow-hidden"
           )}
         >
-          <div className="flex items-center justify-between gap-2 border-b border-[#f3b8c4]/10 px-2 py-2 sm:gap-3 sm:px-4 sm:py-3">
-            <div className="flex min-w-0 flex-1 items-center gap-1 sm:gap-2">
-              <button
-                type="button"
-                aria-label="เดือนก่อน"
-                onClick={goPrevMonth}
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "icon" }),
-                  "size-8 shrink-0 rounded-2xl text-[#fff5f7] sm:size-9"
-                )}
-              >
-                <ChevronLeft className="size-4" />
-              </button>
-
+          <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[#f3b8c4]/12 px-4 py-4 sm:px-5">
+            <p className="font-[family-name:var(--font-display)] text-lg font-normal text-[#fff5f7]">
+              {englishMonth(month)} {year}
+            </p>
+            <div className="ml-auto flex w-full min-w-0 items-center gap-1.5 sm:w-auto">
               <label className="min-w-0 flex-1 sm:flex-none">
                 <span className="sr-only">เดือน</span>
                 <select
@@ -600,42 +639,49 @@ export function LiveScheduleBoard() {
 
               <button
                 type="button"
+                aria-label="เดือนก่อน"
+                onClick={goPrevMonth}
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "icon" }),
+                  CTA_OUTLINE_CLASS, "size-10 shrink-0"
+                )}
+              >
+                <ChevronLeft className="size-4" />
+              </button>
+              <button
+                type="button"
                 aria-label="เดือนถัดไป"
                 onClick={goNextMonth}
                 className={cn(
-                  buttonVariants({ variant: "ghost", size: "icon" }),
-                  "size-8 shrink-0 rounded-2xl text-[#fff5f7] sm:size-9"
+                  buttonVariants({ variant: "outline", size: "icon" }),
+                  CTA_OUTLINE_CLASS, "size-10 shrink-0"
                 )}
               >
                 <ChevronRight className="size-4" />
               </button>
             </div>
-
-            <p className="hidden shrink-0 text-sm text-[#f3b8c4]/55 md:block">
-              {englishMonth(month)} {year}
-            </p>
           </div>
 
           <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1.5 border-b border-[#f3b8c4]/10 px-3 py-2 sm:gap-3 sm:px-4 sm:py-2.5">
             <p className="mr-auto text-xs tracking-[0.14em] text-[#f3b8c4]/55 uppercase sm:text-sm">
               เดือนนี้
               <span className="ml-1.5 tabular-nums text-[#f3b8c4]/75">
-                {calendarLoading ? "—" : monthKindStats.total}
+                {monthKindStats.total}
               </span>
             </p>
             {/* Mobile: compact counts — full pills from sm+ */}
             <div className="flex items-center gap-2.5 text-[0.65rem] tabular-nums tracking-wide sm:hidden">
               <span className="inline-flex items-center gap-1 text-[#cfc6ff]">
                 <span className="size-1.5 rounded-full bg-[#9b8cff]" aria-hidden />
-                {calendarLoading ? "—" : monthKindStats.member}
+                {monthKindStats.member}
               </span>
               <span className="inline-flex items-center gap-1 text-[#f3b8c4]/80">
                 <span className="size-1.5 rounded-full bg-[#e85a7a]" aria-hidden />
-                {calendarLoading ? "—" : monthKindStats.solo}
+                {monthKindStats.solo}
               </span>
               <span className="inline-flex items-center gap-1 text-[#e8c49a]">
                 <span className="size-1.5 rounded-full bg-[#d4a574]" aria-hidden />
-                {calendarLoading ? "—" : monthKindStats.collab}
+                {monthKindStats.collab}
               </span>
             </div>
             <span
@@ -647,7 +693,7 @@ export function LiveScheduleBoard() {
             >
               Member
               <span className="tabular-nums">
-                {calendarLoading ? "—" : monthKindStats.member}
+                {monthKindStats.member}
               </span>
             </span>
             <span
@@ -659,7 +705,7 @@ export function LiveScheduleBoard() {
             >
               Solo
               <span className="tabular-nums">
-                {calendarLoading ? "—" : monthKindStats.solo}
+                {monthKindStats.solo}
               </span>
             </span>
             <span
@@ -671,7 +717,7 @@ export function LiveScheduleBoard() {
             >
               Collab
               <span className="tabular-nums">
-                {calendarLoading ? "—" : monthKindStats.collab}
+                {monthKindStats.collab}
               </span>
             </span>
           </div>
@@ -744,7 +790,7 @@ export function LiveScheduleBoard() {
                     {dayNum}
                   </span>
 
-                  {!calendarLoading && daySlots.length > 0 ? (
+                  {daySlots.length > 0 ? (
                     <div className="mt-auto flex min-h-0 flex-col gap-0.5">
                       {visibleSlots.map((slot) => (
                         <MobileCalendarTimeSlot
@@ -752,7 +798,7 @@ export function LiveScheduleBoard() {
                           slot={slot}
                           onSelect={() => {
                             selectDay(iso);
-                            setActiveSlot(slot);
+                            openDetail(slot);
                           }}
                         />
                       ))}
@@ -762,7 +808,7 @@ export function LiveScheduleBoard() {
                         </span>
                       ) : null}
                     </div>
-                  ) : !calendarLoading && showOfflineForDay(iso) ? (
+                  ) : showOfflineForDay(iso) ? (
                     <div className="mt-auto border-l-2 border-[#6ec9b0]/70 py-px pl-1">
                       <span className="text-[0.5rem] tracking-[0.1em] text-[#6ec9b0]/85 uppercase">
                         Off
@@ -784,7 +830,7 @@ export function LiveScheduleBoard() {
                     >
                       {dayNum}
                     </span>
-                    {!calendarLoading ? (
+                    {daySlots.length > 0 ? (
                       <LiveDayChannelBadges
                         slots={daySlots}
                         size="sm"
@@ -794,7 +840,7 @@ export function LiveScheduleBoard() {
                     ) : null}
                   </div>
 
-                  {!calendarLoading && daySlots.length > 0 ? (
+                  {daySlots.length > 0 ? (
                     <div className="flex min-h-0 w-full flex-1 flex-col gap-0.5 overflow-hidden sm:gap-1">
                       {visibleSlots.map((slot) => (
                         <CalendarMonthSlot
@@ -803,7 +849,7 @@ export function LiveScheduleBoard() {
                           crowded={crowded}
                           onSelect={() => {
                             selectDay(iso);
-                            setActiveSlot(slot);
+                            openDetail(slot);
                           }}
                         />
                       ))}
@@ -813,7 +859,7 @@ export function LiveScheduleBoard() {
                         </span>
                       ) : null}
                     </div>
-                  ) : !calendarLoading && showOfflineForDay(iso) ? (
+                  ) : showOfflineForDay(iso) ? (
                     <div className="flex w-full flex-col items-center pt-0.5">
                       <OfflineBadge size="sm" />
                     </div>
@@ -843,6 +889,12 @@ export function LiveScheduleBoard() {
           </span>
         </div>
 
+        <h2 className={cn(DISPLAY_H2_CLASS, "mt-10 sm:mt-12")}>
+          ตารางไลฟ์รายสัปดาห์
+        </h2>
+        <p className="mt-3 text-sm leading-relaxed text-[#f3b8c4]/65 sm:text-base">
+          เลือกวันจากปฏิทิน หรือเลื่อนชมตารางไลฟ์ในแต่ละสัปดาห์
+        </p>
         <div ref={weekDetailRef} className={cn(GLASS_CARD_CLASS, "mt-6 overflow-hidden")}>
           {selectedDate ? (
             <>
@@ -868,6 +920,24 @@ export function LiveScheduleBoard() {
                       สัปดาห์นี้
                     </span>
                   ) : null}
+                  <button
+                    type="button"
+                    aria-label="สัปดาห์ก่อนหน้า"
+                    disabled={!canMoveWeek(-1)}
+                    onClick={() => moveWeek(-1)}
+                    className={cn(buttonVariants({ variant: "outline", size: "icon" }), CTA_OUTLINE_CLASS, "size-10 disabled:opacity-35")}
+                  >
+                    <ChevronLeft className="size-4" aria-hidden />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="สัปดาห์ถัดไป"
+                    disabled={!canMoveWeek(1)}
+                    onClick={() => moveWeek(1)}
+                    className={cn(buttonVariants({ variant: "outline", size: "icon" }), CTA_OUTLINE_CLASS, "size-10 disabled:opacity-35")}
+                  >
+                    <ChevronRight className="size-4" aria-hidden />
+                  </button>
                 </div>
               </div>
 
@@ -926,7 +996,7 @@ export function LiveScheduleBoard() {
                               slot={slot}
                               onOpen={() => {
                                 selectDay(iso);
-                                setActiveSlot(slot);
+                                openDetail(slot);
                               }}
                             />
                           ))}
@@ -954,17 +1024,7 @@ export function LiveScheduleBoard() {
         </div>
       </section>
 
-      <LiveDetailModal
-        slot={activeSlot}
-        open={activeSlot !== null}
-        onOpenChange={(open) => {
-          if (!open) setActiveSlot(null);
-        }}
-        onSelectSlot={(slotId) => {
-          const related = allSlots.find((s) => s.id === slotId);
-          if (related) setActiveSlot(related);
-        }}
-      />
+      <LiveDetailHost ref={detailRef} slots={allSlots} />
     </div>
   );
 }

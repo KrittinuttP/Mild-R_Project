@@ -17,7 +17,10 @@ function cacheKey(range: LiveScheduleRange) {
   return `${range.from}:${range.to}`;
 }
 
-export function useLiveSchedule(range: LiveScheduleRange) {
+export function useLiveSchedule(
+  range: LiveScheduleRange,
+  { keepPreviousData = false }: { keepPreviousData?: boolean } = {}
+) {
   const [weeks, setWeeks] = useState<LiveWeek[]>(() => {
     return scheduleCache.get(cacheKey(range)) ?? [];
   });
@@ -25,6 +28,10 @@ export function useLiveSchedule(range: LiveScheduleRange) {
     scheduleCache.has(cacheKey(range)) ? "ready" : "loading"
   );
   const [error, setError] = useState<string | null>(null);
+  const [hasLoaded, setHasLoaded] = useState(() => scheduleCache.has(cacheKey(range)));
+  const [resolvedKey, setResolvedKey] = useState(() =>
+    scheduleCache.has(cacheKey(range)) ? cacheKey(range) : null
+  );
   const [fetchKey, setFetchKey] = useState(0);
   const rangeRef = useRef(range);
   rangeRef.current = range;
@@ -40,13 +47,15 @@ export function useLiveSchedule(range: LiveScheduleRange) {
     const cached = scheduleCache.get(key);
 
     if (cached) {
+      setResolvedKey(key);
+      setHasLoaded(true);
       setWeeks(cached);
       setStatus("ready");
       setError(null);
       return;
     }
 
-    setWeeks([]);
+    if (!keepPreviousData) setWeeks([]);
     setStatus("loading");
     setError(null);
 
@@ -72,10 +81,12 @@ export function useLiveSchedule(range: LiveScheduleRange) {
         }
         scheduleCache.set(key, data.weeks);
         setWeeks(data.weeks);
+        setResolvedKey(key);
+        setHasLoaded(true);
         setStatus("ready");
       } catch (err) {
         if (cancelled) return;
-        setWeeks([]);
+        if (!keepPreviousData) setWeeks([]);
         setStatus("error");
         setError(err instanceof Error ? err.message : "load failed");
         console.error("[useLiveSchedule]", err);
@@ -85,7 +96,7 @@ export function useLiveSchedule(range: LiveScheduleRange) {
     return () => {
       cancelled = true;
     };
-  }, [range.from, range.to, fetchKey]);
+  }, [range.from, range.to, fetchKey, keepPreviousData]);
 
-  return { weeks, status, error, retry };
+  return { weeks, status, error, retry, hasLoaded, resolvedKey };
 }
