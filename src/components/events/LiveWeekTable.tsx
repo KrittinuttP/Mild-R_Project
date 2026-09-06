@@ -58,6 +58,7 @@ type LiveWeekTableProps = {
   weeks: LiveWeek[];
   className?: string;
   compact?: boolean;
+  blankEmptyDays?: boolean;
 };
 
 function platformLabel(platform?: LivePlatform) {
@@ -263,7 +264,7 @@ function SlotCard({
         cancelled
           ? "border-[#8a7f88]/30 opacity-80 hover:border-[#8a7f88]/50 hover:bg-[#8a7f88]/10"
           : guestTone
-            ? "border-[#d4a574]/35 hover:border-[#d4a574]/55 hover:bg-[#d4a574]/10"
+          ? "border-[#d4a574]/35 hover:border-[#d4a574]/55 hover:bg-[#d4a574]/10"
             : isLive
               ? "border-[#e85a7a]/60 shadow-[0_0_16px_rgba(232,90,122,0.18)] hover:border-[#e85a7a] hover:bg-[#1f0d16]"
               : "border-[#f3b8c4]/12 hover:border-[#e85a7a]/40 hover:bg-[#1a0c12]"
@@ -323,7 +324,7 @@ function SlotCard({
                 ) : null}
                 {collab ? (
                   <span
-                    className={cn(
+          className={cn(
                       LIVE_BADGE_PILL_COMPACT,
                       LIVE_BADGE_COLLAB,
                       "shadow-[0_4px_12px_rgba(0,0,0,0.8)] backdrop-blur-md bg-[#140a0d]/85"
@@ -425,15 +426,20 @@ function OfflineDaySlot({ compact }: { compact?: boolean }) {
   );
 }
 
-function EmptyDaySlot({ compact }: { compact?: boolean }) {
+function EmptyDaySlot({ compact, blank }: { compact?: boolean; blank?: boolean }) {
   return (
     <div
       className={cn(
-        "flex h-full min-h-[7.25rem] items-center justify-center border border-dashed border-[#6ec9b0]/20 bg-transparent sm:min-h-[8rem]",
+        "flex h-full min-h-[7.25rem] items-center justify-center border border-dashed border-[#8a7f88]/30 bg-transparent sm:min-h-[8rem]",
         compact ? "min-h-[5.5rem] rounded-xl sm:min-h-[5.5rem]" : "rounded-2xl"
       )}
     >
-      <OfflineBadge size={compact ? "sm" : "md"} />
+      {blank ? (
+        <span className="flex flex-col items-center gap-2 px-1 text-center text-[0.65rem] leading-relaxed text-[#f3b8c4]/50">
+          <Calendar className="size-4 shrink-0" aria-hidden />
+          <span>ยังไม่มีข้อมูลไลฟ์</span>
+        </span>
+      ) : <OfflineBadge size={compact ? "sm" : "md"} />}
     </div>
   );
 }
@@ -992,6 +998,7 @@ export function LiveWeekTable({
   weeks,
   className,
   compact = false,
+  blankEmptyDays = false,
 }: LiveWeekTableProps) {
   const nowMs = useLiveClock(30000);
   const sorted = useMemo(() => sortLiveWeeks(weeks), [weeks]);
@@ -1069,12 +1076,12 @@ export function LiveWeekTable({
               key={slot.id}
               className={cn("min-h-0", crowded ? "min-h-0 flex-1" : "flex-1")}
             >
-              <SlotCard
-                slot={slot}
+          <SlotCard
+            slot={slot}
                 compact={compact}
                 crowded={crowded}
-                onOpen={() => setActiveSlot(slot)}
-              />
+            onOpen={() => setActiveSlot(slot)}
+          />
             </div>
           ))}
         </div>
@@ -1091,7 +1098,7 @@ export function LiveWeekTable({
 
     return (
       <div className="flex-1">
-        <EmptyDaySlot compact={compact} />
+        <EmptyDaySlot compact={compact} blank={blankEmptyDays} />
       </div>
     );
   };
@@ -1199,8 +1206,8 @@ export function LiveWeekTable({
                         isToday ? "font-bold text-[#fff5f7]" : "text-[#f3b8c4]/65"
                       )}
                     >
-                      {thaiWeekdayShort(date)}
-                    </p>
+                    {thaiWeekdayShort(date)}
+                  </p>
                   </div>
                   <div className="mt-1 flex flex-wrap items-center justify-center gap-1">
                     <span
@@ -1211,7 +1218,7 @@ export function LiveWeekTable({
                           : "text-[#f7d7de]/80"
                       )}
                     >
-                      {formatThaiShortDate(iso)}
+                    {formatThaiShortDate(iso)}
                     </span>
                     <LiveDayChannelBadges slots={daySlots} size="sm" />
                   </div>
@@ -1277,9 +1284,17 @@ export function LiveWeekTable({
                 {daySlots.length > 0 || offline ? (
                   renderDayBody(iso, true)
                 ) : (
-                  <div className="flex items-center gap-2 border-l-2 border-dashed border-[#6ec9b0]/40 px-3 py-2">
-                    <OfflineBadge size="sm" />
-                    <span className="text-xs text-[#a8e6d4]/75">
+                  <div className="relative flex items-center gap-2 border-l-2 border-dashed border-[#8a7f88]/40 px-3 py-2">
+                    {blankEmptyDays ? (
+                      <span className="absolute inset-y-0 left-3 flex items-center gap-2 text-xs text-[#f3b8c4]/50">
+                        <Calendar className="size-4 shrink-0" aria-hidden />
+                        <span>ยังไม่มีข้อมูลไลฟ์</span>
+                      </span>
+                    ) : null}
+                    <span className={cn("inline-flex", blankEmptyDays && "invisible")} aria-hidden={blankEmptyDays || undefined}>
+                      <OfflineBadge size="sm" />
+                    </span>
+                    <span className={cn("text-xs text-[#a8e6d4]/75", blankEmptyDays && "invisible")} aria-hidden={blankEmptyDays || undefined}>
                       ไม่มีไลฟ์
                     </span>
                   </div>

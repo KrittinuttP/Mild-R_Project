@@ -486,10 +486,15 @@ export function LiveScheduleBoard() {
         <div className="relative mt-8 sm:mt-10">
           {thisWeekQuery.status === "loading" && thisWeekOnly.length === 0 ? (
             <LiveScheduleSkeleton variant="compact" />
-          ) : thisWeekOnly.length > 0 ? (
-            <LiveWeekTable weeks={thisWeekOnly} />
           ) : (
-            <p className="text-sm text-[#f3b8c4]/65">ยังไม่มีไลฟ์สัปดาห์นี้</p>
+            <LiveWeekTable
+              weeks={thisWeekOnly.length > 0 ? thisWeekOnly : [{
+                id: `empty-${thisWeekRange.from}`,
+                weekStart: thisWeekRange.from,
+                slots: [],
+              }]}
+              blankEmptyDays
+            />
           )}
         </div>
       </section>
