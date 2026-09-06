@@ -302,8 +302,8 @@ async function fetchPeakByColumn(
     .from("mild_r_live_streams")
     .select(STREAM_SELECT)
     .not("actual_end", "is", null)
-    .gte("actual_end", from)
-    .lt("actual_end", to)
+    .gte("actual_start", from)
+    .lt("actual_start", to)
     .order(column, { ascending: false, nullsFirst: false })
     .limit(1);
 
@@ -358,7 +358,7 @@ export async function loadLiveViewPeaks(options: {
   }
 }
 
-/** Exclusive kind stats (Member > Collab > Solo) for streams ended in the calendar range. */
+/** Exclusive kind stats (Member > Collab > Solo) for completed streams started in the calendar range. */
 export async function loadLiveKindStats(options: {
   grain: TrendGrain;
   ownOnly: boolean;
@@ -383,9 +383,9 @@ export async function loadLiveKindStats(options: {
         .from("mild_r_live_streams")
         .select("video_id, title, is_collab, metadata")
         .not("actual_end", "is", null)
-        .gte("actual_end", from)
-        .lt("actual_end", to)
-        .order("actual_end", { ascending: false })
+        .gte("actual_start", from)
+        .lt("actual_start", to)
+        .order("actual_start", { ascending: false })
         .range(fromIdx, fromIdx + page - 1);
 
       if (options.ownOnly) q = q.eq("is_own_channel", true);
@@ -432,8 +432,8 @@ export async function loadStreamsInBucket(
     .from("mild_r_live_streams")
     .select(STREAM_SELECT)
     .not("actual_end", "is", null)
-    .gte("actual_end", range.from)
-    .lt("actual_end", range.to)
+    .gte("actual_start", range.from)
+    .lt("actual_start", range.to)
     .order("latest_views", { ascending: false, nullsFirst: false })
     .limit(100);
 
