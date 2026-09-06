@@ -1,4 +1,5 @@
 "use client";
+import { englishWeekday, englishMonth, formatLiveShortDate, formatLiveDateRange } from "@/lib/live-date-format";
 
 import { useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, ExternalLink, Loader2 } from "lucide-react";
@@ -38,7 +39,7 @@ import {
   findDefaultWeekIndex,
   flattenLiveSlots,
   formatISODate,
-  formatThaiShortDate,
+
   isInCurrentWeek,
   isSameMonth,
   mergeLiveWeekLists,
@@ -48,8 +49,8 @@ import {
   slotsByDateMap,
   sortLiveWeeks,
   startOfWeekSunday,
-  thaiMonthName,
-  thaiWeekdayShort,
+
+
   thisWeekRangeYmd,
   weekDayDates,
 } from "@/lib/events";
@@ -379,7 +380,7 @@ export function LiveScheduleBoard() {
 
   const selectedWeekRangeLabel =
     selectedWeekDays.length === 7
-      ? `${formatThaiShortDate(selectedWeekDays[0])} – ${formatThaiShortDate(selectedWeekDays[6])}`
+      ? formatLiveDateRange(selectedWeekDays[0], selectedWeekDays[6])
       : null;
 
   const selectedWeekSlotCount = useMemo(() => {
@@ -390,21 +391,16 @@ export function LiveScheduleBoard() {
     return n;
   }, [selectedWeekDays, byDate]);
 
-  /** End of week containing the latest live date — offline only up through this day */
-  const offlineCutoffIso = useMemo(() => {
-    let latest: string | null = null;
+  const weeksWithLiveData = useMemo(() => {
+    const weekStarts = new Set<string>();
     for (const slot of allSlots) {
-      if (!latest || slot.date > latest) latest = slot.date;
+      weekStarts.add(formatISODate(startOfWeekSunday(parseISODate(slot.date))));
     }
-    if (!latest) return null;
-    const week = weekDayDates(
-      formatISODate(startOfWeekSunday(parseISODate(latest)))
-    );
-    return week[6] ?? latest;
+    return weekStarts;
   }, [allSlots]);
 
   const showOfflineForDay = (iso: string) =>
-    Boolean(offlineCutoffIso && iso <= offlineCutoffIso);
+    weeksWithLiveData.has(formatISODate(startOfWeekSunday(parseISODate(iso))));
 
   /** Exclusive kind counts for the visible calendar month: Member > Collab > Solo */
   const monthKindStats = useMemo(() => {
@@ -474,7 +470,7 @@ export function LiveScheduleBoard() {
     return Array.from({ length: 7 }, (_, i) => {
       const d = new Date(sunday);
       d.setDate(sunday.getDate() + i);
-      return thaiWeekdayShort(d);
+      return englishWeekday(d);
     });
   }, [today]);
 
@@ -581,7 +577,7 @@ export function LiveScheduleBoard() {
                 >
                   {Array.from({ length: 12 }, (_, index) => (
                     <option key={index} value={index}>
-                      {thaiMonthName(index)}
+                      {englishMonth(index)}
                     </option>
                   ))}
                 </select>
@@ -616,7 +612,7 @@ export function LiveScheduleBoard() {
             </div>
 
             <p className="hidden shrink-0 text-sm text-[#f3b8c4]/55 md:block">
-              {thaiMonthName(month)} {year}
+              {englishMonth(month)} {year}
             </p>
           </div>
 
@@ -910,10 +906,10 @@ export function LiveScheduleBoard() {
                           {date.getDate()}
                         </span>
                         <span className="text-xs tracking-[0.14em] text-[#f3b8c4]/65 uppercase sm:text-sm">
-                          {thaiWeekdayShort(date)}
+                          {englishWeekday(date)}
                         </span>
                         <span className="text-xs text-[#f3b8c4]/50 sm:text-sm">
-                          {formatThaiShortDate(iso)}
+                          {formatLiveShortDate(iso)}
                         </span>
                         <LiveDayChannelBadges
                           slots={daySlots}

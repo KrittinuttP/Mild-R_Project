@@ -1,4 +1,5 @@
 "use client";
+import { englishWeekday, formatLiveShortDate, formatLiveDate, formatLiveDateRange } from "@/lib/live-date-format";
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -27,10 +28,10 @@ import { buttonVariants } from "@/components/ui/button";
 import {
   findDefaultWeekIndex,
   formatISODate,
-  formatThaiShortDate,
+
   parseISODate,
   sortLiveWeeks,
-  thaiWeekdayShort,
+
   weekDayDates,
   weekOverlapsYmdRange,
 } from "@/lib/events";
@@ -126,47 +127,6 @@ function MobileSlotCard({
           <LiveCoverPlaceholder className="relative" size="sm" />
         )}
 
-        {/* Status badges on bottom-right of thumbnail */}
-        {hasBadges ? (
-          <div className="absolute bottom-1 right-1 flex flex-wrap items-center justify-end gap-1">
-            {cancelled ? (
-              <span
-                className={cn(
-                  LIVE_BADGE_PILL_COMPACT,
-                  LIVE_BADGE_CANCELLED,
-                  "h-4 bg-[#140a0d]/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
-                )}
-              >
-                ยกเลิก
-              </span>
-            ) : (
-              <>
-                {isMember ? (
-                  <span
-                    className={cn(
-                      LIVE_BADGE_PILL_COMPACT,
-                      LIVE_BADGE_MEMBER,
-                      "h-4 bg-[#140a0d]/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
-                    )}
-                  >
-                    Member
-                  </span>
-                ) : null}
-                {collab ? (
-                  <span
-                    className={cn(
-                      LIVE_BADGE_PILL_COMPACT,
-                      LIVE_BADGE_COLLAB,
-                      "h-4 bg-[#140a0d]/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
-                    )}
-                  >
-                    Collab
-                  </span>
-                ) : null}
-              </>
-            )}
-          </div>
-        ) : null}
       </div>
 
       {/* 📝 Right: Content Details (Strict 2-Line Clamp with ellipsis '...') */}
@@ -209,6 +169,47 @@ function MobileSlotCard({
               />
             </div>
           )}
+        {/* Status badge follows the time on mobile. */}
+        {hasBadges ? (
+          <div className="flex shrink-0 items-center gap-1">
+            {cancelled ? (
+              <span
+                className={cn(
+                  LIVE_BADGE_PILL_COMPACT,
+                  LIVE_BADGE_CANCELLED,
+                  "h-4 bg-[#140a0d]/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
+                )}
+              >
+                ยกเลิก
+              </span>
+            ) : (
+              <>
+                {isMember ? (
+                  <span
+                    className={cn(
+                      LIVE_BADGE_PILL_COMPACT,
+                      LIVE_BADGE_MEMBER,
+                      "h-4 bg-[#140a0d]/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
+                    )}
+                  >
+                    Member
+                  </span>
+                ) : null}
+                {collab ? (
+                  <span
+                    className={cn(
+                      LIVE_BADGE_PILL_COMPACT,
+                      LIVE_BADGE_COLLAB,
+                      "h-4 bg-[#140a0d]/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
+                    )}
+                  >
+                    Collab
+                  </span>
+                ) : null}
+              </>
+            )}
+          </div>
+        ) : null}
         </div>
 
         {/* Title: บังคับตัดบรรทัดด้วย line-clamp-2 (เกินใส่ ...) */}
@@ -288,9 +289,67 @@ function SlotCard({
           <LiveCoverPlaceholder className="relative h-full w-full" size="md" />
         )}
 
-        {/* 🏷️ Status Badges on Bottom-Right of Image with drop-shadow & backdrop blur */}
+        <LiveSourceBadges
+          isOwnChannel={own}
+          sourceTitle={slot.sourceTitle}
+          showCollab={false}
+          showMember={false}
+          compactChannel
+          className="absolute bottom-1.5 right-1.5 max-w-[calc(100%-0.75rem)] rounded-full bg-[#140a0d]/85 shadow-md backdrop-blur-md [&>span]:truncate"
+        />
+      </div>
+
+      {/* 🕒 2. Hero Time Highlight Bar (คั่นกลางชัดเจน โล่ง โปร่ง เด่นชัด) */}
+      <div
+        className={cn(
+          "flex min-w-0 items-center justify-between gap-1 border-y px-2.5 py-1.5 transition sm:px-3",
+          cancelled
+            ? "border-[#8a7f88]/20 bg-[#160a0f]/90"
+            : isLive
+              ? "border-[#e85a7a]/40 bg-[#e85a7a]/20"
+              : "border-[#f3b8c4]/10 bg-[#14080e]/95 group-hover:bg-[#180912]"
+        )}
+      >
+        <div className="flex min-w-0 flex-1 items-center gap-1.5">
+          {isLive ? (
+            <span className="inline-flex items-center gap-1 rounded-md bg-[#e85a7a] px-2 py-0.5 text-[0.68rem] font-bold tracking-wider text-white uppercase shadow-[0_0_8px_rgba(232,90,122,0.6)]">
+              <span className="size-1.5 rounded-full bg-white animate-ping" />
+              LIVE
+            </span>
+          ) : (
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Clock
+                className={cn(
+                  "size-3.5 shrink-0",
+                  cancelled
+                    ? "text-[#8a7f88]"
+                    : isMember
+                      ? "text-[#9b8cff]"
+                      : guestTone
+                        ? "text-[#d4a574]"
+                        : "text-[#e85a7a]"
+                )}
+              />
+              <LiveSlotTime
+                time={slot.time}
+                timePrevious={slot.timePrevious ?? undefined}
+                timeUpdated={slot.timeUpdated ?? undefined}
+                className="text-xs font-bold tabular-nums sm:text-[0.84rem]"
+                accentClassName={
+                  cancelled
+                    ? "text-[#d8d0d4]"
+                    : isMember
+                      ? "text-[#cfc6ff]"
+                      : guestTone
+                        ? "text-[#f3d9be]"
+                        : "text-[#fff5f7]"
+                }
+              />
+            </div>
+          )}
+        </div>
         {hasBadges ? (
-          <div className="absolute bottom-1.5 right-1.5 flex flex-wrap items-center justify-end gap-1">
+          <div className="flex shrink-0 items-center justify-end gap-1">
             {cancelled ? (
               <span
                 className={cn(
@@ -328,58 +387,8 @@ function SlotCard({
               </>
             )}
           </div>
-        ) : null}
-      </div>
 
-      {/* 🕒 2. Hero Time Highlight Bar (คั่นกลางชัดเจน โล่ง โปร่ง เด่นชัด) */}
-      <div
-        className={cn(
-          "flex min-w-0 items-center justify-between gap-1 border-y px-2.5 py-1.5 transition sm:px-3",
-          cancelled
-            ? "border-[#8a7f88]/20 bg-[#160a0f]/90"
-            : isLive
-              ? "border-[#e85a7a]/40 bg-[#e85a7a]/20"
-              : "border-[#f3b8c4]/10 bg-[#14080e]/95 group-hover:bg-[#180912]"
-        )}
-      >
-        <div className="flex min-w-0 flex-1 items-center gap-1.5">
-          {isLive ? (
-            <span className="inline-flex items-center gap-1 rounded-md bg-[#e85a7a] px-2 py-0.5 text-[0.68rem] font-bold tracking-wider text-white uppercase shadow-[0_0_8px_rgba(232,90,122,0.6)]">
-              <span className="size-1.5 rounded-full bg-white animate-ping" />
-              LIVE NOW
-            </span>
-          ) : (
-            <div className="flex items-center gap-1.5 min-w-0">
-              <Clock
-                className={cn(
-                  "size-3.5 shrink-0",
-                  cancelled
-                    ? "text-[#8a7f88]"
-                    : isMember
-                      ? "text-[#9b8cff]"
-                      : guestTone
-                        ? "text-[#d4a574]"
-                        : "text-[#e85a7a]"
-                )}
-              />
-              <LiveSlotTime
-                time={slot.time}
-                timePrevious={slot.timePrevious ?? undefined}
-                timeUpdated={slot.timeUpdated ?? undefined}
-                className="text-xs font-bold tabular-nums sm:text-[0.84rem]"
-                accentClassName={
-                  cancelled
-                    ? "text-[#d8d0d4]"
-                    : isMember
-                      ? "text-[#cfc6ff]"
-                      : guestTone
-                        ? "text-[#f3d9be]"
-                        : "text-[#fff5f7]"
-                }
-              />
-            </div>
-          )}
-        </div>
+        ) : null}
       </div>
 
       {/* 📝 3. Title Content */}
@@ -422,7 +431,8 @@ function EmptyDaySlot({ compact, blank }: { compact?: boolean; blank?: boolean }
   return (
     <div
       className={cn(
-        "flex h-full min-h-[7.25rem] items-center justify-center border border-dashed border-[#8a7f88]/30 bg-transparent sm:min-h-[8rem]",
+        "flex h-full min-h-[7.25rem] items-center justify-center border border-dashed sm:min-h-[8rem]",
+        blank ? "border-[#8a7f88]/30 bg-transparent" : "border-[#6ec9b0]/25 bg-[#6ec9b0]/05",
         compact ? "min-h-[5.5rem] rounded-xl sm:min-h-[5.5rem]" : "rounded-2xl"
       )}
     >
@@ -558,12 +568,11 @@ function LiveSpotlightBanner({
         ? "ไลฟ์วันนี้ (จบแล้ว)"
         : "ไลฟ์วันนี้";
 
-  const dateObj = parseISODate(slot.date);
-  const dateFormatted = `${thaiWeekdayShort(dateObj)} ${formatThaiShortDate(slot.date)}`;
+  const dateFormatted = formatLiveDate(slot.date);
   const timeFormatted = slot.time;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-dashed border-[#8a7f88]/30 bg-transparent">
+    <div className="relative overflow-hidden rounded-3xl border border-[#e85a7a]/35 bg-gradient-to-r from-[#220e18]/95 via-[#1a0c12]/90 to-[#140a0d] shadow-[0_16px_40px_rgba(232,90,122,0.16)]">
       {/* 💻 Desktop / Tablet: Split Panorama Glass Card */}
       <div className="hidden sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-5 lg:gap-8 lg:p-6">
         <div className="flex min-w-0 flex-1 flex-col justify-center">
@@ -604,7 +613,7 @@ function LiveSpotlightBanner({
               sourceTitle={slot.sourceTitle}
               isCollab={collab}
               isMember={slot.isMember}
-              showChannel={!own}
+              showChannel
               size="md"
             />
           </div>
@@ -752,7 +761,7 @@ function LiveSpotlightBanner({
                 sourceTitle={slot.sourceTitle}
                 isCollab={collab}
                 isMember={slot.isMember}
-                showChannel={!own}
+                showChannel
                 size="sm"
               />
             </div>
@@ -793,7 +802,7 @@ function LiveSpotlightBanner({
                 sourceTitle={slot.sourceTitle}
                 isCollab={collab}
                 isMember={slot.isMember}
-                showChannel={!own}
+                showChannel
                 size="sm"
               />
             </div>
@@ -868,22 +877,23 @@ function LiveSpotlightBanner({
 
 function LiveTodayOfflineBanner({
   todayIso,
+  offline,
   nextSlot,
   onOpenNext,
 }: {
   todayIso: string;
+  offline: boolean;
   nextSlot: LiveSlot | null;
   onOpenNext?: () => void;
 }) {
-  const dateObj = parseISODate(todayIso);
-  const dateFormatted = `${thaiWeekdayShort(dateObj)} ${formatThaiShortDate(todayIso)}`;
+  const dateFormatted = formatLiveDate(todayIso);
 
   const nextCoverUrl = nextSlot ? getSlotCoverUrl(nextSlot) : null;
   const nextLabel = nextSlot
     ? (nextSlot.titleLocal ?? nextSlot.title)
     : null;
   const nextDateFormatted = nextSlot
-    ? `${thaiWeekdayShort(parseISODate(nextSlot.date))} ${formatThaiShortDate(nextSlot.date)}`
+    ? formatLiveDate(nextSlot.date)
     : null;
 
   const nextPreview = nextSlot ? (
@@ -926,19 +936,19 @@ function LiveTodayOfflineBanner({
   ) : null;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[#e85a7a]/35 bg-gradient-to-r from-[#220e18]/95 via-[#1a0c12]/90 to-[#140a0d] shadow-[0_16px_40px_rgba(232,90,122,0.16)]">
+    <div className={cn("relative overflow-hidden rounded-3xl border border-dashed", offline ? "border-[#6ec9b0]/25 bg-[#6ec9b0]/05" : "border-[#8a7f88]/30 bg-transparent")}>
       <div className="hidden sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-5 lg:gap-8 lg:p-6">
         <div className="flex min-w-0 flex-1 flex-col justify-center">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-2 text-sm text-[#f3b8c4]/50">
+            {offline ? <OfflineBadge size="md" /> : <span className="inline-flex items-center gap-2 text-sm text-[#f3b8c4]/50">
               <Calendar className="size-4 shrink-0" aria-hidden />
               ยังไม่มีข้อมูลไลฟ์
-            </span>
+            </span>}
           </div>
 
           <div className="mt-3.5 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
-            <div className="inline-flex items-center gap-1.5 rounded-xl border border-[#f3b8c4]/15 bg-[#14080e]/90 px-3 py-1.5 text-[#fff5f7] shadow-inner">
-              <Calendar className="size-3.5 text-[#e85a7a]" />
+            <div className={cn("inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 shadow-inner", offline ? "border-[#6ec9b0]/25 bg-[#6ec9b0]/05 text-[#a8e6d4]" : "border-[#f3b8c4]/15 bg-[#14080e]/90 text-[#fff5f7]")}>
+              <Calendar className={cn("size-3.5", offline ? "text-[#6ec9b0]" : "text-[#e85a7a]")} />
               <span className="font-semibold">{dateFormatted}</span>
             </div>
           </div>
@@ -949,26 +959,29 @@ function LiveTodayOfflineBanner({
           </div>
         </div>
 
-        <div className="relative aspect-[16/9] w-64 shrink-0 overflow-hidden rounded-2xl border border-dashed border-[#8a7f88]/30 bg-transparent lg:w-80">
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-sm text-[#f3b8c4]/50">
+        <div className={cn("relative aspect-[16/9] w-64 shrink-0 overflow-hidden rounded-2xl border border-dashed bg-transparent lg:w-80", offline ? "border-[#6ec9b0]/25" : "border-[#8a7f88]/30")}>
+          {offline ? <LiveCoverPlaceholder className="absolute inset-0" size="lg" variant="offline" /> : <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-sm text-[#f3b8c4]/50">
             <Calendar className="size-6 shrink-0" aria-hidden />
             <span>ยังไม่มีข้อมูลไลฟ์</span>
-          </div>
+          </div>}
         </div>
       </div>
 
       <div className="flex flex-col sm:hidden">
         <div className="relative aspect-[16/9] w-full overflow-hidden bg-transparent">
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-sm text-[#f3b8c4]/50">
+          {offline ? <>
+            <LiveCoverPlaceholder className="absolute inset-0" size="lg" variant="offline" />
+            <div className="pointer-events-none absolute left-3 top-3 z-10"><OfflineBadge size="sm" /></div>
+          </> : <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-sm text-[#f3b8c4]/50">
             <Calendar className="size-6 shrink-0" aria-hidden />
             <span>ยังไม่มีข้อมูลไลฟ์</span>
-          </div>
+          </div>}
         </div>
 
         <div className="p-4">
           <div className="flex flex-wrap items-center gap-1.5 text-xs">
-            <div className="inline-flex items-center gap-1 rounded-lg border border-[#f3b8c4]/15 bg-[#14080e]/90 px-2.5 py-1 text-[#fff5f7]">
-              <Calendar className="size-3 text-[#e85a7a]" />
+            <div className={cn("inline-flex items-center gap-1 rounded-lg border px-2.5 py-1", offline ? "border-[#6ec9b0]/25 bg-[#6ec9b0]/05 text-[#a8e6d4]" : "border-[#f3b8c4]/15 bg-[#14080e]/90 text-[#fff5f7]")}>
+              <Calendar className={cn("size-3", offline ? "text-[#6ec9b0]" : "text-[#e85a7a]")} />
               <span className="font-semibold">{dateFormatted}</span>
             </div>
           </div>
@@ -1189,7 +1202,10 @@ export function LiveWeekTable({
     return <p className="text-sm text-[#f3b8c4]/70">ยังไม่มีตารางไลฟ์</p>;
   }
 
-  const rangeLabel = `${formatThaiShortDate(dayIsos[0] ?? week.weekStart)} – ${formatThaiShortDate(dayIsos[6] ?? week.weekStart)}`;
+  const weekHasLiveData = week.slots.length > 0;
+  const showNoLiveData = blankEmptyDays && !weekHasLiveData;
+
+  const rangeLabel = formatLiveDateRange(dayIsos[0] ?? week.weekStart, dayIsos[6] ?? week.weekStart);
 
   const renderDayBody = (iso: string, isMobile?: boolean) => {
     const daySlots = preferOwnChannelSlots(slotsByDate.get(iso) ?? []);
@@ -1248,7 +1264,7 @@ export function LiveWeekTable({
 
     return (
       <div className="flex-1">
-        <EmptyDaySlot compact={compact} blank={blankEmptyDays} />
+        <EmptyDaySlot compact={compact} blank={showNoLiveData} />
       </div>
     );
   };
@@ -1316,6 +1332,7 @@ export function LiveWeekTable({
       ) : weekIncludesToday ? (
         <LiveTodayOfflineBanner
           todayIso={todayIso}
+          offline={weekHasLiveData || offlineByDate.has(todayIso)}
           nextSlot={nextHighlightSlot}
           onOpenNext={
             nextHighlightSlot
@@ -1363,7 +1380,7 @@ export function LiveWeekTable({
                         isToday ? "font-bold text-[#fff5f7]" : "text-[#f3b8c4]/65"
                       )}
                     >
-                    {thaiWeekdayShort(date)}
+                    {englishWeekday(date)}
                   </p>
                   </div>
                   <div className="mt-1 flex flex-wrap items-center justify-center gap-1">
@@ -1375,9 +1392,9 @@ export function LiveWeekTable({
                           : "text-[#f7d7de]/80"
                       )}
                     >
-                    {formatThaiShortDate(iso)}
+                    {formatLiveShortDate(iso)}
                     </span>
-                    <LiveDayChannelBadges slots={daySlots} size="sm" />
+
                   </div>
                 </div>
                 <div className="relative z-10 mt-2 flex flex-1 flex-col gap-2">
@@ -1417,7 +1434,7 @@ export function LiveWeekTable({
                       isToday ? "font-bold text-[#fff5f7]" : "text-[#f3b8c4]/65"
                     )}
                   >
-                    {thaiWeekdayShort(date)}
+                    {englishWeekday(date)}
                   </p>
                 </div>
                 <span
@@ -1428,7 +1445,7 @@ export function LiveWeekTable({
                       : "text-[#f7d7de]/80"
                   )}
                 >
-                  {formatThaiShortDate(iso)}
+                  {formatLiveShortDate(iso)}
                 </span>
                 {isToday ? (
                   <span className={cn(BADGE_ACCENT_CLASS, "px-2 py-0.5 text-[0.65rem] uppercase font-bold shadow-sm")}>
@@ -1441,17 +1458,17 @@ export function LiveWeekTable({
                 {daySlots.length > 0 || offline ? (
                   renderDayBody(iso, true)
                 ) : (
-                  <div className="relative flex items-center gap-2 border-l-2 border-dashed border-[#8a7f88]/40 px-3 py-2">
-                    {blankEmptyDays ? (
+                  <div className={cn("relative flex items-center gap-2 border-l-2 border-dashed px-3 py-2", showNoLiveData ? "border-[#8a7f88]/40" : "border-[#6ec9b0]/40")}>
+                    {showNoLiveData ? (
                       <span className="absolute inset-y-0 left-3 flex items-center gap-2 text-xs text-[#f3b8c4]/50">
                         <Calendar className="size-4 shrink-0" aria-hidden />
                         <span>ยังไม่มีข้อมูลไลฟ์</span>
                       </span>
                     ) : null}
-                    <span className={cn("inline-flex", blankEmptyDays && "invisible")} aria-hidden={blankEmptyDays || undefined}>
+                    <span className={cn("inline-flex", showNoLiveData && "invisible")} aria-hidden={showNoLiveData || undefined}>
                       <OfflineBadge size="sm" />
                     </span>
-                    <span className={cn("text-xs text-[#a8e6d4]/75", blankEmptyDays && "invisible")} aria-hidden={blankEmptyDays || undefined}>
+                    <span className={cn("text-xs text-[#a8e6d4]/75", showNoLiveData && "invisible")} aria-hidden={showNoLiveData || undefined}>
                       ไม่มีไลฟ์
                     </span>
                   </div>

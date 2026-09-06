@@ -25,7 +25,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { formatThaiDate, parseISODate, thaiWeekdayShort } from "@/lib/events";
+import { formatLiveDate } from "@/lib/live-date-format";
 import { getSlotCoverUrl } from "@/lib/live-cover";
 import {
   CTA_PRIMARY_CLASS,
@@ -138,11 +138,7 @@ function WatchLink({
 }
 
 function formatNewLiveDateLine(iso: string, time?: string) {
-  const date = parseISODate(iso);
-  const shortMonth = date.toLocaleDateString("th-TH-u-ca-gregory", {
-    month: "short",
-  });
-  const label = `${thaiWeekdayShort(date)} ${date.getDate()} ${shortMonth}`;
+  const label = formatLiveDate(iso);
   return time ? `${label} · ${time}` : label;
 }
 
@@ -407,7 +403,7 @@ export function LiveDetailModal({
                       className="size-3.5 shrink-0 text-[#e85a7a]"
                       aria-hidden
                     />
-                    {formatThaiDate(slot.date)}
+                    {formatLiveDate(slot.date)}
                   </MetaPill>
                   {platform && !slot.isPreview ? (
                     <MetaPill className="border-red-500/40 bg-red-500/15 text-xs font-semibold text-red-200 uppercase">
