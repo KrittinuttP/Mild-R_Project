@@ -205,33 +205,17 @@ export function EventsTeaser({ data }: EventsTeaserProps) {
               <LiveScheduleError message={error} onRetry={retry} />
             ) : (
               <div className="transition-opacity duration-500 ease-out">
-                <LiveWeekTable weeks={displayWeeks} compact blankEmptyDays />
+                <LiveWeekTable weeks={displayWeeks} compact blankEmptyDays weekRange={teaserRange} />
               </div>
             )}
           </ScrollReveal>
 
-<<<<<<< HEAD
           <ScrollReveal delay={0.1} className="mt-8 sm:mt-10">
             <Link
               href="/live"
               className={cn(
                 buttonVariants({ size: "lg", variant: "outline" }),
                 CTA_OUTLINE_CLASS
-=======
-            <ScrollReveal delay={0.06} className="mt-8 sm:mt-10">
-              {status === "loading" ? (
-                <LiveScheduleSkeleton variant="compact" />
-              ) : status === "error" ? (
-                <LiveScheduleError message={error} onRetry={retry} />
-              ) : teaserWeeks.length > 0 ? (
-                <div className="transition-opacity duration-500 ease-out">
-                  <LiveWeekTable weeks={teaserWeeks} compact weekRange={teaserRange} />
-                </div>
-              ) : (
-                <p className="text-sm text-[#f3b8c4]/65">
-                  ยังไม่มีตารางไลฟ์ในช่วงนี้
-                </p>
->>>>>>> e0f20dd3a14abeef2d9717d0b54184bb36a75b49
               )}
             >
               ดูตารางไลฟ์ทั้งหมด

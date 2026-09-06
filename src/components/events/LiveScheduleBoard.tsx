@@ -511,11 +511,6 @@ export function LiveScheduleBoard() {
         <div className="relative mt-8 sm:mt-10">
           {thisWeekQuery.status === "loading" && thisWeekOnly.length === 0 ? (
             <LiveScheduleSkeleton variant="compact" />
-<<<<<<< HEAD
-=======
-          ) : thisWeekOnly.length > 0 ? (
-            <LiveWeekTable weeks={thisWeekOnly} slotLookup={allSlots} />
->>>>>>> e0f20dd3a14abeef2d9717d0b54184bb36a75b49
           ) : (
             <LiveWeekTable
               weeks={thisWeekOnly.length > 0 ? thisWeekOnly : [{
@@ -524,6 +519,7 @@ export function LiveScheduleBoard() {
                 slots: [],
               }]}
               blankEmptyDays
+              slotLookup={allSlots}
             />
           )}
         </div>

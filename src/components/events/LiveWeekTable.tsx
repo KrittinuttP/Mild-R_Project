@@ -60,14 +60,11 @@ type LiveWeekTableProps = {
   weeks: LiveWeek[];
   className?: string;
   compact?: boolean;
-<<<<<<< HEAD
   blankEmptyDays?: boolean;
-=======
   /** All slots for reschedule banner navigation (defaults to slots in `weeks`). */
   slotLookup?: LiveSlot[];
   /** Clamp week picker to the loaded schedule window (e.g. homepage 2-week range). */
   weekRange?: { from: string; to: string };
->>>>>>> e0f20dd3a14abeef2d9717d0b54184bb36a75b49
 };
 
 function platformLabel(platform?: LivePlatform) {
@@ -566,7 +563,7 @@ function LiveSpotlightBanner({
   const timeFormatted = slot.time;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[#e85a7a]/35 bg-gradient-to-r from-[#220e18]/95 via-[#1a0c12]/90 to-[#140a0d] shadow-[0_16px_40px_rgba(232,90,122,0.16)]">
+    <div className="relative overflow-hidden rounded-3xl border border-dashed border-[#8a7f88]/30 bg-transparent">
       {/* 💻 Desktop / Tablet: Split Panorama Glass Card */}
       <div className="hidden sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-5 lg:gap-8 lg:p-6">
         <div className="flex min-w-0 flex-1 flex-col justify-center">
@@ -933,7 +930,10 @@ function LiveTodayOfflineBanner({
       <div className="hidden sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-5 lg:gap-8 lg:p-6">
         <div className="flex min-w-0 flex-1 flex-col justify-center">
           <div className="flex flex-wrap items-center gap-2">
-            <OfflineBadge size="md" />
+            <span className="inline-flex items-center gap-2 text-sm text-[#f3b8c4]/50">
+              <Calendar className="size-4 shrink-0" aria-hidden />
+              ยังไม่มีข้อมูลไลฟ์
+            </span>
           </div>
 
           <div className="mt-3.5 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
@@ -949,24 +949,19 @@ function LiveTodayOfflineBanner({
           </div>
         </div>
 
-        <div className="relative aspect-[16/9] w-64 shrink-0 overflow-hidden rounded-2xl border border-[#f3b8c4]/20 bg-[#12080c] lg:w-80">
-          <LiveCoverPlaceholder
-            className="absolute inset-0"
-            size="lg"
-            variant="offline"
-          />
+        <div className="relative aspect-[16/9] w-64 shrink-0 overflow-hidden rounded-2xl border border-dashed border-[#8a7f88]/30 bg-transparent lg:w-80">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-sm text-[#f3b8c4]/50">
+            <Calendar className="size-6 shrink-0" aria-hidden />
+            <span>ยังไม่มีข้อมูลไลฟ์</span>
+          </div>
         </div>
       </div>
 
       <div className="flex flex-col sm:hidden">
-        <div className="relative aspect-[16/9] w-full overflow-hidden bg-[#12080c]">
-          <LiveCoverPlaceholder
-            className="absolute inset-0"
-            size="lg"
-            variant="offline"
-          />
-          <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-wrap items-center gap-1.5">
-            <OfflineBadge size="sm" />
+        <div className="relative aspect-[16/9] w-full overflow-hidden bg-transparent">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-sm text-[#f3b8c4]/50">
+            <Calendar className="size-6 shrink-0" aria-hidden />
+            <span>ยังไม่มีข้อมูลไลฟ์</span>
           </div>
         </div>
 
@@ -1116,12 +1111,9 @@ export function LiveWeekTable({
   weeks,
   className,
   compact = false,
-<<<<<<< HEAD
   blankEmptyDays = false,
-=======
   slotLookup,
   weekRange,
->>>>>>> e0f20dd3a14abeef2d9717d0b54184bb36a75b49
 }: LiveWeekTableProps) {
   const nowMs = useLiveClock(30000);
   const sorted = useMemo(() => sortLiveWeeks(weeks), [weeks]);
