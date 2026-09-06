@@ -1,8 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Activity, Radio } from "lucide-react";
 
 import { LiveOpsSyncPanel } from "@/components/events/LiveOpsSyncPanel";
 import { BackLink } from "@/components/layout/BackLink";
+import { buttonVariants } from "@/components/ui/button";
+import {
+  CTA_OUTLINE_CLASS,
+  DISPLAY_H1_CLASS,
+  META_CLASS,
+} from "@/lib/site-ui";
+import { cn } from "@/lib/utils";
 import {
   bangkokInclusiveToUtcRange,
   bangkokYmdToday,
@@ -47,29 +55,39 @@ export default async function LiveOpsPage() {
   const streams = partitionLiveStreams(streamRows);
 
   return (
-    <main className="min-h-dvh bg-[#0c0709] px-4 py-10 text-[#fff5f7] sm:px-8">
-      <div className="mx-auto max-w-6xl space-y-12">
+    <main className="relative min-h-dvh bg-[#0c0709] px-4 py-10 text-[#fff5f7] sm:px-8 sm:py-14">
+      {/* 🌟 Background Ambient Glow */}
+      <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 size-96 bg-[radial-gradient(circle,rgba(232,90,122,0.12),transparent_70%)]" />
+
+      <div className="relative mx-auto max-w-6xl space-y-12">
         <header className="border-b border-[#f3b8c4]/12 pb-6">
-          <BackLink href="/live" className="mb-6">
-            ตารางไลฟ์
+          <BackLink href="/live" className="mb-4">
+            กลับหน้าตารางไลฟ์
           </BackLink>
-          <p className="mt-6 text-[0.65rem] tracking-[0.28em] text-[#f3b8c4]/60 uppercase">
-            Internal · noindex
-          </p>
-          <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
-            <h1 className="font-[family-name:var(--font-display)] text-3xl font-normal tracking-normal sm:text-4xl">
+          <div className="mt-4 flex items-center gap-2">
+            <Radio className="size-4 text-[#e85a7a]" />
+            <p className={META_CLASS}>
+              Live Ops & Sync Monitor · Internal
+            </p>
+          </div>
+          <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
+            <h1 className={DISPLAY_H1_CLASS}>
               YouTube Sync Monitor
             </h1>
             <Link
               href="/live/ops/trends"
-              className="border border-[#e85a7a]/45 bg-[#e85a7a]/10 px-3 py-1.5 text-[0.7rem] tracking-[0.16em] text-[#fff5f7] uppercase transition-colors hover:border-[#e85a7a]/7 hover:bg-[#e85a7a]/18"
+              className={cn(
+                buttonVariants({ variant: "outline", size: "sm" }),
+                CTA_OUTLINE_CLASS,
+                "inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider"
+              )}
             >
-              View trends →
+              <Activity className="size-3.5 text-[#e85a7a]" />
+              <span>View trends</span>
             </Link>
           </div>
-          <p className="mt-2 max-w-xl text-sm text-[#f7d7de]/70">
-            ติดตาม sync YouTube (Main / Search) และคลิปในช่วงวันที่เลือก —
-            หน้าซ่อน ไม่โชว์ในเมนูเว็บ
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-[#f7d7de]/80">
+            ติดตามสถานะ sync YouTube (Main / Search) และประวัติคลิปในช่วงวันที่เลือก
           </p>
         </header>
 

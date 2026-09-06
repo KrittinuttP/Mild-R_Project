@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, Loader2 } from "lucide-react";
 
+import { LiveCoverPlaceholder } from "@/components/events/LiveCoverPlaceholder";
 import { LiveDetailModal } from "@/components/events/LiveDetailModal";
 import {
   LiveCancelledBadge,
@@ -25,8 +26,10 @@ import {
   CTA_OUTLINE_CLASS,
   DISPLAY_H2_CLASS,
   GLASS_CARD_CLASS,
+  LIVE_BADGE_CANCELLED,
   LIVE_BADGE_COLLAB,
   LIVE_BADGE_MEMBER,
+  LIVE_BADGE_PILL_COMPACT,
   LIVE_BADGE_PILL_SM,
   LIVE_BADGE_SOFT,
 } from "@/lib/site-ui";
@@ -51,18 +54,9 @@ import {
   weekDayDates,
 } from "@/lib/events";
 import { sortLiveSlotsForCalendar } from "@/lib/live-stream-utils";
+import { getSlotCoverUrl } from "@/lib/live-cover";
 import { cn } from "@/lib/utils";
-import {
-  getYoutubeThumbnailUrl,
-  getYoutubeVideoId,
-} from "@/lib/youtube";
 import type { LiveSlot } from "@/types/vtuber";
-
-function slotCoverUrl(slot: LiveSlot) {
-  if (slot.coverUrl) return slot.coverUrl;
-  const videoId = getYoutubeVideoId(slot.url);
-  return videoId ? getYoutubeThumbnailUrl(videoId) : null;
-}
 
 function WeekSlotCard({
   slot,
@@ -75,16 +69,19 @@ function WeekSlotCard({
   const collab = slot.kind === "collab";
   const guestTone = !own && collab;
   const cancelled = slot.status === "cancelled";
-  const cover = slotCoverUrl(slot);
+  const isMember = Boolean(slot.isMember);
+  const cover = getSlotCoverUrl(slot);
   const title = slot.titleLocal ?? slot.title;
+  const hasBadges = cancelled || collab || isMember;
 
   return (
     <li>
       <button
         type="button"
         onClick={onOpen}
+        title={`${slot.timePrevious ? `${slot.timePrevious}→` : ""}${slot.timeUpdated ?? slot.time} · ${title}`}
         className={cn(
-          "group flex w-full cursor-pointer gap-3 overflow-hidden rounded-3xl border bg-[#1a0c12]/60 p-3 text-left transition sm:gap-4 sm:p-3.5",
+          "group flex min-h-[5.5rem] w-full cursor-pointer gap-3 overflow-hidden rounded-3xl border bg-[#1a0c12]/60 p-3 text-left transition sm:min-h-[6rem] sm:gap-4 sm:p-3.5",
           cancelled
             ? "border-[#8a7f88]/30 opacity-85 hover:border-[#8a7f88]/50"
             : guestTone
@@ -94,21 +91,62 @@ function WeekSlotCard({
       >
         <div className="relative aspect-video w-[6.5rem] shrink-0 overflow-hidden rounded-2xl bg-[#10070b] sm:w-36">
           {cover ? (
-            <ProtectedImage
-              src={cover}
-              alt=""
-              wrapClassName="absolute inset-0 block"
-              className={cn(
-                "h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]",
-                cancelled && "opacity-70 grayscale-[0.35]"
-              )}
-            />
+            <>
+              <ProtectedImage
+                src={cover}
+                alt=""
+                wrapClassName="absolute inset-0 block"
+                className={cn(
+                  "absolute inset-0 h-full w-full scale-[1.2] object-cover object-center transition duration-500 group-hover:scale-[1.25] sm:scale-100 sm:group-hover:scale-[1.03]",
+                  cancelled && "opacity-70 grayscale-[0.35]"
+                )}
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140a0d]/80 via-transparent to-transparent" />
+            </>
           ) : (
-            <div
-              className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(232,90,122,0.22),transparent_55%),linear-gradient(160deg,#1c0d12,#10070b)]"
-              aria-hidden
-            />
+            <LiveCoverPlaceholder className="absolute inset-0" size="sm" />
           )}
+
+          {hasBadges ? (
+            <div className="absolute bottom-1 right-1 flex flex-wrap items-center justify-end gap-1 sm:bottom-1.5 sm:right-1.5">
+              {cancelled ? (
+                <span
+                  className={cn(
+                    LIVE_BADGE_PILL_COMPACT,
+                    LIVE_BADGE_CANCELLED,
+                    "h-4 bg-[#140a0d]/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
+                  )}
+                >
+                  ยกเลิก
+                </span>
+              ) : (
+                <>
+                  {isMember ? (
+                    <span
+                      className={cn(
+                        LIVE_BADGE_PILL_COMPACT,
+                        LIVE_BADGE_MEMBER,
+                        "h-4 bg-[#140a0d]/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
+                      )}
+                    >
+                      Member
+                    </span>
+                  ) : null}
+                  {collab ? (
+                    <span
+                      className={cn(
+                        LIVE_BADGE_PILL_COMPACT,
+                        LIVE_BADGE_COLLAB,
+                        "h-4 bg-[#140a0d]/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
+                      )}
+                    >
+                      Collab
+                    </span>
+                  ) : null}
+                </>
+              )}
+            </div>
+          ) : null}
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col justify-center py-0.5">
@@ -121,27 +159,19 @@ function WeekSlotCard({
               accentClassName={
                 cancelled
                   ? "text-[#d8d0d4]"
-                  : guestTone
-                    ? "text-[#e8c49a]"
-                    : "text-[#e85a7a]"
+                  : isMember
+                    ? "text-[#cfc6ff]"
+                    : guestTone
+                      ? "text-[#e8c49a]"
+                      : "text-[#e85a7a]"
               }
             />
-            {cancelled ? (
-              <LiveCancelledBadge />
-            ) : collab || slot.isMember ? (
-              <LiveSourceBadges
-                isCollab={collab}
-                isMember={slot.isMember}
-                showChannel={false}
-                size="sm"
-              />
-            ) : null}
           </div>
-          <p className="mt-1 text-sm leading-snug font-medium whitespace-normal break-words text-[#fff5f7]">
+          <p className="mt-1 line-clamp-2 min-w-0 text-sm leading-snug font-medium text-[#fff5f7]">
             {title}
           </p>
           {slot.titleLocal ? (
-            <p className="mt-0.5 line-clamp-1 text-xs text-[#f3b8c4]/55">
+            <p className="mt-0.5 line-clamp-1 min-w-0 text-xs text-[#f3b8c4]/55">
               {slot.title}
             </p>
           ) : null}
@@ -332,8 +362,7 @@ export function LiveScheduleBoard() {
     thisWeekQuery.status === "error" &&
     monthQuery.status === "error";
 
-  const calendarLoading =
-    monthQuery.status === "loading" && monthQuery.weeks.length === 0;
+  const calendarLoading = monthQuery.status === "loading";
 
   // Calendar UI only: selected month + pad days to complete weeks
   const grid = useMemo(
@@ -420,13 +449,9 @@ export function LiveScheduleBoard() {
     setSelectedDate(iso);
   };
 
-  /** Calendar cell tap: select day; 1 slot → open detail; many → scroll to list (mobile). */
+  /** Calendar cell tap: select day only; slot detail opens from time/title click. */
   const selectCalendarDay = (iso: string, daySlots: LiveSlot[]) => {
     selectDay(iso);
-    if (daySlots.length === 1) {
-      setActiveSlot(daySlots[0]);
-      return;
-    }
     if (daySlots.length > 1 && typeof window !== "undefined") {
       const narrow = window.matchMedia("(max-width: 639px)").matches;
       if (narrow) {
@@ -486,6 +511,11 @@ export function LiveScheduleBoard() {
         <div className="relative mt-8 sm:mt-10">
           {thisWeekQuery.status === "loading" && thisWeekOnly.length === 0 ? (
             <LiveScheduleSkeleton variant="compact" />
+<<<<<<< HEAD
+=======
+          ) : thisWeekOnly.length > 0 ? (
+            <LiveWeekTable weeks={thisWeekOnly} slotLookup={allSlots} />
+>>>>>>> e0f20dd3a14abeef2d9717d0b54184bb36a75b49
           ) : (
             <LiveWeekTable
               weeks={thisWeekOnly.length > 0 ? thisWeekOnly : [{
@@ -502,17 +532,17 @@ export function LiveScheduleBoard() {
       {/* ── Month calendar ── */}
       {/* ── Month calendar ── */}
       <section className="relative">
-        {calendarLoading ? (
-          <div
-            className="pointer-events-none absolute inset-0 z-10 animate-pulse rounded-3xl bg-[#140a0d]/35"
-            aria-hidden
-          />
-        ) : null}
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
+          <div className="flex flex-wrap items-center gap-3">
             <h2 className={DISPLAY_H2_CLASS}>
               ปฏิทินรายเดือน
             </h2>
+            {calendarLoading ? (
+              <span className="inline-flex items-center gap-1.5 text-xs text-[#e85a7a]/90">
+                <Loader2 className="size-3.5 animate-spin" aria-hidden />
+                กำลังโหลด…
+              </span>
+            ) : null}
           </div>
           <button
             type="button"
@@ -598,22 +628,22 @@ export function LiveScheduleBoard() {
             <p className="mr-auto text-xs tracking-[0.14em] text-[#f3b8c4]/55 uppercase sm:text-sm">
               เดือนนี้
               <span className="ml-1.5 tabular-nums text-[#f3b8c4]/75">
-                {monthKindStats.total}
+                {calendarLoading ? "—" : monthKindStats.total}
               </span>
             </p>
             {/* Mobile: compact counts — full pills from sm+ */}
             <div className="flex items-center gap-2.5 text-[0.65rem] tabular-nums tracking-wide sm:hidden">
               <span className="inline-flex items-center gap-1 text-[#cfc6ff]">
                 <span className="size-1.5 rounded-full bg-[#9b8cff]" aria-hidden />
-                {monthKindStats.member}
+                {calendarLoading ? "—" : monthKindStats.member}
               </span>
               <span className="inline-flex items-center gap-1 text-[#f3b8c4]/80">
                 <span className="size-1.5 rounded-full bg-[#e85a7a]" aria-hidden />
-                {monthKindStats.solo}
+                {calendarLoading ? "—" : monthKindStats.solo}
               </span>
               <span className="inline-flex items-center gap-1 text-[#e8c49a]">
                 <span className="size-1.5 rounded-full bg-[#d4a574]" aria-hidden />
-                {monthKindStats.collab}
+                {calendarLoading ? "—" : monthKindStats.collab}
               </span>
             </div>
             <span
@@ -624,7 +654,9 @@ export function LiveScheduleBoard() {
               )}
             >
               Member
-              <span className="tabular-nums">{monthKindStats.member}</span>
+              <span className="tabular-nums">
+                {calendarLoading ? "—" : monthKindStats.member}
+              </span>
             </span>
             <span
               className={cn(
@@ -634,7 +666,9 @@ export function LiveScheduleBoard() {
               )}
             >
               Solo
-              <span className="tabular-nums">{monthKindStats.solo}</span>
+              <span className="tabular-nums">
+                {calendarLoading ? "—" : monthKindStats.solo}
+              </span>
             </span>
             <span
               className={cn(
@@ -644,7 +678,9 @@ export function LiveScheduleBoard() {
               )}
             >
               Collab
-              <span className="tabular-nums">{monthKindStats.collab}</span>
+              <span className="tabular-nums">
+                {calendarLoading ? "—" : monthKindStats.collab}
+              </span>
             </span>
           </div>
 
@@ -716,7 +752,7 @@ export function LiveScheduleBoard() {
                     {dayNum}
                   </span>
 
-                  {daySlots.length > 0 ? (
+                  {!calendarLoading && daySlots.length > 0 ? (
                     <div className="mt-auto flex min-h-0 flex-col gap-0.5">
                       {visibleSlots.map((slot) => (
                         <MobileCalendarTimeSlot
@@ -734,7 +770,7 @@ export function LiveScheduleBoard() {
                         </span>
                       ) : null}
                     </div>
-                  ) : showOfflineForDay(iso) ? (
+                  ) : !calendarLoading && showOfflineForDay(iso) ? (
                     <div className="mt-auto border-l-2 border-[#6ec9b0]/70 py-px pl-1">
                       <span className="text-[0.5rem] tracking-[0.1em] text-[#6ec9b0]/85 uppercase">
                         Off
@@ -756,15 +792,17 @@ export function LiveScheduleBoard() {
                     >
                       {dayNum}
                     </span>
-                    <LiveDayChannelBadges
-                      slots={daySlots}
-                      size="sm"
-                      compact
-                      className="justify-start"
-                    />
+                    {!calendarLoading ? (
+                      <LiveDayChannelBadges
+                        slots={daySlots}
+                        size="sm"
+                        compact
+                        className="justify-start"
+                      />
+                    ) : null}
                   </div>
 
-                  {daySlots.length > 0 ? (
+                  {!calendarLoading && daySlots.length > 0 ? (
                     <div className="flex min-h-0 w-full flex-1 flex-col gap-0.5 overflow-hidden sm:gap-1">
                       {visibleSlots.map((slot) => (
                         <CalendarMonthSlot
@@ -783,7 +821,7 @@ export function LiveScheduleBoard() {
                         </span>
                       ) : null}
                     </div>
-                  ) : showOfflineForDay(iso) ? (
+                  ) : !calendarLoading && showOfflineForDay(iso) ? (
                     <div className="flex w-full flex-col items-center pt-0.5">
                       <OfflineBadge size="sm" />
                     </div>
@@ -929,6 +967,10 @@ export function LiveScheduleBoard() {
         open={activeSlot !== null}
         onOpenChange={(open) => {
           if (!open) setActiveSlot(null);
+        }}
+        onSelectSlot={(slotId) => {
+          const related = allSlots.find((s) => s.id === slotId);
+          if (related) setActiveSlot(related);
         }}
       />
     </div>

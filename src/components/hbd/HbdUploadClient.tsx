@@ -243,7 +243,7 @@ export function HbdUploadClient() {
     await new Promise((r) => setTimeout(r, 450));
     setLoading(false);
     setPhase("preview");
-    setNotify("พรีวิวพร้อมแล้ว — ตรวจก่อนกดตกลง");
+    setNotify("ตัวอย่างการ์ดอวยพร — กรุณาตรวจสอบข้อมูลก่อนกดยืนยันส่ง");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -290,7 +290,7 @@ export function HbdUploadClient() {
       clearMedia();
 
       setPhase("done");
-      setNotify("ส่งเข้าคิวอนุมัติแล้ว — ทีมจะตรวจก่อนขึ้นหน้า HBD");
+      setNotify("ส่งการ์ดอวยพรเรียบร้อยแล้ว — การ์ดจะถูกนำไปจัดแสดงในหน้า HBD เร็วๆ นี้");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
       setError("เครือข่ายมีปัญหา — ลองอีกครั้ง");
@@ -346,7 +346,7 @@ export function HbdUploadClient() {
                 ล้างข้อมูลฟอร์ม?
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-[#f3b8c4]/80">
-                ข้อความที่กรอก แคช และรูปที่อัปโหลดจะถูกลบ และกู้คืนไม่ได้
+                ข้อความและรูปภาพที่เลือกไว้จะถูกล้างออกทั้งหมด
               </p>
               <div className="mt-6 flex flex-col gap-2 sm:flex-row-reverse">
                 <button
@@ -557,7 +557,7 @@ export function HbdUploadClient() {
             <section className="rounded-3xl bg-white/[0.03] p-5 ring-1 ring-white/10 sm:p-6">
               <h2 className={labelClass}>ช่องทางติดต่อ *</h2>
               <p className={hintClass}>
-                ไม่แสดงบนเว็บ — ใช้ติดต่อเมื่อมีปัญหาเท่านั้น
+                ข้อมูลติดต่อนี้จะไม่แสดงบนเว็บ ใช้สำหรับติดต่อเมื่อมีปัญหาเท่านั้น
               </p>
               <div className="mt-3 flex rounded-2xl bg-black/25 p-1 ring-1 ring-white/10">
                 {(["x", "discord"] as const).map((channel) => (
@@ -666,7 +666,7 @@ export function HbdUploadClient() {
                       จาก {preview.displayName}
                     </p>
                     <p className="mt-1 text-xs leading-relaxed text-[#f3b8c4]/55">
-                      ช่องทางติดต่อเก็บไว้กับทีม · ไม่แสดงบนเว็บ
+                      ข้อมูลติดต่อจะไม่แสดงบนหน้าเว็บ
                     </p>
                   </div>
                 </div>
@@ -715,7 +715,7 @@ export function HbdUploadClient() {
                 )}
               >
                 {loading ? <Loader2 className="size-4 animate-spin" /> : null}
-                ตกลง · ส่งเข้าคิว
+                ยืนยันส่งการ์ดอวยพร
               </button>
             </div>
           </div>
@@ -727,7 +727,7 @@ export function HbdUploadClient() {
               ขอบคุณนะฮันนี่
             </p>
             <p className="mt-3 text-sm leading-relaxed text-[#f3b8c4]/80">
-              การ์ดจะขึ้นในหน้าคำอวยพรหลังทีมอนุมัติ
+              การ์ดของคุณจะถูกนำไปจัดแสดงในหน้ารวมคำอวยพรเร็วๆ นี้
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link

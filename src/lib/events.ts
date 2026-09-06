@@ -181,6 +181,42 @@ export function isYmd(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(value);
 }
 
+/** Inclusive Bangkok calendar-day range (YYYY-MM-DD strings). */
+export function isYmdInInclusiveRange(
+  ymd: string,
+  from: string,
+  to: string
+): boolean {
+  return ymd >= from && ymd <= to;
+}
+
+/** True when the Sun–Sat week containing `weekStart` overlaps [from, to]. */
+export function weekOverlapsYmdRange(
+  weekStart: string,
+  from: string,
+  to: string
+): boolean {
+  const weekEnd = formatISODate(addDays(parseISODate(weekStart), 6));
+  return weekStart <= to && weekEnd >= from;
+}
+
+/** Keep only weeks (and their slots) that fall within the fetch window. */
+export function clipLiveWeeksToRange(
+  weeks: LiveWeek[],
+  from: string,
+  to: string
+): LiveWeek[] {
+  return weeks
+    .filter((week) => weekOverlapsYmdRange(week.weekStart, from, to))
+    .map((week) => ({
+      ...week,
+      slots: week.slots.filter((slot) =>
+        isYmdInInclusiveRange(slot.date, from, to)
+      ),
+    }))
+    .filter((week) => week.slots.length > 0);
+}
+
 /** Sunday–Saturday of the week containing `today`. */
 export function thisWeekRangeYmd(today = new Date()): {
   from: string;

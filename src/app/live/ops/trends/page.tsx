@@ -1,9 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Activity, Radio, Sparkles } from "lucide-react";
 
 import { AddManualLiveButton } from "@/components/events/AddManualLiveModal";
 import { LiveViewTrendsPanel } from "@/components/events/LiveViewTrendsPanel";
 import { BackLink } from "@/components/layout/BackLink";
+import { buttonVariants } from "@/components/ui/button";
+import {
+  CTA_OUTLINE_CLASS,
+  DISPLAY_H1_CLASS,
+  META_CLASS,
+} from "@/lib/site-ui";
+import { cn } from "@/lib/utils";
 import {
   loadLiveKindStats,
   loadLiveViewPeaks,
@@ -55,32 +63,42 @@ export default async function LiveOpsTrendsPage({ searchParams }: PageProps) {
   const totals = sumTrendRows(rows);
 
   return (
-    <main className="min-h-dvh bg-[#0c0709] px-4 py-10 text-[#fff5f7] sm:px-8">
-      <div className="mx-auto max-w-6xl space-y-10">
+    <main className="relative min-h-dvh bg-[#0c0709] px-4 py-10 text-[#fff5f7] sm:px-8 sm:py-14">
+      {/* 🌟 Background Ambient Glow */}
+      <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 size-96 bg-[radial-gradient(circle,rgba(232,90,122,0.14),transparent_70%)]" />
+
+      <div className="relative mx-auto max-w-6xl space-y-10">
         <header className="border-b border-[#f3b8c4]/12 pb-6">
-          <BackLink href="/live" className="mb-6">
-            กลับหน้าหลัก
+          <BackLink href="/live" className="mb-4">
+            กลับหน้าตารางไลฟ์
           </BackLink>
-          <p className="mt-6 text-[0.65rem] tracking-[0.28em] text-[#f3b8c4]/60 uppercase">
-            Internal · noindex
-          </p>
-          <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
-            <h1 className="font-[family-name:var(--font-display)] text-3xl font-normal tracking-normal sm:text-4xl">
-              View trends
+          <div className="mt-4 flex items-center gap-2">
+            <Activity className="size-4 text-[#e85a7a]" />
+            <p className={META_CLASS}>
+              Live View Analytics · Internal
+            </p>
+          </div>
+          <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
+            <h1 className={DISPLAY_H1_CLASS}>
+              View Trends
             </h1>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2.5">
               <AddManualLiveButton />
               <Link
                 href="/live/ops"
-                className="inline-flex items-center gap-1.5 border border-[#f3b8c4]/20 bg-[#1a0d12]/50 px-3 py-1.5 text-[0.7rem] tracking-[0.16em] text-[#f3b8c4]/80 uppercase transition hover:border-[#e85a7a]/40 hover:text-[#fff5f7]"
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                  CTA_OUTLINE_CLASS,
+                  "inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider"
+                )}
               >
-                ไป ops
+                <Radio className="size-3.5 text-[#e85a7a]" />
+                <span>Sync Monitor</span>
               </Link>
             </div>
           </div>
-          <p className="mt-2 max-w-xl text-sm text-[#f7d7de]/70">
-            ยอดคนดูหลังไลฟ์ · ยอดรวมล่าสุด · ส่วนต่าง (diff) — ช่วงวันที่ของรายวัน
-            / เดือน / ปี แยกกันอิสระ
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-[#f7d7de]/80">
+            วิเคราะห์แนวโน้มยอดคนดูหลังจบไลฟ์, ยอดวิวสะสมล่าสุด และสัดส่วน Solo / Collab / Member
           </p>
         </header>
 

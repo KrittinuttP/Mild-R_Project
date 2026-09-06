@@ -1,9 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
+  ArrowRight,
   CalendarDays,
   Clock,
   ExternalLink,
@@ -13,9 +14,8 @@ import {
   Timer,
 } from "lucide-react";
 
-import {
-  LiveSlotTime,
-} from "@/components/events/LiveSlotMeta";
+import { LiveSlotTime } from "@/components/events/LiveSlotMeta";
+import { LiveCoverPlaceholder } from "@/components/events/LiveCoverPlaceholder";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -25,19 +25,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { formatThaiDate } from "@/lib/events";
-import { CTA_PRIMARY_CLASS, MODAL_CLOSE_BUTTON_CLASS } from "@/lib/site-ui";
-import { cn } from "@/lib/utils";
+import { formatThaiDate, parseISODate, thaiWeekdayShort } from "@/lib/events";
+import { getSlotCoverUrl } from "@/lib/live-cover";
 import {
-  getYoutubeThumbnailUrl,
-  getYoutubeVideoId,
-} from "@/lib/youtube";
+  CTA_PRIMARY_CLASS,
+  MODAL_CLOSE_BUTTON_CLASS,
+} from "@/lib/site-ui";
+import { cn } from "@/lib/utils";
 import type { LivePlatform, LiveSlot } from "@/types/vtuber";
 
 type LiveDetailModalProps = {
   slot: LiveSlot | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Switch modal to a paired rescheduled slot (same video, different date). */
+  onSelectSlot?: (slotId: string) => void;
 };
 
 function platformLabel(platform?: LivePlatform) {
@@ -50,7 +52,7 @@ function platformLabel(platform?: LivePlatform) {
 function statusLabel(status?: LiveSlot["status"]) {
   if (status === "live") return "กำลังไลฟ์";
   if (status === "upcoming") return "รอไลฟ์";
-  if (status === "ended") return "จบไลฟ์แล้ว";
+  if (status === "ended") return "ไลฟ์จบแล้ว";
   if (status === "cancelled") return "ยกเลิก";
   return null;
 }
@@ -65,7 +67,7 @@ function MetaPill({
   return (
     <span
       className={cn(
-        "inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-xs leading-none tracking-wide",
+        "inline-flex h-7 items-center gap-1 rounded-full border px-2.5 text-[0.7rem] leading-none tracking-wide md:h-8 md:gap-1.5 md:px-3 md:text-xs",
         className
       )}
     >
@@ -88,20 +90,127 @@ function TimeCell({
   return (
     <div
       className={cn(
-        "min-w-0 px-3 py-2.5 sm:px-3.5",
+        "min-w-0 px-2.5 py-2 sm:px-3.5 sm:py-2.5",
         accent && "bg-[#e85a7a]/06"
       )}
     >
-      <p className="flex items-center gap-1.5 text-xs tracking-[0.14em] text-[#f3b8c4]/60 uppercase">
+      <p className="flex items-center gap-1 text-[0.65rem] tracking-[0.12em] text-[#f3b8c4]/60 uppercase sm:gap-1.5 sm:text-xs sm:tracking-[0.14em]">
         <span className="opacity-80" aria-hidden>
           {icon}
         </span>
         {label}
       </p>
-      <div className="mt-1 font-[family-name:var(--font-display)] text-sm tabular-nums text-[#fff5f7] sm:text-[0.95rem]">
+      <div className="mt-0.5 font-[family-name:var(--font-display)] text-[0.82rem] tabular-nums text-[#fff5f7] sm:mt-1 sm:text-sm md:text-[0.95rem]">
         {children}
       </div>
     </div>
+  );
+}
+
+function WatchLink({
+  slot,
+  external,
+  className,
+}: {
+  slot: LiveSlot;
+  external: boolean;
+  className?: string;
+}) {
+  if (!slot.url) return null;
+
+  return (
+    <Link
+      href={slot.url}
+      target={external ? "_blank" : undefined}
+      rel={external ? "noopener noreferrer" : undefined}
+      className={cn(
+        buttonVariants({ size: "lg" }),
+        CTA_PRIMARY_CLASS,
+        "group flex h-10 w-full items-center justify-center gap-2 font-semibold md:h-11",
+        className
+      )}
+    >
+      <Play className="size-4 fill-current" aria-hidden />
+      <span>ไปดูไลฟ์</span>
+      {external ? <ExternalLink className="size-3.5 opacity-75" /> : null}
+    </Link>
+  );
+}
+
+function formatNewLiveDateLine(iso: string, time?: string) {
+  const date = parseISODate(iso);
+  const shortMonth = date.toLocaleDateString("th-TH-u-ca-gregory", {
+    month: "short",
+  });
+  const label = `${thaiWeekdayShort(date)} ${date.getDate()} ${shortMonth}`;
+  return time ? `${label} · ${time}` : label;
+}
+
+/** Ghost slot: single card CTA to open the later live round in-app. */
+function NewLiveRoundCta({
+  link,
+  onSelectSlot,
+  className,
+}: {
+  link: NonNullable<LiveSlot["rescheduleLink"]>;
+  onSelectSlot: (slotId: string) => void;
+  className?: string;
+}) {
+  const dateLine = formatNewLiveDateLine(link.date, link.time);
+
+  return (
+    <button
+      type="button"
+      onClick={() => onSelectSlot(link.slotId)}
+      aria-label={`มีการไลฟ์ใหม่ ${dateLine} — เปิดไลฟ์รอบใหม่`}
+      className={cn(
+        "group w-full overflow-hidden rounded-xl border border-[#f3b8c4]/18 bg-gradient-to-br from-[#e85a7a]/12 via-[#1c0c14]/90 to-[#14080e]/95 p-2.5 text-left shadow-[0_8px_24px_rgba(0,0,0,0.22)] transition duration-200 sm:rounded-2xl sm:p-3.5",
+        "hover:border-[#e85a7a]/45 hover:from-[#e85a7a]/18 hover:shadow-[0_12px_28px_rgba(232,90,122,0.16)]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e85a7a]/55 focus-visible:ring-offset-2 focus-visible:ring-offset-[#14080e]",
+        className
+      )}
+    >
+      <div className="flex items-center gap-2 sm:gap-3">
+        <span
+          className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-[#e85a7a]/25 bg-[#e85a7a]/12 text-[#f3b8c4] transition group-hover:border-[#e85a7a]/40 group-hover:bg-[#e85a7a]/20 sm:size-10 sm:rounded-xl"
+          aria-hidden
+        >
+          <Radio className="size-3.5 sm:size-4" />
+        </span>
+
+        <div className="min-w-0 flex-1">
+          <p className="text-[0.62rem] font-semibold tracking-[0.1em] text-[#e85a7a] uppercase sm:text-[0.68rem] sm:tracking-[0.12em]">
+            มีการไลฟ์ใหม่
+          </p>
+          <p className="mt-px flex items-center gap-1 font-[family-name:var(--font-display)] text-xs leading-snug tabular-nums text-[#fff5f7] sm:mt-0.5 sm:gap-1.5 sm:text-sm">
+            <CalendarDays
+              className="size-3 shrink-0 text-[#f3b8c4]/55 sm:size-3.5"
+              aria-hidden
+            />
+            <span className="truncate">{dateLine}</span>
+          </p>
+        </div>
+
+        <span className="flex shrink-0 items-center gap-0.5 whitespace-nowrap text-[0.68rem] font-semibold text-[#f3b8c4] transition group-hover:text-[#fff5f7] sm:gap-1 sm:text-xs">
+          <span>ไลฟ์รอบใหม่</span>
+          <ArrowRight
+            className="size-3.5 shrink-0 transition group-hover:translate-x-0.5 sm:size-4"
+            aria-hidden
+          />
+        </span>
+      </div>
+    </button>
+  );
+}
+
+function isGhostNewLiveRound(
+  slot: LiveSlot,
+  onSelectSlot?: (slotId: string) => void
+) {
+  return (
+    slot.status === "cancelled" &&
+    slot.rescheduleLink?.direction === "to" &&
+    Boolean(onSelectSlot)
   );
 }
 
@@ -109,19 +218,22 @@ export function LiveDetailModal({
   slot,
   open,
   onOpenChange,
+  onSelectSlot,
 }: LiveDetailModalProps) {
   const external = Boolean(slot?.url?.startsWith("http"));
   const own = Boolean(slot?.isOwnChannel);
   const collab = slot?.kind === "collab";
   const cancelled = slot?.status === "cancelled";
   const platform = platformLabel(slot?.platform);
-  const videoId = getYoutubeVideoId(slot?.url);
-  const fallbackThumb = videoId ? getYoutubeThumbnailUrl(videoId) : null;
-  const coverCandidates = [
-    slot?.coverUrl,
-    ...(slot?.coverHistory?.map((h) => h.url) ?? []),
-    fallbackThumb,
-  ].filter((u): u is string => Boolean(u));
+  const coverCandidates = useMemo(() => {
+    const urls: string[] = [];
+    const primary = slot ? getSlotCoverUrl(slot) : null;
+    if (primary) urls.push(primary);
+    for (const item of slot?.coverHistory ?? []) {
+      if (item.url && !urls.includes(item.url)) urls.push(item.url);
+    }
+    return urls;
+  }, [slot]);
   const [activeCover, setActiveCover] = useState<string | null>(
     coverCandidates[0] ?? null
   );
@@ -149,7 +261,7 @@ export function LiveDetailModal({
 
   const startValue = slot?.actualStartLabel ?? (
     <span className="text-[#f3b8c4]/45">
-      {cancelled ? "ไม่ได้เริ่ม (ยกเลิก)" : "ยังไม่เริ่ม"}
+      {cancelled ? "ไม่ได้เริ่ม" : "ยังไม่เริ่ม"}
     </span>
   );
   const endValue = slot?.actualEndLabel ?? (
@@ -159,228 +271,244 @@ export function LiveDetailModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-h-[92dvh] w-[min(100%,calc(100vw-1rem))] max-w-md overflow-hidden rounded-2xl border-[#e85a7a]/25 bg-[#140a0d] p-0 text-[#fff5f7] shadow-[0_0_0_1px_rgba(232,90,122,0.08),0_24px_64px_rgba(8,2,4,0.65)] sm:max-w-md"
+        className="max-h-[92dvh] w-[min(100%,calc(100vw-1rem))] max-w-lg overflow-hidden rounded-3xl border border-[#f3b8c4]/20 bg-gradient-to-b from-[#220e18]/95 via-[#1a0c12]/95 to-[#12070c] p-0 text-[#fff5f7] shadow-[0_24px_60px_rgba(0,0,0,0.7)] backdrop-blur-xl md:max-w-3xl"
         showCloseButton
         closeButtonClassName={MODAL_CLOSE_BUTTON_CLASS}
       >
         {slot ? (
-          <div className="relative max-h-[92dvh] overflow-y-auto">
+          <div className="relative md:grid md:grid-cols-12 md:overflow-visible">
             <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-px bg-gradient-to-r from-transparent via-[#e85a7a]/80 to-transparent" />
 
-            <div className="relative aspect-video overflow-hidden bg-[#10070b]">
-              {activeCover ? (
-                <ProtectedImage
-                  src={activeCover}
-                  alt={displayTitle}
-                  wrapClassName="absolute inset-0 block"
-                  className={cn(
-                    "h-full w-full object-cover",
-                    cancelled && "opacity-70 grayscale-[0.35]"
+            {/* 🖼️ Left Column: Media & Primary Action (md:col-span-5) */}
+            <div className="flex flex-col justify-between gap-2 border-b border-[#f3b8c4]/12 bg-[#10070b]/70 p-3 sm:gap-4 sm:p-5 md:col-span-5 md:border-b-0 md:border-r">
+              <div className="space-y-2 sm:space-y-3.5">
+                {/* Main Thumbnail Container */}
+                <div className="relative aspect-video max-h-[9.75rem] w-full overflow-hidden rounded-xl border border-[#f3b8c4]/15 bg-[#12070c] shadow-md sm:max-h-none sm:rounded-2xl">
+                  {activeCover ? (
+                    <ProtectedImage
+                      src={activeCover}
+                      alt={displayTitle}
+                      wrapClassName="absolute inset-0 block"
+                      className={cn(
+                        "h-full w-full object-cover",
+                        cancelled && "opacity-70 grayscale-[0.35]"
+                      )}
+                    />
+                  ) : (
+                    <LiveCoverPlaceholder className="absolute inset-0" size="lg" />
                   )}
-                />
-              ) : (
-                <div
-                  className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(232,90,122,0.28),transparent_55%),radial-gradient(ellipse_at_80%_80%,rgba(243,184,196,0.12),transparent_50%),linear-gradient(160deg,#1c0d12,#10070b)]"
-                  aria-hidden
-                />
-              )}
 
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140a0d] via-[#140a0d]/45 to-transparent" />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140a0d]/80 via-transparent to-transparent" />
 
-              <div className="absolute inset-x-0 top-0 p-3 pr-12 sm:p-3.5 sm:pr-12">
-                <span
-                  className={cn(
-                    "inline-flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[0.58rem] tracking-[0.16em] uppercase backdrop-blur-sm",
-                    cancelled
-                      ? "border-[#8a7f88]/50 bg-[#140a0d]/75 text-[#d8d0d4]"
-                      : slot.status === "live"
-                        ? "border-[#e85a7a]/55 bg-[#140a0d]/75 text-[#e85a7a]"
-                        : "border-[#f3b8c4]/30 bg-[#140a0d]/75 text-[#f3b8c4]"
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "size-1.5 rounded-full",
-                      cancelled
-                        ? "bg-[#8a7f88]"
-                        : slot.status === "live"
-                          ? "animate-pulse bg-[#e85a7a]"
-                          : "bg-[#f3b8c4]/70"
-                    )}
-                  />
-                  {statusText ?? "Live"}
-                </span>
+                  {/* Status Badge */}
+                  <div className="absolute top-2.5 left-2.5 z-10">
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[0.62rem] font-bold tracking-wider uppercase shadow-md backdrop-blur-md",
+                        cancelled
+                          ? "border-[#8a7f88]/50 bg-[#140a0d]/85 text-[#d8d0d4]"
+                          : slot.status === "live"
+                            ? "border-[#e85a7a]/70 bg-[#e85a7a]/25 text-[#fff5f7] shadow-[0_0_12px_rgba(232,90,122,0.5)]"
+                            : "border-[#f3b8c4]/30 bg-[#140a0d]/85 text-[#f3b8c4]"
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "size-1.5 rounded-full",
+                          cancelled
+                            ? "bg-[#8a7f88]"
+                            : slot.status === "live"
+                              ? "animate-pulse bg-[#e85a7a]"
+                              : "bg-[#f3b8c4]/80"
+                        )}
+                      />
+                      {statusText ?? "Live"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 🎞️ Cover History (if more than 1) */}
+                {history.length > 1 ? (
+                  <div className="space-y-1">
+                    <p className="inline-flex items-center gap-1 text-[0.58rem] font-medium tracking-wider text-[#f3b8c4]/65 uppercase sm:gap-1.5 sm:text-[0.62rem]">
+                      <Images className="size-3 text-[#e85a7a]" aria-hidden />
+                      ประวัติปก ({history.length})
+                    </p>
+                    <div className="flex gap-2 overflow-x-auto pb-1">
+                      {history.map((item, index) => {
+                        const selected = activeCover === item.url;
+                        return (
+                          <button
+                            key={`${item.url}-${item.capturedAt}`}
+                            type="button"
+                            onClick={() => setActiveCover(item.url)}
+                            className={cn(
+                              "relative h-9 w-14 shrink-0 overflow-hidden rounded-lg border transition sm:h-11 sm:w-16 sm:rounded-xl",
+                              selected
+                                ? "border-[#e85a7a] ring-2 ring-[#e85a7a]/50"
+                                : "border-[#f3b8c4]/20 hover:border-[#e85a7a]/40"
+                            )}
+                            title={`ปก #${history.length - index}`}
+                          >
+                            <ProtectedImage
+                              src={item.url}
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : null}
               </div>
+
+              {isGhostNewLiveRound(slot, onSelectSlot) ? (
+                <div className="hidden md:block">
+                  <NewLiveRoundCta
+                    link={slot.rescheduleLink!}
+                    onSelectSlot={onSelectSlot!}
+                  />
+                </div>
+              ) : slot.url && !cancelled ? (
+                <div className="hidden md:block">
+                  <WatchLink slot={slot} external={external} />
+                </div>
+              ) : null}
             </div>
 
-            <div className="relative space-y-4 px-5 pt-4 pb-5 sm:px-6 sm:pb-6">
-              <DialogHeader className="gap-1.5 pr-6 text-left">
-                <DialogTitle
-                  className="line-clamp-2 font-[family-name:var(--font-display)] text-[1.35rem] leading-snug font-normal tracking-normal break-words text-[#fff5f7] sm:text-xl"
-                  title={displayTitle}
-                >
-                  {displayTitle}
-                </DialogTitle>
-                {slot.titleLocal ? (
-                  <DialogDescription
-                    className="line-clamp-2 text-sm break-words text-[#f3b8c4]/70"
-                    title={slot.title}
+            {/* 📝 Right Column: Details & Schedule (md:col-span-7) */}
+            <div className="flex flex-col justify-between gap-2.5 p-3 sm:gap-5 sm:p-6 md:col-span-7">
+              <div className="space-y-2.5 sm:space-y-4">
+                {/* Header & Titles (No line-clamp, full width & wrap) */}
+                <DialogHeader className="gap-0.5 pr-7 text-left sm:gap-1.5 sm:pr-8">
+                  <DialogTitle
+                    className="font-[family-name:var(--font-display)] text-base font-normal leading-snug break-words text-[#fff5f7] sm:text-lg md:text-xl"
                   >
-                    {slot.title}
-                  </DialogDescription>
-                ) : (
-                  <DialogDescription className="sr-only">
-                    รายละเอียดไลฟ์ {slot.title}
-                  </DialogDescription>
-                )}
-              </DialogHeader>
+                    {displayTitle}
+                  </DialogTitle>
+                  {slot.titleLocal ? (
+                    <DialogDescription
+                      className="text-[0.7rem] leading-snug break-words text-[#f3b8c4]/75 sm:text-xs sm:leading-relaxed md:text-sm"
+                    >
+                      {slot.title}
+                    </DialogDescription>
+                  ) : (
+                    <DialogDescription className="sr-only">
+                      รายละเอียดไลฟ์ {slot.title}
+                    </DialogDescription>
+                  )}
+                </DialogHeader>
 
-              <div className="flex flex-wrap items-center gap-1.5">
-                <MetaPill className="normal-case tracking-normal border-[#f3b8c4]/30 bg-[#f3b8c4]/08 text-[#f7d7de]">
-                  <CalendarDays
-                    className="size-3.5 shrink-0 text-[#e85a7a]"
-                    aria-hidden
-                  />
-                  {formatThaiDate(slot.date)}
-                </MetaPill>
-                {platform && !slot.isPreview ? (
-                  <MetaPill className="border-[#ff6b7a]/45 bg-[#ff4d5e]/12 text-[#ffb3bc] uppercase">
-                    {platform}
+                {/* 🏷️ Meta Badges */}
+                <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
+                  <MetaPill className="border-[#f3b8c4]/30 bg-[#f3b8c4]/10 text-xs font-medium text-[#f7d7de]">
+                    <CalendarDays
+                      className="size-3.5 shrink-0 text-[#e85a7a]"
+                      aria-hidden
+                    />
+                    {formatThaiDate(slot.date)}
                   </MetaPill>
-                ) : null}
-                {slot.isPreview ? (
-                  <MetaPill className="border-[#a8e6d4]/45 bg-[#a8e6d4]/10 text-[#a8e6d4] uppercase">
-                    ตัวอย่าง
-                  </MetaPill>
-                ) : null}
-                {own ? (
-                  <MetaPill className="border-[#e85a7a]/50 bg-[#e85a7a]/15 text-[#f3b8c4] uppercase">
-                    Mild-R
-                  </MetaPill>
-                ) : null}
-                {!own && slot.sourceTitle ? (
-                  <MetaPill className="normal-case tracking-[0.08em] border-[#7eb6d4]/50 bg-[#7eb6d4]/14 text-[#b8d9ec]">
-                    {slot.sourceTitle}
-                  </MetaPill>
-                ) : null}
-                {slot.isMember ? (
-                  <MetaPill className="border-[#9b8cff]/55 bg-[#9b8cff]/14 text-[#cfc6ff] uppercase">
-                    Member
-                  </MetaPill>
-                ) : null}
-                {collab ? (
-                  <MetaPill className="border-[#d4a574]/55 bg-[#d4a574]/14 text-[#e8c49a] uppercase">
-                    Collab
-                  </MetaPill>
-                ) : null}
-              </div>
+                  {platform && !slot.isPreview ? (
+                    <MetaPill className="border-red-500/40 bg-red-500/15 text-xs font-semibold text-red-200 uppercase">
+                      {platform}
+                    </MetaPill>
+                  ) : null}
+                  {slot.isPreview ? (
+                    <MetaPill className="border-emerald-500/40 bg-emerald-500/15 text-xs font-semibold text-emerald-200 uppercase">
+                      ตัวอย่าง
+                    </MetaPill>
+                  ) : null}
+                  {own ? (
+                    <MetaPill className="border-[#e85a7a]/50 bg-[#e85a7a]/15 text-xs font-semibold text-[#f3b8c4] uppercase">
+                      Mild-R
+                    </MetaPill>
+                  ) : null}
+                  {!own && slot.sourceTitle ? (
+                    <MetaPill className="border-sky-500/40 bg-sky-500/15 text-xs text-sky-200">
+                      {slot.sourceTitle}
+                    </MetaPill>
+                  ) : null}
+                  {slot.isMember ? (
+                    <MetaPill className="border-[#9b8cff]/60 bg-[#9b8cff]/20 text-xs font-semibold text-[#dcd6ff] uppercase">
+                      Member
+                    </MetaPill>
+                  ) : null}
+                  {collab ? (
+                    <MetaPill className="border-[#d4a574]/60 bg-[#d4a574]/20 text-xs font-semibold text-[#f0d3b6] uppercase">
+                      Collab
+                    </MetaPill>
+                  ) : null}
+                </div>
 
-              {hasScheduleBlock ? (
-                <div className="overflow-hidden rounded-2xl border border-[#f3b8c4]/15 bg-[#1a0c12]/55">
-                  <div className="border-b border-[#f3b8c4]/12 px-3 py-2 sm:px-3.5">
-                    <p className="text-[0.62rem] tracking-[0.18em] text-[#f3b8c4]/55 uppercase">
-                      ตารางเวลา
-                    </p>
-                  </div>
-
-                  <TimeCell
-                    label="Scheduled"
-                    icon={<Clock className="size-3.5" />}
-                  >
-                    {scheduledDisplay || slot.scheduledPrevious ? (
-                      <LiveSlotTime
-                        time={scheduledDisplay ?? slot.time}
-                        timePrevious={slot.scheduledPrevious}
-                        timeUpdated={slot.scheduledUpdated}
-                        accentClassName="text-[#fff5f7]"
-                      />
-                    ) : (
-                      <span className="text-[#f3b8c4]/45">—</span>
-                    )}
-                  </TimeCell>
-
-                  <div className="grid grid-cols-2 border-t border-[#f3b8c4]/10">
-                    <div className="border-r border-[#f3b8c4]/10">
-                      <TimeCell
-                        label="Start Live"
-                        icon={<Radio className="size-3.5" />}
-                        accent={slot.status === "live"}
-                      >
-                        {startValue}
-                      </TimeCell>
+                {/* ⏰ Schedule Timing Grid */}
+                {hasScheduleBlock ? (
+                  <div className="overflow-hidden rounded-xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1c0c14]/80 to-[#14080e]/90 shadow-md sm:rounded-2xl">
+                    <div className="border-b border-[#f3b8c4]/12 px-2.5 py-1 sm:px-3.5 sm:py-2">
+                      <p className="text-[0.58rem] font-semibold tracking-wider text-[#e85a7a] uppercase sm:text-[0.62rem]">
+                        ตารางเวลาสตรีม
+                      </p>
                     </div>
+
                     <TimeCell
-                      label="End Live"
+                      label="Scheduled"
                       icon={<Clock className="size-3.5" />}
                     >
-                      {endValue}
-                    </TimeCell>
-                  </div>
-
-                  <div className="border-t border-[#f3b8c4]/10">
-                    <TimeCell
-                      label="เวลาไลฟ์"
-                      icon={<Timer className="size-3.5" />}
-                    >
-                      {slot.durationLabel ?? (
+                      {scheduledDisplay || slot.scheduledPrevious ? (
+                        <LiveSlotTime
+                          time={scheduledDisplay ?? slot.time}
+                          timePrevious={slot.scheduledPrevious}
+                          timeUpdated={slot.scheduledUpdated}
+                          accentClassName="text-[#fff5f7]"
+                        />
+                      ) : (
                         <span className="text-[#f3b8c4]/45">—</span>
                       )}
                     </TimeCell>
-                  </div>
-                </div>
-              ) : null}
 
-              {history.length > 1 ? (
-                <div className="space-y-2">
-                  <p className="inline-flex items-center gap-1.5 text-[0.62rem] tracking-[0.16em] text-[#f3b8c4]/55 uppercase">
-                    <Images className="size-3.5" aria-hidden />
-                    ประวัติปก ({history.length})
-                  </p>
-                  <div className="flex gap-2 overflow-x-auto pb-0.5">
-                    {history.map((item, index) => {
-                      const selected = activeCover === item.url;
-                      return (
-                        <button
-                          key={`${item.url}-${item.capturedAt}`}
-                          type="button"
-                          onClick={() => setActiveCover(item.url)}
-                          className={cn(
-                            "relative h-12 w-20 shrink-0 overflow-hidden rounded-lg border transition",
-                            selected
-                              ? "border-[#e85a7a] ring-1 ring-[#e85a7a]/45"
-                              : "border-[#f3b8c4]/18 hover:border-[#e85a7a]/35"
-                          )}
-                          title={`ปก #${history.length - index}`}
+                    <div className="grid grid-cols-2 border-t border-[#f3b8c4]/10">
+                      <div className="border-r border-[#f3b8c4]/10">
+                        <TimeCell
+                          label="Start Live"
+                          icon={<Radio className="size-3.5" />}
+                          accent={slot.status === "live"}
                         >
-                          <ProtectedImage
-                            src={item.url}
-                            alt=""
-                            className="h-full w-full object-cover"
-                          />
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ) : null}
+                          {startValue}
+                        </TimeCell>
+                      </div>
+                      <TimeCell
+                        label="End Live"
+                        icon={<Clock className="size-3.5" />}
+                      >
+                        {endValue}
+                      </TimeCell>
+                    </div>
 
-              {slot.url && !cancelled ? (
-                <Link
-                  href={slot.url}
-                  target={external ? "_blank" : undefined}
-                  rel={external ? "noopener noreferrer" : undefined}
-                  className={cn(
-                    buttonVariants({ size: "lg" }),
-                    CTA_PRIMARY_CLASS,
-                    "group relative w-full overflow-hidden"
-                  )}
-                >
-                  <Play className="size-4 fill-current" aria-hidden />
-                  ไปดูไลฟ์
-                  {external ? (
-                    <ExternalLink className="size-4 opacity-80" />
-                  ) : null}
-                </Link>
+                    <div className="border-t border-[#f3b8c4]/10">
+                      <TimeCell
+                        label="เวลาไลฟ์"
+                        icon={<Timer className="size-3.5" />}
+                      >
+                        {slot.durationLabel ?? (
+                          <span className="text-[#f3b8c4]/45">—</span>
+                        )}
+                      </TimeCell>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+
+              {isGhostNewLiveRound(slot, onSelectSlot) ? (
+                <div className="block md:hidden">
+                  <NewLiveRoundCta
+                    link={slot.rescheduleLink!}
+                    onSelectSlot={onSelectSlot!}
+                  />
+                </div>
+              ) : slot.url && !cancelled ? (
+                <div className="block md:hidden">
+                  <WatchLink slot={slot} external={external} />
+                </div>
               ) : null}
             </div>
           </div>

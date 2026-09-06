@@ -249,6 +249,13 @@ export interface LiveSlot {
   coverHistory?: { url: string; capturedAt: string }[];
   /** DB row created_at — tie-break when same calendar time */
   createdAt?: string;
+  /** Linked slot when a live was rescheduled to another calendar day */
+  rescheduleLink?: {
+    direction: "from" | "to";
+    date: string;
+    time?: string;
+    slotId: string;
+  };
 }
 
 /** Day intentionally marked offline (no stream) — driven by content JSON */

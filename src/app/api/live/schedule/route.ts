@@ -44,7 +44,7 @@ export async function GET(request: Request) {
     }
 
     const streams = await loadLiveStreamsInRange(from, to, 500);
-    const weeks = mergeLiveWeeksWithStreams([], streams);
+    const weeks = mergeLiveWeeksWithStreams([], streams, { from, to });
     return NextResponse.json(
       { weeks, from, to },
       {
