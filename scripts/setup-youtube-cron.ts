@@ -74,9 +74,11 @@ select cron.schedule(
   $cron$
 );
 
+-- Every 6h aligned to Bangkok midnight (UTC 17:00 = 00:00 BKK):
+-- BKK 00:00 / 06:00 / 12:00 / 18:00 → UTC 17 / 23 / 05 / 11
 select cron.schedule(
   'run-youtube-step3-refresh',
-  '0 */6 * * *',
+  '0 5,11,17,23 * * *',
   $cron$
   select net.http_post(
     url := ${pgClientLiteral(fnUrl)},
