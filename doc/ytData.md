@@ -122,8 +122,8 @@ Playlist poll วนจาก master list ของช่อง Lumina (World En
 แก้ placeholder ใน `supabase/cron/youtube-tracker.sql` แล้วรันใน SQL Editor
 
 - Step 1 `main` → `*/30 * * * *`
-- Step 2 `search` → `0 */6 * * *`
-- Step 3 `refresh` → `0 5,11,17,23 * * *` (ทุก 6 ชม. เริ่มเที่ยงคืน BKK)
+- Step 2 `search` → `0 5,11,17,23 * * *` (ทุก 6 ชม. เริ่มเที่ยงคืน BKK)
+- Step 3 `refresh` → `0 * * * *` (ทุก 1 ชม.)
 
 ---
 
