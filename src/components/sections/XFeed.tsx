@@ -3,12 +3,7 @@
 import { useState } from "react";
 import { ExternalLink, Heart, Repeat2 } from "lucide-react";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ImageLightbox } from "@/components/media/ImageLightbox";
 import { META_MUTED_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { XPost, XQuotedTweet } from "@/types/x-post";
@@ -277,39 +272,30 @@ export function XFeed({ posts, retweets, className }: XFeedProps) {
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 rounded-2xl border border-[#f3b8c4]/22 bg-[#e85a7a]/10 px-4 py-3.5 text-sm font-medium text-[#f3b8c4] transition hover:border-[#e85a7a]/45 hover:bg-[#e85a7a]/18 hover:text-[#fff5f7]"
         >
-          ไปที่ X ดูต้นฉบับ
+          เปิดโปรไฟล์บน X
           <ExternalLink className="size-3.5 opacity-80" aria-hidden />
         </a>
       </div>
 
-      <Dialog
-        open={Boolean(lightboxUrl)}
-        onOpenChange={(open) => {
-          if (!open) setLightboxUrl(null);
+      <ImageLightbox
+        tone="mild-r"
+        items={
+          lightboxUrl
+            ? [
+                {
+                  id: lightboxUrl,
+                  src: lightboxUrl,
+                  alt: "รูปจากโพสต์ X",
+                  caption: "รูปจากโพสต์ X",
+                },
+              ]
+            : []
+        }
+        activeIndex={lightboxUrl ? 0 : null}
+        onActiveIndexChange={(index) => {
+          if (index === null) setLightboxUrl(null);
         }}
-      >
-        <DialogContent
-          className="max-h-[90dvh] w-[min(100%,calc(100vw-1.25rem))] max-w-3xl overflow-hidden rounded-3xl border border-[#f3b8c4]/20 bg-[#12070c] p-3 text-[#fff5f7] shadow-[0_24px_60px_rgba(0,0,0,0.7)] sm:p-4"
-          overlayClassName="bg-black/70 supports-backdrop-filter:backdrop-blur-sm"
-          closeButtonClassName="text-[#f3b8c4] hover:bg-[#e85a7a]/15 hover:text-[#fff5f7]"
-        >
-          <DialogTitle className="sr-only">ดูรูปจากโพสต์ X</DialogTitle>
-          <DialogDescription className="sr-only">
-            รูปขนาดใหญ่จากฟีด X ของ Mild-R
-          </DialogDescription>
-          {lightboxUrl ? (
-            <div className="relative mx-auto max-h-[min(78dvh,720px)] w-full overflow-hidden rounded-2xl bg-black/40">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={lightboxUrl}
-                alt=""
-                className="mx-auto max-h-[min(78dvh,720px)] w-auto max-w-full object-contain"
-                referrerPolicy="no-referrer"
-              />
-            </div>
-          ) : null}
-        </DialogContent>
-      </Dialog>
+      />
     </div>
   );
 }
