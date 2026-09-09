@@ -3,6 +3,7 @@ import { ExternalLink, Heart, Music2 } from "lucide-react";
 
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { ConnectHashtagPills } from "@/components/sections/ConnectHashtagPills";
+import { XFeed } from "@/components/sections/XFeed";
 import { SocialPlatformIcon } from "@/components/icons/SocialPlatformIcon";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -14,10 +15,13 @@ import {
   META_MUTED_CLASS,
 } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
+import type { XPost } from "@/types/x-post";
 import type { SocialLink, VtuberProfile } from "@/types/vtuber";
 
 type SocialsProps = {
   data: VtuberProfile;
+  xPosts?: XPost[];
+  xRetweets?: XPost[];
 };
 
 const PRIMARY_SOCIAL_IDS = new Set(["youtube", "x"]);
@@ -53,7 +57,7 @@ function PrimarySocialCard({ social }: { social: SocialLink }) {
   );
 }
 
-export function Socials({ data }: SocialsProps) {
+export function Socials({ data, xPosts = [], xRetweets = [] }: SocialsProps) {
   const song = data.basic.originalSong;
   const hasHashtags = data.hashtags.some((group) => group.tags.length > 0);
   const primarySocials = data.socials.filter((social) => PRIMARY_SOCIAL_IDS.has(social.id));
@@ -87,6 +91,8 @@ export function Socials({ data }: SocialsProps) {
               ))}
             </div>
           </div>
+
+          <XFeed posts={xPosts} retweets={xRetweets} />
 
           {secondarySocials.length > 0 ? (
             <div>

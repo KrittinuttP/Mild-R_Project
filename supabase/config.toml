@@ -12,3 +12,6 @@ major_version = 15
 
 [functions.youtube-tracker]
 verify_jwt = true
+
+[functions.x-feed-sync]
+verify_jwt = true

@@ -10,10 +10,13 @@ import { Lore } from "@/components/sections/Lore";
 import { Media } from "@/components/sections/Media";
 import { Socials } from "@/components/sections/Socials";
 import { mildRData } from "@/data/vtuber-data";
+import { loadXFeedTabs } from "@/lib/x-posts";
 
 export const revalidate = 300;
 
-export default function Home() {
+export default async function Home() {
+  const { posts: xPosts, retweets: xRetweets } = await loadXFeedTabs();
+
   return (
     <>
       <MediaProtection />
@@ -28,7 +31,7 @@ export default function Home() {
         <Gallery data={mildRData} />
         <Media data={mildRData} />
         <EventsTeaser data={mildRData} />
-        <Socials data={mildRData} />
+        <Socials data={mildRData} xPosts={xPosts} xRetweets={xRetweets} />
       </main>
       <Footer data={mildRData} />
       <BackToTop />
