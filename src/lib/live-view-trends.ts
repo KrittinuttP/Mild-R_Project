@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import type {
+  LiveKind,
   LiveTrendStreamItem,
   LiveViewPeakStream,
   LiveViewPeaks,
@@ -17,6 +18,66 @@ export const RANGE_DAYS: Record<TrendGrain, number> = {
   month: 730,
   year: 1826,
 };
+
+export const ALL_LIVE_KINDS: LiveKind[] = ["solo", "collab", "member"];
+
+export function parseLiveKinds(raw: string | undefined | null): LiveKind[] {
+  if (!raw?.trim()) return [...ALL_LIVE_KINDS];
+  const selected = new Set<LiveKind>();
+  for (const part of raw.split(",")) {
+    const p = part.trim().toLowerCase();
+    if (p === "solo" || p === "collab" || p === "member") selected.add(p);
+  }
+  return selected.size === 0
+    ? [...ALL_LIVE_KINDS]
+    : ALL_LIVE_KINDS.filter((k) => selected.has(k));
+}
+
+export function serializeLiveKinds(kinds: LiveKind[]): string | undefined {
+  const unique = ALL_LIVE_KINDS.filter((k) => kinds.includes(k));
+  if (unique.length === 0 || unique.length === ALL_LIVE_KINDS.length) {
+    return undefined;
+  }
+  return unique.join(",");
+}
+
+export function isAllLiveKinds(kinds: LiveKind[]): boolean {
+  return ALL_LIVE_KINDS.every((k) => kinds.includes(k));
+}
+
+export function classifyLiveKind(options: {
+  is_member?: boolean | null;
+  is_collab?: boolean | null;
+  title?: string | null;
+  metadata?: Record<string, unknown> | null;
+}): LiveKind {
+  const isMember =
+    options.is_member === true ||
+    options.metadata?.member === true ||
+    (typeof options.title === "string" &&
+      /【?\s*membership\b/i.test(options.title));
+  if (isMember) return "member";
+  if (options.is_collab) return "collab";
+  return "solo";
+}
+
+export function streamMatchesKinds(
+  item: {
+    is_member?: boolean | null;
+    is_collab?: boolean | null;
+    title?: string | null;
+  },
+  kinds: LiveKind[]
+): boolean {
+  if (isAllLiveKinds(kinds)) return true;
+  return kinds.includes(
+    classifyLiveKind({
+      is_member: item.is_member,
+      is_collab: item.is_collab,
+      title: item.title,
+    })
+  );
+}
 
 const STREAM_SELECT =
   "video_id, title, url, channel_name, scheduled_start, actual_start, actual_end, thumbnail_url, views_on_end, latest_views, likes_on_end, latest_likes, is_own_channel, is_collab, metadata, updated_at";
@@ -252,13 +313,211 @@ export function sumTrendRows(rows: LiveViewTrendRow[]): LiveViewTrendTotals {
   );
 }
 
+/** Bangkok calendar bucket start date (YYYY-MM-DD) matching RPC date_trunc. */
+export function bangkokBucketFromIso(
+  iso: string,
+  grain: TrendGrain
+): string | null {
+  const ymd = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Bangkok",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(iso));
+  if (!isValidYmd(ymd)) return null;
+  const [y, m] = ymd.split("-");
+  if (grain === "day") return ymd;
+  if (grain === "month") return `${y}-${m}-01`;
+  return `${y}-01-01`;
+}
+
+function mapTrendStreamRow(row: Record<string, unknown>): LiveTrendStreamItem {
+  const meta = row.metadata as Record<string, unknown> | null;
+  const title = (row.title as string | null) ?? null;
+  return {
+    video_id: row.video_id as string,
+    title,
+    url: (row.url as string | null) ?? null,
+    channel_name: (row.channel_name as string | null) ?? null,
+    scheduled_start: (row.scheduled_start as string | null) ?? null,
+    actual_start: (row.actual_start as string | null) ?? null,
+    actual_end: (row.actual_end as string | null) ?? null,
+    thumbnail_url: (row.thumbnail_url as string | null) ?? null,
+    views_on_end: row.views_on_end as number | null,
+    latest_views: row.latest_views as number | null,
+    likes_on_end: row.likes_on_end as number | null,
+    latest_likes: row.latest_likes as number | null,
+    is_own_channel: row.is_own_channel as boolean | null,
+    is_collab: row.is_collab as boolean | null,
+    is_member:
+      meta?.member === true ||
+      (typeof title === "string" && /【?\s*membership\b/i.test(title)),
+    likes:
+      (row.latest_likes as number | null) ??
+      (row.likes_on_end as number | null) ??
+      parseLikes(row.metadata),
+    updated_at: (row.updated_at as string | null) ?? null,
+  };
+}
+
+export async function loadCompletedStreamsInRange(options: {
+  ownOnly: boolean;
+  fromYmd?: string | null;
+  toYmd?: string | null;
+  grain?: TrendGrain;
+}): Promise<LiveTrendStreamItem[]> {
+  if (!isSupabaseConfigured()) return [];
+  const grain = options.grain ?? "day";
+  const { from, to } = resolveDateRange({ ...options, grain });
+  const items: LiveTrendStreamItem[] = [];
+
+  try {
+    const supabase = createPublicClient();
+    const page = 1000;
+    let fromIdx = 0;
+
+    for (;;) {
+      let q = supabase
+        .from("mild_r_live_streams")
+        .select(STREAM_SELECT)
+        .not("actual_end", "is", null)
+        .not("actual_start", "is", null)
+        .gte("actual_start", from)
+        .lt("actual_start", to)
+        .order("actual_start", { ascending: false })
+        .range(fromIdx, fromIdx + page - 1);
+
+      if (options.ownOnly) q = q.eq("is_own_channel", true);
+
+      const { data, error } = await q;
+      if (error) {
+        console.error("[completed_streams_range]", error.message);
+        break;
+      }
+      const batch = data ?? [];
+      for (const raw of batch) {
+        items.push(mapTrendStreamRow(raw as Record<string, unknown>));
+      }
+      if (batch.length < page) break;
+      fromIdx += page;
+    }
+  } catch (err) {
+    console.error("[completed_streams_range]", err);
+  }
+
+  return items;
+}
+
+export function aggregateTrendsFromStreams(
+  streams: LiveTrendStreamItem[],
+  grain: TrendGrain
+): LiveViewTrendRow[] {
+  const byBucket = new Map<
+    string,
+    {
+      views_on_end: number;
+      latest_views: number;
+      views_diff: number;
+      stream_count: number;
+      peak_views_on_end: number;
+    }
+  >();
+
+  for (const s of streams) {
+    if (!s.actual_start) continue;
+    const bucket = bangkokBucketFromIso(s.actual_start, grain);
+    if (!bucket) continue;
+    const onEnd = s.views_on_end ?? 0;
+    const latest = s.latest_views ?? 0;
+    const diff = latest - (s.views_on_end ?? latest);
+    const prev = byBucket.get(bucket) ?? {
+      views_on_end: 0,
+      latest_views: 0,
+      views_diff: 0,
+      stream_count: 0,
+      peak_views_on_end: 0,
+    };
+    prev.views_on_end += onEnd;
+    prev.latest_views += latest;
+    prev.views_diff += diff;
+    prev.stream_count += 1;
+    prev.peak_views_on_end = Math.max(prev.peak_views_on_end, onEnd);
+    byBucket.set(bucket, prev);
+  }
+
+  return [...byBucket.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([bucket, v]) => ({ bucket, ...v }));
+}
+
+export function peaksFromStreams(streams: LiveTrendStreamItem[]): LiveViewPeaks {
+  function pick(column: "latest_views" | "views_on_end"): LiveViewPeakStream | null {
+    let best: LiveTrendStreamItem | null = null;
+    let bestVal = -1;
+    for (const s of streams) {
+      const v = s[column] ?? 0;
+      if (v > bestVal) {
+        bestVal = v;
+        best = s;
+      }
+    }
+    if (!best) return null;
+    return {
+      video_id: best.video_id,
+      title: best.title,
+      url: best.url,
+      channel_name: best.channel_name,
+      actual_end: best.actual_end,
+      thumbnail_url: best.thumbnail_url,
+      views: best[column] ?? 0,
+      views_on_end: best.views_on_end ?? 0,
+      latest_views: best.latest_views ?? 0,
+    };
+  }
+  return { byLatest: pick("latest_views"), byOnEnd: pick("views_on_end") };
+}
+
+/** Peak stream (by views_on_end) per trend bucket — for summary table cover/title. */
+export function bucketPeakStreamsFromList(
+  streams: LiveTrendStreamItem[],
+  grain: TrendGrain
+): Record<string, LiveTrendStreamItem> {
+  const out: Record<string, LiveTrendStreamItem> = {};
+  for (const item of streams) {
+    if (!item.actual_start) continue;
+    const bucket = bangkokBucketFromIso(item.actual_start, grain);
+    if (!bucket) continue;
+    const prev = out[bucket];
+    if (
+      !prev ||
+      (item.views_on_end ?? 0) > (prev.views_on_end ?? 0) ||
+      ((item.views_on_end ?? 0) === (prev.views_on_end ?? 0) &&
+        (item.latest_views ?? 0) > (prev.latest_views ?? 0))
+    ) {
+      out[bucket] = item;
+    }
+  }
+  return out;
+}
+
 /** Server-side aggregate via Postgres RPC (no row fan-out). */
 export async function loadLiveViewTrends(options: {
   grain: TrendGrain;
   ownOnly: boolean;
   fromYmd?: string | null;
   toYmd?: string | null;
+  kinds?: LiveKind[];
 }): Promise<LiveViewTrendRow[]> {
+  const kinds = options.kinds ?? ALL_LIVE_KINDS;
+
+  if (!isAllLiveKinds(kinds)) {
+    const streams = await loadCompletedStreamsInRange(options);
+    return aggregateTrendsFromStreams(
+      streams.filter((s) => streamMatchesKinds(s, kinds)),
+      options.grain
+    );
+  }
+
   if (!isSupabaseConfigured()) return [];
 
   const { from, to } = resolveDateRange(options);
@@ -325,12 +584,32 @@ export async function loadLiveViewPeaks(options: {
   fromYmd?: string | null;
   toYmd?: string | null;
   bucket?: string | null;
+  kinds?: LiveKind[];
 }): Promise<LiveViewPeaks> {
+  const kinds = options.kinds ?? ALL_LIVE_KINDS;
+
+  if (!isAllLiveKinds(kinds) || options.bucket) {
+    // Filtered kinds (or bucket detail) — resolve from stream list
+    if (options.bucket) {
+      if (!isSupabaseConfigured()) return { byLatest: null, byOnEnd: null };
+      const supabase = createPublicClient();
+      const list = await loadStreamsInBucket(supabase, {
+        bucket: options.bucket,
+        grain: options.grain,
+        ownOnly: options.ownOnly,
+        kinds,
+      });
+      return peaksFromStreams(list);
+    }
+    const streams = await loadCompletedStreamsInRange(options);
+    return peaksFromStreams(
+      streams.filter((s) => streamMatchesKinds(s, kinds))
+    );
+  }
+
   if (!isSupabaseConfigured()) return { byLatest: null, byOnEnd: null };
 
-  const range = options.bucket
-    ? getBucketRange(options.bucket, options.grain)
-    : resolveDateRange(options);
+  const range = resolveDateRange(options);
   if (!range) return { byLatest: null, byOnEnd: null };
 
   try {
@@ -364,57 +643,15 @@ export async function loadLiveKindStats(options: {
   ownOnly: boolean;
   fromYmd?: string | null;
   toYmd?: string | null;
+  kinds?: LiveKind[];
 }): Promise<LiveKindStats> {
   const empty: LiveKindStats = { member: 0, collab: 0, solo: 0, total: 0 };
   if (!isSupabaseConfigured()) return empty;
 
-  const { from, to } = resolveDateRange(options);
-
-  try {
-    const supabase = createPublicClient();
-    let member = 0;
-    let collab = 0;
-    let solo = 0;
-    const page = 1000;
-    let fromIdx = 0;
-
-    for (;;) {
-      let q = supabase
-        .from("mild_r_live_streams")
-        .select("video_id, title, is_collab, metadata")
-        .not("actual_end", "is", null)
-        .gte("actual_start", from)
-        .lt("actual_start", to)
-        .order("actual_start", { ascending: false })
-        .range(fromIdx, fromIdx + page - 1);
-
-      if (options.ownOnly) q = q.eq("is_own_channel", true);
-
-      const { data, error } = await q;
-      if (error) {
-        console.error("[live_kind_stats]", error.message);
-        break;
-      }
-      const batch = data ?? [];
-      for (const row of batch) {
-        const meta = row.metadata as Record<string, unknown> | null;
-        const isMember =
-          meta?.member === true ||
-          (typeof row.title === "string" &&
-            /【?\s*membership\b/i.test(row.title));
-        if (isMember) member += 1;
-        else if (row.is_collab) collab += 1;
-        else solo += 1;
-      }
-      if (batch.length < page) break;
-      fromIdx += page;
-    }
-
-    return { member, collab, solo, total: member + collab + solo };
-  } catch (err) {
-    console.error("[live_kind_stats]", err);
-    return empty;
-  }
+  const kinds = options.kinds ?? ALL_LIVE_KINDS;
+  const streams = await loadCompletedStreamsInRange(options);
+  const filtered = streams.filter((s) => streamMatchesKinds(s, kinds));
+  return countKindStats(filtered);
 }
 
 export async function loadStreamsInBucket(
@@ -423,10 +660,12 @@ export async function loadStreamsInBucket(
     bucket: string;
     grain: TrendGrain;
     ownOnly: boolean;
+    kinds?: LiveKind[];
   }
 ): Promise<LiveTrendStreamItem[]> {
   const range = getBucketRange(options.bucket, options.grain);
   if (!range) return [];
+  const kinds = options.kinds ?? ALL_LIVE_KINDS;
 
   let q = supabase
     .from("mild_r_live_streams")
@@ -445,46 +684,26 @@ export async function loadStreamsInBucket(
     return [];
   }
 
-  return (data ?? []).map((row) => {
-    const meta = row.metadata as Record<string, unknown> | null;
-    return {
-      video_id: row.video_id as string,
-      title: (row.title as string | null) ?? null,
-      url: (row.url as string | null) ?? null,
-      channel_name: (row.channel_name as string | null) ?? null,
-      scheduled_start: (row.scheduled_start as string | null) ?? null,
-      actual_start: (row.actual_start as string | null) ?? null,
-      actual_end: (row.actual_end as string | null) ?? null,
-      thumbnail_url: (row.thumbnail_url as string | null) ?? null,
-      views_on_end: row.views_on_end as number | null,
-      latest_views: row.latest_views as number | null,
-      likes_on_end: row.likes_on_end as number | null,
-      latest_likes: row.latest_likes as number | null,
-      is_own_channel: row.is_own_channel as boolean | null,
-      is_collab: row.is_collab as boolean | null,
-      is_member:
-        meta?.member === true ||
-        (typeof row.title === "string" &&
-          /【?\s*membership\b/i.test(row.title)),
-      likes:
-        (row.latest_likes as number | null) ??
-        (row.likes_on_end as number | null) ??
-        parseLikes(row.metadata),
-      updated_at: (row.updated_at as string | null) ?? null,
-    };
-  });
+  return (data ?? [])
+    .map((row) => mapTrendStreamRow(row as Record<string, unknown>))
+    .filter((s) => streamMatchesKinds(s, kinds));
 }
 
 /** Exclusive: Member > Collab > Solo */
 export function countKindStats(
-  items: Array<{ is_member?: boolean | null; is_collab?: boolean | null }>
+  items: Array<{
+    is_member?: boolean | null;
+    is_collab?: boolean | null;
+    title?: string | null;
+  }>
 ): LiveKindStats {
   let member = 0;
   let collab = 0;
   let solo = 0;
   for (const item of items) {
-    if (item.is_member) member += 1;
-    else if (item.is_collab) collab += 1;
+    const kind = classifyLiveKind(item);
+    if (kind === "member") member += 1;
+    else if (kind === "collab") collab += 1;
     else solo += 1;
   }
   return { member, collab, solo, total: member + collab + solo };

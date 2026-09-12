@@ -35,6 +35,9 @@ export type LiveViewPeaks = {
   byOnEnd: LiveViewPeakStream | null;
 };
 
+/** Exclusive live kinds: Member > Collab > Solo */
+export type LiveKind = "solo" | "collab" | "member";
+
 /** Exclusive kind counts: Member > Collab > Solo */
 export type LiveKindStats = {
   member: number;

@@ -6,7 +6,6 @@ import { useEffect, useMemo, useRef, useState, useTransition, type ReactNode } f
 import {
   Activity,
   ArrowUpRight,
-  Calendar,
   ChevronDown,
   ChevronUp,
   ExternalLink,
@@ -28,10 +27,12 @@ import { LiveViewTrendsChart } from "@/components/events/LiveViewTrendsChart";
 import { createClient } from "@/lib/supabase/client";
 import { liveStreamToSlot } from "@/lib/live-stream-utils";
 import {
+  ALL_LIVE_KINDS,
   countKindStats,
   defaultFromToYmd,
   grainRangesToSearchParams,
   loadStreamsInBucket,
+  serializeLiveKinds,
   type TrendGrainRanges,
 } from "@/lib/live-view-trends";
 import { cn } from "@/lib/utils";
@@ -49,6 +50,7 @@ import {
 } from "@/lib/site-ui";
 import { getYoutubeThumbnailUrl } from "@/lib/youtube";
 import type {
+  LiveKind,
   LiveKindStats,
   LiveTrendStreamItem,
   LiveViewPeaks,
@@ -64,8 +66,11 @@ type LiveViewTrendsPanelProps = {
   totals: LiveViewTrendTotals;
   peaks: LiveViewPeaks;
   kindStats: LiveKindStats;
+  /** Peak stream per bucket for summary table cover/title */
+  bucketPeaks: Record<string, LiveTrendStreamItem>;
   grain: TrendGrain;
   ownOnly: boolean;
+  kinds: LiveKind[];
   ranges: TrendGrainRanges;
 };
 
@@ -107,6 +112,7 @@ function formatWhen(iso: string | null) {
 function trendsHref(options: {
   grain: TrendGrain;
   ownOnly: boolean;
+  kinds: LiveKind[];
   ranges: TrendGrainRanges;
 }) {
   const active = options.ranges[options.grain];
@@ -117,6 +123,8 @@ function trendsHref(options: {
     to: active.to,
     ...grainRangesToSearchParams(options.ranges),
   });
+  const kindsParam = serializeLiveKinds(options.kinds);
+  if (kindsParam) params.set("kinds", kindsParam);
   return `/live/ops/trends?${params.toString()}`;
 }
 
@@ -132,6 +140,12 @@ const GRAINS: { id: TrendGrain; label: string }[] = [
   { id: "year", label: "รายปี" },
 ];
 
+const KIND_OPTIONS: { id: LiveKind; label: string }[] = [
+  { id: "solo", label: "Solo" },
+  { id: "collab", label: "Collab" },
+  { id: "member", label: "Member" },
+];
+
 const dateInputClass =
   "rounded-2xl border border-[#f3b8c4]/20 bg-[#12070c]/90 px-3.5 py-2 text-sm text-[#fff5f7] outline-none transition focus:border-[#e85a7a] focus:ring-1 focus:ring-[#e85a7a]/40 [color-scheme:dark]";
 
@@ -140,8 +154,10 @@ export function LiveViewTrendsPanel({
   totals,
   peaks,
   kindStats,
+  bucketPeaks,
   grain,
   ownOnly,
+  kinds,
   ranges,
 }: LiveViewTrendsPanelProps) {
   const router = useRouter();
@@ -149,9 +165,11 @@ export function LiveViewTrendsPanel({
   const toYmd = ranges[grain].to;
   const [draftFrom, setDraftFrom] = useState(fromYmd);
   const [draftTo, setDraftTo] = useState(toYmd);
+  const [draftKinds, setDraftKinds] = useState<LiveKind[]>(kinds);
   const [selectedBucket, setSelectedBucket] = useState<string | null>(null);
   const [streams, setStreams] = useState<LiveTrendStreamItem[]>([]);
-  const [bucketPeaks, setBucketPeaks] = useState<LiveViewPeaks | null>(null);
+  const [bucketDetailPeaks, setBucketDetailPeaks] =
+    useState<LiveViewPeaks | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [activeSlot, setActiveSlot] = useState<LiveSlot | null>(null);
@@ -167,13 +185,14 @@ export function LiveViewTrendsPanel({
   useEffect(() => {
     setDraftFrom(fromYmd);
     setDraftTo(toYmd);
+    setDraftKinds(kinds);
     setSelectedBucket(null);
     setStreams([]);
-    setBucketPeaks(null);
+    setBucketDetailPeaks(null);
     setError(null);
-  }, [grain, ownOnly, fromYmd, toYmd]);
+  }, [grain, ownOnly, kinds, fromYmd, toYmd]);
 
-  function applyDateRange() {
+  function applyFilters() {
     let from = draftFrom;
     let to = draftTo;
     if (from > to) {
@@ -181,24 +200,42 @@ export function LiveViewTrendsPanel({
       from = to;
       to = tmp;
     }
+    const nextKinds =
+      draftKinds.length === 0 ? [...ALL_LIVE_KINDS] : draftKinds;
     router.push(
       trendsHref({
         grain,
         ownOnly,
+        kinds: nextKinds,
         ranges: { ...ranges, [grain]: { from, to } },
       })
     );
   }
 
-  function resetDateRange() {
+  function resetFilters() {
     const d = defaultFromToYmd(grain);
+    setDraftFrom(d.from);
+    setDraftTo(d.to);
+    setDraftKinds([...ALL_LIVE_KINDS]);
     router.push(
       trendsHref({
         grain,
         ownOnly,
+        kinds: [...ALL_LIVE_KINDS],
         ranges: { ...ranges, [grain]: d },
       })
     );
+  }
+
+  function toggleDraftKind(kind: LiveKind) {
+    setDraftKinds((prev) => {
+      const has = prev.includes(kind);
+      if (has) {
+        const next = prev.filter((k) => k !== kind);
+        return next.length === 0 ? [...ALL_LIVE_KINDS] : next;
+      }
+      return ALL_LIVE_KINDS.filter((k) => prev.includes(k) || k === kind);
+    });
   }
 
   function selectBucket(bucket: string) {
@@ -211,9 +248,10 @@ export function LiveViewTrendsPanel({
           bucket,
           grain,
           ownOnly,
+          kinds,
         });
         setStreams(list);
-        setBucketPeaks({
+        setBucketDetailPeaks({
           byLatest: peakFromList(list, "latest_views"),
           byOnEnd: peakFromList(list, "views_on_end"),
         });
@@ -225,7 +263,7 @@ export function LiveViewTrendsPanel({
         });
       } catch (err) {
         setStreams([]);
-        setBucketPeaks(null);
+        setBucketDetailPeaks(null);
         setError(err instanceof Error ? err.message : "โหลดไลฟ์ไม่สำเร็จ");
       }
     });
@@ -259,6 +297,7 @@ export function LiveViewTrendsPanel({
               href={trendsHref({
                 grain: g.id,
                 ownOnly,
+                kinds,
                 ranges,
               })}
               className={cn(
@@ -276,7 +315,7 @@ export function LiveViewTrendsPanel({
         {/* Channel Selector */}
         <div className="flex items-center gap-1.5 rounded-full border border-[#f3b8c4]/15 bg-[#14080e]/90 p-1 shadow-inner">
           <Link
-            href={trendsHref({ grain, ownOnly: true, ranges })}
+            href={trendsHref({ grain, ownOnly: true, kinds, ranges })}
             className={cn(
               "rounded-full px-4 py-1.5 text-xs font-semibold tracking-wider uppercase transition",
               ownOnly
@@ -287,7 +326,7 @@ export function LiveViewTrendsPanel({
             ช่อง Mild-R
           </Link>
           <Link
-            href={trendsHref({ grain, ownOnly: false, ranges })}
+            href={trendsHref({ grain, ownOnly: false, kinds, ranges })}
             className={cn(
               "rounded-full px-4 py-1.5 text-xs font-semibold tracking-wider uppercase transition",
               !ownOnly
@@ -300,13 +339,13 @@ export function LiveViewTrendsPanel({
         </div>
       </div>
 
-      {/* 📅 Date Range Filter Card */}
+      {/* Combined filter: kinds + date range */}
       <div className="relative overflow-hidden rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1f0d16]/80 to-[#14080e]/90 p-5 shadow-lg sm:p-6">
         <div className="flex items-center justify-between gap-2 border-b border-[#f3b8c4]/10 pb-3">
           <div className="flex items-center gap-2">
-            <Calendar className="size-4 text-[#e85a7a]" />
+            <Filter className="size-4 text-[#e85a7a]" />
             <p className={META_CLASS}>
-              ช่วงเวลา · {GRAIN_LABEL[grain]} (Asia/Bangkok)
+              ตัวกรอง · {GRAIN_LABEL[grain]} (Asia/Bangkok)
             </p>
           </div>
           <span className="text-[0.68rem] text-[#f3b8c4]/50">
@@ -314,50 +353,82 @@ export function LiveViewTrendsPanel({
           </span>
         </div>
 
-        <div className="mt-4 flex flex-col gap-3.5 sm:flex-row sm:flex-wrap sm:items-end">
-          <label className="flex min-w-[10rem] flex-1 flex-col gap-1.5 text-sm">
-            <span className="text-xs font-medium text-[#f3b8c4]/70">วันที่เริ่มต้น (Start)</span>
-            <input
-              type="date"
-              className={dateInputClass}
-              value={draftFrom}
-              max={draftTo}
-              onChange={(e) => setDraftFrom(e.target.value)}
-            />
-          </label>
-          <label className="flex min-w-[10rem] flex-1 flex-col gap-1.5 text-sm">
-            <span className="text-xs font-medium text-[#f3b8c4]/70">วันที่สิ้นสุด (End)</span>
-            <input
-              type="date"
-              className={dateInputClass}
-              value={draftTo}
-              min={draftFrom}
-              onChange={(e) => setDraftTo(e.target.value)}
-            />
-          </label>
-          <div className="flex flex-wrap gap-2 pt-1">
-            <button
-              type="button"
-              onClick={applyDateRange}
-              className={cn(
-                CTA_PRIMARY_CLASS,
-                "flex items-center gap-1.5 px-4 py-2 text-xs font-semibold"
-              )}
-            >
-              <Filter className="size-3.5" />
-              <span>ใช้ช่วงนี้</span>
-            </button>
-            <button
-              type="button"
-              onClick={resetDateRange}
-              className={cn(
-                CTA_OUTLINE_CLASS,
-                "flex items-center gap-1.5 px-4 py-2 text-xs font-semibold"
-              )}
-            >
-              <RotateCcw className="size-3.5" />
-              <span>รีเซ็ต</span>
-            </button>
+        <div className="mt-4 space-y-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+            <span className="text-xs font-medium text-[#f3b8c4]/70">
+              ประเภทไลฟ์
+            </span>
+            <div className="flex items-center gap-1.5 rounded-full border border-[#f3b8c4]/15 bg-[#12070c]/90 p-1 shadow-inner">
+              {KIND_OPTIONS.map((opt) => {
+                const active = draftKinds.includes(opt.id);
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => toggleDraftKind(opt.id)}
+                    className={cn(
+                      "rounded-full px-4 py-1.5 text-xs font-semibold tracking-wider uppercase transition",
+                      active
+                        ? "border border-[#e85a7a]/60 bg-[#e85a7a]/25 text-[#fff5f7] shadow-[0_0_12px_rgba(232,90,122,0.35)]"
+                        : "text-[#f3b8c4]/65 hover:text-[#fff5f7]"
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3.5 sm:flex-row sm:flex-wrap sm:items-end">
+            <label className="flex min-w-[10rem] flex-1 flex-col gap-1.5 text-sm">
+              <span className="text-xs font-medium text-[#f3b8c4]/70">
+                วันที่เริ่มต้น (Start)
+              </span>
+              <input
+                type="date"
+                className={dateInputClass}
+                value={draftFrom}
+                max={draftTo}
+                onChange={(e) => setDraftFrom(e.target.value)}
+              />
+            </label>
+            <label className="flex min-w-[10rem] flex-1 flex-col gap-1.5 text-sm">
+              <span className="text-xs font-medium text-[#f3b8c4]/70">
+                วันที่สิ้นสุด (End)
+              </span>
+              <input
+                type="date"
+                className={dateInputClass}
+                value={draftTo}
+                min={draftFrom}
+                onChange={(e) => setDraftTo(e.target.value)}
+              />
+            </label>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <button
+                type="button"
+                onClick={applyFilters}
+                className={cn(
+                  CTA_PRIMARY_CLASS,
+                  "flex items-center gap-1.5 px-4 py-2 text-xs font-semibold"
+                )}
+              >
+                <Filter className="size-3.5" />
+                <span>ใช้ช่วงนี้</span>
+              </button>
+              <button
+                type="button"
+                onClick={resetFilters}
+                className={cn(
+                  CTA_OUTLINE_CLASS,
+                  "flex items-center gap-1.5 px-4 py-2 text-xs font-semibold"
+                )}
+              >
+                <RotateCcw className="size-3.5" />
+                <span>รีเซ็ต</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -499,7 +570,7 @@ export function LiveViewTrendsPanel({
               <BucketPeriodDetail
                 trendRow={selectedTrendRow}
                 streams={streams}
-                peaks={bucketPeaks}
+                peaks={bucketDetailPeaks}
                 onOpen={openLiveModal}
               />
             )}
@@ -517,7 +588,7 @@ export function LiveViewTrendsPanel({
           <div className="flex items-center gap-2">
             <Video className="size-4 text-[#e85a7a]" />
             <span className="text-xs font-bold tracking-wider text-[#fff5f7] uppercase sm:text-sm">
-              ตารางสรุปข้อมูล ({rows.length} แถว)
+              ตารางสรุปข้อมูล
             </span>
           </div>
           <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#e85a7a]">
@@ -540,39 +611,65 @@ export function LiveViewTrendsPanel({
               <thead className="border-b border-[#f3b8c4]/15 bg-[#14080e]/80 text-[0.68rem] tracking-wider text-[#f3b8c4]/70 uppercase">
                 <tr>
                   <th className="px-5 py-3 font-semibold">ช่วงเวลา</th>
+                  <th className="px-5 py-3 font-semibold">ปก</th>
+                  <th className="px-5 py-3 font-semibold">ชื่อไลฟ์</th>
                   <th className="px-5 py-3 font-semibold">หลังไลฟ์</th>
                   <th className="px-5 py-3 font-semibold">ยอดรวมล่าสุด</th>
                   <th className="px-5 py-3 font-semibold">Diff (เพิ่มขึ้น)</th>
-                  <th className="px-5 py-3 font-semibold">จำนวนคลิป</th>
                 </tr>
               </thead>
               <tbody>
-                {[...rows].reverse().map((row) => (
-                  <tr
-                    key={row.bucket}
-                    onClick={() => selectBucket(row.bucket)}
-                    className={cn(
-                      "cursor-pointer border-b border-[#f3b8c4]/08 last:border-0 transition-colors hover:bg-[#e85a7a]/12",
-                      selectedBucket === row.bucket && "bg-[#e85a7a]/20 font-semibold"
-                    )}
-                  >
-                    <td className="px-5 py-3 text-[#fff5f7]">
-                      {formatBucket(row.bucket, grain)}
-                    </td>
-                    <td className="px-5 py-3 tabular-nums text-[#f7d7de]/85">
-                      {formatViews(row.views_on_end)}
-                    </td>
-                    <td className="px-5 py-3 tabular-nums text-[#fff5f7]">
-                      {formatViews(row.latest_views)}
-                    </td>
-                    <td className="px-5 py-3 font-semibold tabular-nums text-[#7dd3c0]">
-                      +{formatViews(row.views_diff)}
-                    </td>
-                    <td className="px-5 py-3 tabular-nums text-[#f3b8c4]/80">
-                      {row.stream_count}
-                    </td>
-                  </tr>
-                ))}
+                {[...rows].reverse().map((row) => {
+                  const peak = bucketPeaks[row.bucket];
+                  return (
+                    <tr
+                      key={row.bucket}
+                      onClick={() => selectBucket(row.bucket)}
+                      className={cn(
+                        "cursor-pointer border-b border-[#f3b8c4]/08 last:border-0 transition-colors hover:bg-[#e85a7a]/12",
+                        selectedBucket === row.bucket &&
+                          "bg-[#e85a7a]/20 font-semibold"
+                      )}
+                    >
+                      <td className="px-5 py-3 text-[#fff5f7]">
+                        {formatBucket(row.bucket, grain)}
+                      </td>
+                      <td className="px-5 py-3">
+                        {peak ? (
+                          <div className="relative h-12 w-20 overflow-hidden rounded-lg border border-[#f3b8c4]/15 bg-[#10070b]">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={streamThumb(
+                                peak.video_id,
+                                peak.thumbnail_url
+                              )}
+                              alt=""
+                              className="h-full w-full object-cover"
+                              loading="lazy"
+                              referrerPolicy="no-referrer"
+                            />
+                          </div>
+                        ) : (
+                          <span className="text-[#f3b8c4]/45">—</span>
+                        )}
+                      </td>
+                      <td className="max-w-[16rem] px-5 py-3 text-[#fff5f7]">
+                        <span className="line-clamp-2">
+                          {peak?.title || "—"}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 tabular-nums text-[#f7d7de]/85">
+                        {formatViews(row.views_on_end)}
+                      </td>
+                      <td className="px-5 py-3 tabular-nums text-[#fff5f7]">
+                        {formatViews(row.latest_views)}
+                      </td>
+                      <td className="px-5 py-3 font-semibold tabular-nums text-[#7dd3c0]">
+                        +{formatViews(row.views_diff)}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

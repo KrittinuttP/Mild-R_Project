@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Activity, Radio, Sparkles } from "lucide-react";
+import { Activity, Radio } from "lucide-react";
 
 import { AddManualLiveButton } from "@/components/events/AddManualLiveModal";
 import { LiveViewTrendsPanel } from "@/components/events/LiveViewTrendsPanel";
@@ -13,10 +13,17 @@ import {
 } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import {
-  loadLiveKindStats,
+  aggregateTrendsFromStreams,
+  bucketPeakStreamsFromList,
+  countKindStats,
+  isAllLiveKinds,
+  loadCompletedStreamsInRange,
   loadLiveViewPeaks,
   loadLiveViewTrends,
   parseGrainRanges,
+  parseLiveKinds,
+  peaksFromStreams,
+  streamMatchesKinds,
   sumTrendRows,
 } from "@/lib/live-view-trends";
 import type { TrendGrain } from "@/types/live-view-trends";
@@ -32,6 +39,7 @@ type PageProps = {
   searchParams: Promise<{
     grain?: string;
     own?: string;
+    kinds?: string;
     from?: string;
     to?: string;
     from_day?: string;
@@ -52,14 +60,30 @@ export default async function LiveOpsTrendsPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const grain = parseGrain(params.grain);
   const ownOnly = params.own === "1";
+  const kinds = parseLiveKinds(params.kinds);
   const ranges = parseGrainRanges(params, grain);
   const { from: fromYmd, to: toYmd } = ranges[grain];
 
-  const [rows, peaks, kindStats] = await Promise.all([
-    loadLiveViewTrends({ grain, ownOnly, fromYmd, toYmd }),
-    loadLiveViewPeaks({ grain, ownOnly, fromYmd, toYmd }),
-    loadLiveKindStats({ grain, ownOnly, fromYmd, toYmd }),
-  ]);
+  const streams = await loadCompletedStreamsInRange({
+    grain,
+    ownOnly,
+    fromYmd,
+    toYmd,
+  });
+  const filtered = streams.filter((s) => streamMatchesKinds(s, kinds));
+
+  const [rows, peaks] = isAllLiveKinds(kinds)
+    ? await Promise.all([
+        loadLiveViewTrends({ grain, ownOnly, fromYmd, toYmd }),
+        loadLiveViewPeaks({ grain, ownOnly, fromYmd, toYmd }),
+      ])
+    : [
+        aggregateTrendsFromStreams(filtered, grain),
+        peaksFromStreams(filtered),
+      ];
+
+  const kindStats = countKindStats(filtered);
+  const bucketPeaks = bucketPeakStreamsFromList(filtered, grain);
   const totals = sumTrendRows(rows);
 
   return (
@@ -74,14 +98,10 @@ export default async function LiveOpsTrendsPage({ searchParams }: PageProps) {
           </BackLink>
           <div className="mt-4 flex items-center gap-2">
             <Activity className="size-4 text-[#e85a7a]" />
-            <p className={META_CLASS}>
-              Live View Analytics · Internal
-            </p>
+            <p className={META_CLASS}>Live View Analytics · Internal</p>
           </div>
           <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
-            <h1 className={DISPLAY_H1_CLASS}>
-              View Trends
-            </h1>
+            <h1 className={DISPLAY_H1_CLASS}>View Trends</h1>
             <div className="flex flex-wrap items-center gap-2.5">
               <AddManualLiveButton />
               <Link
@@ -98,7 +118,8 @@ export default async function LiveOpsTrendsPage({ searchParams }: PageProps) {
             </div>
           </div>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-[#f7d7de]/80">
-            วิเคราะห์แนวโน้มยอดคนดูหลังจบไลฟ์, ยอดวิวสะสมล่าสุด และสัดส่วน Solo / Collab / Member
+            วิเคราะห์แนวโน้มยอดคนดูหลังจบไลฟ์, ยอดวิวสะสมล่าสุด และสัดส่วน Solo /
+            Collab / Member
           </p>
         </header>
 
@@ -107,8 +128,10 @@ export default async function LiveOpsTrendsPage({ searchParams }: PageProps) {
           totals={totals}
           peaks={peaks}
           kindStats={kindStats}
+          bucketPeaks={bucketPeaks}
           grain={grain}
           ownOnly={ownOnly}
+          kinds={kinds}
           ranges={ranges}
         />
       </div>

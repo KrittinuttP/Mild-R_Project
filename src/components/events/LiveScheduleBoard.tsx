@@ -201,7 +201,8 @@ function MobileCalendarTimeSlot({
   const cancelled = slot.status === "cancelled";
   const own = Boolean(slot.isOwnChannel);
   const collab = slot.kind === "collab";
-  const guestTone = !own && collab && !cancelled;
+  const isMember = Boolean(slot.isMember);
+  const guestTone = !own && collab && !cancelled && !isMember;
   const time = calendarSlotTimeLabel(slot);
   const label = slot.titleLocal ?? slot.title;
 
@@ -216,9 +217,11 @@ function MobileCalendarTimeSlot({
         "flex min-w-0 cursor-pointer items-center gap-0.5 border-l-2 py-px pl-1 text-left",
         cancelled
           ? "border-dashed border-[#8a7f88]/70 opacity-75"
-          : guestTone
-            ? "border-[#d4a574]"
-            : "border-[#e85a7a]/70"
+          : isMember
+            ? "border-[#9b8cff]/80"
+            : guestTone
+              ? "border-[#d4a574]"
+              : "border-[#e85a7a]/70"
       )}
       title={`${time} · ${label}${cancelled ? " (ยกเลิก)" : ""}`}
     >
@@ -227,9 +230,11 @@ function MobileCalendarTimeSlot({
           "truncate text-[0.55rem] tabular-nums leading-none",
           cancelled
             ? "text-[#d8d0d4] line-through decoration-[#8a7f88]/80"
-            : guestTone
-              ? "text-[#e8c49a]"
-              : "text-[#e85a7a]"
+            : isMember
+              ? "text-[#cfc6ff]"
+              : guestTone
+                ? "text-[#e8c49a]"
+                : "text-[#e85a7a]"
         )}
       >
         {time}
@@ -255,7 +260,8 @@ function CalendarMonthSlot({
   const cancelled = slot.status === "cancelled";
   const own = Boolean(slot.isOwnChannel);
   const collab = slot.kind === "collab";
-  const guestTone = !own && collab && !cancelled;
+  const isMember = Boolean(slot.isMember);
+  const guestTone = !own && collab && !cancelled && !isMember;
   const time = calendarSlotTimeLabel(slot);
   const label = slot.titleLocal ?? slot.title;
 
@@ -271,9 +277,11 @@ function CalendarMonthSlot({
         crowded && "overflow-hidden",
         cancelled
           ? "border-dashed border-[#8a7f88]/70 opacity-75 hover:bg-[#8a7f88]/08"
-          : guestTone
-            ? "border-[#d4a574] text-[#fff5f7] hover:bg-white/5"
-            : "border-[#e85a7a]/55 text-[#f7d7de]/90 hover:bg-white/5"
+          : isMember
+            ? "border-[#9b8cff]/80 text-[#fff5f7] hover:bg-[#9b8cff]/08"
+            : guestTone
+              ? "border-[#d4a574] text-[#fff5f7] hover:bg-white/5"
+              : "border-[#e85a7a]/55 text-[#f7d7de]/90 hover:bg-white/5"
       )}
       title={`${slot.timePrevious ? `${slot.timePrevious}→` : ""}${time} · ${label}${cancelled ? " (ยกเลิก)" : ""}`}
     >
@@ -288,13 +296,19 @@ function CalendarMonthSlot({
             timePrevious={slot.timePrevious}
             timeUpdated={slot.timeUpdated}
             className="text-[0.55rem] sm:text-[0.62rem]"
-            accentClassName={guestTone ? "text-[#e8c49a]" : "text-[#e85a7a]"}
+            accentClassName={
+              isMember
+                ? "text-[#cfc6ff]"
+                : guestTone
+                  ? "text-[#e8c49a]"
+                  : "text-[#e85a7a]"
+            }
           />
         )}
-        {!cancelled && (collab || slot.isMember) ? (
+        {!cancelled && (collab || isMember) ? (
           <LiveSourceBadges
             isCollab={collab}
-            isMember={slot.isMember}
+            isMember={isMember}
             showChannel={false}
             compactChannel
           />
