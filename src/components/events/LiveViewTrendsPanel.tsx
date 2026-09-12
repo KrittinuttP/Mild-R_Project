@@ -547,7 +547,7 @@ export function LiveViewTrendsPanel({
                 onClick={() => {
                   setSelectedBucket(null);
                   setStreams([]);
-                  setBucketPeaks(null);
+                  setBucketDetailPeaks(null);
                 }}
                 className="rounded-full border border-[#f3b8c4]/20 bg-[#1f0d16] px-3 py-1 text-xs text-[#f3b8c4]/80 transition hover:border-[#e85a7a]/50 hover:text-[#fff5f7]"
               >
