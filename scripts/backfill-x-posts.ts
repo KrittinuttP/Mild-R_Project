@@ -5,6 +5,10 @@
  *   npx tsx --env-file=.env scripts/backfill-x-posts.ts
  */
 import { createClient } from "@supabase/supabase-js";
+import {
+  firstImageUrl,
+  isLiveScheduleText,
+} from "../src/lib/x-live-schedule";
 
 const TWITTERAPI_IO_KEY = process.env.TWITTERAPI_IO_KEY?.trim();
 const X_USER_ID = process.env.X_USER_ID?.trim() || "";
@@ -15,6 +19,7 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 const API_BASE = "https://api.twitterapi.io/twitter/user/last_tweets";
 const MAX_PAGES = 3;
 const BACKFILL_TARGET = 60;
+const MEDIA_BUCKET = "x-media";
 
 if (!TWITTERAPI_IO_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   console.error(
@@ -48,6 +53,7 @@ type XPostRow = {
   is_quote: boolean;
   quoted_tweet: QuotedTweetUi | null;
   original_url: string | null;
+  is_live_schedule: boolean;
   raw: Record<string, unknown> | null;
   updated_at: string;
 };
@@ -155,6 +161,7 @@ function mapTweet(tweet: ApiTweet): XPostRow | null {
   const post_type = classify(tweet);
   const is_quote = post_type === "quote";
   const username = tweet.author?.userName ?? null;
+  const text = tweet.text ?? null;
   const original_url =
     tweet.url?.trim() ||
     (username ? `https://x.com/${username}/status/${id}` : null);
@@ -165,7 +172,7 @@ function mapTweet(tweet: ApiTweet): XPostRow | null {
     author_name: tweet.author?.name ?? null,
     author_username: username,
     author_avatar: tweet.author?.profilePicture ?? null,
-    text: tweet.text ?? null,
+    text,
     media_urls: extractMediaUrls(tweet),
     posted_at: parsePostedAt(tweet.createdAt),
     likes_count: typeof tweet.likeCount === "number" ? tweet.likeCount : null,
@@ -179,6 +186,7 @@ function mapTweet(tweet: ApiTweet): XPostRow | null {
           ? mapQuoted(tweet.retweeted_tweet)
           : null,
     original_url,
+    is_live_schedule: isLiveScheduleText(text),
     raw: tweet as Record<string, unknown>,
     updated_at: new Date().toISOString(),
   };
@@ -210,6 +218,95 @@ async function fetchLastTweetsPage(cursor: string) {
   };
 }
 
+async function cacheLiveScheduleImages(rows: XPostRow[]) {
+  let cached = 0;
+  for (const row of rows) {
+    if (!row.is_live_schedule) continue;
+    const sourceUrl = firstImageUrl(row.media_urls);
+    if (!sourceUrl) continue;
+
+    const { data: existing } = await supabase
+      .from("mild_r_x_posts")
+      .select("schedule_image_url, schedule_image_source_url")
+      .eq("tweet_id", row.tweet_id)
+      .maybeSingle();
+
+    if (
+      existing?.schedule_image_url &&
+      existing.schedule_image_source_url === sourceUrl
+    ) {
+      continue;
+    }
+
+    try {
+      const imgRes = await fetch(sourceUrl, {
+        headers: { Accept: "image/*" },
+      });
+      if (!imgRes.ok) {
+        console.error(
+          `  schedule image fetch ${row.tweet_id}: HTTP ${imgRes.status}`
+        );
+        continue;
+      }
+      const contentType =
+        imgRes.headers.get("content-type")?.split(";")[0] || "image/jpeg";
+      const ext = contentType.includes("png")
+        ? "png"
+        : contentType.includes("webp")
+          ? "webp"
+          : contentType.includes("gif")
+            ? "gif"
+            : "jpg";
+      const bytes = Buffer.from(await imgRes.arrayBuffer());
+      const path = `live-schedule/${row.tweet_id}/${Date.now()}.${ext}`;
+
+      const { error: upErr } = await supabase.storage
+        .from(MEDIA_BUCKET)
+        .upload(path, bytes, {
+          contentType,
+          upsert: false,
+          cacheControl: "31536000",
+        });
+      if (upErr) {
+        console.error(
+          `  schedule image upload ${row.tweet_id}:`,
+          upErr.message
+        );
+        continue;
+      }
+
+      const { data: pub } = supabase.storage
+        .from(MEDIA_BUCKET)
+        .getPublicUrl(path);
+
+      const { error: updErr } = await supabase
+        .from("mild_r_x_posts")
+        .update({
+          schedule_image_url: pub.publicUrl,
+          schedule_image_source_url: sourceUrl,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("tweet_id", row.tweet_id);
+
+      if (updErr) {
+        console.error(
+          `  schedule image update ${row.tweet_id}:`,
+          updErr.message
+        );
+        continue;
+      }
+      cached += 1;
+      console.log(`  cached schedule image: ${row.tweet_id}`);
+    } catch (err) {
+      console.error(
+        `  schedule image ${row.tweet_id}:`,
+        err instanceof Error ? err.message : err
+      );
+    }
+  }
+  return cached;
+}
+
 async function main() {
   console.log(
     `X backfill → @${X_USER_ID ? `id:${X_USER_ID}` : X_USER_NAME} · target ${BACKFILL_TARGET} · max ${MAX_PAGES} pages`
@@ -219,6 +316,8 @@ async function main() {
   let pages = 0;
   let fetched = 0;
   let upserted = 0;
+  let scheduleFlagged = 0;
+  let scheduleCached = 0;
   const byType = { tweet: 0, quote: 0, retweet: 0 };
   let oldest: string | null = null;
 
@@ -235,6 +334,7 @@ async function main() {
       if (!mapped) continue;
       rows.push(mapped);
       byType[mapped.post_type] += 1;
+      if (mapped.is_live_schedule) scheduleFlagged += 1;
       if (mapped.posted_at) {
         if (!oldest || mapped.posted_at < oldest) oldest = mapped.posted_at;
       }
@@ -246,6 +346,7 @@ async function main() {
       });
       if (error) throw error;
       upserted += rows.length;
+      scheduleCached += await cacheLiveScheduleImages(rows);
     }
 
     if (!page.has_next_page || !page.next_cursor) break;
@@ -270,6 +371,8 @@ async function main() {
         fetched,
         upserted,
         byType,
+        scheduleFlagged,
+        scheduleCached,
         oldest_posted_at: oldest,
         table_count: count ?? null,
       },

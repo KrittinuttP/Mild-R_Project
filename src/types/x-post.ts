@@ -23,6 +23,19 @@ export type XPost = {
   is_quote: boolean;
   quoted_tweet: XQuotedTweet | null;
   original_url: string | null;
+  is_live_schedule?: boolean;
+  /** Cached poster in Supabase Storage (preferred). */
+  schedule_image_url?: string | null;
+  schedule_image_source_url?: string | null;
   created_at?: string;
   updated_at?: string;
+};
+
+/** Latest Live Schedule poster for /live. */
+export type XLiveSchedulePoster = {
+  tweet_id: string;
+  image_url: string;
+  posted_at: string | null;
+  original_url: string | null;
+  text: string | null;
 };

@@ -10,6 +10,96 @@ const SUPABASE_SERVICE_ROLE_KEY =
 const API_BASE = "https://api.twitterapi.io/twitter/user/last_tweets";
 const MAX_PAGES = 3;
 const BACKFILL_TARGET = 60;
+const MEDIA_BUCKET = "x-media";
+/** Live Schedule — case-insensitive, optional spaces; ASCII + stylized Unicode */
+const LIVE_SCHEDULE_RE = /live\s*schedule/i;
+
+/** Latin letter small capitals / phonetic forms used in aesthetic X fonts. */
+const STYLIZED_LATIN: Record<string, string> = {
+  ʟ: "l",
+  ɪ: "i",
+  ᴠ: "v",
+  ᴇ: "e",
+  ꜱ: "s",
+  ᴄ: "c",
+  ʜ: "h",
+  ᴅ: "d",
+  ᴜ: "u",
+  ᴀ: "a",
+  ʙ: "b",
+  ꜰ: "f",
+  ɢ: "g",
+  ᴊ: "j",
+  ᴋ: "k",
+  ᴍ: "m",
+  ɴ: "n",
+  ᴏ: "o",
+  ᴘ: "p",
+  ǫ: "q",
+  ʀ: "r",
+  ᴛ: "t",
+  ᴡ: "w",
+  ʏ: "y",
+  ᴢ: "z",
+  ı: "i",
+  ɩ: "i",
+  ʋ: "v",
+};
+
+function mathAlnumToAscii(cp: number): string | null {
+  const ranges: Array<{ start: number; base: number; count: number }> = [
+    { start: 0x1d400, base: 65, count: 26 },
+    { start: 0x1d41a, base: 97, count: 26 },
+    { start: 0x1d434, base: 65, count: 26 },
+    { start: 0x1d44e, base: 97, count: 26 },
+    { start: 0x1d468, base: 65, count: 26 },
+    { start: 0x1d482, base: 97, count: 26 },
+    { start: 0x1d49c, base: 65, count: 26 },
+    { start: 0x1d4b6, base: 97, count: 26 },
+    { start: 0x1d4d0, base: 65, count: 26 },
+    { start: 0x1d4ea, base: 97, count: 26 },
+    { start: 0x1d504, base: 65, count: 26 },
+    { start: 0x1d51e, base: 97, count: 26 },
+    { start: 0x1d538, base: 65, count: 26 },
+    { start: 0x1d552, base: 97, count: 26 },
+    { start: 0x1d56c, base: 65, count: 26 },
+    { start: 0x1d586, base: 97, count: 26 },
+    { start: 0x1d5a0, base: 65, count: 26 },
+    { start: 0x1d5ba, base: 97, count: 26 },
+    { start: 0x1d5d4, base: 65, count: 26 },
+    { start: 0x1d5ee, base: 97, count: 26 },
+    { start: 0x1d608, base: 65, count: 26 },
+    { start: 0x1d622, base: 97, count: 26 },
+    { start: 0x1d63c, base: 65, count: 26 },
+    { start: 0x1d656, base: 97, count: 26 },
+    { start: 0x1d670, base: 65, count: 26 },
+    { start: 0x1d68a, base: 97, count: 26 },
+  ];
+  for (const r of ranges) {
+    if (cp >= r.start && cp < r.start + r.count) {
+      return String.fromCharCode(r.base + (cp - r.start));
+    }
+  }
+  return null;
+}
+
+function foldStylizedLatin(input: string): string {
+  let out = "";
+  for (const ch of input) {
+    const mapped = STYLIZED_LATIN[ch];
+    if (mapped) {
+      out += mapped;
+      continue;
+    }
+    const cp = ch.codePointAt(0)!;
+    if (cp >= 0x1d400 && cp <= 0x1d7ff) {
+      out += mathAlnumToAscii(cp) ?? ch;
+      continue;
+    }
+    out += ch;
+  }
+  return out.normalize("NFKD").replace(/\p{M}/gu, "");
+}
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -36,6 +126,7 @@ type XPostRow = {
   is_quote: boolean;
   quoted_tweet: QuotedTweetUi | null;
   original_url: string | null;
+  is_live_schedule: boolean;
   raw: Record<string, unknown> | null;
   updated_at: string;
 };
@@ -76,6 +167,24 @@ type LastTweetsResponse = {
     next_cursor?: string;
   };
 };
+
+function isLiveScheduleText(text: string | null | undefined): boolean {
+  if (!text) return false;
+  return LIVE_SCHEDULE_RE.test(foldStylizedLatin(text));
+}
+
+function isLikelyImageUrl(url: string): boolean {
+  const u = url.toLowerCase();
+  return (
+    u.includes("pbs.twimg.com") ||
+    u.includes("twimg.com") ||
+    /\.(jpe?g|png|webp|gif)(\?|$)/i.test(u)
+  );
+}
+
+function firstImageUrl(urls: string[] | null | undefined): string | null {
+  return (urls ?? []).find((u) => u && isLikelyImageUrl(u)) ?? null;
+}
 
 function extractMediaUrls(tweet: ApiTweet | null | undefined): string[] {
   if (!tweet) return [];
@@ -144,6 +253,7 @@ function mapTweet(tweet: ApiTweet): XPostRow | null {
   const post_type = classify(tweet);
   const is_quote = post_type === "quote";
   const username = tweet.author?.userName ?? null;
+  const text = tweet.text ?? null;
   const original_url =
     tweet.url?.trim() ||
     (username ? `https://x.com/${username}/status/${id}` : null);
@@ -154,7 +264,7 @@ function mapTweet(tweet: ApiTweet): XPostRow | null {
     author_name: tweet.author?.name ?? null,
     author_username: username,
     author_avatar: tweet.author?.profilePicture ?? null,
-    text: tweet.text ?? null,
+    text,
     media_urls: extractMediaUrls(tweet),
     posted_at: parsePostedAt(tweet.createdAt),
     likes_count:
@@ -162,7 +272,6 @@ function mapTweet(tweet: ApiTweet): XPostRow | null {
     retweets_count:
       typeof tweet.retweetCount === "number" ? tweet.retweetCount : null,
     is_quote,
-    // Nested card: quote target OR retweeted original (UI reads by post_type)
     quoted_tweet:
       post_type === "quote"
         ? mapQuoted(tweet.quoted_tweet)
@@ -170,6 +279,7 @@ function mapTweet(tweet: ApiTweet): XPostRow | null {
           ? mapQuoted(tweet.retweeted_tweet)
           : null,
     original_url,
+    is_live_schedule: isLiveScheduleText(text),
     raw: tweet as Record<string, unknown>,
     updated_at: new Date().toISOString(),
   };
@@ -238,6 +348,89 @@ async function upsertPosts(rows: XPostRow[]) {
   if (error) throw error;
 }
 
+/** Download Live Schedule poster into Storage when needed. */
+async function cacheLiveScheduleImages(rows: XPostRow[]) {
+  let cached = 0;
+  for (const row of rows) {
+    if (!row.is_live_schedule) continue;
+    const sourceUrl = firstImageUrl(row.media_urls);
+    if (!sourceUrl) continue;
+
+    const { data: existing } = await supabase
+      .from("mild_r_x_posts")
+      .select("schedule_image_url, schedule_image_source_url")
+      .eq("tweet_id", row.tweet_id)
+      .maybeSingle();
+
+    if (
+      existing?.schedule_image_url &&
+      existing.schedule_image_source_url === sourceUrl
+    ) {
+      continue;
+    }
+
+    try {
+      const imgRes = await fetch(sourceUrl, {
+        headers: { Accept: "image/*" },
+      });
+      if (!imgRes.ok) {
+        console.error(
+          `schedule image fetch ${row.tweet_id}: HTTP ${imgRes.status}`
+        );
+        continue;
+      }
+      const contentType =
+        imgRes.headers.get("content-type")?.split(";")[0] || "image/jpeg";
+      const ext = contentType.includes("png")
+        ? "png"
+        : contentType.includes("webp")
+          ? "webp"
+          : contentType.includes("gif")
+            ? "gif"
+            : "jpg";
+      const bytes = new Uint8Array(await imgRes.arrayBuffer());
+      const path = `live-schedule/${row.tweet_id}/${Date.now()}.${ext}`;
+
+      const { error: upErr } = await supabase.storage
+        .from(MEDIA_BUCKET)
+        .upload(path, bytes, {
+          contentType,
+          upsert: false,
+          cacheControl: "31536000",
+        });
+      if (upErr) {
+        console.error(`schedule image upload ${row.tweet_id}:`, upErr.message);
+        continue;
+      }
+
+      const { data: pub } = supabase.storage
+        .from(MEDIA_BUCKET)
+        .getPublicUrl(path);
+
+      const { error: updErr } = await supabase
+        .from("mild_r_x_posts")
+        .update({
+          schedule_image_url: pub.publicUrl,
+          schedule_image_source_url: sourceUrl,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("tweet_id", row.tweet_id);
+
+      if (updErr) {
+        console.error(`schedule image update ${row.tweet_id}:`, updErr.message);
+        continue;
+      }
+      cached += 1;
+    } catch (err) {
+      console.error(
+        `schedule image ${row.tweet_id}:`,
+        err instanceof Error ? err.message : err
+      );
+    }
+  }
+  return cached;
+}
+
 async function writeSyncLog(entry: {
   source: string;
   status: "success" | "error" | "skipped";
@@ -262,6 +455,8 @@ async function runBackfill() {
   let pages = 0;
   let fetched = 0;
   let upserted = 0;
+  let scheduleCached = 0;
+  let scheduleFlagged = 0;
   const byType = { tweet: 0, quote: 0, retweet: 0 };
 
   while (pages < MAX_PAGES && upserted < BACKFILL_TARGET) {
@@ -276,14 +471,15 @@ async function runBackfill() {
       if (!mapped) continue;
       rows.push(mapped);
       byType[mapped.post_type] += 1;
+      if (mapped.is_live_schedule) scheduleFlagged += 1;
     }
 
     await upsertPosts(rows);
     upserted += rows.length;
+    scheduleCached += await cacheLiveScheduleImages(rows);
 
     if (!page.has_next_page || !page.next_cursor) break;
     cursor = page.next_cursor;
-    // Free tier: max 1 request / 5s
     await new Promise((r) => setTimeout(r, 5500));
   }
 
@@ -293,6 +489,8 @@ async function runBackfill() {
     fetched,
     upserted,
     byType,
+    scheduleFlagged,
+    scheduleCached,
     target: BACKFILL_TARGET,
     maxPages: MAX_PAGES,
   };
@@ -304,6 +502,8 @@ async function runIncremental() {
   let fetched = 0;
   let upserted = 0;
   let newCount = 0;
+  let scheduleCached = 0;
+  let scheduleFlagged = 0;
   const byType = { tweet: 0, quote: 0, retweet: 0 };
   let stoppedReason: "overlap" | "max_pages" | "end" = "end";
 
@@ -321,9 +521,13 @@ async function runIncremental() {
     const pageNew = rows.filter((r) => !existing.has(r.tweet_id)).length;
     newCount += pageNew;
 
-    for (const r of rows) byType[r.post_type] += 1;
+    for (const r of rows) {
+      byType[r.post_type] += 1;
+      if (r.is_live_schedule) scheduleFlagged += 1;
+    }
     await upsertPosts(rows);
     upserted += rows.length;
+    scheduleCached += await cacheLiveScheduleImages(rows);
 
     if (pageNew === 0) {
       stoppedReason = "overlap";
@@ -338,7 +542,6 @@ async function runIncremental() {
       break;
     }
     cursor = page.next_cursor;
-    // Free tier: max 1 request / 5s
     await new Promise((r) => setTimeout(r, 5500));
   }
 
@@ -353,6 +556,8 @@ async function runIncremental() {
     upserted,
     newCount,
     byType,
+    scheduleFlagged,
+    scheduleCached,
     stoppedReason,
     maxPages: MAX_PAGES,
   };
@@ -385,7 +590,7 @@ Deno.serve(async (req) => {
       await writeSyncLog({
         source: "edge-x-backfill",
         status: "success",
-        message: `Backfill upserted ${result.upserted} posts (${result.pages} pages)`,
+        message: `Backfill upserted ${result.upserted} posts (${result.pages} pages, schedule ${result.scheduleFlagged}/${result.scheduleCached})`,
         saved_count: result.upserted,
         meta: result,
       });
@@ -399,7 +604,7 @@ Deno.serve(async (req) => {
       await writeSyncLog({
         source: "edge-x-incremental",
         status: result.upserted === 0 ? "skipped" : "success",
-        message: `Incremental upserted ${result.upserted} (new ${result.newCount}, stop=${result.stoppedReason})`,
+        message: `Incremental upserted ${result.upserted} (new ${result.newCount}, schedule ${result.scheduleFlagged}/${result.scheduleCached}, stop=${result.stoppedReason})`,
         saved_count: result.upserted,
         meta: result,
       });

@@ -10,7 +10,7 @@ UI contract แยกอยู่ที่ [`feed-x.md`](./feed-x.md)
 | UI | Next.js (Vercel) | `loadXPosts()` → `public.mild_r_x_posts` (filter ใน loader) |
 | Table | `mild_r.x_posts` | source of truth |
 | Jobs | Edge Function `x-feed-sync` | fetch twitterapi.io + upsert |
-| Cron | `pg_cron` + `pg_net` | incremental ทุก 3 วัน |
+| Cron | `pg_cron` + `pg_net` | incremental อังคาร / ศุกร์ / อาทิตย์ |
 | Seed | `action=backfill` ครั้งเดียว | เติมคลังเริ่มต้น ~60 โพสต์ |
 
 ```
@@ -33,7 +33,7 @@ twitterapi.io  →  Edge Function  →  mild_r.x_posts
 | Replies | `includeReplies=false` |
 | Page size | ≤20 ต่อหน้า (API ไม่มี `limit`) |
 | **Seed / backfill** | **60 โพสต์ = `max_pages=3`** · รันครั้งเดียวตอนตั้งต้น |
-| **Cron** | ทุก **3 วัน** |
+| **Cron** | **อังคาร / ศุกร์ / อาทิตย์** 00:00 BKK |
 | **Incremental** | ไล่หน้าจากล่าสุด **จนชน `tweet_id` ที่มีใน DB** · เพดาน **`max_pages=3`** |
 | Persist | เก็บครบ `tweet` / `quote` / `retweet` |
 | Write | `upsert` ตาม `tweet_id` (ของใหม่ insert · ของเก่าอัปสถิติได้) |
@@ -59,7 +59,7 @@ twitterapi.io  →  Edge Function  →  mild_r.x_posts
 3. map ทุกแถว → classify → upsert ทั้งก้อน
 4. **ไม่** ให้ cron เรียกโหมดนี้
 
-### B) `incremental` — cron ทุก 3 วัน
+### B) `incremental` — cron อังคาร / ศุกร์ / อาทิตย์
 
 1. ดึงหน้า 1 → upsert ทั้งหน้า
 2. ถ้ายังมี `tweet_id` ใหม่ → ดึงหน้าถัดไป
@@ -189,7 +189,8 @@ npx supabase secrets set TWITTERAPI_IO_KEY=... X_USER_NAME=MildRWorldEnd --proje
 ตั้งจริง: `npm run cron:x` → `scripts/setup-x-feed-cron.ts`
 
 - Job: `run-x-feed-incremental` · `{"action":"incremental"}`
-- ตารางเวลา: **`0 17 */3 * *` UTC = 00:00 Asia/Bangkok ทุก 3 วันตามปฏิทิน**
+- ตารางเวลา: **`0 17 * * 1,4,6` UTC = 00:00 Asia/Bangkok อังคาร / ศุกร์ / อาทิตย์**  
+  (จันทร์/พฤหัส/เสาร์ 17:00 UTC เพราะ BKK = UTC+7)
 - อย่า schedule `backfill`
 
 ---
@@ -212,7 +213,7 @@ npx supabase secrets set TWITTERAPI_IO_KEY=... X_USER_NAME=MildRWorldEnd --proje
 - [x] รัน migration บน Supabase + backfill ~60 (ครั้งแรก)
 - [x] Supabase secrets (`TWITTERAPI_IO_KEY`, `X_USER_NAME`)
 - [x] `npx supabase functions deploy x-feed-sync`
-- [x] เปิด cron (`npm run cron:x` · 00:00 BKK ทุก 3 วัน)
+- [x] เปิด cron (`npm run cron:x` · 00:00 BKK อังคาร / ศุกร์ / อาทิตย์)
 - [x] UI ฟีดแท็บโพส(6)/รี(5) · compact + lightbox ใน Connect (`XFeed` + `loadXFeedTabs`)
 
 หมายเหตุ free tier: twitterapi.io จำกัด **1 request / 5 วินาที** — สคริปต์และ Edge ใส่ delay ระหว่างหน้าแล้ว
@@ -222,6 +223,6 @@ npx supabase secrets set TWITTERAPI_IO_KEY=... X_USER_NAME=MildRWorldEnd --proje
 ## Out of scope (เฟสแรก)
 
 - โชว์ retweet ใน UI
-- Sync ถี่กว่าทุก 3 วัน / realtime stream
+- Sync ถี่กว่าสัปดาห์ละ 3 ครั้ง / realtime stream
 - ให้ Next.js หรือ browser เรียก twitterapi.io โดยตรง
 - Backfill ทั้งประวัติโดยไม่มีเพดานหน้า
