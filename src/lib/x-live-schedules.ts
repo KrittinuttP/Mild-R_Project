@@ -119,46 +119,46 @@ export async function loadXLiveSchedulesInRange(
       return [];
     }
 
-    return ((data ?? []) as Array<Record<string, unknown>>)
-      .map((row) => {
-        const tweetId = typeof row.tweet_id === "string" ? row.tweet_id : "";
-        const imageUrl =
-          typeof row.image_url === "string" ? row.image_url.trim() : "";
-        if (!tweetId || !imageUrl) return null;
-        const status = row.status as XLiveScheduleStatus;
-        if (
-          status !== "pending" &&
-          status !== "imported" &&
-          status !== "skipped" &&
-          status !== "failed"
-        ) {
-          return null;
-        }
-        const weekStart =
-          typeof row.schedule_week_start === "string"
-            ? row.schedule_week_start
-            : null;
-        return {
-          tweet_id: tweetId,
-          image_url: imageUrl,
-          image_source_url:
-            typeof row.image_source_url === "string"
-              ? row.image_source_url
-              : null,
-          posted_at: typeof row.posted_at === "string" ? row.posted_at : null,
-          schedule_week_start: weekStart,
-          status,
-          agent_processed_at:
-            typeof row.agent_processed_at === "string"
-              ? row.agent_processed_at
-              : null,
-          error_message:
-            typeof row.error_message === "string" ? row.error_message : null,
-          parsed_json: row.parsed_json ?? null,
-          original_url: `https://x.com/i/status/${tweetId}`,
-        } satisfies XLiveScheduleHistoryRow;
-      })
-      .filter((r): r is XLiveScheduleHistoryRow => r != null);
+    const out: XLiveScheduleHistoryRow[] = [];
+    for (const row of (data ?? []) as Array<Record<string, unknown>>) {
+      const tweetId = typeof row.tweet_id === "string" ? row.tweet_id : "";
+      const imageUrl =
+        typeof row.image_url === "string" ? row.image_url.trim() : "";
+      if (!tweetId || !imageUrl) continue;
+      const status = row.status;
+      if (
+        status !== "pending" &&
+        status !== "imported" &&
+        status !== "skipped" &&
+        status !== "failed"
+      ) {
+        continue;
+      }
+      const weekStart =
+        typeof row.schedule_week_start === "string"
+          ? row.schedule_week_start
+          : null;
+      out.push({
+        tweet_id: tweetId,
+        image_url: imageUrl,
+        image_source_url:
+          typeof row.image_source_url === "string"
+            ? row.image_source_url
+            : null,
+        posted_at: typeof row.posted_at === "string" ? row.posted_at : null,
+        schedule_week_start: weekStart,
+        status,
+        agent_processed_at:
+          typeof row.agent_processed_at === "string"
+            ? row.agent_processed_at
+            : null,
+        error_message:
+          typeof row.error_message === "string" ? row.error_message : null,
+        parsed_json: (row.parsed_json ?? null) as unknown,
+        original_url: `https://x.com/i/status/${tweetId}`,
+      });
+    }
+    return out;
   } catch (err) {
     console.error("[x_live_schedules] load range:", err);
     return [];
