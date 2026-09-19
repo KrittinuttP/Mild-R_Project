@@ -40,7 +40,6 @@ import {
 import {
   addDays,
   calendarYearOptions,
-  findDefaultWeekIndex,
   flattenLiveSlots,
   formatISODate,
 
@@ -56,6 +55,7 @@ import {
 
 
   thisWeekRangeYmd,
+  surroundingWeeksRangeYmd,
   weekDayDates,
 } from "@/lib/events";
 import { sortLiveSlotsForCalendar } from "@/lib/live-stream-utils";
@@ -348,13 +348,17 @@ export function LiveScheduleBoard() {
   const weekScrollAnchor = useRef<{ top: number; date: string } | null>(null);
 
   const thisWeekRange = useMemo(() => thisWeekRangeYmd(today), [today]);
+  const spotlightRange = useMemo(
+    () => surroundingWeeksRangeYmd(today),
+    [today]
+  );
   // Fetch only: selected month ± 7 days (not tied to grid shape)
   const monthRange = useMemo(
     () => monthRangeWithPadYmd(requestedYear, requestedMonth, 7),
     [requestedYear, requestedMonth]
   );
 
-  const thisWeekQuery = useLiveSchedule(thisWeekRange);
+  const spotlightQuery = useLiveSchedule(spotlightRange);
   const monthQuery = useLiveSchedule(monthRange, { keepPreviousData: true });
 
   const xScheduleRange = useMemo(() => {
@@ -384,8 +388,8 @@ export function LiveScheduleBoard() {
   }, [monthReady, selectedDate, monthQuery.weeks]);
 
   const weeks = useMemo(
-    () => mergeLiveWeekLists(thisWeekQuery.weeks, monthQuery.weeks),
-    [thisWeekQuery.weeks, monthQuery.weeks]
+    () => mergeLiveWeekLists(spotlightQuery.weeks, monthQuery.weeks),
+    [spotlightQuery.weeks, monthQuery.weeks]
   );
   const allSlots = useMemo(() => flattenLiveSlots(weeks), [weeks]);
   // Place fetched slots onto calendar cells by matching date
@@ -396,20 +400,28 @@ export function LiveScheduleBoard() {
     [today]
   );
 
-  const thisWeekIndex = findDefaultWeekIndex(thisWeekQuery.weeks, today);
-  const thisWeek = sortLiveWeeks(thisWeekQuery.weeks)[thisWeekIndex];
-  const thisWeekOnly = thisWeek ? [thisWeek] : [];
+  const spotlightWeeks = useMemo(() => {
+    const sorted = sortLiveWeeks(spotlightQuery.weeks);
+    if (sorted.length > 0) return sorted;
+    return [
+      {
+        id: `empty-${thisWeekRange.from}`,
+        weekStart: thisWeekRange.from,
+        slots: [],
+      },
+    ];
+  }, [spotlightQuery.weeks, thisWeekRange.from]);
 
   const initialLoading =
     !monthQuery.hasLoaded &&
-    (thisWeekQuery.status === "loading" || monthQuery.status === "loading") &&
+    (spotlightQuery.status === "loading" || monthQuery.status === "loading") &&
     weeks.length === 0 &&
-    thisWeekQuery.status !== "error" &&
+    spotlightQuery.status !== "error" &&
     monthQuery.status !== "error";
 
   const fatalError =
     weeks.length === 0 &&
-    thisWeekQuery.status === "error" &&
+    spotlightQuery.status === "error" &&
     monthQuery.status === "error";
 
   const calendarLoading = !monthReady || monthQuery.status === "loading";
@@ -552,8 +564,9 @@ export function LiveScheduleBoard() {
   }, [today]);
 
   const retryAll = () => {
-    thisWeekQuery.retry();
+    spotlightQuery.retry();
     monthQuery.retry();
+    xSchedulesQuery.retry();
   };
 
   if (initialLoading) {
@@ -563,7 +576,7 @@ export function LiveScheduleBoard() {
   if (fatalError) {
     return (
       <LiveScheduleError
-        message={thisWeekQuery.error ?? monthQuery.error}
+        message={spotlightQuery.error ?? monthQuery.error}
         onRetry={retryAll}
       />
     );
@@ -582,17 +595,15 @@ export function LiveScheduleBoard() {
         </div>
 
         <div className="relative mt-8 sm:mt-10">
-          {thisWeekQuery.status === "loading" && thisWeekOnly.length === 0 ? (
+          {spotlightQuery.status === "loading" &&
+          spotlightQuery.weeks.length === 0 ? (
             <LiveScheduleSkeleton variant="compact" />
           ) : (
             <LiveWeekTable
-              weeks={thisWeekOnly.length > 0 ? thisWeekOnly : [{
-                id: `empty-${thisWeekRange.from}`,
-                weekStart: thisWeekRange.from,
-                slots: [],
-              }]}
+              weeks={spotlightWeeks}
               blankEmptyDays
               slotLookup={allSlots}
+              weekRange={spotlightRange}
             />
           )}
         </div>

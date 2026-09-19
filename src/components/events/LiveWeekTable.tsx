@@ -1137,18 +1137,49 @@ export function LiveWeekTable({
     );
   }, [sorted, weekRange]);
 
-  const [index, setIndex] = useState(() => findDefaultWeekIndex(visibleWeeks));
+  const todayIsoForNav =
+    bangkokDateFromIso(new Date().toISOString()) ?? formatISODate(new Date());
+
+  /** Weeks user can flip through: current week always, others only if they have lives. */
+  const navigableWeeks = useMemo(() => {
+    const filtered = visibleWeeks.filter((week) => {
+      const days = weekDayDates(week.weekStart);
+      if (days.includes(todayIsoForNav)) return true;
+      return week.slots.length > 0;
+    });
+    if (filtered.length > 0) return filtered;
+
+    // Ensure at least one week shell so empty state still renders
+    if (visibleWeeks.length > 0) return [visibleWeeks[0]];
+    return sorted.slice(0, 1);
+  }, [visibleWeeks, sorted, todayIsoForNav]);
+
+  const [index, setIndex] = useState(() =>
+    findDefaultWeekIndex(navigableWeeks)
+  );
   const { detailRef, openDetail } = useLiveDetail();
 
   useEffect(() => {
-    setIndex(findDefaultWeekIndex(visibleWeeks));
-  }, [visibleWeeks]);
+    setIndex(findDefaultWeekIndex(navigableWeeks));
+  }, [navigableWeeks]);
+
+  const todayIso =
+    bangkokDateFromIso(new Date().toISOString()) ?? formatISODate(new Date());
+
+  /** Week containing today — spotlight banner stays pinned here while grid navigates. */
+  const currentWeek = useMemo(() => {
+    const hit = navigableWeeks.find((w) =>
+      weekDayDates(w.weekStart).includes(todayIso)
+    );
+    return hit ?? navigableWeeks[findDefaultWeekIndex(navigableWeeks)] ?? null;
+  }, [navigableWeeks, todayIso]);
 
   const safeIndex = Math.min(
     Math.max(index, 0),
-    Math.max(visibleWeeks.length - 1, 0)
+    Math.max(navigableWeeks.length - 1, 0)
   );
-  const week = visibleWeeks[safeIndex];
+  /** Week shown in the 7-day grid (changes with arrows). */
+  const week = navigableWeeks[safeIndex];
   const dayIsos = week ? weekDayDates(week.weekStart) : [];
 
   const slotsByDate = useMemo(() => {
@@ -1178,24 +1209,28 @@ export function LiveWeekTable({
     return map;
   }, [week]);
 
-  const todayIso =
-    bangkokDateFromIso(new Date().toISOString()) ?? formatISODate(new Date());
-  const weekIncludesToday = Boolean(week && dayIsos.includes(todayIso));
+  const currentOfflineByDate = useMemo(() => {
+    const map = new Map<string, LiveOfflineDay>();
+    for (const day of currentWeek?.offlineDays ?? []) {
+      map.set(day.date, day);
+    }
+    return map;
+  }, [currentWeek]);
 
   const highlightSlot = useMemo(
     () =>
-      week && weekIncludesToday
-        ? findTodayHighlightSlot(week, todayIso)
+      currentWeek
+        ? findTodayHighlightSlot(currentWeek, todayIso)
         : null,
-    [week, weekIncludesToday, todayIso]
+    [currentWeek, todayIso]
   );
 
   const nextHighlightSlot = useMemo(
     () =>
-      week && weekIncludesToday && !highlightSlot
-        ? findNextHighlightSlot(week, todayIso, allSlots)
+      currentWeek && !highlightSlot
+        ? findNextHighlightSlot(currentWeek, todayIso, allSlots)
         : null,
-    [week, weekIncludesToday, highlightSlot, todayIso, allSlots]
+    [currentWeek, highlightSlot, todayIso, allSlots]
   );
 
   if (!week) {
@@ -1204,8 +1239,18 @@ export function LiveWeekTable({
 
   const weekHasLiveData = week.slots.length > 0;
   const showNoLiveData = blankEmptyDays && !weekHasLiveData;
+  const viewingCurrentWeek = Boolean(
+    currentWeek && week.weekStart === currentWeek.weekStart
+  );
+  const currentWeekHasLiveData = (currentWeek?.slots.length ?? 0) > 0;
 
-  const rangeLabel = formatLiveDateRange(dayIsos[0] ?? week.weekStart, dayIsos[6] ?? week.weekStart);
+  const rangeLabel = formatLiveDateRange(
+    dayIsos[0] ?? week.weekStart,
+    dayIsos[6] ?? week.weekStart
+  );
+  const weekNavLabel = viewingCurrentWeek
+    ? (week.label ?? "สัปดาห์นี้")
+    : (week.label ?? "สัปดาห์อื่น");
 
   const renderDayBody = (iso: string, isMobile?: boolean) => {
     const daySlots = preferOwnChannelSlots(slotsByDate.get(iso) ?? []);
@@ -1271,17 +1316,39 @@ export function LiveWeekTable({
 
   return (
     <div className={cn("space-y-5", className)}>
+      {/* Spotlight stays on this calendar week (today) while grid navigates. */}
+      {currentWeek?.banner ? (
+        <LiveWeekBannerCard banner={currentWeek.banner} />
+      ) : highlightSlot ? (
+        <LiveSpotlightBanner
+          slot={highlightSlot}
+          nowMs={nowMs}
+          onOpenDetail={() => openDetail(highlightSlot)}
+        />
+      ) : currentWeek ? (
+        <LiveTodayOfflineBanner
+          todayIso={todayIso}
+          offline={
+            currentWeekHasLiveData || currentOfflineByDate.has(todayIso)
+          }
+          nextSlot={nextHighlightSlot}
+          onOpenNext={
+            nextHighlightSlot
+              ? () => openDetail(nextHighlightSlot)
+              : undefined
+          }
+        />
+      ) : null}
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className={META_MUTED_CLASS}>
-            {week.label ?? "สัปดาห์นี้"}
-          </p>
+          <p className={META_MUTED_CLASS}>{weekNavLabel}</p>
           <p className="mt-1 font-[family-name:var(--font-display)] text-lg font-normal text-[#fff5f7] sm:text-xl">
             {rangeLabel}
           </p>
         </div>
 
-        {visibleWeeks.length > 1 ? (
+        {navigableWeeks.length > 1 ? (
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -1297,15 +1364,15 @@ export function LiveWeekTable({
               <ChevronLeft className="size-4" />
             </button>
             <span className="min-w-[4.5rem] text-center text-xs tabular-nums text-[#f3b8c4]/70 sm:text-sm">
-              {safeIndex + 1} / {visibleWeeks.length}
+              {safeIndex + 1} / {navigableWeeks.length}
             </span>
             <button
               type="button"
               aria-label="สัปดาห์ถัดไป"
-              disabled={safeIndex >= visibleWeeks.length - 1}
+              disabled={safeIndex >= navigableWeeks.length - 1}
               onClick={() =>
                 setIndex((value) =>
-                  Math.min(visibleWeeks.length - 1, value + 1)
+                  Math.min(navigableWeeks.length - 1, value + 1)
                 )
               }
               className={cn(
@@ -1319,28 +1386,6 @@ export function LiveWeekTable({
           </div>
         ) : null}
       </div>
-
-      {/* 🌟 Top Spotlight Banner: Custom weekly banner or today's live highlight */}
-      {week.banner ? (
-        <LiveWeekBannerCard banner={week.banner} />
-      ) : highlightSlot ? (
-        <LiveSpotlightBanner
-          slot={highlightSlot}
-          nowMs={nowMs}
-          onOpenDetail={() => openDetail(highlightSlot)}
-        />
-      ) : weekIncludesToday ? (
-        <LiveTodayOfflineBanner
-          todayIso={todayIso}
-          offline={weekHasLiveData || offlineByDate.has(todayIso)}
-          nextSlot={nextHighlightSlot}
-          onOpenNext={
-            nextHighlightSlot
-              ? () => openDetail(nextHighlightSlot)
-              : undefined
-          }
-        />
-      ) : null}
 
       <div
         className={cn(

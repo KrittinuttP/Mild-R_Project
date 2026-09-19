@@ -241,6 +241,18 @@ export function thisAndNextWeekRangeYmd(today = new Date()): {
   };
 }
 
+/** Previous + this + next week (21 days), Sunday-start — for week spotlight nav. */
+export function surroundingWeeksRangeYmd(today = new Date()): {
+  from: string;
+  to: string;
+} {
+  const sunday = startOfWeekSunday(today);
+  return {
+    from: formatISODate(addDays(sunday, -7)),
+    to: formatISODate(addDays(sunday, 13)),
+  };
+}
+
 /**
  * Data-fetch window for a selected calendar month (independent of grid UI).
  * Inclusive Bangkok YMD: first of month − padDays … last of month + padDays.

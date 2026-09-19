@@ -18,7 +18,7 @@ import {
   eventStatusLabel,
   formatThaiDate,
   recentEvents,
-  thisAndNextWeekRangeYmd,
+  surroundingWeeksRangeYmd,
 } from "@/lib/events";
 import {
   BADGE_ACCENT_CLASS,
@@ -117,20 +117,22 @@ function EventCard({
 export function EventsTeaser({ data }: EventsTeaserProps) {
   const board = data.events;
   const events = recentEvents(board, 3);
-  const teaserRange = useMemo(() => thisAndNextWeekRangeYmd(), []);
+  const teaserRange = useMemo(() => surroundingWeeksRangeYmd(), []);
   const { weeks: teaserWeeks, status, error, retry } =
     useLiveSchedule(teaserRange);
   const [activeId, setActiveId] = useState<string | null>(null);
   const active = events.find((event) => event.id === activeId) ?? null;
 
-  const displayWeeks = useMemo(
-    () => teaserWeeks.length > 0 ? teaserWeeks : [{
-      id: `empty-${teaserRange.from}`,
-      weekStart: teaserRange.from,
-      slots: [],
-    }],
-    [teaserWeeks, teaserRange.from]
-  );
+  const displayWeeks = useMemo(() => {
+    if (teaserWeeks.length > 0) return teaserWeeks;
+    return [
+      {
+        id: `empty-${teaserRange.from}`,
+        weekStart: teaserRange.from,
+        slots: [],
+      },
+    ];
+  }, [teaserWeeks, teaserRange.from]);
 
   return (
     <>
