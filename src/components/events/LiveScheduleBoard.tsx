@@ -21,7 +21,10 @@ import {
   LiveScheduleError,
   LiveScheduleSkeleton,
 } from "@/components/events/LiveScheduleSkeleton";
+import { XLiveSchedulePoster, XLiveSchedulePosterEmpty } from "@/components/events/XLiveSchedulePoster";
 import { useLiveSchedule } from "@/hooks/useLiveSchedule";
+import { useXLiveSchedules } from "@/hooks/useXLiveSchedules";
+import { matchScheduleForWeek } from "@/lib/x-live-schedules";
 import {
   BADGE_SOFT_CLASS,
   CTA_OUTLINE_CLASS,
@@ -35,6 +38,7 @@ import {
   LIVE_BADGE_SOFT,
 } from "@/lib/site-ui";
 import {
+  addDays,
   calendarYearOptions,
   findDefaultWeekIndex,
   flattenLiveSlots,
@@ -352,6 +356,12 @@ export function LiveScheduleBoard() {
 
   const thisWeekQuery = useLiveSchedule(thisWeekRange);
   const monthQuery = useLiveSchedule(monthRange, { keepPreviousData: true });
+
+  const xScheduleRange = useMemo(() => {
+    const from = formatISODate(addDays(parseISODate(monthRange.from), -14));
+    return { from, to: monthRange.to };
+  }, [monthRange]);
+  const xSchedulesQuery = useXLiveSchedules(xScheduleRange);
   const monthReady = monthQuery.resolvedKey === `${monthRange.from}:${monthRange.to}`;
   const view = monthReady
     ? { year: requestedYear, month: requestedMonth, selectedDate: requestedDate }
@@ -452,6 +462,11 @@ export function LiveScheduleBoard() {
     }
     return n;
   }, [selectedWeekDays, byDate]);
+
+  const selectedWeekPoster = useMemo(() => {
+    if (selectedWeekDays.length !== 7) return null;
+    return matchScheduleForWeek(xSchedulesQuery.rows, selectedWeekDays[0]);
+  }, [selectedWeekDays, xSchedulesQuery.rows]);
 
   const weeksWithLiveData = useMemo(() => {
     const weekStarts = new Set<string>();
@@ -1029,6 +1044,21 @@ export function LiveScheduleBoard() {
                   );
                 })}
               </div>
+
+              {selectedWeekPoster ? (
+                <XLiveSchedulePoster
+                  poster={selectedWeekPoster}
+                  status={selectedWeekPoster.status}
+                  errorMessage={selectedWeekPoster.error_message}
+                  embedded
+                />
+              ) : xSchedulesQuery.status === "loading" ? (
+                <div className="border-t border-[#f3b8c4]/10 px-4 py-5 sm:px-5">
+                  <p className="text-sm text-[#f3b8c4]/45">กำลังโหลด Live Schedule…</p>
+                </div>
+              ) : (
+                <XLiveSchedulePosterEmpty hint="ยังไม่มี Live Schedule จาก X สำหรับสัปดาห์นี้" />
+              )}
             </>
           ) : (
             <p className="px-4 py-8 text-sm text-[#f3b8c4]/55 sm:px-5">

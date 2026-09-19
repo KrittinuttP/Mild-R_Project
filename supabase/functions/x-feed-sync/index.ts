@@ -449,6 +449,34 @@ async function cacheLiveScheduleImages(rows: XPostRow[]) {
   return { cached, schedules };
 }
 
+/** Bangkok post date → week Sunday; Saturday bumps +1 day first. */
+function scheduleWeekStartFromPostedAt(
+  postedAt: string | null | undefined
+): string | null {
+  if (!postedAt) return null;
+  const ms = new Date(postedAt).getTime();
+  if (!Number.isFinite(ms)) return null;
+  const ymd = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Bangkok",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(ms));
+  const [y, m, d] = ymd.split("-").map(Number);
+  let anchor = new Date(Date.UTC(y, m - 1, d));
+  if (anchor.getUTCDay() === 6) {
+    anchor = new Date(Date.UTC(y, m - 1, d + 1));
+  }
+  const dow = anchor.getUTCDay();
+  anchor = new Date(
+    Date.UTC(anchor.getUTCFullYear(), anchor.getUTCMonth(), anchor.getUTCDate() - dow)
+  );
+  const yy = anchor.getUTCFullYear();
+  const mm = String(anchor.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(anchor.getUTCDate()).padStart(2, "0");
+  return `${yy}-${mm}-${dd}`;
+}
+
 async function ensureXLiveScheduleRow(input: {
   tweet_id: string;
   image_url: string;
@@ -462,6 +490,7 @@ async function ensureXLiveScheduleRow(input: {
   const now = new Date().toISOString();
   const sourceUrl = input.image_source_url?.trim() || null;
   const postedAt = input.posted_at ?? null;
+  const scheduleWeekStart = scheduleWeekStartFromPostedAt(postedAt);
 
   const { data: existing, error: selErr } = await supabase
     .from("mild_r_x_live_schedules")
@@ -480,6 +509,7 @@ async function ensureXLiveScheduleRow(input: {
       image_url: imageUrl,
       image_source_url: sourceUrl,
       posted_at: postedAt,
+      schedule_week_start: scheduleWeekStart,
       added_at: now,
       status: "pending",
       created_at: now,
@@ -498,6 +528,7 @@ async function ensureXLiveScheduleRow(input: {
       image_url: imageUrl,
       image_source_url: sourceUrl ?? existing.image_source_url,
       posted_at: postedAt,
+      schedule_week_start: scheduleWeekStart,
       updated_at: now,
     })
     .eq("tweet_id", tweetId);

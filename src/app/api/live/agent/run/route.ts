@@ -5,6 +5,11 @@ import {
   processLiveScheduleRow,
 } from "@/lib/live-schedule-agent";
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  LIVE_SCHEDULE_AGENT_SOURCE,
+  summarizeLiveAgentRun,
+  writeSyncLog,
+} from "@/lib/sync-logs";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -34,6 +39,13 @@ export async function POST(request: Request) {
   }
 
   if (!process.env.GEMINI_API_KEY?.trim()) {
+    await writeSyncLog({
+      source: LIVE_SCHEDULE_AGENT_SOURCE,
+      status: "error",
+      message: "GEMINI_API_KEY is not configured on this server",
+      saved_count: 0,
+      meta: { via: "api" },
+    });
     return NextResponse.json(
       { error: "GEMINI_API_KEY is not configured on this server" },
       { status: 500 }
@@ -59,30 +71,36 @@ export async function POST(request: Request) {
 
   const apiBase = new URL(request.url).origin;
   const supabase = createAdminClient();
-  const rows = await loadPendingLiveSchedules(supabase, { limit, tweetId });
 
-  if (rows.length === 0) {
-    return NextResponse.json({
-      ok: true,
-      dryRun,
-      processed: 0,
-      message: "No pending rows",
-      results: [],
-    });
-  }
+  try {
+    const rows = await loadPendingLiveSchedules(supabase, { limit, tweetId });
 
-  const results = [];
-  for (const row of rows) {
-    results.push(
-      await processLiveScheduleRow(supabase, row, { dryRun, apiBase })
-    );
-  }
+    if (rows.length === 0) {
+      await writeSyncLog(
+        summarizeLiveAgentRun({
+          dryRun,
+          via: "api",
+          processed: 0,
+          results: [],
+        })
+      );
+      return NextResponse.json({
+        ok: true,
+        dryRun,
+        processed: 0,
+        message: "No pending rows",
+        results: [],
+      });
+    }
 
-  return NextResponse.json({
-    ok: true,
-    dryRun,
-    processed: results.length,
-    results: results.map((r) => ({
+    const results = [];
+    for (const row of rows) {
+      results.push(
+        await processLiveScheduleRow(supabase, row, { dryRun, apiBase })
+      );
+    }
+
+    const summaryResults = results.map((r) => ({
       tweet_id: r.tweet_id,
       status: r.status,
       items: r.items.length,
@@ -90,6 +108,32 @@ export async function POST(request: Request) {
       skippedDates: r.skippedDates ?? [],
       imported: r.imported,
       error: r.error,
-    })),
-  });
+    }));
+
+    await writeSyncLog(
+      summarizeLiveAgentRun({
+        dryRun,
+        via: "api",
+        processed: results.length,
+        results: summaryResults,
+      })
+    );
+
+    return NextResponse.json({
+      ok: true,
+      dryRun,
+      processed: results.length,
+      results: summaryResults,
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    await writeSyncLog({
+      source: LIVE_SCHEDULE_AGENT_SOURCE,
+      status: "error",
+      message: message.slice(0, 500),
+      saved_count: 0,
+      meta: { via: "api", dryRun },
+    });
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

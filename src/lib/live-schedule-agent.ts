@@ -244,8 +244,15 @@ async function generateWithGeminiApiKey(options: {
       "Set GEMINI_API_KEY from Google AI Studio (https://aistudio.google.com/apikey)"
     );
   }
-  const model =
+  const modelRaw =
     process.env.GEMINI_MODEL?.trim() || "gemini-flash-lite-latest";
+  // Env sometimes includes "models/" — URL already prefixes models/
+  const model = modelRaw.replace(/^models\//i, "").trim();
+  if (!model || /[/\s]/.test(model)) {
+    throw new Error(
+      `Invalid GEMINI_MODEL "${modelRaw}". Use e.g. gemini-flash-lite-latest`
+    );
+  }
   const url =
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 

@@ -1,5 +1,5 @@
 /**
- * Process pending X Live Schedule posters with Gemini/Vertex → /api/live/manual
+ * Process pending X Live Schedule posters with Gemini → /api/live/manual
  *
  * Usage:
  *   npx tsx --env-file=.env.local scripts/run-live-schedule-agent.ts
@@ -21,6 +21,10 @@ import {
   loadPendingLiveSchedules,
   processLiveScheduleRow,
 } from "../src/lib/live-schedule-agent";
+import {
+  summarizeLiveAgentRun,
+  writeSyncLog,
+} from "../src/lib/sync-logs";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
@@ -53,6 +57,14 @@ async function main() {
   });
 
   if (rows.length === 0) {
+    await writeSyncLog(
+      summarizeLiveAgentRun({
+        dryRun,
+        via: "cli",
+        processed: 0,
+        results: [],
+      })
+    );
     console.log(JSON.stringify({ ok: true, processed: 0, message: "No rows" }));
     return;
   }
@@ -80,22 +92,33 @@ async function main() {
     );
   }
 
+  const summaryResults = results.map((r) => ({
+    tweet_id: r.tweet_id,
+    status: r.status,
+    items: r.items.length,
+    toInsert: r.toInsert?.length ?? null,
+    skippedDates: r.skippedDates ?? [],
+    imported: r.imported,
+    error: r.error,
+    sample: (r.toInsert ?? r.items).slice(0, 2),
+  }));
+
+  await writeSyncLog(
+    summarizeLiveAgentRun({
+      dryRun,
+      via: "cli",
+      processed: results.length,
+      results: summaryResults,
+    })
+  );
+
   console.log(
     JSON.stringify(
       {
         ok: true,
         dryRun,
         processed: results.length,
-        results: results.map((r) => ({
-          tweet_id: r.tweet_id,
-          status: r.status,
-          items: r.items.length,
-          toInsert: r.toInsert?.length ?? null,
-          skippedDates: r.skippedDates ?? [],
-          imported: r.imported,
-          error: r.error,
-          sample: (r.toInsert ?? r.items).slice(0, 2),
-        })),
+        results: summaryResults,
       },
       null,
       2
@@ -103,7 +126,18 @@ async function main() {
   );
 }
 
-main().catch((err) => {
+main().catch(async (err) => {
   console.error(err);
+  try {
+    await writeSyncLog({
+      source: "agent-live-schedule",
+      status: "error",
+      message: (err instanceof Error ? err.message : String(err)).slice(0, 500),
+      saved_count: 0,
+      meta: { via: "cli" },
+    });
+  } catch {
+    /* ignore */
+  }
   process.exit(1);
 });

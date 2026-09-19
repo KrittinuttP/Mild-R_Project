@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { LiveSchedulePanel } from "@/components/events/LiveSchedulePanel";
-import { XLiveSchedulePoster } from "@/components/events/XLiveSchedulePoster";
 import { BackLink } from "@/components/layout/BackLink";
 import { BackToTop } from "@/components/layout/BackToTop";
 import { Footer } from "@/components/layout/Footer";
@@ -10,7 +9,6 @@ import { Header } from "@/components/layout/Header";
 import { MediaProtection } from "@/components/media/MediaProtection";
 import { mildRData } from "@/data/vtuber-data";
 import { META_CLASS, DISPLAY_H1_CLASS } from "@/lib/site-ui";
-import { loadLatestLiveSchedulePoster } from "@/lib/x-posts";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -21,9 +19,7 @@ export const metadata: Metadata = {
 /** Live data loads client-side via /api/live/schedule (always fresh). */
 export const dynamic = "force-dynamic";
 
-export default async function LivePage() {
-  const xSchedulePoster = await loadLatestLiveSchedulePoster();
-
+export default function LivePage() {
   return (
     <>
       <MediaProtection />
@@ -44,10 +40,6 @@ export default async function LivePage() {
             <div className="mt-12 sm:mt-16">
               <LiveSchedulePanel />
             </div>
-
-            {xSchedulePoster ? (
-              <XLiveSchedulePoster poster={xSchedulePoster} />
-            ) : null}
 
             <div className="mt-12 flex justify-end sm:mt-16">
               <Link

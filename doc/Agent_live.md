@@ -15,8 +15,8 @@
 | ข้ามวันที่มีในปฏิทินแล้ว | ✅ |
 | API cron `POST /api/live/agent/run` | ✅ |
 | pg_cron setup script | ✅ `npm run cron:live-agent` |
-| UI ย้อนหลัง | ⏳ ข้ามไว้ก่อน |
-| Production: ตั้ง env + รัน `cron:live-agent` | ⏳ |
+| Agent sync log (`mild_r_sync_logs` · `agent-live-schedule`) | ✅ |
+| Production: ตั้ง env + รัน `cron:live-agent` | ✅ ชี้ `https://mild-r-project.vercel.app` |
 
 ## รัน Agent (มือ)
 
@@ -72,6 +72,8 @@ Production env ที่ต้องมีบน Next host:
 
 Agent เลือกเฉพาะ `status=pending` เรียง `posted_at` ใหม่สุด — ของเก่าที่ปิดแล้วควรเป็น `skipped` / `imported` เพื่อไม่กินโควตา
 
+บน `/live` รูป Live Schedule ผูกกับสัปดาห์ผ่านคอลัมน์ `schedule_week_start` (วันโพสต์ Bangkok; **เสาร์ +1** แล้วหานาทีอาทิตย์ของสัปดาห์)
+
 ## ไฟล์หลัก
 
 | ไฟล์ | บทบาท |
@@ -86,4 +88,4 @@ Agent เลือกเฉพาะ `status=pending` เรียง `posted_at
 
 ## ตาราง `mild_r.x_live_schedules`
 
-`tweet_id`, `image_url`, `image_source_url`, `posted_at`, `added_at`, `agent_processed_at`, `status`, `parsed_json`, `error_message`, …
+`tweet_id`, `image_url`, `image_source_url`, `posted_at`, `schedule_week_start`, `added_at`, `agent_processed_at`, `status`, `parsed_json`, `error_message`, …

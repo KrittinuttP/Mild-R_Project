@@ -55,7 +55,7 @@ const TABS: { id: SyncLogSourceTab; label: string; hint: string }[] = [
   { id: "main", label: "Main", hint: "ช่อง Mild-R · ทุก 30 นาที" },
   { id: "search", label: "Search", hint: "Related / search · ทุก 6 ชม." },
   { id: "refresh", label: "Refresh", hint: "อัปยอดวิว/ไลก์ · ทุก 6 ชม." },
-  { id: "other", label: "อื่น ๆ", hint: "Backfill · manual · error" },
+  { id: "other", label: "อื่น ๆ", hint: "X sync · Live Agent · backfill · error" },
 ];
 
 function bangkokYmdToday(): string {
@@ -110,6 +110,12 @@ function sourceBadgeClass(source: string) {
   }
   if (source === "edge-refresh") {
     return "border-[#7dd3c0]/45 bg-[#7dd3c0]/12 text-[#b8ede0]";
+  }
+  if (source === "agent-live-schedule") {
+    return "border-[#c4a0e8]/45 bg-[#c4a0e8]/12 text-[#e4d4f5]";
+  }
+  if (source.startsWith("edge-x-")) {
+    return "border-[#6ec9b0]/40 bg-[#6ec9b0]/10 text-[#a8e6d4]";
   }
   return "border-[#d4a574]/40 bg-[#d4a574]/12 text-[#e8c49a]";
 }
