@@ -9,6 +9,7 @@ import {
   firstImageUrl,
   isLiveScheduleText,
 } from "../src/lib/x-live-schedule";
+import { ensureXLiveScheduleRow } from "../src/lib/x-live-schedules";
 
 const TWITTERAPI_IO_KEY = process.env.TWITTERAPI_IO_KEY?.trim();
 const X_USER_ID = process.env.X_USER_ID?.trim() || "";
@@ -220,6 +221,7 @@ async function fetchLastTweetsPage(cursor: string) {
 
 async function cacheLiveScheduleImages(rows: XPostRow[]) {
   let cached = 0;
+  let schedules = 0;
   for (const row of rows) {
     if (!row.is_live_schedule) continue;
     const sourceUrl = firstImageUrl(row.media_urls);
@@ -227,7 +229,7 @@ async function cacheLiveScheduleImages(rows: XPostRow[]) {
 
     const { data: existing } = await supabase
       .from("mild_r_x_posts")
-      .select("schedule_image_url, schedule_image_source_url")
+      .select("schedule_image_url, schedule_image_source_url, posted_at")
       .eq("tweet_id", row.tweet_id)
       .maybeSingle();
 
@@ -235,6 +237,14 @@ async function cacheLiveScheduleImages(rows: XPostRow[]) {
       existing?.schedule_image_url &&
       existing.schedule_image_source_url === sourceUrl
     ) {
+      const ensured = await ensureXLiveScheduleRow(supabase, {
+        tweet_id: row.tweet_id,
+        image_url: existing.schedule_image_url as string,
+        image_source_url: existing.schedule_image_source_url as string,
+        posted_at:
+          row.posted_at ?? ((existing.posted_at as string | null) ?? null),
+      });
+      if (ensured === "inserted" || ensured === "updated") schedules += 1;
       continue;
     }
 
@@ -297,6 +307,14 @@ async function cacheLiveScheduleImages(rows: XPostRow[]) {
       }
       cached += 1;
       console.log(`  cached schedule image: ${row.tweet_id}`);
+
+      const ensured = await ensureXLiveScheduleRow(supabase, {
+        tweet_id: row.tweet_id,
+        image_url: pub.publicUrl,
+        image_source_url: sourceUrl,
+        posted_at: row.posted_at,
+      });
+      if (ensured === "inserted" || ensured === "updated") schedules += 1;
     } catch (err) {
       console.error(
         `  schedule image ${row.tweet_id}:`,
@@ -304,7 +322,7 @@ async function cacheLiveScheduleImages(rows: XPostRow[]) {
       );
     }
   }
-  return cached;
+  return { cached, schedules };
 }
 
 async function main() {
@@ -318,6 +336,7 @@ async function main() {
   let upserted = 0;
   let scheduleFlagged = 0;
   let scheduleCached = 0;
+  let scheduleRows = 0;
   const byType = { tweet: 0, quote: 0, retweet: 0 };
   let oldest: string | null = null;
 
@@ -346,7 +365,9 @@ async function main() {
       });
       if (error) throw error;
       upserted += rows.length;
-      scheduleCached += await cacheLiveScheduleImages(rows);
+      const cacheResult = await cacheLiveScheduleImages(rows);
+      scheduleCached += cacheResult.cached;
+      scheduleRows += cacheResult.schedules;
     }
 
     if (!page.has_next_page || !page.next_cursor) break;
@@ -373,6 +394,7 @@ async function main() {
         byType,
         scheduleFlagged,
         scheduleCached,
+        scheduleRows,
         oldest_posted_at: oldest,
         table_count: count ?? null,
       },

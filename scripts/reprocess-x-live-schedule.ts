@@ -10,6 +10,7 @@ import {
   firstImageUrl,
   isLiveScheduleText,
 } from "../src/lib/x-live-schedule";
+import { ensureXLiveScheduleRow } from "../src/lib/x-live-schedules";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
@@ -28,17 +29,18 @@ type Row = {
   tweet_id: string;
   text: string | null;
   media_urls: string[] | null;
+  posted_at: string | null;
   is_live_schedule: boolean;
   schedule_image_url: string | null;
   schedule_image_source_url: string | null;
 };
 
-async function cacheImage(row: Row, sourceUrl: string): Promise<boolean> {
+async function cacheImage(row: Row, sourceUrl: string): Promise<string | null> {
   if (
     row.schedule_image_url &&
     row.schedule_image_source_url === sourceUrl
   ) {
-    return false;
+    return row.schedule_image_url;
   }
 
   const imgRes = await fetch(sourceUrl, {
@@ -81,16 +83,18 @@ async function cacheImage(row: Row, sourceUrl: string): Promise<boolean> {
     .eq("tweet_id", row.tweet_id);
 
   if (updErr) throw updErr;
-  return true;
+  row.schedule_image_url = pub.publicUrl;
+  row.schedule_image_source_url = sourceUrl;
+  return pub.publicUrl;
 }
 
 async function main() {
-  console.log("Reprocess X posts → Live Schedule flag + image cache");
+  console.log("Reprocess X posts → Live Schedule flag + image cache + schedules");
 
   const { data, error } = await supabase
     .from("mild_r_x_posts")
     .select(
-      "tweet_id, text, media_urls, is_live_schedule, schedule_image_url, schedule_image_source_url"
+      "tweet_id, text, media_urls, posted_at, is_live_schedule, schedule_image_url, schedule_image_source_url"
     )
     .order("posted_at", { ascending: false, nullsFirst: false });
 
@@ -101,6 +105,7 @@ async function main() {
   let unflagged = 0;
   let cached = 0;
   let skippedCache = 0;
+  let scheduleRows = 0;
   let errors = 0;
 
   for (const row of rows) {
@@ -135,12 +140,25 @@ async function main() {
     }
 
     try {
-      const did = await cacheImage(row, sourceUrl);
-      if (did) {
+      const beforeUrl = row.schedule_image_url;
+      const imageUrl = await cacheImage(row, sourceUrl);
+      if (imageUrl && imageUrl !== beforeUrl) {
         cached += 1;
         console.log(`  cached: ${row.tweet_id}`);
       } else {
         skippedCache += 1;
+      }
+
+      if (imageUrl) {
+        const ensured = await ensureXLiveScheduleRow(supabase, {
+          tweet_id: row.tweet_id,
+          image_url: imageUrl,
+          image_source_url: sourceUrl,
+          posted_at: row.posted_at,
+        });
+        if (ensured === "inserted" || ensured === "updated") {
+          scheduleRows += 1;
+        }
       }
     } catch (err) {
       errors += 1;
@@ -160,6 +178,7 @@ async function main() {
         unflagged,
         cached,
         skippedCache,
+        scheduleRows,
         errors,
       },
       null,

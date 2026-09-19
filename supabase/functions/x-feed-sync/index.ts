@@ -351,6 +351,7 @@ async function upsertPosts(rows: XPostRow[]) {
 /** Download Live Schedule poster into Storage when needed. */
 async function cacheLiveScheduleImages(rows: XPostRow[]) {
   let cached = 0;
+  let schedules = 0;
   for (const row of rows) {
     if (!row.is_live_schedule) continue;
     const sourceUrl = firstImageUrl(row.media_urls);
@@ -358,7 +359,7 @@ async function cacheLiveScheduleImages(rows: XPostRow[]) {
 
     const { data: existing } = await supabase
       .from("mild_r_x_posts")
-      .select("schedule_image_url, schedule_image_source_url")
+      .select("schedule_image_url, schedule_image_source_url, posted_at")
       .eq("tweet_id", row.tweet_id)
       .maybeSingle();
 
@@ -366,6 +367,15 @@ async function cacheLiveScheduleImages(rows: XPostRow[]) {
       existing?.schedule_image_url &&
       existing.schedule_image_source_url === sourceUrl
     ) {
+      const ensured = await ensureXLiveScheduleRow({
+        tweet_id: row.tweet_id,
+        image_url: existing.schedule_image_url as string,
+        image_source_url: existing.schedule_image_source_url as string,
+        posted_at:
+          row.posted_at ??
+          ((existing.posted_at as string | null) ?? null),
+      });
+      if (ensured === "inserted" || ensured === "updated") schedules += 1;
       continue;
     }
 
@@ -421,6 +431,14 @@ async function cacheLiveScheduleImages(rows: XPostRow[]) {
         continue;
       }
       cached += 1;
+
+      const ensured = await ensureXLiveScheduleRow({
+        tweet_id: row.tweet_id,
+        image_url: pub.publicUrl,
+        image_source_url: sourceUrl,
+        posted_at: row.posted_at,
+      });
+      if (ensured === "inserted" || ensured === "updated") schedules += 1;
     } catch (err) {
       console.error(
         `schedule image ${row.tweet_id}:`,
@@ -428,7 +446,67 @@ async function cacheLiveScheduleImages(rows: XPostRow[]) {
       );
     }
   }
-  return cached;
+  return { cached, schedules };
+}
+
+async function ensureXLiveScheduleRow(input: {
+  tweet_id: string;
+  image_url: string;
+  image_source_url?: string | null;
+  posted_at?: string | null;
+}): Promise<"inserted" | "updated" | "skipped" | "error"> {
+  const tweetId = input.tweet_id?.trim();
+  const imageUrl = input.image_url?.trim();
+  if (!tweetId || !imageUrl) return "skipped";
+
+  const now = new Date().toISOString();
+  const sourceUrl = input.image_source_url?.trim() || null;
+  const postedAt = input.posted_at ?? null;
+
+  const { data: existing, error: selErr } = await supabase
+    .from("mild_r_x_live_schedules")
+    .select("tweet_id, image_source_url")
+    .eq("tweet_id", tweetId)
+    .maybeSingle();
+
+  if (selErr) {
+    console.error("x_live_schedules select:", selErr.message);
+    return "error";
+  }
+
+  if (!existing) {
+    const { error: insErr } = await supabase.from("mild_r_x_live_schedules").insert({
+      tweet_id: tweetId,
+      image_url: imageUrl,
+      image_source_url: sourceUrl,
+      posted_at: postedAt,
+      added_at: now,
+      status: "pending",
+      created_at: now,
+      updated_at: now,
+    });
+    if (insErr) {
+      console.error("x_live_schedules insert:", insErr.message);
+      return "error";
+    }
+    return "inserted";
+  }
+
+  const { error: updErr } = await supabase
+    .from("mild_r_x_live_schedules")
+    .update({
+      image_url: imageUrl,
+      image_source_url: sourceUrl ?? existing.image_source_url,
+      posted_at: postedAt,
+      updated_at: now,
+    })
+    .eq("tweet_id", tweetId);
+
+  if (updErr) {
+    console.error("x_live_schedules update:", updErr.message);
+    return "error";
+  }
+  return "updated";
 }
 
 async function writeSyncLog(entry: {
@@ -456,6 +534,7 @@ async function runBackfill() {
   let fetched = 0;
   let upserted = 0;
   let scheduleCached = 0;
+  let scheduleRows = 0;
   let scheduleFlagged = 0;
   const byType = { tweet: 0, quote: 0, retweet: 0 };
 
@@ -476,7 +555,9 @@ async function runBackfill() {
 
     await upsertPosts(rows);
     upserted += rows.length;
-    scheduleCached += await cacheLiveScheduleImages(rows);
+    const cacheResult = await cacheLiveScheduleImages(rows);
+    scheduleCached += cacheResult.cached;
+    scheduleRows += cacheResult.schedules;
 
     if (!page.has_next_page || !page.next_cursor) break;
     cursor = page.next_cursor;
@@ -491,6 +572,7 @@ async function runBackfill() {
     byType,
     scheduleFlagged,
     scheduleCached,
+    scheduleRows,
     target: BACKFILL_TARGET,
     maxPages: MAX_PAGES,
   };
@@ -503,6 +585,7 @@ async function runIncremental() {
   let upserted = 0;
   let newCount = 0;
   let scheduleCached = 0;
+  let scheduleRows = 0;
   let scheduleFlagged = 0;
   const byType = { tweet: 0, quote: 0, retweet: 0 };
   let stoppedReason: "overlap" | "max_pages" | "end" = "end";
@@ -527,7 +610,9 @@ async function runIncremental() {
     }
     await upsertPosts(rows);
     upserted += rows.length;
-    scheduleCached += await cacheLiveScheduleImages(rows);
+    const cacheResult = await cacheLiveScheduleImages(rows);
+    scheduleCached += cacheResult.cached;
+    scheduleRows += cacheResult.schedules;
 
     if (pageNew === 0) {
       stoppedReason = "overlap";
@@ -558,6 +643,7 @@ async function runIncremental() {
     byType,
     scheduleFlagged,
     scheduleCached,
+    scheduleRows,
     stoppedReason,
     maxPages: MAX_PAGES,
   };
