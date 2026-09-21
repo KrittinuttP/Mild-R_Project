@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { notifyJobDiscord } from "@/lib/discord-job-alert";
 import type { SyncLogRow, SyncLogStatus } from "@/types/sync-log";
 
 /** Source label for Live Schedule Agent runs (ops → อื่น ๆ). */
@@ -42,6 +43,8 @@ export async function writeSyncLog(entry: WriteSyncLogInput): Promise<void> {
   } catch (err) {
     console.error("[sync_logs] write:", err);
   }
+
+  await notifyJobDiscord(entry);
 }
 
 export function summarizeLiveAgentRun(options: {

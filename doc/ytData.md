@@ -53,6 +53,7 @@ Implemented at: `supabase/functions/youtube-tracker/index.ts`
 - `YOUTUBE_API_KEY`
 - `SUPABASE_URL` (auto ในส่วนใหญ่)
 - `SUPABASE_SERVICE_ROLE_KEY` (auto ในส่วนใหญ่)
+- `DISCORD_WEBHOOK_URL` — job alert หลัง sync log
 
 **Vercel / `.env.local` (frontend อ่านอย่างเดียว)**
 

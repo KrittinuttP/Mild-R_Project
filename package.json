@@ -35,6 +35,7 @@
     "reprocess:x-live-schedule": "npx tsx --env-file=.env scripts/reprocess-x-live-schedule.ts",
     "cron:x": "npx tsx --env-file=.env scripts/setup-x-feed-cron.ts",
     "cron:live-agent": "npx tsx --env-file=.env.local scripts/setup-live-agent-cron.ts",
+    "test:discord": "npx tsx --env-file=.env scripts/test-discord-webhook.ts",
     "backfill:pixela": "npx tsx --env-file=.env.local scripts/backfill-pixela-mild-r.ts",
     "backfill:pixela:from-mild": "npx tsx --env-file=.env.local scripts/backfill-pixela-mild-r.ts --from-mild",
     "backfill:lumina": "npx tsx --env-file=.env.local scripts/backfill-lumina-mild-r.ts",

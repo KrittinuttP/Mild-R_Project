@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { notifyJobDiscord } from "../_shared/discord-job-alert.ts";
 
 const TWITTERAPI_IO_KEY = Deno.env.get("TWITTERAPI_IO_KEY") || "";
 const X_USER_ID = Deno.env.get("X_USER_ID") || "";
@@ -557,6 +558,7 @@ async function writeSyncLog(entry: {
   if (error) {
     console.error("sync log error:", error.message);
   }
+  await notifyJobDiscord(entry);
 }
 
 async function runBackfill() {

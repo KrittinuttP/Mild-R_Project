@@ -128,6 +128,7 @@ create index if not exists x_posts_post_type_idx
 - `TWITTERAPI_IO_KEY`
 - `X_USER_NAME=MildRWorldEnd` (หรือ `X_USER_ID=...`)
 - `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` (มักมีใน runtime)
+- `DISCORD_WEBHOOK_URL` — alert ทุกครั้งที่ `writeSyncLog` (success / skipped / error)
 
 **Vercel / `.env.local` (frontend อ่าน DB อย่างเดียว)**
 

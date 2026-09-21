@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+import { notifyJobDiscord } from "../_shared/discord-job-alert.ts";
 import {
   LUMINA_RELATED_CHANNEL_IDS,
   MAIN_CHANNEL_ID,
@@ -649,6 +650,7 @@ async function writeSyncLog(entry: {
   if (error) {
     console.error("❌ Sync log Error:", error.message);
   }
+  await notifyJobDiscord(entry);
 }
 
 Deno.serve(async (req) => {
