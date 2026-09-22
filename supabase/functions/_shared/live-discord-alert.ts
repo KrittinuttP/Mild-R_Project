@@ -17,7 +17,32 @@ export type LiveDiscordAlertInput = {
   scheduledStart?: string | null;
   previousStart?: string | null;
   channelName?: string | null;
+  /** Prefer cached Storage URL, then YouTube CDN, then hqdefault from videoId. */
+  thumbnailUrl?: string | null;
+  videoId?: string | null;
 };
+
+/** Public cover URL Discord can fetch (https). */
+export function resolveLiveCoverUrl(entry: {
+  thumbnailUrl?: string | null;
+  videoId?: string | null;
+  videoUrl?: string | null;
+}): string | null {
+  const direct = entry.thumbnailUrl?.trim();
+  if (direct && /^https?:\/\//i.test(direct)) return direct;
+
+  const fromField = entry.videoId?.trim();
+  const fromUrl = entry.videoUrl
+    ? entry.videoUrl.match(
+        /(?:youtu\.be\/|v=|\/live\/|\/shorts\/)([A-Za-z0-9_-]{6,})/
+      )?.[1]
+    : undefined;
+  const id = fromField || fromUrl;
+  if (id && !id.startsWith("manual-")) {
+    return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+  }
+  return null;
+}
 
 /** Discord embed colors (decimal) */
 const COLORS: Record<LiveDiscordAlertKind, number> = {
@@ -92,16 +117,21 @@ export function buildLiveDiscordPayload(entry: LiveDiscordAlertInput) {
 
   lines.push(entry.videoUrl);
 
+  const coverUrl = resolveLiveCoverUrl(entry);
+  const embed: Record<string, unknown> = {
+    title: TITLES[entry.kind],
+    description: lines.join("\n"),
+    color: COLORS[entry.kind],
+    timestamp: new Date().toISOString(),
+  };
+  if (coverUrl) {
+    // Full-width cover under the text (YouTube 16:9)
+    embed.image = { url: coverUrl };
+  }
+
   return {
     username: "Mild-R Live",
-    embeds: [
-      {
-        title: TITLES[entry.kind],
-        description: lines.join("\n"),
-        color: COLORS[entry.kind],
-        timestamp: new Date().toISOString(),
-      },
-    ],
+    embeds: [embed],
   };
 }
 

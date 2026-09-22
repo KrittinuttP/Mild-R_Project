@@ -155,6 +155,8 @@ async function saveToDatabase(streams: StreamRow[]) {
     scheduledStart: string | null;
     previousStart?: string | null;
     channelName: string | null;
+    thumbnailUrl: string | null;
+    videoId: string;
   };
   const pendingAlerts: PendingLiveAlert[] = [];
 
@@ -195,6 +197,8 @@ async function saveToDatabase(streams: StreamRow[]) {
           videoUrl: row.url,
           scheduledStart: nextScheduled,
           channelName: row.channel_name,
+          thumbnailUrl: row.thumbnail_url,
+          videoId: row.video_id,
         });
         notified_scheduled = true;
       } else {
@@ -216,6 +220,8 @@ async function saveToDatabase(streams: StreamRow[]) {
             scheduledStart: nextScheduled,
             previousStart: existing.scheduled_start,
             channelName: row.channel_name,
+            thumbnailUrl: row.thumbnail_url,
+            videoId: row.video_id,
           });
           // Allow a fresh 30-minute reminder against the new time
           notified_30min = false;
@@ -763,6 +769,8 @@ type MonitorRow = {
   scheduled_start: string | null;
   actual_start: string | null;
   actual_end: string | null;
+  thumbnail_url: string | null;
+  thumbnail_cached_url: string | null;
   notified_30min: boolean;
   notified_live: boolean;
   metadata: Record<string, unknown> | null;
@@ -834,7 +842,7 @@ async function monitorLiveNotifications() {
   const { data: rows, error } = await supabase
     .from("mild_r_live_streams")
     .select(
-      "video_id, title, url, channel_name, scheduled_start, actual_start, actual_end, notified_30min, notified_live, metadata"
+      "video_id, title, url, channel_name, scheduled_start, actual_start, actual_end, thumbnail_url, thumbnail_cached_url, notified_30min, notified_live, metadata"
     )
     .eq("notified_live", false)
     .is("actual_end", null)
@@ -868,6 +876,8 @@ async function monitorLiveNotifications() {
         videoUrl,
         scheduledStart: row.scheduled_start,
         channelName: row.channel_name,
+        thumbnailUrl: row.thumbnail_cached_url || row.thumbnail_url,
+        videoId: row.video_id,
       });
       const { error: updErr } = await supabase
         .from("mild_r_live_streams")
@@ -894,6 +904,8 @@ async function monitorLiveNotifications() {
       videoUrl,
       scheduledStart: row.scheduled_start,
       channelName: row.channel_name,
+      thumbnailUrl: row.thumbnail_cached_url || row.thumbnail_url,
+      videoId: row.video_id,
     });
     const { error: updErr } = await supabase
       .from("mild_r_live_streams")
@@ -939,6 +951,8 @@ async function monitorLiveNotifications() {
         videoUrl,
         scheduledStart: st.scheduledStart || row.scheduled_start,
         channelName: row.channel_name,
+        thumbnailUrl: row.thumbnail_cached_url || row.thumbnail_url,
+        videoId: videoId,
       });
 
       const patch: Record<string, unknown> = {
