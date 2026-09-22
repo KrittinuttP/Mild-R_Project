@@ -1,9 +1,10 @@
-import { Radio, RadioTower } from "lucide-react";
+import { Ban, Radio, RadioTower } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 export const LIVE_COVER_PLACEHOLDER_LABEL = "Mild-R Live";
 export const LIVE_COVER_OFFLINE_LABEL = "ออฟไลน์";
+export const LIVE_COVER_CANCELLED_LABEL = "ยกเลิก";
 
 const SIZE_CLASS = {
   sm: {
@@ -29,8 +30,8 @@ const SIZE_CLASS = {
 type LiveCoverPlaceholderProps = {
   className?: string;
   size?: keyof typeof SIZE_CLASS;
-  /** default = no cover · offline = green offline state */
-  variant?: "default" | "offline";
+  /** default = no cover · offline = green · cancelled = muted gray */
+  variant?: "default" | "offline" | "cancelled";
 };
 
 export function LiveCoverPlaceholder({
@@ -40,6 +41,7 @@ export function LiveCoverPlaceholder({
 }: LiveCoverPlaceholderProps) {
   const s = SIZE_CLASS[size];
   const offline = variant === "offline";
+  const cancelled = variant === "cancelled";
 
   return (
     <div
@@ -47,7 +49,9 @@ export function LiveCoverPlaceholder({
         "flex h-full w-full flex-col items-center justify-center bg-gradient-to-br",
         offline
           ? "from-[#0f1f1a] via-[#0c1612] to-[#08100d]"
-          : "from-[#260f1c] via-[#1a0c13] to-[#12070c]",
+          : cancelled
+            ? "from-[#1a1618] via-[#141012] to-[#0e0c0d]"
+            : "from-[#260f1c] via-[#1a0c13] to-[#12070c]",
         s.root,
         className
       )}
@@ -58,12 +62,16 @@ export function LiveCoverPlaceholder({
           "flex items-center justify-center rounded-full",
           offline
             ? "bg-[#6ec9b0]/10 text-[#a8e6d4]"
-            : "bg-[#f3b8c4]/10 text-[#f3b8c4]/70",
+            : cancelled
+              ? "bg-[#8a7f88]/15 text-[#b5aeb4]"
+              : "bg-[#f3b8c4]/10 text-[#f3b8c4]/70",
           s.iconWrap
         )}
       >
         {offline ? (
           <RadioTower className={s.icon} />
+        ) : cancelled ? (
+          <Ban className={s.icon} />
         ) : (
           <Radio className={s.icon} />
         )}
@@ -71,11 +79,19 @@ export function LiveCoverPlaceholder({
       <span
         className={cn(
           "max-w-full truncate px-1 font-medium tracking-wider uppercase",
-          offline ? "text-[#6ec9b0]/70" : "text-[#f3b8c4]/50",
+          offline
+            ? "text-[#6ec9b0]/70"
+            : cancelled
+              ? "text-[#8a7f88]/85"
+              : "text-[#f3b8c4]/50",
           s.label
         )}
       >
-        {offline ? LIVE_COVER_OFFLINE_LABEL : LIVE_COVER_PLACEHOLDER_LABEL}
+        {offline
+          ? LIVE_COVER_OFFLINE_LABEL
+          : cancelled
+            ? LIVE_COVER_CANCELLED_LABEL
+            : LIVE_COVER_PLACEHOLDER_LABEL}
       </span>
     </div>
   );

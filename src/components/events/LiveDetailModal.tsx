@@ -293,7 +293,11 @@ export function LiveDetailModal({
                       )}
                     />
                   ) : (
-                    <LiveCoverPlaceholder className="absolute inset-0" size="lg" />
+                    <LiveCoverPlaceholder
+                      className="absolute inset-0"
+                      size="lg"
+                      variant={cancelled ? "cancelled" : "default"}
+                    />
                   )}
 
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140a0d]/80 via-transparent to-transparent" />

@@ -1,6 +1,6 @@
 /**
- * Schedule YouTube tracker cron jobs using env from .env.local
- *   npx tsx --env-file=.env.local scripts/setup-youtube-cron.ts
+ * Schedule YouTube tracker cron jobs using env from .env / .env.local
+ *   npx tsx --env-file=.env scripts/setup-youtube-cron.ts
  */
 import pg from "pg";
 
@@ -40,6 +40,13 @@ end $$;
 do $$
 begin
   perform cron.unschedule('run-youtube-step3-refresh');
+exception when others then
+  null;
+end $$;
+
+do $$
+begin
+  perform cron.unschedule('run-youtube-live-monitor');
 exception when others then
   null;
 end $$;
@@ -88,6 +95,22 @@ select cron.schedule(
       'Authorization', ${pgClientLiteral(authHeader)}
     ),
     body := '{"action":"refresh"}'::jsonb
+  ) as request_id;
+  $cron$
+);
+
+-- Live Discord alerts every 5 minutes
+select cron.schedule(
+  'run-youtube-live-monitor',
+  '*/5 * * * *',
+  $cron$
+  select net.http_post(
+    url := ${pgClientLiteral(fnUrl)},
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'Authorization', ${pgClientLiteral(authHeader)}
+    ),
+    body := '{"action":"monitor"}'::jsonb
   ) as request_id;
   $cron$
 );

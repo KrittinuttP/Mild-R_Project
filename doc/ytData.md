@@ -54,6 +54,7 @@ Implemented at: `supabase/functions/youtube-tracker/index.ts`
 - `SUPABASE_URL` (auto ในส่วนใหญ่)
 - `SUPABASE_SERVICE_ROLE_KEY` (auto ในส่วนใหญ่)
 - `DISCORD_WEBHOOK_URL` — job alert หลัง sync log
+- `LIVE_DISCORD_WEBHOOK_URL` — fan live alerts (`action: monitor`, ทุก 5 นาที)
 
 **Vercel / `.env.local` (frontend อ่านอย่างเดียว)**
 

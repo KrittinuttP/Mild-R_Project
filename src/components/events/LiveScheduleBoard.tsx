@@ -109,7 +109,11 @@ function WeekSlotCard({
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140a0d]/80 via-transparent to-transparent" />
             </>
           ) : (
-            <LiveCoverPlaceholder className="absolute inset-0" size="sm" />
+            <LiveCoverPlaceholder
+              className="absolute inset-0"
+              size="sm"
+              variant={cancelled ? "cancelled" : "default"}
+            />
           )}
 
           {hasBadges ? (

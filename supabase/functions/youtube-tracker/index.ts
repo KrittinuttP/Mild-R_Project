@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 import { notifyJobDiscord } from "../_shared/discord-job-alert.ts";
+import { notifyLiveDiscord } from "../_shared/live-discord-alert.ts";
 import {
   LUMINA_RELATED_CHANNEL_IDS,
   MAIN_CHANNEL_ID,
@@ -17,6 +18,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 const SEARCH_KEYWORD = "@MildRWorldEnd";
 const REFRESH_LOOKBACK_DAYS = 30;
+/** Ignore tiny YouTube schedule jitter / half-hour snap noise */
+const RESCHEDULE_MIN_DELTA_MS = 2 * 60 * 1000;
 const COLLAB_TITLE_RE =
   /\bft\.?\b|\bfeat\.?\b|featuring|collab|コラボ|คอลาบ|ร่วมกับ/i;
 const MILD_MENTION_RE = /@?MildRWorldEnd|Mild-?R\b|MildR\b/i;
@@ -56,30 +59,67 @@ type StreamRow = {
   is_own_channel: boolean;
   is_collab: boolean;
   metadata: Record<string, unknown>;
+  notified_scheduled?: boolean;
+  notified_30min?: boolean;
+  notified_live?: boolean;
 };
+
+type ExistingStream = {
+  views_on_end: number | null;
+  likes_on_end: number | null;
+  latest_likes: number | null;
+  scheduled_start: string | null;
+  scheduled_start_first: string | null;
+  actual_start: string | null;
+  notified_scheduled: boolean;
+  notified_30min: boolean;
+  notified_live: boolean;
+  metadata: Record<string, unknown> | null;
+};
+
+function isCancelledMeta(meta: Record<string, unknown> | null | undefined): boolean {
+  if (!meta) return false;
+  if (meta.cancelled === true) return true;
+  if (String(meta.status ?? "").toLowerCase() === "cancelled") return true;
+  return false;
+}
+
+/** Upcoming waiting-room style schedule (not started / not clearly past). */
+function isFanAlertSchedule(
+  scheduledStart: string | null | undefined,
+  actualStart: string | null | undefined,
+  actualEnd: string | null | undefined
+): boolean {
+  if (!scheduledStart || actualStart || actualEnd) return false;
+  const t = new Date(scheduledStart).getTime();
+  if (!Number.isFinite(t)) return false;
+  // Allow slight lateness so late discovery still announces
+  return t >= Date.now() - 15 * 60 * 1000;
+}
+
+function scheduleDeltaMs(
+  a: string | null | undefined,
+  b: string | null | undefined
+): number | null {
+  if (!a || !b) return null;
+  const ta = new Date(a).getTime();
+  const tb = new Date(b).getTime();
+  if (!Number.isFinite(ta) || !Number.isFinite(tb)) return null;
+  return Math.abs(ta - tb);
+}
 
 async function saveToDatabase(streams: StreamRow[]) {
   if (streams.length === 0) return;
 
   const videoIds = streams.map((s) => s.video_id);
-  const existingById = new Map<
-    string,
-    {
-      views_on_end: number | null;
-      likes_on_end: number | null;
-      latest_likes: number | null;
-      scheduled_start: string | null;
-      scheduled_start_first: string | null;
-      actual_start: string | null;
-    }
-  >();
+  const existingById = new Map<string, ExistingStream>();
 
   for (let i = 0; i < videoIds.length; i += 200) {
     const chunk = videoIds.slice(i, i + 200);
     const { data, error: lookupError } = await supabase
       .from("mild_r_live_streams")
       .select(
-        "video_id, views_on_end, likes_on_end, latest_likes, scheduled_start, scheduled_start_first, actual_start, metadata"
+        "video_id, views_on_end, likes_on_end, latest_likes, scheduled_start, scheduled_start_first, actual_start, notified_scheduled, notified_30min, notified_live, metadata"
       )
       .in("video_id", chunk);
 
@@ -97,6 +137,9 @@ async function saveToDatabase(streams: StreamRow[]) {
         scheduled_start_first:
           (row.scheduled_start_first as string | null) ?? null,
         actual_start: (row.actual_start as string | null) ?? null,
+        notified_scheduled: Boolean(row.notified_scheduled),
+        notified_30min: Boolean(row.notified_30min),
+        notified_live: Boolean(row.notified_live),
         metadata:
           row.metadata && typeof row.metadata === "object"
             ? (row.metadata as Record<string, unknown>)
@@ -105,6 +148,16 @@ async function saveToDatabase(streams: StreamRow[]) {
     }
   }
 
+  type PendingLiveAlert = {
+    kind: "scheduled_new" | "rescheduled";
+    title: string;
+    videoUrl: string;
+    scheduledStart: string | null;
+    previousStart?: string | null;
+    channelName: string | null;
+  };
+  const pendingAlerts: PendingLiveAlert[] = [];
+
   // - views_on_end / likes_on_end / scheduled_start_first: first-seen lock
   // - scheduled_start: refresh while not started; freeze once actual_start exists
   // - metadata: preserve custom flags like member, preview, etc.
@@ -112,6 +165,64 @@ async function saveToDatabase(streams: StreamRow[]) {
     const existing = existingById.get(row.video_id);
     const started =
       existing?.actual_start != null || row.actual_start != null;
+
+    const nextScheduled = started
+      ? (existing?.scheduled_start ?? row.scheduled_start)
+      : row.scheduled_start;
+
+    let notified_scheduled = existing?.notified_scheduled ?? false;
+    let notified_30min = existing?.notified_30min ?? false;
+    const notified_live = existing?.notified_live ?? false;
+
+    const isReal = !row.video_id.startsWith("manual-");
+    const cancelled = isCancelledMeta({
+      ...(existing?.metadata ?? {}),
+      ...(row.metadata ?? {}),
+    });
+
+    if (
+      isReal &&
+      !cancelled &&
+      !started &&
+      !row.actual_end &&
+      isFanAlertSchedule(nextScheduled, row.actual_start, row.actual_end)
+    ) {
+      if (!existing) {
+        // First insert → waiting room / new schedule
+        pendingAlerts.push({
+          kind: "scheduled_new",
+          title: row.title,
+          videoUrl: row.url,
+          scheduledStart: nextScheduled,
+          channelName: row.channel_name,
+        });
+        notified_scheduled = true;
+      } else {
+        const delta = scheduleDeltaMs(
+          existing.scheduled_start,
+          nextScheduled
+        );
+        if (
+          delta != null &&
+          delta >= RESCHEDULE_MIN_DELTA_MS &&
+          existing.scheduled_start &&
+          nextScheduled &&
+          !notified_live
+        ) {
+          pendingAlerts.push({
+            kind: "rescheduled",
+            title: row.title,
+            videoUrl: row.url,
+            scheduledStart: nextScheduled,
+            previousStart: existing.scheduled_start,
+            channelName: row.channel_name,
+          });
+          // Allow a fresh 30-minute reminder against the new time
+          notified_30min = false;
+          notified_scheduled = true;
+        }
+      }
+    }
 
     return {
       ...row,
@@ -125,9 +236,10 @@ async function saveToDatabase(streams: StreamRow[]) {
         existing?.scheduled_start_first ??
         row.scheduled_start ??
         row.scheduled_start_first,
-      scheduled_start: started
-        ? (existing?.scheduled_start ?? row.scheduled_start)
-        : row.scheduled_start,
+      scheduled_start: nextScheduled,
+      notified_scheduled,
+      notified_30min,
+      notified_live,
       metadata: {
         ...(existing?.metadata ?? {}),
         ...(row.metadata ?? {}),
@@ -145,6 +257,16 @@ async function saveToDatabase(streams: StreamRow[]) {
   }
 
   console.log(`💾 บันทึกสำเร็จ: ${merged.length} รายการ`);
+
+  for (const alert of pendingAlerts) {
+    await notifyLiveDiscord(alert);
+  }
+  if (pendingAlerts.length > 0) {
+    console.log(
+      `📢 Live Discord: ${pendingAlerts.length} schedule alert(s)`
+    );
+  }
+
   await removeMatchingPreviews(merged);
   await archiveThumbnails(merged);
 }
@@ -633,6 +755,225 @@ async function refreshRecentStreams() {
   };
 }
 
+type MonitorRow = {
+  video_id: string;
+  title: string | null;
+  url: string | null;
+  channel_name: string | null;
+  scheduled_start: string | null;
+  actual_start: string | null;
+  actual_end: string | null;
+  notified_30min: boolean;
+  notified_live: boolean;
+  metadata: Record<string, unknown> | null;
+};
+
+function isRealYoutubeId(videoId: string): boolean {
+  return Boolean(videoId) && !videoId.startsWith("manual-");
+}
+
+/** Light videos.list — only liveStreamingDetails + snippet.title */
+async function fetchStreamingStatus(videoIds: string[]): Promise<
+  Map<
+    string,
+    {
+      title: string;
+      actualStart: string | null;
+      actualEnd: string | null;
+      scheduledStart: string | null;
+    }
+  >
+> {
+  const out = new Map<
+    string,
+    {
+      title: string;
+      actualStart: string | null;
+      actualEnd: string | null;
+      scheduledStart: string | null;
+    }
+  >();
+  if (videoIds.length === 0) return out;
+
+  for (let i = 0; i < videoIds.length; i += 50) {
+    const chunk = videoIds.slice(i, i + 50);
+    const url =
+      `https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails&id=${chunk.join(",")}&key=${YOUTUBE_API_KEY}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.error) {
+      throw new Error(data.error.message || "YouTube videos.list (monitor) failed");
+    }
+    for (const item of data.items || []) {
+      const details = item.liveStreamingDetails || {};
+      out.set(item.id as string, {
+        title: (item.snippet?.title as string) || "",
+        actualStart: (details.actualStartTime as string) || null,
+        actualEnd: (details.actualEndTime as string) || null,
+        scheduledStart: (details.scheduledStartTime as string) || null,
+      });
+    }
+  }
+  return out;
+}
+
+/**
+ * Fan live alerts — performance-first:
+ * - 30min: DB clock only (0 YouTube quota)
+ * - LIVE: if actual_start already in DB → notify without API
+ * - else videos.list only for due candidates in a tight window
+ */
+async function monitorLiveNotifications() {
+  console.log("▶️ [monitor] Live Discord notifications...");
+  const now = Date.now();
+  const soonFrom = new Date(now).toISOString();
+  const soonTo = new Date(now + 35 * 60 * 1000).toISOString();
+  const liveFrom = new Date(now - 3 * 60 * 60 * 1000).toISOString();
+  const liveTo = new Date(now + 15 * 60 * 1000).toISOString();
+
+  const { data: rows, error } = await supabase
+    .from("mild_r_live_streams")
+    .select(
+      "video_id, title, url, channel_name, scheduled_start, actual_start, actual_end, notified_30min, notified_live, metadata"
+    )
+    .eq("notified_live", false)
+    .is("actual_end", null)
+    .not("scheduled_start", "is", null)
+    .gte("scheduled_start", liveFrom)
+    .lte("scheduled_start", soonTo);
+
+  if (error) throw error;
+
+  const candidates = ((rows ?? []) as MonitorRow[]).filter(
+    (r) => isRealYoutubeId(r.video_id) && !isCancelledMeta(r.metadata)
+  );
+
+  let notified30 = 0;
+  let notifiedLive = 0;
+  let ytPolled = 0;
+
+  // —— 30 minutes before (DB only) ——
+  for (const row of candidates) {
+    if (row.notified_30min) continue;
+    if (!row.scheduled_start) continue;
+    const startMs = new Date(row.scheduled_start).getTime();
+    if (!Number.isFinite(startMs)) continue;
+    const diffMins = (startMs - now) / 60000;
+    if (diffMins <= 30 && diffMins > 0) {
+      const videoUrl =
+        row.url || `https://www.youtube.com/watch?v=${row.video_id}`;
+      await notifyLiveDiscord({
+        kind: "soon_30min",
+        title: row.title || row.video_id,
+        videoUrl,
+        scheduledStart: row.scheduled_start,
+        channelName: row.channel_name,
+      });
+      const { error: updErr } = await supabase
+        .from("mild_r_live_streams")
+        .update({ notified_30min: true })
+        .eq("video_id", row.video_id);
+      if (updErr) {
+        console.error("notify_30min update", row.video_id, updErr.message);
+        continue;
+      }
+      row.notified_30min = true;
+      notified30 += 1;
+    }
+  }
+
+  // —— LIVE: already have actual_start in DB ——
+  for (const row of candidates) {
+    if (row.notified_live) continue;
+    if (!row.actual_start) continue;
+    const videoUrl =
+      row.url || `https://www.youtube.com/watch?v=${row.video_id}`;
+    await notifyLiveDiscord({
+      kind: "live_now",
+      title: row.title || row.video_id,
+      videoUrl,
+      scheduledStart: row.scheduled_start,
+      channelName: row.channel_name,
+    });
+    const { error: updErr } = await supabase
+      .from("mild_r_live_streams")
+      .update({
+        notified_live: true,
+        notified_30min: true,
+      })
+      .eq("video_id", row.video_id);
+    if (updErr) {
+      console.error("notify_live update", row.video_id, updErr.message);
+      continue;
+    }
+    row.notified_live = true;
+    notifiedLive += 1;
+  }
+
+  // —— LIVE: poll YouTube only for due rows still missing actual_start ——
+  const pollIds = candidates
+    .filter((r) => {
+      if (r.notified_live || r.actual_start) return false;
+      if (!r.scheduled_start) return false;
+      const t = new Date(r.scheduled_start).getTime();
+      if (!Number.isFinite(t)) return false;
+      return t >= new Date(liveFrom).getTime() && t <= new Date(liveTo).getTime();
+    })
+    .map((r) => r.video_id);
+
+  if (pollIds.length > 0) {
+    ytPolled = pollIds.length;
+    const statusMap = await fetchStreamingStatus(pollIds);
+    for (const videoId of pollIds) {
+      const st = statusMap.get(videoId);
+      if (!st?.actualStart) continue;
+      const row = candidates.find((r) => r.video_id === videoId);
+      if (!row || row.notified_live) continue;
+
+      const title = st.title || row.title || videoId;
+      const videoUrl =
+        row.url || `https://www.youtube.com/watch?v=${videoId}`;
+      await notifyLiveDiscord({
+        kind: "live_now",
+        title,
+        videoUrl,
+        scheduledStart: st.scheduledStart || row.scheduled_start,
+        channelName: row.channel_name,
+      });
+
+      const patch: Record<string, unknown> = {
+        actual_start: st.actualStart,
+        notified_live: true,
+        notified_30min: true,
+      };
+      if (st.actualEnd) patch.actual_end = st.actualEnd;
+      if (st.scheduledStart) patch.scheduled_start = st.scheduledStart;
+      if (st.title) patch.title = st.title;
+
+      const { error: updErr } = await supabase
+        .from("mild_r_live_streams")
+        .update(patch)
+        .eq("video_id", videoId);
+      if (updErr) {
+        console.error("notify_live yt update", videoId, updErr.message);
+        continue;
+      }
+      notifiedLive += 1;
+    }
+  }
+
+  const skipped = notified30 === 0 && notifiedLive === 0;
+  return {
+    candidates: candidates.length,
+    windowSoon: { from: soonFrom, to: soonTo },
+    windowLivePoll: { from: liveFrom, to: liveTo },
+    notified30,
+    notifiedLive,
+    ytPolled,
+    skipped,
+  };
+}
+
 async function writeSyncLog(entry: {
   source: string;
   status: "success" | "error" | "skipped";
@@ -713,15 +1054,33 @@ Deno.serve(async (req) => {
       );
     }
 
+    if (action === "monitor") {
+      const result = await monitorLiveNotifications();
+      // Quiet when nothing to alert — avoid ops Discord spam every 5 min
+      if (!result.skipped) {
+        await writeSyncLog({
+          source: "edge-live-monitor",
+          status: "success",
+          message: `Live alerts · 30min=${result.notified30} live=${result.notifiedLive} ytPolled=${result.ytPolled}`,
+          saved_count: result.notified30 + result.notifiedLive,
+          meta: result,
+        });
+      }
+      return new Response(
+        JSON.stringify({ success: true, task: "monitor", ...result }),
+        { headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     await writeSyncLog({
       source: "edge-unknown",
       status: "error",
-      message: 'Invalid action. Use "main", "search", or "refresh".',
+      message: 'Invalid action. Use "main", "search", "refresh", or "monitor".',
     });
 
     return new Response(
       JSON.stringify({
-        error: 'Invalid action. Use "main", "search", or "refresh".',
+        error: 'Invalid action. Use "main", "search", "refresh", or "monitor".',
       }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );

@@ -73,3 +73,26 @@ select cron.schedule(
   ) as request_id;
   $$
 );
+
+do $$
+begin
+  perform cron.unschedule('run-youtube-live-monitor');
+exception when others then
+  null;
+end $$;
+
+-- Live Discord alerts every 5 minutes
+select cron.schedule(
+  'run-youtube-live-monitor',
+  '*/5 * * * *',
+  $$
+  select net.http_post(
+    url := 'https://YOUR_PROJECT_REF.supabase.co/functions/v1/youtube-tracker',
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'Authorization', 'Bearer YOUR_SERVICE_ROLE_KEY'
+    ),
+    body := '{"action":"monitor"}'::jsonb
+  ) as request_id;
+  $$
+);

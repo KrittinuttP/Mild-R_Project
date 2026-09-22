@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { X } from "lucide-react";
 
 import { SocialPlatformIcon } from "@/components/icons/SocialPlatformIcon";
 import type { VtuberProfile } from "@/types/vtuber";
@@ -37,21 +36,19 @@ const DEVELOPER = {
 
 function DeveloperCredit() {
   return (
-    <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs tracking-wide text-[#f3b8c4]/45">
+    <p className="m-0 inline-flex flex-wrap items-center gap-x-1.5 gap-y-0 leading-none">
       <span>Made with 🩷 by</span>
       <Link
         href={DEVELOPER.xUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="group inline-flex items-center gap-2 transition hover:text-[#e85a7a]"
+        className="group inline-flex items-center gap-1 transition hover:text-[#e85a7a]"
       >
         <span>{DEVELOPER.name}</span>
-        <span
-          className="inline-flex size-6 items-center justify-center rounded-full border border-[#f3b8c4]/35 text-[#f7d7de]/90 transition group-hover:border-[#e85a7a]/55 group-hover:text-[#e85a7a]"
-          aria-hidden
-        >
-          <X className="size-3.5" />
-        </span>
+        <SocialPlatformIcon
+          platform="x"
+          className="size-[0.85em] shrink-0 opacity-80 transition group-hover:opacity-100"
+        />
         <span className="sr-only">on X</span>
       </Link>
     </p>
@@ -139,8 +136,10 @@ export function Footer({ data }: FooterProps) {
         <div className="mt-10 space-y-4 border-t border-[#f3b8c4]/10 pt-8">
           <div className="hidden md:block">{disclaimer}</div>
 
-          <div className="flex flex-col gap-3 text-xs tracking-wide text-[#f3b8c4]/45 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-6 sm:gap-y-2">
-            <p>© {year} Fan-made · Not affiliated with Lumina Project</p>
+          <div className="flex flex-col gap-3 text-xs leading-none tracking-wide text-[#f3b8c4]/45 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-6 sm:gap-y-2">
+            <p className="m-0 leading-none">
+              © {year} Fan-made · Not affiliated with Lumina Project
+            </p>
             <DeveloperCredit />
           </div>
         </div>

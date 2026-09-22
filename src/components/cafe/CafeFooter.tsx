@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ExternalLink, X } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 
+import { SocialPlatformIcon } from "@/components/icons/SocialPlatformIcon";
 import type { CafePage } from "@/types/vtuber";
 
 const DEVELOPER = {
@@ -71,7 +72,7 @@ export function CafeFooter({ cafe }: CafeFooterProps) {
                 {cafe.closing.disclaimer}
               </p>
             ) : null}
-            <p className="text-[0.65rem] tracking-[0.14em] text-[#9a7b5a]/70 uppercase sm:text-xs sm:tracking-[0.16em]">
+            <p className="m-0 text-[0.65rem] leading-none tracking-[0.14em] text-[#9a7b5a]/70 uppercase sm:text-xs sm:tracking-[0.16em]">
               © {year} · {cafe.title.split(": ", 2)[0] ?? cafe.title} · Fan-made
               <Link
                 href="/cafe/settings"
@@ -81,21 +82,19 @@ export function CafeFooter({ cafe }: CafeFooterProps) {
                 ·
               </Link>
             </p>
-            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs tracking-wide text-[#9a7b5a]/70 md:justify-end">
+            <p className="m-0 inline-flex flex-wrap items-center gap-x-1.5 gap-y-0 text-xs leading-none tracking-wide text-[#9a7b5a]/70 md:justify-end">
               <span>Made with 🩷 by</span>
               <Link
                 href={DEVELOPER.xUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex items-center gap-2 transition hover:text-[#c46a7a]"
+                className="group inline-flex items-center gap-1 transition hover:text-[#c46a7a]"
               >
                 <span>{DEVELOPER.name}</span>
-                <span
-                  className="inline-flex size-6 items-center justify-center rounded-full border border-[#9a7b5a]/40 text-[#d8d0c4] transition group-hover:border-[#c46a7a]/55 group-hover:text-[#c46a7a]"
-                  aria-hidden
-                >
-                  <X className="size-3.5" />
-                </span>
+                <SocialPlatformIcon
+                  platform="x"
+                  className="size-[0.85em] shrink-0 opacity-80 transition group-hover:opacity-100"
+                />
                 <span className="sr-only">บน X</span>
               </Link>
             </p>

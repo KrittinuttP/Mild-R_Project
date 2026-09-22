@@ -124,7 +124,11 @@ function MobileSlotCard({
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140a0d]/80 via-transparent to-transparent" />
           </>
         ) : (
-          <LiveCoverPlaceholder className="relative" size="sm" />
+          <LiveCoverPlaceholder
+            className="relative"
+            size="sm"
+            variant={cancelled ? "cancelled" : "default"}
+          />
         )}
 
       </div>
@@ -286,7 +290,11 @@ function SlotCard({
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140a0d]/80 via-transparent to-transparent" />
           </>
         ) : (
-          <LiveCoverPlaceholder className="relative h-full w-full" size="md" />
+          <LiveCoverPlaceholder
+            className="relative h-full w-full"
+            size="md"
+            variant={cancelled ? "cancelled" : "default"}
+          />
         )}
 
         <LiveSourceBadges
@@ -709,7 +717,11 @@ function LiveSpotlightBanner({
             onClick={onOpenDetail}
             className="relative aspect-[16/9] w-64 shrink-0 overflow-hidden rounded-2xl border border-[#f3b8c4]/20 bg-[#12080c] text-left transition hover:border-[#e85a7a]/50 lg:w-80"
           >
-            <LiveCoverPlaceholder className="absolute inset-0" size="lg" />
+            <LiveCoverPlaceholder
+              className="absolute inset-0"
+              size="lg"
+              variant={cancelled ? "cancelled" : "default"}
+            />
           </button>
         )}
       </div>
@@ -772,7 +784,11 @@ function LiveSpotlightBanner({
             onClick={onOpenDetail}
             className="relative aspect-[16/9] w-full overflow-hidden bg-[#12080c] text-left"
           >
-            <LiveCoverPlaceholder className="absolute inset-0" size="lg" />
+            <LiveCoverPlaceholder
+              className="absolute inset-0"
+              size="lg"
+              variant={cancelled ? "cancelled" : "default"}
+            />
           </button>
         )}
 
