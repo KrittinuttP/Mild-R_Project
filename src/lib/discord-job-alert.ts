@@ -235,6 +235,9 @@ export function buildDiscordJobPayload(entry: DiscordJobAlertInput) {
 export async function notifyJobDiscord(
   entry: DiscordJobAlertInput
 ): Promise<void> {
+  // Temporarily: only surface failures (success/skipped muted)
+  if (String(entry.status || "").toLowerCase() !== "error") return;
+
   const webhookUrl =
     typeof process !== "undefined"
       ? process.env.DISCORD_WEBHOOK_URL?.trim()
