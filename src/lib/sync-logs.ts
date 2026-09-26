@@ -58,6 +58,9 @@ export function summarizeLiveAgentRun(options: {
     error?: string;
     toInsert?: number | null;
     skippedDates?: string[];
+    attempt?: number;
+    nextRetryAt?: string | null;
+    recovered?: boolean;
   }>;
 }): WriteSyncLogInput {
   const { dryRun, via, processed, results } = options;
@@ -81,8 +84,16 @@ export function summarizeLiveAgentRun(options: {
   if (imported.length) parts.push(`importedRows=${imported.length}`);
   if (skipped.length) parts.push(`skippedRows=${skipped.length}`);
   if (failed.length) parts.push(`failedRows=${failed.length}`);
+  const recovered = results.filter((r) => r.recovered);
+  if (recovered.length) parts.push(`recovered=${recovered.length}`);
   if (importedTotal) parts.push(`saved=${importedTotal}`);
-  if (failed[0]?.error) parts.push(failed[0].error.slice(0, 180));
+  if (failed[0]) {
+    if (failed[0].attempt) parts.push(`attempt=${failed[0].attempt}`);
+    parts.push(
+      failed[0].nextRetryAt ? `retryAt=${failed[0].nextRetryAt}` : "noRetry"
+    );
+    if (failed[0].error) parts.push(failed[0].error.slice(0, 180));
+  }
 
   return {
     source: LIVE_SCHEDULE_AGENT_SOURCE,
@@ -94,6 +105,7 @@ export function summarizeLiveAgentRun(options: {
       via,
       processed,
       results,
+      rowAlerts: !dryRun && processed > 0,
     },
   };
 }

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import {
   loadPendingLiveSchedules,
   processLiveScheduleRow,
+  redactAgentSecrets,
 } from "@/lib/live-schedule-agent";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
@@ -31,25 +32,13 @@ type RunBody = {
   limit?: unknown;
   dryRun?: unknown;
   tweetId?: unknown;
+  /** Retry cron: no sync log when nothing is pending / due. */
+  quietWhenIdle?: unknown;
 };
 
 export async function POST(request: Request) {
   if (!authorize(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  if (!process.env.GEMINI_API_KEY?.trim()) {
-    await writeSyncLog({
-      source: LIVE_SCHEDULE_AGENT_SOURCE,
-      status: "error",
-      message: "GEMINI_API_KEY is not configured on this server",
-      saved_count: 0,
-      meta: { via: "api" },
-    });
-    return NextResponse.json(
-      { error: "GEMINI_API_KEY is not configured on this server" },
-      { status: 500 }
-    );
   }
 
   let body: RunBody = {};
@@ -64,6 +53,7 @@ export async function POST(request: Request) {
     ? Math.max(1, Math.min(limitRaw, 5))
     : 1;
   const dryRun = body.dryRun === true;
+  const quietWhenIdle = body.quietWhenIdle === true;
   const tweetId =
     typeof body.tweetId === "string" && body.tweetId.trim()
       ? body.tweetId.trim()
@@ -76,14 +66,16 @@ export async function POST(request: Request) {
     const rows = await loadPendingLiveSchedules(supabase, { limit, tweetId });
 
     if (rows.length === 0) {
-      await writeSyncLog(
-        summarizeLiveAgentRun({
-          dryRun,
-          via: "api",
-          processed: 0,
-          results: [],
-        })
-      );
+      if (!quietWhenIdle) {
+        await writeSyncLog(
+          summarizeLiveAgentRun({
+            dryRun,
+            via: "api",
+            processed: 0,
+            results: [],
+          })
+        );
+      }
       return NextResponse.json({
         ok: true,
         dryRun,
@@ -91,6 +83,20 @@ export async function POST(request: Request) {
         message: "No pending rows",
         results: [],
       });
+    }
+
+    if (!process.env.GEMINI_API_KEY?.trim()) {
+      await writeSyncLog({
+        source: LIVE_SCHEDULE_AGENT_SOURCE,
+        status: "error",
+        message: "GEMINI_API_KEY is not configured on this server",
+        saved_count: 0,
+        meta: { via: "api" },
+      });
+      return NextResponse.json(
+        { error: "GEMINI_API_KEY is not configured on this server" },
+        { status: 500 }
+      );
     }
 
     const results = [];
@@ -108,6 +114,9 @@ export async function POST(request: Request) {
       skippedDates: r.skippedDates ?? [],
       imported: r.imported,
       error: r.error,
+      attempt: r.attempt,
+      nextRetryAt: r.nextRetryAt ?? null,
+      recovered: r.recovered ?? false,
     }));
 
     await writeSyncLog(
@@ -126,7 +135,9 @@ export async function POST(request: Request) {
       results: summaryResults,
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
+    const message = redactAgentSecrets(
+      err instanceof Error ? err.message : String(err)
+    );
     await writeSyncLog({
       source: LIVE_SCHEDULE_AGENT_SOURCE,
       status: "error",

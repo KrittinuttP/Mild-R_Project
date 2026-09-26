@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { resolveLuminaChannel } from "@/data/lumina-channels";
+import { notifyLiveScheduleRowDiscord } from "@/lib/discord-job-alert";
 import { buildLiveAgentPrompt } from "@/lib/live-agent-prompt";
 import {
   bangkokDateFromIso,
@@ -16,6 +17,7 @@ export type XLiveScheduleRow = {
   image_source_url: string | null;
   posted_at: string | null;
   status: XLiveScheduleStatus;
+  attempt_count?: number | null;
 };
 
 export type LiveAgentManualItem = {
@@ -38,7 +40,49 @@ export type ProcessScheduleResult = {
   imported?: number;
   error?: string;
   dryRun?: boolean;
+  attempt?: number;
+  /** Set when failed and an automatic retry is scheduled. */
+  nextRetryAt?: string | null;
+  /** Previously failed, now imported/skipped. */
+  recovered?: boolean;
 };
+
+const DEFAULT_GEMINI_MODEL = "gemini-flash-lite-latest";
+
+/** Minutes to wait before retry N (1-based attempt that just failed). */
+const RETRY_BACKOFF_MINUTES = [30, 60, 120, 180];
+
+const PERMANENT_ERRORS = new Set(["Missing image_url"]);
+
+export function nextRetryAtFor(attempt: number, from = Date.now()): string {
+  const idx = Math.min(Math.max(attempt, 1), RETRY_BACKOFF_MINUTES.length) - 1;
+  return new Date(from + RETRY_BACKOFF_MINUTES[idx] * 60_000).toISOString();
+}
+
+/** Strip API key (or fragments of it) from messages stored in public tables. */
+export function redactAgentSecrets(message: string): string {
+  const out = message.replace(/([?&]key=)[^&\s"]+/gi, "$1***");
+  const key = process.env.GEMINI_API_KEY?.trim();
+  const win = 8;
+  if (!key || key.length < win) return out;
+
+  const masked = new Array<boolean>(out.length).fill(false);
+  for (let i = 0; i + win <= key.length; i++) {
+    const frag = key.slice(i, i + win);
+    let at = out.indexOf(frag);
+    while (at >= 0) {
+      for (let j = at; j < at + win; j++) masked[j] = true;
+      at = out.indexOf(frag, at + 1);
+    }
+  }
+
+  let result = "";
+  for (let i = 0; i < out.length; i++) {
+    if (!masked[i]) result += out[i];
+    else if (i === 0 || !masked[i - 1]) result += "***";
+  }
+  return result;
+}
 
 function addDaysYmd(ymd: string, days: number): string {
   const [y, m, d] = ymd.split("-").map(Number);
@@ -244,14 +288,15 @@ async function generateWithGeminiApiKey(options: {
       "Set GEMINI_API_KEY from Google AI Studio (https://aistudio.google.com/apikey)"
     );
   }
-  const modelRaw =
-    process.env.GEMINI_MODEL?.trim() || "gemini-flash-lite-latest";
+  const modelRaw = process.env.GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL;
   // Env sometimes includes "models/" — URL already prefixes models/
-  const model = modelRaw.replace(/^models\//i, "").trim();
-  if (!model || /[/\s]/.test(model)) {
-    throw new Error(
-      `Invalid GEMINI_MODEL "${modelRaw}". Use e.g. gemini-flash-lite-latest`
+  let model = modelRaw.replace(/^models\//i, "").trim();
+  if (!/^gemini-[a-z0-9.\-]+$/i.test(model)) {
+    // Never echo the raw value: a mis-pasted env can contain secrets
+    console.warn(
+      `[live-agent] GEMINI_MODEL is invalid; falling back to ${DEFAULT_GEMINI_MODEL}`
     );
+    model = DEFAULT_GEMINI_MODEL;
   }
   const url =
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
@@ -361,6 +406,8 @@ async function markSchedule(
     parsed_json?: unknown;
     error_message?: string | null;
     agent_processed_at?: string | null;
+    attempt: number;
+    next_retry_at?: string | null;
   }
 ) {
   const now = new Date().toISOString();
@@ -374,31 +421,91 @@ async function markSchedule(
         patch.agent_processed_at === undefined
           ? now
           : patch.agent_processed_at,
+      attempt_count: patch.attempt,
+      last_attempt_at: now,
+      next_retry_at: patch.next_retry_at ?? null,
       updated_at: now,
     })
     .eq("tweet_id", tweetId);
   if (error) throw error;
 }
 
+/**
+ * Process one poster, track attempts / retry schedule, and alert Discord
+ * on failure or when a previously failed poster recovers.
+ */
 export async function processLiveScheduleRow(
   supabase: SupabaseClient,
   row: XLiveScheduleRow,
   options?: { dryRun?: boolean; apiBase?: string }
 ): Promise<ProcessScheduleResult> {
   const dryRun = Boolean(options?.dryRun);
-  const apiBase = options?.apiBase;
-  if (!row.image_url) {
-    await markSchedule(supabase, row.tweet_id, {
-      status: "failed",
-      error_message: "Missing image_url",
-      parsed_json: null,
+  const attempt = (row.attempt_count ?? 0) + 1;
+  const result = await attemptLiveScheduleRow(supabase, row, {
+    dryRun,
+    apiBase: options?.apiBase,
+    attempt,
+  });
+  result.attempt = attempt;
+  if (dryRun) return result;
+
+  if (result.status === "failed") {
+    await notifyLiveScheduleRowDiscord({
+      kind: "failed",
+      tweetId: row.tweet_id,
+      attempt,
+      error: result.error,
+      nextRetryAt: result.nextRetryAt ?? null,
     });
+  } else if (
+    row.status === "failed" &&
+    (result.status === "imported" || result.status === "skipped")
+  ) {
+    result.recovered = true;
+    await notifyLiveScheduleRowDiscord({
+      kind: "recovered",
+      tweetId: row.tweet_id,
+      attempt,
+      imported: result.imported ?? 0,
+      rowStatus: result.status,
+    });
+  }
+  return result;
+}
+
+async function attemptLiveScheduleRow(
+  supabase: SupabaseClient,
+  row: XLiveScheduleRow,
+  options: { dryRun: boolean; apiBase?: string; attempt: number }
+): Promise<ProcessScheduleResult> {
+  const { dryRun, apiBase, attempt } = options;
+
+  const fail = async (rawMessage: string): Promise<ProcessScheduleResult> => {
+    const message = redactAgentSecrets(rawMessage).slice(0, 2000);
+    const nextRetryAt = PERMANENT_ERRORS.has(message)
+      ? null
+      : nextRetryAtFor(attempt);
+    if (!dryRun) {
+      await markSchedule(supabase, row.tweet_id, {
+        status: "failed",
+        error_message: message,
+        parsed_json: null,
+        attempt,
+        next_retry_at: nextRetryAt,
+      });
+    }
     return {
       tweet_id: row.tweet_id,
       status: "failed",
       items: [],
-      error: "Missing image_url",
+      error: message,
+      dryRun,
+      nextRetryAt,
     };
+  };
+
+  if (!row.image_url) {
+    return fail("Missing image_url");
   }
 
   try {
@@ -413,6 +520,7 @@ export async function processLiveScheduleRow(
           status: "skipped",
           parsed_json: [],
           error_message: "No extractable lives",
+          attempt,
         });
       }
       return {
@@ -436,6 +544,7 @@ export async function processLiveScheduleRow(
           status: "skipped",
           parsed_json: items,
           error_message: `All dates already on calendar: ${skippedDates.join(", ")}`,
+          attempt,
         });
       }
       return {
@@ -472,6 +581,7 @@ export async function processLiveScheduleRow(
         skippedDates.length > 0
           ? `Skipped existing dates: ${skippedDates.join(", ")}`
           : null,
+      attempt,
     });
     return {
       tweet_id: row.tweet_id,
@@ -482,45 +592,53 @@ export async function processLiveScheduleRow(
       imported: inserted,
     };
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    if (!dryRun) {
-      await markSchedule(supabase, row.tweet_id, {
-        status: "failed",
-        error_message: message.slice(0, 2000),
-        parsed_json: null,
-      });
-    }
-    return {
-      tweet_id: row.tweet_id,
-      status: "failed",
-      items: [],
-      error: message,
-      dryRun,
-    };
+    return fail(err instanceof Error ? err.message : String(err));
   }
 }
 
+const SCHEDULE_ROW_COLUMNS =
+  "id, tweet_id, image_url, image_source_url, posted_at, status, attempt_count";
+
+/**
+ * Rows to process: pending first (newest poster first), then failed rows
+ * whose next_retry_at has passed. A tweetId bypasses status filters.
+ */
 export async function loadPendingLiveSchedules(
   supabase: SupabaseClient,
   options?: { limit?: number; tweetId?: string }
 ): Promise<XLiveScheduleRow[]> {
-  let q = supabase
-    .from("mild_r_x_live_schedules")
-    .select(
-      "id, tweet_id, image_url, image_source_url, posted_at, status"
-    )
-    .order("posted_at", { ascending: false, nullsFirst: false });
+  const limit = Math.max(1, Math.min(options?.limit ?? 1, 20));
 
   if (options?.tweetId) {
-    q = q.eq("tweet_id", options.tweetId);
-  } else {
-    q = q.eq("status", "pending");
+    const { data, error } = await supabase
+      .from("mild_r_x_live_schedules")
+      .select(SCHEDULE_ROW_COLUMNS)
+      .eq("tweet_id", options.tweetId)
+      .limit(1);
+    if (error) throw error;
+    return (data ?? []) as XLiveScheduleRow[];
   }
 
-  const limit = options?.limit ?? 1;
-  q = q.limit(Math.max(1, Math.min(limit, 20)));
+  const { data: pending, error: pendingErr } = await supabase
+    .from("mild_r_x_live_schedules")
+    .select(SCHEDULE_ROW_COLUMNS)
+    .eq("status", "pending")
+    .order("posted_at", { ascending: false, nullsFirst: false })
+    .limit(limit);
+  if (pendingErr) throw pendingErr;
 
-  const { data, error } = await q;
-  if (error) throw error;
-  return (data ?? []) as XLiveScheduleRow[];
+  const rows = (pending ?? []) as XLiveScheduleRow[];
+  if (rows.length >= limit) return rows;
+
+  const { data: due, error: dueErr } = await supabase
+    .from("mild_r_x_live_schedules")
+    .select(SCHEDULE_ROW_COLUMNS)
+    .eq("status", "failed")
+    .not("next_retry_at", "is", null)
+    .lte("next_retry_at", new Date().toISOString())
+    .order("next_retry_at", { ascending: true })
+    .limit(limit - rows.length);
+  if (dueErr) throw dueErr;
+
+  return [...rows, ...((due ?? []) as XLiveScheduleRow[])];
 }

@@ -20,6 +20,7 @@ import { createClient } from "@supabase/supabase-js";
 import {
   loadPendingLiveSchedules,
   processLiveScheduleRow,
+  redactAgentSecrets,
 } from "../src/lib/live-schedule-agent";
 import {
   summarizeLiveAgentRun,
@@ -100,6 +101,9 @@ async function main() {
     skippedDates: r.skippedDates ?? [],
     imported: r.imported,
     error: r.error,
+    attempt: r.attempt,
+    nextRetryAt: r.nextRetryAt ?? null,
+    recovered: r.recovered ?? false,
     sample: (r.toInsert ?? r.items).slice(0, 2),
   }));
 
@@ -132,7 +136,9 @@ main().catch(async (err) => {
     await writeSyncLog({
       source: "agent-live-schedule",
       status: "error",
-      message: (err instanceof Error ? err.message : String(err)).slice(0, 500),
+      message: redactAgentSecrets(
+        err instanceof Error ? err.message : String(err)
+      ).slice(0, 500),
       saved_count: 0,
       meta: { via: "cli" },
     });

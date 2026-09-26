@@ -1,6 +1,7 @@
 /**
  * Schedule Live Schedule Agent cron (Tue/Fri/Sun 00:15 Asia/Bangkok)
- * — 15 minutes after x-feed-sync incremental.
+ * — 15 minutes after x-feed-sync incremental — plus a retry job every
+ * 30 minutes that picks up failed posters whose next_retry_at has passed.
  *
  *   npx tsx --env-file=.env.local scripts/setup-live-agent-cron.ts
  *
@@ -52,19 +53,23 @@ exception when others then
   null;
 end $$;
 
+do $$
+begin
+  perform cron.unschedule('run-live-schedule-agent-retry');
+exception when others then
+  null;
+end $$;
+
 select cron.schedule(
   'run-live-schedule-agent',
   '15 17 * * 1,4,6',
-  $cron$
-  select net.http_post(
-    url := ${pgClientLiteral(runUrl)},
-    headers := jsonb_build_object(
-      'Content-Type', 'application/json',
-      'Authorization', ${pgClientLiteral(authHeader)}
-    ),
-    body := '{"limit":1}'::jsonb
-  ) as request_id;
-  $cron$
+  ${httpPostSql(runUrl, authHeader, '{"limit":1}')}
+);
+
+select cron.schedule(
+  'run-live-schedule-agent-retry',
+  '5,35 * * * *',
+  ${httpPostSql(runUrl, authHeader, '{"limit":1,"quietWhenIdle":true}')}
 );
 `;
 
@@ -77,7 +82,7 @@ select cron.schedule(
   try {
     await client.query(sql);
     const jobs = await client.query(
-      `select jobid, jobname, schedule, active from cron.job where jobname = 'run-live-schedule-agent'`
+      `select jobid, jobname, schedule, active from cron.job where jobname like 'run-live-schedule-agent%' order by jobname`
     );
     console.log("OK scheduled:");
     for (const row of jobs.rows) {
@@ -87,9 +92,25 @@ select cron.schedule(
     console.log(
       "note: 15 17 * * 1,4,6 UTC = 00:15 BKK Tue / Fri / Sun (after x-feed 00:00)"
     );
+    console.log("note: retry job every 30 min (:05 / :35), silent when idle");
   } finally {
     await client.end();
   }
+}
+
+// pg_net defaults to a short timeout; the agent (Gemini + manual API) takes longer
+function httpPostSql(url: string, authHeader: string, bodyJson: string) {
+  return `$cron$
+  select net.http_post(
+    url := ${pgClientLiteral(url)},
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'Authorization', ${pgClientLiteral(authHeader)}
+    ),
+    body := ${pgClientLiteral(bodyJson)}::jsonb,
+    timeout_milliseconds := 60000
+  ) as request_id;
+  $cron$`;
 }
 
 function pgClientLiteral(value: string) {

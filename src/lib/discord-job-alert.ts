@@ -237,7 +237,77 @@ export async function notifyJobDiscord(
 ): Promise<void> {
   // Temporarily: only surface failures (success/skipped muted)
   if (String(entry.status || "").toLowerCase() !== "error") return;
+  // Per-poster alerts already sent by notifyLiveScheduleRowDiscord
+  if (entry.meta?.rowAlerts === true) return;
 
+  await postDiscordWebhook(buildDiscordJobPayload(entry));
+}
+
+export type LiveScheduleRowAlertInput = {
+  kind: "failed" | "recovered";
+  tweetId: string;
+  attempt: number;
+  error?: string | null;
+  nextRetryAt?: string | null;
+  imported?: number | null;
+  rowStatus?: string | null;
+};
+
+function bangkokTime(iso: string): string {
+  return new Date(iso).toLocaleString("th-TH", {
+    timeZone: "Asia/Bangkok",
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
+
+/** Discord embed for one Live Schedule poster (fail / recovered). */
+export function buildLiveScheduleRowPayload(input: LiveScheduleRowAlertInput) {
+  const postUrl = `https://x.com/i/status/${input.tweetId}`;
+  const failed = input.kind === "failed";
+  const title = failed
+    ? "❌ Live Schedule Agent · อ่านตารางไลฟ์ไม่สำเร็จ | Poster failed"
+    : "✅ Live Schedule Agent · กลับมาสำเร็จ | Recovered";
+
+  const lines: string[] = [`โพสต์ / Post: ${postUrl}`];
+  lines.push(`ครั้งที่ / Attempt: ${input.attempt}`);
+  if (failed) {
+    lines.push(
+      input.nextRetryAt
+        ? `ลองใหม่ / Next retry: ${bangkokTime(input.nextRetryAt)}`
+        : "ไม่ลองใหม่อัตโนมัติ (ต้องแก้เอง) / No auto retry"
+    );
+    lines.push(`[Error: ${(input.error || "unknown").slice(0, 400)}]`);
+  } else {
+    if (input.rowStatus) lines.push(`สถานะ / Status: ${input.rowStatus}`);
+    if (input.imported != null) {
+      lines.push(`บันทึก / Saved: ${input.imported}`);
+    }
+  }
+  lines.push(bangkokNow());
+
+  return {
+    username: "Mild-R Jobs",
+    embeds: [
+      {
+        title: title.slice(0, 250),
+        url: postUrl,
+        description: lines.join("\n").slice(0, 1800),
+        color: failed ? STATUS_COLOR.error : STATUS_COLOR.success,
+        footer: { text: "source: agent-live-schedule" },
+      },
+    ],
+  };
+}
+
+/** Notify Discord about one poster failing or recovering. Never throws. */
+export async function notifyLiveScheduleRowDiscord(
+  input: LiveScheduleRowAlertInput
+): Promise<void> {
+  await postDiscordWebhook(buildLiveScheduleRowPayload(input));
+}
+
+async function postDiscordWebhook(payload: unknown): Promise<void> {
   const webhookUrl =
     typeof process !== "undefined"
       ? process.env.DISCORD_WEBHOOK_URL?.trim()
@@ -248,7 +318,7 @@ export async function notifyJobDiscord(
     const res = await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(buildDiscordJobPayload(entry)),
+      body: JSON.stringify(payload),
     });
     if (!res.ok) {
       const body = await res.text().catch(() => "");

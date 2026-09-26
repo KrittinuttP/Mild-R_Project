@@ -38,6 +38,22 @@ function sameInstant(a: string | null, b: string | null) {
   return ta === tb;
 }
 
+function isManualPreviewRow(row: LiveStreamRow) {
+  const meta = row.metadata;
+  if (meta && meta.preview === true) return true;
+  return row.video_id.startsWith("manual-");
+}
+
+function linkedYoutubeVideoId(row: LiveStreamRow): string | null {
+  const linked = row.metadata?.linked_video_id;
+  return typeof linked === "string" && linked.trim() ? linked.trim() : null;
+}
+
+/** Unlinked schedule preview — never gets YouTube actual_start unless linked later. */
+function isUnlinkedSchedulePreview(row: LiveStreamRow): boolean {
+  return isManualPreviewRow(row) && !linkedYoutubeVideoId(row);
+}
+
 export function getLiveStreamStatus(row: LiveStreamRow): LiveStreamStatus {
   if (
     row.metadata?.cancelled === true ||
@@ -53,8 +69,12 @@ export function getLiveStreamStatus(row: LiveStreamRow): LiveStreamStatus {
     if (!Number.isFinite(start)) return "ended";
     const now = Date.now();
     if (start > now) return "upcoming";
-    // Past scheduled, never started: grace 3h then cancelled
-    if (now - start >= 3 * 60 * 60 * 1000) return "cancelled";
+    // Preview mocks never start on YouTube → cancel as soon as start time passes.
+    // Real videos keep a 3h grace (late start / tracker lag).
+    const graceMs = isUnlinkedSchedulePreview(row)
+      ? 0
+      : 3 * 60 * 60 * 1000;
+    if (now - start >= graceMs) return "cancelled";
     return "upcoming";
   }
   return "ended";
@@ -84,17 +104,6 @@ function bangkokDateTimeLabel(iso: string): string {
   const { date, time } = bangkokParts(iso);
   const [y, m, d] = date.split("-");
   return `${Number(d)}/${Number(m)} ${time}`;
-}
-
-function isManualPreviewRow(row: LiveStreamRow) {
-  const meta = row.metadata;
-  if (meta && meta.preview === true) return true;
-  return row.video_id.startsWith("manual-");
-}
-
-function linkedYoutubeVideoId(row: LiveStreamRow): string | null {
-  const linked = row.metadata?.linked_video_id;
-  return typeof linked === "string" && linked.trim() ? linked.trim() : null;
 }
 
 /** Public watch URL only when a real video exists (not channel-page placeholders). */

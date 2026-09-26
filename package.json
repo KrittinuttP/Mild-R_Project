@@ -30,6 +30,7 @@
     "db:migrate:x-live-schedule": "npx tsx --env-file=.env scripts/apply-sql.ts supabase/migrations/20260918160000_x_posts_live_schedule.sql",
     "db:migrate:live-notify": "npx tsx --env-file=.env scripts/apply-sql.ts supabase/migrations/20260922100000_live_streams_notify_flags.sql",
     "db:migrate:live-notify-scheduled": "npx tsx --env-file=.env scripts/apply-sql.ts supabase/migrations/20260922110000_live_streams_notified_scheduled.sql",
+    "db:migrate:x-live-retry": "npx tsx --env-file=.env.local scripts/apply-sql.ts supabase/migrations/20260927010000_x_live_schedules_retry.sql",
     "backfill:youtube": "npx tsx --env-file=.env.local scripts/backfill-youtube-lives.ts",
     "backfill:x": "npx tsx --env-file=.env scripts/backfill-x-posts.ts",
     "backfill:x-live-schedules": "npx tsx --env-file=.env.local scripts/backfill-x-live-schedules.ts",

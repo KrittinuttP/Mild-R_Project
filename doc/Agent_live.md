@@ -46,6 +46,14 @@ curl -X POST "$SITE/api/live/agent/run" \
 
 1. X sync ต/ศ/อา **00:00 BKK** → upsert รูป Live Schedule เป็น `pending`
 2. Agent ต/ศ/อา **00:15 BKK** → กิน `pending` ทีละ 1 แถว
+3. Retry ทุก 30 นาที (**:05 / :35**) → กินแถว `failed` ที่ถึง `next_retry_at` (และ `pending` ที่ค้าง) — ไม่มีงานจะไม่เขียน log
+
+### Retry + แจ้งเตือน
+
+- Fail แต่ละครั้ง: `attempt_count` +1, `next_retry_at` = +30 นาที → +1 ชม. → +2 ชม. → ทุก 3 ชม. จนกว่าจะผ่าน
+- Error ถาวร (`Missing image_url`) → `next_retry_at = null` ไม่ลองซ้ำ
+- Discord (`DISCORD_WEBHOOK_URL` บน Vercel): ❌ ทุกครั้งที่ fail (ลิงก์โพสต์ · error · เวลาลองใหม่) และ ✅ ตอนกลับมาผ่าน
+- ข้อความ error ถูกลบ API key ออกก่อนเก็บ (ตาราง / log อ่านได้แบบ public)
 
 ```bash
 # ต้องชี้ LIVE_AGENT_API_BASE เป็นโดเมน production (ห้าม localhost)
@@ -59,6 +67,7 @@ Production env ที่ต้องมีบน Next host:
 | `GEMINI_API_KEY` | API key จาก [Google AI Studio](https://aistudio.google.com/apikey) |
 | `GEMINI_MODEL` | optional, default `gemini-flash-lite-latest` |
 | `LIVE_AGENT_CRON_SECRET` | Bearer สำหรับ cron (หรือใช้ service role) |
+| `DISCORD_WEBHOOK_URL` | แจ้งเตือน fail / กลับมาผ่าน (ตัวเดียวกับ Supabase secrets) |
 | `LIVE_AGENT_API_BASE` / `NEXT_PUBLIC_SITE_URL` | URL สาธารณะของเว็บ |
 | `SUPABASE_SERVICE_ROLE_KEY` | อ่าน/เขียนตาราง |
 
@@ -70,7 +79,7 @@ Production env ที่ต้องมีบน Next host:
 4. ข้ามวันที่มีใน `live_streams` อยู่แล้ว (Asia/Bangkok) → ใส่เฉพาะวันที่ยังว่าง  
 5. `POST /api/live/manual` → `status=imported` (หรือ `skipped` ถ้าครบทุกวันแล้ว), `agent_processed_at`
 
-Agent เลือกเฉพาะ `status=pending` เรียง `posted_at` ใหม่สุด — ของเก่าที่ปิดแล้วควรเป็น `skipped` / `imported` เพื่อไม่กินโควตา
+Agent เลือก `status=pending` เรียง `posted_at` ใหม่สุดก่อน แล้วตามด้วย `failed` ที่ถึง `next_retry_at` — ของเก่าที่ปิดแล้วควรเป็น `skipped` / `imported` เพื่อไม่กินโควตา
 
 บน `/live` รูป Live Schedule ผูกกับสัปดาห์ผ่านคอลัมน์ `schedule_week_start` (วันโพสต์ Bangkok; **เสาร์ +1** แล้วหานาทีอาทิตย์ของสัปดาห์)
 
