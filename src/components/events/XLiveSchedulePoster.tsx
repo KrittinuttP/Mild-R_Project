@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, ZoomIn } from "lucide-react";
 
 import { ImageLightbox } from "@/components/media/ImageLightbox";
 import type {
@@ -134,8 +134,8 @@ export function XLiveSchedulePoster({
         type="button"
         onClick={() => setOpen(true)}
         className={cn(
-          "group mt-4 block w-full overflow-hidden rounded-2xl border border-[#f3b8c4]/18 bg-[#1a0c12]/50 text-left transition",
-          "hover:border-[#e85a7a]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e85a7a]/50",
+          "group relative mt-4 block w-full overflow-hidden rounded-2xl border border-[#f3b8c4]/18 bg-[#1a0c12]/50 text-left",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e85a7a]/50",
           !embedded && "mt-6"
         )}
         aria-label="ขยายรูป Live Schedule"
@@ -144,8 +144,21 @@ export function XLiveSchedulePoster({
         <img
           src={poster.image_url}
           alt="Live Schedule จาก X"
-          className="h-auto w-full object-contain transition duration-300 group-hover:brightness-110"
+          className="h-auto w-full object-contain"
         />
+        <span
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full",
+            "border border-[#f3b8c4]/25 bg-[#1a0c12]/75 px-2.5 py-1 text-xs text-[#fff5f7] backdrop-blur-sm",
+            "opacity-70 transition duration-200 sm:translate-y-1 sm:opacity-0",
+            "sm:group-hover:translate-y-0 sm:group-hover:opacity-100",
+            "sm:group-focus-visible:translate-y-0 sm:group-focus-visible:opacity-100"
+          )}
+        >
+          <ZoomIn className="size-3.5" />
+          ดูภาพเต็ม
+        </span>
       </button>
 
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1">
