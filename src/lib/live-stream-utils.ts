@@ -30,12 +30,13 @@ function bangkokParts(iso: string) {
   };
 }
 
-function sameInstant(a: string | null, b: string | null) {
-  if (!a || !b) return a === b;
-  const ta = new Date(a).getTime();
-  const tb = new Date(b).getTime();
-  if (!Number.isFinite(ta) || !Number.isFinite(tb)) return a === b;
-  return ta === tb;
+/** YouTube nudges scheduledStartTime by seconds–minutes right before going live. */
+const RESCHEDULE_DISPLAY_MIN_MS = 5 * 60 * 1000;
+
+function isMeaningfulReschedule(a: string | null, b: string | null) {
+  if (!a || !b) return false;
+  const delta = Math.abs(new Date(a).getTime() - new Date(b).getTime());
+  return Number.isFinite(delta) && delta >= RESCHEDULE_DISPLAY_MIN_MS;
 }
 
 function isManualPreviewRow(row: LiveStreamRow) {
@@ -147,7 +148,7 @@ export function liveStreamToSlot(row: LiveStreamRow): LiveSlot {
   let scheduledPrevious: string | undefined;
   let scheduledUpdated: string | undefined;
 
-  if (firstIso && latestIso && !sameInstant(firstIso, latestIso)) {
+  if (firstIso && latestIso && isMeaningfulReschedule(firstIso, latestIso)) {
     scheduledPrevious = bangkokParts(firstIso).time;
     scheduledUpdated = bangkokParts(latestIso).time;
     scheduledLabel = scheduledUpdated;
@@ -252,7 +253,7 @@ export function liveStreamToSlots(row: LiveStreamRow): LiveSlot[] {
   const latestIso = row.scheduled_start;
 
   // Check if original date differs from latest date (rescheduled to another day)
-  if (firstIso && latestIso && !sameInstant(firstIso, latestIso)) {
+  if (firstIso && latestIso && isMeaningfulReschedule(firstIso, latestIso)) {
     const firstDate = bangkokParts(firstIso).date;
     const latestDate = bangkokParts(latestIso).date;
 
