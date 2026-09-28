@@ -1,7 +1,7 @@
 "use client";
 import { englishWeekday, englishMonth, formatLiveShortDate, formatLiveDateRange } from "@/lib/live-date-format";
 
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, ExternalLink, Loader2 } from "lucide-react";
 
 import { LiveCoverPlaceholder } from "@/components/events/LiveCoverPlaceholder";
@@ -60,8 +60,11 @@ import {
 } from "@/lib/events";
 import { sortLiveSlotsForCalendar } from "@/lib/live-stream-utils";
 import { getSlotCoverUrl } from "@/lib/live-cover";
+import { scrollToHashTarget } from "@/lib/scroll-to-hash";
 import { cn } from "@/lib/utils";
 import type { LiveSlot } from "@/types/vtuber";
+
+const LIVE_SECTION_HASHES = new Set(["#this-week", "#calendar", "#weekly"]);
 
 function WeekSlotCard({
   slot,
@@ -430,6 +433,20 @@ export function LiveScheduleBoard() {
 
   const calendarLoading = !monthReady || monthQuery.status === "loading";
 
+  // Sections only exist after data loads, so the browser's native hash scroll misses them.
+  const hashScrollDone = useRef(false);
+  const boardSettled =
+    !initialLoading &&
+    !fatalError &&
+    (!calendarLoading || monthQuery.status === "error");
+  useEffect(() => {
+    if (hashScrollDone.current || !boardSettled) return;
+    hashScrollDone.current = true;
+    const hash = window.location.hash;
+    if (!LIVE_SECTION_HASHES.has(hash)) return;
+    requestAnimationFrame(() => scrollToHashTarget(hash, "smooth"));
+  }, [boardSettled]);
+
   // Calendar UI only: selected month + pad days to complete weeks
   const grid = useMemo(
     () => monthGridDates(year, month),
@@ -589,7 +606,7 @@ export function LiveScheduleBoard() {
   return (
     <div className="space-y-16 sm:space-y-20">
       {/* ── This week ── */}
-      <section className="relative">
+      <section id="this-week" className="relative scroll-mt-24 sm:scroll-mt-28">
         <div className="pointer-events-none absolute -top-10 right-0 size-44 bg-[radial-gradient(circle,rgba(232,90,122,0.14),transparent_65%)]" />
 
         <div className="relative">
@@ -614,8 +631,7 @@ export function LiveScheduleBoard() {
       </section>
 
       {/* ── Month calendar ── */}
-      {/* ── Month calendar ── */}
-      <section className="relative">
+      <section id="calendar" className="relative scroll-mt-24 sm:scroll-mt-28">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3">
             <h2 className={DISPLAY_H2_CLASS}>
@@ -933,7 +949,10 @@ export function LiveScheduleBoard() {
           </span>
         </div>
 
-        <h2 className={cn(DISPLAY_H2_CLASS, "mt-10 sm:mt-12")}>
+        <h2
+          id="weekly"
+          className={cn(DISPLAY_H2_CLASS, "mt-10 scroll-mt-24 sm:mt-12 sm:scroll-mt-28")}
+        >
           ตารางไลฟ์รายสัปดาห์
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-[#f3b8c4]/65 sm:text-base">

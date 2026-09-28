@@ -20,10 +20,11 @@ const FOOTER_NAV_GROUPS = [
   {
     title: "Explore",
     links: [
-      { href: "/gallery", label: "Gallery" },
-      { href: "/fan-art", label: "Fan art" },
       { href: "/events", label: "Events" },
       { href: "/live", label: "Live" },
+      { href: "/gallery", label: "Gallery" },
+      { href: "/gallery/live", label: "Live covers" },
+      { href: "/gallery/fanart", label: "Fan art" },
       { href: "/projects", label: "Projects" },
     ],
   },

@@ -7,7 +7,13 @@ import { Header } from "@/components/layout/Header";
 import { MediaProtection } from "@/components/media/MediaProtection";
 import { HbdProjectDetail } from "@/components/projects/HbdProjectDetail";
 import { ProjectDetail } from "@/components/projects/ProjectDetail";
+import {
+  PROJECTS_DESCRIPTION,
+  PROJECTS_TITLE,
+  ProjectsComingSoonPage,
+} from "@/components/projects/ProjectsComingSoon";
 import { getProjectBySlug, mildRData } from "@/data/vtuber-data";
+import { PROJECTS_COMING_SOON } from "@/lib/site-flags";
 
 type ProjectPageProps = {
   params: Promise<{ slug: string }>;
@@ -25,6 +31,13 @@ export async function generateMetadata({
 
   if (!project) {
     return { title: "Project | Mild-R Fanclub" };
+  }
+
+  if (PROJECTS_COMING_SOON) {
+    return {
+      title: `${PROJECTS_TITLE} | Mild-R Fanclub`,
+      description: PROJECTS_DESCRIPTION,
+    };
   }
 
   return {
@@ -49,7 +62,9 @@ export default async function ProjectSlugPage({ params }: ProjectPageProps) {
       <MediaProtection />
       <Header data={mildRData} />
       <main className="relative flex-1 bg-[#140a0d] text-[#fff5f7]">
-        {isHbd ? (
+        {PROJECTS_COMING_SOON ? (
+          <ProjectsComingSoonPage />
+        ) : isHbd ? (
           <HbdProjectDetail project={project} />
         ) : (
           <>

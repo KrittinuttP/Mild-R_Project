@@ -44,7 +44,7 @@ export async function GET(request: Request) {
       sourceTab,
       limit: 1500,
     }),
-    loadLiveStreamsInRange(fromYmd, toYmd, 500),
+    loadLiveStreamsInRange(fromYmd, toYmd, 500, { includeHidden: true }),
   ]);
 
   const partitioned = partitionLiveStreams(streamRows);

@@ -40,11 +40,6 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
   const categoryKey = project.category.toLowerCase();
   const categoryLabel = CATEGORY_LABEL[categoryKey] ?? project.category;
   const isHbd = categoryKey === "hbd";
-  const backHref =
-    categoryKey === "fansong" ? "/projects?category=fansong" : "/projects";
-  const backLabel =
-    categoryKey === "fansong" ? "Fansong ทั้งหมด" : "โปรเจกต์ทั้งหมด";
-
   const actions = [
     ...(project.cta ? [project.cta] : []),
     ...(project.ctas ?? []),
@@ -52,8 +47,8 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
 
   return (
     <article className="relative mx-auto max-w-6xl px-5 pb-24 pt-28 sm:px-10 sm:pt-32 lg:px-16">
-      <BackLink href={backHref} className="mb-8">
-        {backLabel}
+      <BackLink href="/projects" className="mb-8">
+        โปรเจกต์ทั้งหมด
       </BackLink>
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-end lg:gap-14">

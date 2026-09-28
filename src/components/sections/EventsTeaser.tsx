@@ -23,6 +23,7 @@ import {
 import {
   BADGE_ACCENT_CLASS,
   BADGE_SOFT_CLASS,
+  BODY_CLASS,
   CTA_OUTLINE_CLASS,
   CTA_PRIMARY_CLASS,
   DISPLAY_H2_CLASS,
@@ -139,7 +140,7 @@ export function EventsTeaser({ data }: EventsTeaserProps) {
       {events.length > 0 ? (
         <section
           id="events"
-          className="relative scroll-mt-20 bg-[#12080c] px-5 py-20 text-[#fff5f7] sm:scroll-mt-24 sm:px-10 sm:py-24 lg:px-16"
+          className="relative scroll-mt-20 bg-[#10070b] px-5 py-20 text-[#fff5f7] sm:scroll-mt-24 sm:px-10 sm:py-28 lg:px-16"
         >
           <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[radial-gradient(ellipse_at_20%_0%,rgba(232,90,122,0.12),transparent_55%)]" />
           <div className="relative mx-auto max-w-6xl">
@@ -151,7 +152,7 @@ export function EventsTeaser({ data }: EventsTeaserProps) {
               <h2 className={cn("mt-3", DISPLAY_H2_CLASS)}>
                 อีเวนต์
               </h2>
-              <p className="mt-4 max-w-xl text-sm text-[#f7d7de]/85 sm:text-base">
+              <p className={cn("mt-4 max-w-xl", BODY_CLASS)}>
                 กิจกรรมและอีเวนต์ล่าสุด
               </p>
             </ScrollReveal>
@@ -186,7 +187,7 @@ export function EventsTeaser({ data }: EventsTeaserProps) {
 
       <section
         id="live"
-        className="relative scroll-mt-20 bg-[#140a0d] px-5 py-20 text-[#fff5f7] sm:scroll-mt-24 sm:px-10 sm:py-24 lg:px-16"
+        className="relative scroll-mt-20 bg-[#140a0d] px-5 py-20 text-[#fff5f7] sm:scroll-mt-24 sm:px-10 sm:py-28 lg:px-16"
       >
         <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[radial-gradient(ellipse_at_80%_0%,rgba(232,90,122,0.12),transparent_55%)]" />
         <div className="relative mx-auto max-w-6xl">

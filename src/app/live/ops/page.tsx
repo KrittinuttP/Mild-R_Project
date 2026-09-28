@@ -44,7 +44,7 @@ export default async function LiveOpsPage() {
   const { from, to } = bangkokInclusiveToUtcRange(fromYmd, toYmd);
 
   const [streamRows, logs] = await Promise.all([
-    loadLiveStreamsInRange(fromYmd, toYmd, 500),
+    loadLiveStreamsInRange(fromYmd, toYmd, 500, { includeHidden: true }),
     loadSyncLogs({
       fromIso: from,
       toIso: to,

@@ -50,6 +50,11 @@ function linkedYoutubeVideoId(row: LiveStreamRow): string | null {
   return typeof linked === "string" && linked.trim() ? linked.trim() : null;
 }
 
+/** metadata.hidden = true → excluded from public schedule / covers (still in ops). */
+export function isHiddenLiveRow(row: Pick<LiveStreamRow, "metadata">): boolean {
+  return row.metadata?.hidden === true;
+}
+
 /** Unlinked schedule preview — never gets YouTube actual_start unless linked later. */
 function isUnlinkedSchedulePreview(row: LiveStreamRow): boolean {
   return isManualPreviewRow(row) && !linkedYoutubeVideoId(row);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 
 import {
   isReloadNavigation,
@@ -72,9 +72,12 @@ export function SiteSplash({ name, oshiMark, onFinished }: SiteSplashProps) {
   const [ecgFill, setEcgFill] = useState<EcgFill>("idle");
   const [pulseHeart, setPulseHeart] = useState(false);
 
-  useEffect(() => {
+  // Layout effect: the skip must land before first paint or the "hold" overlay flashes on in-app returns.
+  useLayoutEffect(() => {
     // Skip splash on in-app back / Link navigation — only show on fresh tab open or reload
     if (wasSoftNavigation() && !isReloadNavigation()) {
+      // sessionStorage/navigation timing are client-only, so this can't be initial state without a hydration mismatch.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPhase("done");
       onFinished?.();
       return;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { BookOpen } from "lucide-react";
 
 import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
 import { BODY_CLASS, DISPLAY_H2_CLASS, DISPLAY_H3_CLASS, META_CLASS } from "@/lib/site-ui";
@@ -109,7 +110,10 @@ export function Lore({ data }: LoreProps) {
 
       <div className="relative mx-auto max-w-6xl">
         <div className="max-w-2xl">
-          <p className={META_CLASS}>Lore</p>
+          <div className="flex items-center gap-2">
+            <BookOpen className="size-4 text-[#e85a7a]" aria-hidden />
+            <p className={META_CLASS}>Lore</p>
+          </div>
           <h2 className={cn("mt-3", DISPLAY_H2_CLASS)}>
             เรื่องราวหลังภัย
           </h2>

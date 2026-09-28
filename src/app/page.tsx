@@ -8,6 +8,7 @@ import { Gallery } from "@/components/sections/Gallery";
 import { HeroProfileScroll } from "@/components/sections/HeroProfileScroll";
 import { Lore } from "@/components/sections/Lore";
 import { Media } from "@/components/sections/Media";
+import { Projects } from "@/components/sections/Projects";
 import { Socials } from "@/components/sections/Socials";
 import { mildRData } from "@/data/vtuber-data";
 import { loadXFeedTabs } from "@/lib/x-posts";
@@ -28,9 +29,10 @@ export default async function Home() {
       <main className="flex-1 bg-[#140a0d]">
         <HeroProfileScroll data={mildRData} />
         <Lore data={mildRData} />
-        <Gallery data={mildRData} />
         <Media data={mildRData} />
         <EventsTeaser data={mildRData} />
+        <Gallery data={mildRData} />
+        <Projects data={mildRData} />
         <Socials data={mildRData} xPosts={xPosts} xRetweets={xRetweets} />
       </main>
       <Footer data={mildRData} />

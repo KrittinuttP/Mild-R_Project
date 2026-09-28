@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { HBD_AVATAR_DEFAULT } from "@/lib/hbd-upload";
 import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
+import { PROJECTS_COMING_SOON } from "@/lib/site-flags";
 import { cn } from "@/lib/utils";
 import type { HbdPage, VtuberProfile } from "@/types/vtuber";
 
@@ -259,9 +260,15 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
       >
         <div className="relative mx-auto w-full max-w-6xl px-5 sm:px-10 lg:px-16">
           <div data-hbd-anim>
-            <BackLink href="/projects/hbd" className="mb-8">
-              กลับโปรเจกต์
-            </BackLink>
+            {PROJECTS_COMING_SOON ? (
+              <BackLink href="/" className="mb-8">
+                กลับหน้าแรก
+              </BackLink>
+            ) : (
+              <BackLink href="/projects/hbd" className="mb-8">
+                กลับโปรเจกต์
+              </BackLink>
+            )}
           </div>
         </div>
 

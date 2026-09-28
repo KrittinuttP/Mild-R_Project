@@ -103,10 +103,12 @@ function EventCard({
 }
 
 function EventSection({
+  id,
   title,
   events,
   onOpen,
 }: {
+  id: string;
   title: string;
   events: CalendarEvent[];
   onOpen: (id: string) => void;
@@ -114,7 +116,7 @@ function EventSection({
   if (events.length === 0) return null;
 
   return (
-    <section>
+    <section id={id} className="scroll-mt-24 sm:scroll-mt-28">
       <h2 className={DISPLAY_H2_CLASS}>{title}</h2>
       <ul className="mt-6 grid grid-cols-1 gap-5 sm:mt-8 sm:grid-cols-3 sm:gap-6">
         {events.map((event) => (
@@ -142,8 +144,18 @@ export function EventsPageClient({ board }: EventsPageClientProps) {
 
   return (
     <div className="space-y-14 sm:space-y-16">
-      <EventSection title="อีเวนต์เร็วๆ นี้" events={upcoming} onOpen={setActiveId} />
-      <EventSection title="อีเวนต์ที่ผ่านมา" events={past} onOpen={setActiveId} />
+      <EventSection
+        id="upcoming"
+        title="อีเวนต์เร็วๆ นี้"
+        events={upcoming}
+        onOpen={setActiveId}
+      />
+      <EventSection
+        id="past"
+        title="อีเวนต์ที่ผ่านมา"
+        events={past}
+        onOpen={setActiveId}
+      />
 
       <EventDetailModal
         event={active}

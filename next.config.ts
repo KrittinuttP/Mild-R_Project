@@ -17,6 +17,11 @@ const nextConfig: NextConfig = {
       ...envOrigins,
     ])
   ),
+  async redirects() {
+    return [
+      { source: "/fan-art", destination: "/gallery/fanart", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

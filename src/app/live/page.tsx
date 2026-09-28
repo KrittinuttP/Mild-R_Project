@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Radio } from "lucide-react";
 
 import { LiveSchedulePanel } from "@/components/events/LiveSchedulePanel";
 import { BackLink } from "@/components/layout/BackLink";
@@ -32,7 +33,10 @@ export default function LivePage() {
             <BackLink href="/#live" className="mb-8">
               กลับหน้าแรก
             </BackLink>
-            <p className={META_CLASS}>Live</p>
+            <div className="flex items-center gap-2">
+              <Radio className="size-4 text-[#e85a7a]" aria-hidden />
+              <p className={META_CLASS}>Live</p>
+            </div>
             <h1 className={cn("mt-4 max-w-2xl", DISPLAY_H1_CLASS)}>
               ตารางไลฟ์
             </h1>

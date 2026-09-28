@@ -1,48 +1,37 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Palette } from "lucide-react";
 
 import { GallerySection } from "@/components/gallery/GallerySection";
+import { GallerySubNav } from "@/components/gallery/GallerySubNav";
 import { BackToTop } from "@/components/layout/BackToTop";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { MediaProtection } from "@/components/media/MediaProtection";
-import { buttonVariants } from "@/components/ui/button";
 import { mildRData } from "@/data/vtuber-data";
-import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Fan Art | Mild-R Fanclub",
   description: "คลังแฟนอาร์ตของ Mild-R จากฮันนี่",
 };
 
-export default function FanArtPage() {
+export default function GalleryFanArtPage() {
   return (
     <>
       <MediaProtection />
       <Header data={mildRData} />
-      <main className="flex-1 bg-[#140a0d]">
+      <main className="flex-1 bg-[#10070b]">
+        <GallerySubNav active="fanart" className="bg-[#10070b]" />
         <GallerySection
           id="fan-art"
-          eyebrow="Fan art"
-          title="จากฮันนี่"
+          eyebrow="Gallery"
+          icon={Palette}
+          title="Fan art"
+          description="แฟนอาร์ต Mild-R จากฮันนี่"
           items={mildRData.fanArt}
           variant="fan-art"
           mode="full"
-          backHref="/#fan-art"
-          backLabel="กลับหน้าแรก"
-          className="pt-28 sm:pt-32"
+          className="pt-10 sm:pt-12"
         />
-        <div className="flex justify-center pb-20">
-          <Link
-            href="/gallery"
-            className={cn(
-              buttonVariants({ variant: "ghost", size: "lg" }),
-              "text-[#f3b8c4]/80 hover:text-[#fff5f7]"
-            )}
-          >
-            ← ไปคลัง Archive
-          </Link>
-        </div>
       </main>
       <Footer data={mildRData} />
       <BackToTop />

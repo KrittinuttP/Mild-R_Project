@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CalendarDays } from "lucide-react";
 
 import { EventsPageClient } from "@/components/events/EventsPageClient";
 import { BackLink } from "@/components/layout/BackLink";
@@ -28,7 +29,10 @@ export default function EventsPage() {
             <BackLink href="/#events" className="mb-8">
               กลับหน้าแรก
             </BackLink>
-            <p className={META_CLASS}>Events</p>
+            <div className="flex items-center gap-2">
+              <CalendarDays className="size-4 text-[#e85a7a]" aria-hidden />
+              <p className={META_CLASS}>Events</p>
+            </div>
             <h1 className={cn("mt-4 max-w-2xl", DISPLAY_H1_CLASS)}>
               อีเวนต์
             </h1>

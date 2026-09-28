@@ -2,11 +2,12 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ExternalLink, Play } from "lucide-react";
+import { Clapperboard, ExternalLink, Play } from "lucide-react";
 
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { buttonVariants } from "@/components/ui/button";
 import { groupMediaByCategory } from "@/lib/media";
+import { PROJECTS_COMING_SOON } from "@/lib/site-flags";
 import {
   CTA_OUTLINE_CLASS,
   DISPLAY_H2_CLASS,
@@ -50,7 +51,7 @@ export function Media({ data }: MediaProps) {
   const videoId = getYoutubeVideoId(active?.youtubeUrl);
   const canEmbed = Boolean(active?.embedExternal && videoId);
   const youtubeSocial = data.socials.find((s) => s.platform === "youtube");
-  const hasFansong = data.projects.some(
+  const fansongProject = data.projects.find(
     (project) => project.category.toLowerCase() === "fansong"
   );
 
@@ -66,14 +67,17 @@ export function Media({ data }: MediaProps) {
   return (
     <section
       id="media"
-      className="relative scroll-mt-20 bg-[#10070b] px-5 py-20 text-[#fff5f7] sm:scroll-mt-24 sm:px-10 sm:py-28 lg:px-16"
+      className="relative scroll-mt-20 bg-[#12080c] px-5 py-20 text-[#fff5f7] sm:scroll-mt-24 sm:px-10 sm:py-28 lg:px-16"
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#12080c] to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#10080c] to-transparent" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[22rem] bg-[radial-gradient(ellipse_at_20%_0%,rgba(232,90,122,0.14),transparent_55%)]" />
 
       <div className="relative mx-auto max-w-6xl">
         <ScrollReveal>
-          <p className={META_CLASS}>Media</p>
+          <div className="flex items-center gap-2">
+            <Clapperboard className="size-4 text-[#e85a7a]" aria-hidden />
+            <p className={META_CLASS}>Media</p>
+          </div>
           <h2 className={cn("mt-3", DISPLAY_H2_CLASS)}>
             รับชมคลิป
           </h2>
@@ -281,9 +285,9 @@ export function Media({ data }: MediaProps) {
                 </Link>
               ) : null}
 
-              {hasFansong ? (
+              {fansongProject && !PROJECTS_COMING_SOON ? (
                 <Link
-                  href="/projects?category=fansong"
+                  href={`/projects/${fansongProject.slug}`}
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "lg" }),
                     "w-full justify-between text-[#f3b8c4]/80 hover:text-[#fff5f7]"

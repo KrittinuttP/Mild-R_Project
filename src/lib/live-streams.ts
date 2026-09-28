@@ -1,6 +1,12 @@
 import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { liveStreamSortKey } from "@/lib/live-stream-utils";
+import { bangkokDateFromIso } from "@/lib/live-preview-match";
+import {
+  getLiveStreamStatus,
+  isHiddenLiveRow,
+  liveStreamSortKey,
+  liveStreamToSlot,
+} from "@/lib/live-stream-utils";
 import { bangkokInclusiveToUtcRange } from "@/lib/live-view-trends";
 import type {
   LiveStreamRow,
@@ -50,9 +56,15 @@ async function loadThumbnailsForVideos(
   return map;
 }
 
+export type LoadLiveStreamsOptions = {
+  /** Include metadata.hidden rows (ops only). */
+  includeHidden?: boolean;
+};
+
 /** Load all YouTube live rows (paginated) + thumbnail history. */
 export async function loadLiveStreams(
-  limit = Number.POSITIVE_INFINITY
+  limit = Number.POSITIVE_INFINITY,
+  options?: LoadLiveStreamsOptions
 ): Promise<LiveStreamRow[]> {
   if (!isSupabaseConfigured()) return [];
 
@@ -78,7 +90,11 @@ export async function loadLiveStreams(
 
       const batch = (data ?? []) as LiveStreamRow[];
       if (batch.length === 0) break;
-      rows.push(...batch);
+      rows.push(
+        ...(options?.includeHidden
+          ? batch
+          : batch.filter((row) => !isHiddenLiveRow(row)))
+      );
       if (batch.length < PAGE) break;
       from += PAGE;
     }
@@ -108,6 +124,91 @@ export async function loadLiveStreams(
   }
 }
 
+/** One live for the Gallery "Live covers" archive. */
+export type LiveCoverItem = {
+  videoId: string;
+  title: string;
+  /** Bangkok YYYY-MM-DD (actual start → first scheduled). */
+  date: string | null;
+  isOwnChannel: boolean;
+  isMember: boolean;
+  /** Collab in Mild-R's channel (is_collab) or on another channel. */
+  isCollab: boolean;
+  channelLabel: string;
+  /** Small image for the grid. */
+  thumbUrl: string;
+  /** Full image for the lightbox. */
+  coverUrl: string;
+  /** All cover versions newest-first (includes current). */
+  versions: { url: string; capturedAt: string | null }[];
+  youtubeUrl: string;
+};
+
+function isPreviewRow(row: LiveStreamRow): boolean {
+  return row.video_id.startsWith("manual-") || row.metadata?.preview === true;
+}
+
+/** YouTube mqdefault is 16:9 320×180 — enough for grid tiles. */
+function youtubeGridThumb(url: string) {
+  if (!url.includes("i.ytimg.com/vi/")) return url;
+  return url.replace(
+    /\/(maxresdefault|sddefault|hqdefault|mqdefault|default)\.jpg/,
+    "/mqdefault.jpg"
+  );
+}
+
+/** Real lives with a cover (Mild-R + collabs), newest first. */
+export async function loadLiveCoverArchive(): Promise<LiveCoverItem[]> {
+  const rows = await loadLiveStreams();
+  const out: LiveCoverItem[] = [];
+
+  for (const row of rows) {
+    if (isPreviewRow(row)) continue;
+    if (getLiveStreamStatus(row) === "cancelled") continue;
+
+    const slot = liveStreamToSlot(row);
+    const current =
+      slot.coverUrl ?? slot.coverHistory?.[0]?.url ?? row.thumbnail_url;
+    if (!current) continue;
+
+    const versions: LiveCoverItem["versions"] = [];
+    const seen = new Set<string>();
+    for (const v of [
+      { url: current, capturedAt: null as string | null },
+      ...(slot.coverHistory ?? []),
+    ]) {
+      if (!v.url || seen.has(v.url)) continue;
+      seen.add(v.url);
+      versions.push({ url: v.url, capturedAt: v.capturedAt });
+    }
+
+    const own = Boolean(row.is_own_channel);
+    const linked = row.metadata?.linked_video_id;
+    const videoId =
+      typeof linked === "string" && linked.trim() ? linked.trim() : row.video_id;
+
+    out.push({
+      videoId: row.video_id,
+      title: row.title?.trim() || "Untitled live",
+      date: bangkokDateFromIso(
+        row.actual_start ?? row.scheduled_start_first ?? row.scheduled_start
+      ),
+      isOwnChannel: own,
+      isMember: Boolean(slot.isMember),
+      isCollab: slot.kind === "collab",
+      channelLabel: own
+        ? "Mild-R"
+        : row.source_title?.trim() || row.channel_name?.trim() || "Collab",
+      thumbUrl: youtubeGridThumb(current),
+      coverUrl: current,
+      versions,
+      youtubeUrl: `https://www.youtube.com/watch?v=${videoId}`,
+    });
+  }
+
+  return out;
+}
+
 const STREAM_SELECT =
   "video_id, channel_id, channel_name, source_title, title, url, scheduled_start, scheduled_start_first, actual_start, actual_end, thumbnail_url, thumbnail_cached_url, views_on_end, latest_views, likes_on_end, latest_likes, is_own_channel, is_collab, metadata, created_at, updated_at";
 
@@ -128,7 +229,8 @@ function streamAnchorIso(row: LiveStreamRow): string | null {
 export async function loadLiveStreamsInRange(
   fromYmd: string,
   toYmd: string,
-  limit = 500
+  limit = 500,
+  options?: LoadLiveStreamsOptions
 ): Promise<LiveStreamRow[]> {
   if (!isSupabaseConfigured()) return [];
 
@@ -191,6 +293,7 @@ export async function loadLiveStreamsInRange(
         });
 
         if (!inRange) continue;
+        if (!options?.includeHidden && isHiddenLiveRow(row)) continue;
         byId.set(row.video_id, row);
       }
     }

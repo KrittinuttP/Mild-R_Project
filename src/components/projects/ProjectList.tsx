@@ -26,21 +26,31 @@ const CATEGORY_LABEL: Record<string, string> = {
 
 type ProjectListProps = {
   projects: ProjectItem[];
-  emptyLabel?: string;
+  /** Card title tag — h3 when the list sits under a section h2 (home). */
+  headingAs?: "h2" | "h3";
+  className?: string;
 };
 
-export function ProjectList({ projects, emptyLabel }: ProjectListProps) {
+export function ProjectList({
+  projects,
+  headingAs: CardHeading = "h2",
+  className,
+}: ProjectListProps) {
   if (projects.length === 0) {
     return (
       <p className="mt-12 max-w-md text-sm text-[#f3b8c4]/75 sm:mt-16 sm:text-base">
         ยังไม่มีโปรเจกต์
-        {emptyLabel ? ` ในหมวด ${CATEGORY_LABEL[emptyLabel] ?? emptyLabel}` : ""}
       </p>
     );
   }
 
   return (
-    <ul className="mt-12 grid grid-cols-1 gap-5 sm:mt-16 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+    <ul
+      className={cn(
+        "mt-12 grid grid-cols-1 gap-5 sm:mt-16 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3",
+        className
+      )}
+    >
       {projects.map((project) => {
         const isHbd = project.category.toLowerCase() === "hbd";
         const ended = project.status === "ended";
@@ -91,14 +101,14 @@ export function ProjectList({ projects, emptyLabel }: ProjectListProps) {
                   ) : null}
                 </div>
 
-                <h2
+                <CardHeading
                   className={cn(
                     "mt-2 transition group-hover:text-white",
                     DISPLAY_H3_CLASS
                   )}
                 >
                   {project.title}
-                </h2>
+                </CardHeading>
                 {project.titleLocal ? (
                   <p className="mt-1 text-sm text-[#f3b8c4]/65">
                     {project.titleLocal}
