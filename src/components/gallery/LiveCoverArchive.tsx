@@ -1,13 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import Link from "next/link";
 import {
   ArrowUpRight,
+  CalendarDays,
   ChevronLeft,
   ChevronRight,
   ExternalLink,
+  LayoutGrid,
   MonitorPlay,
+  Search,
+  X,
 } from "lucide-react";
 
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
@@ -48,6 +58,8 @@ registerGsapPlugins();
 const PAGE_STEP = 24;
 const SKELETON_COUNT = 8;
 const PREVIEW_COUNT = 8;
+const COVER_GRID_CLASS =
+  "grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-x-4 lg:grid-cols-4";
 /** Start fetching a bit before the section scrolls into view. */
 const PREFETCH_MARGIN = "600px 0px";
 
@@ -68,11 +80,101 @@ function matchesFilter(item: LiveCoverItem, filter: Filter): boolean {
   return true;
 }
 
+type CoverView = "month" | "all";
+
+const VIEW_STORAGE_KEY = "mild-r:live-cover-view";
+const VIEW_CHANGE_EVENT = "mild-r:live-cover-view-change";
+
+function readCoverView(): CoverView {
+  try {
+    return localStorage.getItem(VIEW_STORAGE_KEY) === "all" ? "all" : "month";
+  } catch {
+    return "month";
+  }
+}
+
+function subscribeCoverView(onChange: () => void) {
+  window.addEventListener("storage", onChange);
+  window.addEventListener(VIEW_CHANGE_EVENT, onChange);
+  return () => {
+    window.removeEventListener("storage", onChange);
+    window.removeEventListener(VIEW_CHANGE_EVENT, onChange);
+  };
+}
+
+function writeCoverView(view: CoverView) {
+  try {
+    localStorage.setItem(VIEW_STORAGE_KEY, view);
+  } catch {
+    // Private mode / storage disabled: preference just won't persist.
+  }
+  window.dispatchEvent(new Event(VIEW_CHANGE_EVENT));
+}
+
+const VIEW_OPTIONS: {
+  key: CoverView;
+  label: string;
+  ariaLabel: string;
+  Icon: typeof CalendarDays;
+}[] = [
+  { key: "month", label: "รายเดือน", ariaLabel: "ดูแบบแบ่งตามเดือน", Icon: CalendarDays },
+  { key: "all", label: "ทั้งหมด", ariaLabel: "ดูทั้งหมดต่อกัน", Icon: LayoutGrid },
+];
+
+function normalizeSearch(value: string): string {
+  return value.normalize("NFC").trim().toLocaleLowerCase();
+}
+
+function matchesSearch(item: LiveCoverItem, normalizedQuery: string): boolean {
+  return normalizeSearch(`${item.title} ${item.channelLabel}`).includes(
+    normalizedQuery
+  );
+}
+
+const UNKNOWN_MONTH = "unknown";
+
+function coverYear(item: LiveCoverItem): string | null {
+  return item.date?.slice(0, 4) ?? null;
+}
+
+function coverMonth(item: LiveCoverItem): string {
+  return item.date?.slice(0, 7) ?? UNKNOWN_MONTH;
+}
+
+function formatMonthHeading(monthKey: string): string {
+  if (monthKey === UNKNOWN_MONTH) return "ไม่ระบุวันที่";
+  const d = new Date(`${monthKey}-15T12:00:00+07:00`);
+  if (Number.isNaN(d.getTime())) return monthKey;
+  return d.toLocaleDateString("th-TH-u-ca-gregory", {
+    timeZone: "Asia/Bangkok",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+type MonthGroup = {
+  key: string;
+  items: LiveCoverItem[];
+  /** Index of the first item in the flat visible list (lightbox order). */
+  start: number;
+};
+
+function groupByMonth(items: LiveCoverItem[]): MonthGroup[] {
+  const groups: MonthGroup[] = [];
+  items.forEach((item, index) => {
+    const key = coverMonth(item);
+    const last = groups[groups.length - 1];
+    if (last && last.key === key) last.items.push(item);
+    else groups.push({ key, items: [item], start: index });
+  });
+  return groups;
+}
+
 function formatDate(ymd: string | null): string {
   if (!ymd) return "";
   const d = new Date(`${ymd}T12:00:00+07:00`);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("th-TH", {
+  return d.toLocaleDateString("th-TH-u-ca-gregory", {
     timeZone: "Asia/Bangkok",
     day: "numeric",
     month: "short",
@@ -226,7 +328,7 @@ export function LiveCoverArchive({
 }: LiveCoverArchiveProps) {
   const preview = mode === "preview";
   const sectionRef = useRef<HTMLElement>(null);
-  const gridRef = useRef<HTMLUListElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
   const [nearView, setNearView] = useState(false);
   const { covers, total, status, retry } = useLiveCovers(
     nearView,
@@ -234,6 +336,13 @@ export function LiveCoverArchive({
   );
 
   const [filter, setFilter] = useState<Filter>("all");
+  const [year, setYear] = useState<string>("all");
+  const [query, setQuery] = useState("");
+  const view = useSyncExternalStore(
+    subscribeCoverView,
+    readCoverView,
+    () => "month" as const
+  );
   const [visibleCount, setVisibleCount] = useState(PAGE_STEP);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [versionIndex, setVersionIndex] = useState(0);
@@ -254,25 +363,74 @@ export function LiveCoverArchive({
     return () => io.disconnect();
   }, [nearView]);
 
+  const normalizedQuery = normalizeSearch(query);
+
+  const searched = useMemo(
+    () =>
+      normalizedQuery
+        ? covers.filter((c) => matchesSearch(c, normalizedQuery))
+        : covers,
+    [covers, normalizedQuery]
+  );
+
   const counts = useMemo(() => {
     const out = { all: 0, own: 0, member: 0, collab: 0 } as Record<Filter, number>;
-    for (const c of covers) {
+    for (const c of searched) {
       for (const key of Object.keys(out) as Filter[]) {
         if (matchesFilter(c, key)) out[key] += 1;
       }
     }
     return out;
-  }, [covers]);
+  }, [searched]);
+
+  const byCategory = useMemo(
+    () => searched.filter((c) => matchesFilter(c, filter)),
+    [searched, filter]
+  );
+
+  const yearCounts = useMemo(() => {
+    const out = new Map<string, number>();
+    for (const c of covers) {
+      const y = coverYear(c);
+      if (y) out.set(y, 0);
+    }
+    for (const c of byCategory) {
+      const y = coverYear(c);
+      if (y) out.set(y, (out.get(y) ?? 0) + 1);
+    }
+    return [...out].sort((a, b) => b[0].localeCompare(a[0]));
+  }, [covers, byCategory]);
 
   const filtered = useMemo(
-    () => covers.filter((c) => matchesFilter(c, filter)),
-    [covers, filter]
+    () =>
+      year === "all"
+        ? byCategory
+        : byCategory.filter((c) => coverYear(c) === year),
+    [byCategory, year]
   );
+
+  const byMonth = !preview && view === "month";
+
+  const monthGroups = useMemo(() => {
+    if (!byMonth) return [];
+    // Whole months only: stop once the running total reaches visibleCount.
+    const all = groupByMonth(filtered);
+    const out: MonthGroup[] = [];
+    let shown = 0;
+    for (const group of all) {
+      if (shown >= visibleCount) break;
+      out.push(group);
+      shown += group.items.length;
+    }
+    return out;
+  }, [byMonth, filtered, visibleCount]);
 
   const visible = preview
     ? filtered.slice(0, PREVIEW_COUNT)
-    : filtered.slice(0, visibleCount);
-  const hasMore = !preview && visibleCount < filtered.length;
+    : byMonth
+      ? monthGroups.flatMap((g) => g.items)
+      : filtered.slice(0, visibleCount);
+  const hasMore = !preview && visible.length < filtered.length;
   const active = activeIndex !== null ? (visible[activeIndex] ?? null) : null;
   const activeVersion = active?.versions[versionIndex] ?? null;
   const lightboxSrc =
@@ -285,6 +443,31 @@ export function LiveCoverArchive({
 
   const selectFilter = (next: Filter) => {
     setFilter(next);
+    if (
+      year !== "all" &&
+      !searched.some((c) => matchesFilter(c, next) && coverYear(c) === year)
+    ) {
+      setYear("all");
+    }
+    setVisibleCount(PAGE_STEP);
+    openAt(null);
+  };
+
+  const selectYear = (next: string) => {
+    setYear(next);
+    setVisibleCount(PAGE_STEP);
+    openAt(null);
+  };
+
+  const changeQuery = (next: string) => {
+    setQuery(next);
+    setVisibleCount(PAGE_STEP);
+    openAt(null);
+  };
+
+  const selectView = (next: CoverView) => {
+    if (next === view) return;
+    writeCoverView(next);
     setVisibleCount(PAGE_STEP);
     openAt(null);
   };
@@ -347,7 +530,10 @@ export function LiveCoverArchive({
       // Filtering reflows tiles that keep their old triggers; re-measure so they reveal in place.
       ScrollTrigger.refresh();
     },
-    { scope: gridRef, dependencies: [visibleCount, filter, status] }
+    {
+      scope: gridRef,
+      dependencies: [visibleCount, filter, year, normalizedQuery, view, status],
+    }
   );
 
   return (
@@ -383,29 +569,133 @@ export function LiveCoverArchive({
         </ScrollReveal>
 
         {!preview && status === "ready" && covers.length > 0 ? (
-          <div
-            className="mt-6 flex flex-wrap gap-2"
-            role="tablist"
-            aria-label="กรองปกไลฟ์"
-          >
-            {(Object.keys(FILTER_LABEL) as Filter[]).map((key) => (
-              <button
-                key={key}
-                type="button"
-                role="tab"
-                aria-selected={filter === key}
-                onClick={() => selectFilter(key)}
+          <div className="mt-6 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-3 sm:gap-x-3 lg:gap-x-4">
+            <div
+              className="relative col-start-2 row-start-1 grid h-10 grid-cols-2 rounded-full border border-[#f3b8c4]/15 bg-[#1a0c12]/70 p-0.5 lg:h-9"
+              role="group"
+              aria-label="มุมมอง"
+            >
+              <span
+                aria-hidden
                 className={cn(
-                  "rounded-full border px-3.5 py-1.5 text-xs transition sm:text-sm",
-                  filter === key
-                    ? "border-[#e85a7a]/60 bg-[#e85a7a]/20 text-[#fff5f7]"
-                    : "border-[#f3b8c4]/20 text-[#f3b8c4]/70 hover:border-[#f3b8c4]/40 hover:text-[#fff5f7]"
+                  "pointer-events-none absolute inset-y-0.5 left-0.5 w-[calc(50%-2px)] rounded-full border border-[#e85a7a]/55",
+                  "bg-gradient-to-b from-[#e85a7a]/30 to-[#e85a7a]/12 shadow-[0_0_18px_-6px_rgba(232,90,122,0.75)]",
+                  "transition-transform duration-300 ease-out motion-reduce:transition-none",
+                  view === "all" && "translate-x-full"
                 )}
+              />
+              {VIEW_OPTIONS.map(({ key, label, ariaLabel, Icon }) => {
+                const selected = view === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    aria-pressed={selected}
+                    aria-label={ariaLabel}
+                    title={ariaLabel}
+                    onClick={() => selectView(key)}
+                    className={cn(
+                      "relative flex items-center justify-center gap-1.5 rounded-full px-3 text-xs transition-colors duration-300 sm:px-4 sm:text-sm",
+                      "focus-visible:ring-2 focus-visible:ring-[#e85a7a]/60 focus-visible:outline-none",
+                      selected
+                        ? "text-[#fff5f7]"
+                        : "text-[#f3b8c4]/55 hover:text-[#fff5f7]"
+                    )}
+                  >
+                    <Icon className="size-4 shrink-0" aria-hidden />
+                    <span className="hidden whitespace-nowrap sm:inline">{label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <label className="relative col-start-1 row-start-1 block w-full lg:col-start-2 lg:row-start-2 lg:w-64 lg:justify-self-end">
+              <span className="sr-only">ค้นหาปกไลฟ์</span>
+              <Search
+                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#f3b8c4]/45"
+                aria-hidden
+              />
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => changeQuery(e.target.value)}
+                placeholder="ค้นหาชื่อไลฟ์ หรือช่อง…"
+                enterKeyHint="search"
+                className={cn(
+                  "h-10 w-full rounded-full border border-[#f3b8c4]/15 bg-[#1a0c12]/70 pr-9 pl-9 text-sm text-[#fff5f7] transition outline-none",
+                  "placeholder:text-[#f3b8c4]/40 focus:border-[#e85a7a]/55 focus:bg-[#1a0c12]",
+                  "[&::-webkit-search-cancel-button]:appearance-none"
+                )}
+              />
+              {query ? (
+                <button
+                  type="button"
+                  onClick={() => changeQuery("")}
+                  aria-label="ล้างคำค้น"
+                  className="absolute top-1/2 right-2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-[#f3b8c4]/60 transition hover:bg-[#f3b8c4]/10 hover:text-[#fff5f7]"
+                >
+                  <X className="size-3.5" />
+                </button>
+              ) : null}
+            </label>
+
+            <div
+              className="col-span-2 row-start-2 -mx-5 flex min-w-0 gap-1.5 overflow-x-auto px-5 [scrollbar-width:none] sm:-mx-10 sm:gap-2 sm:px-10 lg:col-span-1 lg:col-start-1 lg:row-start-1 lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0 [&::-webkit-scrollbar]:hidden"
+              role="tablist"
+              aria-label="กรองปกไลฟ์"
+            >
+              {(Object.keys(FILTER_LABEL) as Filter[]).map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  role="tab"
+                  aria-selected={filter === key}
+                  onClick={() => selectFilter(key)}
+                  className={cn(
+                    "shrink-0 rounded-full border px-3 py-1.5 text-xs whitespace-nowrap transition sm:px-3.5 sm:text-sm",
+                    filter === key
+                      ? "border-[#e85a7a]/60 bg-[#e85a7a]/20 text-[#fff5f7]"
+                      : "border-[#f3b8c4]/20 text-[#f3b8c4]/70 hover:border-[#f3b8c4]/40 hover:text-[#fff5f7]"
+                  )}
+                >
+                  {FILTER_LABEL[key]}
+                  <span className="ml-1.5 text-[#f3b8c4]/55">{counts[key]}</span>
+                </button>
+              ))}
+            </div>
+
+            {yearCounts.length > 1 ? (
+              <div
+                className="col-span-2 row-start-3 flex flex-wrap gap-1.5 lg:col-span-1 lg:col-start-1 lg:row-start-2"
+                role="group"
+                aria-label="กรองตามปี"
               >
-                {FILTER_LABEL[key]}
-                <span className="ml-1.5 text-[#f3b8c4]/55">{counts[key]}</span>
-              </button>
-            ))}
+                {[["all", byCategory.length] as const, ...yearCounts].map(
+                  ([key, count]) => {
+                    const selected = year === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        aria-pressed={selected}
+                        disabled={count === 0 && !selected}
+                        onClick={() => selectYear(key)}
+                        className={cn(
+                          "rounded-full border px-3 py-1 text-[0.7rem] transition sm:text-xs",
+                          "disabled:cursor-not-allowed disabled:opacity-35",
+                          selected
+                            ? "border-[#f3b8c4]/45 bg-[#f3b8c4]/12 text-[#fff5f7]"
+                            : "border-[#f3b8c4]/12 text-[#f3b8c4]/60 enabled:hover:border-[#f3b8c4]/35 enabled:hover:text-[#fff5f7]"
+                        )}
+                      >
+                        {key === "all" ? "ทุกปี" : key}
+                        <span className="ml-1.5 text-[#f3b8c4]/45">{count}</span>
+                      </button>
+                    );
+                  }
+                )}
+              </div>
+            ) : null}
           </div>
         ) : null}
 
@@ -424,25 +714,82 @@ export function LiveCoverArchive({
             </button>
           </div>
         ) : status === "ready" && filtered.length === 0 ? (
-          <p className="mt-8 text-sm text-[#f3b8c4]/60">ยังไม่มีปกไลฟ์ในหมวดนี้</p>
+          normalizedQuery ? (
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <p className="text-sm text-[#f3b8c4]/60">
+                ไม่พบไลฟ์ที่ตรงกับ “{query.trim()}”
+              </p>
+              <button
+                type="button"
+                onClick={() =>
+                  year !== "all" && byCategory.length > 0
+                    ? selectYear("all")
+                    : changeQuery("")
+                }
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                  CTA_OUTLINE_CLASS
+                )}
+              >
+                {year !== "all" && byCategory.length > 0
+                  ? "ค้นหาในทุกปี"
+                  : "ล้างคำค้น"}
+              </button>
+            </div>
+          ) : (
+            <p className="mt-8 text-sm text-[#f3b8c4]/60">ยังไม่มีปกไลฟ์ในหมวดนี้</p>
+          )
         ) : (
-          <ul
-            ref={gridRef}
-            className="mt-6 grid grid-cols-2 gap-x-3 gap-y-6 sm:mt-8 sm:grid-cols-3 sm:gap-x-4 lg:grid-cols-4"
-          >
-            {status === "ready"
-              ? visible.map((item, index) => (
+          <div ref={gridRef} className="mt-6 sm:mt-8">
+            {status !== "ready" ? (
+              <ul className={COVER_GRID_CLASS}>
+                {Array.from(
+                  { length: preview ? PREVIEW_COUNT : SKELETON_COUNT },
+                  (_, i) => <SkeletonTile key={i} />
+                )}
+              </ul>
+            ) : !byMonth ? (
+              <ul className={COVER_GRID_CLASS}>
+                {visible.map((item, index) => (
                   <CoverTile
                     key={item.videoId}
                     item={item}
                     onOpen={() => openAt(index)}
                   />
-                ))
-              : Array.from(
-                  { length: preview ? PREVIEW_COUNT : SKELETON_COUNT },
-                  (_, i) => <SkeletonTile key={i} />
-                )}
-          </ul>
+                ))}
+              </ul>
+            ) : (
+              <div className="space-y-10 sm:space-y-12">
+                {monthGroups.map((group) => (
+                  <section
+                    key={group.key}
+                    aria-labelledby={`${id}-month-${group.key}`}
+                  >
+                    <h3
+                      id={`${id}-month-${group.key}`}
+                      className="sticky top-14 z-10 -mx-2 mb-4 flex items-baseline gap-2 bg-[#12080c]/90 px-2 py-2.5 backdrop-blur-sm sm:top-16"
+                    >
+                      <span className="font-[family-name:var(--font-display)] text-lg text-[#fff5f7] sm:text-xl">
+                        {formatMonthHeading(group.key)}
+                      </span>
+                      <span className="text-xs text-[#f3b8c4]/55">
+                        {group.items.length} ไลฟ์
+                      </span>
+                    </h3>
+                    <ul className={COVER_GRID_CLASS}>
+                      {group.items.map((item, i) => (
+                        <CoverTile
+                          key={item.videoId}
+                          item={item}
+                          onOpen={() => openAt(group.start + i)}
+                        />
+                      ))}
+                    </ul>
+                  </section>
+                ))}
+              </div>
+            )}
+          </div>
         )}
 
         {preview && status === "ready" && total > 0 ? (
@@ -466,9 +813,7 @@ export function LiveCoverArchive({
           <div className="mt-10 flex justify-center sm:mt-12">
             <button
               type="button"
-              onClick={() =>
-                setVisibleCount((n) => Math.min(n + PAGE_STEP, filtered.length))
-              }
+              onClick={() => setVisibleCount(visible.length + PAGE_STEP)}
               className={cn(
                 buttonVariants({ variant: "outline", size: "lg" }),
                 CTA_OUTLINE_CLASS,
@@ -477,7 +822,7 @@ export function LiveCoverArchive({
             >
               โหลดเพิ่ม
               <span className="ml-2 text-[#f3b8c4]/70">
-                ({filtered.length - visibleCount})
+                ({filtered.length - visible.length})
               </span>
             </button>
           </div>
