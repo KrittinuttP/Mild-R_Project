@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import type { XLiveScheduleHistoryRow } from "@/lib/x-live-schedules";
 
@@ -13,32 +13,36 @@ function keyOf(range: XSchedulesRange) {
 }
 
 export function useXLiveSchedules(range: XSchedulesRange) {
+  const key = keyOf(range);
   const [rows, setRows] = useState<XLiveScheduleHistoryRow[]>(
-    () => cache.get(keyOf(range)) ?? []
+    () => cache.get(key) ?? []
   );
   const [status, setStatus] = useState<"loading" | "ready" | "error">(() =>
-    cache.has(keyOf(range)) ? "ready" : "loading"
+    cache.has(key) ? "ready" : "loading"
   );
   const [fetchKey, setFetchKey] = useState(0);
-  const rangeRef = useRef(range);
-  rangeRef.current = range;
 
   const retry = useCallback(() => {
-    cache.delete(keyOf(rangeRef.current));
+    cache.delete(key);
     setFetchKey((k) => k + 1);
-  }, []);
+  }, [key]);
 
-  useEffect(() => {
-    let cancelled = false;
-    const key = keyOf(range);
+  const requestKey = `${key}|${fetchKey}`;
+  const [startedKey, setStartedKey] = useState(requestKey);
+  if (startedKey !== requestKey) {
+    setStartedKey(requestKey);
     const cached = cache.get(key);
     if (cached) {
       setRows(cached);
       setStatus("ready");
-      return;
+    } else {
+      setStatus("loading");
     }
+  }
 
-    setStatus("loading");
+  useEffect(() => {
+    if (cache.has(key)) return;
+    let cancelled = false;
     const url = `/api/live/x-schedules?from=${encodeURIComponent(range.from)}&to=${encodeURIComponent(range.to)}`;
 
     fetch(url)
@@ -67,7 +71,7 @@ export function useXLiveSchedules(range: XSchedulesRange) {
     return () => {
       cancelled = true;
     };
-  }, [range.from, range.to, fetchKey]);
+  }, [key, range.from, range.to, fetchKey]);
 
   return { rows, status, retry };
 }

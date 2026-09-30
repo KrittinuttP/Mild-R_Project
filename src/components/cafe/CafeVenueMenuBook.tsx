@@ -275,10 +275,16 @@ export function CafeVenueMenuBook({
     indexRef.current = index;
   }, [index]);
 
+  const layoutKey = `${step}|${spread}`;
+  const [snappedLayoutKey, setSnappedLayoutKey] = useState(layoutKey);
+  if (snappedLayoutKey !== layoutKey) {
+    setSnappedLayoutKey(layoutKey);
+    setIndex(snapToStep(index, step));
+  }
+
   useEffect(() => {
     stepRef.current = step;
     spreadRef.current = spread;
-    setIndex((current) => snapToStep(current, step));
   }, [step, spread]);
 
   useGSAP(

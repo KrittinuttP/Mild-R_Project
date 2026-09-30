@@ -332,6 +332,8 @@ export interface HbdWish {
   /** Future: sourced from Supabase Storage upload */
   fromUpload?: boolean;
   loadOnDemand?: boolean;
+  /** JPEG download endpoint for the card */
+  downloadUrl?: string;
 }
 
 /** Birthday wishes page content */

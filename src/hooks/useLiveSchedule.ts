@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import type { LiveWeek } from "@/types/vtuber";
 
@@ -28,8 +28,9 @@ export function useLiveSchedule(
     initialWeeks?: LiveWeek[] | null;
   } = {}
 ) {
+  const key = cacheKey(range);
   const initialSeed = (): LiveWeek[] | null =>
-    scheduleCache.get(cacheKey(range)) ?? initialWeeks;
+    scheduleCache.get(key) ?? initialWeeks;
   const [weeks, setWeeks] = useState<LiveWeek[]>(() => initialSeed() ?? []);
   const [status, setStatus] = useState<LiveScheduleStatus>(() =>
     initialSeed() ? "ready" : "loading"
@@ -37,42 +38,42 @@ export function useLiveSchedule(
   const [error, setError] = useState<string | null>(null);
   const [hasLoaded, setHasLoaded] = useState(() => initialSeed() !== null);
   const [resolvedKey, setResolvedKey] = useState(() =>
-    initialSeed() ? cacheKey(range) : null
+    initialSeed() ? key : null
   );
   const [fetchKey, setFetchKey] = useState(0);
-  const rangeRef = useRef(range);
-  rangeRef.current = range;
-  const silentKeyRef = useRef<string | null>(
-    initialWeeks && !scheduleCache.has(cacheKey(range)) ? cacheKey(range) : null
+  /** Range seeded from `initialWeeks` — refetched without clearing / loading UI. */
+  const [silentKey, setSilentKey] = useState<string | null>(() =>
+    initialWeeks && !scheduleCache.has(key) ? key : null
   );
 
   const retry = useCallback(() => {
-    silentKeyRef.current = null;
-    scheduleCache.delete(cacheKey(rangeRef.current));
+    setSilentKey(null);
+    scheduleCache.delete(key);
     setFetchKey((k) => k + 1);
-  }, []);
+  }, [key]);
 
-  useEffect(() => {
-    let cancelled = false;
-    const key = cacheKey(range);
+  const requestKey = `${key}|${fetchKey}`;
+  const [startedKey, setStartedKey] = useState(requestKey);
+  if (startedKey !== requestKey) {
+    setStartedKey(requestKey);
     const cached = scheduleCache.get(key);
-
     if (cached) {
       setResolvedKey(key);
       setHasLoaded(true);
       setWeeks(cached);
       setStatus("ready");
       setError(null);
-      return;
-    }
-
-    const silent = silentKeyRef.current === key;
-
-    if (!silent) {
+    } else if (silentKey !== key) {
       if (!keepPreviousData) setWeeks([]);
       setStatus("loading");
       setError(null);
     }
+  }
+
+  useEffect(() => {
+    if (scheduleCache.has(key)) return;
+    let cancelled = false;
+    const silent = silentKey === key;
 
     (async () => {
       try {
@@ -93,11 +94,12 @@ export function useLiveSchedule(
           throw new Error(data.error ?? "invalid response");
         }
         scheduleCache.set(key, data.weeks);
-        if (silentKeyRef.current === key) silentKeyRef.current = null;
         setWeeks(data.weeks);
         setResolvedKey(key);
         setHasLoaded(true);
         setStatus("ready");
+        setError(null);
+        if (silent) setSilentKey(null);
       } catch (err) {
         if (cancelled) return;
         if (silent) {
@@ -114,7 +116,7 @@ export function useLiveSchedule(
     return () => {
       cancelled = true;
     };
-  }, [range.from, range.to, fetchKey, keepPreviousData]);
+  }, [key, range.from, range.to, fetchKey, keepPreviousData, silentKey]);
 
   return { weeks, status, error, retry, hasLoaded, resolvedKey };
 }

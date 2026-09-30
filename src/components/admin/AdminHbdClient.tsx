@@ -8,16 +8,27 @@ import {
   Check,
   CheckCircle2,
   Clock,
+  Eye,
+  EyeOff,
   ExternalLink,
   Lock,
   MessageSquare,
   Sparkles,
+  Trash2,
   X,
   XCircle,
 } from "lucide-react";
 
 import { BackLink } from "@/components/layout/BackLink";
 import { buttonVariants } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { HbdSubmissionRow } from "@/lib/hbd-submissions-store";
 import {
   CTA_OUTLINE_CLASS,
@@ -32,7 +43,23 @@ import { cn } from "@/lib/utils";
 
 const DISPLAY = "font-[family-name:var(--font-display)]";
 
-type Tab = "pending" | "approved";
+type Tab = "pending" | "approved" | "hidden";
+type ItemAction = "approve" | "reject" | "hide" | "unhide";
+
+const TABS: { key: Tab; label: string }[] = [
+  { key: "pending", label: "รออนุมัติ" },
+  { key: "approved", label: "อนุมัติแล้ว" },
+  { key: "hidden", label: "ซ่อน / ปฏิเสธ" },
+];
+
+const EMPTY_HINT: Record<Tab, string> = {
+  pending: "รอแฟนคลับส่งการ์ดคำอวยพรจากหน้า /hbd/2026/upload",
+  approved: "ยังไม่มีรายการที่ได้รับการอนุมัติ",
+  hidden: "รายการที่ซ่อนหรือปฏิเสธจะมาอยู่ที่นี่ กดแสดงอีกครั้งได้",
+};
+
+const ACTION_BUTTON_CLASS =
+  "inline-flex items-center gap-1.5 rounded-xl px-3.5 text-xs transition disabled:opacity-50";
 
 export function AdminHbdClient() {
   const [unlocked, setUnlocked] = useState(false);
@@ -43,6 +70,7 @@ export function AdminHbdClient() {
   const [loading, setLoading] = useState(false);
   const [actingId, setActingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<HbdSubmissionRow | null>(null);
 
   const load = useCallback(async (status: Tab) => {
     setLoading(true);
@@ -99,7 +127,28 @@ export function AdminHbdClient() {
     await load(next);
   }
 
-  async function act(id: string, action: "approve" | "reject") {
+  async function remove(item: HbdSubmissionRow) {
+    setActingId(item.id);
+    setError(null);
+    try {
+      const res = await fetch(`/api/hbd/admin/submissions/${item.id}`, {
+        method: "DELETE",
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setError(data.error ?? "ลบไม่สำเร็จ");
+        return;
+      }
+      setDeleteTarget(null);
+      await load(tab);
+    } catch {
+      setError("เครือข่ายมีปัญหา");
+    } finally {
+      setActingId(null);
+    }
+  }
+
+  async function act(id: string, action: ItemAction) {
     setActingId(id);
     setError(null);
     try {
@@ -194,38 +243,29 @@ export function AdminHbdClient() {
       </div>
 
       {/* 🏷️ Segmented Pill Tabs */}
-      <div className="mt-6 flex items-center gap-2 rounded-2xl border border-[#f3b8c4]/15 bg-[#14080e]/80 p-1.5 shadow-inner">
-        <button
-          type="button"
-          onClick={() => switchTab("pending")}
-          className={cn(
-            "flex-1 rounded-xl px-4 py-2 text-xs font-semibold tracking-wide transition sm:text-sm",
-            tab === "pending"
-              ? "border border-[#e85a7a]/60 bg-[#e85a7a]/25 text-[#fff5f7] shadow-[0_0_16px_rgba(232,90,122,0.3)]"
-              : "text-[#f3b8c4]/65 hover:text-[#fff5f7]"
-          )}
-        >
-          <span className="inline-flex items-center gap-1.5">
-            <span>รออนุมัติ (Pending)</span>
-            {pendingCount > 0 ? (
-              <span className="rounded-full bg-[#e85a7a] px-2 py-0.2 text-[0.68rem] font-bold text-white shadow-sm">
-                {pendingCount}
-              </span>
-            ) : null}
-          </span>
-        </button>
-        <button
-          type="button"
-          onClick={() => switchTab("approved")}
-          className={cn(
-            "flex-1 rounded-xl px-4 py-2 text-xs font-semibold tracking-wide transition sm:text-sm",
-            tab === "approved"
-              ? "border border-[#e85a7a]/60 bg-[#e85a7a]/25 text-[#fff5f7] shadow-[0_0_16px_rgba(232,90,122,0.3)]"
-              : "text-[#f3b8c4]/65 hover:text-[#fff5f7]"
-          )}
-        >
-          อนุมัติแล้ว (Approved)
-        </button>
+      <div className="mt-6 flex items-center gap-1.5 rounded-2xl border border-[#f3b8c4]/15 bg-[#14080e]/80 p-1.5 shadow-inner sm:gap-2">
+        {TABS.map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => switchTab(key)}
+            className={cn(
+              "flex-1 rounded-xl px-2 py-2 text-xs font-semibold tracking-wide transition sm:px-4 sm:text-sm",
+              tab === key
+                ? "border border-[#e85a7a]/60 bg-[#e85a7a]/25 text-[#fff5f7] shadow-[0_0_16px_rgba(232,90,122,0.3)]"
+                : "text-[#f3b8c4]/65 hover:text-[#fff5f7]"
+            )}
+          >
+            <span className="inline-flex items-center gap-1.5">
+              <span>{label}</span>
+              {key === "pending" && pendingCount > 0 ? (
+                <span className="rounded-full bg-[#e85a7a] px-2 py-0.2 text-[0.68rem] font-bold text-white shadow-sm">
+                  {pendingCount}
+                </span>
+              ) : null}
+            </span>
+          </button>
+        ))}
       </div>
 
       {error ? (
@@ -251,11 +291,7 @@ export function AdminHbdClient() {
           <p className={cn(DISPLAY, "mt-4 text-lg font-normal text-[#fff5f7]")}>
             ยังไม่มีรายการในสถานะนี้
           </p>
-          <p className="mt-1.5 text-xs text-[#f3b8c4]/65">
-            {tab === "pending"
-              ? "รอแฟนคลับส่งการ์ดคำอวยพรจากหน้า /hbd/2026/upload"
-              : "ยังไม่มีรายการที่ได้รับการอนุมัติ"}
-          </p>
+          <p className="mt-1.5 text-xs text-[#f3b8c4]/65">{EMPTY_HINT[tab]}</p>
         </div>
       ) : (
         <ul className="mt-6 space-y-4">
@@ -310,47 +346,154 @@ export function AdminHbdClient() {
                       )}
                     </div>
 
-                    <div className="mt-2.5 flex items-center gap-1.5 text-[0.68rem] text-[#f3b8c4]/50">
+                    <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-[0.68rem] text-[#f3b8c4]/50">
                       <Clock className="size-3 text-[#e85a7a]" />
                       <span>{new Date(item.created_at).toLocaleString("th-TH")}</span>
+                      {tab === "hidden" ? (
+                        <span
+                          className={cn(
+                            "ml-1 rounded-full border px-2 py-0.5 font-semibold",
+                            item.status === "rejected"
+                              ? "border-red-500/40 bg-red-500/10 text-red-200"
+                              : "border-[#f3b8c4]/25 bg-[#f3b8c4]/10 text-[#f3b8c4]/80"
+                          )}
+                        >
+                          {item.status === "rejected" ? "ปฏิเสธแล้ว" : "ซ่อนอยู่"}
+                        </span>
+                      ) : null}
                     </div>
                   </div>
 
-                  {/* 🔘 Action Buttons (Only in Pending tab) */}
-                  {tab === "pending" ? (
-                    <div className="mt-4 flex flex-wrap items-center gap-2.5 border-t border-[#f3b8c4]/10 pt-3.5">
+                  {/* 🔘 Action Buttons */}
+                  <div className="mt-4 flex flex-wrap items-center gap-2.5 border-t border-[#f3b8c4]/10 pt-3.5">
+                    {tab === "pending" ? (
+                      <>
+                        <button
+                          type="button"
+                          disabled={actingId === item.id}
+                          onClick={() => act(item.id, "approve")}
+                          className={cn(
+                            buttonVariants({ size: "sm" }),
+                            ACTION_BUTTON_CLASS,
+                            "border border-emerald-500/50 bg-emerald-500/20 font-semibold text-emerald-200 shadow-sm hover:bg-emerald-500/30 hover:text-white"
+                          )}
+                        >
+                          <CheckCircle2 className="size-3.5" />
+                          อนุมัติ (Approve)
+                        </button>
+                        <button
+                          type="button"
+                          disabled={actingId === item.id}
+                          onClick={() => act(item.id, "reject")}
+                          className={cn(
+                            buttonVariants({ variant: "outline", size: "sm" }),
+                            ACTION_BUTTON_CLASS,
+                            "border-red-500/40 bg-red-500/10 text-red-200 hover:bg-red-500/20 hover:text-white"
+                          )}
+                        >
+                          <XCircle className="size-3.5" />
+                          ปฏิเสธ (Reject)
+                        </button>
+                      </>
+                    ) : tab === "approved" ? (
                       <button
                         type="button"
                         disabled={actingId === item.id}
-                        onClick={() => act(item.id, "approve")}
-                        className={cn(
-                          buttonVariants({ size: "sm" }),
-                          "inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/50 bg-emerald-500/20 px-3.5 text-xs font-semibold text-emerald-200 shadow-sm transition hover:bg-emerald-500/30 hover:text-white"
-                        )}
-                      >
-                        <CheckCircle2 className="size-3.5" />
-                        อนุมัติ (Approve)
-                      </button>
-                      <button
-                        type="button"
-                        disabled={actingId === item.id}
-                        onClick={() => act(item.id, "reject")}
+                        onClick={() => act(item.id, "hide")}
                         className={cn(
                           buttonVariants({ variant: "outline", size: "sm" }),
-                          "inline-flex items-center gap-1.5 rounded-xl border-red-500/40 bg-red-500/10 px-3.5 text-xs text-red-200 transition hover:bg-red-500/20 hover:text-white"
+                          ACTION_BUTTON_CLASS,
+                          "border-[#f3b8c4]/30 bg-[#f3b8c4]/5 text-[#f7d7de] hover:bg-[#f3b8c4]/15 hover:text-white"
                         )}
                       >
-                        <XCircle className="size-3.5" />
-                        ปฏิเสธ (Reject)
+                        <EyeOff className="size-3.5" />
+                        ซ่อน (Hide)
                       </button>
-                    </div>
-                  ) : null}
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={actingId === item.id}
+                        onClick={() => act(item.id, "unhide")}
+                        className={cn(
+                          buttonVariants({ size: "sm" }),
+                          ACTION_BUTTON_CLASS,
+                          "border border-emerald-500/50 bg-emerald-500/20 font-semibold text-emerald-200 shadow-sm hover:bg-emerald-500/30 hover:text-white"
+                        )}
+                      >
+                        <Eye className="size-3.5" />
+                        แสดงอีกครั้ง
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      disabled={actingId === item.id}
+                      onClick={() => setDeleteTarget(item)}
+                      className={cn(
+                        buttonVariants({ variant: "ghost", size: "sm" }),
+                        ACTION_BUTTON_CLASS,
+                        "ml-auto text-red-300/80 hover:bg-red-500/15 hover:text-red-200"
+                      )}
+                    >
+                      <Trash2 className="size-3.5" />
+                      ลบ
+                    </button>
+                  </div>
                 </div>
               </div>
             </li>
           ))}
         </ul>
       )}
+
+      {/* 🗑️ Delete confirmation */}
+      <Dialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open && actingId === null) setDeleteTarget(null);
+        }}
+      >
+        <DialogContent className="border-[#f3b8c4]/15 bg-[#1a0c12] text-[#fff5f7]">
+          <DialogHeader>
+            <DialogTitle className={cn(DISPLAY, "text-lg font-normal")}>
+              ลบคำอวยพรนี้ถาวร?
+            </DialogTitle>
+            <DialogDescription className="text-[#f7d7de]/75">
+              การ์ดของ{" "}
+              <span className="font-semibold text-[#fff5f7]">
+                {deleteTarget?.display_name}
+              </span>{" "}
+              และรูปที่อัปโหลดจะถูกลบออกจากระบบ กู้คืนไม่ได้ — ถ้าแค่ไม่อยากให้แสดง ใช้ “ซ่อน” แทน
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="border-[#f3b8c4]/10 bg-[#14080e]/60">
+            <button
+              type="button"
+              disabled={actingId !== null}
+              onClick={() => setDeleteTarget(null)}
+              className={cn(
+                buttonVariants({ variant: "outline", size: "sm" }),
+                ACTION_BUTTON_CLASS,
+                "border-[#f3b8c4]/25 bg-transparent text-[#f7d7de] hover:bg-[#f3b8c4]/10"
+              )}
+            >
+              ยกเลิก
+            </button>
+            <button
+              type="button"
+              disabled={actingId !== null}
+              onClick={() => deleteTarget && remove(deleteTarget)}
+              className={cn(
+                buttonVariants({ size: "sm" }),
+                ACTION_BUTTON_CLASS,
+                "border border-red-500/60 bg-red-500/25 font-semibold text-red-100 hover:bg-red-500/40 hover:text-white"
+              )}
+            >
+              <Trash2 className="size-3.5" />
+              {actingId !== null ? "กำลังลบ…" : "ลบถาวร"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   CartesianGrid,
   Legend,
@@ -183,9 +183,7 @@ export function LiveViewTrendsChart({
   const canTogglePeak = grain === "month" || grain === "year";
   const peakOnly = canTogglePeak && chartMode === "peak";
 
-  useEffect(() => {
-    if (!canTogglePeak) setChartMode("totals");
-  }, [canTogglePeak]);
+  if (!canTogglePeak && chartMode !== "totals") setChartMode("totals");
 
   if (rows.length === 0) {
     return (

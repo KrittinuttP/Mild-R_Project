@@ -1,7 +1,7 @@
 "use client";
 import { englishWeekday, formatLiveShortDate, formatLiveDate, formatLiveDateRange } from "@/lib/live-date-format";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
   ArrowUpRight,
@@ -26,6 +26,7 @@ import { OfflineBadge } from "@/components/events/OfflineBadge";
 import { FadeInImage } from "@/components/media/FadeInImage";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { buttonVariants } from "@/components/ui/button";
+import { useNow } from "@/hooks/useNow";
 import {
   findDefaultWeekIndex,
   formatISODate,
@@ -494,16 +495,6 @@ function findNextHighlightSlot(
       (a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time)
     );
   return candidates[0] ?? null;
-}
-
-function useLiveClock(intervalMs = 30000) {
-  const [now, setNow] = useState<number | null>(null);
-  useEffect(() => {
-    setNow(Date.now());
-    const timer = setInterval(() => setNow(Date.now()), intervalMs);
-    return () => clearInterval(timer);
-  }, [intervalMs]);
-  return now;
 }
 
 function getSlotTargetTimestamp(slot: LiveSlot): number | null {
@@ -1013,19 +1004,34 @@ function LiveTodayOfflineBanner({
   );
 }
 
+function BannerLink({
+  href,
+  className,
+  children,
+}: {
+  href: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  if (href.startsWith("http")) {
+    return (
+      <a href={href} target="_blank" rel="noreferrer" className={className}>
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link href={href} className={className}>
+      {children}
+    </Link>
+  );
+}
+
 function LiveWeekBannerCard({
   banner,
 }: {
   banner: LiveWeekBanner;
 }) {
-  const isExternal = banner.linkUrl?.startsWith("http");
-  const LinkComponent = banner.linkUrl ? (isExternal ? "a" : Link) : "div";
-  const linkProps = banner.linkUrl
-    ? isExternal
-      ? { href: banner.linkUrl, target: "_blank", rel: "noreferrer" }
-      : { href: banner.linkUrl }
-    : {};
-
   return (
     <div className="overflow-hidden rounded-3xl border border-[#e85a7a]/30 bg-gradient-to-r from-[#220e18]/90 via-[#1a0c12]/80 to-[#140a0d] shadow-[0_12px_32px_rgba(232,90,122,0.12)]">
       {/* 💻 Desktop / Tablet: Split Panorama Glass Card */}
@@ -1050,8 +1056,8 @@ function LiveWeekBannerCard({
 
           {banner.linkUrl ? (
             <div className="mt-4">
-              <LinkComponent
-                {...(linkProps as any)}
+              <BannerLink
+                href={banner.linkUrl}
                 className={cn(
                   buttonVariants({ size: "sm" }),
                   CTA_PRIMARY_CLASS,
@@ -1060,7 +1066,7 @@ function LiveWeekBannerCard({
               >
                 {banner.buttonLabel ?? "ดูรายละเอียด"}
                 <ArrowUpRight className="size-4" />
-              </LinkComponent>
+              </BannerLink>
             </div>
           ) : null}
         </div>
@@ -1119,8 +1125,8 @@ function LiveWeekBannerCard({
           ) : null}
 
           {banner.linkUrl ? (
-            <LinkComponent
-              {...(linkProps as any)}
+            <BannerLink
+              href={banner.linkUrl}
               className={cn(
                 buttonVariants({ size: "sm" }),
                 CTA_PRIMARY_CLASS,
@@ -1129,7 +1135,7 @@ function LiveWeekBannerCard({
             >
               {banner.buttonLabel ?? "ดูรายละเอียด"}
               <ArrowUpRight className="size-4" />
-            </LinkComponent>
+            </BannerLink>
           ) : null}
         </div>
       </div>
@@ -1145,7 +1151,7 @@ export function LiveWeekTable({
   slotLookup,
   weekRange,
 }: LiveWeekTableProps) {
-  const nowMs = useLiveClock(30000);
+  const nowMs = useNow(30000);
   const sorted = useMemo(() => sortLiveWeeks(weeks), [weeks]);
   const visibleWeeks = useMemo(() => {
     if (!weekRange) return sorted;
@@ -1174,11 +1180,12 @@ export function LiveWeekTable({
   const [index, setIndex] = useState(() =>
     findDefaultWeekIndex(navigableWeeks)
   );
-  const { detailRef, openDetail } = useLiveDetail();
-
-  useEffect(() => {
+  const [indexWeeks, setIndexWeeks] = useState(navigableWeeks);
+  if (indexWeeks !== navigableWeeks) {
+    setIndexWeeks(navigableWeeks);
     setIndex(findDefaultWeekIndex(navigableWeeks));
-  }, [navigableWeeks]);
+  }
+  const { detailRef, openDetail } = useLiveDetail();
 
   const todayIso =
     bangkokDateFromIso(new Date().toISOString()) ?? formatISODate(new Date());

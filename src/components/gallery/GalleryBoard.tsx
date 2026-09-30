@@ -62,10 +62,13 @@ export function GalleryBoard({
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const navDirectionRef = useRef<1 | -1>(1);
 
-  useEffect(() => {
+  const resetKey = `${startCount}|${variant}|${mode}`;
+  const [appliedResetKey, setAppliedResetKey] = useState(resetKey);
+  if (appliedResetKey !== resetKey) {
+    setAppliedResetKey(resetKey);
     setVisibleCount(startCount);
     setActiveIndex(null);
-  }, [startCount, variant, mode]);
+  }
 
   const visibleItems = items.slice(0, visibleCount);
   const hasMore = mode === "full" && visibleCount < items.length;

@@ -3,7 +3,7 @@ import type { LiveSlot } from "@/types/vtuber";
 /** Real uploaded/cached cover only — no YouTube id fallback. */
 export function getSlotCoverUrl(slot: LiveSlot): string | null {
   if (slot.coverUrl) {
-    let url = slot.coverUrl;
+    const url = slot.coverUrl;
     if (
       url.includes("i.ytimg.com/vi/") &&
       (url.includes("/hqdefault.jpg") ||

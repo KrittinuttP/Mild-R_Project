@@ -6,6 +6,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Download,
   Sparkles,
 } from "lucide-react";
 
@@ -53,6 +54,7 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
           src: wish.image as string,
           alt: wish.alt ?? `Wish from ${wish.from}`,
           from: wish.from,
+          downloadUrl: wish.downloadUrl,
         })),
     [wishes]
   );
@@ -394,6 +396,18 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
               <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-[#f7d7de]/90 sm:text-lg">
                 {wish.message}
               </p>
+              {wish.image && wish.downloadUrl ? (
+                <div className="mt-5 flex justify-center">
+                  <a
+                    href={wish.downloadUrl}
+                    download
+                    className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs text-[#f3b8c4]/75 ring-1 ring-white/15 transition hover:bg-white/5 hover:text-[#fff5f7]"
+                  >
+                    <Download className="size-3.5" />
+                    ดาวน์โหลดการ์ด (JPG)
+                  </a>
+                </div>
+              ) : null}
             </div>
           </section>
         ))}
@@ -481,13 +495,24 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
         >
           {activeLightbox ? (
             <>
-              <DialogHeader className="shrink-0 px-1 pt-0.5 pr-10 sm:px-2">
-                <DialogTitle className={cn(DISPLAY, "text-base sm:text-lg")}>
+              <DialogHeader className="shrink-0 flex-row items-center justify-between gap-3 px-1 pt-0.5 pr-10 sm:px-2 sm:pr-12">
+                <DialogTitle className={cn(DISPLAY, "min-w-0 truncate text-base sm:text-lg")}>
                   จาก {activeLightbox.from}
                 </DialogTitle>
                 <DialogDescription className="sr-only">
                   ดูรูปอวยพรขนาดใหญ่
                 </DialogDescription>
+                {activeLightbox.downloadUrl ? (
+                  <a
+                    href={activeLightbox.downloadUrl}
+                    download
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs text-[#f3b8c4]/85 ring-1 ring-[#f3b8c4]/25 transition hover:bg-[#e85a7a]/20 hover:text-[#fff5f7]"
+                  >
+                    <Download className="size-3.5" />
+                    <span className="hidden sm:inline">ดาวน์โหลด JPG</span>
+                    <span className="sm:hidden">JPG</span>
+                  </a>
+                ) : null}
               </DialogHeader>
 
               <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden">

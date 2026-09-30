@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ChevronDown, Menu, X } from "lucide-react";
@@ -70,19 +70,26 @@ export function Header({ data }: HeaderProps) {
   const onHome = pathname === "/";
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  /** Desktop dropdown forced shut after a click/Esc until the pointer or focus leaves it. */
-  const [closedMenu, setClosedMenu] = useState<string | null>(null);
+  /** Desktop dropdown: opens on click/tap (touch has no hover) and on mouse hover. */
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const primaryNavRef = useRef<HTMLElement>(null);
+  /** Set when a mouse hover opened the menu, so the click that follows keeps it open. */
+  const hoverOpenedRef = useRef<string | null>(null);
+  /** Mobile accordion: one group expanded at a time. */
+  const [mobileOpenMenu, setMobileOpenMenu] = useState<string | null>(null);
 
-  const closeMenu = (label: string) => {
-    // Blur first: its onBlur release must run before the suppression is set.
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
-    setClosedMenu(label);
+  const closeMenu = (label?: string) => {
+    hoverOpenedRef.current = null;
+    setOpenMenu((current) => (label === undefined || current === label ? null : current));
   };
 
-  const releaseMenu = (label: string) => {
-    setClosedMenu((current) => (current === label ? null : current));
+  const toggleMenu = (label: string) => {
+    if (hoverOpenedRef.current === label) {
+      hoverOpenedRef.current = null;
+      setOpenMenu(label);
+      return;
+    }
+    setOpenMenu((current) => (current === label ? null : label));
   };
 
   const resolveHref = (link: NavLink) => {
@@ -92,6 +99,9 @@ export function Header({ data }: HeaderProps) {
     if (onHome && link.homeHash) return link.homeHash;
     return link.href;
   };
+
+  /** Home-page section, from any route (e.g. "#live" on home, "/#live" elsewhere). */
+  const homeSectionHref = (hash: string) => (onHome ? hash : `/${hash}`);
 
   const isActive = (link: NavLink) => {
     if (link.kind === "page") {
@@ -137,6 +147,32 @@ export function Header({ data }: HeaderProps) {
   }, []);
 
   useEffect(() => {
+    if (!openMenu) return;
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (!primaryNavRef.current?.contains(event.target as Node)) {
+        hoverOpenedRef.current = null;
+        setOpenMenu(null);
+      }
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      hoverOpenedRef.current = null;
+      setOpenMenu(null);
+      primaryNavRef.current
+        ?.querySelector<HTMLButtonElement>(`[data-menu-trigger="${openMenu}"]`)
+        ?.focus();
+    };
+
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [openMenu]);
+
+  useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
@@ -174,6 +210,7 @@ export function Header({ data }: HeaderProps) {
         </Link>
 
         <nav
+          ref={primaryNavRef}
           className="hidden items-center gap-5 lg:gap-7 md:flex"
           aria-label="Primary"
         >
@@ -185,28 +222,32 @@ export function Header({ data }: HeaderProps) {
             );
 
             if (link.kind === "page" && link.children?.length) {
-              const suppressed = closedMenu === link.label;
+              const menuOpen = openMenu === link.label;
+              const menuId = `nav-menu-${link.label.toLowerCase()}`;
               return (
                 <div
                   key={link.label}
-                  className="group relative"
-                  onMouseLeave={() => releaseMenu(link.label)}
+                  className="relative"
+                  onPointerEnter={(event) => {
+                    if (event.pointerType !== "mouse" || menuOpen) return;
+                    hoverOpenedRef.current = link.label;
+                    setOpenMenu(link.label);
+                  }}
+                  onPointerLeave={(event) => {
+                    if (event.pointerType === "mouse") closeMenu(link.label);
+                  }}
                   onBlur={(event) => {
                     if (!event.currentTarget.contains(event.relatedTarget)) {
-                      releaseMenu(link.label);
+                      closeMenu(link.label);
                     }
                   }}
-                  onKeyDown={(event) => {
-                    if (event.key === "Escape") closeMenu(link.label);
-                  }}
                 >
-                  <Link
-                    href={href}
-                    onClick={(event) => {
-                      closeMenu(link.label);
-                      handleNavClick(event, href);
-                    }}
-                    aria-haspopup="true"
+                  <button
+                    type="button"
+                    data-menu-trigger={link.label}
+                    onClick={() => toggleMenu(link.label)}
+                    aria-expanded={menuOpen}
+                    aria-controls={menuId}
                     className={cn(linkClass, "inline-flex items-center gap-1")}
                   >
                     {link.label}
@@ -214,19 +255,32 @@ export function Header({ data }: HeaderProps) {
                       aria-hidden
                       className={cn(
                         "size-3.5 opacity-70 transition",
-                        !suppressed &&
-                          "group-hover:rotate-180 group-focus-within:rotate-180"
+                        menuOpen && "rotate-180"
                       )}
                     />
-                  </Link>
+                  </button>
                   <div
+                    id={menuId}
                     className={cn(
-                      "invisible absolute left-1/2 top-full z-50 -translate-x-1/2 pt-3 opacity-0 transition duration-150",
-                      !suppressed &&
-                        "group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+                      "absolute left-1/2 top-full z-50 -translate-x-1/2 pt-3 transition duration-150",
+                      menuOpen ? "visible opacity-100" : "invisible opacity-0"
                     )}
                   >
                     <ul className="min-w-44 rounded-xl border border-[#f3b8c4]/15 bg-[#140a0d]/95 p-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.45)] backdrop-blur-md">
+                      {link.homeHash ? (
+                        <li className="mb-1 border-b border-[#f3b8c4]/10 pb-1">
+                          <Link
+                            href={homeSectionHref(link.homeHash)}
+                            onClick={(event) => {
+                              closeMenu();
+                              handleNavClick(event, homeSectionHref(link.homeHash!));
+                            }}
+                            className="block whitespace-nowrap rounded-lg px-3 py-2 text-sm text-[#f7d7de]/80 transition hover:bg-[#e85a7a]/15 hover:text-[#fff5f7] focus-visible:bg-[#e85a7a]/15 focus-visible:outline-none"
+                          >
+                            {link.label}
+                          </Link>
+                        </li>
+                      ) : null}
                       {link.children.map((child) => {
                         const childActive = pathname === child.href;
                         return (
@@ -235,7 +289,7 @@ export function Header({ data }: HeaderProps) {
                               href={child.href}
                               aria-current={childActive ? "page" : undefined}
                               onClick={(event) => {
-                                closeMenu(link.label);
+                                closeMenu();
                                 handleNavClick(event, child.href);
                               }}
                               className={cn(
@@ -276,7 +330,15 @@ export function Header({ data }: HeaderProps) {
           aria-expanded={open}
           aria-controls="mobile-nav"
           aria-label={open ? "Close menu" : "Open menu"}
-          onClick={() => setOpen((value) => !value)}
+          onClick={() => {
+            if (!open) {
+              const current = NAV_LINKS.find(
+                (link) => link.kind === "page" && link.children?.length && isActive(link)
+              );
+              setMobileOpenMenu(current?.label ?? null);
+            }
+            setOpen(!open);
+          }}
         >
           {open ? <X /> : <Menu />}
         </button>
@@ -285,7 +347,8 @@ export function Header({ data }: HeaderProps) {
       <div
         id="mobile-nav"
         className={cn(
-          "border-t border-[#f3b8c4]/10 bg-[#140a0d]/95 md:hidden",
+          // Page scroll is locked while open, so the panel must scroll itself (header is h-14 / sm:h-16).
+          "max-h-[calc(100dvh-3.5rem)] overflow-y-auto overscroll-contain border-t border-[#f3b8c4]/10 bg-[#140a0d]/95 sm:max-h-[calc(100dvh-4rem)] md:hidden",
           open ? "block" : "hidden"
         )}
       >
@@ -295,36 +358,83 @@ export function Header({ data }: HeaderProps) {
         >
           {NAV_LINKS.map((link) => {
             const href = resolveHref(link);
-            return (
-              <div key={link.label} className="flex flex-col">
-                <Link
-                  href={href}
-                  className="min-h-12 py-3.5 text-base text-[#f7d7de] transition hover:text-[#fff5f7]"
-                  onClick={(event) => handleNavClick(event, href)}
-                >
-                  {link.label}
-                </Link>
-                {link.kind === "page" && link.children?.length ? (
-                  <div className="mb-1 flex flex-col border-l border-[#f3b8c4]/15 pl-4">
-                    {link.children.map((child) => (
-                      <Link
-                        key={child.href}
-                        href={child.href}
-                        aria-current={pathname === child.href ? "page" : undefined}
-                        className={cn(
-                          "min-h-11 py-3 text-sm transition hover:text-[#fff5f7]",
-                          pathname === child.href
-                            ? "text-[#fff5f7]"
-                            : "text-[#f7d7de]/70"
-                        )}
-                        onClick={(event) => handleNavClick(event, child.href)}
-                      >
-                        {child.label}
-                      </Link>
-                    ))}
+
+            if (link.kind === "page" && link.children?.length) {
+              const expanded = mobileOpenMenu === link.label;
+              const panelId = `mobile-nav-menu-${link.label.toLowerCase()}`;
+              const subLinks: SubNavLink[] = [
+                ...(link.homeHash
+                  ? [{ label: link.label, href: homeSectionHref(link.homeHash) }]
+                  : []),
+                ...link.children,
+              ];
+              return (
+                <div key={link.label} className="flex flex-col">
+                  <button
+                    type="button"
+                    aria-expanded={expanded}
+                    aria-controls={panelId}
+                    onClick={() =>
+                      setMobileOpenMenu((current) =>
+                        current === link.label ? null : link.label
+                      )
+                    }
+                    className={cn(
+                      "flex min-h-12 items-center justify-between py-3.5 text-left text-base transition hover:text-[#fff5f7]",
+                      expanded || isActive(link) ? "text-[#fff5f7]" : "text-[#f7d7de]"
+                    )}
+                  >
+                    {link.label}
+                    <ChevronDown
+                      aria-hidden
+                      className={cn(
+                        "size-4 opacity-70 transition-transform duration-200",
+                        expanded && "rotate-180"
+                      )}
+                    />
+                  </button>
+                  <div
+                    id={panelId}
+                    inert={!expanded ? true : undefined}
+                    className={cn(
+                      "grid transition-[grid-template-rows,opacity] duration-200 ease-out",
+                      expanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                    )}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="mb-1 flex flex-col border-l border-[#f3b8c4]/15 pl-4">
+                        {subLinks.map((child) => (
+                          <Link
+                            key={child.href}
+                            href={child.href}
+                            aria-current={pathname === child.href ? "page" : undefined}
+                            className={cn(
+                              "min-h-11 py-3 text-sm transition hover:text-[#fff5f7]",
+                              pathname === child.href
+                                ? "text-[#fff5f7]"
+                                : "text-[#f7d7de]/70"
+                            )}
+                            onClick={(event) => handleNavClick(event, child.href)}
+                          >
+                            {child.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                ) : null}
-              </div>
+                </div>
+              );
+            }
+
+            return (
+              <Link
+                key={link.label}
+                href={href}
+                className="flex min-h-12 items-center py-3.5 text-base text-[#f7d7de] transition hover:text-[#fff5f7]"
+                onClick={(event) => handleNavClick(event, href)}
+              >
+                {link.label}
+              </Link>
             );
           })}
         </nav>

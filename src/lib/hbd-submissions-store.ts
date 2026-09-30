@@ -7,7 +7,7 @@ import type { HbdWish } from "@/types/vtuber";
 
 export const HBD_STORAGE_BUCKET = "hbd-uploads";
 
-export type HbdSubmissionStatus = "pending" | "approved" | "rejected";
+export type HbdSubmissionStatus = "pending" | "approved" | "rejected" | "hidden";
 
 export type HbdSubmissionRow = {
   id: string;
@@ -63,10 +63,31 @@ export function submissionToWish(row: HbdSubmissionRow): HbdWish {
     alt: `Wish from ${row.display_name}`,
     avatar: row.avatar_url?.trim() || HBD_AVATAR_DEFAULT,
     fromUpload: true,
+    downloadUrl: `/api/hbd/wishes/${row.id}/download`,
   };
 }
 
-/** Public: approved wishes for /HBD/2026 */
+/** Public: card of one approved wish (null when hidden, rejected or missing). */
+export async function loadApprovedHbdCard(
+  id: string
+): Promise<{ displayName: string; cardUrl: string } | null> {
+  if (!isSupabaseConfigured()) return null;
+
+  const supabase = createPublicClient();
+  const { data, error } = await supabase
+    .from("mild_r_hbd_wishes_public")
+    .select("display_name, card_url")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return {
+    displayName: String(data.display_name),
+    cardUrl: String(data.card_url),
+  };
+}
+
+/** Public: approved wishes for /hbd/2026 */
 export async function loadApprovedHbdWishes(): Promise<HbdWish[]> {
   if (!isSupabaseConfigured()) return [];
 
@@ -122,13 +143,13 @@ export async function countPendingHbdSubmissions(): Promise<number> {
 }
 
 export async function listHbdSubmissions(
-  status: HbdSubmissionStatus
+  statuses: HbdSubmissionStatus[]
 ): Promise<HbdSubmissionRow[]> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("mild_r_hbd_submissions")
     .select("*")
-    .eq("status", status)
+    .in("status", statuses)
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
@@ -200,8 +221,76 @@ export async function rejectHbdSubmission(
   return mapRow(data as Record<string, unknown>);
 }
 
-export function extensionForMime(mime: string): string {
-  if (mime === "image/png") return "png";
-  if (mime === "image/webp") return "webp";
-  return "jpg";
+/** Approved → hidden: removed from /hbd/2026 but kept for later. */
+export async function hideHbdSubmission(id: string): Promise<HbdSubmissionRow> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("mild_r_hbd_submissions")
+    .update({ status: "hidden", reviewed_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("status", "approved")
+    .select("*")
+    .single();
+
+  if (error) throw new Error(error.message);
+  return mapRow(data as Record<string, unknown>);
+}
+
+/** Hidden or rejected → approved (shown on /hbd/2026 again). */
+export async function unhideHbdSubmission(
+  id: string
+): Promise<HbdSubmissionRow> {
+  const supabase = createAdminClient();
+  const now = new Date().toISOString();
+
+  const { data: current, error: readError } = await supabase
+    .from("mild_r_hbd_submissions")
+    .select("approved_at")
+    .eq("id", id)
+    .in("status", ["hidden", "rejected"])
+    .single();
+  if (readError) throw new Error(readError.message);
+
+  const { data, error } = await supabase
+    .from("mild_r_hbd_submissions")
+    .update({
+      status: "approved",
+      approved_at: (current?.approved_at as string | null) ?? now,
+      reviewed_at: now,
+    })
+    .eq("id", id)
+    .in("status", ["hidden", "rejected"])
+    .select("*")
+    .single();
+
+  if (error) throw new Error(error.message);
+  return mapRow(data as Record<string, unknown>);
+}
+
+/** Permanently delete the row and its uploaded card/avatar files. */
+export async function deleteHbdSubmission(id: string): Promise<void> {
+  const supabase = createAdminClient();
+
+  const { data: row, error: readError } = await supabase
+    .from("mild_r_hbd_submissions")
+    .select("card_path, avatar_path")
+    .eq("id", id)
+    .single();
+  if (readError) throw new Error(readError.message);
+
+  const paths = [row?.card_path, row?.avatar_path].filter(
+    (p): p is string => typeof p === "string" && p.length > 0
+  );
+  if (paths.length > 0) {
+    const { error: storageError } = await supabase.storage
+      .from(HBD_STORAGE_BUCKET)
+      .remove(paths);
+    if (storageError) throw new Error(storageError.message);
+  }
+
+  const { error } = await supabase
+    .from("mild_r_hbd_submissions")
+    .delete()
+    .eq("id", id);
+  if (error) throw new Error(error.message);
 }

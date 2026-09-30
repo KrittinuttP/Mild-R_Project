@@ -60,7 +60,7 @@ export async function loadCafeVisibilityRows(): Promise<
   }>
 > {
   const map = await loadCafeVisibility();
-  let updatedByKey = new Map<string, string>();
+  const updatedByKey = new Map<string, string>();
 
   if (isSupabaseConfigured()) {
     try {

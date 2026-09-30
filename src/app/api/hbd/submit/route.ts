@@ -5,9 +5,9 @@ import {
   HBD_CARD_TEMPLATE,
   type HbdContactChannel,
 } from "@/lib/hbd-upload";
+import { processHbdAvatar, processHbdCard } from "@/lib/hbd-image";
 import {
   createHbdSubmission,
-  extensionForMime,
   HBD_STORAGE_BUCKET,
 } from "@/lib/hbd-submissions-store";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -16,6 +16,9 @@ import { isSupabaseConfigured } from "@/lib/supabase/env";
 export const runtime = "nodejs";
 
 const ALLOWED_IMAGE = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+/** Paths are random UUIDs, so stored files never change. */
+const STORAGE_CACHE_SECONDS = "31536000";
 
 function isContactChannel(value: string): value is HbdContactChannel {
   return value === "x" || value === "discord";
@@ -86,16 +89,29 @@ export async function POST(request: Request) {
     }
   }
 
+  let cardImage: Awaited<ReturnType<typeof processHbdCard>>;
+  let avatarImage: Awaited<ReturnType<typeof processHbdAvatar>> | null = null;
+  try {
+    cardImage = await processHbdCard(Buffer.from(await card.arrayBuffer()));
+    if (avatar instanceof File && avatar.size > 0) {
+      avatarImage = await processHbdAvatar(Buffer.from(await avatar.arrayBuffer()));
+    }
+  } catch {
+    return NextResponse.json(
+      { error: "อ่านไฟล์รูปไม่ได้ — ลองบันทึกเป็น JPEG / PNG แล้วอัปใหม่" },
+      { status: 400 }
+    );
+  }
+
   const supabase = createAdminClient();
   const id = crypto.randomUUID();
-  const cardExt = extensionForMime(card.type);
-  const cardPath = `cards/${id}.${cardExt}`;
+  const cardPath = `cards/${id}.${cardImage.extension}`;
 
-  const cardBuffer = Buffer.from(await card.arrayBuffer());
   const { error: cardUploadError } = await supabase.storage
     .from(HBD_STORAGE_BUCKET)
-    .upload(cardPath, cardBuffer, {
-      contentType: card.type,
+    .upload(cardPath, cardImage.buffer, {
+      contentType: cardImage.contentType,
+      cacheControl: STORAGE_CACHE_SECONDS,
       upsert: false,
     });
 
@@ -113,14 +129,13 @@ export async function POST(request: Request) {
   let avatarPath: string | null = null;
   let avatarUrl: string | null = null;
 
-  if (avatar instanceof File && avatar.size > 0) {
-    const avatarExt = extensionForMime(avatar.type);
-    avatarPath = `avatars/${id}.${avatarExt}`;
-    const avatarBuffer = Buffer.from(await avatar.arrayBuffer());
+  if (avatarImage) {
+    avatarPath = `avatars/${id}.${avatarImage.extension}`;
     const { error: avatarUploadError } = await supabase.storage
       .from(HBD_STORAGE_BUCKET)
-      .upload(avatarPath, avatarBuffer, {
-        contentType: avatar.type,
+      .upload(avatarPath, avatarImage.buffer, {
+        contentType: avatarImage.contentType,
+        cacheControl: STORAGE_CACHE_SECONDS,
         upsert: false,
       });
 

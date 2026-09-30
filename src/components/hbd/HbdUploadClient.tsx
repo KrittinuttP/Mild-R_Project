@@ -13,10 +13,12 @@ import { Download, Eraser, Loader2, Pencil, Sparkles, Upload, X } from "lucide-r
 import { BackLink } from "@/components/layout/BackLink";
 
 import { buttonVariants } from "@/components/ui/button";
+import { shrinkImageFile } from "@/lib/hbd-client-resize";
 import {
   HBD_AVATAR_DEFAULT,
   HBD_AVATAR_LIMITS,
   HBD_CARD_TEMPLATE,
+  HBD_IMAGE_SIZES,
   type HbdContactChannel,
   type HbdUploadDraft,
 } from "@/lib/hbd-upload";
@@ -115,6 +117,7 @@ export function HbdUploadClient() {
   useEffect(() => {
     const cached = readFormCache();
     if (cached) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage is unavailable during SSR; restoring in render would mismatch hydration
       setDisplayName(cached.displayName);
       setMessage(cached.message);
       setContactChannel(cached.contactChannel);
@@ -185,8 +188,8 @@ export function HbdUploadClient() {
     setError(null);
     if (!file) return;
 
-    if (file.size > HBD_CARD_TEMPLATE.maxBytes) {
-      setError("ไฟล์การ์ดใหญ่เกินไป (สูงสุด 5 MB)");
+    if (file.size > HBD_CARD_TEMPLATE.maxSourceBytes) {
+      setError("ไฟล์การ์ดใหญ่เกินไป (สูงสุด 20 MB)");
       event.target.value = "";
       return;
     }
@@ -199,8 +202,8 @@ export function HbdUploadClient() {
     setError(null);
     if (!file) return;
 
-    if (file.size > HBD_AVATAR_LIMITS.maxBytes) {
-      setError("ไฟล์ avatar ใหญ่เกินไป (สูงสุด 2 MB)");
+    if (file.size > HBD_AVATAR_LIMITS.maxSourceBytes) {
+      setError("ไฟล์ avatar ใหญ่เกินไป (สูงสุด 10 MB)");
       event.target.value = "";
       return;
     }
@@ -258,13 +261,33 @@ export function HbdUploadClient() {
     setError(null);
 
     try {
+      const card = await shrinkImageFile(file, {
+        maxEdge: HBD_IMAGE_SIZES.cardMaxEdge,
+        maxBytes: HBD_CARD_TEMPLATE.maxBytes,
+      });
+      const avatarSource = avatarFileRef.current ?? avatarFile;
+      const avatar = avatarSource
+        ? await shrinkImageFile(avatarSource, {
+            maxEdge: HBD_IMAGE_SIZES.avatarClientMaxEdge,
+            maxBytes: HBD_AVATAR_LIMITS.maxBytes,
+          })
+        : null;
+
+      if (card.size > HBD_CARD_TEMPLATE.maxBytes) {
+        setError("ไฟล์การ์ดใหญ่เกินไปหลังย่อ — ลองบันทึกเป็น JPEG แล้วอัปใหม่");
+        return;
+      }
+      if (avatar && avatar.size > HBD_AVATAR_LIMITS.maxBytes) {
+        setError("ไฟล์ avatar ใหญ่เกินไปหลังย่อ — ลองใช้รูปอื่น");
+        return;
+      }
+
       const body = new FormData();
       body.set("displayName", displayName.trim());
       body.set("message", message.trim());
       body.set("contactChannel", contactChannel);
       body.set("contactHandle", contactHandle.trim());
-      body.set("card", file);
-      const avatar = avatarFileRef.current ?? avatarFile;
+      body.set("card", card);
       if (avatar) body.set("avatar", avatar);
 
       const res = await fetch("/api/hbd/submit", {
@@ -451,7 +474,7 @@ export function HbdUploadClient() {
                 <h2 className={labelClass}>อัปโหลดการ์ด *</h2>
               </div>
               <p className={hintClass}>
-                ใช้ไฟล์ที่แก้จากเทมเพลต · สูงสุด 5 MB
+                ใช้ไฟล์ที่แก้จากเทมเพลต · สูงสุด 20 MB (ระบบย่อให้อัตโนมัติ)
               </p>
               <input
                 ref={cardInputRef}
@@ -534,7 +557,7 @@ export function HbdUploadClient() {
                     required
                   />
                   <p className={hintClass}>
-                    รูปโปรไฟล์ไม่บังคับ · ไม่ใส่ใช้รูปเริ่มต้น · สูงสุด 2 MB
+                    รูปโปรไฟล์ไม่บังคับ · ไม่ใส่ใช้รูปเริ่มต้น · สูงสุด 10 MB
                   </p>
                 </label>
               </div>

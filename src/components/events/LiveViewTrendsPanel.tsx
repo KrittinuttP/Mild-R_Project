@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, useTransition, type ReactNode } from "react";
+import { useMemo, useRef, useState, useTransition, type ReactNode } from "react";
 import {
   Activity,
   ArrowUpRight,
@@ -182,7 +182,10 @@ export function LiveViewTrendsPanel({
     setModalOpen(true);
   }
 
-  useEffect(() => {
+  const filterKey = `${grain}|${ownOnly}|${kinds.join(",")}|${fromYmd}|${toYmd}`;
+  const [appliedFilterKey, setAppliedFilterKey] = useState(filterKey);
+  if (appliedFilterKey !== filterKey) {
+    setAppliedFilterKey(filterKey);
     setDraftFrom(fromYmd);
     setDraftTo(toYmd);
     setDraftKinds(kinds);
@@ -190,7 +193,7 @@ export function LiveViewTrendsPanel({
     setStreams([]);
     setBucketDetailPeaks(null);
     setError(null);
-  }, [grain, ownOnly, kinds, fromYmd, toYmd]);
+  }
 
   function applyFilters() {
     let from = draftFrom;

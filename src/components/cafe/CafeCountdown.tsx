@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { useNow } from "@/hooks/useNow";
 import { gsap, registerGsapPlugins } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 
@@ -165,14 +166,7 @@ export function CafeCountdown({
   const startMs = Date.parse(startsAt);
   const endMs = endsAt ? Date.parse(endsAt) : Number.NaN;
   const valid = Number.isFinite(startMs);
-  const [now, setNow] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (!valid) return;
-    setNow(Date.now());
-    const id = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(id);
-  }, [valid]);
+  const now = useNow(1000, valid);
 
   if (!valid) return null;
 

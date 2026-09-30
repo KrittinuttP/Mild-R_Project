@@ -18,10 +18,16 @@ export function useLiveCovers(enabled: boolean, limit?: number) {
 
   const retry = useCallback(() => setFetchKey((k) => k + 1), []);
 
+  const requestKey = enabled ? `${limit ?? ""}|${fetchKey}` : null;
+  const [startedKey, setStartedKey] = useState<string | null>(null);
+  if (startedKey !== requestKey) {
+    setStartedKey(requestKey);
+    if (requestKey !== null) setStatus("loading");
+  }
+
   useEffect(() => {
     if (!enabled) return;
     let cancelled = false;
-    setStatus("loading");
 
     const url = limit ? `/api/live/covers?limit=${limit}` : "/api/live/covers";
     fetch(url, { cache: "no-store" })

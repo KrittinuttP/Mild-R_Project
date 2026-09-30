@@ -22,7 +22,7 @@ const FOOTER_NAV_GROUPS = [
     links: [
       { href: "/events", label: "Events" },
       { href: "/live", label: "Live" },
-      { href: "/gallery", label: "Gallery" },
+      { href: "/gallery/archive", label: "Gallery" },
       { href: "/gallery/live", label: "Live covers" },
       { href: "/gallery/fanart", label: "Fan art" },
       { href: "/projects", label: "Projects" },

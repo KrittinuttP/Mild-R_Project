@@ -35,6 +35,7 @@ export function CafeSplash({
 
   useEffect(() => {
     if (wasSoftNavigation() && !isReloadNavigation()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- navigation / sessionStorage state only exists on the client
       setPhase("done");
       onFinished?.();
       return;

@@ -10,9 +10,12 @@ import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 export const runtime = "nodejs";
 
-function isStatus(value: string): value is HbdSubmissionStatus {
-  return value === "pending" || value === "approved" || value === "rejected";
-}
+/** Admin tabs → statuses listed (hidden tab also shows rejected, so mistakes can be restored). */
+const TAB_STATUSES: Record<string, HbdSubmissionStatus[]> = {
+  pending: ["pending"],
+  approved: ["approved"],
+  hidden: ["hidden", "rejected"],
+};
 
 export async function GET(request: Request) {
   if (!(await isSiteAdminUnlocked())) {
@@ -36,12 +39,13 @@ export async function GET(request: Request) {
       return NextResponse.json({ pendingCount });
     }
 
-    if (!isStatus(statusParam)) {
+    const statuses = TAB_STATUSES[statusParam];
+    if (!statuses) {
       return NextResponse.json({ error: "status ไม่ถูกต้อง" }, { status: 400 });
     }
 
     const [submissions, pendingCount] = await Promise.all([
-      listHbdSubmissions(statusParam),
+      listHbdSubmissions(statuses),
       countPendingHbdSubmissions(),
     ]);
 
