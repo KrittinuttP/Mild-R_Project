@@ -1,9 +1,9 @@
-import type { ComponentPropsWithoutRef } from "react";
+import type { ComponentPropsWithRef } from "react";
 
 import { cn } from "@/lib/utils";
 
 type ProtectedImageProps = Omit<
-  ComponentPropsWithoutRef<"img">,
+  ComponentPropsWithRef<"img">,
   "draggable"
 > & {
   wrapClassName?: string;

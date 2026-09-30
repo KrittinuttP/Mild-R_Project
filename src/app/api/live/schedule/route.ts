@@ -9,7 +9,7 @@ import {
   mergeLiveWeeksWithStreams,
 } from "@/lib/live-streams";
 
-/** Always fresh — ranged schedule for home / live calendar. */
+/** Ranged schedule for home / live calendar — CDN-cached ~1 min. */
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
@@ -49,7 +49,7 @@ export async function GET(request: Request) {
       { weeks, from, to },
       {
         headers: {
-          "Cache-Control": "no-store",
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
         },
       }
     );

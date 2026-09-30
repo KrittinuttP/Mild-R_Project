@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   description: "ตารางไลฟ์ Mild-R",
 };
 
-/** Live data loads client-side via /api/live/schedule (always fresh). */
+/** Live data loads client-side via /api/live/schedule (CDN-cached ~1 min). */
 export const dynamic = "force-dynamic";
 
 export default function LivePage() {

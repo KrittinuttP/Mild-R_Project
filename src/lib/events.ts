@@ -253,6 +253,21 @@ export function surroundingWeeksRangeYmd(today = new Date()): {
   };
 }
 
+/** Same as `surroundingWeeksRangeYmd`, anchored to today in Asia/Bangkok (server-safe). */
+export function surroundingWeeksRangeYmdBangkok(now = new Date()): {
+  from: string;
+  to: string;
+} {
+  const ymd = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Bangkok",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
+  const [y, m, d] = ymd.split("-").map(Number);
+  return surroundingWeeksRangeYmd(new Date(y, m - 1, d, 12));
+}
+
 /**
  * Data-fetch window for a selected calendar month (independent of grid UI).
  * Inclusive Bangkok YMD: first of month − padDays … last of month + padDays.

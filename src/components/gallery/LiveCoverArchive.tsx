@@ -22,7 +22,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useLiveCovers } from "@/hooks/useLiveCovers";
-import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
+import {
+  gsap,
+  registerGsapPlugins,
+  ScrollTrigger,
+  useGSAP,
+} from "@/lib/gsap";
 import type { LiveCoverItem } from "@/lib/live-streams";
 import {
   BODY_CLASS,
@@ -339,6 +344,8 @@ export function LiveCoverArchive({
           }
         );
       });
+      // Filtering reflows tiles that keep their old triggers; re-measure so they reveal in place.
+      ScrollTrigger.refresh();
     },
     { scope: gridRef, dependencies: [visibleCount, filter, status] }
   );

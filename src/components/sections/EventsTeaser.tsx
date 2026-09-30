@@ -31,10 +31,17 @@ import {
   META_CLASS,
 } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
-import type { CalendarEvent, VtuberProfile } from "@/types/vtuber";
+import type { CalendarEvent, LiveWeek, VtuberProfile } from "@/types/vtuber";
+
+export type InitialLiveSchedule = {
+  from: string;
+  to: string;
+  weeks: LiveWeek[];
+};
 
 type EventsTeaserProps = {
   data: VtuberProfile;
+  initialLiveSchedule?: InitialLiveSchedule | null;
 };
 
 function EventCard({
@@ -115,12 +122,22 @@ function EventCard({
   );
 }
 
-export function EventsTeaser({ data }: EventsTeaserProps) {
+export function EventsTeaser({ data, initialLiveSchedule }: EventsTeaserProps) {
   const board = data.events;
   const events = recentEvents(board, 3);
-  const teaserRange = useMemo(() => surroundingWeeksRangeYmd(), []);
-  const { weeks: teaserWeeks, status, error, retry } =
-    useLiveSchedule(teaserRange);
+  const initialFrom = initialLiveSchedule?.from;
+  const initialTo = initialLiveSchedule?.to;
+  const teaserRange = useMemo(
+    () =>
+      initialFrom && initialTo
+        ? { from: initialFrom, to: initialTo }
+        : surroundingWeeksRangeYmd(),
+    [initialFrom, initialTo]
+  );
+  const { weeks: teaserWeeks, status, error, retry } = useLiveSchedule(
+    teaserRange,
+    { initialWeeks: initialLiveSchedule?.weeks ?? null }
+  );
   const [activeId, setActiveId] = useState<string | null>(null);
   const active = events.find((event) => event.id === activeId) ?? null;
 

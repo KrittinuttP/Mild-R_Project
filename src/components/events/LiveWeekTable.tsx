@@ -23,6 +23,7 @@ import {
   preferOwnChannelSlots,
 } from "@/components/events/LiveSlotMeta";
 import { OfflineBadge } from "@/components/events/OfflineBadge";
+import { FadeInImage } from "@/components/media/FadeInImage";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -112,7 +113,7 @@ function MobileSlotCard({
       <div className="relative h-full w-28 shrink-0 overflow-hidden bg-[#10070b] xs:w-32">
         {coverUrl ? (
           <>
-            <ProtectedImage
+            <FadeInImage
               src={coverUrl}
               alt={label}
               wrapClassName="absolute inset-0 block"
@@ -278,7 +279,7 @@ function SlotCard({
       <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden bg-[#10070b]">
         {coverUrl ? (
           <>
-            <ProtectedImage
+            <FadeInImage
               src={coverUrl}
               alt={label}
               wrapClassName="absolute inset-0 block"
@@ -703,7 +704,7 @@ function LiveSpotlightBanner({
             onClick={onOpenDetail}
             className="group relative aspect-[16/9] w-64 shrink-0 overflow-hidden rounded-2xl border border-[#f3b8c4]/20 bg-[#12080c] text-left transition hover:border-[#e85a7a]/50 lg:w-80"
           >
-            <ProtectedImage
+            <FadeInImage
               src={coverUrl}
               alt={label}
               wrapClassName="absolute inset-0 block"
@@ -734,7 +735,7 @@ function LiveSpotlightBanner({
             onClick={onOpenDetail}
             className="relative aspect-[16/9] w-full overflow-hidden bg-[#12080c] text-left"
           >
-            <ProtectedImage
+            <FadeInImage
               src={coverUrl}
               alt={label}
               wrapClassName="absolute inset-0 block"
@@ -920,7 +921,7 @@ function LiveTodayOfflineBanner({
     >
       <span className="relative aspect-video w-20 shrink-0 overflow-hidden rounded-xl border border-[#f3b8c4]/15 bg-[#12080c] sm:w-24">
         {nextCoverUrl ? (
-          <ProtectedImage
+          <FadeInImage
             src={nextCoverUrl}
             alt={nextLabel ?? "ไลฟ์ถัดไป"}
             wrapClassName="absolute inset-0 block"

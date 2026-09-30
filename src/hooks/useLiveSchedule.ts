@@ -19,24 +19,35 @@ function cacheKey(range: LiveScheduleRange) {
 
 export function useLiveSchedule(
   range: LiveScheduleRange,
-  { keepPreviousData = false }: { keepPreviousData?: boolean } = {}
+  {
+    keepPreviousData = false,
+    initialWeeks = null,
+  }: {
+    keepPreviousData?: boolean;
+    /** Server-rendered weeks for `range`; shown immediately, refreshed silently. */
+    initialWeeks?: LiveWeek[] | null;
+  } = {}
 ) {
-  const [weeks, setWeeks] = useState<LiveWeek[]>(() => {
-    return scheduleCache.get(cacheKey(range)) ?? [];
-  });
+  const initialSeed = (): LiveWeek[] | null =>
+    scheduleCache.get(cacheKey(range)) ?? initialWeeks;
+  const [weeks, setWeeks] = useState<LiveWeek[]>(() => initialSeed() ?? []);
   const [status, setStatus] = useState<LiveScheduleStatus>(() =>
-    scheduleCache.has(cacheKey(range)) ? "ready" : "loading"
+    initialSeed() ? "ready" : "loading"
   );
   const [error, setError] = useState<string | null>(null);
-  const [hasLoaded, setHasLoaded] = useState(() => scheduleCache.has(cacheKey(range)));
+  const [hasLoaded, setHasLoaded] = useState(() => initialSeed() !== null);
   const [resolvedKey, setResolvedKey] = useState(() =>
-    scheduleCache.has(cacheKey(range)) ? cacheKey(range) : null
+    initialSeed() ? cacheKey(range) : null
   );
   const [fetchKey, setFetchKey] = useState(0);
   const rangeRef = useRef(range);
   rangeRef.current = range;
+  const silentKeyRef = useRef<string | null>(
+    initialWeeks && !scheduleCache.has(cacheKey(range)) ? cacheKey(range) : null
+  );
 
   const retry = useCallback(() => {
+    silentKeyRef.current = null;
     scheduleCache.delete(cacheKey(rangeRef.current));
     setFetchKey((k) => k + 1);
   }, []);
@@ -55,9 +66,13 @@ export function useLiveSchedule(
       return;
     }
 
-    if (!keepPreviousData) setWeeks([]);
-    setStatus("loading");
-    setError(null);
+    const silent = silentKeyRef.current === key;
+
+    if (!silent) {
+      if (!keepPreviousData) setWeeks([]);
+      setStatus("loading");
+      setError(null);
+    }
 
     (async () => {
       try {
@@ -65,9 +80,7 @@ export function useLiveSchedule(
           from: range.from,
           to: range.to,
         });
-        const res = await fetch(`/api/live/schedule?${qs}`, {
-          cache: "no-store",
-        });
+        const res = await fetch(`/api/live/schedule?${qs}`);
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);
         }
@@ -80,12 +93,17 @@ export function useLiveSchedule(
           throw new Error(data.error ?? "invalid response");
         }
         scheduleCache.set(key, data.weeks);
+        if (silentKeyRef.current === key) silentKeyRef.current = null;
         setWeeks(data.weeks);
         setResolvedKey(key);
         setHasLoaded(true);
         setStatus("ready");
       } catch (err) {
         if (cancelled) return;
+        if (silent) {
+          console.warn("[useLiveSchedule] background refresh failed", err);
+          return;
+        }
         if (!keepPreviousData) setWeeks([]);
         setStatus("error");
         setError(err instanceof Error ? err.message : "load failed");
