@@ -56,6 +56,8 @@ import { cn } from "@/lib/utils";
 registerGsapPlugins();
 
 const PAGE_STEP = 24;
+/** Month view shows (and loads more) this many months at a time. */
+const MONTH_STEP = 3;
 const SKELETON_COUNT = 8;
 const PREVIEW_COUNT = 8;
 const COVER_GRID_CLASS =
@@ -330,13 +332,10 @@ export function LiveCoverArchive({
   const sectionRef = useRef<HTMLElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const [nearView, setNearView] = useState(false);
-  const { covers, total, status, retry } = useLiveCovers(
-    nearView,
-    preview ? PREVIEW_COUNT : undefined
-  );
 
   const [filter, setFilter] = useState<Filter>("all");
-  const [year, setYear] = useState<string>("all");
+  /** `null` = newest year with lives · `"all"` = every year. */
+  const [yearChoice, setYearChoice] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const view = useSyncExternalStore(
     subscribeCoverView,
@@ -344,8 +343,19 @@ export function LiveCoverArchive({
     () => "month" as const
   );
   const [visibleCount, setVisibleCount] = useState(PAGE_STEP);
+  const [visibleMonths, setVisibleMonths] = useState(MONTH_STEP);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [versionIndex, setVersionIndex] = useState(0);
+
+  const { covers, years, latestYear, status, retry } = useLiveCovers(
+    nearView,
+    preview
+      ? { kind: "latest", limit: PREVIEW_COUNT }
+      : yearChoice === "all"
+        ? { kind: "all" }
+        : { kind: "year", year: yearChoice }
+  );
+  const year = preview ? "all" : (yearChoice ?? latestYear ?? "all");
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -373,57 +383,34 @@ export function LiveCoverArchive({
     [covers, normalizedQuery]
   );
 
+  const inYear = useMemo(
+    () =>
+      year === "all" ? searched : searched.filter((c) => coverYear(c) === year),
+    [searched, year]
+  );
+
   const counts = useMemo(() => {
     const out = { all: 0, own: 0, member: 0, collab: 0 } as Record<Filter, number>;
-    for (const c of searched) {
+    for (const c of inYear) {
       for (const key of Object.keys(out) as Filter[]) {
         if (matchesFilter(c, key)) out[key] += 1;
       }
     }
     return out;
-  }, [searched]);
-
-  const byCategory = useMemo(
-    () => searched.filter((c) => matchesFilter(c, filter)),
-    [searched, filter]
-  );
-
-  const yearCounts = useMemo(() => {
-    const out = new Map<string, number>();
-    for (const c of covers) {
-      const y = coverYear(c);
-      if (y) out.set(y, 0);
-    }
-    for (const c of byCategory) {
-      const y = coverYear(c);
-      if (y) out.set(y, (out.get(y) ?? 0) + 1);
-    }
-    return [...out].sort((a, b) => b[0].localeCompare(a[0]));
-  }, [covers, byCategory]);
+  }, [inYear]);
 
   const filtered = useMemo(
-    () =>
-      year === "all"
-        ? byCategory
-        : byCategory.filter((c) => coverYear(c) === year),
-    [byCategory, year]
+    () => inYear.filter((c) => matchesFilter(c, filter)),
+    [inYear, filter]
   );
 
   const byMonth = !preview && view === "month";
 
-  const monthGroups = useMemo(() => {
-    if (!byMonth) return [];
-    // Whole months only: stop once the running total reaches visibleCount.
-    const all = groupByMonth(filtered);
-    const out: MonthGroup[] = [];
-    let shown = 0;
-    for (const group of all) {
-      if (shown >= visibleCount) break;
-      out.push(group);
-      shown += group.items.length;
-    }
-    return out;
-  }, [byMonth, filtered, visibleCount]);
+  const allMonthGroups = useMemo(
+    () => (byMonth ? groupByMonth(filtered) : []),
+    [byMonth, filtered]
+  );
+  const monthGroups = allMonthGroups.slice(0, visibleMonths);
 
   const visible = preview
     ? filtered.slice(0, PREVIEW_COUNT)
@@ -441,36 +428,42 @@ export function LiveCoverArchive({
     setVersionIndex(0);
   };
 
+  const resetPaging = () => {
+    setVisibleCount(PAGE_STEP);
+    setVisibleMonths(MONTH_STEP);
+    openAt(null);
+  };
+
   const selectFilter = (next: Filter) => {
     setFilter(next);
-    if (
-      year !== "all" &&
-      !searched.some((c) => matchesFilter(c, next) && coverYear(c) === year)
-    ) {
-      setYear("all");
-    }
-    setVisibleCount(PAGE_STEP);
-    openAt(null);
+    resetPaging();
   };
 
   const selectYear = (next: string) => {
-    setYear(next);
-    setVisibleCount(PAGE_STEP);
-    openAt(null);
+    setYearChoice(next);
+    resetPaging();
   };
 
   const changeQuery = (next: string) => {
+    // Searching spans every year (loads the whole archive once).
+    if (!normalizedQuery && normalizeSearch(next)) setYearChoice("all");
     setQuery(next);
-    setVisibleCount(PAGE_STEP);
-    openAt(null);
+    resetPaging();
   };
 
   const selectView = (next: CoverView) => {
     if (next === view) return;
     writeCoverView(next);
-    setVisibleCount(PAGE_STEP);
-    openAt(null);
+    resetPaging();
   };
+
+  const showMore = () => {
+    if (byMonth) setVisibleMonths((m) => m + MONTH_STEP);
+    else setVisibleCount(visible.length + PAGE_STEP);
+  };
+
+  const matchesInOtherYears =
+    year !== "all" && searched.some((c) => matchesFilter(c, filter));
 
   const step = (dir: 1 | -1) => {
     setActiveIndex((i) =>
@@ -532,7 +525,15 @@ export function LiveCoverArchive({
     },
     {
       scope: gridRef,
-      dependencies: [visibleCount, filter, year, normalizedQuery, view, status],
+      dependencies: [
+        visibleCount,
+        visibleMonths,
+        filter,
+        year,
+        normalizedQuery,
+        view,
+        status,
+      ],
     }
   );
 
@@ -568,7 +569,7 @@ export function LiveCoverArchive({
           <p className={cn("mt-4 max-w-xl", BODY_CLASS)}>รวมปกไลฟ์ Mild-R</p>
         </ScrollReveal>
 
-        {!preview && status === "ready" && covers.length > 0 ? (
+        {!preview && years.length > 0 ? (
           <div className="mt-6 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-3 sm:gap-x-3 lg:gap-x-4">
             <div
               className="relative col-start-2 row-start-1 grid h-10 grid-cols-2 rounded-full border border-[#f3b8c4]/15 bg-[#1a0c12]/70 p-0.5 lg:h-9"
@@ -664,36 +665,31 @@ export function LiveCoverArchive({
               ))}
             </div>
 
-            {yearCounts.length > 1 ? (
+            {years.length > 1 ? (
               <div
                 className="col-span-2 row-start-3 flex flex-wrap gap-1.5 lg:col-span-1 lg:col-start-1 lg:row-start-2"
                 role="group"
                 aria-label="กรองตามปี"
               >
-                {[["all", byCategory.length] as const, ...yearCounts].map(
-                  ([key, count]) => {
-                    const selected = year === key;
-                    return (
-                      <button
-                        key={key}
-                        type="button"
-                        aria-pressed={selected}
-                        disabled={count === 0 && !selected}
-                        onClick={() => selectYear(key)}
-                        className={cn(
-                          "rounded-full border px-3 py-1 text-[0.7rem] transition sm:text-xs",
-                          "disabled:cursor-not-allowed disabled:opacity-35",
-                          selected
-                            ? "border-[#f3b8c4]/45 bg-[#f3b8c4]/12 text-[#fff5f7]"
-                            : "border-[#f3b8c4]/12 text-[#f3b8c4]/60 enabled:hover:border-[#f3b8c4]/35 enabled:hover:text-[#fff5f7]"
-                        )}
-                      >
-                        {key === "all" ? "ทุกปี" : key}
-                        <span className="ml-1.5 text-[#f3b8c4]/45">{count}</span>
-                      </button>
-                    );
-                  }
-                )}
+                {["all", ...years].map((key) => {
+                  const selected = year === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => selectYear(key)}
+                      className={cn(
+                        "rounded-full border px-3 py-1 text-[0.7rem] transition sm:text-xs",
+                        selected
+                          ? "border-[#f3b8c4]/45 bg-[#f3b8c4]/12 text-[#fff5f7]"
+                          : "border-[#f3b8c4]/12 text-[#f3b8c4]/60 hover:border-[#f3b8c4]/35 hover:text-[#fff5f7]"
+                      )}
+                    >
+                      {key === "all" ? "ทุกปี" : key}
+                    </button>
+                  );
+                })}
               </div>
             ) : null}
           </div>
@@ -722,18 +718,14 @@ export function LiveCoverArchive({
               <button
                 type="button"
                 onClick={() =>
-                  year !== "all" && byCategory.length > 0
-                    ? selectYear("all")
-                    : changeQuery("")
+                  matchesInOtherYears ? selectYear("all") : changeQuery("")
                 }
                 className={cn(
                   buttonVariants({ variant: "outline", size: "sm" }),
                   CTA_OUTLINE_CLASS
                 )}
               >
-                {year !== "all" && byCategory.length > 0
-                  ? "ค้นหาในทุกปี"
-                  : "ล้างคำค้น"}
+                {matchesInOtherYears ? "ค้นหาในทุกปี" : "ล้างคำค้น"}
               </button>
             </div>
           ) : (
@@ -792,7 +784,7 @@ export function LiveCoverArchive({
           </div>
         )}
 
-        {preview && status === "ready" && total > 0 ? (
+        {preview && status === "ready" && covers.length > 0 ? (
           <div className="mt-10 flex justify-center sm:mt-12">
             <Link
               href={viewAllHref}
@@ -803,7 +795,6 @@ export function LiveCoverArchive({
               )}
             >
               View all
-              <span className="ml-2 text-[#f3b8c4]/70">({total})</span>
               <ArrowUpRight className="size-4 opacity-80" />
             </Link>
           </div>
@@ -813,7 +804,7 @@ export function LiveCoverArchive({
           <div className="mt-10 flex justify-center sm:mt-12">
             <button
               type="button"
-              onClick={() => setVisibleCount(visible.length + PAGE_STEP)}
+              onClick={showMore}
               className={cn(
                 buttonVariants({ variant: "outline", size: "lg" }),
                 CTA_OUTLINE_CLASS,

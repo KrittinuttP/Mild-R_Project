@@ -24,8 +24,13 @@ export {
 
 const PAGE = 1000;
 
+type PublicClient = ReturnType<typeof createPublicClient>;
+
+const LIVE_LIST_SELECT =
+  "video_id, channel_id, channel_name, source_title, title, url, scheduled_start, scheduled_start_first, actual_start, actual_end, thumbnail_url, thumbnail_cached_url, views_on_end, latest_views, is_own_channel, is_collab, metadata, created_at";
+
 async function loadThumbnailsForVideos(
-  supabase: ReturnType<typeof createPublicClient>,
+  supabase: PublicClient,
   videoIds: string[]
 ): Promise<Map<string, LiveStreamThumbnail[]>> {
   const map = new Map<string, LiveStreamThumbnail[]>();
@@ -61,6 +66,63 @@ export type LoadLiveStreamsOptions = {
   includeHidden?: boolean;
 };
 
+/** Paginated live rows, optionally narrowed by a PostgREST `or` filter. */
+async function selectLiveRows(
+  supabase: PublicClient,
+  {
+    or,
+    limit = Number.POSITIVE_INFINITY,
+    includeHidden = false,
+  }: { or?: string; limit?: number; includeHidden?: boolean } = {}
+): Promise<LiveStreamRow[]> {
+  const rows: LiveStreamRow[] = [];
+  let from = 0;
+
+  while (rows.length < limit) {
+    let query = supabase.from("mild_r_live_streams").select(LIVE_LIST_SELECT);
+    if (or) query = query.or(or);
+    const { data, error } = await query
+      .order("actual_start", { ascending: false, nullsFirst: false })
+      .range(from, from + PAGE - 1);
+
+    if (error) {
+      console.error("[live_streams]", error.message);
+      break;
+    }
+
+    const batch = (data ?? []) as LiveStreamRow[];
+    if (batch.length === 0) break;
+    rows.push(
+      ...(includeHidden ? batch : batch.filter((row) => !isHiddenLiveRow(row)))
+    );
+    if (batch.length < PAGE) break;
+    from += PAGE;
+  }
+
+  return Number.isFinite(limit) && rows.length > limit
+    ? rows.slice(0, limit)
+    : rows;
+}
+
+/** Attach thumbnail history and sort newest first. */
+async function withThumbnails(
+  supabase: PublicClient,
+  rows: LiveStreamRow[]
+): Promise<LiveStreamRow[]> {
+  const thumbs = await loadThumbnailsForVideos(
+    supabase,
+    rows.map((r) => r.video_id)
+  );
+
+  return rows
+    .map((row) => ({
+      ...row,
+      thumbnail_cached_url: row.thumbnail_cached_url ?? null,
+      thumbnails: thumbs.get(row.video_id) ?? [],
+    }))
+    .sort((a, b) => liveStreamSortKey(b) - liveStreamSortKey(a));
+}
+
 /** Load all YouTube live rows (paginated) + thumbnail history. */
 export async function loadLiveStreams(
   limit = Number.POSITIVE_INFINITY,
@@ -70,54 +132,11 @@ export async function loadLiveStreams(
 
   try {
     const supabase = createPublicClient();
-    const rows: LiveStreamRow[] = [];
-    let from = 0;
-
-    while (rows.length < limit) {
-      const to = from + PAGE - 1;
-      const { data, error } = await supabase
-        .from("mild_r_live_streams")
-        .select(
-          "video_id, channel_id, channel_name, source_title, title, url, scheduled_start, scheduled_start_first, actual_start, actual_end, thumbnail_url, thumbnail_cached_url, views_on_end, latest_views, is_own_channel, is_collab, metadata, created_at"
-        )
-        .order("actual_start", { ascending: false, nullsFirst: false })
-        .range(from, to);
-
-      if (error) {
-        console.error("[live_streams]", error.message);
-        break;
-      }
-
-      const batch = (data ?? []) as LiveStreamRow[];
-      if (batch.length === 0) break;
-      rows.push(
-        ...(options?.includeHidden
-          ? batch
-          : batch.filter((row) => !isHiddenLiveRow(row)))
-      );
-      if (batch.length < PAGE) break;
-      from += PAGE;
-    }
-
-    const capped =
-      Number.isFinite(limit) && rows.length > limit
-        ? rows.slice(0, limit)
-        : rows;
-
-    const thumbs = await loadThumbnailsForVideos(
-      supabase,
-      capped.map((r) => r.video_id)
-    );
-
-    const withThumbs = capped.map((row) => ({
-      ...row,
-      thumbnail_cached_url: row.thumbnail_cached_url ?? null,
-      thumbnails: thumbs.get(row.video_id) ?? [],
-    }));
-
-    return [...withThumbs].sort(
-      (a, b) => liveStreamSortKey(b) - liveStreamSortKey(a)
-    );
+    const rows = await selectLiveRows(supabase, {
+      limit,
+      includeHidden: options?.includeHidden,
+    });
+    return await withThumbnails(supabase, rows);
   } catch (err) {
     console.error("[live_streams]", err);
     return [];
@@ -157,9 +176,169 @@ function youtubeGridThumb(url: string) {
   );
 }
 
+/** Bangkok year (YYYY) a cover is filed under — same anchor as `LiveCoverItem.date`. */
+export function liveCoverYear(item: Pick<LiveCoverItem, "date">): string | null {
+  return item.date?.slice(0, 4) ?? null;
+}
+
 /** Real lives with a cover (Mild-R + collabs), newest first. */
 export async function loadLiveCoverArchive(): Promise<LiveCoverItem[]> {
-  const rows = await loadLiveStreams();
+  return toLiveCoverItems(await loadLiveStreams());
+}
+
+/** Upcoming lives stay "upcoming" for this long past their start (see getLiveStreamStatus). */
+const UPCOMING_GRACE_MS = 3 * 60 * 60 * 1000;
+/** Extra rows per query to absorb previews / cancelled / cover-less rows. */
+const LATEST_BUFFER = 24;
+
+/** Newest `limit` covers (home preview) without loading the whole archive. */
+export async function loadLatestLiveCovers(
+  limit: number
+): Promise<LiveCoverItem[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  try {
+    const supabase = createPublicClient();
+    const upcomingFrom = new Date(Date.now() - UPCOMING_GRACE_MS).toISOString();
+    // Not-yet-started lives sort first but have no actual_start, so fetch them separately.
+    const [started, upcoming] = await Promise.all([
+      supabase
+        .from("mild_r_live_streams")
+        .select(LIVE_LIST_SELECT)
+        .not("actual_start", "is", null)
+        .order("actual_start", { ascending: false })
+        .limit(limit + LATEST_BUFFER),
+      supabase
+        .from("mild_r_live_streams")
+        .select(LIVE_LIST_SELECT)
+        .is("actual_start", null)
+        .or(
+          `scheduled_start.gte.${upcomingFrom},scheduled_start_first.gte.${upcomingFrom}`
+        )
+        .limit(LATEST_BUFFER),
+    ]);
+
+    for (const res of [started, upcoming]) {
+      if (res.error) console.error("[live_covers_latest]", res.error.message);
+    }
+
+    const rows = [
+      ...((started.data ?? []) as LiveStreamRow[]),
+      ...((upcoming.data ?? []) as LiveStreamRow[]),
+    ].filter((row) => !isHiddenLiveRow(row));
+
+    return toLiveCoverItems(await withThumbnails(supabase, rows)).slice(
+      0,
+      limit
+    );
+  } catch (err) {
+    console.error("[live_covers_latest]", err);
+    return [];
+  }
+}
+
+/** Covers filed under one Bangkok calendar year (YYYY). */
+export async function loadLiveCoversForYear(
+  year: string
+): Promise<LiveCoverItem[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  try {
+    const supabase = createPublicClient();
+    const { from, to } = bangkokInclusiveToUtcRange(
+      `${year}-01-01`,
+      `${year}-12-31`
+    );
+    const inYear = (column: string) =>
+      `and(${column}.gte.${from},${column}.lt.${to})`;
+    const rows = await selectLiveRows(supabase, {
+      or: [
+        inYear("actual_start"),
+        inYear("scheduled_start_first"),
+        inYear("scheduled_start"),
+      ].join(","),
+    });
+
+    return toLiveCoverItems(await withThumbnails(supabase, rows)).filter(
+      (item) => liveCoverYear(item) === year
+    );
+  } catch (err) {
+    console.error("[live_covers_year]", err);
+    return [];
+  }
+}
+
+/** Years that have lives, newest first (oldest started live → newest started / upcoming). */
+export async function loadLiveCoverYears(): Promise<string[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  try {
+    const supabase = createPublicClient();
+    const upcomingFrom = new Date(Date.now() - UPCOMING_GRACE_MS).toISOString();
+    const startedEdge = (ascending: boolean) =>
+      supabase
+        .from("mild_r_live_streams")
+        .select("actual_start")
+        .not("actual_start", "is", null)
+        .order("actual_start", { ascending })
+        .limit(1);
+
+    const [oldest, newest, upcoming] = await Promise.all([
+      startedEdge(true),
+      startedEdge(false),
+      supabase
+        .from("mild_r_live_streams")
+        .select(LIVE_LIST_SELECT)
+        .is("actual_start", null)
+        .gte("scheduled_start", upcomingFrom)
+        .order("scheduled_start", { ascending: false })
+        .limit(LATEST_BUFFER),
+    ]);
+
+    const yearOf = (iso: string | null | undefined) =>
+      bangkokDateFromIso(iso)?.slice(0, 4) ?? null;
+
+    const upcomingYears = toLiveCoverItems(
+      ((upcoming.data ?? []) as LiveStreamRow[]).filter(
+        (row) => !isHiddenLiveRow(row)
+      )
+    )
+      .map(liveCoverYear)
+      .filter((y): y is string => Boolean(y));
+
+    const oldestYear = yearOf(oldest.data?.[0]?.actual_start);
+    const latestYear = [
+      yearOf(newest.data?.[0]?.actual_start),
+      ...upcomingYears,
+    ]
+      .filter((y): y is string => Boolean(y))
+      .sort()
+      .at(-1);
+
+    if (!oldestYear || !latestYear) return [];
+
+    const years: string[] = [];
+    for (let y = Number(latestYear); y >= Number(oldestYear); y--) {
+      years.push(String(y));
+    }
+    return years;
+  } catch (err) {
+    console.error("[live_covers_years]", err);
+    return [];
+  }
+}
+
+/** Years present in a loaded cover list, newest first. */
+export function liveCoverYearsOf(items: LiveCoverItem[]): string[] {
+  const years = new Set<string>();
+  for (const item of items) {
+    const y = liveCoverYear(item);
+    if (y) years.add(y);
+  }
+  return [...years].sort((a, b) => b.localeCompare(a));
+}
+
+function toLiveCoverItems(rows: LiveStreamRow[]): LiveCoverItem[] {
   const out: LiveCoverItem[] = [];
 
   for (const row of rows) {

@@ -6,58 +6,99 @@ import type { LiveCoverItem } from "@/lib/live-streams";
 
 export type LiveCoversStatus = "idle" | "loading" | "ready" | "error";
 
+type CoversPayload = {
+  covers: LiveCoverItem[];
+  /** Year the server resolved (`year=latest` → e.g. "2026"). */
+  year: string | null;
+  years: string[];
+};
+
+type Entry = { status: "ready"; data: CoversPayload } | { status: "error" };
+
+export type LiveCoversScope =
+  /** Newest N only (home preview). */
+  | { kind: "latest"; limit: number }
+  /** One year; `null` = newest year with lives. */
+  | { kind: "year"; year: string | null }
+  /** Whole archive (search / "all years"). */
+  | { kind: "all" };
+
+const NO_COVERS: LiveCoverItem[] = [];
+const LATEST_YEAR_QUERY = "year=latest";
+const ALL_QUERY = "";
+
 /**
- * Fetch live covers once per page visit, only after `enabled` turns true
- * (section near viewport). No polling. `limit` fetches only the newest N.
+ * Fetch live covers once per scope per page visit, only after `enabled` turns
+ * true (section near viewport). No polling. Once the whole archive is loaded,
+ * every year scope reuses it (callers filter by year locally).
  */
-export function useLiveCovers(enabled: boolean, limit?: number) {
-  const [covers, setCovers] = useState<LiveCoverItem[]>([]);
-  const [total, setTotal] = useState(0);
-  const [status, setStatus] = useState<LiveCoversStatus>("idle");
-  const [fetchKey, setFetchKey] = useState(0);
+export function useLiveCovers(enabled: boolean, scope: LiveCoversScope) {
+  const [entries, setEntries] = useState<Record<string, Entry>>({});
+  /** Last year list / latest year seen — kept while another scope loads. */
+  const [years, setYears] = useState<string[]>([]);
+  const [latestYear, setLatestYear] = useState<string | null>(null);
 
-  const retry = useCallback(() => setFetchKey((k) => k + 1), []);
+  const hasAll = entries[ALL_QUERY]?.status === "ready";
+  const query =
+    scope.kind === "latest"
+      ? `limit=${scope.limit}`
+      : scope.kind === "all" || hasAll
+        ? ALL_QUERY
+        : scope.year === null || scope.year === latestYear
+          ? LATEST_YEAR_QUERY
+          : `year=${scope.year}`;
+  const entry = entries[query];
 
-  const requestKey = enabled ? `${limit ?? ""}|${fetchKey}` : null;
-  const [startedKey, setStartedKey] = useState<string | null>(null);
-  if (startedKey !== requestKey) {
-    setStartedKey(requestKey);
-    if (requestKey !== null) setStatus("loading");
-  }
+  const retry = useCallback(() => {
+    setEntries((prev) => {
+      const next = { ...prev };
+      delete next[query];
+      return next;
+    });
+  }, [query]);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || entry) return;
     let cancelled = false;
 
-    const url = limit ? `/api/live/covers?limit=${limit}` : "/api/live/covers";
-    fetch(url, { cache: "no-store" })
+    fetch(`/api/live/covers${query ? `?${query}` : ""}`, { cache: "no-store" })
       .then(async (res) => {
-        const body = (await res.json().catch(() => ({}))) as {
-          covers?: LiveCoverItem[];
-          total?: number;
-          error?: string;
-        };
+        const body = (await res.json().catch(() => ({}))) as Partial<
+          CoversPayload & { error: string }
+        >;
         if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
         return body;
       })
       .then((body) => {
         if (cancelled) return;
-        const rows = body.covers ?? [];
-        setCovers(rows);
-        setTotal(typeof body.total === "number" ? body.total : rows.length);
-        setStatus("ready");
+        const data: CoversPayload = {
+          covers: body.covers ?? [],
+          year: body.year ?? null,
+          years: body.years ?? [],
+        };
+        setEntries((prev) => ({ ...prev, [query]: { status: "ready", data } }));
+        if (data.years.length > 0) setYears(data.years);
+        if (query === LATEST_YEAR_QUERY && data.year) setLatestYear(data.year);
       })
       .catch(() => {
         if (cancelled) return;
-        setCovers([]);
-        setTotal(0);
-        setStatus("error");
+        setEntries((prev) => ({ ...prev, [query]: { status: "error" } }));
       });
 
     return () => {
       cancelled = true;
     };
-  }, [enabled, limit, fetchKey]);
+  }, [enabled, query, entry]);
 
-  return { covers, total, status, retry };
+  const status: LiveCoversStatus = !enabled
+    ? "idle"
+    : (entry?.status ?? "loading");
+
+  return {
+    covers: entry?.status === "ready" ? entry.data.covers : NO_COVERS,
+    years,
+    latestYear,
+    status,
+    retry,
+  };
 }
