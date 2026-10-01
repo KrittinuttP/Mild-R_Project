@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import {
   clearSiteAdminCookie,
+  isSiteAdminConfigured,
   isSiteAdminUnlocked,
   setSiteAdminCookie,
   verifySiteAdminPassword,
@@ -24,6 +25,13 @@ export async function POST(request: Request) {
   if (body.action === "lock") {
     await clearSiteAdminCookie();
     return NextResponse.json({ unlocked: false });
+  }
+
+  if (!isSiteAdminConfigured()) {
+    return NextResponse.json(
+      { error: "ระบบแอดมินยังไม่ได้ตั้งค่า (SITE_ADMIN_PASSWORD / SITE_ADMIN_SECRET)" },
+      { status: 503 }
+    );
   }
 
   const password = typeof body.password === "string" ? body.password : "";

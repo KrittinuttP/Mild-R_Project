@@ -66,7 +66,7 @@ Production env ที่ต้องมีบน Next host:
 |--------|----------|
 | `GEMINI_API_KEY` | API key จาก [Google AI Studio](https://aistudio.google.com/apikey) |
 | `GEMINI_MODEL` | optional, default `gemini-flash-lite-latest` |
-| `LIVE_AGENT_CRON_SECRET` | Bearer สำหรับ cron (หรือใช้ service role) |
+| `LIVE_AGENT_CRON_SECRET` | Bearer สำหรับ cron และ header `x-live-agent-secret` ที่ agent ส่งไป `/api/live/manual` (ถ้าไม่ตั้งจะ fallback เป็น service role — ไม่แนะนำบน production) |
 | `DISCORD_WEBHOOK_URL` | แจ้งเตือน fail / กลับมาผ่าน (ตัวเดียวกับ Supabase secrets) |
 | `LIVE_AGENT_API_BASE` / `NEXT_PUBLIC_SITE_URL` | URL สาธารณะของเว็บ |
 | `SUPABASE_SERVICE_ROLE_KEY` | อ่าน/เขียนตาราง |

@@ -130,9 +130,10 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
-# รหัสผ่านสำหรับเข้าหน้า /admin ตรวจและอนุมัติการ์ด
-SITE_ADMIN_PASSWORD=MILDRPROJECT
-SITE_ADMIN_SECRET=your-random-secret-string-here
+# รหัสผ่านสำหรับเข้าหน้า /admin ตรวจและอนุมัติการ์ด (บังคับตั้ง ไม่มีค่า default)
+# รหัสผ่าน ≥ 12 ตัวอักษร, secret ≥ 32 ตัวอักษร (เช่น `openssl rand -base64 48`)
+SITE_ADMIN_PASSWORD=
+SITE_ADMIN_SECRET=
 ```
 
 ---
@@ -428,52 +429,76 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 
 export const SITE_ADMIN_COOKIE = "mild_r_site_admin";
-export const DEFAULT_SITE_ADMIN_PASSWORD = "MILDRPROJECT";
 
-export function getSiteAdminPassword() {
-  return process.env.SITE_ADMIN_PASSWORD?.trim() || DEFAULT_SITE_ADMIN_PASSWORD;
+const MIN_PASSWORD_LENGTH = 16;
+const MIN_SECRET_LENGTH = 32;
+const SESSION_SECONDS = 60 * 60 * 12;
+
+function sitePassword(): string | null {
+  const value = process.env.SITE_ADMIN_PASSWORD?.trim() || "";
+  return value.length >= MIN_PASSWORD_LENGTH ? value : null;
 }
 
-function signingSecret() {
-  return (
-    process.env.SITE_ADMIN_SECRET?.trim() ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ||
-    getSiteAdminPassword()
-  );
+function signingSecret(): string | null {
+  const value = process.env.SITE_ADMIN_SECRET?.trim() || "";
+  return value.length >= MIN_SECRET_LENGTH ? value : null;
 }
 
-function tokenForPassword(password: string) {
-  return createHmac("sha256", signingSecret()).update(`site-admin:${password}`).digest("hex");
+/** No built-in default — admin login is disabled until both env values are set. */
+export function isSiteAdminConfigured() {
+  return sitePassword() !== null && signingSecret() !== null;
+}
+
+function safeEqual(a: string, b: string) {
+  const left = Buffer.from(a);
+  const right = Buffer.from(b);
+  return left.length === right.length && timingSafeEqual(left, right);
+}
+
+/** Signs the expiry together with the password, so rotating either revokes old cookies. */
+function signature(expiresAt: number, password: string, secret: string) {
+  return createHmac("sha256", secret)
+    .update(`site-admin:v2:${expiresAt}:${password}`)
+    .digest("hex");
+}
+
+function isValidToken(token: string): boolean {
+  const password = sitePassword();
+  const secret = signingSecret();
+  if (!password || !secret) return false;
+  const [expiresRaw, sig] = token.split(".");
+  const expiresAt = Number(expiresRaw);
+  if (!sig || !Number.isInteger(expiresAt)) return false;
+  if (expiresAt <= Math.floor(Date.now() / 1000)) return false;
+  return safeEqual(sig, signature(expiresAt, password, secret));
 }
 
 export function verifySiteAdminPassword(input: string) {
-  const expected = getSiteAdminPassword();
-  const a = Buffer.from(input);
-  const b = Buffer.from(expected);
-  if (a.length !== b.length) return false;
-  return timingSafeEqual(a, b);
+  const expected = sitePassword();
+  if (!expected || !signingSecret()) return false;
+  return safeEqual(input, expected);
 }
 
 export async function isSiteAdminUnlocked() {
   const jar = await cookies();
   const value = jar.get(SITE_ADMIN_COOKIE)?.value;
-  if (!value) return false;
-  const expected = tokenForPassword(getSiteAdminPassword());
-  const a = Buffer.from(value);
-  const b = Buffer.from(expected);
-  if (a.length !== b.length) return false;
-  return timingSafeEqual(a, b);
+  return value ? isValidToken(value) : false;
 }
 
 export async function setSiteAdminCookie() {
+  const password = sitePassword();
+  const secret = signingSecret();
+  if (!password || !secret) return false;
+  const expiresAt = Math.floor(Date.now() / 1000) + SESSION_SECONDS;
   const jar = await cookies();
-  jar.set(SITE_ADMIN_COOKIE, tokenForPassword(getSiteAdminPassword()), {
+  jar.set(SITE_ADMIN_COOKIE, `${expiresAt}.${signature(expiresAt, password, secret)}`, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: 60 * 60 * 12,
+    maxAge: SESSION_SECONDS,
   });
+  return true;
 }
 
 export async function clearSiteAdminCookie() {

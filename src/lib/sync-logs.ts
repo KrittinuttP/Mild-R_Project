@@ -1,5 +1,4 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { notifyJobDiscord } from "@/lib/discord-job-alert";
 import type { SyncLogRow, SyncLogStatus } from "@/types/sync-log";
@@ -138,7 +137,7 @@ export async function loadSyncLogs(
   const limit = Math.min(Math.max(opts.limit ?? 500, 1), 2000);
 
   try {
-    const supabase = createPublicClient();
+    const supabase = createAdminClient();
     let query = supabase
       .from("mild_r_sync_logs")
       .select("id, source, status, message, saved_count, meta, created_at")

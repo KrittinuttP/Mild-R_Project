@@ -25,7 +25,7 @@
 - Table: `mild_r.hbd_submissions` (+ view `public.mild_r_hbd_submissions`)
 - Storage bucket: `hbd-uploads` (JPEG/PNG/WebP · ≤ 5 MB)
 - Migrate: `npm run db:migrate:hbd-submissions`
-- Admin auth: cookie ร่วม `/admin` (`SITE_ADMIN_PASSWORD` / default ดู `.env.example`)
+- Admin auth: cookie ร่วม `/admin` (`SITE_ADMIN_PASSWORD` + `SITE_ADMIN_SECRET` บังคับตั้ง ไม่มีค่า default — ดู `.env.example`)
 
 ## Status
 

@@ -4,6 +4,7 @@ import {
   getLuminaSourceTitle,
   resolveLuminaChannel,
 } from "@/data/lumina-channels";
+import { hasLiveAgentSecret } from "@/lib/live-agent-auth";
 import {
   classifyLiveOwnership,
   MILD_R_CHANNEL_ID,
@@ -14,6 +15,7 @@ import {
   previewLocalDate,
   type PreviewLikeRow,
 } from "@/lib/live-preview-match";
+import { isSiteAdminUnlocked } from "@/lib/site-admin-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { snapScheduledToHalfHour } from "@/lib/snap-scheduled";
 import { getYoutubeVideoId } from "@/lib/youtube";
@@ -252,7 +254,12 @@ async function fetchYoutubeVideos(
   return map;
 }
 
+/** Admin form (site-admin cookie) or live schedule agent (server secret header). */
 export async function POST(request: Request) {
+  if (!hasLiveAgentSecret(request) && !(await isSiteAdminUnlocked())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   let items: ManualLiveInput[];
   try {
     items = await parseBody(request);

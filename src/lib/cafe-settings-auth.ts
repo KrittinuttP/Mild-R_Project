@@ -5,8 +5,7 @@
 export {
   SITE_ADMIN_COOKIE as CAFE_SETTINGS_COOKIE,
   clearSiteAdminCookie as clearCafeSettingsCookie,
-  expectedSiteAdminToken as expectedCafeSettingsToken,
-  getSiteAdminPassword,
+  isSiteAdminConfigured as isCafeSettingsConfigured,
   isSiteAdminUnlocked as isCafeSettingsUnlocked,
   setSiteAdminCookie as setCafeSettingsCookie,
   verifySiteAdminPassword as verifyCafeSettingsPassword,

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Activity, Radio } from "lucide-react";
 
 import { LiveOpsSyncPanel } from "@/components/events/LiveOpsSyncPanel";
@@ -19,6 +20,7 @@ import {
   loadLiveStreamsInRange,
   partitionLiveStreams,
 } from "@/lib/live-streams";
+import { isSiteAdminUnlocked } from "@/lib/site-admin-auth";
 import { loadSyncLogs } from "@/lib/sync-logs";
 
 export const metadata: Metadata = {
@@ -37,8 +39,10 @@ function addDaysYmd(ymd: string, deltaDays: number): string {
   return `${yy}-${mm}-${dd}`;
 }
 
-/** Hidden ops page — not linked from public nav. Open `/live/ops` directly. */
+/** Internal ops page — site-admin only (unlock at `/admin`). */
 export default async function LiveOpsPage() {
+  if (!(await isSiteAdminUnlocked())) redirect("/admin");
+
   const toYmd = bangkokYmdToday();
   const fromYmd = addDaysYmd(toYmd, -6); // default 7 days inclusive
   const { from, to } = bangkokInclusiveToUtcRange(fromYmd, toYmd);

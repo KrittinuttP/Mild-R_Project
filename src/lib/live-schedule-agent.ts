@@ -2,6 +2,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { resolveLuminaChannel } from "@/data/lumina-channels";
 import { notifyLiveScheduleRowDiscord } from "@/lib/discord-job-alert";
+import {
+  LIVE_AGENT_SECRET_HEADER,
+  liveAgentSecret,
+} from "@/lib/live-agent-auth";
 import { buildLiveAgentPrompt } from "@/lib/live-agent-prompt";
 import {
   bangkokDateFromIso,
@@ -371,10 +375,17 @@ export async function postManualLiveItems(
     process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
     "http://localhost:3000";
   const url = `${base.replace(/\/$/, "")}/api/live/manual`;
+  const secret = liveAgentSecret();
+  if (!secret) {
+    throw new Error("LIVE_AGENT_CRON_SECRET is not configured");
+  }
 
   const res = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      [LIVE_AGENT_SECRET_HEADER]: secret,
+    },
     body: JSON.stringify(items),
   });
   const body = await res.json().catch(() => ({}));

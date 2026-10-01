@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { hasLiveAgentSecret } from "@/lib/live-agent-auth";
 import {
   loadPendingLiveSchedules,
   processLiveScheduleRow,
@@ -16,18 +17,6 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-function authorize(request: Request): boolean {
-  const secret =
-    process.env.LIVE_AGENT_CRON_SECRET?.trim() ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
-  if (!secret) return false;
-
-  const auth = request.headers.get("authorization")?.trim() || "";
-  const bearer = auth.replace(/^Bearer\s+/i, "").trim();
-  const header = request.headers.get("x-live-agent-secret")?.trim() || "";
-  return bearer === secret || header === secret;
-}
-
 type RunBody = {
   limit?: unknown;
   dryRun?: unknown;
@@ -37,7 +26,7 @@ type RunBody = {
 };
 
 export async function POST(request: Request) {
-  if (!authorize(request)) {
+  if (!hasLiveAgentSecret(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

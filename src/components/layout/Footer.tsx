@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { KeyRound } from "lucide-react";
 
 import { SocialPlatformIcon } from "@/components/icons/SocialPlatformIcon";
 import type { VtuberProfile } from "@/types/vtuber";
@@ -138,8 +139,17 @@ export function Footer({ data }: FooterProps) {
           <div className="hidden md:block">{disclaimer}</div>
 
           <div className="flex flex-col gap-3 text-xs leading-none tracking-wide text-[#f3b8c4]/45 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-6 sm:gap-y-2">
-            <p className="m-0 leading-none">
-              © {year} Fan-made · Not affiliated with Lumina Project
+            <p className="m-0 inline-flex items-center gap-1.5 leading-none">
+              <span>© {year} Fan-made · Not affiliated with Lumina Project</span>
+              <Link
+                href="/admin"
+                prefetch={false}
+                rel="nofollow"
+                aria-label="Admin"
+                className="inline-flex text-[#f3b8c4]/20 transition hover:text-[#e85a7a]"
+              >
+                <KeyRound className="size-3" aria-hidden />
+              </Link>
             </p>
             <DeveloperCredit />
           </div>

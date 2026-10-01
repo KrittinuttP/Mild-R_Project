@@ -5,6 +5,7 @@ import {
   loadLiveStreamsInRange,
   partitionLiveStreams,
 } from "@/lib/live-streams";
+import { isSiteAdminUnlocked } from "@/lib/site-admin-auth";
 import {
   loadSyncLogs,
   type SyncLogSourceTab,
@@ -23,6 +24,10 @@ function isYmd(value: string | null): value is string {
 }
 
 export async function GET(request: Request) {
+  if (!(await isSiteAdminUnlocked())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { searchParams } = new URL(request.url);
   const sourceTab = parseTab(searchParams.get("source"));
   const fromYmd = searchParams.get("from");

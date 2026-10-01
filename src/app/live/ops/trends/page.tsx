@@ -26,6 +26,7 @@ import {
   streamMatchesKinds,
   sumTrendRows,
 } from "@/lib/live-view-trends";
+import { isSiteAdminUnlocked } from "@/lib/site-admin-auth";
 import type { TrendGrain } from "@/types/live-view-trends";
 
 export const metadata: Metadata = {
@@ -85,6 +86,7 @@ export default async function LiveOpsTrendsPage({ searchParams }: PageProps) {
   const kindStats = countKindStats(filtered);
   const bucketPeaks = bucketPeakStreamsFromList(filtered, grain);
   const totals = sumTrendRows(rows);
+  const isAdmin = await isSiteAdminUnlocked();
 
   return (
     <main className="relative min-h-dvh bg-[#0c0709] px-4 py-10 text-[#fff5f7] sm:px-8 sm:py-14">
@@ -103,18 +105,22 @@ export default async function LiveOpsTrendsPage({ searchParams }: PageProps) {
           <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
             <h1 className={DISPLAY_H1_CLASS}>View Trends</h1>
             <div className="flex flex-wrap items-center gap-2.5">
-              <AddManualLiveButton />
-              <Link
-                href="/live/ops"
-                className={cn(
-                  buttonVariants({ variant: "outline", size: "sm" }),
-                  CTA_OUTLINE_CLASS,
-                  "inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider"
-                )}
-              >
-                <Radio className="size-3.5 text-[#e85a7a]" />
-                <span>Sync Monitor</span>
-              </Link>
+              {isAdmin ? (
+                <>
+                  <AddManualLiveButton />
+                  <Link
+                    href="/live/ops"
+                    className={cn(
+                      buttonVariants({ variant: "outline", size: "sm" }),
+                      CTA_OUTLINE_CLASS,
+                      "inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider"
+                    )}
+                  >
+                    <Radio className="size-3.5 text-[#e85a7a]" />
+                    <span>Sync Monitor</span>
+                  </Link>
+                </>
+              ) : null}
             </div>
           </div>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-[#f7d7de]/80">
