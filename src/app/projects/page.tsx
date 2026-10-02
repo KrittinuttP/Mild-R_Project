@@ -21,7 +21,7 @@ export const metadata: Metadata = PROJECTS_COMING_SOON
       description: PROJECTS_DESCRIPTION,
     }
   : {
-      title: "Projects | Mild-R Fanclub",
+      title: `${PROJECTS_TITLE} | Mild-R Fanclub`,
       description: "โปรเจกต์ที่ฮันนี่จัดทำเพื่อ Mild-R เช่น Cafe และ Fansong",
     };
 

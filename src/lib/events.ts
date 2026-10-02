@@ -1,6 +1,9 @@
 import type {
   CalendarEvent,
+  CalendarEventInput,
+  CalendarEventStatus,
   EventsBoard,
+  EventVideoKind,
   LiveSlot,
   LiveWeek,
 } from "@/types/vtuber";
@@ -80,13 +83,43 @@ export function formatThaiShortDate(iso: string): string {
   return `${date.getDate()}/${date.getMonth() + 1}`;
 }
 
+const TH_MONTHS_SHORT = [
+  "ม.ค.",
+  "ก.พ.",
+  "มี.ค.",
+  "เม.ย.",
+  "พ.ค.",
+  "มิ.ย.",
+  "ก.ค.",
+  "ส.ค.",
+  "ก.ย.",
+  "ต.ค.",
+  "พ.ย.",
+  "ธ.ค.",
+] as const;
+
+/** "9 ส.ค. 2026" — built by hand so server and browser ICU never disagree. */
 export function formatThaiDate(iso: string): string {
-  const date = parseISODate(iso);
-  return date.toLocaleDateString("th-TH-u-ca-gregory", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  const [y, m, d] = iso.split("-").map(Number);
+  return `${d} ${TH_MONTHS_SHORT[(m ?? 1) - 1]} ${y}`;
+}
+
+/** "14–15 ก.พ. 2026", "22 ก.ย. – 10 ต.ค. 2026", or a single date. */
+export function formatThaiDateRange(start: string, end?: string): string {
+  if (!end || end === start) return formatThaiDate(start);
+  const [y1, m1, d1] = start.split("-").map(Number);
+  const [y2, m2, d2] = end.split("-").map(Number);
+  if (y1 !== y2) return `${formatThaiDate(start)} – ${formatThaiDate(end)}`;
+  if (m1 !== m2) {
+    return `${d1} ${TH_MONTHS_SHORT[m1 - 1]} – ${d2} ${TH_MONTHS_SHORT[m2 - 1]} ${y2}`;
+  }
+  return `${d1}–${d2} ${TH_MONTHS_SHORT[m2 - 1]} ${y2}`;
+}
+
+export function formatEventDateRange(
+  event: Pick<CalendarEvent, "date" | "endDate">
+): string {
+  return formatThaiDateRange(event.date, event.endDate);
 }
 
 /** English short date like birthday style + year, e.g. "23 May 2024" */
@@ -357,6 +390,49 @@ export function isCollabSlot(slot: LiveSlot): boolean {
   return slot.kind === "collab";
 }
 
+/** Today's calendar date in Bangkok as YYYY-MM-DD. */
+export function bangkokTodayYmd(now: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Bangkok",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
+}
+
+export function resolveEventStatus(
+  event: Pick<CalendarEventInput, "date" | "endDate">,
+  todayYmd: string
+): CalendarEventStatus {
+  if (todayYmd < event.date) return "upcoming";
+  if (todayYmd > (event.endDate ?? event.date)) return "ended";
+  return "ongoing";
+}
+
+function daysBetweenYmd(fromYmd: string, toYmd: string): number {
+  const toUtc = (ymd: string) => {
+    const [y, m, d] = ymd.split("-").map(Number);
+    return Date.UTC(y, m - 1, d);
+  };
+  return Math.round((toUtc(toYmd) - toUtc(fromYmd)) / 86_400_000);
+}
+
+export function resolveEvents(
+  events: CalendarEventInput[],
+  todayYmd: string
+): CalendarEvent[] {
+  return events.map((event) => {
+    const status = resolveEventStatus(event, todayYmd);
+    const statusDays =
+      status === "ongoing"
+        ? daysBetweenYmd(todayYmd, event.endDate ?? event.date) + 1
+        : status === "upcoming"
+          ? daysBetweenYmd(todayYmd, event.date)
+          : undefined;
+    return { ...event, status, statusDays };
+  });
+}
+
 export function sortEvents(events: CalendarEvent[]): CalendarEvent[] {
   return [...events].sort((a, b) => {
     if (a.date !== b.date) return a.date < b.date ? -1 : 1;
@@ -364,14 +440,16 @@ export function sortEvents(events: CalendarEvent[]): CalendarEvent[] {
   });
 }
 
+export function ongoingEvents(board: EventsBoard): CalendarEvent[] {
+  return sortEvents(board.events.filter((event) => event.status === "ongoing"));
+}
+
 export function upcomingEvents(
   board: EventsBoard,
   limit?: number
 ): CalendarEvent[] {
   const list = sortEvents(
-    board.events.filter(
-      (event) => event.status === "upcoming" || event.status === "ongoing"
-    )
+    board.events.filter((event) => event.status === "upcoming")
   );
   return typeof limit === "number" ? list.slice(0, limit) : list;
 }
@@ -386,19 +464,75 @@ export function pastEvents(
   return typeof limit === "number" ? list.slice(0, limit) : list;
 }
 
-export function recentEvents(
+/** Ongoing, then soonest upcoming, then most recent past (home teaser and /events). */
+export function featuredEvents(
   board: EventsBoard,
   limit?: number
 ): CalendarEvent[] {
-  const list = [...board.events].sort((a, b) => {
-    if (a.date !== b.date) return a.date > b.date ? -1 : 1;
-    return a.title.localeCompare(b.title);
-  });
+  const list = [
+    ...ongoingEvents(board),
+    ...upcomingEvents(board),
+    ...pastEvents(board),
+  ];
   return typeof limit === "number" ? list.slice(0, limit) : list;
 }
 
-export function eventStatusLabel(status: CalendarEvent["status"]): string {
-  if (status === "ongoing") return "กำลังจัด";
-  if (status === "ended") return "สิ้นสุดแล้ว";
-  return "เร็วๆ นี้";
+/** Event categories shared by the /events filter buttons and the card tags. */
+export const EVENT_CATEGORIES = [
+  { id: "offline", label: "ออฟไลน์", kind: "format" },
+  { id: "online", label: "ออนไลน์", kind: "format" },
+  { id: "gaming", label: "เกม", kind: "theme" },
+  { id: "birthday", label: "วันเกิด", kind: "theme" },
+] as const;
+
+export type EventCategory = (typeof EVENT_CATEGORIES)[number];
+export type EventCategoryId = EventCategory["id"];
+
+export function matchesEventCategory(
+  event: Pick<CalendarEvent, "format" | "themes">,
+  id: EventCategoryId
+): boolean {
+  if (id === "gaming" || id === "birthday") return event.themes.includes(id);
+  return event.format === id;
+}
+
+/** Start year (YYYY) — shown as a tag and used by the year filter. */
+export function eventYear(event: Pick<CalendarEvent, "date">): string {
+  return event.date.slice(0, 4);
+}
+
+/** Distinct start years, newest first. */
+export function eventYears(events: Pick<CalendarEvent, "date">[]): string[] {
+  return [...new Set(events.map(eventYear))].sort((a, b) => b.localeCompare(a));
+}
+
+/** Heading for an event's linked videos: "ไลฟ์", "วิดีโอ", or both. */
+export function eventVideosLabel(items: { kind?: EventVideoKind }[]): string {
+  const hasVideo = items.some((item) => item.kind === "video");
+  const hasLive = items.some((item) => item.kind !== "video");
+  if (hasLive && hasVideo) return "ไลฟ์และวิดีโอ";
+  return hasVideo ? "วิดีโอ" : "ไลฟ์";
+}
+
+/** Categories the event appears under when filtering — used as its tags. */
+export function eventTags(
+  event: Pick<CalendarEvent, "format" | "themes">
+): EventCategory[] {
+  return EVENT_CATEGORIES.filter((category) =>
+    matchesEventCategory(event, category.id)
+  );
+}
+
+/** e.g. "กำลังจัด · เหลือ 9 วัน", "อีก 5 วัน", "จบแล้ว". */
+export function eventStatusLabel(
+  event: Pick<CalendarEvent, "status" | "statusDays">
+): string {
+  const days = event.statusDays;
+  if (event.status === "ended") return "จบแล้ว";
+  if (event.status === "ongoing") {
+    if (days === undefined) return "กำลังจัด";
+    return days <= 1 ? "กำลังจัด · วันสุดท้าย" : `กำลังจัด · เหลือ ${days} วัน`;
+  }
+  if (days === undefined) return "เร็วๆ นี้";
+  return days <= 1 ? "พรุ่งนี้" : `อีก ${days} วัน`;
 }

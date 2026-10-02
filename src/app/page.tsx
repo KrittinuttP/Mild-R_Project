@@ -3,17 +3,18 @@ import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { HomeEntry } from "@/components/layout/HomeEntry";
 import { MediaProtection } from "@/components/media/MediaProtection";
-import {
-  EventsTeaser,
-  type InitialLiveSchedule,
-} from "@/components/sections/EventsTeaser";
+import { EventsTeaser } from "@/components/sections/EventsTeaser";
 import { Gallery } from "@/components/sections/Gallery";
 import { HeroProfileScroll } from "@/components/sections/HeroProfileScroll";
+import {
+  LiveTeaser,
+  type InitialLiveSchedule,
+} from "@/components/sections/LiveTeaser";
 import { Lore } from "@/components/sections/Lore";
 import { Media } from "@/components/sections/Media";
 import { Projects } from "@/components/sections/Projects";
 import { Socials } from "@/components/sections/Socials";
-import { mildRData } from "@/data/vtuber-data";
+import { getEventsBoard, mildRData } from "@/data/vtuber-data";
 import { surroundingWeeksRangeYmdBangkok } from "@/lib/events";
 import {
   loadLiveStreamsInRange,
@@ -50,8 +51,9 @@ export default async function Home() {
       <main className="flex-1 bg-[#140a0d]">
         <HeroProfileScroll data={mildRData} />
         <Lore data={mildRData} />
+        <LiveTeaser initialLiveSchedule={initialLiveSchedule} />
         <Media data={mildRData} />
-        <EventsTeaser data={mildRData} initialLiveSchedule={initialLiveSchedule} />
+        <EventsTeaser board={getEventsBoard()} />
         <Gallery data={mildRData} />
         <Projects data={mildRData} />
         <Socials data={mildRData} xPosts={xPosts} xRetweets={xRetweets} />

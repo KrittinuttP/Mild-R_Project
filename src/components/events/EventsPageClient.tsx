@@ -1,161 +1,128 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { ArrowUpRight } from "lucide-react";
+import { useMemo, useState, type ReactNode } from "react";
 
+import { EventCard } from "@/components/events/EventCard";
 import { EventDetailModal } from "@/components/events/EventDetailModal";
-import { ProtectedImage } from "@/components/media/ProtectedImage";
 import {
-  eventStatusLabel,
-  formatThaiDate,
-  pastEvents,
-  upcomingEvents,
+  EVENT_CATEGORIES,
+  eventYear,
+  eventYears,
+  featuredEvents,
+  matchesEventCategory,
+  type EventCategoryId,
 } from "@/lib/events";
-import {
-  BADGE_ACCENT_CLASS,
-  BADGE_SOFT_CLASS,
-  DISPLAY_H2_CLASS,
-  DISPLAY_H3_CLASS,
-} from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { CalendarEvent, EventsBoard } from "@/types/vtuber";
 
+const eventFilters = [
+  { id: "all", label: "ทั้งหมด" },
+  ...EVENT_CATEGORIES,
+] as const;
+
+type EventFilter = "all" | EventCategoryId;
+
+function matchesFilter(event: CalendarEvent, filter: EventFilter): boolean {
+  return filter === "all" || matchesEventCategory(event, filter);
+}
+
 type EventsPageClientProps = {
+  /** Board with date-derived status, resolved on the server. */
   board: EventsBoard;
 };
 
-function EventCard({
-  event,
-  onOpen,
+function FilterChip({
+  active,
+  size = "md",
+  onClick,
+  children,
 }: {
-  event: CalendarEvent;
-  onOpen: () => void;
+  active: boolean;
+  size?: "md" | "sm";
+  onClick: () => void;
+  children: ReactNode;
 }) {
-  const ended = event.status === "ended";
-  const meta = [event.venue, event.platform].filter(Boolean).join(" · ");
-
   return (
-    <li className="h-full">
-      <button
-        type="button"
-        onClick={onOpen}
-        className={cn(
-          "group flex h-full w-full flex-col overflow-hidden rounded-3xl border bg-[#1a0c12]/60 text-left transition",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e85a7a]/60",
-          ended
-            ? "border-[#f3b8c4]/10 opacity-90 hover:border-[#f3b8c4]/25 hover:bg-[#1a0c12] hover:opacity-100"
-            : "border-[#f3b8c4]/12 hover:border-[#e85a7a]/40 hover:bg-[#1a0c12]"
-        )}
-      >
-        <div className="relative aspect-[16/10] overflow-hidden bg-[#12080c]">
-          <ProtectedImage
-            src={event.cover}
-            alt={event.coverAlt ?? event.title}
-            wrapClassName="absolute inset-0 block"
-            className={cn(
-              "h-full w-full object-cover object-top transition duration-700 group-hover:scale-[1.04]",
-              ended && "opacity-85"
-            )}
-          />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#1a0c12] via-[#1a0c12]/40 to-transparent" />
-          <span
-            className={cn(
-              ended ? BADGE_SOFT_CLASS : BADGE_ACCENT_CLASS,
-              "absolute top-3 left-3 uppercase backdrop-blur-sm"
-            )}
-          >
-            {eventStatusLabel(event.status)}
-          </span>
-        </div>
-
-        <div className="flex flex-1 flex-col px-5 py-5 sm:px-6 sm:py-6">
-          <p className="text-xs tabular-nums text-[#f3b8c4]/70 sm:text-sm">
-            {formatThaiDate(event.date)}
-            {event.endDate ? ` – ${formatThaiDate(event.endDate)}` : null}
-            {event.timeLabel ? ` · ${event.timeLabel}` : null}
-          </p>
-
-          <h3 className={cn("mt-2 transition group-hover:text-white", DISPLAY_H3_CLASS)}>
-            {event.titleLocal ?? event.title}
-          </h3>
-          {event.titleLocal ? (
-            <p className="mt-1 text-sm text-[#f3b8c4]/65">{event.title}</p>
-          ) : null}
-
-          {event.summary ? (
-            <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-[#f7d7de]/80">
-              {event.summary}
-            </p>
-          ) : null}
-
-          {meta ? (
-            <p className="mt-2 text-xs text-[#f3b8c4]/55">{meta}</p>
-          ) : null}
-
-          <span className="mt-auto inline-flex items-center gap-1.5 pt-5 text-sm tracking-wide text-[#e85a7a] transition group-hover:gap-2.5">
-            ดูรายละเอียด
-            <ArrowUpRight className="size-4" />
-          </span>
-        </div>
-      </button>
-    </li>
-  );
-}
-
-function EventSection({
-  id,
-  title,
-  events,
-  onOpen,
-}: {
-  id: string;
-  title: string;
-  events: CalendarEvent[];
-  onOpen: (id: string) => void;
-}) {
-  if (events.length === 0) return null;
-
-  return (
-    <section id={id} className="scroll-mt-24 sm:scroll-mt-28">
-      <h2 className={DISPLAY_H2_CLASS}>{title}</h2>
-      <ul className="mt-6 grid grid-cols-1 gap-5 sm:mt-8 sm:grid-cols-3 sm:gap-6">
-        {events.map((event) => (
-          <EventCard
-            key={event.id}
-            event={event}
-            onOpen={() => onOpen(event.id)}
-          />
-        ))}
-      </ul>
-    </section>
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={cn(
+        "rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e85a7a]/60",
+        size === "md" ? "px-4 py-2 text-sm" : "px-3.5 py-1.5 text-xs tabular-nums sm:text-sm",
+        active
+          ? "border-[#e85a7a] bg-[#e85a7a] text-white"
+          : "border-[#f3b8c4]/20 text-[#f7d7de]/80 hover:border-[#e85a7a]/60 hover:text-white"
+      )}
+    >
+      {children}
+    </button>
   );
 }
 
 export function EventsPageClient({ board }: EventsPageClientProps) {
-  const upcoming = useMemo(() => upcomingEvents(board), [board]);
-  const past = useMemo(() => pastEvents(board), [board]);
+  const [filter, setFilter] = useState<EventFilter>("all");
+  const [year, setYear] = useState<string>("all");
+  const ordered = useMemo(() => featuredEvents(board), [board]);
+  const years = useMemo(() => eventYears(board.events), [board]);
+  const events = useMemo(
+    () =>
+      ordered.filter(
+        (event) =>
+          matchesFilter(event, filter) && (year === "all" || eventYear(event) === year)
+      ),
+    [ordered, filter, year]
+  );
   const [activeId, setActiveId] = useState<string | null>(null);
-  const active =
-    [...upcoming, ...past].find((event) => event.id === activeId) ?? null;
+  const active = board.events.find((event) => event.id === activeId) ?? null;
 
-  if (upcoming.length === 0 && past.length === 0) {
+  if (board.events.length === 0) {
     return <p className="text-sm text-[#f3b8c4]/65">ยังไม่มีอีเวนต์</p>;
   }
 
   return (
-    <div className="space-y-14 sm:space-y-16">
-      <EventSection
-        id="upcoming"
-        title="อีเวนต์เร็วๆ นี้"
-        events={upcoming}
-        onOpen={setActiveId}
-      />
-      <EventSection
-        id="past"
-        title="อีเวนต์ที่ผ่านมา"
-        events={past}
-        onOpen={setActiveId}
-      />
+    <div className="space-y-8 sm:space-y-10">
+      <div className="space-y-3">
+        <div className="flex flex-wrap gap-2" aria-label="กรองประเภทอีเวนต์">
+          {eventFilters.map((item) => (
+            <FilterChip
+              key={item.id}
+              active={filter === item.id}
+              onClick={() => setFilter(item.id)}
+            >
+              {item.label}
+            </FilterChip>
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-2" aria-label="กรองตามปี">
+          {["all", ...years].map((item) => (
+            <FilterChip
+              key={item}
+              size="sm"
+              active={year === item}
+              onClick={() => setYear(item)}
+            >
+              {item === "all" ? "ทุกปี" : item}
+            </FilterChip>
+          ))}
+        </div>
+      </div>
+
+      {events.length === 0 ? (
+        <p className="text-sm text-[#f3b8c4]/65">ยังไม่มีรายการในหมวดนี้</p>
+      ) : (
+        <ul className="grid auto-rows-fr grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+          {events.map((event) => (
+            <li key={event.id} className="h-full">
+              <EventCard
+                event={event}
+                headingAs="h2"
+                onOpen={() => setActiveId(event.id)}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
 
       <EventDetailModal
         event={active}

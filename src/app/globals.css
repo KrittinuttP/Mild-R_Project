@@ -130,6 +130,10 @@
   html {
     @apply font-sans;
   }
+  /* Keeps anchor targets clear of the live-today strip under the fixed header */
+  html[data-live-banner] {
+    scroll-padding-top: 2.25rem;
+  }
   img {
     -webkit-user-drag: none;
     user-select: none;

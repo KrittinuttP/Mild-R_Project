@@ -13,7 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 
 export const PROJECTS_EYEBROW = "Fanclub";
-export const PROJECTS_TITLE = "Projects";
+export const PROJECTS_TITLE = "Fan Projects";
 export const PROJECTS_DESCRIPTION = "โปรเจกต์ฮันนี่สำหรับ Mild-R";
 
 type ProjectsHeadingProps = {

@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ChevronDown, Menu, X } from "lucide-react";
 
 import { GALLERY_CATEGORIES } from "@/components/gallery/gallery-categories";
+import { LiveTodayBanner } from "@/components/layout/LiveTodayBanner";
 import { buttonVariants } from "@/components/ui/button";
 import { scrollToHashTarget } from "@/lib/scroll-to-hash";
 import { cn } from "@/lib/utils";
@@ -14,7 +15,12 @@ import type { VtuberProfile } from "@/types/vtuber";
 type SubNavLink = { label: string; href: string };
 
 type NavLink =
-  | { label: string; kind: "section"; hash: string }
+  | {
+      label: string;
+      kind: "section";
+      hash: string;
+      children?: readonly SubNavLink[];
+    }
   | {
       label: string;
       kind: "page";
@@ -24,18 +30,14 @@ type NavLink =
     };
 
 const NAV_LINKS: NavLink[] = [
-  // Hero+Profile scrollytelling starts at #top (desktop profile pin breaks #profile)
-  { kind: "section", hash: "#top", label: "Profile" },
-  { kind: "section", hash: "#lore", label: "Lore" },
-  { kind: "section", hash: "#media", label: "Media" },
   {
-    kind: "page",
-    href: "/events",
-    homeHash: "#events",
-    label: "Events",
+    kind: "section",
+    hash: "#top",
+    label: "Profile",
     children: [
-      { label: "อีเวนต์เร็วๆ นี้", href: "/events#upcoming" },
-      { label: "อีเวนต์ที่ผ่านมา", href: "/events#past" },
+      // Hero+Profile scrollytelling starts at #top (desktop profile pin breaks #profile)
+      { label: "แนะนำตัว", href: "/#top" },
+      { label: "Lore", href: "/#lore" },
     ],
   },
   {
@@ -49,6 +51,14 @@ const NAV_LINKS: NavLink[] = [
       { label: "ตารางรายสัปดาห์", href: "/live#weekly" },
     ],
   },
+  { kind: "section", hash: "#media", label: "Media" },
+  {
+    kind: "page",
+    href: "/events",
+    homeHash: "#events",
+    label: "Events",
+    children: [{ label: "อีเวนต์ทั้งหมด", href: "/events" }],
+  },
   {
     kind: "page",
     href: "/gallery",
@@ -56,9 +66,19 @@ const NAV_LINKS: NavLink[] = [
     label: "Gallery",
     children: GALLERY_CATEGORIES,
   },
-  { kind: "page", href: "/projects", homeHash: "#projects", label: "Projects" },
+  {
+    kind: "page",
+    href: "/projects",
+    homeHash: "#projects",
+    label: "Fan Projects",
+  },
   { kind: "section", hash: "#socials", label: "Connect" },
 ];
+
+/** Home-section entry shown first in a page link's dropdown (e.g. Live → #live). */
+function homeHashOf(link: NavLink) {
+  return link.kind === "page" ? link.homeHash : undefined;
+}
 
 type HeaderProps = {
   data: VtuberProfile;
@@ -68,6 +88,7 @@ export function Header({ data }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const onHome = pathname === "/";
+  const showLiveBanner = pathname !== "/live" && !pathname.startsWith("/live/");
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   /** Desktop dropdown: opens on click/tap (touch has no hover) and on mouse hover. */
@@ -221,9 +242,10 @@ export function Header({ data }: HeaderProps) {
               isActive(link) ? "text-[#fff5f7]" : "text-[#f7d7de]/80"
             );
 
-            if (link.kind === "page" && link.children?.length) {
+            if (link.children?.length) {
               const menuOpen = openMenu === link.label;
-              const menuId = `nav-menu-${link.label.toLowerCase()}`;
+              const menuId = `nav-menu-${link.label.toLowerCase().replace(/\s+/g, "-")}`;
+              const homeHash = homeHashOf(link);
               return (
                 <div
                   key={link.label}
@@ -267,13 +289,13 @@ export function Header({ data }: HeaderProps) {
                     )}
                   >
                     <ul className="min-w-44 rounded-xl border border-[#f3b8c4]/15 bg-[#140a0d]/95 p-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.45)] backdrop-blur-md">
-                      {link.homeHash ? (
+                      {homeHash ? (
                         <li className="mb-1 border-b border-[#f3b8c4]/10 pb-1">
                           <Link
-                            href={homeSectionHref(link.homeHash)}
+                            href={homeSectionHref(homeHash)}
                             onClick={(event) => {
                               closeMenu();
-                              handleNavClick(event, homeSectionHref(link.homeHash!));
+                              handleNavClick(event, homeSectionHref(homeHash));
                             }}
                             className="block whitespace-nowrap rounded-lg px-3 py-2 text-sm text-[#f7d7de]/80 transition hover:bg-[#e85a7a]/15 hover:text-[#fff5f7] focus-visible:bg-[#e85a7a]/15 focus-visible:outline-none"
                           >
@@ -344,6 +366,12 @@ export function Header({ data }: HeaderProps) {
         </button>
       </div>
 
+      {showLiveBanner ? (
+        <div className={open ? "hidden" : undefined}>
+          <LiveTodayBanner />
+        </div>
+      ) : null}
+
       <div
         id="mobile-nav"
         className={cn(
@@ -359,12 +387,13 @@ export function Header({ data }: HeaderProps) {
           {NAV_LINKS.map((link) => {
             const href = resolveHref(link);
 
-            if (link.kind === "page" && link.children?.length) {
+            if (link.children?.length) {
               const expanded = mobileOpenMenu === link.label;
-              const panelId = `mobile-nav-menu-${link.label.toLowerCase()}`;
+              const panelId = `mobile-nav-menu-${link.label.toLowerCase().replace(/\s+/g, "-")}`;
+              const homeHash = homeHashOf(link);
               const subLinks: SubNavLink[] = [
-                ...(link.homeHash
-                  ? [{ label: link.label, href: homeSectionHref(link.homeHash) }]
+                ...(homeHash
+                  ? [{ label: link.label, href: homeSectionHref(homeHash) }]
                   : []),
                 ...link.children,
               ];

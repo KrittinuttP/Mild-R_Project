@@ -40,6 +40,9 @@ zayzhik-projecct-mildR.json
 *-sa.json
 *-service-account.json
 
+# original event research images (webp copies live in public/assets/events/gallery)
+/public/assets/events/archive/
+
 # vercel
 .vercel
 

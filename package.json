@@ -43,6 +43,7 @@
     "backfill:pixela": "npx tsx --env-file=.env.local scripts/backfill-pixela-mild-r.ts",
     "backfill:pixela:from-mild": "npx tsx --env-file=.env.local scripts/backfill-pixela-mild-r.ts --from-mild",
     "backfill:lumina": "npx tsx --env-file=.env.local scripts/backfill-lumina-mild-r.ts",
+    "events:gallery": "npx tsx scripts/build-event-gallery.ts",
     "purge:preview-mocks": "npx tsx --env-file=.env.local scripts/purge-stale-preview-mocks.ts"
   },
   "dependencies": {

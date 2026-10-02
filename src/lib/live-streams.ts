@@ -401,6 +401,30 @@ function streamAnchorIso(row: LiveStreamRow): string | null {
   );
 }
 
+/** Rows for specific YouTube video ids (with thumbnail history); missing ids are skipped. */
+export async function loadLiveStreamsByIds(
+  videoIds: string[]
+): Promise<LiveStreamRow[]> {
+  if (!isSupabaseConfigured() || videoIds.length === 0) return [];
+
+  try {
+    const supabase = createPublicClient();
+    const { data, error } = await supabase
+      .from("mild_r_live_streams")
+      .select(STREAM_SELECT)
+      .in("video_id", videoIds);
+
+    if (error) {
+      console.error("[live_streams_by_ids]", error.message);
+      return [];
+    }
+    return await withThumbnails(supabase, (data ?? []) as LiveStreamRow[]);
+  } catch (err) {
+    console.error("[live_streams_by_ids]", err);
+    return [];
+  }
+}
+
 /**
  * Streams whose anchor time (actual → scheduled → first) falls in the
  * inclusive Bangkok calendar range [fromYmd, toYmd].

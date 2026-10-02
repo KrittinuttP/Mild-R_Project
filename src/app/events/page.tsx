@@ -7,7 +7,7 @@ import { BackToTop } from "@/components/layout/BackToTop";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { MediaProtection } from "@/components/media/MediaProtection";
-import { mildRData } from "@/data/vtuber-data";
+import { getEventsBoard, mildRData } from "@/data/vtuber-data";
 import { DISPLAY_H1_CLASS, META_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +15,9 @@ export const metadata: Metadata = {
   title: "Events | Mild-R Fanclub",
   description: "อีเวนต์ของ Mild-R",
 };
+
+/** Re-derive upcoming / ongoing / ended from the Bangkok date. */
+export const revalidate = 3600;
 
 export default function EventsPage() {
   return (
@@ -38,7 +41,7 @@ export default function EventsPage() {
             </h1>
 
             <div className="mt-12 sm:mt-16">
-              <EventsPageClient board={mildRData.events} />
+              <EventsPageClient board={getEventsBoard()} />
             </div>
           </div>
         </section>

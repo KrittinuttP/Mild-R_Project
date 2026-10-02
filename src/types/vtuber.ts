@@ -179,6 +179,18 @@ export interface ProjectItem {
 
 /** Fan-facing calendar event (collab, cafe, stage, …) */
 export type CalendarEventStatus = "upcoming" | "ongoing" | "ended";
+export type CalendarEventFormat = "offline" | "online" | "campaign";
+export type CalendarEventTheme =
+  | "birthday"
+  | "contest"
+  | "debut"
+  | "expo"
+  | "fan-meet"
+  | "gaming"
+  | "halloween"
+  | "music"
+  | "songkran"
+  | "valentine";
 
 export interface CalendarEvent {
   id: string;
@@ -190,12 +202,86 @@ export interface CalendarEvent {
   timeLabel?: string;
   venue?: string;
   platform?: string;
+  format: CalendarEventFormat;
+  themes: CalendarEventTheme[];
   url?: string;
+  sources?: { label: string; url: string }[];
+  /** Derived from date/endDate (Bangkok) by `resolveEventsBoard`; not stored in JSON. */
   status: CalendarEventStatus;
+  /** Derived with `status`: days left (ongoing, today counts) or days until start (upcoming). */
+  statusDays?: number;
   summary?: string;
+  /** Long-form paragraphs for /events/[id] */
+  details?: string[];
+  /** Dated slots — fan meets, stage times, live vs. campaign dates */
+  schedule?: CalendarEventScheduleItem[];
+  /** Caveats shown on the detail page (e.g. what the sources do not confirm) */
+  notes?: string[];
   /** Cover image path under /public */
   cover: string;
   coverAlt?: string;
+  /** Additional local images shown in the event details */
+  images?: { src: string; alt: string }[];
+  /** Archive images in event-gallery.json; filled by `getEventsBoard`. */
+  galleryCount?: number;
+  /** YouTube lives tied to the event, resolved from Supabase on /events/[id]. */
+  lives?: CalendarEventLiveRef[];
+}
+
+export type EventVideoKind = "live" | "video";
+
+/** Optional fields are the fallback when the video is not in Supabase. */
+export interface CalendarEventLiveRef {
+  videoId: string;
+  /** Omitted = "live"; "video" is an uploaded clip such as a stage recording. */
+  kind?: EventVideoKind;
+  title?: string;
+  /** ISO date YYYY-MM-DD (Bangkok) */
+  date?: string;
+  /** e.g. "20:00" */
+  time?: string;
+  channel?: string;
+}
+
+/** A linked live ready to render on /events/[id]. */
+export interface EventLive {
+  videoId: string;
+  kind: EventVideoKind;
+  title: string;
+  url: string;
+  cover: string;
+  channelName?: string;
+  date?: string;
+  time?: string;
+  durationLabel?: string;
+  views?: number;
+}
+
+export interface CalendarEventScheduleItem {
+  /** ISO date YYYY-MM-DD */
+  date: string;
+  endDate?: string;
+  /** e.g. "16:00–17:00 น." */
+  time?: string;
+  label: string;
+  note?: string;
+}
+
+/** `events.json` row — `status` is derived at request time. */
+export type CalendarEventInput = Omit<
+  CalendarEvent,
+  "status" | "statusDays" | "galleryCount"
+>;
+
+/** One processed image from the event research archive. */
+export interface EventGalleryImage {
+  src: string;
+  thumb: string;
+  width: number;
+  height: number;
+  alt: string;
+  sourceUrl: string;
+  publishedAt?: string;
 }
 
 export type LivePlatform = "youtube" | "x" | "other";

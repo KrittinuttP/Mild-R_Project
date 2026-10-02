@@ -1,93 +1,808 @@
 {
   "events": [
     {
-      "id": "together-garden",
-      "title": "Together Garden",
-      "titleLocal": "Together Garden",
-      "date": "2026-09-01",
-      "endDate": "2026-09-07",
-      "timeLabel": "รอบเข้าชม · TBA",
-      "venue": "Fanmmet",
-      "platform": "Offline",
-      "url": "/cafe",
-      "status": "upcoming",
-      "summary": "Fanmmet Together Garden",
-      "cover": "/assets/images/gallery-01.svg",
-      "coverAlt": "Honey Pulse Cafe cover"
+      "id": "lumina-clip-meme-2026",
+      "title": "Lumina Clip Meme Contest 2026",
+      "titleLocal": "ประกวดตัดคลิปมีม Lumina",
+      "date": "2026-09-22",
+      "endDate": "2026-10-10",
+      "platform": "YouTube · X · Facebook",
+      "format": "online",
+      "themes": [
+        "contest"
+      ],
+      "url": "https://x.com/LuminaVProject/status/2102379005731275013",
+      "summary": "แคมเปญประกวดตัดคลิปมีม VTuber ของ Lumina ที่ Mild-R ร่วมด้วย ส่งคลิปที่เข้าเกณฑ์รับการ์ด PVC ใส เลือกลาย Mild-R ได้",
+      "details": [
+        "ตัดคลิป VTuber ในค่ายความยาว 10 วินาทีถึง 5 นาที ใส่เพลงของแคมเปญ แล้วโพสต์สาธารณะบน YouTube, X หรือ Facebook แท็กทาเลนต์ในคลิปและติด #CLIPMEMELUMINA จากนั้นส่งหลักฐานผ่านแบบฟอร์มกิจกรรม",
+        "คลิปต้องมีภาพหรือวิดีโอมากกว่า 3 ชิ้น มีข้อความและทรานซิชัน และห้ามใช้ภาพ AI ประกอบ",
+        "1 คลิปที่เข้าเกณฑ์ได้การ์ด PVC ใส 1 ใบ เลือกลายทาเลนต์ได้ (มีลาย Mild-R) และแต่ละทาเลนต์จะเลือกคลิปที่ชอบ 1 คลิปเพื่อมอบเสื้อยืดลายพิเศษ",
+        "คลิปเดียวกันที่โพสต์หลายแพลตฟอร์มนับเป็น 1 สิทธิ์ ส่วนการตัดจากแนวนอนเป็นแนวตั้งนับเป็นคลิปใหม่ได้ และลายการ์ดที่เลือกไม่จำเป็นต้องตรงกับคนในคลิป"
+      ],
+      "cover": "/assets/events/gallery/lumina-clip-meme-2026/2104164154995003638-01-2104146960475402240.webp",
+      "coverAlt": "ภาพโปรโมตกิจกรรม Clip Meme Lumina ที่ Mild-R โพสต์",
+      "sources": [
+        {
+          "label": "ประกาศกิจกรรมของ Lumina",
+          "url": "https://x.com/LuminaVProject/status/2102379005731275013"
+        },
+        {
+          "label": "รายละเอียดรางวัล",
+          "url": "https://x.com/LuminaVProject/status/2102379016233840945"
+        },
+        {
+          "label": "Q&A ทางการ",
+          "url": "https://x.com/LuminaVProject/status/2103104769623785973"
+        },
+        {
+          "label": "โพสต์ร่วมกิจกรรมของ Mild-R",
+          "url": "https://x.com/MildRWorldEnd/status/2104164154995003638"
+        },
+        {
+          "label": "แบบฟอร์มกิจกรรม",
+          "url": "https://forms.gle/6WUrxR7KHgrg7DWFA"
+        }
+      ]
     },
     {
-      "id": "august-collab-live",
-      "title": "Pixela-World",
-      "titleLocal": "Pixela-World",
-      "date": "2026-08-09",
-      "timeLabel": "20:00 ICT",
-      "platform": "YouTube",
-      "status": "upcoming",
-      "summary": "ไลฟ์คอลแลบสั้นๆ (placeholder) — วันเวลาจริงอัปเดตทีหลัง",
-      "cover": "/assets/images/gallery-02.svg",
-      "coverAlt": "Weekend Collab Live cover"
-    },
-    {
-      "id": "maruya-44",
-      "title": "MARUYA #44",
-      "titleLocal": "MARUYA #44",
-      "date": "2026-07-26",
-      "timeLabel": "21:00 ICT",
-      "platform": "YouTube",
-      "url": "https://www.youtube.com/@MildRWorldEnd",
-      "status": "ended",
-      "summary": "รวมเพลงฮิตและร้องเล่น — archive placeholder",
-      "cover": "/assets/images/gallery-01.svg",
-      "coverAlt": "Karaoke Night cover"
-    },
-    {
-      "id": "maruya-41",
-      "title": "MARUYA #41",
-      "titleLocal": "MARUYA #41",
-      "date": "2026-07-26",
-      "timeLabel": "21:00 ICT",
-      "platform": "YouTube",
-      "url": "https://www.youtube.com/@MildRWorldEnd",
-      "status": "ended",
-      "summary": "รวมเพลงฮิตและร้องเล่น — archive placeholder",
-      "cover": "/assets/images/gallery-01.svg",
-      "coverAlt": "Karaoke Night cover"
+      "id": "puyo-puyo-global-ranking-series-2026",
+      "title": "Puyo Puyo Global Ranking Series 2026",
+      "date": "2026-07-04",
+      "endDate": "2026-07-05",
+      "timeLabel": "17:00 น. เป็นต้นไป",
+      "platform": "ออนไลน์",
+      "format": "online",
+      "themes": [
+        "gaming"
+      ],
+      "url": "https://x.com/PixelaProject/status/2063130913043784171",
+      "summary": "การแข่งขัน Puyo Puyo ออนไลน์ที่ Mild-R ชวนแฟน ๆ สมัครเข้าทีม แข่งวันที่ 4–5 กรกฎาคม 2569 พร้อมของรางวัลสำหรับผู้ร่วมกิจกรรม",
+      "lives": [
+        {
+          "videoId": "qP7ZH3-zr04"
+        },
+        {
+          "videoId": "Ue2pzJIGeHM"
+        },
+        {
+          "videoId": "-v9rolJWHyI"
+        }
+      ],
+      "cover": "/assets/events/gallery/puyo-puyo-global-ranking-series-2026/2070492275478507927-01-HLuTbkgaoAA96n8.webp",
+      "coverAlt": "โปสเตอร์ Puyo Puyo VTube Championship ที่ Mild-R โพสต์ชวนแฟน ๆ สมัครเข้าทีม",
+      "sources": [
+        {
+          "label": "ประกาศรับสมัครและกำหนดการแข่งขัน",
+          "url": "https://x.com/PixelaProject/status/2063130913043784171"
+        },
+        {
+          "label": "Mild-R ชวนแฟน ๆ สมัครเข้าทีมและแจ้งของรางวัล",
+          "url": "https://x.com/MildRWorldEnd/status/2070492275478507927"
+        },
+        {
+          "label": "ประกาศผลการแข่งขัน",
+          "url": "https://x.com/PixelaProject/status/2074002598160691595"
+        }
+      ]
     },
     {
       "id": "pastry-fantasy-2026",
-      "title": "Pastry Fantasy",
-      "titleLocal": "Pastry Fantasy 2026",
-      "date": "2026-07-19",
-      "timeLabel": "20:30 ICT",
+      "title": "Pastry Fantasy 2026",
+      "date": "2026-06-28",
+      "timeLabel": "14:00 น.",
+      "venue": "เวทีกลาง Hall 100 ไบเทคบางนา",
+      "format": "offline",
+      "themes": [
+        "music"
+      ],
+      "url": "https://x.com/PixelaProject/status/2067203058124407055",
+      "summary": "Mild-R อยู่ในโปสเตอร์คอนเสิร์ต VTuber ของ Pixela ภายในงานสหกรุ๊ปแฟร์ แอนด์ เฟส ครั้งที่ 30",
+      "cover": "/assets/events/pastry-fantasy-2026.webp",
+      "coverAlt": "โปสเตอร์ Pastry Fantasy 2026 ที่มีภาพ Mild-R",
+      "sources": [
+        {
+          "label": "ประกาศคอนเสิร์ต",
+          "url": "https://x.com/PixelaProject/status/2067203058124407055"
+        }
+      ]
+    },
+    {
+      "id": "pixela-songkran-mild-r-2026",
+      "title": "Pixela Songkran 2026 — Mild-R",
+      "date": "2026-04-08",
       "platform": "YouTube",
-      "status": "ended",
-      "summary": "อัปเดตสั้นๆ กับฮันนี่ — archive placeholder",
-      "cover": "/assets/images/gallery-04.svg",
-      "coverAlt": "Chill Talk Stream cover"
+      "format": "online",
+      "themes": [
+        "songkran"
+      ],
+      "url": "https://x.com/MildRWorldEnd/status/2041440860919709861",
+      "summary": "ไลฟ์ธีมสงกรานต์ของ Mild-R วันที่ 8 เมษายน 2026 ในกิจกรรม Pixela Songkran 2026 โดเนทขั้นต่ำ 150 หรือ 350 บาทในไลฟ์เพื่อรับ Clear Card",
+      "schedule": [
+        {
+          "date": "2026-03-16",
+          "label": "Pixela โพสต์ทีเซอร์กิจกรรมสงกรานต์"
+        },
+        {
+          "date": "2026-04-07",
+          "label": "Mild-R โพสต์ประกาศไลฟ์"
+        },
+        {
+          "date": "2026-04-08",
+          "label": "ไลฟ์สงกรานต์ของ Mild-R"
+        },
+        {
+          "date": "2026-04-12",
+          "endDate": "2026-04-18",
+          "label": "ยืนยันสิทธิ์รับ Clear Card",
+          "note": "ฟอร์มโพสต์ในช่อง Pixela Project หลังจบกิจกรรมทั้งหมด"
+        }
+      ],
+      "lives": [
+        {
+          "videoId": "sVU-2Mb_Ajs"
+        }
+      ],
+      "cover": "/assets/events/mild-r-songkran-2026.webp",
+      "coverAlt": "ภาพประกาศกิจกรรมสงกรานต์ 2026 ของ Mild-R",
+      "sources": [
+        {
+          "label": "ประกาศกิจกรรมของ Mild-R",
+          "url": "https://x.com/MildRWorldEnd/status/2041440860919709861"
+        },
+        {
+          "label": "ทีเซอร์ของ Pixela",
+          "url": "https://x.com/PixelaProject/status/2033483412393357732"
+        }
+      ]
+    },
+    {
+      "id": "together-garden-2026",
+      "title": "Together Garden",
+      "date": "2026-02-14",
+      "endDate": "2026-02-15",
+      "venue": "Co-Event Studio ชั้น 5 ยูเนี่ยนมอลล์",
+      "format": "offline",
+      "themes": [
+        "fan-meet",
+        "valentine"
+      ],
+      "url": "https://x.com/PixelaProject/status/2014654356470300729",
+      "summary": "งานพบแฟนของ Pixela, Lumina และ RiseON ที่ยูเนี่ยนมอลล์ โดย Mild-R มีรอบ Fan Meet ทั้งวันที่ 14 และ 15 กุมภาพันธ์ (Normal ทั้งสองวัน และ Special วันที่ 15)",
+      "schedule": [
+        {
+          "date": "2026-02-14",
+          "time": "13:30–14:15 น.",
+          "label": "Normal Fan Meet",
+          "note": "ห้อง 6"
+        },
+        {
+          "date": "2026-02-14",
+          "time": "16:30–17:15 น.",
+          "label": "Normal Fan Meet",
+          "note": "ห้อง 2"
+        },
+        {
+          "date": "2026-02-15",
+          "time": "12:15–13:00 น.",
+          "label": "Normal Fan Meet",
+          "note": "ห้อง 4"
+        },
+        {
+          "date": "2026-02-15",
+          "time": "13:30–13:50 น.",
+          "label": "Special Fan Meet"
+        }
+      ],
+      "notes": [
+        "Normal คุยได้ 1 นาที/บัตร (490 บาท) · Special 2 นาที/บัตร (1,590 บาท)",
+        "เข้างานฟรี ส่วน Fan Meet และ Activity Zone มีค่าใช้จ่าย"
+      ],
+      "cover": "/assets/events/gallery/together-garden-2026/2018303183370736042-01-2018303145437499392.webp",
+      "coverAlt": "โปสเตอร์ Together Garden ที่มี Mild-R ร่วมงาน",
+      "images": [
+        {
+          "src": "/assets/events/together-garden-fan-meet.webp",
+          "alt": "ตาราง Normal Fan Meet วันที่ 14 กุมภาพันธ์ 2026 ซึ่งมี Mild-R"
+        }
+      ],
+      "sources": [
+        {
+          "label": "ประกาศงาน",
+          "url": "https://x.com/PixelaProject/status/2014654356470300729"
+        },
+        {
+          "label": "รายชื่อ Fan Meet วันที่ 14 กุมภาพันธ์",
+          "url": "https://x.com/PixelaProject/status/2019024045103300873"
+        },
+        {
+          "label": "ตาราง Fan Meet วันที่ 15 กุมภาพันธ์",
+          "url": "https://x.com/PixelaProject/status/2019756734521512085"
+        },
+        {
+          "label": "รายละเอียดเวทีและกิจกรรม",
+          "url": "https://x.com/PixelaProject/status/2019302422460657685"
+        },
+        {
+          "label": "หน้ากิจกรรม Ticketmelon",
+          "url": "https://www.ticketmelon.com/virtupentertainment/TogetherGarden"
+        },
+        {
+          "label": "ภาพและคลิปเวที Pixela ย้อนหลัง",
+          "url": "https://x.com/PixelaProject/status/2024071182010720467"
+        },
+        {
+          "label": "คลิปเวที Pixela (YouTube)",
+          "url": "https://youtu.be/lUMHYCLHWik"
+        }
+      ],
+      "lives": [
+        {
+          "videoId": "lUMHYCLHWik",
+          "kind": "video",
+          "title": "【Together Garden 】Pixela Stage : รอบนี้สวยหล่อ (กี่โมง??)",
+          "date": "2026-02-18",
+          "channel": "Pixela Official"
+        }
+      ]
+    },
+    {
+      "id": "mild-r-birthday-2025",
+      "title": "Mild-R Birthday 2025",
+      "titleLocal": "ไลฟ์วันเกิด Mild-R 2025",
+      "date": "2025-12-12",
+      "timeLabel": "20:00 น.",
+      "platform": "YouTube",
+      "format": "online",
+      "themes": [
+        "birthday"
+      ],
+      "url": "https://www.youtube.com/watch?v=GKeJI4bcEXk",
+      "summary": "ไลฟ์วันเกิดของ Mild-R บนช่อง YouTube พร้อมคอลเลกชันสินค้าวันเกิดที่เปิดพรีออเดอร์ต่อหลังไลฟ์",
+      "schedule": [
+        {
+          "date": "2025-12-09",
+          "label": "ทีเซอร์วันเกิด"
+        },
+        {
+          "date": "2025-12-11",
+          "label": "Mild-R ประกาศไลฟ์"
+        },
+        {
+          "date": "2025-12-12",
+          "time": "20:00 น.",
+          "label": "ไลฟ์วันเกิดของ Mild-R",
+          "note": "【Mild-R's Birthday 2025】แสงของดวงดาวจะมอบปาฏิหาริย์ให้กับคุณ"
+        },
+        {
+          "date": "2025-12-12",
+          "endDate": "2026-01-12",
+          "label": "พรีออเดอร์สินค้าวันเกิด",
+          "note": "ร้าน VFORGE"
+        }
+      ],
+      "lives": [
+        {
+          "videoId": "GKeJI4bcEXk"
+        }
+      ],
+      "cover": "/assets/events/gallery/mild-r-birthday-2025/1999071672373309742-01-1997968337905807361.webp",
+      "coverAlt": "ภาพประกาศไลฟ์วันเกิด Mild-R 12 ธ.ค. 2025",
+      "sources": [
+        {
+          "label": "ไลฟ์วันเกิดบนช่อง Mild-R",
+          "url": "https://www.youtube.com/watch?v=GKeJI4bcEXk"
+        },
+        {
+          "label": "ประกาศไลฟ์ของ Mild-R",
+          "url": "https://x.com/MildRWorldEnd/status/1999071672373309742"
+        },
+        {
+          "label": "วิดีโอทีเซอร์",
+          "url": "https://www.youtube.com/watch?v=ilowFP9Uw3o"
+        },
+        {
+          "label": "ทีเซอร์ของ Mild-R",
+          "url": "https://x.com/MildRWorldEnd/status/1998331795629314449"
+        },
+        {
+          "label": "ประกาศสินค้าวันเกิด",
+          "url": "https://x.com/PixelaProject/status/1999468604799221785"
+        }
+      ]
+    },
+    {
+      "id": "pixela-halloween-mild-r-2025",
+      "title": "Pixela Halloween 2025 — Mild-R",
+      "date": "2025-10-29",
+      "timeLabel": "20:30 น.",
+      "platform": "YouTube",
+      "format": "online",
+      "themes": [
+        "halloween"
+      ],
+      "url": "https://x.com/MildRWorldEnd/status/1983095569230025065",
+      "summary": "ไลฟ์ธีมฮาโลวีนของ Mild-R วันที่ 29 ตุลาคม 2025 เป็นส่วนหนึ่งของกิจกรรม Pixela Halloween 2025 ที่โดเนทในไลฟ์ธีมฮาโลวีนเพื่อรับการ์ด",
+      "schedule": [
+        {
+          "date": "2025-10-08",
+          "label": "Pixela ประกาศกิจกรรมรับการ์ด"
+        },
+        {
+          "date": "2025-10-19",
+          "endDate": "2025-10-31",
+          "label": "ช่วงกิจกรรมโดเนทรับการ์ดของทั้งค่าย",
+          "note": "โดเนทในวันที่แต่ละช่องไลฟ์ธีมฮาโลวีน"
+        },
+        {
+          "date": "2025-10-28",
+          "label": "Mild-R โพสต์ประกาศไลฟ์"
+        },
+        {
+          "date": "2025-10-29",
+          "time": "20:30 น.",
+          "label": "ไลฟ์ Halloween ของ Mild-R",
+          "note": "โดเนท 150 บาท รับการ์ด Chibi PVC · 350 บาท รับซองสุ่มการ์ด"
+        },
+        {
+          "date": "2025-10-31",
+          "endDate": "2025-12-01",
+          "label": "พรีออเดอร์สินค้า Pixela Halloween 2025",
+          "note": "ร้าน VFORGE · เริ่มจัดส่งช่วงมกราคม 2026"
+        }
+      ],
+      "lives": [
+        {
+          "videoId": "z3Dn8mmeONk"
+        }
+      ],
+      "cover": "/assets/events/mild-r-halloween-2025.webp",
+      "coverAlt": "ภาพประกาศไลฟ์ฮาโลวีน 2025 ของ Mild-R",
+      "sources": [
+        {
+          "label": "ประกาศไลฟ์ของ Mild-R",
+          "url": "https://x.com/MildRWorldEnd/status/1983095569230025065"
+        },
+        {
+          "label": "รายละเอียดกิจกรรมรับการ์ด",
+          "url": "https://x.com/PixelaProject/status/1975849271330308220"
+        },
+        {
+          "label": "ประกาศสินค้า Halloween",
+          "url": "https://x.com/PixelaProject/status/1984216582222967119"
+        }
+      ]
+    },
+    {
+      "id": "maruya-44-2025",
+      "title": "MARUYA #44: The Movie",
+      "date": "2025-10-26",
+      "venue": "Jewel Hall ชั้น 5 สยามพารากอน",
+      "format": "offline",
+      "themes": [
+        "music",
+        "fan-meet"
+      ],
+      "url": "https://x.com/PixelaProject/status/1982009243260834260",
+      "summary": "Pixela ร่วมงาน MARUYA #44 พร้อมเวที Pixela The Musical และกิจกรรมที่บูธ โดย Mild-R ปรากฏในภาพประกาศรวมของงาน",
+      "cover": "/assets/events/maruya-44-2025.webp",
+      "coverAlt": "โปสเตอร์กิจกรรม Pixela ในงาน MARUYA #44 ที่มี Mild-R",
+      "sources": [
+        {
+          "label": "ประกาศงาน Pixela",
+          "url": "https://x.com/PixelaProject/status/1982009243260834260"
+        },
+        {
+          "label": "กำหนดการ Pixela The Musical",
+          "url": "https://x.com/PixelaProject/status/1981706348954873909"
+        },
+        {
+          "label": "รายละเอียดบูธและกิจกรรม",
+          "url": "https://x.com/PixelaProject/status/1980559690976182272"
+        }
+      ],
+      "lives": [
+        {
+          "videoId": "mthEJz3rmBQ",
+          "kind": "video",
+          "title": "MARUYA #44: The Movie | Pixela The Musical",
+          "date": "2026-01-01",
+          "channel": "Pixela Official"
+        }
+      ]
     },
     {
       "id": "pastry-fantasy-2025",
-      "title": "Pastry Fantasy",
-      "titleLocal": "Pastry Fantasy 2025",
-      "date": "2025-07-19",
-      "timeLabel": "20:30 ICT",
+      "title": "Pastry Fantasy 2025",
+      "date": "2025-06-29",
+      "timeLabel": "14:00 น.",
+      "venue": "เวทีกลาง Hall 100 ไบเทคบางนา",
+      "format": "offline",
+      "themes": [
+        "music"
+      ],
+      "url": "https://x.com/PixelaProject/status/1934582185509413360",
+      "summary": "Mild-R ร่วมโชว์กับ Pixela ภายในงานสหกรุ๊ปแฟร์ แอนด์ เฟส ครั้งที่ 29",
+      "cover": "/assets/events/pastry-fantasy-2025.webp",
+      "coverAlt": "โปสเตอร์ Pastry Fantasy 2025 ที่มีภาพ Mild-R",
+      "sources": [
+        {
+          "label": "ประกาศเวที",
+          "url": "https://x.com/PixelaProject/status/1934582185509413360"
+        },
+        {
+          "label": "ประกาศย้ำกำหนดการ",
+          "url": "https://x.com/PixelaProject/status/1938917444153942495"
+        }
+      ]
+    },
+    {
+      "id": "maruya-42-2025",
+      "title": "MARUYA #42: Game Start",
+      "date": "2025-03-09",
+      "timeLabel": "Stage Show 12:00 น.",
+      "venue": "Union Hall ชั้น 6 ยูเนี่ยนมอลล์",
+      "format": "offline",
+      "themes": [
+        "music",
+        "fan-meet"
+      ],
+      "url": "https://x.com/PixelaProject/status/1897195415805813176",
+      "summary": "Mild-R ร่วม Stage Show ของ Pixela เวลา 12:00 น. พร้อมกิจกรรม Special Talk ที่บูธ AA-12",
+      "cover": "/assets/events/maruya-42-2025.webp",
+      "coverAlt": "โปสเตอร์ Stage Show งาน MARUYA #42 ที่ระบุชื่อ Mild-R",
+      "images": [
+        {
+          "src": "/assets/events/maruya-42-special-talk.webp",
+          "alt": "โปสเตอร์ Special Talk with Pixela ที่มี Mild-R"
+        }
+      ],
+      "sources": [
+        {
+          "label": "ประกาศ Stage Show",
+          "url": "https://x.com/PixelaProject/status/1897195415805813176"
+        },
+        {
+          "label": "ประกาศ Special Talk",
+          "url": "https://x.com/PixelaProject/status/1897557796188774433"
+        },
+        {
+          "label": "ตำแหน่งบูธ AA-12",
+          "url": "https://x.com/PixelaProject/status/1898312829603836054"
+        },
+        {
+          "label": "คลิปการแสดง GETCHA!",
+          "url": "https://x.com/PixelaProject/status/1900112094504063220"
+        }
+      ]
+    },
+    {
+      "id": "pixela-valentine-2025",
+      "title": "Pixela Valentine 2025",
+      "date": "2025-02-10",
+      "endDate": "2025-02-18",
       "platform": "YouTube",
-      "status": "ended",
-      "summary": "อัปเดตสั้นๆ กับฮันนี่ — archive placeholder",
-      "cover": "/assets/images/gallery-04.svg",
-      "coverAlt": "Chill Talk Stream cover"
+      "format": "online",
+      "themes": [
+        "valentine"
+      ],
+      "url": "https://x.com/PixelaProject/status/1887788422598963278",
+      "summary": "Mild-R ไลฟ์ Valentine วันที่ 14 กุมภาพันธ์ 2568 เวลา 19.00 น. ผู้ที่โดเนทอย่างน้อย 100 บาทในไลฟ์สามารถรับโปสการ์ดพร้อมข้อความจาก Mild-R ตามกติกากิจกรรม",
+      "schedule": [
+        {
+          "date": "2025-02-14",
+          "time": "19:00 น.",
+          "label": "ไลฟ์ Valentine ของ Mild-R",
+          "note": "โดเนทขั้นต่ำ 100 บาทเพื่อรับโปสการ์ด · ประกาศฟอร์มรับสิทธิ์ภายใน 1 วันหลังไลฟ์"
+        }
+      ],
+      "lives": [
+        {
+          "videoId": "0prMnMhdRD8"
+        }
+      ],
+      "cover": "/assets/events/gallery/pixela-valentine-2025/1889932521577787653-01-GjpeoMGaIAQpGKk.webp",
+      "coverAlt": "โปสเตอร์ไลฟ์ Valentine ของ Mild-R วันที่ 14 กุมภาพันธ์ 2568",
+      "sources": [
+        {
+          "label": "ประกาศกิจกรรม",
+          "url": "https://x.com/PixelaProject/status/1887788422598963278"
+        },
+        {
+          "label": "คำถามและคำตอบกิจกรรม",
+          "url": "https://x.com/PixelaProject/status/1887810199815438651"
+        },
+        {
+          "label": "ประกาศรอบไลฟ์และเงื่อนไขโปสการ์ดของ Mild-R",
+          "url": "https://x.com/MildRWorldEnd/status/1889932521577787653"
+        }
+      ]
+    },
+    {
+      "id": "mild-r-birthday-2024",
+      "title": "Mild-R Birthday 2024",
+      "titleLocal": "ไลฟ์วันเกิด Mild-R 2024",
+      "date": "2024-12-12",
+      "timeLabel": "20:00 น.",
+      "platform": "YouTube",
+      "format": "online",
+      "themes": [
+        "birthday"
+      ],
+      "url": "https://www.youtube.com/watch?v=rF8EL2nMXgU",
+      "summary": "ไลฟ์วันเกิดของ Mild-R บนช่อง YouTube พร้อมคอลเลกชันสินค้าวันเกิดที่เปิดพรีออเดอร์ต่อหลังไลฟ์",
+      "schedule": [
+        {
+          "date": "2024-12-10",
+          "label": "ทีเซอร์วันเกิด"
+        },
+        {
+          "date": "2024-12-11",
+          "label": "Mild-R ประกาศไลฟ์"
+        },
+        {
+          "date": "2024-12-12",
+          "time": "20:00 น.",
+          "label": "ไลฟ์วันเกิดของ Mild-R",
+          "note": "【Birthday】ไฮโซสาวเจ้าของร้านลับ"
+        },
+        {
+          "date": "2024-12-12",
+          "endDate": "2025-01-13",
+          "label": "พรีออเดอร์สินค้าวันเกิด",
+          "note": "ร้าน VFORGE"
+        }
+      ],
+      "lives": [
+        {
+          "videoId": "rF8EL2nMXgU"
+        },
+        {
+          "videoId": "l_pU9KXm_aY"
+        }
+      ],
+      "cover": "/assets/events/gallery/mild-r-birthday-2024/1866800102943215774-01-1866772599994454016.webp",
+      "coverAlt": "ภาพประกาศไลฟ์วันเกิด Mild-R 12 ธ.ค. 2024",
+      "sources": [
+        {
+          "label": "ไลฟ์วันเกิดบนช่อง Mild-R",
+          "url": "https://www.youtube.com/watch?v=rF8EL2nMXgU"
+        },
+        {
+          "label": "ประกาศไลฟ์ของ Mild-R",
+          "url": "https://x.com/MildRWorldEnd/status/1866800102943215774"
+        },
+        {
+          "label": "วิดีโอทีเซอร์",
+          "url": "https://www.youtube.com/watch?v=Y1R-L7DN7aw"
+        },
+        {
+          "label": "ทีเซอร์ของ Mild-R",
+          "url": "https://x.com/MildRWorldEnd/status/1866437707121246481"
+        },
+        {
+          "label": "ประกาศสินค้าวันเกิด",
+          "url": "https://x.com/PixelaProject/status/1867192701604790753"
+        }
+      ]
+    },
+    {
+      "id": "pixela-lockdown-protocol-2024",
+      "title": "Pixela Lockdown Protocol 2024",
+      "titleLocal": "ศึกชิงเจ้า Lockdown Protocol",
+      "date": "2024-10-07",
+      "timeLabel": "20:30 น.",
+      "platform": "YouTube",
+      "format": "online",
+      "themes": [
+        "gaming"
+      ],
+      "url": "https://x.com/PixelaProject/status/1842505006546595861",
+      "summary": "ไลฟ์เกม Lockdown Protocol ของ World End และ Mystic ที่ Mild-R ร่วมเล่น ถ่ายทอดทางช่อง YouTube ของแต่ละคน",
+      "cover": "/assets/events/gallery/pixela-lockdown-protocol-2024/1842505006546595861-01-1842098368744718339.webp",
+      "coverAlt": "โปสเตอร์ไลฟ์ Lockdown Protocol ที่มี Mild-R",
+      "sources": [
+        {
+          "label": "ประกาศไลฟ์ของ Pixela",
+          "url": "https://x.com/PixelaProject/status/1842505006546595861"
+        }
+      ],
+      "lives": [
+        {
+          "videoId": "b7YRGOmBY8Y",
+          "title": "【LOCKDOWN Protocol】คุณจะต้องทำตามข้อปฏิบัติเหล่านี้",
+          "date": "2024-10-07",
+          "time": "20:30",
+          "channel": "Mild-R Ch. Lumina-World-End"
+        }
+      ]
+    },
+    {
+      "id": "wonder-festival-bangkok-2024",
+      "title": "Wonder Festival Bangkok 2024",
+      "date": "2024-08-03",
+      "endDate": "2024-08-04",
+      "venue": "Paragon Hall สยามพารากอน (บูธ K1–K5)",
+      "format": "offline",
+      "themes": [
+        "expo",
+        "fan-meet"
+      ],
+      "url": "https://www.ticketmelon.com/pixelaofficial/pixela-wf-2024?hl=th-TH",
+      "summary": "Pixela ออกบูธในงาน Wonder Festival Bangkok 2024 พร้อมสินค้า Harajuku Collection ที่มี Mild-R โดย Mild-R มีรอบ Fan Meeting ทั้งสองวันและมีชื่อในตารางเวทีวันที่ 4 สิงหาคม",
+      "schedule": [
+        {
+          "date": "2024-08-03",
+          "time": "16:00–17:00 น.",
+          "label": "Fan Meeting — Meeting 1"
+        },
+        {
+          "date": "2024-08-04",
+          "time": "14:45–15:45 น.",
+          "label": "Fan Meeting — Meeting 1"
+        },
+        {
+          "date": "2024-08-04",
+          "time": "17:00–18:00 น.",
+          "label": "เวที Pixela"
+        },
+        {
+          "date": "2024-08-04",
+          "time": "19:15–20:15 น.",
+          "label": "Fan Meeting — Meeting 2"
+        }
+      ],
+      "notes": [
+        "Fan Meeting คุยได้ 1 นาที/บัตร"
+      ],
+      "cover": "/assets/events/wonder-festival-2024-mild-r.webp",
+      "coverAlt": "Mild-R ในภาพโปรโมต Pixela งาน Wonder Festival Bangkok 2024",
+      "images": [
+        {
+          "src": "/assets/events/wonder-festival-2024-poster.webp",
+          "alt": "โปสเตอร์ Pixela ที่งาน Wonder Festival Bangkok 2024"
+        }
+      ],
+      "sources": [
+        {
+          "label": "หน้ากิจกรรม Ticketmelon",
+          "url": "https://www.ticketmelon.com/pixelaofficial/pixela-wf-2024?hl=th-TH"
+        },
+        {
+          "label": "ประกาศสินค้า Pixela ที่มี Mild-R",
+          "url": "https://x.com/PixelaProject/status/1814563580236476708"
+        },
+        {
+          "label": "ประกาศตำแหน่งบูธ K1–K5",
+          "url": "https://x.com/PixelaProject/status/1816775724898091260"
+        }
+      ]
     },
     {
       "id": "pastry-fantasy-2024",
-      "title": "Pastry Fantasy",
-      "titleLocal": "Pastry Fantasy 2024",
-      "date": "2024-07-19",
-      "timeLabel": "20:30 ICT",
+      "title": "Pastry Fantasy 2024",
+      "date": "2024-06-30",
+      "venue": "งานสหกรุ๊ปแฟร์ แอนด์ เฟส 2024",
+      "format": "offline",
+      "themes": [
+        "music"
+      ],
+      "url": "https://www.facebook.com/pixelaproject/posts/pfbid0HjddFFtKN2YAUYPgoWR1azFSnZyasJWa1XrjuzrtV3adAR1na2rQtv8RQofFDG7Gl",
+      "summary": "Mild-R กับสมาชิก Pixela World End ในคอนเสิร์ต Pastry Fantasy วันที่ 30 มิถุนายน 2567 ภายในงานสหกรุ๊ปแฟร์ แอนด์ เฟส",
+      "cover": "/assets/events/gallery/pastry-fantasy-2024/facebook-pastry-fantasy-2024.webp",
+      "coverAlt": "ภาพโปรโมตคลิปย้อนหลัง Pastry Fantasy 2024 ของ Pixela World End ที่มี Mild-R",
+      "sources": [
+        {
+          "label": "โพสต์ภาพและคลิปย้อนหลังของ Pixela (Facebook)",
+          "url": "https://www.facebook.com/pixelaproject/posts/pfbid0HjddFFtKN2YAUYPgoWR1azFSnZyasJWa1XrjuzrtV3adAR1na2rQtv8RQofFDG7Gl"
+        },
+        {
+          "label": "คลิปย้อนหลัง Pastry Fantasy 2024 (YouTube)",
+          "url": "https://www.youtube.com/watch?v=zLHeiuFDo4c"
+        }
+      ],
+      "lives": [
+        {
+          "videoId": "zLHeiuFDo4c",
+          "kind": "video",
+          "title": "\" Pixela World End \" Pastry Fantasy Vtuber Concert Persented by Farmhouse",
+          "date": "2024-07-14",
+          "channel": "Pixela Official"
+        }
+      ]
+    },
+    {
+      "id": "pixela-goose-goose-duck-2024",
+      "title": "Pixela Goose Goose Duck 2024",
+      "titleLocal": "ศึกชิงเจ้า Goose Goose Duck",
+      "date": "2024-06-06",
+      "timeLabel": "20:00 น.",
       "platform": "YouTube",
-      "status": "ended",
-      "summary": "อัปเดตสั้นๆ กับฮันนี่ — archive placeholder",
-      "cover": "/assets/images/gallery-04.svg",
-      "coverAlt": "Chill Talk Stream cover"
+      "format": "online",
+      "themes": [
+        "gaming"
+      ],
+      "url": "https://www.youtube.com/watch?v=goMSp5-27L8",
+      "summary": "ไลฟ์เกม Goose Goose Duck รวมค่าย Pixela ที่ Mild-R ร่วมเล่น ดูย้อนหลังได้จากไลฟ์ช่อง Mild-R",
+      "lives": [
+        {
+          "videoId": "goMSp5-27L8",
+          "title": "【Goose Goose Duck】ค่ายกระต่าย กลายเป็นเป็ด ft.Pixela",
+          "date": "2024-06-06",
+          "time": "20:00",
+          "channel": "Mild-R Ch. Lumina-World-End"
+        }
+      ],
+      "cover": "/assets/events/gallery/pixela-goose-goose-duck-2024/facebook-goose-goose-duck-2024.webp",
+      "coverAlt": "โปสเตอร์ไลฟ์ Goose Goose Duck ของ Pixela ที่มี Mild-R",
+      "sources": [
+        {
+          "label": "ดูไลฟ์ย้อนหลังของ Mild-R บน YouTube",
+          "url": "https://www.youtube.com/watch?v=goMSp5-27L8"
+        },
+        {
+          "label": "ประกาศของ Pixela (Facebook)",
+          "url": "https://www.facebook.com/pixelaproject/posts/pfbid0Eyy52C6uvevRiSgxxEWzP2aPC52VcYxct9tmRudygSqD1g1moxhLBMX2nrsYjGyVl"
+        },
+        {
+          "label": "เพลย์ลิสต์ไลฟ์ Goose Goose Duck ของ Pixela",
+          "url": "https://www.youtube.com/playlist?list=PL6sdtVvrawnX4cHupjkB8MR2Kh7GqnfFF"
+        }
+      ]
+    },
+    {
+      "id": "mild-r-debut-2024",
+      "title": "เตรียมตัวรับมือกับภัยพิบัติระดับโลกแตก",
+      "titleLocal": "เตรียมตัวรับมือกับภัยพิบัติระดับโลกแตก",
+      "date": "2024-05-22",
+      "timeLabel": "20:00 น.",
+      "platform": "YouTube",
+      "format": "online",
+      "themes": [
+        "debut"
+      ],
+      "url": "https://www.facebook.com/pixelaproject/posts/pfbid0mj9e27mvWPXKhyEyk2ytWMWuaD4Rraei6P43MjjqEMaZ1UPeVAUyrE38bs9HR1ibl",
+      "summary": "เตรียมตัวรับมือกับภัยพิบัติระดับโลกแตก การปรากฏตัวของพวกเธอที่มาพร้อมกับความน่ารัก เท่ห์ นุ่มฟู เซ็กซี่ เบียว และตลก จะมาทำให้ 1 วันของคุณไม่เหมือนเดิมอีกต่อไป 🌎",
+      "schedule": [
+        {
+          "date": "2024-05-16",
+          "label": "Pixela เผยแพร่ประกาศเดบิวต์ World End ทาง Facebook"
+        },
+        {
+          "date": "2024-05-22",
+          "time": "20:00 น.",
+          "label": "Mild-R ไลฟ์เดบิวต์",
+          "note": "ดูย้อนหลัง: 【Debut】แหม จะให้เค้าจุ๊บตรงไหนดีคะ"
+        }
+      ],
+      "lives": [
+        {
+          "videoId": "kNcWzy66pP0",
+          "title": "【Debut】แหม จะให้เค้าจุ๊บตรงไหนดีคะ",
+          "date": "2024-05-22",
+          "time": "20:00",
+          "channel": "Mild-R Ch. Lumina-World-End"
+        }
+      ],
+      "cover": "/assets/events/gallery/mild-r-debut-2024/facebook-world-end-family-2024.webp",
+      "coverAlt": "โปสเตอร์ W.E.×FAMILY รวมสมาชิก World End ที่มี Mild-R",
+      "sources": [
+        {
+          "label": "ประกาศและโปสเตอร์เดบิวต์ของ Pixela (Facebook, 16 พ.ค.)",
+          "url": "https://www.facebook.com/pixelaproject/posts/pfbid0mj9e27mvWPXKhyEyk2ytWMWuaD4Rraei6P43MjjqEMaZ1UPeVAUyrE38bs9HR1ibl"
+        },
+        {
+          "label": "ประกาศวันและเวลาเดบิวต์ของ Pixela (X, 15 พ.ค.)",
+          "url": "https://x.com/PixelaProject/status/1790660066695323982"
+        },
+        {
+          "label": "เพลย์ลิสต์ไลฟ์เดบิวต์ World End",
+          "url": "https://www.youtube.com/playlist?list=PL6sdtVvrawnU_WP7VtLVzkmHJQY17uxC7"
+        },
+        {
+          "label": "ไลฟ์เดบิวต์บนช่อง Mild-R (รอบ 22 พ.ค.)",
+          "url": "https://www.youtube.com/watch?v=kNcWzy66pP0"
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,1773 @@
+{
+  "collectedAt": "2026-10-02",
+  "scope": "56 unique X posts supplied by the user, 8 linked posts in the Lumina campaign thread, 6 unique Facebook posts supplied by the user, 2 linked Ticketmelon event pages, and 7 official YouTube video pages; one further YouTube recap is linked from an X post",
+  "notes": "Image research manifest for the local event archive. The event gallery JSON is generated from these local image paths; every source retains its original URL.",
+  "totals": {
+    "eventCollections": 16,
+    "supportingCollections": 2,
+    "sources": 79,
+    "images": 104,
+    "imageBytes": 119278916
+  },
+  "collections": [
+    {
+      "id": "lumina-clip-meme-2026",
+      "title": "Lumina Clip Meme Contest 2026",
+      "collectionType": "event",
+      "imageCount": 11,
+      "suggestedCover": "/assets/events/archive/lumina-clip-meme-2026/2104164154995003638-01-2104146960475402240.jpg",
+      "sources": [
+        {
+          "url": "https://x.com/LuminaVProject/status/2102379005731275013",
+          "publishedAt": "2026-09-22T19:46+07:00",
+          "text": "ตัดคลิป VTuber ให้ตลกๆ รับเลยรางวัลง่ายๆ!\nกติกาการร่วมสนุก :\n- ตัดคลิป VTuber ในค่าย จะตัดคนไหนหรือกี่คนก็ได้ ความยาวไม่ต่ำกว่า 10 วินาที และไม่เกิน 5 นาที (ทั้งแนวตั้งหรือแนวนอน) พร้อมใช้เพลงของแคมเปญประกอบคลิป\n- โพสต์คลิปลง YouTube, X หรือ Facebook\n- แท็กแอคเคาท์ของ VTuber ในคลิป + ติดแฮชแท็ก #CLIPMEMELUMINA\nแคปหลักฐาน/นำลิงก์โพสต์มากรอกที่ฟอร์มนี้ : https://forms.gle/6WUrxR7KHgrg7DWFA\nของรางวัล :\n👉 รางวัลเข้าร่วม : รับฟรี! การ์ด PVC ใส เลือกลายได้ตามใจชอบ (1 คลิป = 1 รางวัล)  (ทำหลายคลิป ก็เก็บสะสมได้หลายลายนะ!)\n👉 รางวัลถูกใจ : รางวัลถูกใจ : คลิปไหนทำมีมได้ถูกใจน้องมากที่สุด รับเลย! \"เสื้อยืดลายน้อง\" สุด Exclusive มีเฉพาะแคมเปญนี้เท่านั้น 👕✨\n🗓️ ระยะเวลากิจกรรม : วันนี้ - 10 ต.ค. นี้เท่านั้น!\n🎵 ดาวน์โหลดเพลงสำหรับร่วมกิจกรรม : ได้ที่ Description ใต้คลิป VTuber Muse คลิกเลย : https://www.youtube.com/playlist?list=PLIMfHmmBqLyc\n\nอ่านรายละเอียดการเข้าร่วมได้ที่ส่วน 4\n\nอ่านส่วนอื่นต่อในคอมเมนต์ (ส่วน1/9)\n#CLIPMEMELUMINA",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-clip-meme-2026/2102379005731275013-01-2102371135086333952.jpg",
+              "width": 1200,
+              "height": 1500,
+              "bytes": 277145,
+              "sha256": "acda3018fde528cb64f00380309ac92f87fe37f8e283331a5d11eb14725d46f8",
+              "kind": "post-image",
+              "mediaId": "2102371135086333952",
+              "remoteUrl": "https://pbs.twimg.com/media/HS0faJTbEAA-P7m.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/LuminaVProject/status/2102379016233840945",
+          "publishedAt": "2026-09-22T19:46+07:00",
+          "text": "📸 พกความน่ารักไปได้ทุกที่! กับการ์ด PVC ใสลายน้องๆ (ส่วน2/9)\nไอเทมเด็ดที่ให้คุณพา VTuber คนโปรดไปถ่ายรูปเช็คอินด้วยกันได้ทุกสถานที่ 💖\nแจกฟรีทันที! แค่เข้าร่วมกิจกรรมประกวดคลิปมีมและทำตามกติกาให้ครบถ้วน\n✅ 1 คลิป = 1 รางวัล ✅  เลือกลายที่ชอบได้เลย! (ทำหลายคลิป ก็เก็บสะสมได้หลายลายนะ!)\nมารับน้องๆ ไปเที่ยวด้วยกันเยอะๆ น้าาา~\n#CLIPMEMELUMINA",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-clip-meme-2026/2102379016233840945-01-2102371209736486912.jpg",
+              "width": 1080,
+              "height": 1080,
+              "bytes": 193803,
+              "sha256": "70314244f75bdce7de3e89ea9e378ced2dab6a7aa29e23e7a5407efd170eab0f",
+              "kind": "post-image",
+              "mediaId": "2102371209736486912",
+              "remoteUrl": "https://pbs.twimg.com/media/HS0fefZaAAAnT5J.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/LuminaVProject/status/2102379033090797688",
+          "publishedAt": "2026-09-22T19:46+07:00",
+          "text": "👕เสื้อยืด Limited Edition ลายพิเศษเฉพาะแคมเปญนี้เท่านั้น!  (ส่วน3/9)\nใครทำคลิปมีมได้โดนใจน้องๆ มากที่สุด เตรียมตัวรับรางวัลใหญ่ไปเลย!\n🏆 กติกาแจกรางวัล : ทาเลนต์แต่ละคน จะเป็นคนเลือก \"คลิปที่ถูกใจที่สุด\" ด้วยตัวเอง (แจก 1 รางวัล / 1 Talent)\n🎨 ความพิเศษขั้นสุด : ผู้ชนะสามารถ \"เลือกลาย\" คนที่อยากให้มาอยู่บนเสื้อคู่กับทาเลนต์ของตัวเองได้ด้วย! ลายเสื้อสามารถเลือกได้ว่าจะเป็นทาเลนต์คนเดียว หรือ 2 คนก็ได้ (ทาเลนต์ที่เลือกคลิปของคุณจะถูกล็อกไว้ในลาย)\nสามารถเลือกสีดำหรือขาวได้\nขนาด: S / M / L / XL / 2XL / 3XL\nรอบอก: 38 / 40 / 42 / 44 / 46 / 48\nความยาว: 27 / 28 / 29 / 30 / 31 / 32\nคลิปใครเด็ด คลิปใครโดน ใส่ไอเดียมาให้เต็มที่ เพราะเสื้อสุด Exclusive ตัวนี้อาจเป็นของคุณ!\n#CLIPMEMELUMINA",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-clip-meme-2026/2102379033090797688-01-2102371338778546177.jpg",
+              "width": 1080,
+              "height": 1080,
+              "bytes": 380318,
+              "sha256": "53470403867444fdcce40570f7730bbdfab3a32af0e15cd7bc5b97776eafeb84",
+              "kind": "post-image",
+              "mediaId": "2102371338778546177",
+              "remoteUrl": "https://pbs.twimg.com/media/HS0fmAHbkAEfbEY.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/LuminaVProject/status/2102379045115871476",
+          "publishedAt": "2026-09-22T19:46+07:00",
+          "text": "📍รายละเอียดการเข้าร่วมและรับรางวัล (ส่วน4/9)\n\nดาวน์โหลดเพลง\n>คุณสามารถเข้าไปดาวน์โหลดเพลง cover จาก Muse เพื่อนำมาประกอบคลิปของคุณได้ใน Description ใต้คลิปของ VTuber Muse แต่ละคน\nLink : https://youtube.com/playlist?list=PLIMfHmmBqLyc&si=EZRp1eSk8JsaNUiJ\n\nการตัดคลิป\n>ภายในคลิปจะต้องมี VTuber ในค่าย จะเป็นใครหรือกี่คนก็ได้ จะมาเป็นภาพหรือวิดีโอผสมกันได้ (จะเป็นภาพเก่าภาพใหม่ ภาพจากไลฟ์ หรือภาพวาดก็ได้หมด)\n>ห้ามใช้ภาพ AI ประกอบคลิปเด็ดขาด\n>ความยาวคลิปต้องไม่ต่ำกว่า 10 วินาที และยาวไม่เกิน 5 นาที\n>สามารถตัดคลิปได้ทั้งแนวตั้งและแนวนอน\n>สามารถเอาคลิปแนวนอนที่โพสต์ไปแล้ว มาตัดแยกอีกครั้งเป็นแนวตั้งแล้วโพสต์ลงอีกครั้งได้ (ในกรณีที่นำคลิปแนวนอนมาตัดเป็นแนวตั้ง จำกัดการส่งคลิปได้ไม่เกิน 4 คลิป และยังสามารถตัดคลิปแนวตั้งคลิปใหม่ส่งมาเพิ่มเติมได้อีก)\n>คลิปที่จะได้รับของรางวัลต้องมีคุณภาพตามมาตรฐานที่ทางทีมงานตั้งไว้เท่านั้น คือ มีการใช้ Transition, ใช้ Text ประกอบคลิป, ใช้ภาพหรือวิดีโอมากกว่า 3 อันขึ้นไป และมีการใช้เพลงของแคมเปญประกอบในคลิป\n>ไม่จำเป็นต้องใช้เพลงทั้งเพลงก็ได้ สามารถนำบางส่วนของเพลงมาตัดใส่ได้\n#CLIPMEMELUMINA",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-clip-meme-2026/2102379045115871476-01-2102371431330045954.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 1493689,
+              "sha256": "3874eec25660971303e91914f4de11142a8be3243a59cbfee0ed185bd63f69d8",
+              "kind": "post-image",
+              "mediaId": "2102371431330045954",
+              "remoteUrl": "https://pbs.twimg.com/media/HS0frY5bYAIiMEL.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/LuminaVProject/status/2102379056222408820",
+          "publishedAt": "2026-09-22T19:46+07:00",
+          "text": "📍รายละเอียดการเข้าร่วมและรับรางวัล (ส่วน5/9)\nการโพสต์คลิป\n>โพสต์คลิปลงช่องทาง Youtube, X หรือ Facebook (สามารถโพสต์ช่องทางใดช่องทางหนึ่งหรือโพสต์ทั้ง 3 ช่องทางก็ได้)\n>ต้องเปิดสาธารณะทุกคลิป\n>1 ช่องทางสามารถโพสต์ได้มากกว่า 1 คลิป จะโพสต์กี่คลิปก็ได้แค่ต้องตรงตามกติกาการตัดคลิปลงก็จะสามารถรับของรางวัลได้เลย\n>1 คลิป = 1 รางวัล\n>ต้องแท็กแอคเคาท์น้องที่อยู่ในคลิป และติดแฮชแท็ก #CLIPMEMELUMINA ในทุกคลิปที่ลง (แท็กได้มากกว่า 1 คน)\n>ในกรณีที่คุณลงคลิปเดียวกันทั้ง 3 ช่องทางคุณจะได้รับ 1 รางวัลเท่านั้น (แต่ถ้าคลิปเดียวกันที่เป็นแนวนอนแล้วเอาไปตัดเป็นแนวตั้งโพสต์ลงใหม่ ก็จะนับเป็นคลิปใหม่และได้รางวัลเพิ่ม)\n\nการส่งหลักฐาน\n>ให้นำหลักฐานการเข้าร่วมกิจกรรมมากรอกที่ฟอร์ม : https://docs.google.com/forms/d/e/1FAIpQLSfSwchzfFzVRykHFJCXP5YmD49egvYy60EchTfUjZN4uYQyPA/viewform\n>ในฟอร์มคุณสามารถเลือกของรางวัลลายทาเลนต์ที่คุณต้องการได้\n>ในกรณีที่ตัดมาหลายคลิปแล้วอยากได้ลายการ์ดซ้ำสามารถพิมพ์บอกไว้ในช่องหมายเหตุได้ เช่น คุณโพสต์คลิป จำนวน 4 คลิป อยากได้การ์ดแอชี่ 3 ใบ การ์ดเอมิ 1 ใบ ก็สามารถติ๊กชื่อน้องที่คุณต้องการทั้ง 2 คนไว้ แล้วพิมพ์ชื่อพร้อมจำนวนที่คุณต้องการไว้ในหมายเหตุได้เลย\n\nรางวัลพิเศษ\n>สำหรับรางวัลพิเศษที่เป็นเสื้อ ทาเลนต์แต่ละคนจะเป็นคนเลือกคลิปที่ถูกใจที่สุดและให้รางวัลกับคนนั้น\n>โดยถ้าคุณเป็นคนที่ถูกเลือก คุณจะได้ลายเสื้อของทาเลนต์คนที่เลือกคุณ\n>คุณสามารถเลือกได้ว่าในเสื้ออยากได้แค่ลายทาเลนต์คนเดียวหรือ 2 คน\n>ในกรณีที่เลือก 2 คน คุณสามารถเลือกได้ว่าอีก 1 คนอยากให้เป็นลายของใคร\n#CLIPMEMELUMINA",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-clip-meme-2026/2102379056222408820-01-2102371521193033728.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 1507592,
+              "sha256": "78240348b7ba35aab3beea2ee30b6deb556d6f3be4188552e8508305792cd671",
+              "kind": "post-image",
+              "mediaId": "2102371521193033728",
+              "remoteUrl": "https://pbs.twimg.com/media/HS0fwnqbwAAPaAF.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/LuminaVProject/status/2102379062249627707",
+          "publishedAt": "2026-09-22T19:46+07:00",
+          "text": "ความเบียว ความสวย ความอ๊อง ความน่ารัก และความหลอน รวมกันเป็น มีม!  😎☠️ (ส่วน6/9)\n\nคุณมีสิทธิ์ได้รับของรางวัลน้องๆทุกคนได้ง่ายๆ\nอยากได้ลายไหน รีบตัดคลิปมีมๆมาอวดให้พวกเราดูด้วยกันเล้ยย!\n\nระยะเวลาเข้าร่วมกิจกรรม : 22/09/26 - 10/10/26\n#CLIPMEMELUMINA",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-clip-meme-2026/2102379062249627707-01-2102371598611402752.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 943953,
+              "sha256": "bc0ed70307ee9e4295eaa80c9710beaf27ab6f7b639aba06e541d0807c6ead9b",
+              "kind": "post-image",
+              "mediaId": "2102371598611402752",
+              "remoteUrl": "https://pbs.twimg.com/media/HS0f1IEaUAAL2ZJ.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/LuminaVProject/status/2102379071418319353",
+          "publishedAt": "2026-09-22T19:46+07:00",
+          "text": "แวะมาปล่อยความฮา ให้มีมกันจนโลกระเบิด!! 🌍💥 (ส่วน7/9)\n\nคุณมีสิทธิ์ได้รับของรางวัลน้องๆทุกคนได้ง่ายๆ\nอยากได้ลายไหน รีบตัดคลิปมีมๆมาอวดให้พวกเราดูด้วยกันเล้ยย!\n\nระยะเวลาเข้าร่วมกิจกรรม : 22/09/26 - 10/10/26\n#CLIPMEMELUMINA",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-clip-meme-2026/2102379071418319353-01-2102371689086717952.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 884183,
+              "sha256": "26d0b0d2d201fe91d1b8ce8d4473f3cee54d7e036383e3219419fd3199de3a8e",
+              "kind": "post-image",
+              "mediaId": "2102371689086717952",
+              "remoteUrl": "https://pbs.twimg.com/media/HS0f6ZHaEAAjCox.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/LuminaVProject/status/2102379077177147762",
+          "publishedAt": "2026-09-22T19:46+07:00",
+          "text": "นอกจากจะเป็นสายมูแล้ว ยังเป็นสายมีมด้วยนะจ๊ะพี่จ๋า 🤫🙏🏻(ส่วน8/9)\n\nคุณมีสิทธิ์ได้รับของรางวัลน้องๆทุกคนได้ง่ายๆ\nอยากได้ลายไหน รีบตัดคลิปมีมๆมาอวดให้พวกเราดูด้วยกันเล้ยย!\n\nระยะเวลาเข้าร่วมกิจกรรม : 22/09/26 - 10/10/26\n#CLIPMEMELUMINA",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-clip-meme-2026/2102379077177147762-01-2102371718262308864.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 980040,
+              "sha256": "6dbbd82a7d85da67e444f4bf542e5c2f19e9b12531d006ee1d1bb4e6b68a14df",
+              "kind": "post-image",
+              "mediaId": "2102371718262308864",
+              "remoteUrl": "https://pbs.twimg.com/media/HS0f8FzaQAAO6Rl.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/LuminaVProject/status/2102379091701998028",
+          "publishedAt": "2026-09-22T19:46+07:00",
+          "text": "พร้อมสะสมความฮากับพวกเรารึยังเอ่ย? ถ้าพร้อมก็มาหัวเราะให้โลกได้ยินไปด้วยกัน! 🎶🪩(ส่วน9/9)\n\nคุณมีสิทธิ์ได้รับของรางวัลน้องๆทุกคนได้ง่ายๆ\nอยากได้ลายไหน รีบตัดคลิปมีมๆมาอวดให้พวกเราดูด้วยกันเล้ยย!\n\nระยะเวลาเข้าร่วมกิจกรรม : 22/09/26 - 10/10/26\n#CLIPMEMELUMINA",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-clip-meme-2026/2102379091701998028-01-2102371817025605632.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 974306,
+              "sha256": "a8aac5c03b7db354718748d9619466d886ec1e45154562c059622af038e55222",
+              "kind": "post-image",
+              "mediaId": "2102371817025605632",
+              "remoteUrl": "https://pbs.twimg.com/media/HS0gB1uakAAdIyD.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/LuminaVProject/status/2103104769623785973",
+          "publishedAt": "2026-09-24T19:50+07:00",
+          "text": "Q & A ประกวดคลิปมีม\nQ1 : ตอนโพสต์คลิปสามารถแท็กน้องหลายคนได้ไหม?\nA : ได้ สามารถแท็กกี่คนที่อยู่ในคลิปก็ได้จะแท็กทุกคนหรือแท็กคนเดียวก็ได้\n\nQ2 : ถ้าคลิปเดียวกัน โพสต์ทั้ง X, FB และ YT จะได้การ์ดทั้งหมดกี่อัน?\nA : 1 อัน เพราะ 1 คลิป = 1 รางวัล (ในกรณีนี้ถึงจะลงหลายแพลตฟอร์ม เราก็นับเป็น 1 คลิปเนื่องจากเป็นคลิปเดียวกัน แต่ถ้าคุณเอาคลิปไปแปลงเป็นแนวอื่น เช่น แนวตั้งหรือแนวนอนที่ต่างจากเดิม จะนับเป็นคนละคลิปและได้รางวัลเพิ่ม)\n\nQ3 : ถ้าในคลิปตัดเป็นคนหนึ่ง แต่ตอนเลือกการ์ดของรางวัลเลือกเป็นลายของคนอื่นได้ไหม?\nA : ได้ สามารถเลือกลายของรางวัลคนที่ต้องการได้เลย แม้จะตัดคลิปอีกคนหนึ่ง\n\nQ4 : ถ้าในคลิปทำเป็นภาพวาดเองได้ไหม?\nA : ได้ สามารถวาดเองได้แค่เป็น VTuber ในค่าย\n\nQ5 : ถ้าในคลิปยาวแบบแนวนอนใส่ VTuber ในค่ายหลายคน ก็นำคลิปยาวมาตัดเป็นคลิปสั้นแบบแนวตั้งได้แค่ 4 คลิปใช่ไหม?\nA : ใช่ สามารถนำคลิปแนวนอนมาตัดเป็นคลิปแนวตั้งได้สูงสุด 4 คลิปเท่านั้น\n\nQ6 : สามารถเอาภาพจากไลฟ์เก่าของน้องๆมาตัดเป็นคลิปได้ไหม?\nA : ได้ แค่มี VTuber ในค่าย จะเป็นภาพจากไลฟ์เก่าหรือไลฟ์ปัจจุบันก็สามารถนำมาใช้ได้หมดเลย\n\nQ7 : ตัดคลิปมีม มีอาเจ๊กับท่านพ่อได้ไหม?\nA : มีประกอบได้ค่ะ แต่ในคลิปต้องมี VTuber ในค่ายด้วยถึงจะเข้าเงื่อนไขการรับของรางวัล\n\nQ8 : คลิปที่แยกจากคลิปยาวนี่ต้องมีเพลงประกอบทุกคลิปไหม?\nA :  ต้องมีเพลงประกอบจากแคมเปญทุกคลิปค่ะ\n\nQ9 : คลิปละ 1 สิทธิ์ ไม่ใช่ว่าในคลิปมี 2 คนได้ 2 สิทธิ์ใช่ไหม?\nA : นับเป็นคลิป ถ้าในคลิปมี 2 คน แต่ทำ 1 คลิป ก็จะนับเป็น 1 สิทธิ์เท่านั้น\n\n#CLIPMEMELUMINA",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-clip-meme-2026/2103104769623785973-01-2103104754637586432.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 236500,
+              "sha256": "f36f273ed3a127bc636bb57d267c93664f55a14c99225f8eaed5d90cdcc17646",
+              "kind": "post-image",
+              "mediaId": "2103104754637586432",
+              "remoteUrl": "https://pbs.twimg.com/media/HS-6obGbwAAWFsS.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/MildRWorldEnd/status/2104164154995003638",
+          "publishedAt": "2026-09-27T18:00+07:00",
+          "text": "ไม่อยากเห็นมุกเพื่อนครับ เพราะเป็นเพื่อนกันอยู่แล้วไม่มุกครับ ขอเป็นเมะธงเขียว ขายสวย หล่อ เท่ เซะซี่ในเวลาเดียวกัน 🟢🩷\n#CLIPMEMELUMINA #MildReverse",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-clip-meme-2026/2104164154995003638-01-2104146960475402240.jpg",
+              "width": 1080,
+              "height": 1080,
+              "bytes": 207048,
+              "sha256": "796da6dc9bfa084135b8a24bcc87d1776eb0a74cf32b5ed57cf480db00ccf3bd",
+              "kind": "post-image",
+              "mediaId": "2104146960475402240",
+              "remoteUrl": "https://pbs.twimg.com/media/HTNugyZasAAbCJs.jpg?name=orig"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maruya-42-2025",
+      "title": "MARUYA #42: Game Start",
+      "collectionType": "event",
+      "imageCount": 7,
+      "sources": [
+        {
+          "url": "https://x.com/PixelaProject/status/1897195415805813176",
+          "publishedAt": "2025-03-05T15:00+07:00",
+          "text": "🕹️Game Start! : Drop the Beat 🎤\n.\n🪩 เตรียมตัวไปสนุกกับ Stage Show จาก #PixelaOfficial ไม่ว่าจะเป็น Aruna Shuun, Biscuit Blythe, Roselia de Magentia, Mycara Melony, Jolly Estaa และ Mild-R ภายในงาน #MARUYA42 #MRY42 เวลา 12.00 ตรงแบบเป๊ะ ๆ อย่าลืมมาให้กำลังใจแล้วก็ชมโชว์สุดพิเศษจากน้อง ๆ กันนะคะ 💃🏻🕺🏻\n.\n📅 วันที่ : 9 มีนาคม พ.ศ. 2568\n📍 สถานที่ : Union Hall ชั้น 6 ศูนย์การค้ายูเนี่ยนมอลล์\n.\n#AnimeFestival #JapaneseCulture #CosplayCelebration #GameStart",
+          "images": [
+            {
+              "path": "/assets/events/archive/maruya-42-2025/1897195415805813176-01-1897195257194004480.jpg",
+              "width": 3000,
+              "height": 3000,
+              "bytes": 1240383,
+              "sha256": "c5e3df86d0acd02deada734940d458217ff91d72b7aa723c734eea245723152c",
+              "kind": "post-image",
+              "mediaId": "1897195257194004480",
+              "remoteUrl": "https://pbs.twimg.com/media/GlQxCN6awAApozt.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/1897557796188774433",
+          "publishedAt": "2025-03-06T15:00+07:00",
+          "text": "🕹️Game Start! : Special Talk with Pixela 👥 🗣️\n.\n✨ นอกจากจะมี Stage Show จาก #PixelaOfficial แล้ว ยังได้มาเจอกับน้อง ๆ อีกด้วย! เพียงเเค่กดติดตามน้อง ๆ ในช่องทางใดก็ได้ จะได้สิทธิ์เข้าไปพูดคุยกับน้อง ๆ ได้ 15 วินาทีฟรีทันที!! พร้อมรับโปสการ์ดเเบบสุ่มจำนวน 1 ลาย แต่ต้องมาให้ตรงรอบของน้อง ๆ เท่านั้นน้าาา อย่าลืมมาเร็ว ๆ กันด้วยล้าาา 🥰 🫶🏻\n.\n📅 วันที่ : 9 มีนาคม พ.ศ. 2568\n📍 สถานที่ : Union Hall ชั้น 6 ศูนย์การค้ายูเนี่ยนมอลล์\n.\n#MARUYA42 #MRY42 #AnimeFestival #JapaneseCulture #CosplayCelebration #GameStart",
+          "images": [
+            {
+              "path": "/assets/events/archive/maruya-42-2025/1897557796188774433-01-1897551619828363264.jpg",
+              "width": 3000,
+              "height": 3000,
+              "bytes": 1195306,
+              "sha256": "9fb8813b489d74164a908a95bfc954b18c5b5eb6705d147dea4fb034707c1d8b",
+              "kind": "post-image",
+              "mediaId": "1897551619828363264",
+              "remoteUrl": "https://pbs.twimg.com/media/GlV1JQLWMAAGjvn.jpg?name=orig"
+            },
+            {
+              "path": "/assets/events/archive/maruya-42-2025/1897557796188774433-02-1897551629681090562.jpg",
+              "width": 3000,
+              "height": 4000,
+              "bytes": 1252781,
+              "sha256": "2114ccea453dd0db267b25080a66c16e0a7c5c0883e3fdbc04ad2c73be550605",
+              "kind": "post-image",
+              "mediaId": "1897551629681090562",
+              "remoteUrl": "https://pbs.twimg.com/media/GlV1J04a4AIj_St.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/1897930739767034018",
+          "publishedAt": "2025-03-07T15:42+07:00",
+          "text": "🕹️Game Start! : Game Booth 🎲🎮\n.\n✨ ยังไม่หมดเพียงเท่านี้ เพราะเรายังมี Game Booth ให้เล่นกันด้วยน้า ใครที่คิดว่าดวงดี หรืออยากจะลองท้าทายระบบการสุ่ม เพียงแค่ 100 บาทเท่านั้น คุณก็สามารถร่วมสนุกกับเราได้ แถมยังมีสิทธิ์ลุ้นรับรางวัลอีกมากมายด้วยน้าาา อย่าลืมมาเล่นกันละ 🧧🔮\n.\n📅 วันที่ : 9 มีนาคม พ.ศ. 2568\n📍 สถานที่ : Union Hall ชั้น 6 ศูนย์การค้ายูเนี่ยนมอลล์\n.\n#PixelaOfficial #MARUYA42 #MRY42 #AnimeFestival #JapaneseCulture #CosplayCelebration #GameStart",
+          "images": [
+            {
+              "path": "/assets/events/archive/maruya-42-2025/1897930739767034018-01-1897930434199404544.jpg",
+              "width": 3000,
+              "height": 3000,
+              "bytes": 813844,
+              "sha256": "a41b8faa8bbe3f46f2f172f049097bf12958a2ae2935161ab3fa2bc0e7bd2695",
+              "kind": "post-image",
+              "mediaId": "1897930434199404544",
+              "remoteUrl": "https://pbs.twimg.com/media/GlbNrJrbwAAUz7O.jpg?name=orig"
+            },
+            {
+              "path": "/assets/events/archive/maruya-42-2025/1897930739767034018-02-1897930455208632320.jpg",
+              "width": 3000,
+              "height": 4000,
+              "bytes": 1825192,
+              "sha256": "ea5f18c26a3f04a5c18dfb86e0231dd307a29133df7ecba1f9288a345784bf70",
+              "kind": "post-image",
+              "mediaId": "1897930455208632320",
+              "remoteUrl": "https://pbs.twimg.com/media/GlbNsX8bIAATwv3.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/1898312829603836054",
+          "publishedAt": "2025-03-08T17:00+07:00",
+          "text": "🔔 แจ้งเตือนจากระบบ ✨\nท่านผู้เล่นทุกท่าน พรุ่งนี้อย่าลืมมาเจอกันได้ที่งาน #MARUYA42 #MRY42 บูธ AA-12 นะคะ! ถ้าพลาดละก็ระวังจะคุยกับเพื่อนไม่รู้เรื่อง 🎮\n.\n📅 วันที่ : 9 มีนาคม พ.ศ. 2568\n📍 สถานที่ : Union Hall ชั้น 6 ศูนย์การค้ายูเนี่ยนมอลล์\n🎫 ค่าเข้างาน : 180 บาท/คน\n.\n#PixelaOfficial #AnimeFestival #JapaneseCulture #CosplayCelebration #GameStart",
+          "images": [
+            {
+              "path": "/assets/events/archive/maruya-42-2025/1898312829603836054-01-1898312148050415616.jpg",
+              "width": 3000,
+              "height": 3000,
+              "bytes": 1205362,
+              "sha256": "1935bc56083ac267b814fe39d64f9d0531685da6d3a5c4384458bd21ba2f68ee",
+              "kind": "post-image",
+              "mediaId": "1898312148050415616",
+              "remoteUrl": "https://pbs.twimg.com/media/Glgo10lakAAfua9.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/1900112094504063220",
+          "publishedAt": "2025-03-13T16:10+07:00",
+          "text": "【Maruya 42】Giga & KIRA - 'GETCHA!' Covered by @MildRWorldEnd  & @JollyEstaaV2 \n.\nhttps://youtu.be/OBaPdA0Ayg4\n.\n#PixelaOfficial #MARUYA42 #MRY42  #AnimeFestival #JapaneseCulture #CosplayCelebration #GameStart",
+          "images": [
+            {
+              "path": "/assets/events/archive/maruya-42-2025/1900112094504063220-01-1900074761386156033.jpg",
+              "width": 1200,
+              "height": 675,
+              "bytes": 167772,
+              "sha256": "6447faf8111ac42a24dc47bc534a87af6b65a3281d83a67ba71ac01f801dbfd7",
+              "kind": "post-image",
+              "mediaId": "1900074761386156033",
+              "remoteUrl": "https://pbs.twimg.com/media/Gl5r7a8bYAE_ktQ.jpg?name=orig"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maruya-44-2025",
+      "title": "MARUYA #44: The Movie",
+      "collectionType": "event",
+      "imageCount": 3,
+      "sources": [
+        {
+          "url": "https://x.com/PixelaProject/status/1980559690976182272",
+          "publishedAt": "2025-10-21T16:00+07:00",
+          "text": "🐰 ก๊อกๆ เปิดคลัง Pixela ลุ้นรับรางวัลใหญ่ภายในงาน MARUYA #44 ณ Jewel Hall ชั้น 5 สยามพารากอน\n.\nกิจกรรม Game Booth กาชาเสี่ยงดวงร่วมสนุกจาก Pixela Official ที่จะนำสินค้าที่อาจจะเคยพลาดไปกลับมาให้คุณร่วมสนุกกันอีกครั้ง\n\n⭐เพียงแค่ครั้งละ 100 บาท⭐ คุณเอก็มีสิทธิ์คว้ารางวัลใหญ่ เช่น โปสการ์ดพร้อมลายเซ็นสดของทาเลนต์ และอื่นๆ อีกมากมาย! พบกันวันที่ 26 ตุลาคนนี้\n\n🎃 แจกฟรีสติกเกอร์สุดคิ้วท์สำหรับ 50 ท่านแรก!🎃\n❤️ นอกจากนี้ยังมีกิจกรรมพูดคุยกับน้องๆ บ้าน Pixela ได้ในเวลาตามรอบที่กำหนดอีกด้วยน้า\n\n🔸กิจกรรมเป็นการสุ่มรางวัล 1 ชิ้นจากทั้งหมดในใบรายการโดยของมีจำนวนจำกัด\n🔸เงื่อนไขเป็นไปตามที่บริษัทฯ กำหนด\n\n▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪\nMARUYA #44 : The Movie 🎬\n📅 Date : October 26, 2025\n📍 Place : Jewel Hall Fl.5, Siam Paragon\n\n#pixela #PixelaOfficial #MRY44 #MARUYA44",
+          "images": [
+            {
+              "path": "/assets/events/archive/maruya-44-2025/1980559690976182272-01-1980541864487870464.jpg",
+              "width": 2480,
+              "height": 3508,
+              "bytes": 4420739,
+              "sha256": "1a80cc50c1d99c43a5ca8be64353db27c52569346a73e540933fda8e37bfa08d",
+              "kind": "post-image",
+              "mediaId": "1980541864487870464",
+              "remoteUrl": "https://pbs.twimg.com/media/G3xMVReW4AAx-Ri.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/1981706348954873909",
+          "publishedAt": "2025-10-24T19:56+07:00",
+          "text": "📢แจ้งปรับเปลี่ยนเวลา Meeting ของ Superpretty TAKOPERO🐙 เป็นเวลา 18.20-18.50 น.\n\n🎬พบกับสเตจ Pixela The Musical ตั้งแต่เวลา 16.30 น. เป็นต้นไป ❤️\n\nอย่าลืมมาเจอกันน้า\n▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪\nMARUYA #44 : The Movie 🎬\n📅 Date : October 26, 2025\n📍 Place : Jewel Hall Fl.5, Siam Paragon\n\n#pixela #PixelaOfficial #MRY44 #MARUYA44",
+          "images": [
+            {
+              "path": "/assets/events/archive/maruya-44-2025/1981706348954873909-01-1981706269699325952.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 801775,
+              "sha256": "e3c4db98cd9d8ea2c03b866eb2ed308952cbfb6c4b673087cd2759cf2f131fd2",
+              "kind": "post-image",
+              "mediaId": "1981706269699325952",
+              "remoteUrl": "https://pbs.twimg.com/media/G4BvWk6XwAAL_0d.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/1982009243260834260",
+          "publishedAt": "2025-10-25T16:00+07:00",
+          "text": "🎬 Action!  พรุ่งนี้อย่าลืมมาเจอกันได้ที่งาน MARUYA44 : The Movie กับบ้าน Pixela และกิจกรรมต่างๆ ภายในบูธ\n\nอย่าลืมมาเจอกันน้า\n\n*เงื่อนไขเป็นไปตามที่บริษัทฯ กำหนด\n▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪\nMARUYA #44 : The Movie 🎬\n📅 Date : October 26, 2025\n📍 Place : Jewel Hall Fl.5, Siam Paragon\n\n#pixela #PixelaOfficial #MRY44 #MARUYA44",
+          "images": [
+            {
+              "path": "/assets/events/archive/maruya-44-2025/1982009243260834260-01-1982008805467533312.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 865567,
+              "sha256": "29de06b8fd4b2bfe78357080b10641a4c5e588818f656fb70929a07073f6a10d",
+              "kind": "post-image",
+              "mediaId": "1982008805467533312",
+              "remoteUrl": "https://pbs.twimg.com/media/G4GCgeeWsAAM2jf.jpg?name=orig"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mild-r-birthday-2024",
+      "title": "Mild-R Birthday 2024",
+      "collectionType": "event",
+      "imageCount": 5,
+      "sources": [
+        {
+          "url": "https://x.com/PixelaProject/status/1867192701604790753",
+          "publishedAt": "2024-12-12T20:00+07:00",
+          "text": "มาสร้างค่ำคืนแห่งความทรงจำในวันเกิด Mild-R นี้ด้วยกันนะคะ 💖\nแล้วอย่าลืมมีของน่ารัก ๆ ติดมือกันไปด้วยล่ะ! 🥂✨\n\nhttps://www.vforgeshop.com/c/168\n\nMild-R Birthday 2024 - Complete Set\n.\nเซตละ 2050 บาท\nรายละเอียดภายในเซตประกอบไปด้วย\n.\n① Mild-R Birthday 2024 - Voice Pack\nชิ้นละ 350 บาท\nเซตเสียงของมายมาในรูปแบบ Flash Drive พร้อมสติกเกอร์อาร์ตวันเกิด\n.\n② Mild-R Birthday 2024 - Metal Bottle Opener with Magnet\nชิ้นละ 75 บาท\nที่เปิดขวดพร้อมแม่เหล็ก\nขนาด 5.8 cm\n.\n③ Mild-R Birthday 2024 - Acrylic Standee\nชิ้นละ 530 บาท\nสแตนดี้อะคริลิค\nขนาด 16 cm\n.\n④ Mild-R Birthday 2024 - Dicut Cushion\nใบละ 1125 บาท\nหมอน\nขนาด 50 cm\n.\n⑤ Mild-R Birthday 2024 - Postcard\nโปสการ์ดสุดพิเศษแทนคำขอบคุณจากมาย\n.\n.\n.\nเปิดพรีออเดอร์ 12/12/2024 - 13/01/2025\nสินค้าเป็นสินค้า Pre-Order จะเริ่มจัดส่งในช่วงเดือนกุมภาพันธ์เป็นต้นไป\nสินค้าในแต่ละออเดอร์ จะถูกส่งจัดส่งพร้อมกันหมด โดยจะจัดส่งเมื่อสินค้าทุกชิ้นในออเดอร์พร้อมจัดส่ง\nกรุณาแยกออเดอร์ในการสั่งซื้อ หากต้องการให้สินค้าที่พร้อมจัดส่ง จัดส่งมาก่อน\nภาพสินค้าเป็นเพียงแค่ภาพตัวอย่างเท่านั้น สินค้าจริงอาจมีความแตกต่างจากภาพตัวอย่าง\n**สินค้าจัดส่งภายในประเทศไทยเท่านั้น These items are ONLY AVAILABLE in Thailand",
+          "images": [
+            {
+              "path": "/assets/events/archive/mild-r-birthday-2024/1867192701604790753-01-1867189570875641856.jpg",
+              "width": 1920,
+              "height": 1080,
+              "bytes": 380765,
+              "sha256": "386292cbe5279bfb832a66b5f773eddecef8e5aed163c5f1446845dfb59d5da4",
+              "kind": "post-image",
+              "mediaId": "1867189570875641856",
+              "remoteUrl": "https://pbs.twimg.com/media/GemXBZxbUAAyoh7.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/MildRWorldEnd/status/1866437707121246481",
+          "publishedAt": "2024-12-10T18:00+07:00",
+          "text": "【Mild-R’s Birthday】สนใจไปบาร์ด้วยกันไหมคะ?\n.\nhttps://youtu.be/Y1R-L7DN7aw\n.\n#MildReverse #MildRBirthday2024",
+          "relation": "birthday-teaser",
+          "relatedVideoUrl": "https://www.youtube.com/watch?v=Y1R-L7DN7aw",
+          "images": [
+            {
+              "path": "/assets/events/archive/mild-r-birthday-2024/1866437707121246481-01-1866424680246382592.jpg",
+              "width": 1200,
+              "height": 675,
+              "bytes": 85264,
+              "sha256": "3d3dfcf26702572916d1d9782d15b844ae04c355b19dff4f8f481d0b34822d77",
+              "kind": "post-image",
+              "mediaId": "1866424680246382592",
+              "remoteUrl": "https://pbs.twimg.com/media/GebfW6IbkAAioTD.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=Y1R-L7DN7aw",
+          "summary": "【Mild-R’s Birthday】สนใจอยู่คุยด้วยกันไหมคะ? — วิดีโอทีเซอร์บนช่อง Mild-R",
+          "relation": "birthday-teaser-video",
+          "images": [
+            {
+              "path": "/assets/events/archive/mild-r-birthday-2024/youtube-Y1R-L7DN7aw-maxresdefault.jpg",
+              "width": 1280,
+              "height": 720,
+              "bytes": 73383,
+              "sha256": "4e2172b27d4ec4e35515d85fdfbb545e2fa05a066864b22053daf0cadb99aa71",
+              "kind": "video-thumbnail",
+              "mediaId": "Y1R-L7DN7aw",
+              "remoteUrl": "https://i.ytimg.com/vi/Y1R-L7DN7aw/maxresdefault.jpg"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/MildRWorldEnd/status/1866800102943215774",
+          "publishedAt": "2024-12-11T18:00+07:00",
+          "text": "ยังไม่ลืมใช่ไหมคะ? ว่าคืนพรุ่งนี้มีนัดมาดื่มด้วยกัน  \nเริ่มชงเครื่องดื่มสุดพิเศษ 2 ทุ่มเป็นต้นไป...อย่าลืมนัดนะ💋\n.\nhttps://youtube.com/live/rF8EL2nMXgU\n.\n#MildReverse #MildRBirthday2024",
+          "relation": "birthday-livestream-announcement",
+          "relatedVideoUrl": "https://www.youtube.com/watch?v=rF8EL2nMXgU",
+          "images": [
+            {
+              "path": "/assets/events/archive/mild-r-birthday-2024/1866800102943215774-01-1866772599994454016.jpg",
+              "width": 3000,
+              "height": 3000,
+              "bytes": 756367,
+              "sha256": "13bfaa66ded6637724127afbbde40fba9db4ea2e6aa20215f2dc08a6a4a395cd",
+              "kind": "post-image",
+              "mediaId": "1866772599994454016",
+              "remoteUrl": "https://pbs.twimg.com/media/GegbygMaEAAL143.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=rF8EL2nMXgU",
+          "summary": "【Birthday】ไฮโซสาวเจ้าของร้านลับ — ไลฟ์วันเกิดบนช่อง Mild-R",
+          "relation": "birthday-livestream",
+          "images": [
+            {
+              "path": "/assets/events/archive/mild-r-birthday-2024/youtube-rF8EL2nMXgU-maxresdefault.jpg",
+              "width": 1280,
+              "height": 720,
+              "bytes": 152634,
+              "sha256": "78e06ffe7deed1a7f68ef22f18aeac1647f115a0d36d36f9bc2b1d60b403e3da",
+              "kind": "video-thumbnail",
+              "mediaId": "rF8EL2nMXgU",
+              "remoteUrl": "https://i.ytimg.com/vi/rF8EL2nMXgU/maxresdefault.jpg"
+            }
+          ],
+          "startedAt": "2024-12-12T20:00:36+07:00",
+          "endedAt": "2024-12-12T23:52:50+07:00",
+          "timeSource": "YouTube liveBroadcastDetails metadata, converted to Asia/Bangkok"
+        }
+      ],
+      "suggestedCover": "/assets/events/archive/mild-r-birthday-2024/youtube-rF8EL2nMXgU-maxresdefault.jpg",
+      "livestreamUrl": "https://www.youtube.com/watch?v=rF8EL2nMXgU",
+      "eventDate": "2024-12-12",
+      "livestreamStartedAt": "2024-12-12T20:00:36+07:00",
+      "livestreamEndedAt": "2024-12-12T23:52:50+07:00"
+    },
+    {
+      "id": "mild-r-birthday-2025",
+      "title": "Mild-R Birthday 2025",
+      "collectionType": "event",
+      "imageCount": 5,
+      "sources": [
+        {
+          "url": "https://x.com/PixelaProject/status/1999468604799221785",
+          "publishedAt": "2025-12-12T20:17+07:00",
+          "text": "สินค้าวันเกิด Mild-R พร้อมเสกคำอธิษฐานให้ทุกคนแล้วค่ะ ✨ 🌟\n\nhttps://www.vforgeshop.com/c/234\n.\n💫 Mild-R Birthday 2025 - Complete Set\n.\nเซตละ 1990 บาท\nรายละเอียดภายในเซตประกอบไปด้วย\n.\n① Mild-R Birthday 2025 - Voice Pack\nชิ้นละ 350 บาท\nเซตเสียงของ Mild-R มาในรูปแบบ Flash Drive พร้อมสติกเกอร์อาร์ตวันเกิด\n.\n② Mild-R Birthday 2025 - Beep Beep Keychain\nชิ้นละ 265 บาท\nพวงกุญแจหมอนไดคัท บีบมีเสียง\nขนาด 12 cm\n.\n③ Mild-R Birthday 2025 - Card Holder\nชิ้นละ 300 บาท\nป้ายคล้องคอ\nขนาด 7x11 cm\n.\n④ Mild-R Birthday 2025 - Acrylic Light Standee\nชิ้นละ 1090 บาท\nอะคริลิคสแตนดี้ฐานไฟ\nขนาด 16 cm\n.\n⑤ Mild-R Birthday 2025 - Postcard\nโปสการ์ดสุดพิเศษแทนคำขอบคุณจาก Mild-R\n.\n.\n.\nเปิดพรีออเดอร์ 12/12/2025 - 12/01/2026\nสินค้าเป็นสินค้า Pre-Order จะเริ่มจัดส่งในช่วงเดือนกุมภาพันธ์ปี 2026 เป็นต้นไป\n*สินค้าในแต่ละออเดอร์ จะถูกส่งจัดส่งพร้อมกันหมด โดยจะจัดส่งเมื่อสินค้าทุกชิ้นในออเดอร์พร้อมจัดส่ง\n*กรุณาแยกออเดอร์ในการสั่งซื้อ หากต้องการให้สินค้าที่พร้อมจัดส่ง จัดส่งมาก่อน\n*ภาพสินค้าเป็นเพียงแค่ภาพตัวอย่างเท่านั้น สินค้าจริงอาจมีความแตกต่างจากภาพตัวอย่าง\n*สินค้าจัดส่งภายในประเทศไทยเท่านั้น These items are ONLY AVAILABLE in Thailand\n\n#MildReverse #MildRBirthday2025",
+          "images": [
+            {
+              "path": "/assets/events/archive/mild-r-birthday-2025/1999468604799221785-01-1999468204587151360.jpg",
+              "width": 1920,
+              "height": 1080,
+              "bytes": 1372148,
+              "sha256": "4503bdce424a69e22d379691ab951157cdbb47ef89706ccd55cfbba3a77b7d16",
+              "kind": "post-image",
+              "mediaId": "1999468204587151360",
+              "remoteUrl": "https://pbs.twimg.com/media/G7-JvQoa8AAVioA.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/MildRWorldEnd/status/1998331795629314449",
+          "publishedAt": "2025-12-09T17:00+07:00",
+          "text": "【Teaser Mild-R's Birthday】คำอธิษฐานที่ฝากถึงดวงดาว\n.\nhttps://youtu.be/ilowFP9Uw3o\n.\n#MildRBirthday2025",
+          "relation": "birthday-teaser",
+          "relatedVideoUrl": "https://www.youtube.com/watch?v=ilowFP9Uw3o",
+          "images": [
+            {
+              "path": "/assets/events/archive/mild-r-birthday-2025/1998331795629314449-01-1997966625929306112.jpg",
+              "width": 1920,
+              "height": 1080,
+              "bytes": 789380,
+              "sha256": "fe3ade5974739110adadcc488cfa3c16f1a23e17e0386ae336f55e2580c5c698",
+              "kind": "post-image",
+              "mediaId": "1997966625929306112",
+              "remoteUrl": "https://pbs.twimg.com/media/G7o0D4OaIAAJ9r_.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=ilowFP9Uw3o",
+          "summary": "【Teaser Mild-R's Birthday】คำอธิษฐานที่ฝากถึงดวงดาว — วิดีโอทีเซอร์บนช่อง Mild-R",
+          "relation": "birthday-teaser-video",
+          "images": [
+            {
+              "path": "/assets/events/archive/mild-r-birthday-2025/youtube-ilowFP9Uw3o-maxresdefault.jpg",
+              "width": 1280,
+              "height": 720,
+              "bytes": 102208,
+              "sha256": "0f9d53c9f122adf0a15e0341d600ef0ca64b97ef5398d6e46b4a81488d3d8c34",
+              "kind": "video-thumbnail",
+              "mediaId": "ilowFP9Uw3o",
+              "remoteUrl": "https://i.ytimg.com/vi/ilowFP9Uw3o/maxresdefault.jpg"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/MildRWorldEnd/status/1999071672373309742",
+          "publishedAt": "2025-12-11T18:00+07:00",
+          "text": "ชวนมองปรากฎการณ์ดาวตก! 🌟☄\nที่มาพร้อมกับแสงสว่างแห่งคำอธิฐาน 💫\n.\n📍มาพบกัน : https://youtube.com/live/GKeJI4bcEXk\n.\n#MildRBirthday2025",
+          "relation": "birthday-livestream-announcement",
+          "relatedVideoUrl": "https://www.youtube.com/watch?v=GKeJI4bcEXk",
+          "images": [
+            {
+              "path": "/assets/events/archive/mild-r-birthday-2025/1999071672373309742-01-1997968337905807361.jpg",
+              "width": 1080,
+              "height": 1920,
+              "bytes": 949510,
+              "sha256": "18042aea47bc93bcf98a15fedb48e3ebf6ea607c9ebfb0a2bd43ab63866fde3b",
+              "kind": "post-image",
+              "mediaId": "1997968337905807361",
+              "remoteUrl": "https://pbs.twimg.com/media/G7o1nh1acAEMEO2.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=GKeJI4bcEXk",
+          "summary": "【Mild-R's Birthday 2025】แสงของดวงดาวจะมอบปาฏิหาริย์ให้กับคุณ — ไลฟ์วันเกิดบนช่อง Mild-R",
+          "relation": "birthday-livestream",
+          "images": [
+            {
+              "path": "/assets/events/archive/mild-r-birthday-2025/youtube-GKeJI4bcEXk-maxresdefault.jpg",
+              "width": 1280,
+              "height": 720,
+              "bytes": 129091,
+              "sha256": "d1972fca57cf2fa2d15a10799ca18eee148826a586f0f368b5e53dc6dfbdba68",
+              "kind": "video-thumbnail",
+              "mediaId": "GKeJI4bcEXk",
+              "remoteUrl": "https://i.ytimg.com/vi/GKeJI4bcEXk/maxresdefault.jpg"
+            }
+          ],
+          "startedAt": "2025-12-12T20:01:33+07:00",
+          "endedAt": "2025-12-13T00:52:33+07:00",
+          "timeSource": "YouTube liveBroadcastDetails metadata, converted to Asia/Bangkok"
+        }
+      ],
+      "suggestedCover": "/assets/events/archive/mild-r-birthday-2025/youtube-GKeJI4bcEXk-maxresdefault.jpg",
+      "livestreamUrl": "https://www.youtube.com/watch?v=GKeJI4bcEXk",
+      "eventDate": "2025-12-12",
+      "livestreamStartedAt": "2025-12-12T20:01:33+07:00",
+      "livestreamEndedAt": "2025-12-13T00:52:33+07:00"
+    },
+    {
+      "id": "mild-r-debut-2024",
+      "title": "เตรียมตัวรับมือกับภัยพิบัติระดับโลกแตก",
+      "collectionType": "event",
+      "primarySourceUrl": "https://www.facebook.com/pixelaproject/posts/pfbid0mj9e27mvWPXKhyEyk2ytWMWuaD4Rraei6P43MjjqEMaZ1UPeVAUyrE38bs9HR1ibl",
+      "imageCount": 6,
+      "sources": [
+        {
+          "url": "https://x.com/PixelaProject/status/1790660066695323982",
+          "publishedAt": "2024-05-15T15:26+07:00",
+          "text": "ภัยพิบัติระดับ Virtual Youtuber ได้ถือกำเนิดขึ้นแล้ว!\nช่องทางติดตามน้องๆและวันเวลาเดบิวต์ 👇👇👇\n\n21 พฤษภาคม 2567\n🔹18.00 น. : @AMIWorldEnd :\nhttps://www.youtube.com/@AMIWorldEnd\n🔹20.00 น. :  @XonebuWorldEnd :\nhttps://www.youtube.com/@XonebuWorldEnd\n\n22 พฤษภาคม 2567\n🔹18.00 น. :  @TsururuWorldEnd  :\nhttps://www.youtube.com/@TsururuWorldEnd\n🔹20.00 น. :  @MildRWorldEnd :\nhttps://www.youtube.com/@MildRWorldEnd\n\n23 พฤษภาคม 2567\n🔹18.00 น. : @DebirunWorldEnd  : https://www.youtube.com/@DebirunWorldEnd\n🔹20:00 น. :  @AshyraWorldEnd  : https://www.youtube.com/@AshyraWorldEnd\n\nรวมลิงค์ไลฟ์เดบิวต์ 👇👇👇 https://youtube.com/playlist?list=PL6sdtVvrawnU_WP7VtLVzkmHJQY17uxC7&si=7xst_XeRg7FjbxXe",
+          "images": [
+            {
+              "path": "/assets/events/archive/mild-r-debut-2024/1790660066695323982-01-1790652546845229056-thumbnail.jpg",
+              "width": 1200,
+              "height": 675,
+              "bytes": 84515,
+              "sha256": "311871edaa495e7fd32eac1e18dc99451c6eb04ea03a729153e2820039b464ba",
+              "kind": "video-thumbnail",
+              "mediaId": "1790652546845229056",
+              "remoteUrl": "https://pbs.twimg.com/ext_tw_video_thumb/1790652546845229056/pu/img/5w1Y74AcCi83WRgK.jpg"
+            }
+          ]
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=kNcWzy66pP0",
+          "text": "【Debut】แหม จะให้เค้าจุ๊บตรงไหนดีคะ — Mild-R Ch. Lumina-World-End; official debut livestream included in the Pixela Official World End debut playlist",
+          "images": [
+            {
+              "path": "/assets/events/archive/mild-r-debut-2024/youtube-kNcWzy66pP0-maxresdefault.jpg",
+              "width": 1280,
+              "height": 720,
+              "bytes": 129750,
+              "sha256": "7c013c88e811d54c135da09bee6f43cc07c1284927229f580e043c77f0f5c412",
+              "kind": "video-thumbnail",
+              "mediaId": "kNcWzy66pP0",
+              "remoteUrl": "https://i.ytimg.com/vi/kNcWzy66pP0/maxresdefault.jpg"
+            }
+          ]
+        },
+        {
+          "url": "https://www.facebook.com/pixelaproject/posts/pfbid022XS1UtEiZaKgVcTJspyW4F7shaB2D2UxP4QpCPoYgcMW2PPgdso2GTnkyV5BRzcyl",
+          "publishedOn": "2024-05-16",
+          "summary": "โพสต์คอนเซปต์ World End x FAMILY ปฏิบัติการลับครอบครัวโลกแตก พร้อมภาพสมาชิกทั้งหกคนรวม Mild-R",
+          "images": [
+            {
+              "path": "/assets/events/archive/mild-r-debut-2024/facebook-world-end-family-2024.jpg",
+              "width": 1080,
+              "height": 1512,
+              "bytes": 271411,
+              "sha256": "030bb727d834e14faa69577b409e18f285b4c7d6b293e40197983176ab31ba7d",
+              "kind": "post-image",
+              "remoteUrl": "https://scontent.fbkk6-2.fna.fbcdn.net/v/t39.30808-6/490574612_1302608021428058_6834973420260600076_n.jpg?stp=cp6_dst-jpg_tt6&cstp=mx1463x2048&ctp=s1080x2048&_nc_cat=108&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=cae128&_nc_ohc=ENcVA6aVvVUQ7kNvwHx6JsO&_nc_oc=AdpE-wOrZm1xh30wH1kVKo1_a7giXb2AwV-lmO_vfEv4iqk23ahUada4wgAIlxHDhRE&_nc_zt=23&_nc_ht=scontent.fbkk6-2.fna&_nc_gid=NWFj8Cx5VAgxSVMrhEevWg&_nc_ss=7020f&oh=00_AQP2VtOjvIIkyoZjw411xcsUaOpHr2ZLuJohseXU3I4s5g&oe=6AC50BBF"
+            }
+          ],
+          "relation": "launch-context"
+        },
+        {
+          "url": "https://www.facebook.com/pixelaproject/posts/pfbid0mj9e27mvWPXKhyEyk2ytWMWuaD4Rraei6P43MjjqEMaZ1UPeVAUyrE38bs9HR1ibl",
+          "publishedOn": "2024-05-16",
+          "summary": "ประกาศตารางไลฟ์เดบิวต์ World End วันที่ 21–23 พฤษภาคม 2024 โดย Mild-R เดบิวต์วันที่ 22 พฤษภาคม เวลา 20:00 น.",
+          "text": "เตรียมตัวรับมือกับภัยพิบัติระดับโลกแตก การปรากฏตัวของพวกเธอที่มาพร้อมกับความน่ารัก เท่ห์ นุ่มฟู เซ็กซี่ เบียว และตลก จะมาทำให้ 1 วันของคุณไม่เหมือนเดิมอีกต่อไป 🌎",
+          "images": [
+            {
+              "path": "/assets/events/archive/mild-r-debut-2024/facebook-debut-schedule-2024.jpg",
+              "width": 1920,
+              "height": 1080,
+              "bytes": 379418,
+              "sha256": "f641c632c3c7c77d07a36a67a9fd3d78547caf1b853ab96939dacc12904e06f0",
+              "kind": "post-image",
+              "remoteUrl": "https://scontent.fbkk6-2.fna.fbcdn.net/v/t39.30808-6/490773958_1302607891428071_3772350207886676852_n.jpg?stp=cp6_dst-jpg_tt6&cstp=mx1920x1080&ctp=s1920x1080&_nc_cat=107&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=cae128&_nc_ohc=jc29BqvPqmUQ7kNvwE32Pld&_nc_oc=Adoe5i6w4M6WVAFyJZHcJoYR3oesWh7Ea6fWHSftBH8x1dhCJylt4WNjKSHQZ55GRxY&_nc_zt=23&_nc_ht=scontent.fbkk6-2.fna&_nc_gid=mCaAzjQdCrGmF7CXBYd-kA&_nc_ss=7020f&oh=00_AQOC5f4gDP2x011KIC1zgYoysmRWteWoJi0d3DzI5HxBbw&oe=6AC50F71"
+            }
+          ],
+          "relation": "debut-schedule"
+        },
+        {
+          "url": "https://www.facebook.com/pixelaproject/posts/pfbid02uLMh5g1Fgp8D7WKVRo4JzhZJ5GdRi1ukcu487tNUUD71U1W3jqEG3R1zraEdJDpTl",
+          "publishedOn": "2024-05-20",
+          "summary": "ภาพโปสเตอร์ตารางเดบิวต์ธีมภาพยนตร์ มีชื่อ X-MILD วันที่ 22 พฤษภาคม เวลา 20:00 น.",
+          "images": [
+            {
+              "path": "/assets/events/archive/mild-r-debut-2024/facebook-debut-movie-2024.jpg",
+              "width": 1080,
+              "height": 1080,
+              "bytes": 187921,
+              "sha256": "a62bbe0bf619511b23828d00222df980d38ee967be96029802deea60df2b03ff",
+              "kind": "post-image",
+              "remoteUrl": "https://scontent.fbkk7-3.fna.fbcdn.net/v/t39.30808-6/490515744_1302700821418778_6064698844202458820_n.jpg?stp=cp6_dst-jpg_tt6&cstp=mx1200x1200&ctp=s1080x2048&_nc_cat=105&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=cae128&_nc_ohc=sMSnn6TJeYoQ7kNvwHU2O4c&_nc_oc=AdqU4RMZylSndBDjAZQHgYWPI1Sto2-Y4CqbxGuDpvVtMZJPVfCuGKmTIThfFuzBoKY&_nc_zt=23&_nc_ht=scontent.fbkk7-3.fna&_nc_gid=3l1uYZoduwwzgZnhbP3cJA&_nc_ss=7020f&oh=00_AQPq8Xz0eU40HspaO1O--h_t0CzJFXLcWdxJpIgD67S83A&oe=6AC4F606"
+            }
+          ],
+          "relation": "debut-schedule"
+        },
+        {
+          "url": "https://www.facebook.com/pixelaproject/posts/pfbid07xPrxbnuQtfhnjKCexL8UDh3n3LEeex3fYYmC9gtdLywQJgUSWTSo5rc2yXdicLrl",
+          "publishedOn": "2024-05-23",
+          "summary": "สินค้า Goods Debut ของ Pixela World End เปิดพรีออเดอร์ 23 พฤษภาคม ถึง 24 มิถุนายน 2024 มีสินค้าและเซตของสมาชิกทั้งหกรวม Mild-R",
+          "images": [
+            {
+              "path": "/assets/events/archive/mild-r-debut-2024/facebook-debut-goods-2024.jpg",
+              "width": 1920,
+              "height": 1080,
+              "bytes": 486197,
+              "sha256": "dae8bbce661f192d05071ba3fbe51faccb9bb6ec611eb17efdc7bcb8f705d9b3",
+              "kind": "post-image",
+              "remoteUrl": "https://scontent.fbkk6-1.fna.fbcdn.net/v/t39.30808-6/490704529_1302715448083982_2935093858987267186_n.jpg?stp=dst-jpg_tt6&cstp=mx1920x1080&ctp=s1920x1080&_nc_cat=108&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=cae128&_nc_ohc=lG5oNXVPQ7cQ7kNvwGt9MBE&_nc_oc=Adp47Rl2m6PKWJtysItzzvRGIJioA8ZotzCrHX4a7pgEx6I2mg7AcE3jTmuSIun8vz4&_nc_zt=23&_nc_ht=scontent.fbkk6-1.fna&_nc_gid=b21t346uICp-AQKYcd7Kfg&_nc_ss=7020f&oh=00_AQO1vAbkKWnbxk_J-ii2WpL_SSomBdCYn3tBpDafEkkFuA&oe=6AC4F3B1"
+            }
+          ],
+          "aliases": [
+            "https://www.facebook.com/share/p/1ACbtZkbyb/"
+          ],
+          "relation": "debut-goods"
+        }
+      ],
+      "suggestedCover": "/assets/events/archive/mild-r-debut-2024/facebook-debut-schedule-2024.jpg"
+    },
+    {
+      "id": "other-announcements",
+      "title": "ประกาศทั่วไปที่ยังไม่จัดเป็นอีเวนต์",
+      "collectionType": "supporting",
+      "imageCount": 1,
+      "sources": [
+        {
+          "url": "https://x.com/PixelaProject/status/2006410270080729129",
+          "publishedAt": "2026-01-01T00:01+07:00",
+          "text": "🎊𝗛𝗮𝗽𝗽𝘆 𝗡𝗲𝘄 𝗬𝗲𝗮𝗿 𝟮𝟬𝟮𝟲🎊\n\nสวัสดีปีใหม่ ขอให้ปีนี้เป็นปีที่เต็มไปด้วยความสุขเป็นปีที่สดใสและราบรื่นของทุกคน ปีนี้พวกเราชาว Pixela ก็ขอฝากตัวด้วยนะคะ 🎆🎉\n\n#pixela #pixelaproject",
+          "images": [
+            {
+              "path": "/assets/events/archive/other-announcements/2006410270080729129-01-2006299015328264192.jpg",
+              "width": 1920,
+              "height": 1080,
+              "bytes": 1853065,
+              "sha256": "5e887672f91c74132573c88f761ace3f48d600063cf96bd989352620886ccfe7",
+              "kind": "post-image",
+              "mediaId": "2006299015328264192",
+              "remoteUrl": "https://pbs.twimg.com/media/G9fOUxnbcAAu4Q9.jpg?name=orig"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pastry-fantasy-2024",
+      "title": "Pastry Fantasy 2024",
+      "collectionType": "event",
+      "imageCount": 1,
+      "suggestedCover": "/assets/events/archive/pastry-fantasy-2024/facebook-pastry-fantasy-2024.jpg",
+      "eventDate": "2024-06-30",
+      "sources": [
+        {
+          "url": "https://www.facebook.com/pixelaproject/posts/pfbid0HjddFFtKN2YAUYPgoWR1azFSnZyasJWa1XrjuzrtV3adAR1na2rQtv8RQofFDG7Gl",
+          "aliases": [
+            "https://www.facebook.com/share/p/1CBF4JkqKU/"
+          ],
+          "publishedOn": "2024-07-14",
+          "text": "\" Pixela World End \" Pastry Fantasy Vtuber Concert Persented by Farmhouse\n.\nhttps://youtu.be/zLHeiuFDo4c\n#SahagroupFairandFest #PastryFantasy #VTuberConcert #PixelaWorldEnd",
+          "relatedVideoUrl": "https://www.youtube.com/watch?v=zLHeiuFDo4c",
+          "images": [
+            {
+              "path": "/assets/events/archive/pastry-fantasy-2024/facebook-pastry-fantasy-2024.jpg",
+              "width": 1920,
+              "height": 1080,
+              "bytes": 291753,
+              "sha256": "a7deb3190cc9c90811029e8da2edcbfc5a5506842b25178676645e1652eed385",
+              "kind": "post-image"
+            }
+          ]
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=zLHeiuFDo4c",
+          "publishedOn": "2024-07-13",
+          "summary": "คลิปย้อนหลังเวที Pastry Fantasy VTuber Concert ในงานสหกรุ๊ปแฟร์ แอนด์ เฟส วันที่ 30 มิถุนายน 2567 โดย Pixela World End ทั้ง 6 คน รวม Mild-R",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "pastry-fantasy-2025",
+      "title": "Pastry Fantasy 2025",
+      "collectionType": "event",
+      "imageCount": 2,
+      "sources": [
+        {
+          "url": "https://x.com/PixelaProject/status/1934582185509413360",
+          "publishedAt": "2025-06-16T19:01+07:00",
+          "text": "🎤 เตรียมตัวไปสนุกกับ Stage Show จาก Pixela ภายในงานสหกรุ๊ป แฟร์ แอนด์ เฟส ครั้งที่ 29  อย่าลืมมาให้กำลังใจและชมโชว์สุดพิเศษ ครั้งนี้จัดใหญ่ จัดเต็มแน่นอน🍞🎤🎼 \n.\n📍 พบกันในงาน สหกรุ๊ป แฟร์ แอนด์ เฟส ครั้งที่ 29\n🗓️ วันอาทิตย์ที่ 29 มิถุนายน 2568\n🕑 เวลา 14.00 น.\n📌 เวทีกลาง Hall",
+          "images": [
+            {
+              "path": "/assets/events/archive/pastry-fantasy-2025/1934582185509413360-01-1934582173677633536.jpg",
+              "width": 1080,
+              "height": 1080,
+              "bytes": 279172,
+              "sha256": "c94341484a14158cfee72cbfe67768705c097ecbc2197f488309c06c87536b21",
+              "kind": "post-image",
+              "mediaId": "1934582173677633536",
+              "remoteUrl": "https://pbs.twimg.com/media/GtkEPLLbwAAKNw0.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/1938917444153942495",
+          "publishedAt": "2025-06-28T18:08+07:00",
+          "text": "✨ พรุ่งนี้แล้ว! มาร่วมสร้างความสนุกสนานในคอนเสิร์ตกับพวกเราได้ที่ภายในงานสหกรุ๊ป แฟร์ แอนด์ เฟส ครั้งที่ 29  อย่าลืมมาให้กำลังใจแล้วก็ชมโชว์สุดพิเศษจากน้อง ๆ กันนะคะ ❤\n.\n📍 สถานที่ ไบเทคบางนา ฮอลล์ 98-100\n🗓️ วันอาทิตย์ที่ 29 มิถุนายน 2568\n🕑 เวลา 14.00 น.\n📌 เวทีกลาง Hall 100",
+          "images": [
+            {
+              "path": "/assets/events/archive/pastry-fantasy-2025/1938917444153942495-01-1938917433923809280.jpg",
+              "width": 1080,
+              "height": 1080,
+              "bytes": 274935,
+              "sha256": "36dc8621fba97b52ee26dc9db3310acc25ef16ac8e3fb03e08f0720a48341b21",
+              "kind": "post-image",
+              "mediaId": "1938917433923809280",
+              "remoteUrl": "https://pbs.twimg.com/media/GuhrIiHXMAAVbLF.jpg?name=orig"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pastry-fantasy-2026",
+      "title": "Pastry Fantasy 2026",
+      "collectionType": "event",
+      "imageCount": 1,
+      "sources": [
+        {
+          "url": "https://x.com/PixelaProject/status/2067203058124407055",
+          "publishedAt": "2026-06-17T18:09+07:00",
+          "text": "เตรียมตัวรับความสนุกจากพวกเรา Pixela Project พร้อมแวะมา ช็อป ชิม และสนุกกันได้แบบจัดเต็ม กับ VTuber Concert \"Pastry Fantasy 2026\" ที่งานสหกรุ๊ป แฟร์ แอนด์ เฟส ครั้งที่ 30 ✨\n.\n📅 ในวันอาทิตย์ที่ 28 มิถุนายน 2569\n🕑 เวลา 14.00 น.\n📍 ณ เวทีกิจกรรมกลาง Hall 100\n📍 สหกรุ๊ป แฟร์ แอนด์ เฟส ครั้งที่ 30 🎊\n📍 สถานที่: ไบเทคบางนา ฮอลล์ 98-100\n📅 วันที่: 25-28 มิถุนายน 2569\n\n#สหกรุ๊ปแฟร์แอนด์เฟส #ขนมปังฟาร์มเฮ้าส์ #VTuberTH #VTuberConcert #PastryFantasy #pixlea",
+          "images": [
+            {
+              "path": "/assets/events/archive/pastry-fantasy-2026/2067203058124407055-01-2067202161747075072.jpg",
+              "width": 1200,
+              "height": 1500,
+              "bytes": 1263199,
+              "sha256": "d6dbf7f82e1d076d3a76843cfe0d3ce55b80beaa9e4169334f91fe20fe416a9e",
+              "kind": "post-image",
+              "mediaId": "2067202161747075072",
+              "remoteUrl": "https://pbs.twimg.com/media/HLAtaeHaoAAgGrI.jpg?name=orig"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pixela-goose-goose-duck-2024",
+      "title": "Pixela Goose Goose Duck 2024",
+      "collectionType": "event",
+      "imageCount": 2,
+      "suggestedCover": "/assets/events/archive/pixela-goose-goose-duck-2024/youtube-goMSp5-27L8-maxresdefault.jpg",
+      "sources": [
+        {
+          "url": "https://www.facebook.com/pixelaproject/posts/pfbid0Eyy52C6uvevRiSgxxEWzP2aPC52VcYxct9tmRudygSqD1g1moxhLBMX2nrsYjGyVl",
+          "publishedOn": "2024-06-05",
+          "summary": "ศึกชิงเจ้า Goose Goose Duck วันที่ 6 มิถุนายน 2024 เวลา 20:00 น. พร้อมลิงก์เพลย์ลิสต์ไลฟ์ของ Pixela",
+          "images": [
+            {
+              "path": "/assets/events/archive/pixela-goose-goose-duck-2024/facebook-goose-goose-duck-2024.jpg",
+              "width": 1080,
+              "height": 1512,
+              "bytes": 306802,
+              "sha256": "5e4e0513e182ebcc386dd4e2d731bd3b5bd9f2d28f893c497e4e335e1919b2dc",
+              "kind": "post-image",
+              "remoteUrl": "https://scontent.fbkk6-2.fna.fbcdn.net/v/t39.30808-6/490351251_1303078921380968_7871025564280330318_n.jpg?stp=dst-jpg_tt6&cstp=mx1463x2048&ctp=s1080x2048&_nc_cat=103&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=cae128&_nc_ohc=099uJe5ZOMEQ7kNvwGt8_za&_nc_oc=AdpyeQ82QmuwlQ-Ss7AmWZkVdpSl7b_zVMnWAgDGOVG0h9t_kNd4IiX3FEOs8Wxi-n4&_nc_zt=23&_nc_ht=scontent.fbkk6-2.fna&_nc_gid=Ea_ez7Lf3Z3ReQRJP4OaUg&_nc_ss=7020f&oh=00_AQN-3cV1ylmdf8WvNIQSwZ0OloSjTr3L1GsZRh2sJbiuMw&oe=6AC510F3"
+            }
+          ]
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=goMSp5-27L8",
+          "summary": "【Goose Goose Duck】ค่ายกระต่าย กลายเป็นเป็ด ft.Pixela — ไลฟ์จากช่อง Mild-R ในเพลย์ลิสต์ Pixela Goose Goose Duck",
+          "images": [
+            {
+              "path": "/assets/events/archive/pixela-goose-goose-duck-2024/youtube-goMSp5-27L8-maxresdefault.jpg",
+              "width": 1280,
+              "height": 720,
+              "bytes": 210660,
+              "sha256": "17cbb3315ce20e77acadb2456151d3f511b16bca72bb6f0fb4c8876844c0200d",
+              "kind": "video-thumbnail",
+              "mediaId": "goMSp5-27L8",
+              "remoteUrl": "https://i.ytimg.com/vi/goMSp5-27L8/maxresdefault.jpg"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pixela-halloween-mild-r-2025",
+      "title": "Pixela Halloween 2025 — Mild-R",
+      "collectionType": "event",
+      "imageCount": 9,
+      "sources": [
+        {
+          "url": "https://x.com/PixelaProject/status/1973709144143413468",
+          "publishedAt": "2025-10-02T18:18+07:00",
+          "text": "🎃 เตรียมรับความหลอนกับกิจกรรม 𝐏𝐢𝐱𝐞𝐥𝐚 𝐇𝐚𝐥𝐥𝐨𝐰𝐞𝐞𝐧 𝟐𝟎𝟐𝟓 🎃\n\nอย่าลืมมารับความสนุกสุดป่วนจากกิจกรรม Pixela Halloween กันน้า✨ ระวังจะหลงรักพวกเราไม่รู้ตัว❤\n.\n#pixela #PixelaOfficial #PixelaHalloween2025",
+          "images": [
+            {
+              "path": "/assets/events/archive/pixela-halloween-mild-r-2025/1973709144143413468-01-1973708111656751104-thumbnail.jpg",
+              "width": 1200,
+              "height": 675,
+              "bytes": 18854,
+              "sha256": "e30037a9610c8892ddd082a7b0c061d31f96fce1d04b127ab174d55615d2dcfc",
+              "kind": "video-thumbnail",
+              "mediaId": "1973708111656751104",
+              "remoteUrl": "https://pbs.twimg.com/amplify_video_thumb/1973708111656751104/img/yWN0GEGoKH-baTpP.jpg"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/1975849271330308220",
+          "publishedAt": "2025-10-08T16:02+07:00",
+          "text": "🎃 Trick or Treat ! เตรียมรับความหลอนกับกิจกรรม 𝗣𝗶𝘅𝗲𝗹𝗮 𝗛𝗮𝗹𝗹𝗼𝘄𝗲𝗲𝗻 𝟮𝟬𝟮𝟱 🎃 รับการ์ดสุดพิเศษในธีมฮาโลวีน\n.\n🍬 สามารถร่วมสนุกได้ด้วยการโดเนทขั้นต่ำ 150 บาท และ 350 บาท ในไลฟ์ 𝗛𝗮𝗹𝗹𝗼𝘄𝗲𝗲𝗻 ของTalent Pixela ในช่วงระยะเวลา 19 - 31 ต.ค. 2568 (ต้องเป็นการโดเนทภายในวันที่มีไลฟ์ธีมฮาโลวีนของ Talent ช่องนั้นเท่านั้น)\n🍬 เงื่อนไขการโดเนท\n▪️ Donate 150 บาท : รับการ์ด Chibi PVC ระดับ R 1 ใบ ได้ลาย Talent จากในช่องนั้นๆ ที่โดเนท\n▪ Donate 350 บาท : รับซองสุ่มการ์ด 1 ซอง ใน 1 ซองมีการ์ด 2 ใบ (ภายในมีโอกาสสุ่มการ์ดระดับ SR SSR (มีลายเซ็น Digital) และ UR (มีข้อความพิเศษพร้อมลายเซ็น Digital) สุ่มลายจาก Talent ทั้งค่าย Pixela!\n🍬 นับเฉพาะยอดโดเนทขั้นต่ำ ครั้งละ 150 หรือ 350 บาท เท่านั้นถึงนับยอด\nตัวอย่าง:\n▪ นาย A โดเนท 150 บาท(รอบที่ 1 )  + 150 บาท(รอบที่ 2 ) + 150 บาท(รอบที่3) รวม 450 บาท แต่จะได้ การ์ดระดับ R แบบธรรมดาไม่มีสุ่มลายเซ็นและข้อความทั้งหมด 3 ใบ\n▪️ หากนาย A โดเนทครั้งละ 350 บาทขึ้นไป จะได้รับซองสุ่มการ์ด 1 ซอง ต่อการโดเนท และหากโดเนท 350 บาท 2 ครั้ง จะได้ซองสุ่มการ์ด 2 ซอง ซึ่งมีโอกาสลุ้นรับการ์ดลายเซ็นดิจิตอลและข้อความพิเศษจาก Talent\n🍬 อย่าลืมแคปหน้าจอหรือหลักฐานการโดเนทไว้ เพื่อมากรอกลิงก์แบบฟอร์มอีกที พร้อมกับที่อยู่ในการจัดส่งการ์ด\n🍬 ลิงก์แบบฟอร์มจะโพสลงใน Social Media ของ Talent ที่ร่วมกิจกรรมนี้ 1 วันหลังจากวันไลฟ์\n🍬 สินค้าจัดส่งเฉพาะภายในประเทศไทยเท่านั้น\n.\nแล้วอย่าลืมมารับความสนุกสุดป่วนจากบ้าน Pixela กันน้า✨\n.\n#pixela #PixelaOfficial #PixelaHalloween2025",
+          "images": [
+            {
+              "path": "/assets/events/archive/pixela-halloween-mild-r-2025/1975849271330308220-01-1975834629342154752.jpg",
+              "width": 1080,
+              "height": 1080,
+              "bytes": 208654,
+              "sha256": "599f6d8a85a7c6e8692952d9b2cd4108dc2906a299d94e3b2d3d7e353a72047a",
+              "kind": "post-image",
+              "mediaId": "1975834629342154752",
+              "remoteUrl": "https://pbs.twimg.com/media/G2uTIIDa0AAM173.jpg?name=orig"
+            },
+            {
+              "path": "/assets/events/archive/pixela-halloween-mild-r-2025/1975849271330308220-02-1975834656294756352.jpg",
+              "width": 1080,
+              "height": 1080,
+              "bytes": 223667,
+              "sha256": "4a04f83e25f2d6d90198574d294cd4045204a9ecc5e2b671949e20b0e52500de",
+              "kind": "post-image",
+              "mediaId": "1975834656294756352",
+              "remoteUrl": "https://pbs.twimg.com/media/G2uTJsda4AAOqvk.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/1982784223275790534",
+          "publishedAt": "2025-10-27T19:19+07:00",
+          "text": "🎃 𝗣𝗶𝘅𝗲𝗹𝗮 𝗛𝗮𝗹𝗹𝗼𝘄𝗲𝗲𝗻 𝟮𝟬𝟮𝟱 🎃 ที่นี่เราไว้ใจใครไม่ได้!\n\n👻การรวมตัวของคนขี้แกล้ง เอ้ย คนสุดน่ารัก และภารกิจตามหาตัวผีที่แฝงตัวมาอยู่ในหมู่พวกเราในคืนสุดหลอน ใครกันแน่ที่พูดโกหกอยู่!\n\nมาร่วมตามหาสปายไปพร้อมกันได้ในวันที่ 31 ตุลาคมนี้ เวลา 18.00 น.\nทาง Youtube Channel : Pixela Official\n\n▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪\n\n#pixela #PixelaOfficial #PixelaHalloween2025",
+          "images": [
+            {
+              "path": "/assets/events/archive/pixela-halloween-mild-r-2025/1982784223275790534-01-1982783970275110912.jpg",
+              "width": 2480,
+              "height": 3508,
+              "bytes": 1101345,
+              "sha256": "8e5cc0c91f9949af98d295e66dcc00cb59bffd5af7cff84a98db5616d607d044",
+              "kind": "post-image",
+              "mediaId": "1982783970275110912",
+              "remoteUrl": "https://pbs.twimg.com/media/G4RDhAaWMAAMxl6.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/MildRWorldEnd/status/1983095569230025065",
+          "publishedAt": "2025-10-28T15:56+07:00",
+          "text": "🎃 𝗣𝗶𝘅𝗲𝗹𝗮 𝗛𝗮𝗹𝗹𝗼𝘄𝗲𝗲𝗻 𝟮𝟬𝟮𝟱 พร้อมเป็นผีสาวกันหรือยัง?\n.\n🍬 ร่วมสนุกได้ ด้วยการโดเนทขั้นต่ำ 150 บาท และ 350 บาท ในไลฟ์ Halloween ของ Mild-R  วันที่ 29 ต.ค. 2568 เวลา20.30 น.\n.\n#PixelaHalloween2025",
+          "images": [
+            {
+              "path": "/assets/events/archive/pixela-halloween-mild-r-2025/1983095569230025065-01-1983095560967217152.jpg",
+              "width": 1080,
+              "height": 1080,
+              "bytes": 240855,
+              "sha256": "6b3225d7aa1dd65bd15880266ab5067a6884462727b8b1f4a5917ade2ee2cb30",
+              "kind": "post-image",
+              "mediaId": "1983095560967217152",
+              "remoteUrl": "https://pbs.twimg.com/media/G4Ve5-Ma4AAG2aw.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/1984216582222967119",
+          "publishedAt": "2025-10-31T18:11+07:00",
+          "text": "👻 เหล่า Vtuber จาก Pixela Project พร้อมชวนทุกคนมา Trick or Treat! ด้วยกันแล้ว 🍭🎃\nมาฉลองฮาโลวีนไปพร้อมสินค้าสุดพิเศษจากพวกเรากันนะ~ ✨\n\nhttps://www.vforgeshop.com/\n.\n🕯️ Pixela Halloween 2025 - Complete Set\n.\nเซตละ 650 บาท\nรายละเอียดภายในเซตประกอบไปด้วย\n.\n① Pixela Halloween 2025 - Chibi Acrylic Figure\nชิ้นละ 259 บาท\nสแตนดี้อะคริลิคหนา 1 cm\nขนาด 6 cm\nมี 15 แบบ\n.\n② Pixela Halloween 2025 - Acrylic Keychain\nชิ้นละ 399 บาท\nพวงกุญแจอะคริลิค 2 ชิ้น\nขนาด 5 cm และ 9 cm\nมี 15 แบบ\n.\n.\n.\nเปิดพรีออเดอร์ 31/10/2025 - 01/12/2025\nสินค้าเป็นสินค้า Pre-Order จะเริ่มจัดส่งในช่วงเดือนมกราคมปี 2026 เป็นต้นไป\nสินค้าในแต่ละออเดอร์ จะถูกส่งจัดส่งพร้อมกันหมด โดยจะจัดส่งเมื่อสินค้าทุกชิ้นในออเดอร์พร้อมจัดส่ง\nกรุณาแยกออเดอร์ในการสั่งซื้อ หากต้องการให้สินค้าที่พร้อมจัดส่ง จัดส่งมาก่อน\nภาพสินค้าเป็นเพียงแค่ภาพตัวอย่างเท่านั้น สินค้าจริงอาจมีความแตกต่างจากภาพตัวอย่าง\n**สินค้าจัดส่งภายในประเทศไทยเท่านั้น These items are ONLY AVAILABLE in Thailand\n\n#pixela #PixelaOfficial #PixelaHalloween2025",
+          "images": [
+            {
+              "path": "/assets/events/archive/pixela-halloween-mild-r-2025/1984216582222967119-01-1984216082115436544.jpg",
+              "width": 1920,
+              "height": 1080,
+              "bytes": 1679099,
+              "sha256": "32a507d81042b6f10eb2d17ee812abedd3ad03ff598fc0671ebc5904e061ea11",
+              "kind": "post-image",
+              "mediaId": "1984216082115436544",
+              "remoteUrl": "https://pbs.twimg.com/media/G4laA4wboAA2VcN.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/1984216586950214133",
+          "publishedAt": "2025-10-31T18:11+07:00",
+          "text": "ตัวอย่างสินค้าเพิ่มเติม",
+          "images": [
+            {
+              "path": "/assets/events/archive/pixela-halloween-mild-r-2025/1984216586950214133-01-1984216305642487808.jpg",
+              "width": 1920,
+              "height": 1920,
+              "bytes": 1761208,
+              "sha256": "a9f6992a5fb876f3ce2d4eca3c2bed4a5d041c03642b211a194c422b394caac5",
+              "kind": "post-image",
+              "mediaId": "1984216305642487808",
+              "remoteUrl": "https://pbs.twimg.com/media/G4laN5dbwAABkyB.jpg?name=orig"
+            },
+            {
+              "path": "/assets/events/archive/pixela-halloween-mild-r-2025/1984216586950214133-02-1984216372533219328.jpg",
+              "width": 1920,
+              "height": 1920,
+              "bytes": 1888082,
+              "sha256": "c63c035a1f48651e6456e33c3a59d124cda2276f5d27c843586dc61741995807",
+              "kind": "post-image",
+              "mediaId": "1984216372533219328",
+              "remoteUrl": "https://pbs.twimg.com/media/G4laRypbUAAxUey.jpg?name=orig"
+            },
+            {
+              "path": "/assets/events/archive/pixela-halloween-mild-r-2025/1984216586950214133-03-1984216403600453632.jpg",
+              "width": 1920,
+              "height": 1920,
+              "bytes": 2006685,
+              "sha256": "73a6e65458c91065baf4ab2f6f1316768b5d66a1cd298e526f1b06ea077e9e05",
+              "kind": "post-image",
+              "mediaId": "1984216403600453632",
+              "remoteUrl": "https://pbs.twimg.com/media/G4laTmYbsAAoAzH.jpg?name=orig"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pixela-songkran-mild-r-2026",
+      "title": "Pixela Songkran 2026 — Mild-R",
+      "collectionType": "event",
+      "imageCount": 2,
+      "sources": [
+        {
+          "url": "https://x.com/PixelaProject/status/2033483412393357732",
+          "publishedAt": "2026-03-16T17:00+07:00",
+          "text": "💦 สงกรานต์ปีนี้ Pixela เตรียมอะไรบางอย่างไว้ให้ทุกคน!\n\nใครอยากรับ “ของขวัญพิเศษจากเหล่าทาเลนต์” เตรียมตัวให้พร้อมรอต้นเดือนเมษายนไว้เลย 👀✨\n\n📢 ติดตามประกาศเร็ว ๆ นี้!\n\n#pixela #PixelaOfficial #PixelaSongkran2026",
+          "images": [
+            {
+              "path": "/assets/events/archive/pixela-songkran-mild-r-2026/2033483412393357732-01-2033464360119709696.jpg",
+              "width": 1920,
+              "height": 1920,
+              "bytes": 420486,
+              "sha256": "e70134ba783990042a092c72e9fc49ad3e17724b03af9b65c3728dc588fc3c15",
+              "kind": "post-image",
+              "mediaId": "2033464360119709696",
+              "remoteUrl": "https://pbs.twimg.com/media/HDhRD9BaMAAJzu7.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/MildRWorldEnd/status/2041440860919709861",
+          "publishedAt": "2026-04-07T16:00+07:00",
+          "text": "🌊𝗣𝗶𝘅𝗲𝗹𝗮 𝗦𝗼𝗻𝗴𝗸𝗿𝗮𝗻 𝟮𝟬𝟮𝟲 มาให้ประแป้งซะดีๆ🩷\nร่วมสนุกด้วยการโดเนทขั้นต่ำ 150 และ 350 บ. ในไลฟ์ของ Mild-R วันที่ 8 เม.ย. 69 ✨\n💦  ฟอร์มจะโพสลงในช่อง Pixela Project หลังจบกิจกรรมทั้งหมด ยืนยันสิทธิ์ได้วันที่ 12-18 เม.ย. 69\n#PixelaSongkran2026 #MelonyApple",
+          "images": [
+            {
+              "path": "/assets/events/archive/pixela-songkran-mild-r-2026/2041440860919709861-01-2039933879914778624.jpg",
+              "width": 1200,
+              "height": 1200,
+              "bytes": 304800,
+              "sha256": "4bd105f5eab53b45ba18ac62a251001fa1b82a620ce34fd14182bc56f98b6b2b",
+              "kind": "post-image",
+              "mediaId": "2039933879914778624",
+              "remoteUrl": "https://pbs.twimg.com/media/HE9NDkWa0AAfa7T.jpg?name=orig"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pixela-valentine-2025",
+      "title": "Pixela Valentine 2025",
+      "collectionType": "event",
+      "imageCount": 3,
+      "sources": [
+        {
+          "url": "https://x.com/PixelaProject/status/1887788422598963278",
+          "publishedAt": "2025-02-07T16:00+07:00",
+          "text": "✨ 🥰 เตรียมเสิร์ฟความน่ารักแบบเต็มพิกัด กับกิจกรรม Pixela Valentine 2025 💝 🍫\n.\n💗 ที่ให้คุณสามารถร่วมสนุกได้ ด้วยการโดเนทขั้นต่ำ 100 บาท ในไลฟ์ Valentine ของสาว ๆ Pixela ในช่วงระยะเวลา 10-18 ก.พ. 2568\n💗 เพียงเท่านี้ก็ได้รับไปเลยโปสการ์ดสุดพิเศษ พร้อมข้อความหวาน ๆ จากสาว ๆ Pixela\n💗 ในกรณีที่ต้องการโปสการ์ดของสาว ๆ Pixela หลายคน ก็ยังสามารถไปโดเนทให้กับสาว ๆ หลายคนได้เช่นกันน้าา\n💗 แล้วก็อย่าลืมแคปหน้าจอหรือหลักฐานการโดเนทไว้ เพื่อมากรอกลิงก์แบบฟอร์มอีกที พร้อมกับที่อยู่ในการจัดส่งโปสการ์ดนะคะ\n💗 ลิงก์แบบฟอร์มจะโพสลงใน Social Media ของสาว ๆ Pixela ที่ร่วมกิจกรรมนี้ 1 วันหลังจากวันไลฟ์\n.\nแล้วอย่าลืมมาส่งความหวานและรับดาเมจความน่ารักจากสาว ๆ Pixela กันน้าาา รับรองว่าน่ารักกว่านี้ไม่มีอีกแล้ว! 😍 🫶🏻\n.\n#PixelaOfficial #PixelaValentine2025",
+          "images": [
+            {
+              "path": "/assets/events/archive/pixela-valentine-2025/1887788422598963278-01-1887767285760462848.jpg",
+              "width": 1080,
+              "height": 1080,
+              "bytes": 162214,
+              "sha256": "a015321551bcb54af54afa68816da4824bacb9b2bd2bfa90041e5542a91165d0",
+              "kind": "post-image",
+              "mediaId": "1887767285760462848",
+              "remoteUrl": "https://pbs.twimg.com/media/GjKyWDZbEAAu4mu.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/1887810199815438651",
+          "publishedAt": "2025-02-07T17:26+07:00",
+          "text": "💌 Q&A มาแล้วค่าา💌 \n.\n#PixelaOfficial #PixelaValentine2025",
+          "images": [
+            {
+              "path": "/assets/events/archive/pixela-valentine-2025/1887810199815438651-01-1887810190160146432.jpg",
+              "width": 1080,
+              "height": 1080,
+              "bytes": 197048,
+              "sha256": "fae0bd53e24424ed8516fa19849f21be30741aec3ca73d3663c38cbf03314be3",
+              "kind": "post-image",
+              "mediaId": "1887810190160146432",
+              "remoteUrl": "https://pbs.twimg.com/media/GjLZXavbsAA2BRW.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/MildRWorldEnd/status/1889932521577787653",
+          "publishedAt": "2025-02-13T14:00+07:00",
+          "text": "💗 คุณสามารถร่วมสนุกได้ ด้วยการโดเนทขั้นต่ำ 100 บาท ในไลฟ์ Valentine ของ Mild-R วันที่ 14 ก.พ. 2568 เวลา 19.00 น.\n💗 เพียงเท่านี้ก็ได้รับไปเลยโปสการ์ดสุดพิเศษ พร้อมข้อความหวาน ๆ จาก Mild-R\n💗 ลิงก์ฟอร์มจะโพสลงใน Social Media ของ Mild-R ภายใน 1 วันหลังไลฟ์\n.\n#PixelaValentine2025",
+          "images": [
+            {
+              "path": "/assets/events/archive/pixela-valentine-2025/1889932521577787653-01-GjpeoMGaIAQpGKk.jpg",
+              "width": 1080,
+              "height": 1080,
+              "bytes": 194266,
+              "sha256": "2e45ed8b50363605bcf01090ac76100241f0e06b45d6728ce7e4819f56d6d39c",
+              "kind": "post-image",
+              "mediaId": "GjpeoMGaIAQpGKk",
+              "remoteUrl": "https://pbs.twimg.com/media/GjpeoMGaIAQpGKk?format=jpg&name=orig"
+            }
+          ],
+          "relation": "mild-r-valentine-live"
+        }
+      ]
+    },
+    {
+      "id": "puyo-puyo-global-ranking-series-2026",
+      "title": "Puyo Puyo Global Ranking Series 2026",
+      "collectionType": "event",
+      "imageCount": 3,
+      "sources": [
+        {
+          "url": "https://x.com/PixelaProject/status/2063130913043784171",
+          "publishedAt": "2026-06-06T12:28+07:00",
+          "text": "🏆 เปิดรับสมัครแล้ววันนี้! สำหรับการแข่งขัน Puyo Puyo Global Ranking Series 2026\n✨ ชิงของรางวัลมูลค่ารวม 12,000 บาท\n📍เปิดรับสมัครวันที่ 6- 28 มิ.ย. 2569\nศึกครั้งนี้เปิดรับสมัครแฟนคลับของน้องๆ ร่วมเข้ามาเป็นหนึ่งในสมาชิกทีมของ\n@MildRWorldEnd\n@DebirunWorldEnd\n@HanabiLafy\n@TAKOPERO\nจำนวน 3 คนต่อ 1 ทีม โดยที่ทางทีมงานจะประกาศรายชื่อหลังจากปิดรับสมัคร\n\n🏆รางวัลชนะเลิศ : สแตนดี้สุด Limited ของ Vtuber ที่ชนะการเเข่งขันครั้งนี้\n🥈 รางวัลรองชนะเลิศอันดับที่ 1 : เหรียญเงินลายจิบิพิเศษ พร้อม clear card\n🥉 รางวัลรองชนะเลิศอันดับที่ 2 : เหรียญเงินลายจิบิพิเศษ\n💫 พิเศษสำหรับผู้เข้าร่วมกิจกรรม จะได้รับพวงกุญแจ Limited จากการแข่งขัน\n\n🏁 รอบ 8 ทีม (แข่ง Online)\n📅 วันที่ 4 ก.ค. 2569\n🕖 เวลา 17:00 น. เป็นต้นไป\n🏁 รอบ 4 ทีม (แข่ง Online)\n📅 วันที่ 5 ก.ค. 2569\n🕖 เวลา 17:00 น. เป็นต้นไป\n\nหมายเหตุ: หากมีการแอบอ้าง หรือคุณสมบัติไม่เป็นไปตามเงื่อนไขที่กำหนด จะถูกตัดสิทธิ์ทันที ทั้งนี้เงื่อนไขจะเป็นไปตามที่บริษัทกำหนด\n\nแล้วมาดูกันว่าทีมไหน ที่จะได้เป็นผู้ชนะในศึกครั้งนี้!\n\n#pixela #PixelaOfficial #PuyoNow #PR",
+          "images": [
+            {
+              "path": "/assets/events/archive/puyo-puyo-global-ranking-series-2026/2063130913043784171-01-2063130901920497664.jpg",
+              "width": 1200,
+              "height": 1200,
+              "bytes": 309198,
+              "sha256": "fea4d70a4cf8685f2c5efbe35c07263e3dae47908f1ee9534ead5fb8413e51d0",
+              "kind": "post-image",
+              "mediaId": "2063130901920497664",
+              "remoteUrl": "https://pbs.twimg.com/media/HKG2n9YaQAAj05j.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/MildRWorldEnd/status/2070492275478507927",
+          "publishedAt": "2026-06-26T20:00+07:00",
+          "text": "เกมนี้แบกไม่ไหว แต่อยากได้คนมาช่วยแบกจังเลยอ้า😘\nนอกจากได้จอยกัน มีของรางวัลแถมให้กับฮันนี่ที่เข้าร่วมด้วยน้า จะไม่มาเล่นกับเค้าจริง ๆ หรอ~\nใกล้หมดเขตแล้วด้วยตอนนี้ยังทันอยู่น้า อย่าลืมมาสมัครกันเยอะ ๆ นะคั้บบบ\nสมัครได้ที่ : https://forms.gle/KWGGz1Vir4izrha98\n#MildReverse #PuyoNow #PR",
+          "images": [
+            {
+              "path": "/assets/events/archive/puyo-puyo-global-ranking-series-2026/2070492275478507927-01-HLuTbkgaoAA96n8.jpg",
+              "width": 544,
+              "height": 680,
+              "bytes": 95907,
+              "sha256": "395c034707026a630cef820708f5ac0fe963ec2baed67d67623eafaab6cc65c1",
+              "kind": "post-image",
+              "mediaId": "HLuTbkgaoAA96n8",
+              "remoteUrl": "https://pbs.twimg.com/media/HLuTbkgaoAA96n8?format=jpg&name=orig"
+            }
+          ],
+          "relation": "mild-r-team-invitation"
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/2074002598160691595",
+          "publishedAt": "2026-07-06T12:28+07:00",
+          "text": "🏆 สิ้นสุดไปแล้วกับการแข่งขัน Puyo Puyo Champions : PGRS VLP VTuber Championship 🏆\n\nยินดีกับผู้ชนะในการแข่งขันครั้งนี้\n\n🏆 ทีม Hanabi Lafy\n🥈 ทีม Debirun\n🥉 ทีม T-Reina Ashyra\n\nขอขอบคุณผู้เข้าแข่งขันทุกท่าน และทาง Puyo Puyo Champions ที่สนับสนุนการแข่งดี ๆ แบบนี้ ♥️\n\n#pixela #PixelaOfficial #PuyoNow #PR",
+          "images": [
+            {
+              "path": "/assets/events/archive/puyo-puyo-global-ranking-series-2026/2074002598160691595-01-2074002183843180544.jpg",
+              "width": 1500,
+              "height": 1500,
+              "bytes": 645509,
+              "sha256": "54cd45f09a639f82d71532f8f0500e710bc5f905afff07b4c6075354ca43e87e",
+              "kind": "post-image",
+              "mediaId": "2074002183843180544",
+              "remoteUrl": "https://pbs.twimg.com/media/HMhV_2dbcAAwBjX.jpg?name=orig"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "related-livestreams-2024",
+      "title": "คอลแลบไลฟ์ที่เกี่ยวข้องในปี 2024",
+      "collectionType": "supporting",
+      "imageCount": 2,
+      "sources": [
+        {
+          "url": "https://x.com/PixelaProject/status/1842505006546595861",
+          "publishedAt": "2024-10-05T17:00+07:00",
+          "text": "ศัตรูจากนอกโลกหรือจะมาสู้ทีมเรา!\nงานนี้ World End กับ Mystic พร้อมลุย ขอจัดหนักเอเลี่ยนกันหน่อยเถอะ!\n\n📍ร่วมลุ้นพร้อมๆกันได้ทางช่อง Youtube ของแต่ละคนในวันจันทร์ที่ 7 ตุลาคมนี้ เวลา 20.30 น.",
+          "images": [
+            {
+              "path": "/assets/events/archive/related-livestreams-2024/1842505006546595861-01-1842098368744718339.jpg",
+              "width": 1276,
+              "height": 1920,
+              "bytes": 474046,
+              "sha256": "b8078cbea75ea1252651049a4049c00f588295db52a4f66ef3c0afb2ad2ba485",
+              "kind": "post-image",
+              "mediaId": "1842098368744718339",
+              "remoteUrl": "https://pbs.twimg.com/media/GZBytN5bAAM40TD.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/1857019075576144091",
+          "publishedAt": "2024-11-14T18:13+07:00",
+          "text": "\"ที่นี่เราไว้ใจใครไม่ได้\" 🔪🩸\nถ้าพลาดอาจโดนจัดการ ถ้าเผลออาจโดนแทงข้างหลัง ต้องระวังตัวทุกฝีก้าว แล้วมาร่วมตามหาคนร้ายไปพร้อม ๆ กัน ทางช่อง YouTube ของน้อง ๆ แต่ละคน ในวันศุกร์ ที่ 15 พฤศจิกายนนี้ เวลา 21.30 น.\n.\n#PixelaOfficial #AmongUs",
+          "images": [
+            {
+              "path": "/assets/events/archive/related-livestreams-2024/1857019075576144091-01-1856980500428320768.jpg",
+              "width": 1276,
+              "height": 1920,
+              "bytes": 552048,
+              "sha256": "b7e6faf09136f323639dc73eabc85d3bf58e1aa4a35f935115712dc19cf2e717",
+              "kind": "post-image",
+              "mediaId": "1856980500428320768",
+              "remoteUrl": "https://pbs.twimg.com/media/GcVR7SrbcAA1bI9.jpg?name=orig"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "together-garden-2026",
+      "title": "Together Garden",
+      "collectionType": "event",
+      "imageCount": 27,
+      "sources": [
+        {
+          "url": "https://x.com/PixelaProject/status/2014654356470300729",
+          "publishedAt": "2026-01-23T18:00+07:00",
+          "text": "ก๊อกๆๆ 🚪🌷✨\n\nวาเลนไทน์ปีนี้มีใครอยากได้ดอกไม้ไหมนะ เพราะที่สวนแห่งนี้หน่ะ เต็มไปด้วยเหล่า Vtuber ทั้ง 3 ค่ายรอให้ดอกไม้คุณอยู่💗\n\nแล้วเจอกัน 14-15 กุมภาพันธ์ 2026 Meeting Event นี้นะ ห้ามลืมล่ะ ✨\n\n#pixela #pixelaproject #togethergarden",
+          "images": [
+            {
+              "path": "/assets/events/archive/together-garden-2026/2014654356470300729-01-2014625326148812800.jpg",
+              "width": 1080,
+              "height": 1350,
+              "bytes": 398189,
+              "sha256": "19348ffb0a2a32941959ab67609c5a480154815c82a34bd2f194d040be025b8a",
+              "kind": "post-image",
+              "mediaId": "2014625326148812800",
+              "remoteUrl": "https://pbs.twimg.com/media/G_VjD2ibAAAf3Wt.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/2018303183370736042",
+          "publishedAt": "2026-02-02T19:39+07:00",
+          "text": "🌷Togeter Garden หนุ่มๆ สาวๆ ทั้ง 3 ค่ายรอให้ดอกไม้คุณอยู่💗\n\n📌เปิดขายบัตร Early Bird ลดทันที 5% วันที่ 4 - 6 Feb เวลา 10:00 น.\n📌 เริ่มจำหน่ายบัตรรอบปกติวันที่ 7 Feb เวลา 10:00 น.\n\n📍 สถานที่ Union Mall 5th Floor (Co-Event Studio)\n 🗓️ วันที่ 14-15 Feb 2026 ตั้งแต่เวลา 11.00 น. เป็นต้นไป\n\n⭐ ราคาบัตร Fan Meeting ⭐\n✨ Normal Fan Meeting 490 บาท (1 นาที / ใบ)\n🔥 Special Fan Meeting 1,590 บาท (2 นาที / ใบ) พร้อมรับสิทธิ์พิเศษ!\n\n#pixela #pixelaproject #togethergarden #Lumina #LuminaProject #RiseONDisguise",
+          "images": [
+            {
+              "path": "/assets/events/archive/together-garden-2026/2018303183370736042-01-2018303145437499392.jpg",
+              "width": 1080,
+              "height": 1920,
+              "bytes": 662508,
+              "sha256": "f7020d49623933b66939b5ac58050cc1dce3f77b6f6afb068a2b3cedc6552b0c",
+              "kind": "post-image",
+              "mediaId": "2018303145437499392",
+              "remoteUrl": "https://pbs.twimg.com/media/HAJ0BHDbEAAFLsu.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/2018708435182014866",
+          "publishedAt": "2026-02-03T22:29+07:00",
+          "text": "🌸 ดินแดนแห่งดอกไม้ กำลังจะเปิดแล้ว!\nประกาศวันเปิดขายบัตร Early Bird Ticket ของเหล่า Vtuber\n.\nกรอกโค้ด EARLYBIRDSAVE25\n.\n📌 เริ่มจำหน่ายบัตร Early Bird Ticket วันที่ 4 กุมภาพันธ์ 2569 เวลา 10:00 น. ถึงวันที่ 6 กุมภาพันธ์ 2569 เวลา 23.59 น.\n(สำหรับเฉพาะรอบ Normal Meeting วันที่ 14 กุมภาพันธ์ 2569 และรอบ Special Meeting วันที่ 14 - 15 กุมภาพันธุ์ 2569 เท่านั้น)\n📌 เริ่มจำหน่ายบัตรรอบปกติวันที่ 7 กุมภาพันธ์ 2569 เวลา 10:00 น.\nบัตรทั้ง 2 แบบ จำหน่ายผ่านทาง http://ticketmelon.com/\n..........................................................................\n🌼  ราคาบัตร Fan Meet 🌻\n✨ Normal Fan meet 490 บาท (1 นาที / รอบ) (สำหรับ Early Bird ลดราคาเหลือ 465 บาท)\n💗  Special Fan meet 1,590 บาท (2 นาที / รอบ)\n(พร้อมของแถมสุดพิเศษ) 📸\n..........................................................................\n💘  ขั้นตอนการซื้อบัตร 💖\n💗ซื้อผ่านเว็บไซต์ http://ticketmelon.com/\n💗ค้นหาตั๋ว Together Garden | Offline Event by Pixela × Lumina × RiseON\n💗เลือกรอบ Vtuber ที่คุณต้องการ\n💗จองได้เลย!! (ซื้อได้สูงสุด 15 ใบ / 1 ใบเสร็จ)\n..........................................................................\n💖 หมายเหตุ 💘\n✦ ราคาข้างต้นยังไม่รวมค่าธรรมเนียม\n✦ เปิดขายบัตร Early Bird Ticket ในวันที่ 4-6 Feb 10.00 น.  (สำหรับเฉพาะรอบ Normal Meeting วันที่ 14 กุมภาพันธ์ 2569 และรอบ Special Meeting วันที่ 14 - 15 กุมภาพันธุ์ 2569 เท่านั้น)\n✦ เปิดขายบัตร Normal Fan meet และ Special Fan meet ในวันที่ 7 กุมภาพันธ์ 2569 เวลา 10:00 น.\n✦ โดยระบบจะทำการปิดขายบัตรก่อนหมดรอบนั้น 15 นาที (บัตรมีจำนวนจำกัด)\n✦ ขอความร่วมมือผู้เข้าร่วมมาถึงงานก่อนรอบเวลาอย่างน้อย 30 นาที\n.........................................................................\n🌼  ของแถม Fan meet ticket 🌻\n✨ Normal Fan meet จะได้รับบัตร Art KV\n💗  Special Fan meet จะได้รับบัตรแข็ง Art KV , โพลารอยด์ถ่ายคู่กับ Talent 1 ใบ (ในเวลา 30 วินาที) จะได้เลยหลังออกจากห้อง , Flash drive เก็บความทรงจำในห้อง Meeting (ส่งภายหลัง) , พิเศษยิ่งขึ้น สำหรับโพลารอยด์ หากต้องการข้อความสุดพิเศษที่เขียนจากลายมือทาเลนต์ ชำระเพิ่ม 250 บาท (ชำระ ณ วันงาน) จัดส่งในภายหลัง\n🔥 ของแถมที่มีการส่งภายหลัง จำเป็นต้องขอข้อมูลเพิ่มเติมเพื่อความถูกต้องในการจัดส่ง🔥\n.\n📆  พบกันในวันที่ 14-15 กุมภาพันธ์ 2569\n🚈  ที่ Union Mall Floor 5 (Co-Event Studio)\n⏲️ สวนดอกไม้พร้อมเปิดให้ท่านชมตั้งแต่ 11 โมงเช้าถึง 1 ทุ่มตรง!\nสามารถเข้าชมงานได้ฟรี (นอกจากโซน Meeting, Activity)\n🌹กลิ่นดอกไม้กำลังเรียกหา…เตรียมพบกัน เร็วๆ นี้ 🌹\n.\n#pixela #pixelaproject #TogetherGarden #Lumina #LuminaProject #RiseOn #Disguise",
+          "images": [
+            {
+              "path": "/assets/events/archive/together-garden-2026/2018708435182014866-01-2018708063499460608.jpg",
+              "width": 1920,
+              "height": 1280,
+              "bytes": 1347454,
+              "sha256": "328993d9c15a7eb7d1b073f6f3b60696012b46206860a0bbd0ee10500c8f39c2",
+              "kind": "post-image",
+              "mediaId": "2018708063499460608",
+              "remoteUrl": "https://pbs.twimg.com/media/HAPkScYaIAAnne4.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/2018708439350870439",
+          "publishedAt": "2026-02-03T22:29+07:00",
+          "text": "",
+          "images": [
+            {
+              "path": "/assets/events/archive/together-garden-2026/2018708439350870439-01-2018708176955408384.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 2152600,
+              "sha256": "0f6ec0b4d8713c7b65c9374f73664032066a6e9bf27a870ce4f583aac129b088",
+              "kind": "post-image",
+              "mediaId": "2018708176955408384",
+              "remoteUrl": "https://pbs.twimg.com/media/HAPkZDCagAAQsPf.jpg?name=orig"
+            },
+            {
+              "path": "/assets/events/archive/together-garden-2026/2018708439350870439-02-2018708205560643584.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 1516111,
+              "sha256": "29bc24722276bef2237b97e06e4afee05dafb31b8b9a0751940a28f17c954052",
+              "kind": "post-image",
+              "mediaId": "2018708205560643584",
+              "remoteUrl": "https://pbs.twimg.com/media/HAPkatmbwAAcdQy.jpg?name=orig"
+            },
+            {
+              "path": "/assets/events/archive/together-garden-2026/2018708439350870439-03-2018708222945968128.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 1651982,
+              "sha256": "5962513b1367c200b4211be75c34a310ab704d2f6914dc3c1e1c1407e07eec21",
+              "kind": "post-image",
+              "mediaId": "2018708222945968128",
+              "remoteUrl": "https://pbs.twimg.com/media/HAPkbuXawAABeHb.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/2019024045103300873",
+          "publishedAt": "2026-02-04T19:23+07:00",
+          "text": "✨  เปิดตาราง Fan Meet วันที่ 14 กุมภาพันธ์!\n.\nกรอกโค้ด EARLYBIRDSAVE25\n.\n📌 เริ่มจำหน่ายบัตร Early Bird Ticket วันที่ 4 กุมภาพันธ์ 2569 เวลา 10:00 น. ถึงวันที่ 6 กุมภาพันธ์ 2569 เวลา 23.59 น.\n(สำหรับเฉพาะรอบ Normal Meeting วันที่ 14 กุมภาพันธ์ 2569 และรอบ Special Meeting วันที่ 14 - 15 กุมภาพันธุ์ 2569 เท่านั้น)\n📌 เริ่มจำหน่ายบัตรรอบปกติวันที่ 7 กุมภาพันธ์ 2569 เวลา 10:00 น.\nบัตรทั้ง 2 แบบ จำหน่ายผ่านทาง http://ticketmelon.com/\n\n⚠ Aranis Elvene และ Nezumi Elze  ไม่สามารถเข้าร่วมกิจกรรม Fan Meet ในครั้งนี้ได้ เนื่องจากติดภารกิจส่วนตัว (รวมไปถึงไม่มีการจำหน่ายสินค้าของทั้งสองท่านภายในงาน)\n\n..........................................................................\n🌼  ราคาบัตร Fan Meet 🌻\n✨ Normal Fan meet 490 บาท (1 นาที / รอบ) (สำหรับ Early Bird ลดราคาเหลือ 465 บาท)\n💗  Special Fan meet 1,590 บาท (2 นาที / รอบ)\n(พร้อมของแถมสุดพิเศษ) 📸\n..........................................................................\n💘  ขั้นตอนการซื้อบัตร 💖\n💗ซื้อผ่านเว็บไซต์ http://ticketmelon.com/\n💗ค้นหาตั๋ว Together Garden | Offline Event by Pixela × Lumina × RiseON\n💗เลือกรอบ Vtuber ที่คุณต้องการ\n💗จองได้เลย!! (ซื้อได้สูงสุด 15 ใบ / 1 ใบเสร็จ)\n..........................................................................\n💖 หมายเหตุ 💘\n✦ ราคาข้างต้นยังไม่รวมค่าธรรมเนียม\n✦ เปิดขายบัตร Early Bird Ticket ในวันที่ 4-6 Feb 10.00 น.  (สำหรับเฉพาะรอบ Normal Meeting วันที่ 14 กุมภาพันธ์ 2569 และรอบ Special Meeting วันที่ 14 - 15 กุมภาพันธุ์ 2569 เท่านั้น)\n✦ เปิดขายบัตร Normal Fan meet และ Special Fan meet ในวันที่ 7 กุมภาพันธ์ 2569 เวลา 10:00 น.\n✦ โดยระบบจะทำการปิดขายบัตรก่อนหมดรอบนั้น 15 นาที (บัตรมีจำนวนจำกัด)\n✦ ขอความร่วมมือผู้เข้าร่วมมาถึงงานก่อนรอบเวลาอย่างน้อย 30 นาที\n.........................................................................\n🌼  ของแถม Fan meet ticket 🌻\n✨ Normal Fan meet จะได้รับบัตร Art KV\n💗  Special Fan meet จะได้รับบัตรแข็ง Art KV , โพลารอยด์ถ่ายคู่กับ Talent 1 ใบ (ในเวลา 30 วินาที) จะได้เลยหลังออกจากห้อง , Flash drive เก็บความทรงจำในห้อง Meeting (ส่งภายหลัง) , พิเศษยิ่งขึ้น สำหรับโพลารอยด์ หากต้องการข้อความสุดพิเศษที่เขียนจากลายมือทาเลนต์ ชำระเพิ่ม 250 บาท (ชำระ ณ วันงาน) จัดส่งในภายหลัง\n🔥 ของแถมที่มีการส่งภายหลัง จำเป็นต้องขอข้อมูลเพิ่มเติมเพื่อความถูกต้องในการจัดส่ง🔥\n.\n📆  พบกันในวันที่ 14-15 กุมภาพันธ์ 2569\n🚈  ที่ Union Mall Floor 5 (Co-Event Studio)\n⏲️ สวนดอกไม้พร้อมเปิดให้ท่านชมตั้งแต่ 11 โมงเช้าถึง 1 ทุ่มตรง!\nสามารถเข้าชมงานได้ฟรี (นอกจากโซน Meeting, Activity)\n🌹กลิ่นดอกไม้กำลังเรียกหา…เตรียมพบกัน เร็วๆ นี้ 🌹\n.\n#pixela #pixelaproject #TogetherGarden #Lumina #LuminaProject #RiseOn #Disguise",
+          "images": [
+            {
+              "path": "/assets/events/archive/together-garden-2026/2019024045103300873-01-2019023949393428480.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 3225541,
+              "sha256": "d2832a1c9fb1ebfceb08b2e60e669c85740503cc9b7ec3732ddf3487b93026a4",
+              "kind": "post-image",
+              "mediaId": "2019023949393428480",
+              "remoteUrl": "https://pbs.twimg.com/media/HAUDlbCaAAAm5HQ.jpg?name=orig"
+            },
+            {
+              "path": "/assets/events/archive/together-garden-2026/2019024045103300873-02-2019023977528819713.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 2723326,
+              "sha256": "7d6d71dbc5560447b6d5c9a9194b232ab51efee3ba0cbae3a15d35663227eff0",
+              "kind": "post-image",
+              "mediaId": "2019023977528819713",
+              "remoteUrl": "https://pbs.twimg.com/media/HAUDnD2aAAEVV_S.jpg?name=orig"
+            },
+            {
+              "path": "/assets/events/archive/together-garden-2026/2019024045103300873-03-2019023997992943616.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 3048463,
+              "sha256": "005a90708f981eeb0e37c217745e59e9689fc5a39d38a078d77b9a26c9281409",
+              "kind": "post-image",
+              "mediaId": "2019023997992943616",
+              "remoteUrl": "https://pbs.twimg.com/media/HAUDoQFbwAAFMIb.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/2019302422460657685",
+          "publishedAt": "2026-02-05T13:49+07:00",
+          "text": "✨  รายละเอียดกิจกรรม Fan Meeting อยู่นี่แล้ว! \n.\n🔻 กิจกรรม Live Stage 2 รอบ 2 วัน แบบจุใจ\nวันที่ 14 Feb เวลา 13.15-14.15 และ 19.20-20.00 \nวันที่ 15 Feb เวลา 13.15-14.15 และ 19.00-20.00\n(การแสดงของทั้ง 2 เวลา และ 2 วัน จะไม่เหมือนกัน)\n\n🔻 Activity Zone สุดจึ้งทั้งหมด 3 กิจกรรม\n🎯  ศรสื่อใจ (ปาเป้า) : ลุ้นรับ มินิสแตนดี้จิบิธีมอีเวนท์ และของรางวัลอื่นๆ\n🌼เด็ดดอกลุ้นรัก (สอยดาว) : สุ่มลุ้นรางวัลใหญ่ Love Letter Box ข้อความจากเหล่า Vtuber \n💕 ใจเราตรงกันมั้ย (วงล้อเสี่ยงทาย) : ลุ้นหมอนธีมอีเวนต์\n\n🔻 กิจกรรมประมูลสแตนดี้ ในวันที่ 15 กุมภาพันธุ์ เวลา 19.00-19.30\n\n🔻 และยังมีสินค้าสุดพิเศษอื่น ๆ ที่จะเปิดขายเฉพาะในงานเท่านั้น 🥳 \n.\n📆  พบกันในวันที่ 14-15 กุมภาพันธ์ 2569\n🚈  ที่ Union Mall Floor 5 (Co-Event Studio)\n⏲️ สวนดอกไม้พร้อมเปิดให้ท่านชมตั้งแต่ 11 โมงเช้าจนถึง 1 ทุ่มตรง!\nสามารถเข้าชมงานได้ฟรี (นอกจากโซน Meeting และ Activity)\n🌹ดอกไม้พร้อมจะผลิบานให้ท่านได้ชมแล้ว เร็วๆ นี้ 🌹\n.\n#pixela #pixelaproject #TogetherGarden #Lumina #LuminaProject #RiseOn #Disguise",
+          "images": [
+            {
+              "path": "/assets/events/archive/together-garden-2026/2019302422460657685-01-2019302380421132289.jpg",
+              "width": 1920,
+              "height": 1280,
+              "bytes": 337288,
+              "sha256": "8d05c2d03b00b6d704deca43b8d12d5c87d7e85b1db5ba59733a94e98ad09256",
+              "kind": "post-image",
+              "mediaId": "2019302380421132289",
+              "remoteUrl": "https://pbs.twimg.com/media/HAYA0PcaMAEOOHy.jpg?name=orig"
+            },
+            {
+              "path": "/assets/events/archive/together-garden-2026/2019302422460657685-02-2019302380219904000.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 408428,
+              "sha256": "ca40b700d04d50b177dad2c874d21a5b5c21789ebb5b0e60e0f200519d328b78",
+              "kind": "post-image",
+              "mediaId": "2019302380219904000",
+              "remoteUrl": "https://pbs.twimg.com/media/HAYA0OsbsAA53oO.jpg?name=orig"
+            },
+            {
+              "path": "/assets/events/archive/together-garden-2026/2019302422460657685-03-2019302377652998144.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 364488,
+              "sha256": "c761868377b9c36d92ee56099a277ee82b39e7ef5842795e2a8836c03a1dcdd3",
+              "kind": "post-image",
+              "mediaId": "2019302377652998144",
+              "remoteUrl": "https://pbs.twimg.com/media/HAYA0FIb0AAZ-d4.jpg?name=orig"
+            },
+            {
+              "path": "/assets/events/archive/together-garden-2026/2019302422460657685-04-2019302380391788549.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 526346,
+              "sha256": "fb2085ff5afdf6a0190004dc93649c963460a185c0c54e38dbecbcbab6a9dacf",
+              "kind": "post-image",
+              "mediaId": "2019302380391788549",
+              "remoteUrl": "https://pbs.twimg.com/media/HAYA0PVacAUHbYu.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/2019756734521512085",
+          "publishedAt": "2026-02-06T19:55+07:00",
+          "text": "ตาราง Meeting วันที่ 15 กุมภาพันธ์! มาแล้วว 🥳\nพร้อมเปิดขายบัตรทุกรอบในวันเสาร์ที่ 7 กุมภาพันธ์ ตั้งแต่เวลา 10.00 น. เป็นต้นไป  😍\n.\n..........................................................................\n🌼  ราคาบัตร Fan Meet 🌻\n✨ Normal Fan meet 490 บาท (1 นาที / รอบ)\n💗  Special Fan meet 1,590 บาท (2 นาที / รอบ)\n(พร้อมของแถมสุดพิเศษ) 📸\n..........................................................................\n💘  ขั้นตอนการซื้อบัตร 💖\n💗ซื้อผ่านเว็บไซต์ https://www.ticketmelon.com/virtupentertainment/TogetherGarden\n💗ค้นหาตั๋ว Together Garden | Offline Event by Pixela × Lumina × RiseON\n💗เลือกรอบ Vtuber ที่คุณต้องการ\n💗จองได้เลย!! (ซื้อได้สูงสุด 15 ใบ / 1 ใบเสร็จ)\n..........................................................................\n💖 หมายเหตุ 💘\n✦ ราคาข้างต้นยังไม่รวมค่าธรรมเนียม\n✦ เปิดขายบัตร Normal Fan meet และ Special Fan meet ในวันที่ 7 กุมภาพันธ์ 2569 เวลา 10:00 น.\n✦ โดยระบบจะทำการปิดขายบัตรก่อนหมดรอบนั้น 15 นาที (บัตรมีจำนวนจำกัด)\n✦ ขอความร่วมมือผู้เข้าร่วมมาถึงงานก่อนรอบเวลาอย่างน้อย 30 นาที\n.........................................................................\n🌼  ของแถม Fan meet ticket 🌻\n✨ Normal Fan meet จะได้รับบัตร Art KV\n💗  Special Fan meet จะได้รับบัตรแข็ง Art KV , โพลารอยด์ถ่ายคู่กับ Talent 1 ใบ (ในเวลา 30 วินาที) จะได้เลยหลังออกจากห้อง , Flash drive เก็บความทรงจำในห้อง Meeting (ส่งภายหลัง) , พิเศษยิ่งขึ้น สำหรับโพลารอยด์ หากต้องการข้อความสุดพิเศษที่เขียนจากลายมือทาเลนต์ ชำระเพิ่ม 250 บาท (ชำระ ณ วันงาน) จัดส่งในภายหลัง\n🔥 ของแถมที่มีการส่งภายหลัง จำเป็นต้องขอข้อมูลเพิ่มเติมเพื่อความถูกต้องในการจัดส่ง🔥\n.\n📆  พบกันในวันที่ 14-15 กุมภาพันธ์ 2569\n🚈  ที่ Union Mall Floor 5 (Co-Event Studio)\n⏲️ สวนดอกไม้พร้อมเปิดให้ท่านชมตั้งแต่ 11 โมงเช้าถึง 1 ทุ่มตรง!\nสามารถเข้าชมงานได้ฟรี (นอกจากโซน Meeting, Activity)\n🌹กลิ่นดอกไม้กำลังเรียกหา…เตรียมพบกัน เร็วๆ นี้ 🌹\n.\n#pixela #pixelaproject #TogetherGarden #Lumina #LuminaProject #RiseOn #Disguise",
+          "images": [
+            {
+              "path": "/assets/events/archive/together-garden-2026/2019756734521512085-01-2019756074337959937.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 2819477,
+              "sha256": "1076d7e2a7a4aa2342c8d45674e6d18552b74fd396c22d6b2b52041789a8a848",
+              "kind": "post-image",
+              "mediaId": "2019756074337959937",
+              "remoteUrl": "https://pbs.twimg.com/media/HAedcs_aAAEc6nj.jpg?name=orig"
+            },
+            {
+              "path": "/assets/events/archive/together-garden-2026/2019756734521512085-02-2019756116142686208.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 2780425,
+              "sha256": "14556eaeae0bd4bef4abb3b09ef3722474c60858ccd80a3ed60fcf40496a47e7",
+              "kind": "post-image",
+              "mediaId": "2019756116142686208",
+              "remoteUrl": "https://pbs.twimg.com/media/HAedfIubgAA5KWv.jpg?name=orig"
+            },
+            {
+              "path": "/assets/events/archive/together-garden-2026/2019756734521512085-03-2019756319931305984.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 2451136,
+              "sha256": "fab0b2f1fd968f33e06567312f02248c6b19adef4e9bdfef1f5c97038780ff72",
+              "kind": "post-image",
+              "mediaId": "2019756319931305984",
+              "remoteUrl": "https://pbs.twimg.com/media/HAedq_5bEAAVu3j.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/2020745141452173574",
+          "publishedAt": "2026-02-09T13:22+07:00",
+          "text": "💘 กฎการเข้าร่วมงาน Together Garden 💖\nโปรดอ่านรายละเอียดอย่างครบถ้วน และอย่าลืมรักษากฎอย่างเคร่งครัดน้าา 🩷\n.\n..........................................................................\n🌼  ราคาบัตร Fan Meet 🌻\n✨ Normal Fan meet 490 บาท (1 นาที / รอบ)\n💗  Special Fan meet 1,590 บาท (2 นาที / รอบ)\n(พร้อมของแถมสุดพิเศษ) 📸\n..........................................................................\n💘  ขั้นตอนการซื้อบัตร 💖\n💗ซื้อผ่านเว็บไซต์ https://www.ticketmelon.com/virtupentertai.../TogetherGarden\n💗ค้นหาตั๋ว Together Garden | Offline Event by Pixela × Lumina × RiseON\n💗เลือกรอบ Vtuber ที่คุณต้องการ\n💗จองได้เลย!! (ซื้อได้สูงสุด 15 ใบ / 1 ใบเสร็จ)\n..........................................................................\n💖 หมายเหตุ 💘\n✦ ราคาข้างต้นยังไม่รวมค่าธรรมเนียม\n✦ โดยระบบจะทำการปิดขายบัตรก่อนหมดรอบนั้น 15 นาที (บัตรมีจำนวนจำกัด)\n✦ ขอความร่วมมือผู้เข้าร่วมมาถึงงานก่อนรอบเวลาอย่างน้อย 30 นาที\n.........................................................................\n🌼  ของแถม Fan meet ticket 🌻\n✨ Normal Fan meet จะได้รับบัตร Art KV\n💗  Special Fan meet จะได้รับบัตรแข็ง Art KV , โพลารอยด์ถ่ายคู่กับ Talent 1 ใบ (ในเวลา 30 วินาที) จะได้เลยหลังออกจากห้อง , Flash drive เก็บความทรงจำในห้อง Meeting (ส่งภายหลัง) , พิเศษยิ่งขึ้น สำหรับโพลารอยด์ หากต้องการข้อความสุดพิเศษที่เขียนจากลายมือทาเลนต์ ชำระเพิ่ม 250 บาท (ชำระ ณ วันงาน) จัดส่งในภายหลัง\n🔥 ของแถมที่มีการส่งภายหลัง จำเป็นต้องขอข้อมูลเพิ่มเติมเพื่อความถูกต้องในการจัดส่ง🔥\n.\n📆  พบกันในวันที่ 14-15 กุมภาพันธ์ 2569\n🚈  ที่ Union Mall Floor 5 (Co-Event Studio)\n⏲️ สวนดอกไม้พร้อมเปิดให้ท่านชมตั้งแต่ 11 โมงเช้าเป็นต้นไป\nสามารถเข้าชมงานได้ฟรี (นอกจากโซน Meeting, Activity)\n.\n#pixela #pixelaproject #TogetherGarden #Lumina #LuminaProject #RiseOn #Disguise",
+          "images": [
+            {
+              "path": "/assets/events/archive/together-garden-2026/2020745141452173574-01-2020744837616787456.jpg",
+              "width": 2480,
+              "height": 3508,
+              "bytes": 3204181,
+              "sha256": "bb0918565b460713505f12d799b3bdbf6ba883969d4039c3dbe728d73cf8f639",
+              "kind": "post-image",
+              "mediaId": "2020744837616787456",
+              "remoteUrl": "https://pbs.twimg.com/media/HAsguTPaYAAWo_H.jpg?name=orig"
+            },
+            {
+              "path": "/assets/events/archive/together-garden-2026/2020745141452173574-02-2020744855799115777.jpg",
+              "width": 2480,
+              "height": 3508,
+              "bytes": 3441952,
+              "sha256": "ef7a67202580ed8564f3e70192b64114289b1785505ecfc1a0a125cd88bfd853",
+              "kind": "post-image",
+              "mediaId": "2020744855799115777",
+              "remoteUrl": "https://pbs.twimg.com/media/HAsgvW-asAEYo3a.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/2020833111039508542",
+          "publishedAt": "2026-02-09T19:12+07:00",
+          "text": "แผนผังงาน Together Garden 💕\n.\n1️⃣ Register - ลงทะเบียนเพื่อรับ Meeting Ticket และจุด Check-in รับของรางวัล\n2️⃣ Merchandise - โซนสินค้า สินค้าสุด Exclusive ที่จะมีแค่เฉพาะในงานนี้เท่านั้น\n3️⃣ Stage - โซนจัดแสดงโชว์ ที่จะมีโชว์ให้คุณดูแบบอิ่มๆ ไม่ซ้ำเลยล่ะ\n4️⃣ Meeting Zone - ห้องพูดคุยกับเหล่า Vtuber แบบ Private\n5️⃣ Special Meeting Room - ห้อง Meeting แบบ Special ที่จะให้คุณได้พูดคุยกับ Vtuber ถึง 2 นาที พร้อมของแถมพิเศษ\n6️⃣ ศรสื่อใจ - กิจกรรมปาเป้า ในราคา 69 บาท ลุ้นรับมินิสแตนดี้\n7️⃣ เด็ดดอกลุ้นรัก - กิจกรรมสอยดาวธีมสวนดอกไม้ ในราคา 129 บาท ลุ้นรับ Love letter box สุดพิเศษ\n8️⃣ ใจเราตรงกันมั้ย - กิจกรรมวงล้อเสี่ยงทายโดยเหล่า Vtuber ในราคา 189 บาท ลุ้นรับหมอนลาย KV รวม\n9️⃣ Free style zone - พื้นที่สำหรับเขียนข้อความในใจส่งถึงเหล่า Vtuber คนโปรดของคุณ!\n.\n📆  พบกันในวันที่ 14-15 กุมภาพันธ์ 2569\n🚈  ที่ Union Mall Floor 5 (Co-Event Studio)\n⏲️ สวนดอกไม้พร้อมเปิดให้ท่านชมตั้งแต่ 11 โมงเช้าเป็นต้นไป\nสามารถเข้าชมงานได้ฟรี (นอกจากโซน Meeting, Activity)\n.\n#pixela #pixelaproject #TogetherGarden #Lumina #LuminaProject #RiseOn #Disguise",
+          "images": [
+            {
+              "path": "/assets/events/archive/together-garden-2026/2020833111039508542-01-2020833066047123456.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 1575324,
+              "sha256": "a29ef994e171a08bb3660213f8eb333489329ea0bc3f2cac44209ec6ead78b94",
+              "kind": "post-image",
+              "mediaId": "2020833066047123456",
+              "remoteUrl": "https://pbs.twimg.com/media/HAtw93waMAAgbaE.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/2021170298989805849",
+          "publishedAt": "2026-02-10T17:32+07:00",
+          "text": "🌻 รายละเอียด Activity Zone สำหรับงาน Together Garden 🌼\n.\n..........................................................................\n🌼  ราคาบัตร Fan Meet 🌻\n✨ Normal Fan meet 490 บาท (1 นาที / รอบ)\n💗  Special Fan meet 1,590 บาท (2 นาที / รอบ)\n(พร้อมของแถมสุดพิเศษ) 📸\n..........................................................................\n💘  ขั้นตอนการซื้อบัตร 💖\n💗ซื้อผ่านเว็บไซต์ https://www.ticketmelon.com/virtupentertai.../TogetherGarden\n💗ค้นหาตั๋ว Together Garden | Offline Event by Pixela × Lumina × RiseON\n💗เลือกรอบ Vtuber ที่คุณต้องการ\n💗จองได้เลย!! (ซื้อได้สูงสุด 15 ใบ / 1 ใบเสร็จ)\n..........................................................................\n💖 หมายเหตุ 💘\n✦ ราคาข้างต้นยังไม่รวมค่าธรรมเนียม\n✦ เปิดขายบัตร Normal Fan meet และ Special Fan meet ในวันที่ 7 กุมภาพันธ์ 2569 เวลา 10:00 น.\n✦ โดยระบบจะทำการปิดขายบัตรก่อนหมดรอบนั้น 15 นาที (บัตรมีจำนวนจำกัด)\n✦ ขอความร่วมมือผู้เข้าร่วมมาถึงงานก่อนรอบเวลาอย่างน้อย 30 นาที\n.........................................................................\n🌼  ของแถม Fan meet ticket 🌻\n✨ Normal Fan meet จะได้รับบัตร Art KV\n💗  Special Fan meet จะได้รับบัตรแข็ง Art KV , โพลารอยด์ถ่ายคู่กับ Talent 1 ใบ (ในเวลา 30 วินาที) จะได้เลยหลังออกจากห้อง , Flash drive เก็บความทรงจำในห้อง Meeting (ส่งภายหลัง) , พิเศษยิ่งขึ้น สำหรับโพลารอยด์ หากต้องการข้อความสุดพิเศษที่เขียนจากลายมือทาเลนต์ ชำระเพิ่ม 250 บาท (ชำระ ณ วันงาน) จัดส่งในภายหลัง\n🔥 ของแถมที่มีการส่งภายหลัง จำเป็นต้องขอข้อมูลเพิ่มเติมเพื่อความถูกต้องในการจัดส่ง🔥\n.\n📆  พบกันในวันที่ 14-15 กุมภาพันธ์ 2569\n🚈  ที่ Union Mall Floor 5 (Co-Event Studio)\n⏲️ สวนดอกไม้พร้อมเปิดให้ท่านชมตั้งแต่ 11 โมงเช้าเป็นต้นไป\nสามารถเข้าชมงานได้ฟรี (นอกจากโซน Meeting, Activity)\n.\n#pixela #pixelaproject #TogetherGarden #Lumina #LuminaProject #RiseOn #Disguise",
+          "images": [
+            {
+              "path": "/assets/events/archive/together-garden-2026/2021170298989805849-01-2021170124234031104.jpg",
+              "width": 2000,
+              "height": 2000,
+              "bytes": 2152215,
+              "sha256": "12d56136f5d3f6698dda770ecdd472eaf63d070213c0621d19184ce1c85c35f8",
+              "kind": "post-image",
+              "mediaId": "2021170124234031104",
+              "remoteUrl": "https://pbs.twimg.com/media/HAyjhPWaAAAjncJ.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/2021940676091601203",
+          "publishedAt": "2026-02-12T20:33+07:00",
+          "text": "💕 กิจกรรมใจเราตรงกันมั้ย💕 ทายถูกรับหมอนธีมอีเวนต์ไปเลย!\n\nรายละเอียดกิจกรรม\n1. เลือกซื้อเลขหัวใจที่ชอบก่อนเข้าห้องกิจกรรม (ราคา 189 บาท ต่อ 1 ใบ)\n2. ใน 1 ใบ สามารถเลือกได้แค่ 1 ใบหัวใจเท่านั้น หากต้องการได้หัวใจเพิ่มอีกใบ ต้องซื้อจำนวนเพิ่มเพื่อรับสิทธิ์ได้รางวัลมากขึ้น หรือสิทธิ์ลุ้นรางวัลใหญ่\n3. กิจกรรมมี 14 รอบต่อวัน รอบละ 20 นาที\n4. น้องๆ จะเข้ามาพบปะทักทายผู้ร่วมกิจกรรม และหมุนวงล้อในห้องจนกว่าจะเลขหัวใจจะตรงกับผู้โชคดีในห้อง\n5. ผู้ที่ได้ตัวเลขหัวใจตรงกับวงล้อ รับรางวัลใหญ่ไปเลย ส่วนคนอื่นๆ จะได้รางวัลทั่วไป\n.\nกิจกรรมสามารถเข้าร่วมได้หลายรอบต่อวัน มาสนุกกันที่งานเยอะๆ น้า 🫶",
+          "images": [
+            {
+              "path": "/assets/events/archive/together-garden-2026/2021940676091601203-01-2021940590074871808.jpg",
+              "width": 2480,
+              "height": 3508,
+              "bytes": 3443538,
+              "sha256": "9f95167261b92aec74f0da79b3ced796c77e4621565f64914e2b547d3f933852",
+              "kind": "post-image",
+              "mediaId": "2021940590074871808",
+              "remoteUrl": "https://pbs.twimg.com/media/HA9gQQRbQAAS-uo.jpg?name=orig"
+            },
+            {
+              "path": "/assets/events/archive/together-garden-2026/2021940676091601203-02-2021940605627379716.jpg",
+              "width": 2480,
+              "height": 3508,
+              "bytes": 3422939,
+              "sha256": "5a50a34ea67a7499f12a4d3358f4399c0272e0213634e104c567a74869df730c",
+              "kind": "post-image",
+              "mediaId": "2021940605627379716",
+              "remoteUrl": "https://pbs.twimg.com/media/HA9gRKNbsAQ2p-e.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/2021952065212387551",
+          "publishedAt": "2026-02-12T21:18+07:00",
+          "text": "สินค้าสุด Exclusive ในงาน Together Garden มาแล้วน้าา~ 💐\n\n✨ รายละเอียดสินค้า ✨\n\n・Acrylic Standee ขนาด 16 cm\nอาร์ต KV Unit Together Garden\n\n・Random Card Pack ขนาด 5.5 x 8.5 cm\n1 แพ็กมี 4 ใบ\n▫️การ์ดอาร์ต Chibi 3 ใบ\n▫️การ์ดอาร์ต KV 1 ใบ (ลุ้น Digital Sign)\n\nมีลายให้สะสมทั้งหมด 64 แบบ\n🔹Normal การ์ดอาร์ต Chibi 32 แบบ\n🔹Normal การ์ดอาร์ต KV Unit Together Garden 16 แบบ\n🔹SR การ์ดอาร์ต KV Unit Together Garden 16 แบบ\n\n・Random Sticker Chibi ขนาด 5 cm\n1 ซองมีสติกเกอร์ 5 ชิ้น คละทาเลนท์\n\n・Random Aroma Candle ขนาด 30 g.\nเทียนหอมที่เมื่อจุดแล้ว ภาพ KV หรือ Chibi ของน้อง ๆ จะค่อย ๆ ปรากฏขึ้น พร้อมกลิ่นที่สื่อถึงอาร์ตและบรรยากาศของงานนี้ 🕯️🌸\n\n📌 สินค้ามีจำนวนจำกัด หมดแล้วหมดเลย\n📌 ไม่มีเปิด Pre-Order\n📌 จำหน่ายเวลา 11.00 – 20.00 น. หรือจนกว่าสินค้าจะหมด\n📌 ชำระเงินผ่านการโอน / สแกน QR Code หรือเงินสดตามยอดพอดี (ภายในงานไม่รองรับบัตรเดบิตและบัตรเครดิต)\n\n📆  พบกันในวันที่ 14-15 กุมภาพันธ์ 2569\n🚈  ที่ Union Mall Floor 5 (Co-Event Studio)\n⏲️ สวนดอกไม้พร้อมเปิดให้ท่านชมตั้งแต่ 11 โมงเช้าเป็นต้นไป\nสามารถเข้าชมงานได้ฟรี (นอกจากโซน Meeting, Activity)\n\n#pixela #pixelaproject #TogetherGarden #Lumina #LuminaProject #RiseOn #Disguise",
+          "images": [
+            {
+              "path": "/assets/events/archive/together-garden-2026/2021952065212387551-01-2021952027291762688.jpg",
+              "width": 2480,
+              "height": 3508,
+              "bytes": 1145291,
+              "sha256": "07efcaf8358ce512fcd7aa6b292c783cb7541c86e21cbd610bfd9f8f00d0a7a6",
+              "kind": "post-image",
+              "mediaId": "2021952027291762688",
+              "remoteUrl": "https://pbs.twimg.com/media/HA9qp_ObQAAJAY4.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://www.ticketmelon.com/virtupentertainment/TogetherGarden",
+          "sourceType": "ticketmelon",
+          "images": [
+            {
+              "path": "/assets/events/archive/together-garden-2026/ticketmelon-banner.png",
+              "width": 1440,
+              "height": 450,
+              "bytes": 1591649,
+              "sha256": "aba5a4afa5933232f14eb00489f96fa3d48ec49f200fadc6631e94f32dab3e2e",
+              "kind": "page-image",
+              "remoteUrl": "https://tm-prod-event-files-v3.s3.ap-southeast-1.amazonaws.com/c9bb1e42f83211f0943101117567899b/banner/c3a575ffff6111f0923401117567899b.png"
+            },
+            {
+              "path": "/assets/events/archive/together-garden-2026/ticketmelon-description.jpeg",
+              "width": 2480,
+              "height": 3508,
+              "bytes": 3596076,
+              "sha256": "dcce378b836509cacfaa1c07bfa407972a93690e20f73fcf3d3049861eed90fe",
+              "kind": "page-image",
+              "remoteUrl": "https://tm-prod-event-files-v3.s3.ap-southeast-1.amazonaws.com/c9bb1e42f83211f0943101117567899b/description/c3f8dd35034d11f1915501117567899b.jpeg"
+            },
+            {
+              "path": "/assets/events/archive/together-garden-2026/ticketmelon-poster.png",
+              "width": 1062,
+              "height": 1501,
+              "bytes": 3710689,
+              "sha256": "b7b055b8e1ed97a33e88a3d7a755706c3d9d38f3661f8f25923ffc003bd328ec",
+              "kind": "page-image",
+              "remoteUrl": "https://tm-prod-event-files-v3.s3.ap-southeast-1.amazonaws.com/c9bb1e42f83211f0943101117567899b/poster/29ed9cd600f111f1923401117567899b.png"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/2024071182010720467",
+          "publishedAt": "2026-02-18T17:39+07:00",
+          "text": "【Together Garden 】Pixela Stage : รอบนี้สวยหล่อ (กี่โมง??)\n\nรับชมความสนุกย้อนหลังได้ที่ : https://youtu.be/lUMHYCLHWik \n\n#pixela #pixelaproject #togethergarden",
+          "relatedVideoUrl": "https://www.youtube.com/watch?v=lUMHYCLHWik",
+          "images": [
+            {
+              "path": "/assets/events/archive/together-garden-2026/2024071182010720467-01-2024070373571272704.jpg",
+              "width": 1920,
+              "height": 1080,
+              "bytes": 1422253,
+              "sha256": "6a8252526b5b9ccb3c6aded4ba463565926c24d4ce51f03ae538f330f32e9da8",
+              "kind": "post-image",
+              "mediaId": "2024070373571272704",
+              "remoteUrl": "https://pbs.twimg.com/media/HBbxR-EboAAR509.jpg?name=orig"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wonder-festival-bangkok-2024",
+      "title": "Wonder Festival Bangkok 2024",
+      "collectionType": "event",
+      "imageCount": 14,
+      "sources": [
+        {
+          "url": "https://x.com/PixelaProject/status/1814563580236476708",
+          "publishedAt": "2024-07-20T14:30+07:00",
+          "text": "สินค้าคอลเลคชั่นพิเศษในงาน Wonder Festival Bangkok 2024 มาแล้วจ้า~🧡\n.\nพบกับสินค้าสุด Exclusive จาก Pixela Official ในคอลเลคชั่น Harajuku ที่จะมาทำให้คุณฟินด้วยความ กุ๊กกิ๊ก คาวาอี้ คาวาใจ กันไปเลย\n\n🧡มีทั้ง🧡\n- Card Collection Pack (ลุ้นรับ SR ลายเซ็นดิจิตอล)\n- Acrylic Standee (KV Unit Wonder)\n- Sticker\n- Acrylic Pin\n- Acrylic Keychain\n\n\"น้องที่ใช่ในกล่องที่ชอบ\" เพิ่มโอกาสสุ่มน้อง ๆ ที่คุณชื่นชอบได้ด้วยการเลือกสุ่มตาม Type ที่คุณตามหา \nเฉพาะสินค้าประเภท Acrylic Pin และ Acrylic Keychain เท่านั้น\n.\n📌สินค้ามีจำนวนจำกัด (มีจำหน่ายทั้ง 2 วัน)\n📌จำหน่ายสินค้าตั้งแต่เวลา 10.30 - 20.00 น. หรือ จนกว่าสินค้าจะหมด\n📌ร้านค้า Merchandise จะอยู่บริเวณหน้าทางเข้างาน (สามารถซื้อสินค้าได้โดยไม่ต้องซื้อบัตรเข้างาน)\n.\n🔸นัดพบกันในวันที่ 3 - 4  สิงหาคม 2567\n🔸ณ พารากอนฮอลล์ (สยามพารากอน)\n🔸เวลา 10.30 - 21.30 น.\n\nไว้เจอกันน้า~🩷🐰\n\n#pixelaofficial #WonderFestivalBangkok2024 #WonderFestivalBangkok #PIXELAxWF",
+          "images": [
+            {
+              "path": "/assets/events/archive/wonder-festival-bangkok-2024/1814563580236476708-01-1814563136097427457.jpg",
+              "width": 2480,
+              "height": 3508,
+              "bytes": 1614824,
+              "sha256": "275897a988eb7f2eb42f8dda1577b9befe8b6ea5661729760c2c6ed6e2a1ef6d",
+              "kind": "post-image",
+              "mediaId": "1814563136097427457",
+              "remoteUrl": "https://pbs.twimg.com/media/GS6fju2bIAE5dg2.jpg?name=orig"
+            },
+            {
+              "path": "/assets/events/archive/wonder-festival-bangkok-2024/1814563580236476708-02-1814563147585630209.jpg",
+              "width": 2480,
+              "height": 3508,
+              "bytes": 1635013,
+              "sha256": "89b187243671a12538e077a410653fef9c21ddf2d547d024e85b43688b12136e",
+              "kind": "post-image",
+              "mediaId": "1814563147585630209",
+              "remoteUrl": "https://pbs.twimg.com/media/GS6fkZpbMAEIaOX.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/1816775724898091260",
+          "publishedAt": "2024-07-26T17:01+07:00",
+          "text": "แผนผังงาน Wonder Festival Bangkok 2024\n.\nพวกเรา Pixela อยู่ที่บูธ K1 - K5 อย่าลืมมาพบกันน้า~ 🧡🐰\n\nสามารถอ่านรายละเอียดข้อมูลเพิ่มเติมได้ที่ https://www.facebook.com/wonderfestivalbangkok/posts/pfbid0DqLVsSjRTvzRJuZVJ7rqXKs262FMJn4CpA2SSQvZ8sRhwVvUXB4QtLQqhufMTFMZl\n\n#pixelaofficial #WonderFestivalBangkok2024 #WonderFestivalBangkok #PIXELAxWF",
+          "images": [
+            {
+              "path": "/assets/events/archive/wonder-festival-bangkok-2024/1816775724898091260-01-1816771143921205249.jpg",
+              "width": 2048,
+              "height": 2048,
+              "bytes": 434675,
+              "sha256": "3013d04e10e81f29d788120df1db6abd11cabc13639ab5a7899cc12aea8e676b",
+              "kind": "post-image",
+              "mediaId": "1816771143921205249",
+              "remoteUrl": "https://pbs.twimg.com/media/GTZ3us-agAEiTd0.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/1818589277326119075",
+          "publishedAt": "2024-07-31T17:07+07:00",
+          "text": "อีก 3 วันเท่านั้นแล้วน้า~🧡🐰\n.\nเตรียมตัวพบกับพวกเรา Pixela ได้ในงาน Wonder Festival Bangkok 2024\n\nสามารถซื้อบัตรได้ที่ https://ticketmelon.com/pixelaofficial/pixela-wf-2024-woder-festival\n\n#pixelaofficial #WonderFestivalBangkok2024 #WonderFestivalBangkok #PIXELAxWF",
+          "images": [
+            {
+              "path": "/assets/events/archive/wonder-festival-bangkok-2024/1818589277326119075-01-1818589182580891648.jpg",
+              "width": 2631,
+              "height": 1860,
+              "bytes": 1022468,
+              "sha256": "8ecef938862423620a743b338386e595493c1a66bd786e9210ea9b7c416ce922",
+              "kind": "post-image",
+              "mediaId": "1818589182580891648",
+              "remoteUrl": "https://pbs.twimg.com/media/GTztOewaIAA0k2a.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/1818950420230033620",
+          "publishedAt": "2024-08-01T17:02+07:00",
+          "text": "อีก 2 วันใกล้ได้พบกันแล้ว~🧡🐰\n.\nมาสนุกไปพร้อมกันกับพวกเรา Pixela ได้ในงาน Wonder Festival Bangkok 2024\n\nสามารถซื้อบัตร Fan Meeting ได้ที่ https://www.ticketmelon.com/pixelaofficial/pixela-wf-2024\n\n#pixelaofficial #WonderFestivalBangkok2024 #WonderFestivalBangkok #PIXELAxWF",
+          "images": [
+            {
+              "path": "/assets/events/archive/wonder-festival-bangkok-2024/1818950420230033620-01-1818950295973453824.jpg",
+              "width": 2631,
+              "height": 1860,
+              "bytes": 1049071,
+              "sha256": "f35a4fbd1657dd9917bf47394beda7bb4591f3da34a717a8aa80603e76a04b6a",
+              "kind": "post-image",
+              "mediaId": "1818950295973453824",
+              "remoteUrl": "https://pbs.twimg.com/media/GT41qC-W4AAWFoz.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/PixelaProject/status/1819329291957817658",
+          "publishedAt": "2024-08-02T18:07+07:00",
+          "text": "อีก 1 วันเท่านั้น 🧡🐰\n.\nพร้อมฟินไปด้วยกันกับพวกเรา Pixela ได้ในงาน Wonder Festival Bangkok 2024 แล้วรึยาง~\n\nสามารถซื้อบัตร Fan Meeting ได้ที่ https://ticketmelon.com/pixelaofficial/pixela-wf-2024\n\n#pixelaofficial #WonderFestivalBangkok2024 #WonderFestivalBangkok #PIXELAxWF",
+          "images": [
+            {
+              "path": "/assets/events/archive/wonder-festival-bangkok-2024/1819329291957817658-01-1819329026886193154.jpg",
+              "width": 2631,
+              "height": 1860,
+              "bytes": 773310,
+              "sha256": "3d988490af49f3a6850a950755ddbbcc4e27b247cddd5808bd4b3ac2a2509783",
+              "kind": "post-image",
+              "mediaId": "1819329026886193154",
+              "remoteUrl": "https://pbs.twimg.com/media/GT-OHFkb0AImvix.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://www.ticketmelon.com/pixelaofficial/pixela-wf-2024?hl=th-TH",
+          "sourceType": "ticketmelon",
+          "images": [
+            {
+              "path": "/assets/events/archive/wonder-festival-bangkok-2024/ticketmelon-banner.jpg",
+              "width": 1440,
+              "height": 450,
+              "bytes": 832785,
+              "sha256": "d03092c3bf77f937957c4e07ec4b6cb624a7c3647c299a3d8a129114bb6c3b0d",
+              "kind": "page-image",
+              "remoteUrl": "https://s3-ap-southeast-1.amazonaws.com/tm-img-banner-event/98b773e23e9a11ef911101117567899b.jpg"
+            },
+            {
+              "path": "/assets/events/archive/wonder-festival-bangkok-2024/ticketmelon-description-02.jpg",
+              "width": 1320,
+              "height": 1868,
+              "bytes": 1289362,
+              "sha256": "ca1e5e3ed8fccd24abcb782bf8b9e5b3f5b86ead76468624b4502b4bd11a273f",
+              "kind": "page-image",
+              "remoteUrl": "https://s3-ap-southeast-1.amazonaws.com/tm-img-description/14298572434311ef911101117567899b.jpg"
+            },
+            {
+              "path": "/assets/events/archive/wonder-festival-bangkok-2024/ticketmelon-description-03.jpg",
+              "width": 1320,
+              "height": 1868,
+              "bytes": 2888756,
+              "sha256": "e3f5df6a558fd127e461e0e806913ddfc05b355b87c8d0756cbf8d96ce33ac9a",
+              "kind": "page-image",
+              "remoteUrl": "https://s3-ap-southeast-1.amazonaws.com/tm-img-description/3aac4e60471911ef911101117567899b.jpg"
+            },
+            {
+              "path": "/assets/events/archive/wonder-festival-bangkok-2024/ticketmelon-description-04.jpg",
+              "width": 1320,
+              "height": 1868,
+              "bytes": 2885141,
+              "sha256": "527c1c1e45e069f843f2f2456fb6a0ac8836e0317f94e784db9732109c5b5190",
+              "kind": "page-image",
+              "remoteUrl": "https://s3-ap-southeast-1.amazonaws.com/tm-img-description/4b1a3d21471911ef911101117567899b.jpg"
+            },
+            {
+              "path": "/assets/events/archive/wonder-festival-bangkok-2024/ticketmelon-description-05.jpg",
+              "width": 1320,
+              "height": 1868,
+              "bytes": 1232241,
+              "sha256": "a918513441a343e02960cf84e06c6ebaa09034e78aca2a34e8dcd29b2864db6e",
+              "kind": "page-image",
+              "remoteUrl": "https://s3-ap-southeast-1.amazonaws.com/tm-img-description/884c4945434511ef911101117567899b.jpg"
+            },
+            {
+              "path": "/assets/events/archive/wonder-festival-bangkok-2024/ticketmelon-description-06.jpg",
+              "width": 1320,
+              "height": 1868,
+              "bytes": 2349047,
+              "sha256": "978a9ac57d6274f3a416d3b303c3e549228c2985d76f5ab398fa685a5e596a13",
+              "kind": "page-image",
+              "remoteUrl": "https://s3-ap-southeast-1.amazonaws.com/tm-img-description/c5b56a52471911ef911101117567899b.jpg"
+            },
+            {
+              "path": "/assets/events/archive/wonder-festival-bangkok-2024/ticketmelon-description-07.jpg",
+              "width": 1320,
+              "height": 1868,
+              "bytes": 628510,
+              "sha256": "9de55bd8620f423ba09ea375c6cad6c18ca230387167c1297d44fb5d31669198",
+              "kind": "page-image",
+              "remoteUrl": "https://s3-ap-southeast-1.amazonaws.com/tm-img-description/ef8a2562434411ef911101117567899b.jpg"
+            },
+            {
+              "path": "/assets/events/archive/wonder-festival-bangkok-2024/ticketmelon-poster.png",
+              "width": 425,
+              "height": 601,
+              "bytes": 363027,
+              "sha256": "2894d4dc790e505f8aeb0102542756b0e72d369c9b426828cdbc2c3fd758596b",
+              "kind": "page-image",
+              "remoteUrl": "https://s3-ap-southeast-1.amazonaws.com/tm-img-poster-event/6aa2a7f13f6b11ef911101117567899b.png"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
