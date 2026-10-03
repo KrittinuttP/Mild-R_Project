@@ -2,9 +2,9 @@ import type { LucideIcon } from "lucide-react";
 import {
   Cake,
   Clapperboard,
-  Globe2,
   Mic2,
   Music2,
+  PartyPopper,
   Sparkles,
 } from "lucide-react";
 
@@ -19,7 +19,7 @@ export type MediaCategoryMeta = {
 
 /** Display order for Media playlist groups */
 export const MEDIA_CATEGORY_ORDER: MediaCategoryMeta[] = [
-  { id: "original", label: "Original", labelLocal: "ต้นฉบับ", icon: Music2 },
+  { id: "original", label: "Original Song", labelLocal: "ต้นฉบับ", icon: Music2 },
   { id: "cover", label: "Cover", labelLocal: "คัฟเวอร์", icon: Mic2 },
   {
     id: "event",
@@ -33,12 +33,17 @@ export const MEDIA_CATEGORY_ORDER: MediaCategoryMeta[] = [
     labelLocal: "วันเกิด",
     icon: Cake,
   },
-  { id: "debut-pv", label: "Debut PV", labelLocal: "เดบิวต์", icon: Sparkles },
   {
-    id: "worldend-pv",
-    label: "WorldEnd PV",
-    labelLocal: "World End",
-    icon: Globe2,
+    id: "new-year",
+    label: "New Year",
+    labelLocal: "อวยพรปีใหม่",
+    icon: PartyPopper,
+  },
+  {
+    id: "pv",
+    label: "PV",
+    labelLocal: "เดบิวต์ & World End",
+    icon: Sparkles,
   },
 ];
 

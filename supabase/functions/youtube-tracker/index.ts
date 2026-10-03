@@ -8,6 +8,15 @@ import {
   getLuminaSourceTitle,
 } from "./lumina-master.ts";
 import { collectPreviewIdsToDelete, type PreviewLikeRow } from "./preview-match.ts";
+import {
+  isHiddenChannel,
+  isRealLive,
+  mentionsMildRVideo,
+  PIXELA_OFFICIAL_CHANNEL_ID,
+  saveVideoItems,
+  VIDEO_PARTS,
+  type YoutubeVideoItem,
+} from "./video-classify.ts";
 
 const YOUTUBE_API_KEY = Deno.env.get("YOUTUBE_API_KEY") || "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
@@ -434,16 +443,19 @@ async function archiveThumbnails(streams: StreamRow[]) {
   }
 }
 
-async function getLiveDetails(videoIds: string[]): Promise<StreamRow[]> {
-  if (videoIds.length === 0) return [];
-
+/** One videos.list pass: real lives → StreamRow, everything else (uploads, Shorts, Premieres) kept raw. */
+async function getVideoDetails(
+  videoIds: string[]
+): Promise<{ lives: StreamRow[]; uploads: YoutubeVideoItem[] }> {
   const liveStreams: StreamRow[] = [];
+  const uploads: YoutubeVideoItem[] = [];
+  if (videoIds.length === 0) return { lives: liveStreams, uploads };
 
   for (let i = 0; i < videoIds.length; i += 50) {
     const chunk = videoIds.slice(i, i + 50);
     const idsParam = chunk.join(",");
     const url =
-      `https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails,statistics&id=${idsParam}&key=${YOUTUBE_API_KEY}`;
+      `https://www.googleapis.com/youtube/v3/videos?part=${VIDEO_PARTS}&id=${idsParam}&key=${YOUTUBE_API_KEY}`;
 
     const res = await fetch(url);
     const data = await res.json();
@@ -453,7 +465,10 @@ async function getLiveDetails(videoIds: string[]): Promise<StreamRow[]> {
     }
 
     for (const item of data.items || []) {
-      if (!item.liveStreamingDetails) continue;
+      if (!isRealLive(item)) {
+        uploads.push(item as YoutubeVideoItem);
+        continue;
+      }
 
       const viewCount = item.statistics?.viewCount
         ? parseInt(item.statistics.viewCount, 10)
@@ -490,12 +505,25 @@ async function getLiveDetails(videoIds: string[]): Promise<StreamRow[]> {
           description: item.snippet.description,
           tags: item.snippet.tags || [],
           likes: item.statistics?.likeCount ?? null,
+          ...(isHiddenChannel(channelId) ? { hidden: true } : {}),
         },
       });
     }
   }
 
-  return liveStreams;
+  return { lives: liveStreams, uploads };
+}
+
+async function saveUploads(uploads: YoutubeVideoItem[]) {
+  const rows = await saveVideoItems(supabase, uploads, getLuminaSourceTitle);
+  if (rows.length > 0) {
+    console.log(`🎬 บันทึกคลิป: ${rows.length} รายการ`);
+  }
+  return rows.length;
+}
+
+function isOwnOrMentionsMildR(item: YoutubeVideoItem) {
+  return item.snippet.channelId === MAIN_CHANNEL_ID || mentionsMildRVideo(item);
 }
 
 /** Step 1: main uploads playlist (low quota) */
@@ -512,15 +540,16 @@ async function checkMainChannel() {
     throw new Error(data.error.message || "YouTube playlistItems failed");
   }
 
-  if (!data.items || data.items.length === 0) return { saved: 0 };
+  if (!data.items || data.items.length === 0) return { saved: 0, videos: 0 };
 
   const videoIds = data.items.map(
     (item: { snippet: { resourceId: { videoId: string } } }) =>
       item.snippet.resourceId.videoId
   );
-  const results = await getLiveDetails(videoIds);
-  await saveToDatabase(results);
-  return { saved: results.length };
+  const { lives, uploads } = await getVideoDetails(videoIds);
+  await saveToDatabase(lives);
+  const videos = await saveUploads(uploads);
+  return { saved: lives.length, videos };
 }
 
 async function searchByEventType(
@@ -575,7 +604,10 @@ async function fetchPlaylistVideoIds(channelId: string, maxResults = 8) {
  * (Search API often lags on ft. tags; playlist poll is the reliable path).
  */
 async function loadGuestChannelIds(): Promise<string[]> {
-  const ids = new Set<string>(LUMINA_RELATED_CHANNEL_IDS);
+  const ids = new Set<string>([
+    ...LUMINA_RELATED_CHANNEL_IDS,
+    PIXELA_OFFICIAL_CHANNEL_ID,
+  ]);
 
   const { data, error } = await supabase
     .from("mild_r_live_streams")
@@ -610,16 +642,18 @@ async function checkGuestChannelPlaylists() {
   }
 
   const unique = [...new Set(videoIds)];
-  const details = await getLiveDetails(unique);
-  const guestCollabs = details.filter(
+  const { lives, uploads } = await getVideoDetails(unique);
+  const guestCollabs = lives.filter(
     (row) => !row.is_own_channel && mentionsMildR(row.title)
   );
   await saveToDatabase(guestCollabs);
+  const videos = await saveUploads(uploads.filter(mentionsMildRVideo));
   return {
     channels: channelIds.length,
     master: LUMINA_RELATED_CHANNEL_IDS.length,
     scanned: unique.length,
     saved: guestCollabs.length,
+    videos,
   };
 }
 
@@ -671,6 +705,7 @@ async function searchRelatedChannels() {
   ];
 
   let searchSaved = 0;
+  let searchVideos = 0;
   if (items.length > 0) {
     const videoIds = [
       ...new Set(
@@ -679,19 +714,22 @@ async function searchRelatedChannels() {
           .filter(Boolean) as string[]
       ),
     ];
-    const results = await getLiveDetails(videoIds);
-    await saveToDatabase(results);
-    searchSaved = results.length;
+    const { lives, uploads } = await getVideoDetails(videoIds);
+    await saveToDatabase(lives);
+    searchSaved = lives.length;
+    searchVideos = await saveUploads(uploads.filter(isOwnOrMentionsMildR));
   }
 
   const saved = searchSaved + playlistScan.saved;
-  const skipped = saved === 0;
+  const videos = searchVideos + playlistScan.videos;
+  const skipped = saved === 0 && videos === 0;
   if (skipped) {
     console.log("⏭️ [Step 2] ข้ามการทำงาน: ไม่พบไลฟ์ที่เกี่ยวข้องจากช่องอื่น");
   }
 
   return {
     saved,
+    videos,
     skipped,
     searchSaved,
     playlistSaved: playlistScan.saved,
@@ -737,27 +775,43 @@ async function loadRecentVideoIds(): Promise<string[]> {
   return [...ids];
 }
 
+async function loadRecentUploadIds(): Promise<string[]> {
+  const since = new Date(
+    Date.now() - REFRESH_LOOKBACK_DAYS * 24 * 60 * 60 * 1000
+  ).toISOString();
+  const { data, error } = await supabase
+    .from("mild_r_videos")
+    .select("video_id")
+    .gte("published_at", since)
+    .limit(1000);
+  if (error) {
+    throw new Error(`refresh videos lookup: ${error.message}`);
+  }
+  return (data ?? []).map((row: { video_id: string }) => row.video_id);
+}
+
 async function refreshRecentStreams() {
   console.log(
     `▶️ [Step 3] Refresh streams ย้อนหลัง ${REFRESH_LOOKBACK_DAYS} วัน (DB → videos.list)...`
   );
-  const videoIds = await loadRecentVideoIds();
-  if (videoIds.length === 0) {
-    return {
-      lookbackDays: REFRESH_LOOKBACK_DAYS,
-      scanned: 0,
-      saved: 0,
-      skipped: true,
-    };
-  }
+  const [videoIds, uploadIds] = await Promise.all([
+    loadRecentVideoIds(),
+    loadRecentUploadIds(),
+  ]);
 
-  const results = await getLiveDetails(videoIds);
-  await saveToDatabase(results);
+  const { lives } = await getVideoDetails(videoIds);
+  await saveToDatabase(lives);
+
+  const { uploads } = await getVideoDetails(uploadIds);
+  const videos = await saveUploads(uploads);
+
   return {
     lookbackDays: REFRESH_LOOKBACK_DAYS,
     scanned: videoIds.length,
-    saved: results.length,
-    skipped: results.length === 0,
+    saved: lives.length,
+    videosScanned: uploadIds.length,
+    videos,
+    skipped: lives.length === 0 && videos === 0,
   };
 }
 
@@ -1024,7 +1078,7 @@ Deno.serve(async (req) => {
       await writeSyncLog({
         source: "edge-main",
         status: "success",
-        message: `Main channel check saved ${result.saved} streams`,
+        message: `Main channel check saved ${result.saved} streams · ${result.videos} videos`,
         saved_count: result.saved,
         meta: result,
       });
@@ -1040,8 +1094,8 @@ Deno.serve(async (req) => {
         source: "edge-search",
         status: result.skipped ? "skipped" : "success",
         message: result.skipped
-          ? "No related live/upcoming/completed streams"
-          : `Related search saved ${result.saved} streams`,
+          ? "No related live/upcoming/completed streams or videos"
+          : `Related search saved ${result.saved} streams · ${result.videos} videos`,
         saved_count: result.saved,
         meta: result,
       });
@@ -1057,8 +1111,8 @@ Deno.serve(async (req) => {
         source: "edge-refresh",
         status: result.skipped ? "skipped" : "success",
         message: result.skipped
-          ? `No streams refreshed in last ${result.lookbackDays} days`
-          : `Refreshed ${result.saved}/${result.scanned} streams (${result.lookbackDays}d)`,
+          ? `No streams or videos refreshed in last ${result.lookbackDays} days`
+          : `Refreshed ${result.saved}/${result.scanned} streams · ${result.videos}/${result.videosScanned} videos (${result.lookbackDays}d)`,
         saved_count: result.saved,
         meta: result,
       });

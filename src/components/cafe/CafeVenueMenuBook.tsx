@@ -401,8 +401,8 @@ export function CafeVenueMenuBook({
         turn(1);
       }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
   }, [open, turn]);
 
   function openDossier() {

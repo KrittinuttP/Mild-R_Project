@@ -12,8 +12,8 @@ import {
 } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 
-export const PROJECTS_EYEBROW = "Fanclub";
 export const PROJECTS_TITLE = "Fan Projects";
+export const PROJECTS_HEADING = "โปรเจกต์แฟนคลับ";
 export const PROJECTS_DESCRIPTION = "โปรเจกต์ฮันนี่สำหรับ Mild-R";
 
 type ProjectsHeadingProps = {
@@ -26,7 +26,7 @@ export function ProjectsHeading({ as: Heading = "h2" }: ProjectsHeadingProps) {
     <>
       <div className="flex items-center gap-2">
         <HeartHandshake className="size-4 text-[#e85a7a]" aria-hidden />
-        <p className={META_CLASS}>{PROJECTS_EYEBROW}</p>
+        <p className={META_CLASS}>{PROJECTS_TITLE}</p>
       </div>
       <Heading
         className={cn(
@@ -34,7 +34,7 @@ export function ProjectsHeading({ as: Heading = "h2" }: ProjectsHeadingProps) {
           Heading === "h1" ? DISPLAY_H1_CLASS : DISPLAY_H2_CLASS
         )}
       >
-        {PROJECTS_TITLE}
+        {PROJECTS_HEADING}
       </Heading>
       <p className={cn("mt-4 max-w-xl", BODY_CLASS)}>{PROJECTS_DESCRIPTION}</p>
     </>

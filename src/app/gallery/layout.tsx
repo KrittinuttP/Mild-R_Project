@@ -27,9 +27,9 @@ export default function GalleryLayout({ children }: { children: ReactNode }) {
             <ScrollReveal>
               <div className="flex items-center gap-2">
                 <LayoutGrid className="size-4 text-[#e85a7a]" aria-hidden />
-                <p className={META_CLASS}>Mild-R Fanclub</p>
+                <p className={META_CLASS}>Gallery</p>
               </div>
-              <h1 className={cn("mt-3", DISPLAY_H1_CLASS)}>Gallery</h1>
+              <h1 className={cn("mt-3", DISPLAY_H1_CLASS)}>แกลเลอรี</h1>
             </ScrollReveal>
             <GalleryCategoryTabs />
           </div>

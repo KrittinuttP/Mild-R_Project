@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
 import {
   artistCredit,
@@ -16,15 +16,12 @@ import {
   type GalleryBoardMode,
   type GalleryVariant,
 } from "@/components/gallery/gallery-utils";
+import {
+  ImageLightbox,
+  type ImageLightboxItem,
+} from "@/components/media/ImageLightbox";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { buttonVariants } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
 import { CTA_OUTLINE_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
@@ -50,8 +47,23 @@ export function GalleryBoard({
   className,
 }: GalleryBoardProps) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const lightboxImageRef = useRef<HTMLDivElement>(null);
   const items = useMemo(() => sortGalleryItems(rawItems), [rawItems]);
+  const lightboxItems = useMemo<ImageLightboxItem[]>(
+    () =>
+      items.map((item) => {
+        const credit = artistCredit(item);
+        const extra =
+          item.credit && isFanArtItem(item) ? ` · ${item.credit}` : "";
+        return {
+          id: item.id,
+          src: item.src,
+          alt: item.alt,
+          caption: item.caption ?? item.alt,
+          description: `${credit}${extra}` || undefined,
+        };
+      }),
+    [items]
+  );
 
   const startCount = useMemo(
     () => initialVisibleCount(items, mode, previewCount),
@@ -60,7 +72,6 @@ export function GalleryBoard({
 
   const [visibleCount, setVisibleCount] = useState(startCount);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const navDirectionRef = useRef<1 | -1>(1);
 
   const resetKey = `${startCount}|${variant}|${mode}`;
   const [appliedResetKey, setAppliedResetKey] = useState(resetKey);
@@ -73,9 +84,21 @@ export function GalleryBoard({
   const visibleItems = items.slice(0, visibleCount);
   const hasMore = mode === "full" && visibleCount < items.length;
   const showViewAll = mode === "preview" && Boolean(viewAllHref) && items.length > 0;
-  const activeItem =
-    activeIndex !== null ? visibleItems[activeIndex] ?? null : null;
   const showArtist = variant === "fan-art";
+
+  const changeLightboxIndex = (index: number | null) => {
+    if (index !== null && mode === "full") {
+      setVisibleCount((count) =>
+        index < count
+          ? count
+          : Math.min(
+              items.length,
+              Math.max(count + GALLERY_LOAD_MORE_STEP, index + 1)
+            )
+      );
+    }
+    setActiveIndex(index);
+  };
 
   useGSAP(
     () => {
@@ -179,61 +202,6 @@ export function GalleryBoard({
     { scope: rootRef, dependencies: [visibleCount, variant, mode] }
   );
 
-  useGSAP(
-    () => {
-      const imageWrap = lightboxImageRef.current;
-      if (!imageWrap || activeIndex === null) return;
-      if (prefersReducedMotion()) return;
-
-      gsap.fromTo(
-        imageWrap,
-        { autoAlpha: 0, y: 12 },
-        { autoAlpha: 1, y: 0, duration: 0.35, ease: "power2.out" }
-      );
-    },
-    { dependencies: [activeIndex, activeItem?.id] }
-  );
-
-  useEffect(() => {
-    if (activeIndex === null) return;
-
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "ArrowRight") {
-        event.preventDefault();
-        setActiveIndex((current) => {
-          if (current === null) return current;
-          return (current + 1) % visibleItems.length;
-        });
-      }
-      if (event.key === "ArrowLeft") {
-        event.preventDefault();
-        setActiveIndex((current) => {
-          if (current === null) return current;
-          return (current - 1 + visibleItems.length) % visibleItems.length;
-        });
-      }
-    };
-
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [activeIndex, visibleItems.length]);
-
-  const goPrev = () => {
-    navDirectionRef.current = -1;
-    setActiveIndex((current) => {
-      if (current === null) return current;
-      return (current - 1 + visibleItems.length) % visibleItems.length;
-    });
-  };
-
-  const goNext = () => {
-    navDirectionRef.current = 1;
-    setActiveIndex((current) => {
-      if (current === null) return current;
-      return (current + 1) % visibleItems.length;
-    });
-  };
-
   if (items.length === 0) {
     return (
       <p className="mt-10 text-sm text-[#f3b8c4]/70">
@@ -262,10 +230,7 @@ export function GalleryBoard({
             >
               <button
                 type="button"
-                onClick={() => {
-                  navDirectionRef.current = 1;
-                  setActiveIndex(index);
-                }}
+                onClick={() => setActiveIndex(index)}
                 className={cn(
                   "group relative h-full w-full overflow-hidden bg-[#1a0c12] text-left outline-none transition duration-500 ease-out focus-visible:ring-2 focus-visible:ring-[#e85a7a]/60",
                   variant === "archive" &&
@@ -301,26 +266,33 @@ export function GalleryBoard({
                   className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 skew-x-[-18deg] bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-0 transition duration-500 group-hover:translate-x-[280%] group-hover:opacity-40"
                 />
 
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#10080c]/90 via-[#10080c]/15 to-transparent opacity-90 transition duration-500 group-hover:opacity-100" />
+                <div
+                  className={cn(
+                    "pointer-events-none absolute inset-0 bg-gradient-to-t from-[#10080c]/90 via-[#10080c]/15 to-transparent transition duration-500",
+                    item.caption ? "opacity-90 group-hover:opacity-100" : "opacity-0 group-hover:opacity-50"
+                  )}
+                />
 
-                <span
-                  data-gallery-caption
-                  className="absolute inset-x-0 bottom-0 flex translate-y-1 flex-col gap-0.5 p-3 transition duration-500 ease-out group-hover:translate-y-0 sm:p-4"
-                >
-                  <span className="flex items-end justify-between gap-2">
-                    <span className="font-[family-name:var(--font-display)] text-sm leading-tight text-[#fff5f7] sm:text-base">
-                      {item.caption ?? item.alt}
+                {item.caption ? (
+                  <span
+                    data-gallery-caption
+                    className="absolute inset-x-0 bottom-0 flex translate-y-1 flex-col gap-0.5 p-3 transition duration-500 ease-out group-hover:translate-y-0 sm:p-4"
+                  >
+                    <span className="flex items-end justify-between gap-2">
+                      <span className="font-[family-name:var(--font-display)] text-sm leading-tight text-[#fff5f7] sm:text-base">
+                        {item.caption}
+                      </span>
+                      <span className="shrink-0 text-[0.6rem] tracking-[0.18em] text-[#f3b8c4]/70 uppercase transition group-hover:text-[#e85a7a] sm:text-[0.65rem]">
+                        View
+                      </span>
                     </span>
-                    <span className="shrink-0 text-[0.6rem] tracking-[0.18em] text-[#f3b8c4]/70 uppercase transition group-hover:text-[#e85a7a] sm:text-[0.65rem]">
-                      View
-                    </span>
+                    {showArtist && isFanArtItem(item) ? (
+                      <span className="text-[0.65rem] tracking-wide text-[#f3b8c4]/65 sm:text-xs">
+                        by {item.artist.name}
+                      </span>
+                    ) : null}
                   </span>
-                  {showArtist && isFanArtItem(item) ? (
-                    <span className="text-[0.65rem] tracking-wide text-[#f3b8c4]/65 sm:text-xs">
-                      by {item.artist.name}
-                    </span>
-                  ) : null}
-                </span>
+                ) : null}
               </button>
             </li>
           );
@@ -367,76 +339,17 @@ export function GalleryBoard({
         </div>
       ) : null}
 
-      <Dialog
-        open={activeIndex !== null}
-        onOpenChange={(open) => {
-          if (!open) setActiveIndex(null);
-        }}
-      >
-        <DialogContent
-          className="max-h-[92dvh] w-[min(100%,calc(100vw-1rem))] max-w-4xl overflow-hidden border-[#f3b8c4]/20 bg-[#140a0d] p-3 text-[#fff5f7] sm:max-w-4xl sm:p-4"
-          showCloseButton
-        >
-          {activeItem ? (
-            <>
-              <DialogHeader className="px-1 pt-1 pr-10 sm:px-2">
-                <DialogTitle className="font-[family-name:var(--font-display)] text-lg text-[#fff5f7] sm:text-xl">
-                  {activeItem.caption ?? activeItem.alt}
-                </DialogTitle>
-                <DialogDescription className="text-[#f3b8c4]/70">
-                  {artistCredit(activeItem)}
-                  {activeItem.credit && isFanArtItem(activeItem)
-                    ? ` · ${activeItem.credit}`
-                    : null}
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="relative mt-1 flex items-center justify-center overflow-hidden">
-                <div ref={lightboxImageRef} className="w-full">
-                  <ProtectedImage
-                    src={activeItem.src}
-                    alt={activeItem.alt}
-                    className="max-h-[68dvh] w-full object-contain"
-                  />
-                </div>
-
-                {visibleItems.length > 1 ? (
-                  <>
-                    <button
-                      type="button"
-                      aria-label="รูปก่อนหน้า"
-                      onClick={goPrev}
-                      className={cn(
-                        buttonVariants({ variant: "ghost", size: "icon" }),
-                        "absolute top-1/2 left-1 size-10 -translate-y-1/2 rounded-full border border-[#f3b8c4]/25 bg-[#140a0d]/75 text-[#fff5f7] backdrop-blur-sm transition hover:scale-105 hover:bg-[#e85a7a]/90 hover:text-white sm:left-2"
-                      )}
-                    >
-                      <ChevronLeft className="size-5" />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label="รูปถัดไป"
-                      onClick={goNext}
-                      className={cn(
-                        buttonVariants({ variant: "ghost", size: "icon" }),
-                        "absolute top-1/2 right-1 size-10 -translate-y-1/2 rounded-full border border-[#f3b8c4]/25 bg-[#140a0d]/75 text-[#fff5f7] backdrop-blur-sm transition hover:scale-105 hover:bg-[#e85a7a]/90 hover:text-white sm:right-2"
-                      )}
-                    >
-                      <ChevronRight className="size-5" />
-                    </button>
-                  </>
-                ) : null}
-              </div>
-
-              <p className="px-1 pt-1 text-center text-xs tracking-wide text-[#f3b8c4]/55 sm:px-2">
-                {(activeIndex ?? 0) + 1} / {visibleItems.length}
-                <span className="mx-2 text-[#f3b8c4]/30">·</span>
-                {variant === "fan-art" ? "Fan art" : "Archive"}
-              </p>
-            </>
-          ) : null}
-        </DialogContent>
-      </Dialog>
+      <ImageLightbox
+        items={
+          mode === "preview"
+            ? lightboxItems.slice(0, visibleCount)
+            : lightboxItems
+        }
+        activeIndex={activeIndex}
+        onActiveIndexChange={changeLightboxIndex}
+        useProtectedImage
+        counterLabel={variant === "fan-art" ? "Fan art" : "Moments"}
+      />
     </div>
   );
 }

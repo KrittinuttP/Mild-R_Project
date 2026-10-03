@@ -12,15 +12,15 @@ type GalleryProps = {
   data: VtuberProfile;
 };
 
-/** Home preview: Archive (Visual archive + Live covers), then Fan art. */
+/** Home preview: Moments + Live covers, then Fan art. */
 export function Gallery({ data }: GalleryProps) {
   return (
     <>
       <GallerySection
         id="gallery"
-        eyebrow="Archive"
+        eyebrow="Moments"
         icon={Images}
-        title="Visual archive"
+        title="ช่วงเวลาของ Mild-R"
         description="คลังภาพของ Mild-R"
         items={data.gallery}
         variant="archive"
@@ -36,9 +36,9 @@ export function Gallery({ data }: GalleryProps) {
       />
       <GallerySection
         id="fan-art"
-        eyebrow="Gallery"
+        eyebrow="Fan art"
         icon={Palette}
-        title="Fan art"
+        title="แฟนอาร์ต"
         description="แฟนอาร์ต Mild-R จากฮันนี่"
         items={data.fanArt}
         variant="fan-art"

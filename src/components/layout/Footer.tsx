@@ -22,6 +22,7 @@ const FOOTER_NAV_GROUPS = [
     title: "Explore",
     links: [
       { href: "/live", label: "Live" },
+      { href: "/media", label: "Media" },
       { href: "/events", label: "Events" },
       { href: "/gallery/archive", label: "Gallery" },
       { href: "/gallery/live", label: "Live covers" },

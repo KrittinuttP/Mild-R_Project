@@ -7,7 +7,7 @@ export type GalleryCategory = {
 };
 
 export const GALLERY_CATEGORIES: readonly GalleryCategory[] = [
-  { key: "archive", label: "Visual archive", href: "/gallery/archive" },
+  { key: "archive", label: "Moments", href: "/gallery/archive" },
   { key: "live", label: "Live covers", href: "/gallery/live" },
   { key: "fanart", label: "Fan art", href: "/gallery/fanart" },
 ];

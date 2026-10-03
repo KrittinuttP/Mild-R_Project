@@ -11,8 +11,6 @@ import Link from "next/link";
 import {
   ArrowUpRight,
   CalendarDays,
-  ChevronLeft,
-  ChevronRight,
   ExternalLink,
   LayoutGrid,
   MonitorPlay,
@@ -22,15 +20,12 @@ import {
 
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { prefersReducedMotion } from "@/components/gallery/gallery-utils";
+import {
+  ImageLightbox,
+  type ImageLightboxItem,
+} from "@/components/media/ImageLightbox";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { buttonVariants } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { useLiveCovers } from "@/hooks/useLiveCovers";
 import {
   gsap,
@@ -321,8 +316,8 @@ type LiveCoverArchiveProps = {
 export function LiveCoverArchive({
   mode = "full",
   id = "live-covers",
-  eyebrow = "Archive",
-  title = "Live covers",
+  eyebrow = "Live covers",
+  title = "ปกไลฟ์",
   headingSize = "h2",
   showDivider = true,
   viewAllHref = "/gallery/live",
@@ -422,6 +417,12 @@ export function LiveCoverArchive({
   const activeVersion = active?.versions[versionIndex] ?? null;
   const lightboxSrc =
     versionIndex === 0 || !activeVersion ? active?.coverUrl : activeVersion.url;
+  const lightboxItems: ImageLightboxItem[] = visible.map((cover, index) => ({
+    id: cover.videoId,
+    src:
+      index === activeIndex && lightboxSrc ? lightboxSrc : cover.coverUrl,
+    alt: cover.title,
+  }));
 
   const openAt = (index: number | null) => {
     setActiveIndex(index);
@@ -464,32 +465,6 @@ export function LiveCoverArchive({
 
   const matchesInOtherYears =
     year !== "all" && searched.some((c) => matchesFilter(c, filter));
-
-  const step = (dir: 1 | -1) => {
-    setActiveIndex((i) =>
-      i === null ? i : (i + dir + visible.length) % visible.length
-    );
-    setVersionIndex(0);
-  };
-
-  useEffect(() => {
-    if (activeIndex === null) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") {
-        e.preventDefault();
-        setActiveIndex((i) => (i === null ? i : (i + 1) % visible.length));
-        setVersionIndex(0);
-      } else if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        setActiveIndex((i) =>
-          i === null ? i : (i - 1 + visible.length) % visible.length
-        );
-        setVersionIndex(0);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [activeIndex, visible.length]);
 
   useGSAP(
     () => {
@@ -820,119 +795,73 @@ export function LiveCoverArchive({
         ) : null}
       </div>
 
-      <Dialog
-        open={active !== null}
-        onOpenChange={(open) => {
-          if (!open) openAt(null);
-        }}
-      >
-        <DialogContent
-          className="max-h-[92dvh] w-[min(100%,calc(100vw-1rem))] max-w-4xl overflow-y-auto border-[#f3b8c4]/20 bg-[#140a0d] p-3 text-[#fff5f7] sm:max-w-4xl sm:p-4"
-          showCloseButton
-        >
-          {active ? (
+      <ImageLightbox
+        items={lightboxItems}
+        activeIndex={active ? activeIndex : null}
+        onActiveIndexChange={openAt}
+        useProtectedImage
+        prevLabel="ปกก่อนหน้า"
+        nextLabel="ปกถัดไป"
+        subtitle={
+          active ? (
             <>
-              <DialogHeader className="px-1 pt-1 pr-10 sm:px-2">
-                <DialogTitle className="font-[family-name:var(--font-display)] text-base leading-snug text-[#fff5f7] sm:text-lg">
-                  {active.title}
-                </DialogTitle>
-                <DialogDescription className="flex flex-wrap items-center gap-2 text-[#f3b8c4]/70">
-                  <ChannelBadge item={active} />
-                  {active.date ? <span>{formatDate(active.date)}</span> : null}
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="relative mt-1 overflow-hidden rounded-xl bg-[#1a0c12]">
-                <ProtectedImage
-                  key={lightboxSrc}
-                  src={lightboxSrc}
-                  alt={active.title}
-                  decoding="async"
-                  className="aspect-video w-full object-contain"
-                />
-                {visible.length > 1 ? (
-                  <>
-                    <button
-                      type="button"
-                      aria-label="ปกก่อนหน้า"
-                      onClick={() => step(-1)}
-                      className={cn(
-                        buttonVariants({ variant: "ghost", size: "icon" }),
-                        "absolute top-1/2 left-2 size-10 -translate-y-1/2 rounded-full border border-[#f3b8c4]/25 bg-[#140a0d]/75 text-[#fff5f7] backdrop-blur-sm hover:bg-[#e85a7a]/90 hover:text-white"
-                      )}
-                    >
-                      <ChevronLeft className="size-5" />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label="ปกถัดไป"
-                      onClick={() => step(1)}
-                      className={cn(
-                        buttonVariants({ variant: "ghost", size: "icon" }),
-                        "absolute top-1/2 right-2 size-10 -translate-y-1/2 rounded-full border border-[#f3b8c4]/25 bg-[#140a0d]/75 text-[#fff5f7] backdrop-blur-sm hover:bg-[#e85a7a]/90 hover:text-white"
-                      )}
-                    >
-                      <ChevronRight className="size-5" />
-                    </button>
-                  </>
-                ) : null}
-              </div>
-
-              {active.versions.length > 1 ? (
-                <div className="mt-3 px-1 sm:px-2">
-                  <p className="text-xs text-[#f3b8c4]/60">
-                    ปกเวอร์ชันอื่น ({active.versions.length})
-                  </p>
-                  <ul className="mt-2 flex gap-2 overflow-x-auto pb-1">
-                    {active.versions.map((v, i) => (
-                      <li key={v.url} className="shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => setVersionIndex(i)}
-                          aria-label={`ปกเวอร์ชัน ${formatCaptured(v.capturedAt)}`}
-                          aria-pressed={versionIndex === i}
-                          className={cn(
-                            "block w-28 overflow-hidden rounded-lg border transition sm:w-32",
-                            versionIndex === i
-                              ? "border-[#e85a7a]/70"
-                              : "border-[#f3b8c4]/15 opacity-70 hover:opacity-100"
-                          )}
-                        >
-                          <ProtectedImage
-                            src={v.url}
-                            alt=""
-                            loading="lazy"
-                            decoding="async"
-                            className="aspect-video w-full object-cover"
-                          />
-                          <span className="block px-1.5 py-1 text-left text-[0.65rem] text-[#f3b8c4]/65">
-                            {formatCaptured(i === 0 ? null : v.capturedAt)}
-                          </span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-
-              <div className="flex flex-wrap items-center justify-between gap-2 px-1 pt-2 sm:px-2">
-                <a
-                  href={active.youtubeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm text-[#f3b8c4]/75 transition hover:text-[#f3b8c4]"
-                >
-                  ดูบน YouTube
-                  <ExternalLink className="size-3.5 opacity-80" aria-hidden />
-                </a>
-                <p className="text-xs tracking-wide text-[#f3b8c4]/55">
-                  {(activeIndex ?? 0) + 1} / {visible.length}
-                </p>
-              </div>
+              <ChannelBadge item={active} />
+              {active.date ? <span>{formatDate(active.date)}</span> : null}
             </>
-          ) : null}
-        </DialogContent>
-      </Dialog>
+          ) : null
+        }
+        belowImage={
+          active && active.versions.length > 1 ? (
+            <>
+              <p className="text-xs text-[#f3b8c4]/60">
+                ปกเวอร์ชันอื่น ({active.versions.length})
+              </p>
+              <ul className="mt-2 flex gap-2 overflow-x-auto pb-1">
+                {active.versions.map((v, i) => (
+                  <li key={v.url} className="shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setVersionIndex(i)}
+                      aria-label={`ปกเวอร์ชัน ${formatCaptured(v.capturedAt)}`}
+                      aria-pressed={versionIndex === i}
+                      className={cn(
+                        "block w-24 overflow-hidden rounded-lg border transition sm:w-28",
+                        versionIndex === i
+                          ? "border-[#e85a7a]/70"
+                          : "border-[#f3b8c4]/15 opacity-70 hover:opacity-100"
+                      )}
+                    >
+                      <ProtectedImage
+                        src={v.url}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        className="aspect-video w-full object-cover"
+                      />
+                      <span className="block px-1.5 py-1 text-left text-[0.65rem] text-[#f3b8c4]/65">
+                        {formatCaptured(i === 0 ? null : v.capturedAt)}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : null
+        }
+        footerStart={
+          active ? (
+            <a
+              href={active.youtubeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-sm text-[#f3b8c4]/75 transition hover:text-[#f3b8c4]"
+            >
+              ดูบน YouTube
+              <ExternalLink className="size-3.5 opacity-80" aria-hidden />
+            </a>
+          ) : null
+        }
+      />
     </section>
   );
 }

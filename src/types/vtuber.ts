@@ -385,8 +385,8 @@ export type MediaCategory =
   | "cover"
   | "event"
   | "birthday-pv"
-  | "worldend-pv"
-  | "debut-pv";
+  | "new-year"
+  | "pv";
 
 /** Homepage / media strip YouTube clip */
 export interface MediaClip {

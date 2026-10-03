@@ -51,7 +51,13 @@ const NAV_LINKS: NavLink[] = [
       { label: "ตารางรายสัปดาห์", href: "/live#weekly" },
     ],
   },
-  { kind: "section", hash: "#media", label: "Media" },
+  {
+    kind: "page",
+    href: "/media",
+    homeHash: "#media",
+    label: "Media",
+    children: [{ label: "คลังคลิปทั้งหมด", href: "/media" }],
+  },
   {
     kind: "page",
     href: "/events",

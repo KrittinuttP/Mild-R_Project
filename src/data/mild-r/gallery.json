@@ -1,152 +1,224 @@
 [
   {
-    "id": "gallery-01",
-    "src": "/assets/images/gallery-01.svg",
-    "alt": "Mild-R portrait placeholder",
-    "caption": "Portrait study",
-    "credit": "Placeholder · replace with official / fan art",
+    "id": "moment-heart-cure",
+    "src": "/assets/Gallery/moments/GNyZqvPbwAAvuGb.jpg",
+    "alt": "รักษาหัวใจ",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "lg"
   },
   {
-    "id": "gallery-02",
-    "src": "/assets/images/gallery-02.svg",
-    "alt": "Mild-R stage atmosphere placeholder",
-    "caption": "Outbreak stage",
-    "credit": "Placeholder · replace with stream key art",
-    "size": "md"
-  },
-  {
-    "id": "gallery-03",
-    "src": "/assets/images/gallery-03.svg",
-    "alt": "Mild-R soft glow placeholder",
-    "caption": "Honey glow",
-    "credit": "Placeholder · replace with #MildRArt",
+    "id": "moment-x-mild",
+    "src": "/assets/Gallery/moments/GNoSjLxbMAAiZcE.jpg",
+    "alt": "โปสเตอร์ X-MILD",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "tall"
   },
   {
-    "id": "gallery-04",
-    "src": "/assets/images/gallery-04.svg",
-    "alt": "Mild-R motif placeholder",
-    "caption": "Signal motif",
-    "credit": "Placeholder · replace with campaign visual",
+    "id": "moment-cozy-night",
+    "src": "/assets/Gallery/moments/19.jpg",
+    "alt": "ม้วนผมก่อนนอน",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "sm"
   },
   {
-    "id": "gallery-05",
-    "src": "/assets/images/gallery-04.svg",
-    "alt": "Wide motif placeholder",
-    "caption": "Wide signal",
-    "credit": "Placeholder",
-    "size": "wide"
-  },
-  {
-    "id": "gallery-06",
-    "src": "/assets/images/gallery-02.svg",
-    "alt": "Stage light study placeholder",
-    "caption": "Stage light",
-    "credit": "Placeholder",
-    "size": "md"
-  },
-  {
-    "id": "gallery-07",
-    "src": "/assets/images/gallery-01.svg",
-    "alt": "Soft expression placeholder",
-    "caption": "Soft glance",
-    "credit": "Placeholder",
+    "id": "moment-starlit-shore",
+    "src": "/assets/Gallery/moments/14.jpg",
+    "alt": "ริมทะเลใต้แสงดาว",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "sm"
   },
   {
-    "id": "gallery-08",
-    "src": "/assets/images/gallery-03.svg",
-    "alt": "Pulse glow placeholder",
-    "caption": "Pulse",
-    "credit": "Placeholder",
+    "id": "moment-good-night",
+    "src": "/assets/Gallery/moments/20.jpg",
+    "alt": "ราตรีสวัสดิ์",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "sm"
+  },
+  {
+    "id": "moment-showtime",
+    "src": "/assets/Gallery/moments/GOFlkJsbIAAdbI2.jpg",
+    "alt": "ประกาศไลฟ์ 22 พ.ค.",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "tall"
   },
   {
-    "id": "gallery-09",
-    "src": "/assets/images/gallery-04.svg",
-    "alt": "Motif fragment placeholder",
-    "caption": "Fragment",
-    "credit": "Placeholder",
+    "id": "moment-snapshot",
+    "src": "/assets/Gallery/moments/21.jpg",
+    "alt": "เมืองหิมะ",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "lg"
+  },
+  {
+    "id": "moment-up-close",
+    "src": "/assets/Gallery/moments/06.jpg",
+    "alt": "ขยับแว่น",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "sm"
   },
   {
-    "id": "gallery-10",
-    "src": "/assets/images/gallery-01.svg",
-    "alt": "Close-up study placeholder",
-    "caption": "Close-up",
-    "credit": "Placeholder",
-    "size": "md"
-  },
-  {
-    "id": "gallery-11",
-    "src": "/assets/images/gallery-02.svg",
-    "alt": "Night outbreak placeholder",
-    "caption": "Night signal",
-    "credit": "Placeholder",
-    "size": "wide"
-  },
-  {
-    "id": "gallery-12",
-    "src": "/assets/images/gallery-03.svg",
-    "alt": "Warm rose placeholder",
-    "caption": "Warm rose",
-    "credit": "Placeholder",
+    "id": "moment-holiday-toast",
+    "src": "/assets/Gallery/moments/12.jpg",
+    "alt": "ชนแก้วคริสต์มาส",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "sm"
   },
   {
-    "id": "gallery-13",
-    "src": "/assets/images/gallery-04.svg",
-    "alt": "Archive tile placeholder",
-    "caption": "Archive 13",
-    "credit": "Placeholder · load on demand",
-    "size": "md",
-    "loadOnDemand": true
+    "id": "moment-daydream",
+    "src": "/assets/Gallery/moments/17.jpg",
+    "alt": "เท้าคางในคาเฟ่",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "lg"
   },
   {
-    "id": "gallery-14",
-    "src": "/assets/images/gallery-01.svg",
-    "alt": "Archive tile placeholder",
-    "caption": "Archive 14",
-    "credit": "Placeholder · load on demand",
-    "size": "tall",
-    "loadOnDemand": true
+    "id": "moment-moonlit-beach",
+    "src": "/assets/Gallery/moments/11.jpg",
+    "alt": "ทะเลแสงจันทร์",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "sm"
   },
   {
-    "id": "gallery-15",
-    "src": "/assets/images/gallery-01.svg",
-    "alt": "Archive tile placeholder",
-    "caption": "Archive 15",
-    "credit": "Placeholder · load on demand",
-    "size": "lg",
-    "loadOnDemand": true
+    "id": "moment-winter-hug",
+    "src": "/assets/Gallery/moments/08.jpg",
+    "alt": "อ้อมกอดหน้าหนาว",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "sm"
   },
   {
-    "id": "gallery-16",
-    "src": "/assets/images/gallery-02.svg",
-    "alt": "Archive tile placeholder",
-    "caption": "Archive 16",
-    "credit": "Placeholder · load on demand",
+    "id": "moment-happy-glasses",
+    "src": "/assets/Gallery/moments/04.jpg",
+    "alt": "ยิ้มหวานใส่แว่น",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "sm"
+  },
+  {
+    "id": "moment-night-shift",
+    "src": "/assets/Gallery/moments/01.jpg",
+    "alt": "พยาบาลกะดึก",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "lg"
+  },
+  {
+    "id": "moment-qipao-night",
+    "src": "/assets/Gallery/moments/03.jpg",
+    "alt": "ชุดกี่เพ้า",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "sm"
+  },
+  {
+    "id": "moment-cafe-gaze",
+    "src": "/assets/Gallery/moments/09.jpg",
+    "alt": "แว่นกรอบทอง",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "sm"
+  },
+  {
+    "id": "moment-boarding-call",
+    "src": "/assets/Gallery/moments/02.jpg",
+    "alt": "แอร์โฮสเตสหูแมว",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "sm"
+  },
+  {
+    "id": "moment-heart-hands",
+    "src": "/assets/Gallery/moments/16.jpg",
+    "alt": "มือรูปหัวใจ",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "sm"
+  },
+  {
+    "id": "moment-membership",
+    "src": "/assets/Gallery/moments/GPtCsPJakAAeTFc.jpg",
+    "alt": "เปิดระบบเมมเบอร์",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "sm",
     "loadOnDemand": true
   },
   {
-    "id": "gallery-17",
-    "src": "/assets/images/gallery-03.svg",
-    "alt": "Archive tile placeholder",
-    "caption": "Archive 17",
-    "credit": "Placeholder · load on demand",
-    "size": "wide",
+    "id": "moment-kitty-nurse",
+    "src": "/assets/Gallery/moments/GPJUYFlbgAASnAp.jpg",
+    "alt": "พยาบาลหูแมว",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "sm",
     "loadOnDemand": true
   },
   {
-    "id": "gallery-18",
-    "src": "/assets/images/gallery-04.svg",
-    "alt": "Archive tile placeholder",
-    "caption": "Archive 18",
-    "credit": "Placeholder · load on demand",
-    "size": "md",
+    "id": "moment-sweet-wink",
+    "src": "/assets/Gallery/moments/15.jpg",
+    "alt": "ขยิบตา",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "lg",
+    "loadOnDemand": true
+  },
+  {
+    "id": "moment-paw-paw",
+    "src": "/assets/Gallery/moments/07.jpg",
+    "alt": "อุ้งเท้าแมว",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "sm",
+    "loadOnDemand": true
+  },
+  {
+    "id": "moment-undercover",
+    "src": "/assets/Gallery/moments/05.jpg",
+    "alt": "สายลับแว่นดำ",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "sm",
+    "loadOnDemand": true
+  },
+  {
+    "id": "moment-heart-pose",
+    "src": "/assets/Gallery/moments/Mild-03.jpg",
+    "alt": "ส่งหัวใจ",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "tall",
+    "loadOnDemand": true
+  },
+  {
+    "id": "moment-full-uniform",
+    "src": "/assets/Gallery/moments/Mild-02.jpg",
+    "alt": "ชุดพยาบาลเต็มตัว",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "tall",
+    "loadOnDemand": true
+  },
+  {
+    "id": "moment-shy-pose",
+    "src": "/assets/Gallery/moments/Mild-01.jpg",
+    "alt": "เขินจัง",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "tall",
+    "loadOnDemand": true
+  },
+  {
+    "id": "moment-chin-up",
+    "src": "/assets/Gallery/moments/10.jpg",
+    "alt": "จับคาง",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "sm",
+    "loadOnDemand": true
+  },
+  {
+    "id": "moment-little-heart",
+    "src": "/assets/Gallery/moments/18.jpg",
+    "alt": "หัวใจดวงน้อย",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "sm",
+    "loadOnDemand": true
+  },
+  {
+    "id": "moment-character-sheet",
+    "src": "/assets/Gallery/moments/character-sheet.jpg",
+    "alt": "ภาพดีไซน์ตัวละคร",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "lg",
+    "loadOnDemand": true
+  },
+  {
+    "id": "moment-winter-treat",
+    "src": "/assets/Gallery/moments/13.jpg",
+    "alt": "เครปหน้าหนาว",
+    "credit": "Mild-R · X (@MildRWorldEnd)",
+    "size": "lg",
     "loadOnDemand": true
   }
 ]

@@ -5,17 +5,17 @@ import { GallerySection } from "@/components/gallery/GallerySection";
 import { mildRData } from "@/data/vtuber-data";
 
 export const metadata: Metadata = {
-  title: "Visual Archive | Mild-R Fanclub",
-  description: "คลังภาพ Archive ของ Mild-R",
+  title: "Moments | Mild-R Fanclub",
+  description: "ช่วงเวลาของ Mild-R รวมภาพบรรยากาศและภาพประจำตัว",
 };
 
 export default function GalleryArchivePage() {
   return (
     <GallerySection
       id="visual-archive"
-      eyebrow="Archive"
+      eyebrow="Moments"
       icon={Images}
-      title="Visual archive"
+      title="ช่วงเวลาของ Mild-R"
       description="คลังภาพของ Mild-R"
       headingSize="h2"
       showTopFade={false}

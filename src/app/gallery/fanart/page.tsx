@@ -13,9 +13,9 @@ export default function GalleryFanArtPage() {
   return (
     <GallerySection
       id="fan-art"
-      eyebrow="Gallery"
+      eyebrow="Fan art"
       icon={Palette}
-      title="Fan art"
+      title="แฟนอาร์ต"
       description="แฟนอาร์ต Mild-R จากฮันนี่"
       headingSize="h2"
       showTopFade={false}

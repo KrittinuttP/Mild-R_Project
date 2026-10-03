@@ -13,9 +13,9 @@ import {
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { HeartAtmosphere } from "@/components/animations/HeartAtmosphere";
 import {
-  CafeImageLightbox,
-  type CafeLightboxItem,
-} from "@/components/cafe/CafeImageLightbox";
+  ImageLightbox,
+  type ImageLightboxItem,
+} from "@/components/media/ImageLightbox";
 import { CafeCountdown } from "@/components/cafe/CafeCountdown";
 import { CafeTopSecret } from "@/components/cafe/CafeTopSecret";
 import { CafeVenueMenuBook } from "@/components/cafe/CafeVenueMenuBook";
@@ -244,6 +244,8 @@ function CafeThumb({
 
 type CafeLightboxSection = "venue" | "menu" | "goods" | "otherMenu" | "operations";
 
+type CafeLightboxItem = ImageLightboxItem & { group?: string };
+
 function buildCafeLightboxGroups(cafe: CafePage): Record<
   CafeLightboxSection,
   CafeLightboxItem[]
@@ -469,6 +471,8 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
 
   const lightboxItems = lightbox ? lightboxGroups[lightbox.section] : [];
   const lightboxIndex = lightbox?.index ?? null;
+  const activeLightboxGroup =
+    lightboxIndex !== null ? lightboxItems[lightboxIndex]?.group : undefined;
 
   useGSAP(
     () => {
@@ -1465,9 +1469,13 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
         </div>
       </Shell>
 
-      <CafeImageLightbox
+      <ImageLightbox
+        tone="cafe"
+        useProtectedImage
         items={lightboxItems}
         activeIndex={lightboxIndex}
+        subtitle={activeLightboxGroup}
+        counterLabel={activeLightboxGroup}
         onActiveIndexChange={(index) => {
           if (index === null || !lightbox) {
             setLightbox(null);

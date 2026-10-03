@@ -284,7 +284,7 @@ function SlotCard({
               src={coverUrl}
               alt={label}
               wrapClassName="absolute inset-0 block"
-              className={cn(
+          className={cn(
                 "absolute inset-0 h-full w-full object-cover object-center transition duration-500 group-hover:scale-[1.04]",
                 cancelled && "opacity-60 grayscale-[0.35]"
               )}
@@ -355,7 +355,7 @@ function SlotCard({
                         : "text-[#fff5f7]"
                 }
               />
-            </div>
+      </div>
           )}
         </div>
         {hasBadges ? (
@@ -403,8 +403,8 @@ function SlotCard({
 
       {/* 📝 3. Title Content */}
       <div className="flex min-w-0 flex-1 flex-col p-2 sm:p-2.5">
-        <p
-          className={cn(
+      <p
+        className={cn(
             "min-w-0 font-medium text-[#fff5f7]",
             compact
               ? "text-[0.72rem] leading-tight"
@@ -1317,7 +1317,7 @@ export function LiveWeekTable({
                 crowded={crowded}
             onOpen={() => openDetail(slot)}
           />
-            </div>
+        </div>
           ))}
         </div>
       );
@@ -1451,7 +1451,7 @@ export function LiveWeekTable({
                     >
                     {englishWeekday(date)}
                   </p>
-                  </div>
+                </div>
                   <div className="mt-1 flex flex-wrap items-center justify-center gap-1">
                     <span
                       className={cn(

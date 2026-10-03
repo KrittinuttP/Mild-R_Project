@@ -2,12 +2,19 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Clapperboard, ExternalLink, Play } from "lucide-react";
+import {
+  Clapperboard,
+  ExternalLink,
+  History,
+  Play,
+  Smartphone,
+  type LucideIcon,
+} from "lucide-react";
 
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { buttonVariants } from "@/components/ui/button";
+import { useVideos } from "@/hooks/useVideos";
 import { groupMediaByCategory } from "@/lib/media";
-import { PROJECTS_COMING_SOON } from "@/lib/site-flags";
 import {
   CTA_OUTLINE_CLASS,
   DISPLAY_H2_CLASS,
@@ -15,6 +22,7 @@ import {
   META_CLASS,
   META_MUTED_CLASS,
 } from "@/lib/site-ui";
+import { videoSubtitle } from "@/lib/video-format";
 import {
   getYoutubeEmbedUrl,
   getYoutubeThumbnailUrl,
@@ -22,44 +30,176 @@ import {
 } from "@/lib/youtube";
 import { cn } from "@/lib/utils";
 import type { MediaCategory, MediaClip, VtuberProfile } from "@/types/vtuber";
+import type { VideoItem } from "@/types/video";
 
 type MediaProps = {
   data: VtuberProfile;
 };
 
+type DynamicTabId = "latest" | "shorts";
+type TabId = MediaCategory | DynamicTabId;
+
+type DynamicTab = {
+  id: DynamicTabId;
+  label: string;
+  labelLocal: string;
+  icon: LucideIcon;
+  query: string;
+};
+
+const DYNAMIC_TAB_LIMIT = 8;
+
+const DYNAMIC_TABS: DynamicTab[] = [
+  {
+    id: "latest",
+    label: "Latest",
+    labelLocal: "คลิปล่าสุด",
+    icon: History,
+    query: `kind=video,premiere&limit=${DYNAMIC_TAB_LIMIT}`,
+  },
+  {
+    id: "shorts",
+    label: "Shorts",
+    labelLocal: "คลิปสั้น",
+    icon: Smartphone,
+    query: `kind=short&limit=${DYNAMIC_TAB_LIMIT}`,
+  },
+];
+
+/** Curated clips and fetched videos share one player + playlist. */
+type PlayerClip = {
+  id: string;
+  title: string;
+  titleLocal?: string;
+  description?: string;
+  youtubeUrl: string;
+  embed: boolean;
+};
+
+function fromCurated(clip: MediaClip): PlayerClip {
+  return {
+    id: clip.id,
+    title: clip.title,
+    titleLocal: clip.titleLocal,
+    description: clip.description,
+    youtubeUrl: clip.youtubeUrl,
+    embed: Boolean(clip.embedExternal),
+  };
+}
+
+function fromVideo(video: VideoItem): PlayerClip {
+  return {
+    id: video.videoId,
+    title: video.title,
+    titleLocal: videoSubtitle(video),
+    youtubeUrl: video.youtubeUrl,
+    embed: video.embeddable,
+  };
+}
+
+function isDynamicTab(tab: TabId): tab is DynamicTabId {
+  return DYNAMIC_TABS.some((t) => t.id === tab);
+}
+
 function pickInitialClip(clips: MediaClip[]) {
   return clips.find((clip) => clip.featured) ?? clips[0] ?? null;
+}
+
+const TAB_BUTTON_CLASS =
+  "shrink-0 rounded-xl px-3 py-2.5 text-left transition sm:min-w-[7rem] sm:px-4 lg:grow";
+
+function TabButton({
+  selected,
+  icon: Icon,
+  label,
+  sublabel,
+  onClick,
+}: {
+  selected: boolean;
+  icon: LucideIcon;
+  label: string;
+  sublabel: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={selected}
+      onClick={onClick}
+      className={cn(
+        TAB_BUTTON_CLASS,
+        selected
+          ? "bg-[#e85a7a] text-[#140a0d] shadow-sm"
+          : "text-[#f3b8c4]/70 hover:bg-white/5 hover:text-[#f7d7de]"
+      )}
+    >
+      <span className="block lg:mx-auto lg:w-fit">
+        <span className="flex items-center gap-2">
+          <Icon
+            className={cn(
+              "size-4 shrink-0",
+              selected ? "text-[#140a0d]" : "text-[#f3b8c4]/55"
+            )}
+            aria-hidden
+          />
+          <span className="text-sm font-medium tracking-wide">{label}</span>
+        </span>
+        <span
+          className={cn(
+            "mt-0.5 block pl-6 text-xs",
+            selected ? "text-[#140a0d]/70" : "text-[#f3b8c4]/50"
+          )}
+        >
+          {sublabel}
+        </span>
+      </span>
+    </button>
+  );
 }
 
 export function Media({ data }: MediaProps) {
   const clips = data.media;
   const groups = useMemo(() => groupMediaByCategory(clips), [clips]);
-  const [activeId, setActiveId] = useState(
-    () => pickInitialClip(clips)?.id ?? ""
+  const initialClip = pickInitialClip(clips);
+  const [activeTab, setActiveTab] = useState<TabId>(
+    () => initialClip?.category ?? groups[0]?.id ?? "latest"
   );
+  const [activeId, setActiveId] = useState(() => initialClip?.id ?? "");
 
-  const active = useMemo(
-    () => clips.find((clip) => clip.id === activeId) ?? pickInitialClip(clips),
-    [activeId, clips]
+  const dynamicTab = isDynamicTab(activeTab)
+    ? DYNAMIC_TABS.find((t) => t.id === activeTab)
+    : undefined;
+  const {
+    videos,
+    status: videosStatus,
+    retry: retryVideos,
+  } = useVideos(Boolean(dynamicTab), dynamicTab?.query ?? "");
+
+  const curatedGroup = dynamicTab
+    ? undefined
+    : (groups.find((group) => group.id === activeTab) ?? groups[0]);
+
+  const playlist = useMemo<PlayerClip[]>(
+    () =>
+      dynamicTab
+        ? videos.map(fromVideo)
+        : (curatedGroup?.clips ?? []).map(fromCurated),
+    [dynamicTab, videos, curatedGroup]
   );
-
-  const activeCategory: MediaCategory | undefined = active?.category;
-  const activeGroup =
-    groups.find((group) => group.id === activeCategory) ?? groups[0];
-  const visibleClips = activeGroup?.clips ?? [];
+  const active = playlist.find((clip) => clip.id === activeId) ?? playlist[0] ?? null;
+  const playlistLabel = dynamicTab?.label ?? curatedGroup?.label;
+  const loadingVideos = Boolean(dynamicTab) && videosStatus !== "ready";
 
   const videoId = getYoutubeVideoId(active?.youtubeUrl);
-  const canEmbed = Boolean(active?.embedExternal && videoId);
+  const canEmbed = Boolean(active?.embed && videoId);
   const youtubeSocial = data.socials.find((s) => s.platform === "youtube");
-  const fansongProject = data.projects.find(
-    (project) => project.category.toLowerCase() === "fansong"
-  );
 
-  function selectCategory(categoryId: MediaCategory) {
-    if (active?.category === categoryId) return;
-    const group = groups.find((g) => g.id === categoryId);
-    const next = group?.clips[0];
-    if (next) setActiveId(next.id);
+  function selectTab(tab: TabId) {
+    if (tab === activeTab) return;
+    setActiveTab(tab);
+    const group = groups.find((g) => g.id === tab);
+    setActiveId(group?.clips[0]?.id ?? "");
   }
 
   if (clips.length === 0) return null;
@@ -89,48 +229,30 @@ export function Media({ data }: MediaProps) {
             aria-label="หมวดคลิป"
             className="flex gap-1 overflow-x-auto rounded-2xl bg-black/25 p-1 ring-1 ring-white/10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-1.5"
           >
-            {groups.map((group) => {
-              const selected = group.id === activeGroup?.id;
-              const Icon = group.icon;
-              return (
-                <button
-                  key={group.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={selected}
-                  onClick={() => selectCategory(group.id)}
-                  className={cn(
-                    "shrink-0 rounded-xl px-3 py-2.5 text-left transition sm:min-w-[7rem] sm:px-4",
-                    selected
-                      ? "bg-[#e85a7a] text-[#140a0d] shadow-sm"
-                      : "text-[#f3b8c4]/70 hover:bg-white/5 hover:text-[#f7d7de]"
-                  )}
-                >
-                  <span className="flex items-center gap-2">
-                    <Icon
-                      className={cn(
-                        "size-4 shrink-0",
-                        selected ? "text-[#140a0d]" : "text-[#f3b8c4]/55"
-                      )}
-                      aria-hidden
-                    />
-                    <span className="text-sm font-medium tracking-wide">
-                      {group.label}
-                    </span>
-                  </span>
-                  <span
-                    className={cn(
-                      "mt-0.5 block pl-6 text-xs",
-                      selected ? "text-[#140a0d]/70" : "text-[#f3b8c4]/50"
-                    )}
-                  >
-                    {group.labelLocal
-                      ? `${group.labelLocal} · ${group.clips.length}`
-                      : `${group.clips.length} คลิป`}
-                  </span>
-                </button>
-              );
-            })}
+            {groups.map((group) => (
+              <TabButton
+                key={group.id}
+                selected={group.id === activeTab}
+                icon={group.icon}
+                label={group.label}
+                sublabel={
+                  group.labelLocal
+                    ? `${group.labelLocal} · ${group.clips.length}`
+                    : `${group.clips.length} คลิป`
+                }
+                onClick={() => selectTab(group.id)}
+              />
+            ))}
+            {DYNAMIC_TABS.map((tab) => (
+              <TabButton
+                key={tab.id}
+                selected={tab.id === activeTab}
+                icon={tab.icon}
+                label={tab.label}
+                sublabel={tab.labelLocal}
+                onClick={() => selectTab(tab.id)}
+              />
+            ))}
           </div>
         </ScrollReveal>
 
@@ -177,6 +299,8 @@ export function Media({ data }: MediaProps) {
                     </span>
                   </span>
                 </Link>
+              ) : loadingVideos ? (
+                <div className="absolute inset-0 animate-pulse bg-[#1a0c12]" />
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center">
                   <Play className="size-10 text-[#e85a7a]/80" />
@@ -208,48 +332,76 @@ export function Media({ data }: MediaProps) {
             <ScrollReveal>
               <h3 className={META_MUTED_CLASS}>
                 Playlist
-                {activeGroup ? (
+                {playlistLabel ? (
                   <span className="ml-2 tracking-normal text-[#f3b8c4]/50 normal-case">
-                    {activeGroup.label}
+                    {playlistLabel}
                   </span>
                 ) : null}
               </h3>
 
               <ul className="mt-4 max-h-[min(28rem,55vh)] space-y-2 overflow-y-auto rounded-3xl border border-[#f3b8c4]/12 bg-[#1a0c12]/40 p-2 [scrollbar-color:rgba(243,184,196,0.35)_transparent] [scrollbar-width:thin]">
-                {visibleClips.map((clip) => {
-                  const selected = clip.id === active?.id;
-                  return (
-                    <li key={clip.id}>
-                      <button
-                        type="button"
-                        onClick={() => setActiveId(clip.id)}
-                        className={cn(
-                          "flex w-full min-h-14 items-start gap-3 rounded-2xl px-3 py-3 text-left transition",
-                          selected
-                            ? "bg-[#e85a7a]/15 text-[#fff5f7]"
-                            : "text-[#f7d7de]/80 hover:bg-white/[0.04] hover:text-[#fff5f7]"
-                        )}
-                      >
-                        <Play
-                          className={cn(
-                            "mt-1 size-4 shrink-0",
-                            selected ? "text-[#e85a7a]" : "text-[#f3b8c4]/55"
-                          )}
-                        />
-                        <span>
-                          <span className="block text-sm font-medium sm:text-base">
-                            {clip.title}
-                          </span>
-                          {clip.titleLocal ? (
-                            <span className="mt-0.5 block text-xs text-[#f3b8c4]/65 sm:text-sm">
-                              {clip.titleLocal}
-                            </span>
-                          ) : null}
-                        </span>
-                      </button>
+                {dynamicTab && videosStatus === "error" ? (
+                  <li className="flex flex-wrap items-center gap-3 px-3 py-3">
+                    <p className="text-sm text-[#f3b8c4]/60">โหลดคลิปไม่สำเร็จ</p>
+                    <button
+                      type="button"
+                      onClick={retryVideos}
+                      className={cn(
+                        buttonVariants({ variant: "outline", size: "sm" }),
+                        CTA_OUTLINE_CLASS
+                      )}
+                    >
+                      ลองใหม่
+                    </button>
+                  </li>
+                ) : loadingVideos ? (
+                  Array.from({ length: 4 }, (_, i) => (
+                    <li key={i} className="flex min-h-14 items-start gap-3 px-3 py-3">
+                      <span className="mt-1 size-4 shrink-0 animate-pulse rounded bg-[#241019]" />
+                      <span className="flex-1 space-y-2">
+                        <span className="block h-3.5 w-4/5 animate-pulse rounded bg-[#241019]" />
+                        <span className="block h-3 w-2/5 animate-pulse rounded bg-[#241019]" />
+                      </span>
                     </li>
-                  );
-                })}
+                  ))
+                ) : playlist.length === 0 ? (
+                  <li className="px-3 py-3 text-sm text-[#f3b8c4]/60">ยังไม่มีคลิปในหมวดนี้</li>
+                ) : (
+                  playlist.map((clip) => {
+                    const selected = clip.id === active?.id;
+                    return (
+                      <li key={clip.id}>
+                        <button
+                          type="button"
+                          onClick={() => setActiveId(clip.id)}
+                          className={cn(
+                            "flex w-full min-h-14 items-start gap-3 rounded-2xl px-3 py-3 text-left transition",
+                            selected
+                              ? "bg-[#e85a7a]/15 text-[#fff5f7]"
+                              : "text-[#f7d7de]/80 hover:bg-white/[0.04] hover:text-[#fff5f7]"
+                          )}
+                        >
+                          <Play
+                            className={cn(
+                              "mt-1 size-4 shrink-0",
+                              selected ? "text-[#e85a7a]" : "text-[#f3b8c4]/55"
+                            )}
+                          />
+                          <span>
+                            <span className="block text-sm font-medium sm:text-base">
+                              {clip.title}
+                            </span>
+                            {clip.titleLocal ? (
+                              <span className="mt-0.5 block text-xs text-[#f3b8c4]/65 sm:text-sm">
+                                {clip.titleLocal}
+                              </span>
+                            ) : null}
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })
+                )}
               </ul>
             </ScrollReveal>
 
@@ -270,6 +422,17 @@ export function Media({ data }: MediaProps) {
                 </Link>
               ) : null}
 
+              <Link
+                href="/media"
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "lg" }),
+                  "w-full justify-between text-[#f3b8c4]/80 hover:text-[#fff5f7]"
+                )}
+              >
+                คลังคลิปทั้งหมด
+                <span aria-hidden>→</span>
+              </Link>
+
               {youtubeSocial ? (
                 <Link
                   href={youtubeSocial.url}
@@ -282,19 +445,6 @@ export function Media({ data }: MediaProps) {
                 >
                   ช่อง {youtubeSocial.handle ?? "YouTube"}
                   <ExternalLink className="size-4 opacity-70" />
-                </Link>
-              ) : null}
-
-              {fansongProject && !PROJECTS_COMING_SOON ? (
-                <Link
-                  href={`/projects/${fansongProject.slug}`}
-                  className={cn(
-                    buttonVariants({ variant: "ghost", size: "lg" }),
-                    "w-full justify-between text-[#f3b8c4]/80 hover:text-[#fff5f7]"
-                  )}
-                >
-                  Fansong
-                  <span aria-hidden>→</span>
                 </Link>
               ) : null}
             </ScrollReveal>

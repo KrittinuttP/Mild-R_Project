@@ -1,25 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   Download,
   Sparkles,
 } from "lucide-react";
 
+import { ImageLightbox } from "@/components/media/ImageLightbox";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { BackLink } from "@/components/layout/BackLink";
-import { buttonVariants } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { HBD_AVATAR_DEFAULT } from "@/lib/hbd-upload";
 import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
 import { PROJECTS_COMING_SOON } from "@/lib/site-flags";
@@ -53,7 +44,7 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
           id: wish.id,
           src: wish.image as string,
           alt: wish.alt ?? `Wish from ${wish.from}`,
-          from: wish.from,
+          caption: `จาก ${wish.from}`,
           downloadUrl: wish.downloadUrl,
         })),
     [wishes]
@@ -66,38 +57,6 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
     const index = lightboxItems.findIndex((item) => item.id === wishId);
     if (index >= 0) setLightboxIndex(index);
   };
-
-  const goPrev = () => {
-    if (lightboxItems.length < 2 || lightboxIndex === null) return;
-    setLightboxIndex(
-      (lightboxIndex - 1 + lightboxItems.length) % lightboxItems.length
-    );
-  };
-
-  const goNext = () => {
-    if (lightboxItems.length < 2 || lightboxIndex === null) return;
-    setLightboxIndex((lightboxIndex + 1) % lightboxItems.length);
-  };
-
-  useEffect(() => {
-    if (lightboxIndex === null || lightboxItems.length < 2) return;
-
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "ArrowLeft") {
-        event.preventDefault();
-        setLightboxIndex(
-          (lightboxIndex - 1 + lightboxItems.length) % lightboxItems.length
-        );
-      }
-      if (event.key === "ArrowRight") {
-        event.preventDefault();
-        setLightboxIndex((lightboxIndex + 1) % lightboxItems.length);
-      }
-    };
-
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [lightboxIndex, lightboxItems.length]);
 
   useGSAP(
     () => {
@@ -483,80 +442,25 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
         </div>
       </footer>
 
-      <Dialog
-        open={lightboxIndex !== null}
-        onOpenChange={(open) => {
-          if (!open) setLightboxIndex(null);
-        }}
-      >
-        <DialogContent
-          className="flex h-[calc(100dvh-0.75rem)] max-h-[calc(100dvh-0.75rem)] w-[calc(100vw-0.75rem)] max-w-none flex-col gap-2 overflow-hidden rounded-2xl border-[#f3b8c4]/20 bg-[#140a0d] p-2 text-[#fff5f7] sm:h-[calc(100dvh-1.25rem)] sm:max-h-[calc(100dvh-1.25rem)] sm:w-[calc(100vw-1.25rem)] sm:max-w-none sm:gap-3 sm:p-3"
-          showCloseButton
-        >
-          {activeLightbox ? (
-            <>
-              <DialogHeader className="shrink-0 flex-row items-center justify-between gap-3 px-1 pt-0.5 pr-10 sm:px-2 sm:pr-12">
-                <DialogTitle className={cn(DISPLAY, "min-w-0 truncate text-base sm:text-lg")}>
-                  จาก {activeLightbox.from}
-                </DialogTitle>
-                <DialogDescription className="sr-only">
-                  ดูรูปอวยพรขนาดใหญ่
-                </DialogDescription>
-                {activeLightbox.downloadUrl ? (
-                  <a
-                    href={activeLightbox.downloadUrl}
-                    download
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs text-[#f3b8c4]/85 ring-1 ring-[#f3b8c4]/25 transition hover:bg-[#e85a7a]/20 hover:text-[#fff5f7]"
-                  >
-                    <Download className="size-3.5" />
-                    <span className="hidden sm:inline">ดาวน์โหลด JPG</span>
-                    <span className="sm:hidden">JPG</span>
-                  </a>
-                ) : null}
-              </DialogHeader>
-
-              <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden">
-                <ProtectedImage
-                  src={activeLightbox.src}
-                  alt={activeLightbox.alt}
-                  className="max-h-full max-w-full h-auto w-auto object-contain"
-                />
-
-                {lightboxItems.length > 1 ? (
-                  <>
-                    <button
-                      type="button"
-                      aria-label="รูปก่อนหน้า"
-                      onClick={goPrev}
-                      className={cn(
-                        buttonVariants({ variant: "ghost", size: "icon" }),
-                        "absolute top-1/2 left-1 size-10 -translate-y-1/2 rounded-full border border-[#f3b8c4]/25 bg-[#140a0d]/85 text-[#fff5f7] backdrop-blur-sm transition hover:bg-[#e85a7a]/90 hover:text-[#fff5f7] sm:left-3"
-                      )}
-                    >
-                      <ChevronLeft className="size-5" />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label="รูปถัดไป"
-                      onClick={goNext}
-                      className={cn(
-                        buttonVariants({ variant: "ghost", size: "icon" }),
-                        "absolute top-1/2 right-1 size-10 -translate-y-1/2 rounded-full border border-[#f3b8c4]/25 bg-[#140a0d]/85 text-[#fff5f7] backdrop-blur-sm transition hover:bg-[#e85a7a]/90 hover:text-[#fff5f7] sm:right-3"
-                      )}
-                    >
-                      <ChevronRight className="size-5" />
-                    </button>
-                  </>
-                ) : null}
-              </div>
-
-              <p className="shrink-0 px-1 pb-0.5 text-center text-xs tracking-wide text-[#f3b8c4]/70 sm:px-2">
-                {(lightboxIndex ?? 0) + 1} / {lightboxItems.length}
-              </p>
-            </>
-          ) : null}
-        </DialogContent>
-      </Dialog>
+      <ImageLightbox
+        items={lightboxItems}
+        activeIndex={lightboxIndex}
+        onActiveIndexChange={setLightboxIndex}
+        useProtectedImage
+        headerAside={
+          activeLightbox?.downloadUrl ? (
+            <a
+              href={activeLightbox.downloadUrl}
+              download
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs text-[#f3b8c4]/85 ring-1 ring-[#f3b8c4]/25 transition hover:bg-[#e85a7a]/20 hover:text-[#fff5f7]"
+            >
+              <Download className="size-3.5" />
+              <span className="hidden sm:inline">ดาวน์โหลด JPG</span>
+              <span className="sm:hidden">JPG</span>
+            </a>
+          ) : null
+        }
+      />
     </article>
   );
 }

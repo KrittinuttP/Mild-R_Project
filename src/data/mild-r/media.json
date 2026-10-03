@@ -26,11 +26,11 @@
     "embedExternal": false
   },
   {
-    "id": "cover-getcha",
-    "title": "GETCHA!",
-    "titleLocal": "Cover — Giga & KIRA · with Jolly Estaa",
-    "youtubeUrl": "https://www.youtube.com/watch?v=OBaPdA0Ayg4",
-    "category": "cover",
+    "id": "event-pastry-fantasy-2026-aikotoba",
+    "title": "Aikotoba III",
+    "titleLocal": "Pastry Fantasy 2026 · with Debirun",
+    "youtubeUrl": "https://www.youtube.com/watch?v=Sizrx7HiPEo",
+    "category": "event",
     "embedExternal": false
   },
   {
@@ -50,6 +50,14 @@
     "embedExternal": false
   },
   {
+    "id": "event-maruya-42-getcha",
+    "title": "GETCHA!",
+    "titleLocal": "MARUYA #42 · with Jolly Estaa",
+    "youtubeUrl": "https://www.youtube.com/watch?v=OBaPdA0Ayg4",
+    "category": "event",
+    "embedExternal": false
+  },
+  {
     "id": "event-pastry-fantasy",
     "title": "Pastry Fantasy Vtuber Concert",
     "titleLocal": "Pixela World End · Farmhouse",
@@ -60,7 +68,7 @@
   {
     "id": "birthday-pv-teaser",
     "title": "คำอธิษฐานที่ฝากถึงดวงดาว",
-    "titleLocal": "Birthday Teaser",
+    "titleLocal": "Birthday Teaser 2025",
     "youtubeUrl": "https://www.youtube.com/watch?v=ilowFP9Uw3o",
     "category": "birthday-pv",
     "embedExternal": true
@@ -68,9 +76,25 @@
   {
     "id": "birthday-pv-chat",
     "title": "สนใจอยู่คุยด้วยกันไหมคะ?",
-    "titleLocal": "Birthday PV",
+    "titleLocal": "Birthday Teaser 2024",
     "youtubeUrl": "https://www.youtube.com/watch?v=Y1R-L7DN7aw",
     "category": "birthday-pv",
+    "embedExternal": true
+  },
+  {
+    "id": "new-year-2026",
+    "title": "รักนะฮันนี่ของมายยยยด์",
+    "titleLocal": "อวยพรปีใหม่ 2026",
+    "youtubeUrl": "https://www.youtube.com/watch?v=motFiWA7Kk4",
+    "category": "new-year",
+    "embedExternal": true
+  },
+  {
+    "id": "new-year-2025",
+    "title": "ขอให้เที่ยวอย่างมีความสุขนะคะเธอ",
+    "titleLocal": "อวยพรปีใหม่ 2025",
+    "youtubeUrl": "https://www.youtube.com/watch?v=HraEjaJJ5bk",
+    "category": "new-year",
     "embedExternal": true
   },
   {
@@ -78,7 +102,7 @@
     "title": "เมื่อวันก่อน ไปดูใครมาห่ะ?",
     "titleLocal": "Debut PV",
     "youtubeUrl": "https://www.youtube.com/watch?v=fBt1KyGY88E",
-    "category": "debut-pv",
+    "category": "pv",
     "embedExternal": true
   },
   {
@@ -86,7 +110,7 @@
     "title": "ภัยพิบัติระดับ Virtual Youtuber",
     "titleLocal": "Pixela World End PV",
     "youtubeUrl": "https://www.youtube.com/watch?v=Xyh7xlkYri8",
-    "category": "worldend-pv",
+    "category": "pv",
     "embedExternal": true
   }
 ]

@@ -103,6 +103,20 @@
         {
           "label": "ประกาศคอนเสิร์ต",
           "url": "https://x.com/PixelaProject/status/2067203058124407055"
+        },
+        {
+          "label": "คลิป Aikotoba III — Debirun & Mild-R (YouTube)",
+          "url": "https://www.youtube.com/watch?v=Sizrx7HiPEo"
+        }
+      ],
+      "lives": [
+        {
+          "videoId": "Sizrx7HiPEo",
+          "kind": "video",
+          "title": "Aikotoba III 【愛言葉III】| Covered by Debirun & MildR | VTuber Concert \"Pastry Fantasy 2026",
+          "date": "2026-10-03",
+          "time": "12:00",
+          "channel": "Pixela Official"
         }
       ]
     },
@@ -345,6 +359,12 @@
         },
         {
           "date": "2025-10-31",
+          "time": "18:00 น.",
+          "label": "ไลฟ์รวม Pixela Halloween",
+          "note": "ช่อง Pixela Official"
+        },
+        {
+          "date": "2025-10-31",
           "endDate": "2025-12-01",
           "label": "พรีออเดอร์สินค้า Pixela Halloween 2025",
           "note": "ร้าน VFORGE · เริ่มจัดส่งช่วงมกราคม 2026"
@@ -353,6 +373,13 @@
       "lives": [
         {
           "videoId": "z3Dn8mmeONk"
+        },
+        {
+          "videoId": "D2JOhiOMyN4",
+          "title": "【Pixela Halloween】ใครคือผีในหมู่พวกเรากันแน่!!!",
+          "date": "2025-10-31",
+          "time": "18:00",
+          "channel": "Pixela Official"
         }
       ],
       "cover": "/assets/events/mild-r-halloween-2025.webp",
@@ -472,6 +499,20 @@
         {
           "label": "คลิปการแสดง GETCHA!",
           "url": "https://x.com/PixelaProject/status/1900112094504063220"
+        },
+        {
+          "label": "คลิปการแสดง GETCHA! (YouTube)",
+          "url": "https://www.youtube.com/watch?v=OBaPdA0Ayg4"
+        }
+      ],
+      "lives": [
+        {
+          "videoId": "OBaPdA0Ayg4",
+          "kind": "video",
+          "title": "【Maruya 42】Giga & KIRA - 'GETCHA!' Covered by Mild-R & Jolly Estaa",
+          "date": "2025-03-13",
+          "time": "16:10",
+          "channel": "Pixela Official"
         }
       ]
     },
