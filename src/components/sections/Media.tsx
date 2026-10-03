@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
+  Check,
+  ChevronDown,
   Clapperboard,
   ExternalLink,
   History,
@@ -13,6 +15,13 @@ import {
 
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { buttonVariants } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetBody,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { useVideos } from "@/hooks/useVideos";
 import { groupMediaByCategory } from "@/lib/media";
 import {
@@ -105,8 +114,15 @@ function pickInitialClip(clips: MediaClip[]) {
   return clips.find((clip) => clip.featured) ?? clips[0] ?? null;
 }
 
+type TabOption = {
+  id: TabId;
+  icon: LucideIcon;
+  label: string;
+  sublabel: string;
+};
+
 const TAB_BUTTON_CLASS =
-  "shrink-0 rounded-xl px-3 py-2.5 text-left transition sm:min-w-[7rem] sm:px-4 lg:grow";
+  "shrink-0 rounded-xl px-4 py-2.5 text-left transition sm:min-w-[7rem] lg:grow";
 
 function TabButton({
   selected,
@@ -166,6 +182,28 @@ export function Media({ data }: MediaProps) {
     () => initialClip?.category ?? groups[0]?.id ?? "latest"
   );
   const [activeId, setActiveId] = useState(() => initialClip?.id ?? "");
+  const [tabSheetOpen, setTabSheetOpen] = useState(false);
+
+  const tabs = useMemo<TabOption[]>(
+    () => [
+      ...groups.map((group) => ({
+        id: group.id,
+        icon: group.icon,
+        label: group.label,
+        sublabel: group.labelLocal
+          ? `${group.labelLocal} · ${group.clips.length}`
+          : `${group.clips.length} คลิป`,
+      })),
+      ...DYNAMIC_TABS.map((tab) => ({
+        id: tab.id,
+        icon: tab.icon,
+        label: tab.label,
+        sublabel: tab.labelLocal,
+      })),
+    ],
+    [groups]
+  );
+  const activeTabOption = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
 
   const dynamicTab = isDynamicTab(activeTab)
     ? DYNAMIC_TABS.find((t) => t.id === activeTab)
@@ -224,37 +262,95 @@ export function Media({ data }: MediaProps) {
         </ScrollReveal>
 
         <ScrollReveal className="mt-8 sm:mt-10">
+          {activeTabOption ? (
+            <button
+              type="button"
+              onClick={() => setTabSheetOpen(true)}
+              aria-haspopup="dialog"
+              className="flex w-full items-center gap-3 rounded-2xl bg-black/25 px-4 py-3 text-left ring-1 ring-white/10 transition active:bg-black/35 sm:hidden"
+            >
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#e85a7a] text-[#140a0d]">
+                <activeTabOption.icon className="size-4" aria-hidden />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[0.65rem] tracking-[0.12em] text-[#f3b8c4]/55 uppercase">
+                  หมวดคลิป
+                </span>
+                <span className="block truncate text-sm font-medium text-[#fff5f7]">
+                  {activeTabOption.label}
+                  <span className="ml-2 font-normal text-[#f3b8c4]/60">
+                    {activeTabOption.sublabel}
+                  </span>
+                </span>
+              </span>
+              <ChevronDown className="size-4 shrink-0 text-[#f3b8c4]/70" aria-hidden />
+            </button>
+          ) : null}
+
           <div
             role="tablist"
             aria-label="หมวดคลิป"
-            className="flex gap-1 overflow-x-auto rounded-2xl bg-black/25 p-1 ring-1 ring-white/10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-1.5"
+            className="hidden gap-1.5 overflow-x-auto rounded-2xl bg-black/25 p-1 ring-1 ring-white/10 [scrollbar-width:none] sm:flex [&::-webkit-scrollbar]:hidden"
           >
-            {groups.map((group) => (
-              <TabButton
-                key={group.id}
-                selected={group.id === activeTab}
-                icon={group.icon}
-                label={group.label}
-                sublabel={
-                  group.labelLocal
-                    ? `${group.labelLocal} · ${group.clips.length}`
-                    : `${group.clips.length} คลิป`
-                }
-                onClick={() => selectTab(group.id)}
-              />
-            ))}
-            {DYNAMIC_TABS.map((tab) => (
+            {tabs.map((tab) => (
               <TabButton
                 key={tab.id}
                 selected={tab.id === activeTab}
                 icon={tab.icon}
                 label={tab.label}
-                sublabel={tab.labelLocal}
+                sublabel={tab.sublabel}
                 onClick={() => selectTab(tab.id)}
               />
             ))}
           </div>
         </ScrollReveal>
+
+        <Sheet open={tabSheetOpen} onOpenChange={setTabSheetOpen}>
+          <SheetContent>
+            <SheetHeader>
+              <SheetTitle>เลือกหมวดคลิป</SheetTitle>
+            </SheetHeader>
+            <SheetBody>
+              <ul className="space-y-1 pb-2">
+                {tabs.map((tab) => {
+                  const selected = tab.id === activeTab;
+                  return (
+                    <li key={tab.id}>
+                      <button
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => {
+                          selectTab(tab.id);
+                          setTabSheetOpen(false);
+                        }}
+                        className={cn(
+                          "flex min-h-14 w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition",
+                          selected
+                            ? "bg-[#e85a7a]/15 text-[#fff5f7]"
+                            : "text-[#f7d7de]/85 active:bg-white/[0.06]"
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "flex size-9 shrink-0 items-center justify-center rounded-xl",
+                            selected ? "bg-[#e85a7a] text-[#140a0d]" : "bg-white/[0.05] text-[#f3b8c4]/70"
+                          )}
+                        >
+                          <tab.icon className="size-4" aria-hidden />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-medium">{tab.label}</span>
+                          <span className="block text-xs text-[#f3b8c4]/55">{tab.sublabel}</span>
+                        </span>
+                        {selected ? <Check className="size-4 shrink-0 text-[#e85a7a]" aria-hidden /> : null}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </SheetBody>
+          </SheetContent>
+        </Sheet>
 
         <div className="mt-8 grid gap-8 lg:mt-10 lg:grid-cols-[1.35fr_0.65fr] lg:gap-10">
           <ScrollReveal>

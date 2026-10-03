@@ -19,7 +19,7 @@ export type MediaCategoryMeta = {
 
 /** Display order for Media playlist groups */
 export const MEDIA_CATEGORY_ORDER: MediaCategoryMeta[] = [
-  { id: "original", label: "Original Song", labelLocal: "ต้นฉบับ", icon: Music2 },
+  { id: "original", label: "Original Song", labelLocal: "ออลิจินอล", icon: Music2 },
   { id: "cover", label: "Cover", labelLocal: "คัฟเวอร์", icon: Mic2 },
   {
     id: "event",

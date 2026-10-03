@@ -17,6 +17,7 @@
  *   alt     filename text outside 【…】 (video timestamps / "screenshot" removed)
  *   credit  YouTube when the filename says "screenshot", otherwise X
  *   size    next slot of TAIL_PATTERN, counted from the item after TAIL_ANCHOR_ID
+ *   width/height  intrinsic pixels (also backfilled on existing entries that lack them)
  *   loadOnDemand  true (keeps new items after the eager ones, i.e. truly last)
  */
 import { createHash } from "node:crypto";
@@ -94,8 +95,30 @@ async function shortHash(file: string) {
   return createHash("sha1").update(await readFile(file)).digest("hex").slice(0, 8);
 }
 
+async function imageSize(file: string) {
+  const meta = await sharp(file).metadata();
+  return {
+    width: meta.autoOrient?.width ?? meta.width ?? 1,
+    height: meta.autoOrient?.height ?? meta.height ?? 1,
+  };
+}
+
+/** Fills width/height on entries that don't have them; returns how many changed. */
+async function backfillSizes(items: GalleryItem[]) {
+  let filled = 0;
+  for (const item of items) {
+    if (item.width && item.height) continue;
+    const file = path.join(ROOT, "public", item.src);
+    if (!item.src.startsWith("/") || !existsSync(file)) continue;
+    Object.assign(item, await imageSize(file));
+    filled += 1;
+  }
+  return filled;
+}
+
 async function main() {
   const items = JSON.parse(await readFile(GALLERY_JSON, "utf8")) as GalleryItem[];
+  const filled = await backfillSizes(items);
   const usedSrc = new Set(items.map((item) => item.src));
   const usedIds = new Set(items.map((item) => item.id));
 
@@ -126,7 +149,12 @@ async function main() {
   }
 
   if (pending.length === 0) {
-    console.log("gallery: no new images");
+    if (filled && !dryRun) {
+      await writeFile(GALLERY_JSON, `${JSON.stringify(items, null, 2)}\n`);
+      console.log(`gallery: no new images · filled size on ${filled} entr${filled === 1 ? "y" : "ies"}`);
+    } else {
+      console.log(`gallery: no new images${filled ? ` · ${filled} entries missing size [dry-run]` : ""}`);
+    }
     return;
   }
 
@@ -163,14 +191,10 @@ async function main() {
     let height: number;
 
     if (isSafeWebp && numbered && !dryRun) {
-      const meta = await sharp(file).metadata();
-      width = meta.autoOrient?.width ?? meta.width ?? 1;
-      height = meta.autoOrient?.height ?? meta.height ?? 1;
+      ({ width, height } = await imageSize(file));
       await rename(file, path.join(dir, outName));
     } else if (keepInPlace || dryRun) {
-      const meta = await sharp(file).metadata();
-      width = meta.autoOrient?.width ?? meta.width ?? 1;
-      height = meta.autoOrient?.height ?? meta.height ?? 1;
+      ({ width, height } = await imageSize(file));
     } else {
       const info = await sharp(file)
         .rotate()
@@ -192,6 +216,8 @@ async function main() {
       alt: altOf(stem),
       credit: creditOf(stem),
       size: tailSize(items.length + added.length),
+      width,
+      height,
       loadOnDemand: true,
     });
     const last = added[added.length - 1];

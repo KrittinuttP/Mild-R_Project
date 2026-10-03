@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
@@ -10,8 +10,10 @@ import {
   GALLERY_PREVIEW_COUNT,
   initialVisibleCount,
   isFanArtItem,
+  masonrySlots,
   prefersReducedMotion,
   SIZE_CLASS,
+  SIZE_CLASS_FROM_SM,
   sortGalleryItems,
   type GalleryBoardMode,
   type GalleryVariant,
@@ -81,7 +83,12 @@ export function GalleryBoard({
     setActiveIndex(null);
   }
 
-  const visibleItems = items.slice(0, visibleCount);
+  const visibleItems = useMemo(() => items.slice(0, visibleCount), [items, visibleCount]);
+  const masonry = variant === "archive";
+  const slots = useMemo(
+    () => (masonry ? masonrySlots(visibleItems) : []),
+    [masonry, visibleItems]
+  );
   const hasMore = mode === "full" && visibleCount < items.length;
   const showViewAll = mode === "preview" && Boolean(viewAllHref) && items.length > 0;
   const showArtist = variant === "fan-art";
@@ -215,18 +222,36 @@ export function GalleryBoard({
       <ul
         className={cn(
           "mt-8 grid grid-cols-2 gap-2 sm:mt-10 sm:grid-cols-4 sm:gap-3 lg:gap-4",
-          variant === "archive"
-            ? "auto-rows-[7.5rem] sm:auto-rows-[9rem] md:auto-rows-[10rem]"
+          masonry
+            ? // Mobile row unit = 1/MASONRY_UNITS of a column: (100vw − px-5 padding − gap-x-2) / 2 / 20.
+              "auto-rows-[var(--masonry-unit)] gap-y-0 [--masonry-unit:calc((100vw-3rem)/40)] sm:auto-rows-[9rem] md:auto-rows-[10rem]"
             : "auto-rows-[8.5rem] sm:auto-rows-[10rem] md:auto-rows-[11rem]"
         )}
       >
         {visibleItems.map((item, index) => {
           const size = item.size ?? "md";
+          const slot = slots[index];
           return (
             <li
               key={`${variant}-${item.id}`}
               data-gallery-item
-              className={cn("min-h-0 will-change-transform", SIZE_CLASS[size])}
+              className={cn(
+                "min-h-0 will-change-transform",
+                slot
+                  ? cn(
+                      "max-sm:[grid-column:var(--masonry-col)] max-sm:[grid-row:var(--masonry-row)] max-sm:pb-[var(--masonry-unit)]",
+                      SIZE_CLASS_FROM_SM[size]
+                    )
+                  : SIZE_CLASS[size]
+              )}
+              style={
+                slot
+                  ? ({
+                      "--masonry-col": slot.column,
+                      "--masonry-row": `${slot.row} / span ${slot.span}`,
+                    } as CSSProperties)
+                  : undefined
+              }
             >
               <button
                 type="button"

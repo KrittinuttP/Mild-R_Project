@@ -141,6 +141,9 @@ export interface GalleryItem {
   credit?: string;
   /** Bento span preset */
   size?: GalleryTileSize;
+  /** Intrinsic pixel size (mobile masonry keeps the real aspect ratio). */
+  width?: number;
+  height?: number;
   /**
    * When true, item is held for "load more" batches
    * (and should not be eagerly fetched until revealed).

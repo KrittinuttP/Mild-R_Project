@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ExternalLink, Heart, Lock, Play, Search, X } from "lucide-react";
+import { ExternalLink, Heart, Lock, Play, Search, SlidersHorizontal, X } from "lucide-react";
 
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { buttonVariants } from "@/components/ui/button";
@@ -12,6 +12,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetBody,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import {
   CTA_OUTLINE_CLASS,
   CTA_PRIMARY_CLASS,
@@ -296,6 +304,8 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
   const [query, setQuery] = useState("");
   const [visibleCount, setVisibleCount] = useState(PAGE_STEP);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const activeFilterCount = Number(channel !== "all") + Number(year !== "all");
 
   const years = useMemo(() => yearsOf(videos), [videos]);
   const normalizedQuery = normalizeSearch(query);
@@ -365,11 +375,7 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
   return (
     <div>
       <div className="mt-8 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div
-          className="-mx-5 flex min-w-0 gap-1.5 overflow-x-auto px-5 [scrollbar-width:none] sm:-mx-10 sm:gap-2 sm:px-10 lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0 [&::-webkit-scrollbar]:hidden"
-          role="tablist"
-          aria-label="ประเภทคลิป"
-        >
+        <div className="flex min-w-0 flex-wrap gap-1.5 sm:gap-2" role="tablist" aria-label="ประเภทคลิป">
           {KIND_FILTERS.filter(({ key }) => key !== "member" || hasMembers).map(({ key, label }) => (
             <button
               key={key}
@@ -385,38 +391,60 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
           ))}
         </div>
 
-        <label className="relative block w-full lg:w-64">
-          <span className="sr-only">ค้นหาคลิป</span>
-          <Search
-            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#f3b8c4]/45"
-            aria-hidden
-          />
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => changeQuery(e.target.value)}
-            placeholder="ค้นหาชื่อคลิป หรือช่อง…"
-            enterKeyHint="search"
+        <div className="flex w-full gap-2 lg:w-64">
+          <label className="relative block min-w-0 flex-1">
+            <span className="sr-only">ค้นหาคลิป</span>
+            <Search
+              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#f3b8c4]/45"
+              aria-hidden
+            />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => changeQuery(e.target.value)}
+              placeholder="ค้นหาชื่อคลิป หรือช่อง…"
+              enterKeyHint="search"
+              className={cn(
+                "h-10 w-full rounded-full border border-[#f3b8c4]/15 bg-[#1a0c12]/70 pr-9 pl-9 text-sm text-[#fff5f7] transition outline-none",
+                "placeholder:text-[#f3b8c4]/40 focus:border-[#e85a7a]/55 focus:bg-[#1a0c12]",
+                "[&::-webkit-search-cancel-button]:appearance-none"
+              )}
+            />
+            {query ? (
+              <button
+                type="button"
+                onClick={() => changeQuery("")}
+                aria-label="ล้างคำค้น"
+                className="absolute top-1/2 right-2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-[#f3b8c4]/60 transition hover:bg-[#f3b8c4]/10 hover:text-[#fff5f7]"
+              >
+                <X className="size-3.5" />
+              </button>
+            ) : null}
+          </label>
+          <button
+            type="button"
+            onClick={() => setFilterSheetOpen(true)}
+            aria-haspopup="dialog"
+            aria-label={activeFilterCount ? `ตัวกรอง (${activeFilterCount})` : "ตัวกรอง"}
             className={cn(
-              "h-10 w-full rounded-full border border-[#f3b8c4]/15 bg-[#1a0c12]/70 pr-9 pl-9 text-sm text-[#fff5f7] transition outline-none",
-              "placeholder:text-[#f3b8c4]/40 focus:border-[#e85a7a]/55 focus:bg-[#1a0c12]",
-              "[&::-webkit-search-cancel-button]:appearance-none"
+              "relative flex h-10 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-sm transition sm:hidden",
+              activeFilterCount
+                ? "border-[#e85a7a]/55 bg-[#e85a7a]/15 text-[#fff5f7]"
+                : "border-[#f3b8c4]/15 bg-[#1a0c12]/70 text-[#f3b8c4]/80"
             )}
-          />
-          {query ? (
-            <button
-              type="button"
-              onClick={() => changeQuery("")}
-              aria-label="ล้างคำค้น"
-              className="absolute top-1/2 right-2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-[#f3b8c4]/60 transition hover:bg-[#f3b8c4]/10 hover:text-[#fff5f7]"
-            >
-              <X className="size-3.5" />
-            </button>
-          ) : null}
-        </label>
+          >
+            <SlidersHorizontal className="size-4" aria-hidden />
+            ตัวกรอง
+            {activeFilterCount ? (
+              <span className="flex size-5 items-center justify-center rounded-full bg-[#e85a7a] text-[0.65rem] font-medium text-[#140a0d]">
+                {activeFilterCount}
+              </span>
+            ) : null}
+          </button>
+        </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-1.5" role="group" aria-label="กรองตามช่อง">
+      <div className="mt-3 hidden flex-wrap gap-1.5 sm:flex" role="group" aria-label="กรองตามช่องและปี">
         {CHANNEL_FILTERS.map(({ key, label }) => (
           <button
             key={key}
@@ -447,6 +475,66 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
           </>
         ) : null}
       </div>
+
+      <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>ตัวกรอง</SheetTitle>
+          </SheetHeader>
+          <SheetBody className="space-y-6 px-5 pb-4">
+            <fieldset>
+              <legend className="text-xs tracking-[0.12em] text-[#f3b8c4]/60 uppercase">ช่อง</legend>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {CHANNEL_FILTERS.map(({ key, label }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    aria-pressed={channel === key}
+                    onClick={() => selectChannel(key)}
+                    className={cn(PILL_CLASS, "px-4 py-2", channel === key ? PILL_ACTIVE_CLASS : PILL_IDLE_CLASS)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+            {years.length > 1 ? (
+              <fieldset>
+                <legend className="text-xs tracking-[0.12em] text-[#f3b8c4]/60 uppercase">ปี</legend>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {["all", ...years].map((key) => (
+                    <button
+                      key={key}
+                      type="button"
+                      aria-pressed={year === key}
+                      onClick={() => selectYear(key)}
+                      className={cn(PILL_CLASS, "px-4 py-2", year === key ? PILL_ACTIVE_CLASS : PILL_IDLE_CLASS)}
+                    >
+                      {key === "all" ? "ทุกปี" : key}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            ) : null}
+          </SheetBody>
+          <div className="flex shrink-0 gap-2 border-t border-[#f3b8c4]/10 px-5 pt-3">
+            <button
+              type="button"
+              disabled={!activeFilterCount}
+              onClick={() => {
+                selectChannel("all");
+                selectYear("all");
+              }}
+              className={cn(buttonVariants({ variant: "outline", size: "lg" }), CTA_OUTLINE_CLASS, "flex-1 disabled:opacity-40")}
+            >
+              ล้างตัวกรอง
+            </button>
+            <SheetClose className={cn(buttonVariants({ size: "lg" }), CTA_PRIMARY_CLASS, "flex-1")}>
+              ดู {filtered.length} คลิป
+            </SheetClose>
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {kind === "member" && membershipIntro ? <MembershipIntro item={membershipIntro} /> : null}
 
