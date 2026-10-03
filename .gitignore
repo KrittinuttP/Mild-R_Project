@@ -43,6 +43,9 @@ zayzhik-projecct-mildR.json
 # original event research images (webp copies live in public/assets/events/gallery)
 /public/assets/events/archive/
 
+# original gallery uploads (webp copies live in public/assets/Gallery/moments)
+/public/assets/Gallery/originals/
+
 # vercel
 .vercel
 

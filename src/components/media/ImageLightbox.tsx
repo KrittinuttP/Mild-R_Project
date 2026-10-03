@@ -3,11 +3,17 @@
 import {
   useEffect,
   useEffectEvent,
+  useId,
   useRef,
   useState,
   type ReactNode,
 } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  type LucideIcon,
+} from "lucide-react";
 
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { buttonVariants } from "@/components/ui/button";
@@ -47,12 +53,25 @@ type ImageLightboxProps = {
   headerAside?: ReactNode;
   /** Between the image and the footer, e.g. version thumbnails. */
   belowImage?: ReactNode;
+  /**
+   * Collapsible panel over the bottom of the image (never resizes it).
+   * Starts closed; open/closed is kept while stepping and reset on close.
+   */
+  drawer?: {
+    label: ReactNode;
+    content: ReactNode;
+    /** Badge after the label, e.g. number of versions. */
+    count?: number;
+    icon?: LucideIcon;
+  };
   /** Left side of the footer, e.g. an external link. */
   footerStart?: ReactNode;
   /** Appended to the counter, e.g. "Moments". */
   counterLabel?: ReactNode;
   prevLabel?: string;
   nextLabel?: string;
+  /** "video" = fixed 16:9 frame (object-cover) so versions with baked-in letterboxing line up. */
+  aspect?: "video";
 };
 
 const PRELOAD_TIMEOUT_MS = 1500;
@@ -100,6 +119,12 @@ const TONE = {
     nav: "rounded-full border border-[#f3b8c4]/25 bg-[#140a0d]/75 text-[#fff5f7] hover:scale-105 hover:bg-[#e85a7a]/90 hover:text-white",
     counter: "text-[#f3b8c4]/55",
     separator: "text-[#f3b8c4]/30",
+    drawerHeader:
+      "border-t border-[#f3b8c4]/20 bg-[#140a0d]/70 text-[#fff5f7] hover:bg-[#3a1220]/75",
+    drawerCount: "rounded-full bg-[#e85a7a] text-white",
+    drawerChevron:
+      "rounded-full border-[#f3b8c4]/30 text-[#f3b8c4] group-hover:border-[#e85a7a] group-hover:text-[#fff5f7]",
+    drawerPanel: "bg-[#140a0d]/70",
   },
   cafe: {
     content: "rounded-none border-[#9a7b5a]/30 bg-[#0a0c0e] text-[#f4ebe3]",
@@ -115,6 +140,12 @@ const TONE = {
     nav: "rounded-none border border-[#9a7b5a]/35 bg-[#0a0c0e]/80 text-[#f4ebe3] hover:bg-[#a84d5f]/90 hover:text-[#f4ebe3]",
     counter: "text-[#9a7b5a]/80",
     separator: "text-[#9a7b5a]/40",
+    drawerHeader:
+      "border-t border-[#9a7b5a]/30 bg-[#0a0c0e]/75 text-[#f4ebe3] hover:bg-[#1a1416]/80",
+    drawerCount: "rounded-none bg-[#a84d5f] text-[#f4ebe3]",
+    drawerChevron:
+      "rounded-none border-[#9a7b5a]/40 text-[#9a7b5a] group-hover:border-[#a84d5f] group-hover:text-[#f4ebe3]",
+    drawerPanel: "bg-[#0a0c0e]/75",
   },
 } as const;
 
@@ -128,10 +159,12 @@ export function ImageLightbox({
   subtitle,
   headerAside,
   belowImage,
+  drawer,
   footerStart,
   counterLabel,
   prevLabel = "รูปก่อนหน้า",
   nextLabel = "รูปถัดไป",
+  aspect,
 }: ImageLightboxProps) {
   const styles = TONE[tone];
   const noReferrer = !useProtectedImage;
@@ -140,6 +173,12 @@ export function ImageLightbox({
   const activeIndexRef = useRef(activeIndex);
   const pendingIndexRef = useRef<number | null>(null);
   const [outgoingIndex, setOutgoingIndex] = useState<number | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const drawerPanelRef = useRef<HTMLDivElement>(null);
+  /** Only a toggle click animates; mounting / stepping snaps to the kept state. */
+  const animateDrawerRef = useRef(false);
+  const drawerId = useId();
+  const hasDrawer = Boolean(drawer);
 
   const open = activeIndex !== null;
   const activeItem = activeIndex !== null ? (items[activeIndex] ?? null) : null;
@@ -242,6 +281,29 @@ export function ImageLightbox({
     { dependencies: [activeIndex] }
   );
 
+  useGSAP(
+    () => {
+      const panel = drawerPanelRef.current;
+      if (!panel) return;
+      const target = drawerOpen
+        ? { height: "auto", autoAlpha: 1 }
+        : { height: 0, autoAlpha: 0 };
+      const animate = animateDrawerRef.current && !prefersReducedMotion();
+      animateDrawerRef.current = false;
+      if (animate) {
+        gsap.to(panel, { ...target, duration: 0.35, ease: "power2.out" });
+      } else {
+        gsap.set(panel, target);
+      }
+    },
+    { dependencies: [drawerOpen, hasDrawer, open] }
+  );
+
+  const toggleDrawer = () => {
+    animateDrawerRef.current = true;
+    setDrawerOpen((value) => !value);
+  };
+
   useEffect(() => {
     if (activeIndex === null || items.length < 2) return;
     void preloadImage(items[(activeIndex + 1) % items.length].src, noReferrer);
@@ -255,6 +317,7 @@ export function ImageLightbox({
     timelineRef.current?.kill();
     pendingIndexRef.current = null;
     setOutgoingIndex(null);
+    setDrawerOpen(false);
     onActiveIndexChange(null);
   };
 
@@ -362,6 +425,7 @@ export function ImageLightbox({
               ref={stageRef}
               className={cn(
                 "relative min-h-0 flex-1 overflow-hidden",
+                aspect === "video" && "[container-type:size]",
                 styles.stage
               )}
             >
@@ -392,7 +456,12 @@ export function ImageLightbox({
                   />
                   {renderImage(
                     item,
-                    "relative h-full w-full object-contain drop-shadow-[0_12px_40px_rgba(0,0,0,0.55)] will-change-transform",
+                    cn(
+                      "drop-shadow-[0_12px_40px_rgba(0,0,0,0.55)] will-change-transform",
+                      aspect === "video"
+                        ? "absolute inset-0 m-auto h-[min(100cqh,calc(100cqw*9/16))] w-[min(100cqw,calc(100cqh*16/9))] object-cover"
+                        : "relative h-full w-full object-contain"
+                    ),
                     { alt: role === "active" ? item.alt : "", photo: true }
                   )}
                 </div>
@@ -425,6 +494,73 @@ export function ImageLightbox({
                     <ChevronRight className="size-5" />
                   </button>
                 </>
+              ) : null}
+
+              {drawer ? (
+                <div className="absolute inset-x-0 bottom-0 z-20">
+                  <button
+                    type="button"
+                    aria-expanded={drawerOpen}
+                    aria-controls={drawerId}
+                    onClick={toggleDrawer}
+                    className={cn(
+                      "group flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm backdrop-blur-md transition-colors duration-300 sm:px-4",
+                      styles.drawerHeader
+                    )}
+                  >
+                    {drawer.icon ? (
+                      <drawer.icon className="size-4 shrink-0 opacity-80" aria-hidden />
+                    ) : null}
+                    <span className="min-w-0 truncate font-medium">
+                      {drawer.label}
+                    </span>
+                    {drawer.count != null ? (
+                      <span
+                        className={cn(
+                          "shrink-0 px-1.5 text-[0.7rem] leading-5 tabular-nums",
+                          styles.drawerCount
+                        )}
+                      >
+                        {drawer.count}
+                      </span>
+                    ) : null}
+                    <span className="ml-auto flex shrink-0 items-center gap-2">
+                      <span className="hidden text-xs opacity-70 sm:inline">
+                        {drawerOpen ? "ซ่อน" : "แตะเพื่อดู"}
+                      </span>
+                      <span
+                        className={cn(
+                          "flex size-6 items-center justify-center border transition duration-300",
+                          !drawerOpen && "group-hover:-translate-y-0.5",
+                          styles.drawerChevron
+                        )}
+                      >
+                        <ChevronUp
+                          className={cn(
+                            "size-3.5 transition-transform duration-300",
+                            drawerOpen && "rotate-180"
+                          )}
+                          aria-hidden
+                        />
+                      </span>
+                    </span>
+                  </button>
+                  <div
+                    id={drawerId}
+                    ref={drawerPanelRef}
+                    inert={!drawerOpen}
+                    className="h-0 overflow-hidden opacity-0"
+                  >
+                    <div
+                      className={cn(
+                        "px-3 pt-1 pb-3 backdrop-blur-md sm:px-4",
+                        styles.drawerPanel
+                      )}
+                    >
+                      {drawer.content}
+                    </div>
+                  </div>
+                </div>
               ) : null}
             </div>
 

@@ -9,9 +9,15 @@ export type VideoKind = "video" | "short" | "premiere";
 
 export const PIXELA_OFFICIAL_CHANNEL_ID = "UCcRaKGCG3RFenb8D2php_Jw";
 
+/** UC… channel id → its members-only uploads playlist (UUMO…). */
+export function membersPlaylistId(channelId: string): string {
+  return channelId.replace(/^UC/, "UUMO");
+}
+
 /** Channels whose lives and videos are always stored hidden (still tracked, never shown). */
 const HIDDEN_CHANNEL_IDS = new Set<string>([
   "UCsUopHmCvJv3cigTolkMpZA", // KYOss Channel
+  "UC0ZulKukNQiTsA2r7dEL0OA", // KiwaPawari Ch.
 ]);
 
 export function isHiddenChannel(channelId: string | null | undefined): boolean {
@@ -209,12 +215,13 @@ type SupabaseLike = { from: (table: string) => any };
 /**
  * Upsert non-live uploads. Keeps the stored kind for known videos (skips the /shorts/ probe)
  * and merges metadata so manual flags survive. Never touches `hidden`.
+ * `membersOnly` marks items from the channel's members-only playlist (metadata.members_only).
  */
 export async function saveVideoItems(
   supabase: SupabaseLike,
   items: YoutubeVideoItem[],
   sourceTitleFor: (channelId: string) => string | null,
-  options: { dryRun?: boolean } = {}
+  options: { dryRun?: boolean; membersOnly?: boolean } = {}
 ): Promise<VideoRow[]> {
   const uploads = items.filter((item) => !isRealLive(item));
   if (uploads.length === 0) return [];
@@ -247,7 +254,11 @@ export async function saveVideoItems(
     );
     batch.forEach((item, j) => {
       const row = buildVideoRow(item, kinds[j], sourceTitleFor(item.snippet.channelId));
-      row.metadata = { ...(existing.get(item.id)?.metadata ?? {}), ...row.metadata };
+      row.metadata = {
+        ...(existing.get(item.id)?.metadata ?? {}),
+        ...row.metadata,
+        ...(options.membersOnly ? { members_only: true } : {}),
+      };
       rows.push(row);
     });
   }

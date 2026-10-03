@@ -54,6 +54,8 @@ export function toVideoItem(row: VideoRow): VideoItem {
     thumbUrl: youtubeThumb(row.video_id, "mqdefault"),
     coverUrl: row.thumbnail_url || youtubeThumb(row.video_id, "hqdefault"),
     embeddable: row.embeddable !== false,
+    membersOnly: row.metadata?.members_only === true,
+    membershipIntro: row.metadata?.membership_intro === true,
     youtubeUrl: `https://www.youtube.com/watch?v=${row.video_id}`,
   };
 }
@@ -61,12 +63,15 @@ export function toVideoItem(row: VideoRow): VideoItem {
 export type LoadVideosOptions = {
   kinds?: VideoKind[];
   limit?: number;
+  /** Members-only uploads are listed on /media only. */
+  includeMembers?: boolean;
 };
 
 /** Visible videos, newest first (RLS already hides `hidden` rows). */
 export async function loadVideos({
   kinds = [],
   limit = Number.POSITIVE_INFINITY,
+  includeMembers = false,
 }: LoadVideosOptions = {}): Promise<VideoItem[]> {
   if (!isSupabaseConfigured()) return [];
 
@@ -79,6 +84,9 @@ export async function loadVideos({
       const size = Math.min(PAGE, limit - rows.length);
       let query = supabase.from("mild_r_videos").select(VIDEO_SELECT);
       if (kinds.length > 0) query = query.in("kind", kinds);
+      if (!includeMembers) {
+        query = query.or("metadata->>members_only.is.null,metadata->>members_only.neq.true");
+      }
       const { data, error } = await query
         .order("published_at", { ascending: false, nullsFirst: false })
         .range(from, from + size - 1);

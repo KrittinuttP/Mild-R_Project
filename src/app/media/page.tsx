@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 export default async function MediaPage() {
-  const videos = await loadVideos();
+  const videos = await loadVideos({ includeMembers: true });
 
   return (
     <>

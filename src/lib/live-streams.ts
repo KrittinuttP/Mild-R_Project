@@ -143,6 +143,57 @@ export async function loadLiveStreams(
   }
 }
 
+type XLiveCoverRow = {
+  video_id: string;
+  public_url: string;
+  thumb_url: string;
+  posted_at: string | null;
+};
+
+/** HD covers cached from X announcement posts, keyed by YouTube video id. */
+async function loadXCovers(
+  rows: LiveStreamRow[],
+  supabase?: PublicClient
+): Promise<Map<string, XLiveCoverRow>> {
+  const map = new Map<string, XLiveCoverRow>();
+  const ids = [...new Set(rows.map(youtubeIdOf))];
+  if (ids.length === 0 || !isSupabaseConfigured()) return map;
+
+  const client = supabase ?? createPublicClient();
+  for (let i = 0; i < ids.length; i += 200) {
+    const { data, error } = await client
+      .from("mild_r_live_stream_x_covers")
+      .select("video_id, public_url, thumb_url, posted_at")
+      .in("video_id", ids.slice(i, i + 200));
+
+    if (error) {
+      console.error("[live_stream_x_covers]", error.message);
+      continue;
+    }
+    for (const row of (data ?? []) as XLiveCoverRow[]) {
+      map.set(row.video_id, row);
+    }
+  }
+  return map;
+}
+
+function youtubeIdOf(row: LiveStreamRow): string {
+  const linked = row.metadata?.linked_video_id;
+  return typeof linked === "string" && linked.trim()
+    ? linked.trim()
+    : row.video_id;
+}
+
+export type LiveCoverVersion = {
+  url: string;
+  /** Small image for the version strip. */
+  thumbUrl: string;
+  capturedAt: string | null;
+  source: "x" | "youtube";
+  /** YouTube maxresdefault to try first; a missing one loads as a 120×90 placeholder. */
+  hdUrl?: string;
+};
+
 /** One live for the Gallery "Live covers" archive. */
 export type LiveCoverItem = {
   videoId: string;
@@ -156,10 +207,10 @@ export type LiveCoverItem = {
   channelLabel: string;
   /** Small image for the grid. */
   thumbUrl: string;
-  /** Full image for the lightbox. */
+  /** Full image for the lightbox (X HD when available). */
   coverUrl: string;
-  /** All cover versions newest-first (includes current). */
-  versions: { url: string; capturedAt: string | null }[];
+  /** X HD first, then YouTube versions newest-first (includes current). */
+  versions: LiveCoverVersion[];
   youtubeUrl: string;
 };
 
@@ -183,7 +234,8 @@ export function liveCoverYear(item: Pick<LiveCoverItem, "date">): string | null 
 
 /** Real lives with a cover (Mild-R + collabs), newest first. */
 export async function loadLiveCoverArchive(): Promise<LiveCoverItem[]> {
-  return toLiveCoverItems(await loadLiveStreams());
+  const rows = await loadLiveStreams();
+  return toLiveCoverItems(rows, await loadXCovers(rows));
 }
 
 /** Upcoming lives stay "upcoming" for this long past their start (see getLiveStreamStatus). */
@@ -227,10 +279,11 @@ export async function loadLatestLiveCovers(
       ...((upcoming.data ?? []) as LiveStreamRow[]),
     ].filter((row) => !isHiddenLiveRow(row));
 
-    return toLiveCoverItems(await withThumbnails(supabase, rows)).slice(
-      0,
-      limit
-    );
+    const [withThumbs, xCovers] = await Promise.all([
+      withThumbnails(supabase, rows),
+      loadXCovers(rows, supabase),
+    ]);
+    return toLiveCoverItems(withThumbs, xCovers).slice(0, limit);
   } catch (err) {
     console.error("[live_covers_latest]", err);
     return [];
@@ -259,7 +312,11 @@ export async function loadLiveCoversForYear(
       ].join(","),
     });
 
-    return toLiveCoverItems(await withThumbnails(supabase, rows)).filter(
+    const [withThumbs, xCovers] = await Promise.all([
+      withThumbnails(supabase, rows),
+      loadXCovers(rows, supabase),
+    ]);
+    return toLiveCoverItems(withThumbs, xCovers).filter(
       (item) => liveCoverYear(item) === year
     );
   } catch (err) {
@@ -338,7 +395,12 @@ export function liveCoverYearsOf(items: LiveCoverItem[]): string[] {
   return [...years].sort((a, b) => b.localeCompare(a));
 }
 
-function toLiveCoverItems(rows: LiveStreamRow[]): LiveCoverItem[] {
+const YOUTUBE_ID_RE = /^[A-Za-z0-9_-]{11}$/;
+
+function toLiveCoverItems(
+  rows: LiveStreamRow[],
+  xCovers: Map<string, XLiveCoverRow> = new Map()
+): LiveCoverItem[] {
   const out: LiveCoverItem[] = [];
 
   for (const row of rows) {
@@ -350,7 +412,18 @@ function toLiveCoverItems(rows: LiveStreamRow[]): LiveCoverItem[] {
       slot.coverUrl ?? slot.coverHistory?.[0]?.url ?? row.thumbnail_url;
     if (!current) continue;
 
-    const versions: LiveCoverItem["versions"] = [];
+    const videoId = youtubeIdOf(row);
+    const xCover = xCovers.get(videoId);
+    const versions: LiveCoverVersion[] = xCover
+      ? [
+          {
+            url: xCover.public_url,
+            thumbUrl: xCover.thumb_url,
+            capturedAt: xCover.posted_at,
+            source: "x",
+          },
+        ]
+      : [];
     const seen = new Set<string>();
     for (const v of [
       { url: current, capturedAt: null as string | null },
@@ -358,13 +431,19 @@ function toLiveCoverItems(rows: LiveStreamRow[]): LiveCoverItem[] {
     ]) {
       if (!v.url || seen.has(v.url)) continue;
       seen.add(v.url);
-      versions.push({ url: v.url, capturedAt: v.capturedAt });
+      versions.push({
+        url: v.url,
+        thumbUrl: v.url,
+        capturedAt: v.capturedAt,
+        source: "youtube",
+        hdUrl:
+          v.url === current && YOUTUBE_ID_RE.test(videoId)
+            ? `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`
+            : undefined,
+      });
     }
 
     const own = Boolean(row.is_own_channel);
-    const linked = row.metadata?.linked_video_id;
-    const videoId =
-      typeof linked === "string" && linked.trim() ? linked.trim() : row.video_id;
 
     out.push({
       videoId: row.video_id,
@@ -378,8 +457,8 @@ function toLiveCoverItems(rows: LiveStreamRow[]): LiveCoverItem[] {
       channelLabel: own
         ? "Mild-R"
         : row.source_title?.trim() || row.channel_name?.trim() || "Collab",
-      thumbUrl: youtubeGridThumb(current),
-      coverUrl: current,
+      thumbUrl: xCover?.thumb_url ?? youtubeGridThumb(current),
+      coverUrl: versions[0].url,
       versions,
       youtubeUrl: `https://www.youtube.com/watch?v=${videoId}`,
     });

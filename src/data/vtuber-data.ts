@@ -22,6 +22,7 @@ import type {
   HbdPage,
   LoreBlock,
   MediaClip,
+  MembershipInfo,
   ParallaxLayer,
   ProjectItem,
   SocialLink,
@@ -36,6 +37,7 @@ import characterDesign from "./mild-r/character-design.json";
 import socials from "./mild-r/socials.json";
 import hashtags from "./mild-r/hashtags.json";
 import fan from "./mild-r/fan.json";
+import membership from "./mild-r/membership.json";
 import gallery from "./mild-r/gallery.json";
 import fanArt from "./mild-r/fan-art.json";
 import media from "./mild-r/media.json";
@@ -90,6 +92,7 @@ export function loadMildRProfile(): VtuberProfile {
     socials: socials as SocialLink[],
     hashtags: hashtags as HashtagGroup[],
     fan: fan as FanIdentity,
+    membership: membership as MembershipInfo,
     gallery: gallery as GalleryItem[],
     fanArt: fanArt as FanArtItem[],
     media: media as MediaClip[],
@@ -147,6 +150,11 @@ export type {
   LoreBlock,
   MediaCategory,
   MediaClip,
+  MembershipBadge,
+  MembershipEmoji,
+  MembershipInfo,
+  MembershipPerk,
+  MembershipTier,
   ParallaxLayer,
   ProjectCta,
   ProjectItem,

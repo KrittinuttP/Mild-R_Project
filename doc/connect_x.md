@@ -158,6 +158,15 @@ Actions (JSON body หรือ query):
 |--------|----------|
 | `backfill` | `max_pages=3` (~60) |
 | `incremental` | early-stop on overlap · `max_pages=3` |
+| `live-covers` | สแกนโพสต์ที่เก็บแล้วทั้งหมดหาปกไลฟ์ HD · **ไม่เรียก twitterapi.io** (`npm run backfill:x-live-covers`) |
+
+### ปกไลฟ์ HD จาก X
+
+- โพสต์ (หรือต้นฉบับของ quote / retweet) ที่มีลิงก์ YouTube **1 ลิงก์** + รูป **1 รูป** สัดส่วน 16:9 กว้าง ≥1280px → ถือเป็นปกของไลฟ์นั้น
+- เก็บเฉพาะไลฟ์ที่มีใน `mild_r_live_streams` · โพสต์แรกสุดชนะ (ไม่เขียนทับ)
+- ดาวน์โหลด `name=orig` + `name=small` ลง `x-media/live-cover/{videoId}/` → ตาราง `mild_r.live_stream_x_covers` (view `public.mild_r_live_stream_x_covers`)
+- `backfill` / `incremental` สแกนซ้ำ 60 โพสต์ล่าสุดทุกรอบ (จับไลฟ์ที่ tracker เจอทีหลัง)
+- หน้าเว็บ (`toLiveCoverItems`): ปก X (1920) → YouTube `maxresdefault` (1280, เช็กฝั่ง client) → ภาพที่ tracker เก็บ (480×360)
 
 ตัวอย่างทดสอบ:
 
@@ -216,6 +225,7 @@ npx supabase secrets set TWITTERAPI_IO_KEY=... X_USER_NAME=MildRWorldEnd --proje
 - [x] `npx supabase functions deploy x-feed-sync`
 - [x] เปิด cron (`npm run cron:x` · 00:00 BKK อังคาร / ศุกร์ / อาทิตย์)
 - [x] UI ฟีดแท็บโพส(6)/รี(5) · compact + lightbox ใน Connect (`XFeed` + `loadXFeedTabs`)
+- [x] ปกไลฟ์ HD จาก X (`npm run db:migrate:live-x-covers` · `npm run backfill:x-live-covers`)
 
 หมายเหตุ free tier: twitterapi.io จำกัด **1 request / 5 วินาที** — สคริปต์และ Edge ใส่ delay ระหว่างหน้าแล้ว
 

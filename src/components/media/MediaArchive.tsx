@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ExternalLink, Play, Search, X } from "lucide-react";
+import { ExternalLink, Heart, Lock, Play, Search, X } from "lucide-react";
 
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { buttonVariants } from "@/components/ui/button";
@@ -14,7 +14,9 @@ import {
 } from "@/components/ui/dialog";
 import {
   CTA_OUTLINE_CLASS,
+  CTA_PRIMARY_CLASS,
   LIVE_BADGE_COLLAB,
+  LIVE_BADGE_MEMBER,
   LIVE_BADGE_MILD,
   LIVE_BADGE_PILL_SM,
   LIVE_BADGE_SOFT,
@@ -29,8 +31,10 @@ import { cn } from "@/lib/utils";
 import type { VideoItem, VideoKind } from "@/types/video";
 
 const PAGE_STEP = 24;
+const MEMBERSHIP_JOIN_URL = "https://www.youtube.com/@MildRWorldEnd/join";
 
-type KindFilter = "all" | VideoKind;
+/** "member" = members-only uploads; they show in "all" and "member" but not in the kind tabs. */
+type KindFilter = "all" | VideoKind | "member";
 type ChannelFilter = "all" | "own" | "collab";
 
 const KIND_FILTERS: { key: KindFilter; label: string }[] = [
@@ -38,7 +42,14 @@ const KIND_FILTERS: { key: KindFilter; label: string }[] = [
   { key: "video", label: VIDEO_KIND_LABEL.video },
   { key: "short", label: VIDEO_KIND_LABEL.short },
   { key: "premiere", label: VIDEO_KIND_LABEL.premiere },
+  { key: "member", label: "Member" },
 ];
+
+function matchesKind(item: VideoItem, filter: KindFilter): boolean {
+  if (filter === "all") return true;
+  if (filter === "member") return item.membersOnly;
+  return !item.membersOnly && item.kind === filter;
+}
 
 const CHANNEL_FILTERS: { key: ChannelFilter; label: string }[] = [
   { key: "all", label: "ทุกช่อง" },
@@ -92,6 +103,18 @@ function VideoBadges({ item }: { item: VideoItem }) {
       >
         {item.channelLabel}
       </span>
+      {item.membersOnly ? (
+        <span
+          className={cn(
+            LIVE_BADGE_PILL_SM,
+            "inline-flex items-center gap-1 text-[0.6rem]",
+            LIVE_BADGE_MEMBER
+          )}
+        >
+          <Lock className="size-2.5" aria-hidden />
+          Member
+        </span>
+      ) : null}
       {item.kind !== "video" ? (
         <span className={cn(LIVE_BADGE_PILL_SM, "text-[0.6rem]", LIVE_BADGE_SOFT)}>
           {VIDEO_KIND_LABEL[item.kind]}
@@ -179,6 +202,92 @@ function VideoTile({
   );
 }
 
+function MembershipIntro({ item }: { item: VideoItem }) {
+  const [playing, setPlaying] = useState(false);
+  const views = formatVideoViews(item.views);
+
+  return (
+    <section
+      aria-label="คลิปแนะนำการสมัครสมาชิก"
+      className="mt-6 grid gap-4 overflow-hidden rounded-2xl border border-[#f3b8c4]/15 bg-[#1a0c12]/70 p-3 sm:mt-8 sm:p-4 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] md:items-center md:gap-6"
+    >
+      <div className="relative aspect-video overflow-hidden rounded-xl bg-black">
+        {playing ? (
+          <iframe
+            title={item.title}
+            src={getYoutubeEmbedUrl(item.videoId, true)}
+            className="absolute inset-0 h-full w-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            referrerPolicy="strict-origin-when-cross-origin"
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setPlaying(true)}
+            className="group absolute inset-0 outline-none"
+            aria-label={`เล่นคลิปแนะนำ ${item.title}`}
+          >
+            <ProtectedImage
+              src={item.coverUrl}
+              alt={item.title}
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+            />
+            <span className="absolute inset-0 flex items-center justify-center bg-black/20 transition group-hover:bg-black/10">
+              <span className="flex size-14 items-center justify-center rounded-full bg-[#e85a7a]/90 text-white shadow-lg transition group-hover:scale-105 group-focus-visible:ring-2 group-focus-visible:ring-[#fff5f7]/70">
+                <Play className="size-6 fill-current" />
+              </span>
+            </span>
+          </button>
+        )}
+      </div>
+
+      <div className="px-1 pb-1 md:px-0 md:pb-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={cn(LIVE_BADGE_PILL_SM, "inline-flex items-center gap-1 text-[0.6rem]", LIVE_BADGE_MEMBER)}>
+            <Lock className="size-2.5" aria-hidden />
+            Membership
+          </span>
+          {item.durationLabel ? (
+            <span className="text-xs text-[#f3b8c4]/55">
+              {item.durationLabel}
+              {views ? ` · ${views}` : null}
+            </span>
+          ) : null}
+        </div>
+        <h2 className="mt-3 font-[family-name:var(--font-display)] text-lg leading-snug text-[#fff5f7] sm:text-xl">
+          มาเป็นสมาชิกช่อง Mild-R กัน
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-[#f3b8c4]/70">
+          สมาชิกช่องดูคลิปเมมเบอร์ทั้งหมดในหน้านี้ได้บน YouTube ดูรายละเอียดสิทธิพิเศษได้จากคลิปแนะนำ
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <a
+            href={MEMBERSHIP_JOIN_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(buttonVariants({ size: "lg" }), CTA_PRIMARY_CLASS, "px-5")}
+          >
+            <Heart className="size-4" aria-hidden />
+            สมัครสมาชิก
+          </a>
+          <a
+            href={item.youtubeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(buttonVariants({ variant: "outline", size: "lg" }), CTA_OUTLINE_CLASS, "px-5")}
+          >
+            ดูบน YouTube
+            <ExternalLink className="size-4" aria-hidden />
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /** /media: every non-live upload (videos, Shorts, Premieres) with filters. */
 export function MediaArchive({ videos }: { videos: VideoItem[] }) {
   const [kind, setKind] = useState<KindFilter>("all");
@@ -204,15 +313,23 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
   );
 
   const counts = useMemo(() => {
-    const out: Record<KindFilter, number> = { all: scoped.length, video: 0, short: 0, premiere: 0 };
-    for (const v of scoped) out[v.kind] += 1;
+    const out: Record<KindFilter, number> = {
+      all: scoped.length,
+      video: 0,
+      short: 0,
+      premiere: 0,
+      member: 0,
+    };
+    for (const v of scoped) out[v.membersOnly ? "member" : v.kind] += 1;
     return out;
   }, [scoped]);
 
   const filtered = useMemo(
-    () => (kind === "all" ? scoped : scoped.filter((v) => v.kind === kind)),
+    () => scoped.filter((v) => matchesKind(v, kind)),
     [scoped, kind]
   );
+  const hasMembers = useMemo(() => videos.some((v) => v.membersOnly), [videos]);
+  const membershipIntro = useMemo(() => videos.find((v) => v.membershipIntro) ?? null, [videos]);
   const visible = filtered.slice(0, visibleCount);
   const shortsOnly = kind === "short";
   const active = activeId ? (videos.find((v) => v.videoId === activeId) ?? null) : null;
@@ -237,7 +354,7 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
   };
 
   const openVideo = (item: VideoItem) => {
-    if (item.embeddable) setActiveId(item.videoId);
+    if (item.embeddable || item.membersOnly) setActiveId(item.videoId);
     else window.open(item.youtubeUrl, "_blank", "noopener,noreferrer");
   };
 
@@ -253,7 +370,7 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
           role="tablist"
           aria-label="ประเภทคลิป"
         >
-          {KIND_FILTERS.map(({ key, label }) => (
+          {KIND_FILTERS.filter(({ key }) => key !== "member" || hasMembers).map(({ key, label }) => (
             <button
               key={key}
               type="button"
@@ -331,6 +448,8 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
         ) : null}
       </div>
 
+      {kind === "member" && membershipIntro ? <MembershipIntro item={membershipIntro} /> : null}
+
       {filtered.length === 0 ? (
         <p className="mt-8 text-sm text-[#f3b8c4]/60">
           {normalizedQuery ? `ไม่พบคลิปที่ตรงกับ “${query.trim()}”` : "ยังไม่มีคลิปในหมวดนี้"}
@@ -395,28 +514,73 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
                   active.kind === "short" ? "mx-auto aspect-[9/16] max-h-[72dvh]" : "aspect-video"
                 )}
               >
-                <iframe
-                  key={active.videoId}
-                  title={active.title}
-                  src={getYoutubeEmbedUrl(active.videoId, true)}
-                  className="absolute inset-0 h-full w-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  referrerPolicy="strict-origin-when-cross-origin"
-                />
+                {active.membersOnly ? (
+                  <>
+                    <ProtectedImage
+                      src={active.coverUrl}
+                      alt={active.title}
+                      decoding="async"
+                      className="absolute inset-0 h-full w-full object-cover opacity-35 blur-[2px]"
+                    />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-t from-[#140a0d]/90 via-[#140a0d]/40 to-transparent p-4 text-center">
+                      <span className="flex size-14 items-center justify-center rounded-full border border-[#f3b8c4]/30 bg-[#140a0d]/70 text-[#f3b8c4] shadow-lg">
+                        <Lock className="size-6" aria-hidden />
+                      </span>
+                      <p className="font-[family-name:var(--font-display)] text-base text-[#fff5f7] sm:text-lg">
+                        คลิปนี้สำหรับสมาชิกช่อง (Member) เท่านั้น
+                      </p>
+                      <p className="max-w-sm text-xs text-[#f3b8c4]/70 sm:text-sm">
+                        ดูได้บน YouTube เมื่อเป็นสมาชิกช่อง Mild-R
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <iframe
+                    key={active.videoId}
+                    title={active.title}
+                    src={getYoutubeEmbedUrl(active.videoId, true)}
+                    className="absolute inset-0 h-full w-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    referrerPolicy="strict-origin-when-cross-origin"
+                  />
+                )}
               </div>
 
-              <div className="px-1 pt-2 sm:px-2">
-                <a
-                  href={active.youtubeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm text-[#f3b8c4]/75 transition hover:text-[#f3b8c4]"
-                >
-                  ดูบน YouTube
-                  <ExternalLink className="size-3.5 opacity-80" aria-hidden />
-                </a>
-              </div>
+              {active.membersOnly ? (
+                <div className="flex flex-col gap-2 px-1 pt-3 sm:flex-row sm:justify-end sm:px-2">
+                  <a
+                    href={MEMBERSHIP_JOIN_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn(buttonVariants({ variant: "outline", size: "lg" }), CTA_OUTLINE_CLASS, "px-5")}
+                  >
+                    <Heart className="size-4" aria-hidden />
+                    สมัครสมาชิก
+                  </a>
+                  <a
+                    href={active.youtubeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn(buttonVariants({ size: "lg" }), CTA_PRIMARY_CLASS, "px-5")}
+                  >
+                    ดูบน YouTube
+                    <ExternalLink className="size-4" aria-hidden />
+                  </a>
+                </div>
+              ) : (
+                <div className="px-1 pt-2 sm:px-2">
+                  <a
+                    href={active.youtubeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm text-[#f3b8c4]/75 transition hover:text-[#f3b8c4]"
+                  >
+                    ดูบน YouTube
+                    <ExternalLink className="size-3.5 opacity-80" aria-hidden />
+                  </a>
+                </div>
+              )}
             </>
           ) : null}
         </DialogContent>

@@ -37,6 +37,7 @@ const NAV_LINKS: NavLink[] = [
     children: [
       // Hero+Profile scrollytelling starts at #top (desktop profile pin breaks #profile)
       { label: "แนะนำตัว", href: "/#top" },
+      { label: "Member", href: "/#member" },
       { label: "Lore", href: "/#lore" },
     ],
   },

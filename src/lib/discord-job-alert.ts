@@ -31,6 +31,8 @@ const SOURCE_TITLE: Record<string, string> = {
   "edge-live-monitor": "YouTube · ระบบเฝ้าระวังไลฟ์ | Live Monitor",
   "edge-x-incremental": "X · ซิงค์ข้อมูลล่าสุด | Incremental Sync",
   "edge-x-backfill": "X · เติมข้อมูลย้อนหลัง | Backfill",
+  "edge-x-live-covers": "X · ปกไลฟ์ HD | Live Covers",
+  "edge-x-schedule-images": "X · รูปตารางไลฟ์ | Schedule Images",
   "edge-x-unknown": "X · คำสั่งไม่ถูกต้อง | Invalid Action",
   "edge-x-error": "X · ข้อผิดพลาดระบบ | System Error",
   "edge-unknown": "YouTube · คำสั่งไม่ถูกต้อง | Invalid Action",
@@ -66,6 +68,12 @@ function humanSummary(entry: DiscordJobAlertInput): string {
   const source = entry.source;
 
   if (status === "error") {
+    if (source === "edge-x-live-covers") {
+      return `เก็บปกไลฟ์ไม่สำเร็จ / Live cover cache failed: ${num(meta, "failed") ?? "?"}`;
+    }
+    if (source === "edge-x-schedule-images") {
+      return `เก็บรูปตารางไลฟ์ไม่สำเร็จ / Schedule image cache failed: ${num(meta, "failed") ?? "?"}`;
+    }
     const msg = (entry.message || "").toLowerCase();
     if (msg.includes("429") || msg.includes("rate limit") || msg.includes("quota")) {
       return "ติดจำกัดการใช้งาน / Rate limit or quota exceeded";
@@ -120,6 +128,12 @@ function humanSummary(entry: DiscordJobAlertInput): string {
   if (source === "edge-x-backfill") {
     return `เติมข้อมูล / Backfill upserted: ${saved}`;
   }
+  if (source === "edge-x-live-covers") {
+    if (status === "skipped" || saved === 0) {
+      return "ไม่มีปกไลฟ์ใหม่ / No new live covers";
+    }
+    return `ปกไลฟ์ HD / Live covers: +${saved}`;
+  }
   if (source === "agent-live-schedule") {
     if (status === "skipped" || (num(meta, "processed") === 0 && saved === 0)) {
       return "ไม่มีตารางงานใหม่ให้ประมวลผล / No new schedules to process";
@@ -161,7 +175,12 @@ function codeDetail(entry: DiscordJobAlertInput): string {
     const flagged = num(meta, "scheduleFlagged") ?? 0;
     const cached = num(meta, "scheduleCached") ?? 0;
     const stop = typeof meta.stoppedReason === "string" ? meta.stoppedReason : "?";
-    return `[Upserted: ${upserted} (new ${newCount}, schedule ${flagged}/${cached}, stop=${stop})]`;
+    const covers = num(meta.liveCovers as Record<string, unknown>, "cached") ?? 0;
+    return `[Upserted: ${upserted} (new ${newCount}, schedule ${flagged}/${cached}, covers +${covers}, stop=${stop})]`;
+  }
+
+  if (entry.source === "edge-x-live-covers" && meta) {
+    return `[Scanned: ${num(meta, "scanned") ?? "?"}, matched ${num(meta, "matched") ?? "?"}, cached +${num(meta, "cached") ?? 0}]`;
   }
 
   if (entry.source === "edge-x-backfill" && meta) {

@@ -84,6 +84,43 @@ export interface FanIdentity {
   greetingToFans?: string;
 }
 
+export interface MembershipPerk {
+  icon: string;
+  label: string;
+}
+
+export interface MembershipTier {
+  id: string;
+  name: string;
+  /** Monthly price on YouTube (THB) */
+  priceThb: number;
+  /** Perks added at this tier; higher tiers include every lower tier. */
+  perks: MembershipPerk[];
+}
+
+export interface MembershipBadge {
+  id: string;
+  src: string;
+  /** Membership duration that unlocks the badge */
+  label: string;
+}
+
+export interface MembershipEmoji {
+  id: string;
+  src: string;
+  alt: string;
+}
+
+export interface MembershipInfo {
+  title: string;
+  description: string;
+  joinUrl: string;
+  introVideoUrl?: string;
+  tiers: MembershipTier[];
+  badges: MembershipBadge[];
+  emojis: MembershipEmoji[];
+}
+
 export interface ParallaxLayer {
   id: string;
   /** Public URL path under /public (omit the `public` segment) */
@@ -656,6 +693,7 @@ export interface VtuberProfile {
   socials: SocialLink[];
   hashtags: HashtagGroup[];
   fan: FanIdentity;
+  membership: MembershipInfo;
   gallery: GalleryItem[];
   fanArt: FanArtItem[];
   media: MediaClip[];

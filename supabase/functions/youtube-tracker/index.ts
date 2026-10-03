@@ -11,6 +11,7 @@ import { collectPreviewIdsToDelete, type PreviewLikeRow } from "./preview-match.
 import {
   isHiddenChannel,
   isRealLive,
+  membersPlaylistId,
   mentionsMildRVideo,
   PIXELA_OFFICIAL_CHANNEL_ID,
   saveVideoItems,
@@ -522,8 +523,35 @@ async function saveUploads(uploads: YoutubeVideoItem[]) {
   return rows.length;
 }
 
-function isOwnOrMentionsMildR(item: YoutubeVideoItem) {
-  return item.snippet.channelId === MAIN_CHANNEL_ID || mentionsMildRVideo(item);
+/**
+ * Keyword search returns fan clips from any channel; only Mild-R's own uploads are kept.
+ * Other official channels come in through checkGuestChannelPlaylists.
+ */
+function isOwnUpload(item: YoutubeVideoItem) {
+  return item.snippet.channelId === MAIN_CHANNEL_ID;
+}
+
+/** Members-only uploads (UUMO playlist); members-only lives are skipped. */
+async function checkMembersPlaylist() {
+  const url =
+    `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${membersPlaylistId(MAIN_CHANNEL_ID)}&maxResults=15&key=${YOUTUBE_API_KEY}`;
+  const data = await (await fetch(url)).json();
+  if (data.error) {
+    console.error("members playlist:", data.error.message);
+    return 0;
+  }
+  const videoIds = (data.items || []).map(
+    (item: { snippet: { resourceId: { videoId: string } } }) =>
+      item.snippet.resourceId.videoId
+  ) as string[];
+  if (videoIds.length === 0) return 0;
+
+  const { uploads } = await getVideoDetails(videoIds);
+  const rows = await saveVideoItems(supabase, uploads, getLuminaSourceTitle, {
+    membersOnly: true,
+  });
+  if (rows.length > 0) console.log(`🔒 บันทึกคลิปเมมเบอร์: ${rows.length} รายการ`);
+  return rows.length;
 }
 
 /** Step 1: main uploads playlist (low quota) */
@@ -540,7 +568,11 @@ async function checkMainChannel() {
     throw new Error(data.error.message || "YouTube playlistItems failed");
   }
 
-  if (!data.items || data.items.length === 0) return { saved: 0, videos: 0 };
+  const memberVideos = await checkMembersPlaylist();
+
+  if (!data.items || data.items.length === 0) {
+    return { saved: 0, videos: memberVideos, memberVideos };
+  }
 
   const videoIds = data.items.map(
     (item: { snippet: { resourceId: { videoId: string } } }) =>
@@ -549,7 +581,7 @@ async function checkMainChannel() {
   const { lives, uploads } = await getVideoDetails(videoIds);
   await saveToDatabase(lives);
   const videos = await saveUploads(uploads);
-  return { saved: lives.length, videos };
+  return { saved: lives.length, videos: videos + memberVideos, memberVideos };
 }
 
 async function searchByEventType(
@@ -717,7 +749,7 @@ async function searchRelatedChannels() {
     const { lives, uploads } = await getVideoDetails(videoIds);
     await saveToDatabase(lives);
     searchSaved = lives.length;
-    searchVideos = await saveUploads(uploads.filter(isOwnOrMentionsMildR));
+    searchVideos = await saveUploads(uploads.filter(isOwnUpload));
   }
 
   const saved = searchSaved + playlistScan.saved;

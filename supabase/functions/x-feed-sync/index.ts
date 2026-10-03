@@ -12,6 +12,15 @@ const API_BASE = "https://api.twitterapi.io/twitter/user/last_tweets";
 const MAX_PAGES = 3;
 const BACKFILL_TARGET = 60;
 const MEDIA_BUCKET = "x-media";
+/** Stored posts re-scanned for live covers after each sync (catches lives tracked late). */
+const LIVE_COVER_RESCAN_LIMIT = 60;
+const LIVE_COVER_MIN_WIDTH = 1280;
+const LIVE_COVER_RATIO = 16 / 9;
+const LIVE_COVER_RATIO_TOLERANCE = 0.03;
+const YOUTUBE_ID_RE =
+  /(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:[^"\s]*?&)?v=|live\/|shorts\/))([A-Za-z0-9_-]{11})/g;
+const PBS_MEDIA_RE =
+  /^(https:\/\/pbs\.twimg\.com\/media\/[A-Za-z0-9_-]+)\.(jpe?g|png|webp)/i;
 /** Live Schedule — case-insensitive, optional spaces; ASCII + stylized Unicode */
 const LIVE_SCHEDULE_RE = /live\s*schedule/i;
 
@@ -349,10 +358,27 @@ async function upsertPosts(rows: XPostRow[]) {
   if (error) throw error;
 }
 
+type JobFailure = { id: string; error: string };
+
+/** Keep alert payloads short. */
+const MAX_REPORTED_FAILURES = 5;
+
+function pushFailure(list: JobFailure[], id: string, err: unknown) {
+  const error = err instanceof Error ? err.message : String(err);
+  console.error(`${id}: ${error}`);
+  if (list.length < MAX_REPORTED_FAILURES) list.push({ id, error });
+}
+
 /** Download Live Schedule poster into Storage when needed. */
 async function cacheLiveScheduleImages(rows: XPostRow[]) {
   let cached = 0;
   let schedules = 0;
+  let failed = 0;
+  const failures: JobFailure[] = [];
+  const fail = (tweetId: string, err: unknown) => {
+    failed += 1;
+    pushFailure(failures, `schedule image ${tweetId}`, err);
+  };
   for (const row of rows) {
     if (!row.is_live_schedule) continue;
     const sourceUrl = firstImageUrl(row.media_urls);
@@ -377,6 +403,7 @@ async function cacheLiveScheduleImages(rows: XPostRow[]) {
           ((existing.posted_at as string | null) ?? null),
       });
       if (ensured === "inserted" || ensured === "updated") schedules += 1;
+      if (ensured === "error") fail(row.tweet_id, "registry write failed");
       continue;
     }
 
@@ -384,12 +411,7 @@ async function cacheLiveScheduleImages(rows: XPostRow[]) {
       const imgRes = await fetch(sourceUrl, {
         headers: { Accept: "image/*" },
       });
-      if (!imgRes.ok) {
-        console.error(
-          `schedule image fetch ${row.tweet_id}: HTTP ${imgRes.status}`
-        );
-        continue;
-      }
+      if (!imgRes.ok) throw new Error(`fetch: HTTP ${imgRes.status}`);
       const contentType =
         imgRes.headers.get("content-type")?.split(";")[0] || "image/jpeg";
       const ext = contentType.includes("png")
@@ -409,10 +431,7 @@ async function cacheLiveScheduleImages(rows: XPostRow[]) {
           upsert: false,
           cacheControl: "31536000",
         });
-      if (upErr) {
-        console.error(`schedule image upload ${row.tweet_id}:`, upErr.message);
-        continue;
-      }
+      if (upErr) throw new Error(`upload: ${upErr.message}`);
 
       const { data: pub } = supabase.storage
         .from(MEDIA_BUCKET)
@@ -427,10 +446,7 @@ async function cacheLiveScheduleImages(rows: XPostRow[]) {
         })
         .eq("tweet_id", row.tweet_id);
 
-      if (updErr) {
-        console.error(`schedule image update ${row.tweet_id}:`, updErr.message);
-        continue;
-      }
+      if (updErr) throw new Error(`update: ${updErr.message}`);
       cached += 1;
 
       const ensured = await ensureXLiveScheduleRow({
@@ -440,14 +456,276 @@ async function cacheLiveScheduleImages(rows: XPostRow[]) {
         posted_at: row.posted_at,
       });
       if (ensured === "inserted" || ensured === "updated") schedules += 1;
+      if (ensured === "error") throw new Error("registry write failed");
     } catch (err) {
-      console.error(
-        `schedule image ${row.tweet_id}:`,
-        err instanceof Error ? err.message : err
+      fail(row.tweet_id, err);
+    }
+  }
+  return { cached, schedules, failed, failures };
+}
+
+type LiveCoverSourceRow = Pick<XPostRow, "tweet_id" | "post_type" | "raw">;
+
+type LiveCoverCandidate = {
+  videoId: string;
+  tweetId: string;
+  sourceUrl: string;
+  base: string;
+  format: string;
+  width: number;
+  height: number;
+  postedAt: string | null;
+};
+
+/** The tweet that carries the content: the original for retweets / quotes. */
+function liveCoverContentTweet(row: LiveCoverSourceRow): ApiTweet | null {
+  const raw = row.raw as ApiTweet | null;
+  if (!raw) return null;
+  if (row.post_type === "retweet") return raw.retweeted_tweet ?? raw;
+  if (row.post_type === "quote") return raw.quoted_tweet ?? null;
+  return raw;
+}
+
+function youtubeIdsOf(tweet: ApiTweet): Set<string> {
+  const haystack = JSON.stringify([tweet.entities, tweet.card, tweet.text]);
+  return new Set(
+    [...haystack.matchAll(YOUTUBE_ID_RE)].map((m) => m[1] as string)
+  );
+}
+
+function photosOf(tweet: ApiTweet): Record<string, unknown>[] {
+  const list =
+    (tweet.extendedEntities as Record<string, unknown> | undefined)?.media ??
+    (tweet.entities as Record<string, unknown> | undefined)?.media ??
+    tweet.media;
+  if (!Array.isArray(list)) return [];
+  return list.filter(
+    (m): m is Record<string, unknown> =>
+      Boolean(m) &&
+      typeof m === "object" &&
+      (m as Record<string, unknown>).type === "photo" &&
+      typeof (m as Record<string, unknown>).media_url_https === "string"
+  );
+}
+
+/** One YouTube link + one 16:9 photo ≥1280px wide = that live's cover. */
+function liveCoverCandidate(row: LiveCoverSourceRow): LiveCoverCandidate | null {
+  const tweet = liveCoverContentTweet(row);
+  if (!tweet) return null;
+
+  const ids = youtubeIdsOf(tweet);
+  const photos = photosOf(tweet);
+  if (ids.size !== 1 || photos.length !== 1) return null;
+
+  const photo = photos[0];
+  const info = photo.original_info as
+    | { width?: number; height?: number }
+    | undefined;
+  const width = info?.width ?? 0;
+  const height = info?.height ?? 0;
+  if (width < LIVE_COVER_MIN_WIDTH || height <= 0) return null;
+  if (
+    Math.abs(width / height - LIVE_COVER_RATIO) / LIVE_COVER_RATIO >
+    LIVE_COVER_RATIO_TOLERANCE
+  ) {
+    return null;
+  }
+
+  const sourceUrl = photo.media_url_https as string;
+  const match = sourceUrl.match(PBS_MEDIA_RE);
+  if (!match) return null;
+
+  return {
+    videoId: [...ids][0],
+    tweetId: (tweet.id ?? row.tweet_id).trim(),
+    sourceUrl,
+    base: match[1],
+    format: match[2].toLowerCase() === "jpeg" ? "jpg" : match[2].toLowerCase(),
+    width,
+    height,
+    postedAt: parsePostedAt(tweet.createdAt),
+  };
+}
+
+async function selectExisting(
+  table: string,
+  ids: string[]
+): Promise<Set<string>> {
+  const found = new Set<string>();
+  for (let i = 0; i < ids.length; i += 200) {
+    const { data, error } = await supabase
+      .from(table)
+      .select("video_id")
+      .in("video_id", ids.slice(i, i + 200));
+    if (error) throw error;
+    for (const row of data || []) found.add(row.video_id as string);
+  }
+  return found;
+}
+
+async function uploadLiveCoverImage(
+  candidate: LiveCoverCandidate,
+  name: "orig" | "small"
+): Promise<{ path: string; url: string }> {
+  const res = await fetch(
+    `${candidate.base}?format=${candidate.format}&name=${name}`,
+    { headers: { Accept: "image/*" } }
+  );
+  if (!res.ok) throw new Error(`fetch ${name}: HTTP ${res.status}`);
+  const contentType =
+    res.headers.get("content-type")?.split(";")[0] || "image/jpeg";
+  const suffix = name === "orig" ? "" : "-small";
+  const path = `live-cover/${candidate.videoId}/${candidate.tweetId}${suffix}.${candidate.format}`;
+
+  const { error } = await supabase.storage
+    .from(MEDIA_BUCKET)
+    .upload(path, new Uint8Array(await res.arrayBuffer()), {
+      contentType,
+      upsert: true,
+      cacheControl: "31536000",
+    });
+  if (error) throw new Error(`upload ${name}: ${error.message}`);
+
+  return {
+    path,
+    url: supabase.storage.from(MEDIA_BUCKET).getPublicUrl(path).data.publicUrl,
+  };
+}
+
+/** Cache X cover images for tracked lives that don't have one yet (earliest post wins). */
+async function cacheLiveCovers(rows: LiveCoverSourceRow[]) {
+  const candidates = new Map<string, LiveCoverCandidate>();
+  for (const row of rows) {
+    const candidate = liveCoverCandidate(row);
+    if (!candidate) continue;
+    const prev = candidates.get(candidate.videoId);
+    if (
+      !prev ||
+      (candidate.postedAt && (!prev.postedAt || candidate.postedAt < prev.postedAt))
+    ) {
+      candidates.set(candidate.videoId, candidate);
+    }
+  }
+  const failures: JobFailure[] = [];
+  if (candidates.size === 0) {
+    return { matched: 0, cached: 0, failed: 0, failures };
+  }
+
+  const ids = [...candidates.keys()];
+  const [tracked, cachedAlready] = await Promise.all([
+    selectExisting("mild_r_live_streams", ids),
+    selectExisting("mild_r_live_stream_x_covers", ids),
+  ]);
+
+  let matched = 0;
+  let cached = 0;
+  let failed = 0;
+  for (const candidate of candidates.values()) {
+    if (!tracked.has(candidate.videoId)) continue;
+    matched += 1;
+    if (cachedAlready.has(candidate.videoId)) continue;
+
+    try {
+      const full = await uploadLiveCoverImage(candidate, "orig");
+      const small = await uploadLiveCoverImage(candidate, "small");
+      const now = new Date().toISOString();
+      const { error } = await supabase.from("mild_r_live_stream_x_covers").upsert(
+        {
+          video_id: candidate.videoId,
+          tweet_id: candidate.tweetId,
+          source_url: candidate.sourceUrl,
+          width: candidate.width,
+          height: candidate.height,
+          storage_path: full.path,
+          public_url: full.url,
+          thumb_url: small.url,
+          posted_at: candidate.postedAt,
+          updated_at: now,
+        },
+        { onConflict: "video_id" }
+      );
+      if (error) throw new Error(error.message);
+      cached += 1;
+    } catch (err) {
+      failed += 1;
+      pushFailure(
+        failures,
+        `live cover ${candidate.videoId} (tweet ${candidate.tweetId})`,
+        err
       );
     }
   }
-  return { cached, schedules };
+  return { matched, cached, failed, failures };
+}
+
+/** Re-scan stored posts (newest `limit`, or all) — no twitterapi.io calls. */
+async function cacheLiveCoversFromStored(limit = Number.POSITIVE_INFINITY) {
+  const rows: LiveCoverSourceRow[] = [];
+  const page = 200;
+  for (let from = 0; rows.length < limit; from += page) {
+    const to = Math.min(from + page, limit) - 1;
+    const { data, error } = await supabase
+      .from("mild_r_x_posts")
+      .select("tweet_id, post_type, raw")
+      .order("posted_at", { ascending: false, nullsFirst: false })
+      .range(from, to);
+    if (error) throw error;
+    rows.push(...((data ?? []) as LiveCoverSourceRow[]));
+    if (!data || data.length < to - from + 1) break;
+  }
+  return { scanned: rows.length, ...(await cacheLiveCovers(rows)) };
+}
+
+/** Sync must still succeed when cover caching fails. */
+async function cacheLiveCoversAfterSync() {
+  try {
+    return await cacheLiveCoversFromStored(LIVE_COVER_RESCAN_LIMIT);
+  } catch (err) {
+    const failures: JobFailure[] = [];
+    pushFailure(failures, "live covers", err);
+    return { scanned: 0, matched: 0, cached: 0, failed: 1, failures };
+  }
+}
+
+function failureMessage(label: string, failed: number, failures: JobFailure[]) {
+  const shown = failures.map((f) => `${f.id}: ${f.error}`).join(" · ");
+  const more = failed > failures.length ? ` · +${failed - failures.length} more` : "";
+  return `${label} failed ${failed}: ${shown}${more}`;
+}
+
+/** Separate error log (→ Discord) so a partial failure doesn't fail the whole sync. */
+async function reportSyncFailures(result: {
+  scheduleFailed: number;
+  scheduleFailures: JobFailure[];
+  liveCovers: { failed: number; failures: JobFailure[] };
+}) {
+  if (result.scheduleFailed > 0) {
+    await writeSyncLog({
+      source: "edge-x-schedule-images",
+      status: "error",
+      message: failureMessage(
+        "Schedule images",
+        result.scheduleFailed,
+        result.scheduleFailures
+      ),
+      meta: {
+        failed: result.scheduleFailed,
+        failures: result.scheduleFailures,
+      },
+    });
+  }
+  if (result.liveCovers.failed > 0) {
+    await writeSyncLog({
+      source: "edge-x-live-covers",
+      status: "error",
+      message: failureMessage(
+        "Live covers",
+        result.liveCovers.failed,
+        result.liveCovers.failures
+      ),
+      meta: result.liveCovers,
+    });
+  }
 }
 
 /** Bangkok post date → week Sunday; Saturday bumps +1 day first. */
@@ -568,6 +846,8 @@ async function runBackfill() {
   let upserted = 0;
   let scheduleCached = 0;
   let scheduleRows = 0;
+  let scheduleFailed = 0;
+  const scheduleFailures: JobFailure[] = [];
   let scheduleFlagged = 0;
   const byType = { tweet: 0, quote: 0, retweet: 0 };
 
@@ -591,11 +871,20 @@ async function runBackfill() {
     const cacheResult = await cacheLiveScheduleImages(rows);
     scheduleCached += cacheResult.cached;
     scheduleRows += cacheResult.schedules;
+    scheduleFailed += cacheResult.failed;
+    scheduleFailures.push(
+      ...cacheResult.failures.slice(
+        0,
+        MAX_REPORTED_FAILURES - scheduleFailures.length
+      )
+    );
 
     if (!page.has_next_page || !page.next_cursor) break;
     cursor = page.next_cursor;
     await new Promise((r) => setTimeout(r, 5500));
   }
+
+  const liveCovers = await cacheLiveCoversAfterSync();
 
   return {
     action: "backfill" as const,
@@ -606,6 +895,9 @@ async function runBackfill() {
     scheduleFlagged,
     scheduleCached,
     scheduleRows,
+    scheduleFailed,
+    scheduleFailures,
+    liveCovers,
     target: BACKFILL_TARGET,
     maxPages: MAX_PAGES,
   };
@@ -619,6 +911,8 @@ async function runIncremental() {
   let newCount = 0;
   let scheduleCached = 0;
   let scheduleRows = 0;
+  let scheduleFailed = 0;
+  const scheduleFailures: JobFailure[] = [];
   let scheduleFlagged = 0;
   const byType = { tweet: 0, quote: 0, retweet: 0 };
   let stoppedReason: "overlap" | "max_pages" | "end" = "end";
@@ -646,6 +940,13 @@ async function runIncremental() {
     const cacheResult = await cacheLiveScheduleImages(rows);
     scheduleCached += cacheResult.cached;
     scheduleRows += cacheResult.schedules;
+    scheduleFailed += cacheResult.failed;
+    scheduleFailures.push(
+      ...cacheResult.failures.slice(
+        0,
+        MAX_REPORTED_FAILURES - scheduleFailures.length
+      )
+    );
 
     if (pageNew === 0) {
       stoppedReason = "overlap";
@@ -667,6 +968,8 @@ async function runIncremental() {
     stoppedReason = "max_pages";
   }
 
+  const liveCovers = await cacheLiveCoversAfterSync();
+
   return {
     action: "incremental" as const,
     pages,
@@ -677,6 +980,9 @@ async function runIncremental() {
     scheduleFlagged,
     scheduleCached,
     scheduleRows,
+    scheduleFailed,
+    scheduleFailures,
+    liveCovers,
     stoppedReason,
     maxPages: MAX_PAGES,
   };
@@ -709,10 +1015,11 @@ Deno.serve(async (req) => {
       await writeSyncLog({
         source: "edge-x-backfill",
         status: "success",
-        message: `Backfill upserted ${result.upserted} posts (${result.pages} pages, schedule ${result.scheduleFlagged}/${result.scheduleCached})`,
+        message: `Backfill upserted ${result.upserted} posts (${result.pages} pages, schedule ${result.scheduleFlagged}/${result.scheduleCached}, live covers +${result.liveCovers.cached})`,
         saved_count: result.upserted,
         meta: result,
       });
+      await reportSyncFailures(result);
       return new Response(JSON.stringify({ success: true, ...result }), {
         headers: { "Content-Type": "application/json" },
       });
@@ -723,24 +1030,45 @@ Deno.serve(async (req) => {
       await writeSyncLog({
         source: "edge-x-incremental",
         status: result.upserted === 0 ? "skipped" : "success",
-        message: `Incremental upserted ${result.upserted} (new ${result.newCount}, schedule ${result.scheduleFlagged}/${result.scheduleCached}, stop=${result.stoppedReason})`,
+        message: `Incremental upserted ${result.upserted} (new ${result.newCount}, schedule ${result.scheduleFlagged}/${result.scheduleCached}, live covers +${result.liveCovers.cached}, stop=${result.stoppedReason})`,
         saved_count: result.upserted,
         meta: result,
       });
+      await reportSyncFailures(result);
       return new Response(JSON.stringify({ success: true, ...result }), {
         headers: { "Content-Type": "application/json" },
       });
     }
 
+    if (action === "live-covers") {
+      const result = await cacheLiveCoversFromStored();
+      const summary = `Live covers scanned ${result.scanned} posts, matched ${result.matched}, cached +${result.cached}`;
+      await writeSyncLog({
+        source: "edge-x-live-covers",
+        status:
+          result.failed > 0 ? "error" : result.cached === 0 ? "skipped" : "success",
+        message:
+          result.failed > 0
+            ? `${summary} · ${failureMessage("Live covers", result.failed, result.failures)}`
+            : summary,
+        saved_count: result.cached,
+        meta: result,
+      });
+      return new Response(
+        JSON.stringify({ success: true, action, ...result }),
+        { headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     await writeSyncLog({
       source: "edge-x-unknown",
       status: "error",
-      message: 'Invalid action. Use "backfill" or "incremental".',
+      message: 'Invalid action. Use "backfill", "incremental" or "live-covers".',
     });
 
     return new Response(
       JSON.stringify({
-        error: 'Invalid action. Use "backfill" or "incremental".',
+        error: 'Invalid action. Use "backfill", "incremental" or "live-covers".',
       }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );

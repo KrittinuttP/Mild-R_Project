@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "tsx scripts/sync-gallery.ts",
     "dev": "next dev",
+    "prebuild": "tsx scripts/sync-gallery.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint && node scripts/check-route-case.mjs",
@@ -34,6 +36,8 @@
     "backfill:youtube": "npx tsx --env-file=.env.local scripts/backfill-youtube-lives.ts",
     "backfill:x": "npx tsx --env-file=.env scripts/backfill-x-posts.ts",
     "backfill:x-live-schedules": "npx tsx --env-file=.env.local scripts/backfill-x-live-schedules.ts",
+    "backfill:x-live-covers": "npx tsx --env-file=.env.local scripts/run-x-live-covers.ts",
+    "db:migrate:live-x-covers": "npx tsx --env-file=.env.local scripts/apply-sql.ts supabase/migrations/20261003120000_live_stream_x_covers.sql",
     "agent:live-schedule": "npx tsx --env-file=.env.local scripts/run-live-schedule-agent.ts",
     "reprocess:x-live-schedule": "npx tsx --env-file=.env scripts/reprocess-x-live-schedule.ts",
     "cron:x": "npx tsx --env-file=.env scripts/setup-x-feed-cron.ts",
@@ -44,7 +48,9 @@
     "backfill:pixela:from-mild": "npx tsx --env-file=.env.local scripts/backfill-pixela-mild-r.ts --from-mild",
     "backfill:lumina": "npx tsx --env-file=.env.local scripts/backfill-lumina-mild-r.ts",
     "backfill:videos": "npx tsx --env-file=.env.local scripts/backfill-videos.ts",
+    "backfill:member-videos": "npx tsx --env-file=.env.local scripts/backfill-member-videos.ts",
     "events:gallery": "npx tsx scripts/build-event-gallery.ts",
+    "gallery:sync": "npx tsx scripts/sync-gallery.ts",
     "purge:preview-mocks": "npx tsx --env-file=.env.local scripts/purge-stale-preview-mocks.ts"
   },
   "dependencies": {

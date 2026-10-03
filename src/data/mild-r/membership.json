@@ -1,0 +1,64 @@
+{
+  "title": "MyHoney · สมาชิกช่อง",
+  "description": "มาเป็น MyHoney ของมาย รับป้ายชานมข้างชื่อ อีโมจิเฉพาะช่อง และไลฟ์พิเศษที่มีแค่สมาชิกเท่านั้น",
+  "joinUrl": "https://www.youtube.com/@MildRWorldEnd/join",
+  "introVideoUrl": "https://www.youtube.com/watch?v=oX6vSIMJUbs",
+  "tiers": [
+    {
+      "id": "sweet",
+      "name": "MyHoneyหวานๆ",
+      "priceThb": 75,
+      "perks": [
+        { "icon": "🧋", "label": "ป้ายผู้สนับสนุนข้างชื่อในความคิดเห็นและแชทสด" },
+        { "icon": "😊", "label": "อีโมจิเฉพาะช่องสำหรับความคิดเห็นและแชทสด" },
+        { "icon": "⭐", "label": "ไลฟ์พิเศษเฉพาะ Members" },
+        { "icon": "🤭", "label": "ไลฟ์แนว Request" },
+        { "icon": "🎮", "label": "เล่นเกมกับมาย" },
+        { "icon": "💭", "label": "โพสพิเศษเฉพาะ Member" }
+      ]
+    },
+    {
+      "id": "very-sweet",
+      "name": "MyHoneyหวานมาก",
+      "priceThb": 300,
+      "perks": [{ "icon": "📜", "label": "ได้เห็นไดอารี่มาย" }]
+    },
+    {
+      "id": "heartfelt",
+      "name": "MyHoneyหวานสุดใจ",
+      "priceThb": 1500,
+      "perks": [
+        { "icon": "🎧", "label": "ไฟล์เสียงเรียกชื่อประจำเดือน" },
+        { "icon": "🎁", "label": "ของขวัญสุดพิเศษประจำเดือน" }
+      ]
+    },
+    {
+      "id": "beg-for-life",
+      "name": "MyHoneyหวานจนร้องขอชีวิต",
+      "priceThb": 3000,
+      "perks": [{ "icon": "💞", "label": "เหมือนกับขั้นก่อนหน้า ที่เพิ่มความรักอย่างท่วมท้น" }]
+    }
+  ],
+  "badges": [
+    { "id": "new", "src": "/assets/membership/badges/01-new.webp", "label": "สมาชิกใหม่" },
+    { "id": "1-month", "src": "/assets/membership/badges/02-1-month.webp", "label": "1 เดือน" },
+    { "id": "2-months", "src": "/assets/membership/badges/03-2-months.webp", "label": "2 เดือน" },
+    { "id": "6-months", "src": "/assets/membership/badges/04-6-months.webp", "label": "6 เดือน" },
+    { "id": "1-year", "src": "/assets/membership/badges/05-1-year.webp", "label": "1 ปี" },
+    { "id": "2-years", "src": "/assets/membership/badges/06-2-years.webp", "label": "2 ปี" }
+  ],
+  "emojis": [
+    { "id": "syringe", "src": "/assets/membership/emoji/01-syringe.webp", "alt": "เข็มฉีดยา" },
+    { "id": "sweat", "src": "/assets/membership/emoji/02-sweat.webp", "alt": "มายเหงื่อตก" },
+    { "id": "heart", "src": "/assets/membership/emoji/03-heart.webp", "alt": "มายกอดหัวใจ" },
+    { "id": "happy", "src": "/assets/membership/emoji/04-happy.webp", "alt": "มายยิ้มแก้มแดง" },
+    { "id": "knocked-out", "src": "/assets/membership/emoji/05-knocked-out.webp", "alt": "มายนอนหมดแรง" },
+    { "id": "boba-shock", "src": "/assets/membership/emoji/06-boba-shock.webp", "alt": "มายช็อกกับชานม" },
+    { "id": "85iyd", "src": "/assets/membership/emoji/07-85iyd.webp", "alt": "85IYD" },
+    { "id": "yellow-hood", "src": "/assets/membership/emoji/08-yellow-hood.webp", "alt": "มายในชุดคลุมสีเหลือง" },
+    { "id": "pudding-poke", "src": "/assets/membership/emoji/09-pudding-poke.webp", "alt": "จิ้มพุดดิ้งหัวใจ" },
+    { "id": "head-pat", "src": "/assets/membership/emoji/10-head-pat.webp", "alt": "มายโดนลูบหัว" },
+    { "id": "nueh", "src": "/assets/membership/emoji/11-nueh.webp", "alt": "เหน่อห์" },
+    { "id": "dont-win", "src": "/assets/membership/emoji/12-dont-win.webp", "alt": "อย่าวิน" }
+  ]
+}

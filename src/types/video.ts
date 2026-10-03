@@ -43,5 +43,9 @@ export type VideoItem = {
   /** Largest available image. */
   coverUrl: string;
   embeddable: boolean;
+  /** From the channel's members-only playlist (metadata.members_only). */
+  membersOnly: boolean;
+  /** Channel membership promo clip (metadata.membership_intro); featured on the Member tab. */
+  membershipIntro: boolean;
   youtubeUrl: string;
 };

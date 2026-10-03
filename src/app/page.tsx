@@ -12,6 +12,7 @@ import {
 } from "@/components/sections/LiveTeaser";
 import { Lore } from "@/components/sections/Lore";
 import { Media } from "@/components/sections/Media";
+import { Membership } from "@/components/sections/Membership";
 import { Projects } from "@/components/sections/Projects";
 import { Socials } from "@/components/sections/Socials";
 import { getEventsBoard, mildRData } from "@/data/vtuber-data";
@@ -50,6 +51,7 @@ export default async function Home() {
       <Header data={mildRData} />
       <main className="flex-1 bg-[#140a0d]">
         <HeroProfileScroll data={mildRData} />
+        <Membership data={mildRData} />
         <Lore data={mildRData} />
         <LiveTeaser initialLiveSchedule={initialLiveSchedule} />
         <Media data={mildRData} />

@@ -12,6 +12,7 @@ import {
   ArrowUpRight,
   CalendarDays,
   ExternalLink,
+  Layers,
   LayoutGrid,
   MonitorPlay,
   Search,
@@ -33,7 +34,7 @@ import {
   ScrollTrigger,
   useGSAP,
 } from "@/lib/gsap";
-import type { LiveCoverItem } from "@/lib/live-streams";
+import type { LiveCoverItem, LiveCoverVersion } from "@/lib/live-streams";
 import {
   BODY_CLASS,
   CTA_OUTLINE_CLASS,
@@ -179,8 +180,12 @@ function formatDate(ymd: string | null): string {
   });
 }
 
-function formatCaptured(iso: string | null): string {
-  if (!iso) return "ปัจจุบัน";
+function versionLabel(version: LiveCoverVersion): string {
+  if (version.source === "x") return "X · HD";
+  return version.capturedAt ? formatCaptured(version.capturedAt) : "YouTube";
+}
+
+function formatCaptured(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
   return d.toLocaleDateString("th-TH", {
@@ -188,6 +193,33 @@ function formatCaptured(iso: string | null): string {
     day: "numeric",
     month: "short",
   });
+}
+
+const hdProbes = new Map<string, Promise<boolean>>();
+
+/** YouTube answers a missing maxresdefault with a 120×90 placeholder (HTTP 404). */
+function probeHdCover(url: string): Promise<boolean> {
+  let probe = hdProbes.get(url);
+  if (!probe) {
+    probe = new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(img.naturalWidth > 120);
+      img.onerror = () => resolve(false);
+      img.src = url;
+    });
+    hdProbes.set(url, probe);
+  }
+  return probe;
+}
+
+function versionSrc(
+  version: LiveCoverVersion | undefined,
+  hdReady: ReadonlySet<string>
+): string | undefined {
+  if (!version) return undefined;
+  return version.hdUrl && hdReady.has(version.hdUrl)
+    ? version.hdUrl
+    : version.url;
 }
 
 function ChannelBadge({ item }: { item: LiveCoverItem }) {
@@ -341,6 +373,7 @@ export function LiveCoverArchive({
   const [visibleMonths, setVisibleMonths] = useState(MONTH_STEP);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [versionIndex, setVersionIndex] = useState(0);
+  const [hdReady, setHdReady] = useState<ReadonlySet<string>>(() => new Set());
 
   const { covers, years, latestYear, status, retry } = useLiveCovers(
     nearView,
@@ -414,15 +447,41 @@ export function LiveCoverArchive({
       : filtered.slice(0, visibleCount);
   const hasMore = !preview && visible.length < filtered.length;
   const active = activeIndex !== null ? (visible[activeIndex] ?? null) : null;
-  const activeVersion = active?.versions[versionIndex] ?? null;
-  const lightboxSrc =
-    versionIndex === 0 || !activeVersion ? active?.coverUrl : activeVersion.url;
   const lightboxItems: ImageLightboxItem[] = visible.map((cover, index) => ({
     id: cover.videoId,
     src:
-      index === activeIndex && lightboxSrc ? lightboxSrc : cover.coverUrl,
+      versionSrc(
+        cover.versions[index === activeIndex ? versionIndex : 0],
+        hdReady
+      ) ?? cover.coverUrl,
     alt: cover.title,
   }));
+
+  const hdProbeKey =
+    activeIndex === null || visible.length === 0
+      ? ""
+      : [
+          visible[activeIndex]?.versions[versionIndex]?.hdUrl,
+          visible[(activeIndex + 1) % visible.length]?.versions[0]?.hdUrl,
+          visible[(activeIndex - 1 + visible.length) % visible.length]
+            ?.versions[0]?.hdUrl,
+        ]
+          .filter(Boolean)
+          .join(" ");
+
+  useEffect(() => {
+    if (!hdProbeKey) return;
+    let cancelled = false;
+    for (const url of hdProbeKey.split(" ")) {
+      void probeHdCover(url).then((ok) => {
+        if (!ok || cancelled) return;
+        setHdReady((prev) => (prev.has(url) ? prev : new Set(prev).add(url)));
+      });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [hdProbeKey]);
 
   const openAt = (index: number | null) => {
     setActiveIndex(index);
@@ -802,6 +861,7 @@ export function LiveCoverArchive({
         useProtectedImage
         prevLabel="ปกก่อนหน้า"
         nextLabel="ปกถัดไป"
+        aspect="video"
         subtitle={
           active ? (
             <>
@@ -810,43 +870,45 @@ export function LiveCoverArchive({
             </>
           ) : null
         }
-        belowImage={
-          active && active.versions.length > 1 ? (
-            <>
-              <p className="text-xs text-[#f3b8c4]/60">
-                ปกเวอร์ชันอื่น ({active.versions.length})
-              </p>
-              <ul className="mt-2 flex gap-2 overflow-x-auto pb-1">
-                {active.versions.map((v, i) => (
-                  <li key={v.url} className="shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => setVersionIndex(i)}
-                      aria-label={`ปกเวอร์ชัน ${formatCaptured(v.capturedAt)}`}
-                      aria-pressed={versionIndex === i}
-                      className={cn(
-                        "block w-24 overflow-hidden rounded-lg border transition sm:w-28",
-                        versionIndex === i
-                          ? "border-[#e85a7a]/70"
-                          : "border-[#f3b8c4]/15 opacity-70 hover:opacity-100"
-                      )}
-                    >
-                      <ProtectedImage
-                        src={v.url}
-                        alt=""
-                        loading="lazy"
-                        decoding="async"
-                        className="aspect-video w-full object-cover"
-                      />
-                      <span className="block px-1.5 py-1 text-left text-[0.65rem] text-[#f3b8c4]/65">
-                        {formatCaptured(i === 0 ? null : v.capturedAt)}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </>
-          ) : null
+        drawer={
+          active && active.versions.length > 1
+            ? {
+                label: "ปกเวอร์ชันอื่น",
+                count: active.versions.length,
+                icon: Layers,
+                content: (
+                  <ul className="mx-auto flex w-fit max-w-full gap-2 overflow-x-auto pb-1">
+                    {active.versions.map((v, i) => (
+                      <li key={v.url} className="shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setVersionIndex(i)}
+                          aria-label={`ปกเวอร์ชัน ${versionLabel(v)}`}
+                          aria-pressed={versionIndex === i}
+                          className={cn(
+                            "block w-24 overflow-hidden rounded-lg border transition sm:w-28",
+                            versionIndex === i
+                              ? "border-[#e85a7a]/70"
+                              : "border-[#f3b8c4]/15 opacity-70 hover:opacity-100"
+                          )}
+                        >
+                          <ProtectedImage
+                            src={v.thumbUrl}
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                            className="aspect-video w-full object-cover"
+                          />
+                          <span className="block px-1.5 py-1 text-left text-[0.65rem] text-[#f3b8c4]/65">
+                            {versionLabel(v)}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ),
+              }
+            : undefined
         }
         footerStart={
           active ? (
