@@ -44,15 +44,15 @@ curl -X POST "$SITE/api/live/agent/run" \
 
 ## Cron (อัตโนมัติ)
 
-1. X sync ต/ศ/อา **00:00 BKK** → upsert รูป Live Schedule เป็น `pending`
-2. Agent ต/ศ/อา **00:15 BKK** → กิน `pending` ทีละ 1 แถว
-3. Retry ทุก 30 นาที (**:05 / :35**) → กินแถว `failed` ที่ถึง `next_retry_at` (และ `pending` ที่ค้าง) — ไม่มีงานจะไม่เขียน log
+1. X sync ทุกชั่วโมง **:00** (search · เที่ยงคืนค้นย้อน 24 ชม.) → upsert รูป Live Schedule เป็น `pending`
+2. Agent ทุกชั่วโมง **:05** (job `run-live-schedule-agent`) → กิน `pending` ทีละ 1 แถว ถ้าไม่มีจึงกินแถว `failed` ที่ถึง `next_retry_at` — ไม่มีงานจะไม่เขียน log
 
 ### Retry + แจ้งเตือน
 
-- Fail แต่ละครั้ง: `attempt_count` +1, `next_retry_at` = +30 นาที → +1 ชม. → +2 ชม. → ทุก 3 ชม. จนกว่าจะผ่าน
+- Fail แต่ละครั้ง: `attempt_count` +1, `next_retry_at` = +30 นาที → +1 ชม. → +2 ชม. → +3 ชม. (agent รันทุก :05 จึงได้ลองจริงในรอบถัดไปหลังถึงเวลา)
+- ครบ **6 ครั้ง** (`MAX_AGENT_ATTEMPTS`) → `next_retry_at = null` หยุดลองอัตโนมัติ ต้อง reprocess เอง (`--tweet-id=`)
 - Error ถาวร (`Missing image_url`) → `next_retry_at = null` ไม่ลองซ้ำ
-- Discord (`DISCORD_WEBHOOK_URL` บน Vercel): ❌ ทุกครั้งที่ fail (ลิงก์โพสต์ · error · เวลาลองใหม่) และ ✅ ตอนกลับมาผ่าน
+- Discord (`DISCORD_WEBHOOK_URL` บน Vercel): ❌ ทุกครั้งที่ fail (ลิงก์โพสต์ · error · เวลาลองใหม่ หรือแจ้งว่าครบ 6 ครั้งแล้ว) และ ✅ ตอนกลับมาผ่าน
 - ข้อความ error ถูกลบ API key ออกก่อนเก็บ (ตาราง / log อ่านได้แบบ public)
 
 ```bash

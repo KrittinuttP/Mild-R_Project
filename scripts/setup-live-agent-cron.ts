@@ -1,7 +1,7 @@
 /**
- * Schedule Live Schedule Agent cron (Tue/Fri/Sun 00:15 Asia/Bangkok)
- * — 15 minutes after x-feed-sync incremental — plus a retry job every
- * 30 minutes that picks up failed posters whose next_retry_at has passed.
+ * Schedule the Live Schedule Agent every hour at :05 — 5 minutes after the
+ * hourly x-feed-sync (:00). Each run takes 1 pending poster, else 1 failed
+ * poster whose next_retry_at has passed; silent when there is nothing to do.
  *
  *   npx tsx --env-file=.env.local scripts/setup-live-agent-cron.ts
  *
@@ -40,8 +40,6 @@ async function main() {
   const runUrl = `${siteUrl}/api/live/agent/run`;
   const authHeader = `Bearer ${secret}`;
 
-  // pg_cron uses UTC. 00:15 Asia/Bangkok = 17:15 UTC previous weekday.
-  // Tue/Fri/Sun 00:15 BKK → Mon/Thu/Sat 17:15 UTC (dow 1,4,6).
   const sql = `
 create extension if not exists pg_cron with schema extensions;
 create extension if not exists pg_net with schema extensions;
@@ -62,13 +60,7 @@ end $$;
 
 select cron.schedule(
   'run-live-schedule-agent',
-  '15 17 * * 1,4,6',
-  ${httpPostSql(runUrl, authHeader, '{"limit":1}')}
-);
-
-select cron.schedule(
-  'run-live-schedule-agent-retry',
-  '5,35 * * * *',
+  '5 * * * *',
   ${httpPostSql(runUrl, authHeader, '{"limit":1,"quietWhenIdle":true}')}
 );
 `;
@@ -90,9 +82,8 @@ select cron.schedule(
     }
     console.log("target:", runUrl);
     console.log(
-      "note: 15 17 * * 1,4,6 UTC = 00:15 BKK Tue / Fri / Sun (after x-feed 00:00)"
+      "note: 5 * * * * = every hour at :05 (after hourly x-feed :00), silent when idle"
     );
-    console.log("note: retry job every 30 min (:05 / :35), silent when idle");
   } finally {
     await client.end();
   }

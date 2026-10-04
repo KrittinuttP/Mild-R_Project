@@ -55,6 +55,8 @@ const DEFAULT_GEMINI_MODEL = "gemini-flash-lite-latest";
 
 /** Minutes to wait before retry N (1-based attempt that just failed). */
 const RETRY_BACKOFF_MINUTES = [30, 60, 120, 180];
+/** After this many failed attempts the poster stays `failed` until reprocessed by hand. */
+export const MAX_AGENT_ATTEMPTS = 6;
 
 const PERMANENT_ERRORS = new Set(["Missing image_url"]);
 
@@ -467,6 +469,7 @@ export async function processLiveScheduleRow(
       attempt,
       error: result.error,
       nextRetryAt: result.nextRetryAt ?? null,
+      maxAttempts: MAX_AGENT_ATTEMPTS,
     });
   } else if (
     row.status === "failed" &&
@@ -493,9 +496,10 @@ async function attemptLiveScheduleRow(
 
   const fail = async (rawMessage: string): Promise<ProcessScheduleResult> => {
     const message = redactAgentSecrets(rawMessage).slice(0, 2000);
-    const nextRetryAt = PERMANENT_ERRORS.has(message)
-      ? null
-      : nextRetryAtFor(attempt);
+    const nextRetryAt =
+      PERMANENT_ERRORS.has(message) || attempt >= MAX_AGENT_ATTEMPTS
+        ? null
+        : nextRetryAtFor(attempt);
     if (!dryRun) {
       await markSchedule(supabase, row.tweet_id, {
         status: "failed",

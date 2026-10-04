@@ -268,6 +268,7 @@ export type LiveScheduleRowAlertInput = {
   attempt: number;
   error?: string | null;
   nextRetryAt?: string | null;
+  maxAttempts?: number;
   imported?: number | null;
   rowStatus?: string | null;
 };
@@ -291,10 +292,16 @@ export function buildLiveScheduleRowPayload(input: LiveScheduleRowAlertInput) {
   const lines: string[] = [`โพสต์ / Post: ${postUrl}`];
   lines.push(`ครั้งที่ / Attempt: ${input.attempt}`);
   if (failed) {
+    const gaveUp =
+      !input.nextRetryAt &&
+      input.maxAttempts != null &&
+      input.attempt >= input.maxAttempts;
     lines.push(
       input.nextRetryAt
         ? `ลองใหม่ / Next retry: ${bangkokTime(input.nextRetryAt)}`
-        : "ไม่ลองใหม่อัตโนมัติ (ต้องแก้เอง) / No auto retry"
+        : gaveUp
+          ? `ครบ ${input.maxAttempts} ครั้งแล้ว หยุดลองอัตโนมัติ (ต้องแก้เอง) / Gave up after ${input.maxAttempts} attempts`
+          : "ไม่ลองใหม่อัตโนมัติ (ต้องแก้เอง) / No auto retry"
     );
     lines.push(`[Error: ${(input.error || "unknown").slice(0, 400)}]`);
   } else {

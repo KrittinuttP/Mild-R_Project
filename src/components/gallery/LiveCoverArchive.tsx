@@ -296,10 +296,10 @@ function CoverTile({
           )}
         </span>
         <span className="mt-2 block px-0.5">
-          <span className="line-clamp-2 text-sm leading-snug text-[#fff5f7]/90">
+          <span className="line-clamp-2 min-h-[2.75em] text-sm leading-snug text-[#fff5f7]/90">
             {item.title}
           </span>
-          <span className="mt-1.5 flex min-w-0 flex-wrap items-center gap-1.5">
+          <span className="mt-1.5 flex min-h-[2.875rem] min-w-0 flex-wrap content-start items-center gap-1.5 md:min-h-5">
             <ChannelBadge item={item} />
             {item.date ? (
               <span className="shrink-0 text-[0.7rem] text-[#f3b8c4]/55">
@@ -317,8 +317,10 @@ function SkeletonTile() {
   return (
     <li className="min-w-0">
       <span className="block aspect-video animate-pulse rounded-xl bg-[#1d0d14]" />
-      <span className="mt-2 block h-3.5 w-4/5 animate-pulse rounded bg-[#1d0d14]" />
-      <span className="mt-2 block h-3 w-2/5 animate-pulse rounded bg-[#1d0d14]" />
+      <span className="mt-2 block h-[2.75em] w-4/5 animate-pulse rounded bg-[#1d0d14] text-sm" />
+      <span className="mt-1.5 block min-h-[2.875rem] md:min-h-5">
+        <span className="block h-5 w-2/5 animate-pulse rounded bg-[#1d0d14]" />
+      </span>
     </li>
   );
 }
@@ -818,7 +820,7 @@ export function LiveCoverArchive({
           </div>
         )}
 
-        {preview && status === "ready" && covers.length > 0 ? (
+        {preview && status !== "error" && !(status === "ready" && covers.length === 0) ? (
           <div className="mt-10 flex justify-center sm:mt-12">
             <Link
               href={viewAllHref}
