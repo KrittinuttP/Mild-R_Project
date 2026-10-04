@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   ArrowUpRight,
   Cake,
+  Coins,
   Eye,
   EyeOff,
   FileLock2,
@@ -76,6 +77,13 @@ const TOOLS: AdminTool[] = [
     titleLocal: "มอนิเตอร์ Sync",
     description: "ตรวจสถานะการดึงข้อมูล YouTube และ Log การทำงาน",
     icon: Radio,
+  },
+  {
+    href: "/admin/x-credits",
+    title: "X API Credits",
+    titleLocal: "เครดิต twitterapi.io",
+    description: "ยอดคงเหลือ, เครดิตที่ใช้ไป, ตัวจำลอง และลิงก์เติมเครดิต",
+    icon: Coins,
   },
 ];
 

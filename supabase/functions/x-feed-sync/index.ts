@@ -9,7 +9,27 @@ const SUPABASE_SERVICE_ROLE_KEY =
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
 const API_BASE = "https://api.twitterapi.io/twitter/user/last_tweets";
+const SEARCH_URL = "https://api.twitterapi.io/twitter/tweet/advanced_search";
+const ACCOUNT_INFO_URL = "https://api.twitterapi.io/oapi/my/info";
 const MAX_PAGES = 3;
+/**
+ * Re-returned posts are billed again, so hourly runs search strictly after the
+ * newest stored post; one daily run re-reads 24h to catch late-indexed posts.
+ */
+const SEARCH_CATCHUP_SECONDS = 24 * 60 * 60;
+const SEARCH_CATCHUP_UTC_HOUR = 17; // 00:00 Asia/Bangkok
+const SEARCH_FULL_PAGE = 20;
+/**
+ * Timeline fallback (300 credits) only runs in the daily catch-up, so a broken
+ * search costs at most one timeline call per day. It also runs when no post is
+ * newer than this — search may be silently returning nothing.
+ */
+const SEARCH_STALE_SECONDS = 72 * 60 * 60;
+/** twitterapi.io: 15 credits per returned tweet, minimum 15 per call. */
+const CREDITS_PER_TWEET = 15;
+const MIN_CREDITS_PER_CALL = 15;
+/** Same error (source + message) is sent to Discord at most once per window. */
+const ALERT_DEDUPE_MS = 6 * 60 * 60 * 1000;
 const BACKFILL_TARGET = 60;
 const MEDIA_BUCKET = "x-media";
 /** Stored posts re-scanned for live covers after each sync (catches lives tracked late). */
@@ -295,11 +315,7 @@ function mapTweet(tweet: ApiTweet): XPostRow | null {
   };
 }
 
-async function fetchLastTweetsPage(cursor: string): Promise<{
-  tweets: ApiTweet[];
-  has_next_page: boolean;
-  next_cursor: string;
-}> {
+function fetchLastTweetsPage(cursor: string) {
   const params = new URLSearchParams({
     includeReplies: "false",
     cursor,
@@ -310,18 +326,66 @@ async function fetchLastTweetsPage(cursor: string): Promise<{
     params.set("userName", X_USER_NAME);
   }
 
-  const res = await fetch(`${API_BASE}?${params.toString()}`, {
-    headers: { "X-API-Key": TWITTERAPI_IO_KEY },
+  return fetchTweetsPage(`${API_BASE}?${params.toString()}`);
+}
+
+/** Posts (incl. retweets) by the account newer than `sinceUnix`, newest first. */
+function fetchSearchPage(sinceUnix: number, cursor: string) {
+  const params = new URLSearchParams({
+    query: `from:${X_USER_NAME} since_time:${sinceUnix} include:nativeretweets -filter:replies`,
+    queryType: "Latest",
+    cursor,
   });
+  return fetchTweetsPage(`${SEARCH_URL}?${params.toString()}`);
+}
+
+type TweetsPage = {
+  tweets: ApiTweet[];
+  has_next_page: boolean;
+  next_cursor: string;
+};
+
+function callCredits(returned: number) {
+  return Math.max(MIN_CREDITS_PER_CALL, returned * CREDITS_PER_TWEET);
+}
+
+class TwitterApiError extends Error {
+  constructor(message: string, readonly status: number) {
+    super(message);
+  }
+}
+
+/** Out of credits / bad key fail the timeline too — falling back would only add noise. */
+function isFallbackable(err: unknown): boolean {
+  if (!(err instanceof TwitterApiError)) return false;
+  if ([401, 402, 403].includes(err.status)) return false;
+  return !/credit|recharge|api key|unauthori[sz]ed/i.test(err.message);
+}
+
+async function fetchTweetsPage(url: string): Promise<TweetsPage> {
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      headers: { "X-API-Key": TWITTERAPI_IO_KEY },
+    });
+  } catch (err) {
+    throw new TwitterApiError(
+      `twitterapi.io network: ${err instanceof Error ? err.message : String(err)}`,
+      0
+    );
+  }
 
   const body = (await res.json().catch(() => ({}))) as LastTweetsResponse;
-  if (!res.ok) {
+  if (!res.ok || body.status === "error") {
     const msg =
       body.message || body.msg || `twitterapi.io HTTP ${res.status}`;
-    throw new Error(msg);
+    throw new TwitterApiError(msg, res.status);
   }
 
   const tweets = body.tweets ?? body.data?.tweets ?? [];
+  if (!Array.isArray(tweets)) {
+    throw new TwitterApiError("twitterapi.io: unexpected response shape", res.status);
+  }
   const has_next_page = Boolean(
     body.has_next_page ?? body.data?.has_next_page
   );
@@ -329,6 +393,28 @@ async function fetchLastTweetsPage(cursor: string): Promise<{
     body.next_cursor ?? body.data?.next_cursor ?? "";
 
   return { tweets, has_next_page, next_cursor };
+}
+
+/** Account balance from twitterapi.io — numeric fields only (no account details). */
+async function fetchAccountCredits() {
+  const res = await fetch(ACCOUNT_INFO_URL, {
+    headers: { "X-API-Key": TWITTERAPI_IO_KEY },
+  });
+  const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+  if (!res.ok || body.status === "error") {
+    const msg = body.message || body.msg || `twitterapi.io HTTP ${res.status}`;
+    throw new Error(String(msg));
+  }
+  const balances: Record<string, number> = {};
+  for (const [key, value] of Object.entries(body)) {
+    if (typeof value === "number" && Number.isFinite(value)) balances[key] = value;
+  }
+  return {
+    rechargeCredits: balances.recharge_credits ?? null,
+    bonusCredits: balances.total_bonus_credits ?? null,
+    balances,
+    checkedAt: new Date().toISOString(),
+  };
 }
 
 async function existingIds(ids: string[]): Promise<Set<string>> {
@@ -348,6 +434,19 @@ async function existingIds(ids: string[]): Promise<Set<string>> {
     }
   }
   return found;
+}
+
+async function latestPostedUnix(): Promise<number | null> {
+  const { data, error } = await supabase
+    .from("mild_r_x_posts")
+    .select("posted_at")
+    .not("posted_at", "is", null)
+    .order("posted_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  const ms = data?.posted_at ? Date.parse(data.posted_at as string) : NaN;
+  return Number.isFinite(ms) ? Math.floor(ms / 1000) : null;
 }
 
 async function upsertPosts(rows: XPostRow[]) {
@@ -826,6 +925,9 @@ async function writeSyncLog(entry: {
   saved_count?: number;
   meta?: Record<string, unknown>;
 }) {
+  const alert =
+    entry.status !== "error" ||
+    !(await alertedRecently(entry.source, entry.message ?? null));
   const { error } = await supabase.from("mild_r_sync_logs").insert({
     source: entry.source,
     status: entry.status,
@@ -836,7 +938,22 @@ async function writeSyncLog(entry: {
   if (error) {
     console.error("sync log error:", error.message);
   }
-  await notifyJobDiscord(entry);
+  if (alert) await notifyJobDiscord(entry);
+}
+
+/** Hourly runs would otherwise repeat a persistent error (e.g. no credits) every hour. */
+async function alertedRecently(source: string, message: string | null) {
+  const since = new Date(Date.now() - ALERT_DEDUPE_MS).toISOString();
+  let query = supabase
+    .from("mild_r_sync_logs")
+    .select("id", { count: "exact", head: true })
+    .eq("source", source)
+    .eq("status", "error")
+    .gte("created_at", since);
+  query = message == null ? query.is("message", null) : query.eq("message", message);
+  const { count, error } = await query;
+  if (error) return false;
+  return (count ?? 0) > 0;
 }
 
 async function runBackfill() {
@@ -851,10 +968,13 @@ async function runBackfill() {
   let scheduleFlagged = 0;
   const byType = { tweet: 0, quote: 0, retweet: 0 };
 
+  let creditsUsed = 0;
+
   while (pages < MAX_PAGES && upserted < BACKFILL_TARGET) {
     const page = await fetchLastTweetsPage(cursor);
     pages += 1;
     fetched += page.tweets.length;
+    creditsUsed += callCredits(page.tweets.length);
 
     const rows: XPostRow[] = [];
     for (const t of page.tweets) {
@@ -888,8 +1008,10 @@ async function runBackfill() {
 
   return {
     action: "backfill" as const,
+    mode: "timeline" as const,
     pages,
     fetched,
+    creditsUsed,
     upserted,
     byType,
     scheduleFlagged,
@@ -903,10 +1025,12 @@ async function runBackfill() {
   };
 }
 
+type StopReason = "overlap" | "max_pages" | "end";
+
 async function runIncremental() {
-  let cursor = "";
   let pages = 0;
   let fetched = 0;
+  let creditsUsed = 0;
   let upserted = 0;
   let newCount = 0;
   let scheduleCached = 0;
@@ -915,14 +1039,14 @@ async function runIncremental() {
   const scheduleFailures: JobFailure[] = [];
   let scheduleFlagged = 0;
   const byType = { tweet: 0, quote: 0, retweet: 0 };
-  let stoppedReason: "overlap" | "max_pages" | "end" = "end";
 
-  while (pages < MAX_PAGES) {
-    const page = await fetchLastTweetsPage(cursor);
+  async function ingest(page: TweetsPage) {
     pages += 1;
     fetched += page.tweets.length;
+    creditsUsed += callCredits(page.tweets.length);
 
     const rows = page.tweets
+      .filter((t) => t.isReply !== true)
       .map(mapTweet)
       .filter((r): r is XPostRow => r != null);
 
@@ -948,32 +1072,99 @@ async function runIncremental() {
       )
     );
 
-    if (pageNew === 0) {
-      stoppedReason = "overlap";
-      break;
-    }
-    if (!page.has_next_page || !page.next_cursor) {
-      stoppedReason = "end";
-      break;
-    }
-    if (pages >= MAX_PAGES) {
-      stoppedReason = "max_pages";
-      break;
-    }
-    cursor = page.next_cursor;
-    await new Promise((r) => setTimeout(r, 5500));
+    return { rows, existing, pageNew };
   }
 
-  if (pages >= MAX_PAGES && stoppedReason === "end") {
-    stoppedReason = "max_pages";
+  async function fromSearch(sinceUnix: number): Promise<StopReason> {
+    let cursor = "";
+    for (let page = 1; ; page += 1) {
+      const res = await fetchSearchPage(sinceUnix, cursor);
+      const { pageNew } = await ingest(res);
+      // A short page is the last one; fetching the (empty) next page still costs 15 credits.
+      if (
+        res.tweets.length < SEARCH_FULL_PAGE ||
+        !res.has_next_page ||
+        !res.next_cursor
+      ) {
+        return "end";
+      }
+      if (pageNew === 0) return "overlap";
+      if (page >= MAX_PAGES) return "max_pages";
+      cursor = res.next_cursor;
+      await new Promise((r) => setTimeout(r, 5500));
+    }
+  }
+
+  async function fromTimeline(): Promise<StopReason> {
+    let cursor = "";
+    for (let page = 1; ; page += 1) {
+      const res = await fetchLastTweetsPage(cursor);
+      const { rows, existing, pageNew } = await ingest(res);
+      // Feed is newest-first (a pinned post may lead), so a known last item
+      // means everything older is already stored — skip the next paid page.
+      const oldest = rows[rows.length - 1];
+      if (pageNew === 0 || (oldest && existing.has(oldest.tweet_id))) {
+        return "overlap";
+      }
+      if (!res.has_next_page || !res.next_cursor) return "end";
+      if (page >= MAX_PAGES) return "max_pages";
+      cursor = res.next_cursor;
+      await new Promise((r) => setTimeout(r, 5500));
+    }
+  }
+
+  const now = new Date();
+  const nowUnix = Math.floor(now.getTime() / 1000);
+  const catchup = now.getUTCHours() === SEARCH_CATCHUP_UTC_HOUR;
+  let searchError: string | null = null;
+  let timelineReason: "empty_db" | "search_error" | "stale_72h" | null = null;
+  let searchMissed = 0;
+  let stoppedReason: StopReason = "end";
+
+  const latest = await latestPostedUnix();
+  if (latest == null) {
+    timelineReason = "empty_db";
+  } else {
+    try {
+      const since = catchup
+        ? Math.min(latest + 1, nowUnix - SEARCH_CATCHUP_SECONDS)
+        : latest + 1;
+      stoppedReason = await fromSearch(since);
+    } catch (err) {
+      searchError = err instanceof Error ? err.message : String(err);
+      if (!catchup || !isFallbackable(err)) {
+        throw new Error(`search: ${searchError}`);
+      }
+      timelineReason = "search_error";
+    }
+    if (!timelineReason && catchup) {
+      const newest = await latestPostedUnix();
+      if (newest == null || nowUnix - newest > SEARCH_STALE_SECONDS) {
+        timelineReason = "stale_72h";
+      }
+    }
+  }
+
+  if (timelineReason) {
+    console.warn("timeline fallback:", timelineReason, searchError ?? "");
+    const before = newCount;
+    stoppedReason = await fromTimeline();
+    if (timelineReason === "stale_72h") searchMissed = newCount - before;
   }
 
   const liveCovers = await cacheLiveCoversAfterSync();
+  const mode: "search" | "timeline" = timelineReason ? "timeline" : "search";
 
   return {
     action: "incremental" as const,
+    mode,
+    catchup,
+    searchError,
+    timelineReason,
+    searchMissed,
     pages,
     fetched,
+    creditsUsed,
     upserted,
     newCount,
     byType,
@@ -1030,12 +1221,34 @@ Deno.serve(async (req) => {
       await writeSyncLog({
         source: "edge-x-incremental",
         status: result.upserted === 0 ? "skipped" : "success",
-        message: `Incremental upserted ${result.upserted} (new ${result.newCount}, schedule ${result.scheduleFlagged}/${result.scheduleCached}, live covers +${result.liveCovers.cached}, stop=${result.stoppedReason})`,
+        message: `Incremental [${result.mode}] upserted ${result.upserted} (new ${result.newCount}, schedule ${result.scheduleFlagged}/${result.scheduleCached}, live covers +${result.liveCovers.cached}, stop=${result.stoppedReason}) · ~${result.creditsUsed} credits`,
         saved_count: result.upserted,
         meta: result,
       });
       await reportSyncFailures(result);
+      if (result.timelineReason === "search_error") {
+        await writeSyncLog({
+          source: "edge-x-search-error",
+          status: "error",
+          message: `Search failed, used timeline fallback: ${result.searchError}`,
+        });
+      }
+      if (result.searchMissed > 0) {
+        await writeSyncLog({
+          source: "edge-x-search-gap",
+          status: "error",
+          message: `Search found no posts for 72h, timeline check found ${result.searchMissed} new post(s)`,
+          saved_count: result.searchMissed,
+        });
+      }
       return new Response(JSON.stringify({ success: true, ...result }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "credits") {
+      const credits = await fetchAccountCredits();
+      return new Response(JSON.stringify({ success: true, action, ...credits }), {
         headers: { "Content-Type": "application/json" },
       });
     }
@@ -1063,12 +1276,12 @@ Deno.serve(async (req) => {
     await writeSyncLog({
       source: "edge-x-unknown",
       status: "error",
-      message: 'Invalid action. Use "backfill", "incremental" or "live-covers".',
+      message: 'Invalid action. Use "backfill", "incremental", "live-covers" or "credits".',
     });
 
     return new Response(
       JSON.stringify({
-        error: 'Invalid action. Use "backfill", "incremental" or "live-covers".',
+        error: 'Invalid action. Use "backfill", "incremental", "live-covers" or "credits".',
       }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );

@@ -24,7 +24,56 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_SERVICE_ROLE_KEY =
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+/**
+ * PostgREST intermittently rejects the per-request token with "JWT issued at future"
+ * (token clock slightly ahead of the DB clock); a short retry gets past the skew.
+ */
+const JWT_CLOCK_SKEW_RE = /JWT issued at future/i;
+const JWT_SKEW_RETRY_DELAYS_MS = [1000, 2000];
+
+async function fetchWithJwtSkewRetry(
+  input: RequestInfo | URL,
+  init?: RequestInit
+): Promise<Response> {
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(input, init);
+    if (res.status !== 401 || attempt >= JWT_SKEW_RETRY_DELAYS_MS.length) return res;
+    if (!JWT_CLOCK_SKEW_RE.test(await res.clone().text())) return res;
+    console.warn(`JWT issued at future · retry ${attempt + 1}`);
+    await new Promise((resolve) => setTimeout(resolve, JWT_SKEW_RETRY_DELAYS_MS[attempt]));
+  }
+}
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+  global: { fetch: fetchWithJwtSkewRetry },
+});
+
+/** Readable text for thrown non-Error values (e.g. PostgREST error objects). */
+function errorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  if (err && typeof err === "object") {
+    const { message, error, details, code } = err as Record<string, unknown>;
+    const text = [message ?? error, details, code]
+      .filter((part): part is string => typeof part === "string" && part.length > 0)
+      .join(" · ");
+    if (text) return text;
+    try {
+      return JSON.stringify(err).slice(0, 500);
+    } catch {
+      // fall through
+    }
+  }
+  return String(err);
+}
+
+/** Sync logs are readable from the site, so strip anything credential-like. */
+function redactSecrets(text: string): string {
+  return text
+    .replace(/([?&]key=)[^&\s"']+/gi, "$1***")
+    .replace(/Bearer\s+[A-Za-z0-9._~+/=-]+/gi, "Bearer ***")
+    .replace(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, "***")
+    .replace(/sb_(secret|publishable)_[A-Za-z0-9_-]+/g, "sb_$1_***");
+}
 
 const SEARCH_KEYWORD = "@MildRWorldEnd";
 const REFRESH_LOOKBACK_DAYS = 30;
@@ -1185,7 +1234,7 @@ Deno.serve(async (req) => {
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
+    const message = redactSecrets(errorMessage(err));
     console.error(message);
     await writeSyncLog({
       source: "edge-error",

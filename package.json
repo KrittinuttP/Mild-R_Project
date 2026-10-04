@@ -40,7 +40,7 @@
     "db:migrate:live-x-covers": "npx tsx --env-file=.env.local scripts/apply-sql.ts supabase/migrations/20261003120000_live_stream_x_covers.sql",
     "agent:live-schedule": "npx tsx --env-file=.env.local scripts/run-live-schedule-agent.ts",
     "reprocess:x-live-schedule": "npx tsx --env-file=.env scripts/reprocess-x-live-schedule.ts",
-    "cron:x": "npx tsx --env-file=.env scripts/setup-x-feed-cron.ts",
+    "cron:x": "npx tsx --env-file=.env.local scripts/setup-x-feed-cron.ts",
     "cron:live-agent": "npx tsx --env-file=.env.local scripts/setup-live-agent-cron.ts",
     "test:discord": "npx tsx --env-file=.env scripts/test-discord-webhook.ts",
     "test:live-discord": "npx tsx --env-file=.env scripts/test-live-discord-webhook.ts",

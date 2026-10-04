@@ -1,6 +1,5 @@
 -- Template only — prefer: npm run cron:x
--- Schedule: incremental Tue/Fri/Sun at 00:00 Asia/Bangkok
--- (= Mon/Thu/Sat 17:00 UTC → cron '0 17 * * 1,4,6')
+-- Schedule: incremental every hour on the hour (cron '0 * * * *')
 -- Do NOT schedule backfill.
 
 create extension if not exists pg_cron with schema extensions;
@@ -15,7 +14,7 @@ end $$;
 
 select cron.schedule(
   'run-x-feed-incremental',
-  '0 17 * * 1,4,6',
+  '0 * * * *',
   $$
   select net.http_post(
     url := 'https://YOUR_PROJECT_REF.supabase.co/functions/v1/x-feed-sync',

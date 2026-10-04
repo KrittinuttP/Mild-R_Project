@@ -31,6 +31,8 @@ const SOURCE_TITLE: Record<string, string> = {
   "edge-x-schedule-images": "X · รูปตารางไลฟ์ | Schedule Images",
   "edge-x-unknown": "X · คำสั่งไม่ถูกต้อง | Invalid Action",
   "edge-x-error": "X · ข้อผิดพลาดระบบ | System Error",
+  "edge-x-search-error": "X · ค้นหาพัง ใช้แบบเดิมแทน | Search Fallback",
+  "edge-x-search-gap": "X · การค้นหาพลาดโพสต์ | Search Gap",
   "edge-unknown": "YouTube · คำสั่งไม่ถูกต้อง | Invalid Action",
   "edge-error": "YouTube · ข้อผิดพลาดระบบ | System Error",
   "agent-live-schedule": "Live Schedule Agent",

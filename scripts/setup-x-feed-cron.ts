@@ -1,6 +1,6 @@
 /**
- * Schedule X feed incremental cron (Tue/Fri/Sun at 00:00 Asia/Bangkok).
- *   npx tsx --env-file=.env scripts/setup-x-feed-cron.ts
+ * Schedule X feed incremental cron (every hour, on the hour).
+ *   npx tsx --env-file=.env.local scripts/setup-x-feed-cron.ts
  */
 import pg from "pg";
 
@@ -19,8 +19,7 @@ async function main() {
   const fnUrl = `${supabaseUrl.replace(/\/$/, "")}/functions/v1/x-feed-sync`;
   const authHeader = `Bearer ${serviceRole}`;
 
-  // pg_cron uses UTC. 00:00 Asia/Bangkok = 17:00 UTC previous weekday.
-  // Tue/Fri/Sun 00:00 BKK → Mon/Thu/Sat 17:00 UTC (dow 1,4,6).
+  // Search mode bills per new post (min 15 credits per empty run), so hourly stays cheap.
   const sql = `
 create extension if not exists pg_cron with schema extensions;
 create extension if not exists pg_net with schema extensions;
@@ -34,7 +33,7 @@ end $$;
 
 select cron.schedule(
   'run-x-feed-incremental',
-  '0 17 * * 1,4,6',
+  '0 * * * *',
   $cron$
   select net.http_post(
     url := ${pgClientLiteral(fnUrl)},
@@ -64,9 +63,7 @@ select cron.schedule(
       console.log(`- ${row.jobname} @ ${row.schedule} (active=${row.active})`);
     }
     console.log("target:", fnUrl);
-    console.log(
-      "note: 0 17 * * 1,4,6 UTC = 00:00 BKK Tue / Fri / Sun"
-    );
+    console.log("note: 0 * * * * = every hour on the hour");
   } finally {
     await client.end();
   }
