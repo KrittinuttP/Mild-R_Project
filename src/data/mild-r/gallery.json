@@ -6,7 +6,8 @@
     "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "lg",
     "width": 1920,
-    "height": 1080
+    "height": 1080,
+    "thumb": "/assets/Gallery/moments/01-heart-cure-thumb.webp"
   },
   {
     "id": "moment-x-mild",
@@ -15,7 +16,8 @@
     "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "tall",
     "width": 1500,
-    "height": 2100
+    "height": 2100,
+    "thumb": "/assets/Gallery/moments/02-x-mild-thumb.webp"
   },
   {
     "id": "moment-birthday-bar",
@@ -24,7 +26,8 @@
     "credit": "Mild-R · YouTube (@MildRWorldEnd)",
     "size": "sm",
     "width": 1920,
-    "height": 1080
+    "height": 1080,
+    "thumb": "/assets/Gallery/moments/03-birthday-bar-thumb.webp"
   },
   {
     "id": "moment-birthday-star-wish",
@@ -33,7 +36,8 @@
     "credit": "Mild-R · YouTube (@MildRWorldEnd)",
     "size": "sm",
     "width": 1920,
-    "height": 1080
+    "height": 1080,
+    "thumb": "/assets/Gallery/moments/04-birthday-star-wish-thumb.webp"
   },
   {
     "id": "moment-good-night",
@@ -42,7 +46,8 @@
     "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "sm",
     "width": 1919,
-    "height": 1079
+    "height": 1079,
+    "thumb": "/assets/Gallery/moments/05-good-night-thumb.webp"
   },
   {
     "id": "moment-showtime",
@@ -51,7 +56,8 @@
     "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "tall",
     "width": 1200,
-    "height": 1200
+    "height": 1200,
+    "thumb": "/assets/Gallery/moments/06-showtime-thumb.webp"
   },
   {
     "id": "moment-snapshot",
@@ -60,7 +66,8 @@
     "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "lg",
     "width": 1919,
-    "height": 1079
+    "height": 1079,
+    "thumb": "/assets/Gallery/moments/07-snapshot-thumb.webp"
   },
   {
     "id": "moment-up-close",
@@ -69,7 +76,8 @@
     "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "sm",
     "width": 1706,
-    "height": 1064
+    "height": 1064,
+    "thumb": "/assets/Gallery/moments/08-up-close-thumb.webp"
   },
   {
     "id": "moment-cozy-night",
@@ -78,7 +86,8 @@
     "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "sm",
     "width": 1919,
-    "height": 1079
+    "height": 1079,
+    "thumb": "/assets/Gallery/moments/09-cozy-night-thumb.webp"
   },
   {
     "id": "moment-daydream",
@@ -87,7 +96,8 @@
     "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "lg",
     "width": 1755,
-    "height": 1024
+    "height": 1024,
+    "thumb": "/assets/Gallery/moments/10-daydream-thumb.webp"
   },
   {
     "id": "moment-holiday-toast",
@@ -96,7 +106,8 @@
     "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "sm",
     "width": 1790,
-    "height": 1079
+    "height": 1079,
+    "thumb": "/assets/Gallery/moments/11-holiday-toast-thumb.webp"
   },
   {
     "id": "moment-starlit-shore",
@@ -105,7 +116,8 @@
     "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "sm",
     "width": 1763,
-    "height": 1063
+    "height": 1063,
+    "thumb": "/assets/Gallery/moments/12-starlit-shore-thumb.webp"
   },
   {
     "id": "moment-moonlit-beach",
@@ -114,7 +126,8 @@
     "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "sm",
     "width": 1702,
-    "height": 944
+    "height": 944,
+    "thumb": "/assets/Gallery/moments/13-moonlit-beach-thumb.webp"
   },
   {
     "id": "moment-night-shift",
@@ -123,7 +136,8 @@
     "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "lg",
     "width": 1738,
-    "height": 1015
+    "height": 1015,
+    "thumb": "/assets/Gallery/moments/14-night-shift-thumb.webp"
   },
   {
     "id": "moment-qipao-night",
@@ -132,7 +146,8 @@
     "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "sm",
     "width": 1254,
-    "height": 957
+    "height": 957,
+    "thumb": "/assets/Gallery/moments/15-qipao-night-thumb.webp"
   },
   {
     "id": "moment-cafe-gaze",
@@ -141,7 +156,8 @@
     "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "sm",
     "width": 1580,
-    "height": 1075
+    "height": 1075,
+    "thumb": "/assets/Gallery/moments/16-cafe-gaze-thumb.webp"
   },
   {
     "id": "moment-boarding-call",
@@ -150,7 +166,8 @@
     "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "sm",
     "width": 1250,
-    "height": 978
+    "height": 978,
+    "thumb": "/assets/Gallery/moments/17-boarding-call-thumb.webp"
   },
   {
     "id": "moment-heart-hands",
@@ -159,7 +176,8 @@
     "credit": "Mild-R · X (@MildRWorldEnd)",
     "size": "sm",
     "width": 1520,
-    "height": 950
+    "height": 950,
+    "thumb": "/assets/Gallery/moments/18-heart-hands-thumb.webp"
   },
   {
     "id": "moment-membership",
@@ -169,7 +187,8 @@
     "size": "sm",
     "loadOnDemand": true,
     "width": 1200,
-    "height": 1200
+    "height": 1200,
+    "thumb": "/assets/Gallery/moments/19-membership-thumb.webp"
   },
   {
     "id": "moment-kitty-nurse",
@@ -179,7 +198,8 @@
     "size": "sm",
     "loadOnDemand": true,
     "width": 1920,
-    "height": 1080
+    "height": 1080,
+    "thumb": "/assets/Gallery/moments/20-kitty-nurse-thumb.webp"
   },
   {
     "id": "moment-sweet-wink",
@@ -189,7 +209,8 @@
     "size": "lg",
     "loadOnDemand": true,
     "width": 2084,
-    "height": 1217
+    "height": 1217,
+    "thumb": "/assets/Gallery/moments/21-sweet-wink-thumb.webp"
   },
   {
     "id": "moment-paw-paw",
@@ -199,7 +220,8 @@
     "size": "sm",
     "loadOnDemand": true,
     "width": 1920,
-    "height": 1080
+    "height": 1080,
+    "thumb": "/assets/Gallery/moments/22-paw-paw-thumb.webp"
   },
   {
     "id": "moment-undercover",
@@ -209,7 +231,8 @@
     "size": "sm",
     "loadOnDemand": true,
     "width": 1920,
-    "height": 1080
+    "height": 1080,
+    "thumb": "/assets/Gallery/moments/23-undercover-thumb.webp"
   },
   {
     "id": "moment-heart-pose",
@@ -219,7 +242,8 @@
     "size": "tall",
     "loadOnDemand": true,
     "width": 1080,
-    "height": 1920
+    "height": 1920,
+    "thumb": "/assets/Gallery/moments/24-heart-pose-thumb.webp"
   },
   {
     "id": "moment-full-uniform",
@@ -229,7 +253,8 @@
     "size": "tall",
     "loadOnDemand": true,
     "width": 1080,
-    "height": 1920
+    "height": 1920,
+    "thumb": "/assets/Gallery/moments/25-full-uniform-thumb.webp"
   },
   {
     "id": "moment-shy-pose",
@@ -239,7 +264,8 @@
     "size": "tall",
     "loadOnDemand": true,
     "width": 1080,
-    "height": 1808
+    "height": 1808,
+    "thumb": "/assets/Gallery/moments/26-shy-pose-thumb.webp"
   },
   {
     "id": "moment-chin-up",
@@ -249,7 +275,8 @@
     "size": "sm",
     "loadOnDemand": true,
     "width": 1920,
-    "height": 1080
+    "height": 1080,
+    "thumb": "/assets/Gallery/moments/27-chin-up-thumb.webp"
   },
   {
     "id": "moment-little-heart",
@@ -259,7 +286,8 @@
     "size": "sm",
     "loadOnDemand": true,
     "width": 1920,
-    "height": 1080
+    "height": 1080,
+    "thumb": "/assets/Gallery/moments/28-little-heart-thumb.webp"
   },
   {
     "id": "moment-character-sheet",
@@ -269,7 +297,8 @@
     "size": "lg",
     "loadOnDemand": true,
     "width": 2048,
-    "height": 1602
+    "height": 1602,
+    "thumb": "/assets/Gallery/moments/29-character-sheet-thumb.webp"
   },
   {
     "id": "moment-winter-treat",
@@ -279,7 +308,8 @@
     "size": "lg",
     "loadOnDemand": true,
     "width": 1920,
-    "height": 1080
+    "height": 1080,
+    "thumb": "/assets/Gallery/moments/30-winter-treat-thumb.webp"
   },
   {
     "id": "moment-happy-glasses",
@@ -289,7 +319,8 @@
     "size": "sm",
     "loadOnDemand": true,
     "width": 1331,
-    "height": 913
+    "height": 913,
+    "thumb": "/assets/Gallery/moments/31-happy-glasses-thumb.webp"
   },
   {
     "id": "moment-winter-hug",
@@ -299,7 +330,8 @@
     "size": "lg",
     "loadOnDemand": true,
     "width": 1489,
-    "height": 1078
+    "height": 1078,
+    "thumb": "/assets/Gallery/moments/32-winter-hug-thumb.webp"
   },
   {
     "id": "moment-asmr-1-46-45",
@@ -309,7 +341,8 @@
     "size": "sm",
     "loadOnDemand": true,
     "width": 1920,
-    "height": 1080
+    "height": 1080,
+    "thumb": "/assets/Gallery/mild/asmr-1-46-45-thumb.webp"
   },
   {
     "id": "moment-asmr-23-17",
@@ -319,7 +352,8 @@
     "size": "sm",
     "loadOnDemand": true,
     "width": 1440,
-    "height": 1080
+    "height": 1080,
+    "thumb": "/assets/Gallery/mild/asmr-23-17-thumb.webp"
   },
   {
     "id": "moment-asmr-35-52",
@@ -329,7 +363,8 @@
     "size": "sm",
     "loadOnDemand": true,
     "width": 1440,
-    "height": 1080
+    "height": 1080,
+    "thumb": "/assets/Gallery/mild/asmr-35-52-thumb.webp"
   },
   {
     "id": "moment-asmr-1-25-15",
@@ -339,7 +374,8 @@
     "size": "lg",
     "loadOnDemand": true,
     "width": 1350,
-    "height": 1080
+    "height": 1080,
+    "thumb": "/assets/Gallery/mild/asmr-1-25-15-thumb.webp"
   },
   {
     "id": "moment-asmr-1-14-17",
@@ -349,7 +385,8 @@
     "size": "sm",
     "loadOnDemand": true,
     "width": 1350,
-    "height": 1080
+    "height": 1080,
+    "thumb": "/assets/Gallery/mild/asmr-1-14-17-thumb.webp"
   },
   {
     "id": "moment-dirty-laundry-2-6-30",
@@ -359,7 +396,8 @@
     "size": "sm",
     "loadOnDemand": true,
     "width": 1512,
-    "height": 1080
+    "height": 1080,
+    "thumb": "/assets/Gallery/mild/dirty-laundry-2-6-30-thumb.webp"
   },
   {
     "id": "moment-dirty-laundry-2-11-3",
@@ -369,7 +407,8 @@
     "size": "sm",
     "loadOnDemand": true,
     "width": 1512,
-    "height": 1080
+    "height": 1080,
+    "thumb": "/assets/Gallery/mild/dirty-laundry-2-11-3-thumb.webp"
   },
   {
     "id": "moment-46-46",
@@ -379,6 +418,7 @@
     "size": "sm",
     "loadOnDemand": true,
     "width": 1436,
-    "height": 1026
+    "height": 1026,
+    "thumb": "/assets/Gallery/mild/46-46-thumb.webp"
   }
 ]

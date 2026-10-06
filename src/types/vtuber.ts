@@ -136,6 +136,8 @@ export type GalleryTileSize = "sm" | "md" | "lg" | "tall" | "wide";
 export interface GalleryItem {
   id: string;
   src: string;
+  /** Smaller webp for grid tiles (written by scripts/sync-gallery.ts); the lightbox uses `src`. */
+  thumb?: string;
   alt: string;
   caption?: string;
   credit?: string;
@@ -144,10 +146,7 @@ export interface GalleryItem {
   /** Intrinsic pixel size (mobile masonry keeps the real aspect ratio). */
   width?: number;
   height?: number;
-  /**
-   * When true, item is held for "load more" batches
-   * (and should not be eagerly fetched until revealed).
-   */
+  /** When true, item is sorted after the rest of the board. */
   loadOnDemand?: boolean;
 }
 

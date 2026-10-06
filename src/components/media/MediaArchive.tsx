@@ -5,6 +5,7 @@ import { ExternalLink, Heart, Lock, Play, Search, SlidersHorizontal, X } from "l
 
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { buttonVariants } from "@/components/ui/button";
+import { useLoadMoreOnScroll } from "@/hooks/useLoadMoreOnScroll";
 import {
   Dialog,
   DialogContent,
@@ -344,6 +345,13 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
   const shortsOnly = kind === "short";
   const active = activeId ? (videos.find((v) => v.videoId === activeId) ?? null) : null;
 
+  const hasMore = visible.length < filtered.length;
+  const { sentinelRef, auto: autoLoad } = useLoadMoreOnScroll({
+    hasMore,
+    onLoadMore: () => setVisibleCount(visible.length + PAGE_STEP),
+    resetKey: `${kind}|${channel}|${year}|${normalizedQuery}`,
+  });
+
   const resetPaging = () => setVisibleCount(PAGE_STEP);
 
   const selectKind = (next: KindFilter) => {
@@ -555,7 +563,9 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
         </ul>
       )}
 
-      {visible.length < filtered.length ? (
+      {autoLoad ? <div ref={sentinelRef} aria-hidden className="h-px" /> : null}
+
+      {hasMore && !autoLoad ? (
         <div className="mt-10 flex justify-center sm:mt-12">
           <button
             type="button"

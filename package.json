@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "predev": "tsx scripts/sync-gallery.ts",
-    "dev": "next dev",
+    "dev": "tsx scripts/sync-gallery.ts --watch=$$ & next dev",
     "prebuild": "tsx scripts/sync-gallery.ts",
     "build": "next build",
     "start": "next start",

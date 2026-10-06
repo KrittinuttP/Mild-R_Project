@@ -6,9 +6,8 @@ import { ArrowUpRight } from "lucide-react";
 
 import {
   artistCredit,
-  GALLERY_LOAD_MORE_STEP,
+  GALLERY_EAGER_COUNT,
   GALLERY_PREVIEW_COUNT,
-  initialVisibleCount,
   isFanArtItem,
   masonrySlots,
   prefersReducedMotion,
@@ -24,7 +23,7 @@ import {
 } from "@/components/media/ImageLightbox";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { buttonVariants } from "@/components/ui/button";
-import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
+import { gsap, registerGsapPlugins, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { CTA_OUTLINE_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { GalleryItem } from "@/types/vtuber";
@@ -67,146 +66,100 @@ export function GalleryBoard({
     [items]
   );
 
-  const startCount = useMemo(
-    () => initialVisibleCount(items, mode, previewCount),
-    [items, mode, previewCount]
-  );
-
-  const [visibleCount, setVisibleCount] = useState(startCount);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
-  const resetKey = `${startCount}|${variant}|${mode}`;
+  const resetKey = `${variant}|${mode}`;
   const [appliedResetKey, setAppliedResetKey] = useState(resetKey);
   if (appliedResetKey !== resetKey) {
     setAppliedResetKey(resetKey);
-    setVisibleCount(startCount);
     setActiveIndex(null);
   }
 
-  const visibleItems = useMemo(() => items.slice(0, visibleCount), [items, visibleCount]);
+  const visibleItems = useMemo(
+    () => (mode === "preview" ? items.slice(0, previewCount) : items),
+    [items, mode, previewCount]
+  );
   const masonry = variant === "archive";
   const slots = useMemo(
     () => (masonry ? masonrySlots(visibleItems) : []),
     [masonry, visibleItems]
   );
-  const hasMore = mode === "full" && visibleCount < items.length;
   const showViewAll = mode === "preview" && Boolean(viewAllHref) && items.length > 0;
   const showArtist = variant === "fan-art";
 
-  const changeLightboxIndex = (index: number | null) => {
-    if (index !== null && mode === "full") {
-      setVisibleCount((count) =>
-        index < count
-          ? count
-          : Math.min(
-              items.length,
-              Math.max(count + GALLERY_LOAD_MORE_STEP, index + 1)
-            )
-      );
-    }
-    setActiveIndex(index);
-  };
-
   useGSAP(
     () => {
-      const reduced = prefersReducedMotion();
       const tiles = gsap.utils.toArray<HTMLElement>(
         "[data-gallery-item]:not([data-revealed])",
         rootRef.current
       );
+      if (tiles.length === 0) return;
+      tiles.forEach((tile) => tile.setAttribute("data-revealed", "true"));
 
-      tiles.forEach((tile, index) => {
-        tile.setAttribute("data-revealed", "true");
-        const media = tile.querySelector<HTMLElement>("[data-gallery-media]");
-        const caption = tile.querySelector<HTMLElement>(
-          "[data-gallery-caption]"
+      if (prefersReducedMotion()) {
+        gsap.set(tiles, { autoAlpha: 1 });
+        return;
+      }
+
+      const fanArt = variant === "fan-art";
+      const stagger = fanArt ? 0.07 : 0.06;
+      gsap.set(tiles, { autoAlpha: 0, y: fanArt ? 36 : 28, scale: 0.97 });
+
+      const reveal = (entered: Element[]) => {
+        const batch = entered as HTMLElement[];
+        // Captions are optional; skip empty target lists so GSAP doesn't warn.
+        const fromTo = (selector: string, from: gsap.TweenVars, to: gsap.TweenVars) => {
+          const targets = batch
+            .map((tile) => tile.querySelector<HTMLElement>(selector))
+            .filter((el): el is HTMLElement => el !== null);
+          if (targets.length > 0) gsap.fromTo(targets, from, to);
+        };
+
+        gsap.to(batch, {
+          autoAlpha: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.75,
+          ease: "power3.out",
+          stagger,
+        });
+        fromTo(
+          "[data-gallery-media]",
+          { scale: fanArt ? 1.08 : 1.06 },
+          { scale: 1, duration: 0.95, ease: "power2.out", stagger }
         );
-        const shine = tile.querySelector<HTMLElement>("[data-gallery-shine]");
-
-        if (reduced) {
-          gsap.set([tile, media, caption].filter(Boolean), { autoAlpha: 1 });
-          return;
-        }
-
-        const fromY = variant === "fan-art" ? 36 : 28;
-        const stagger = variant === "fan-art" ? 0.07 : 0.06;
-
-        gsap.fromTo(
-          tile,
-          { autoAlpha: 0, y: fromY, scale: 0.97 },
+        fromTo(
+          "[data-gallery-caption]",
+          { y: 14, autoAlpha: 0 },
+          { y: 0, autoAlpha: 1, duration: 0.5, delay: 0.18, ease: "power2.out", stagger }
+        );
+        fromTo(
+          "[data-gallery-shine]",
+          { xPercent: -130, opacity: 0 },
           {
-            autoAlpha: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.75,
-            delay: (index % 4) * stagger,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: tile,
-              start: "top 92%",
-              toggleActions: "play none none none",
-            },
+            xPercent: 130,
+            opacity: 0.3,
+            duration: 1.05,
+            delay: 0.12,
+            ease: "power1.inOut",
+            stagger,
           }
         );
+      };
 
-        if (media) {
-          gsap.fromTo(
-            media,
-            { scale: variant === "fan-art" ? 1.08 : 1.06 },
-            {
-              scale: 1,
-              duration: 0.95,
-              delay: (index % 4) * stagger,
-              ease: "power2.out",
-              scrollTrigger: {
-                trigger: tile,
-                start: "top 92%",
-                toggleActions: "play none none none",
-              },
-            }
-          );
-        }
-
-        if (caption) {
-          gsap.fromTo(
-            caption,
-            { y: 14, autoAlpha: 0 },
-            {
-              y: 0,
-              autoAlpha: 1,
-              duration: 0.5,
-              delay: 0.18 + (index % 4) * stagger,
-              ease: "power2.out",
-              scrollTrigger: {
-                trigger: tile,
-                start: "top 92%",
-                toggleActions: "play none none none",
-              },
-            }
-          );
-        }
-
-        if (shine) {
-          gsap.fromTo(
-            shine,
-            { xPercent: -130, opacity: 0 },
-            {
-              xPercent: 130,
-              opacity: 0.3,
-              duration: 1.05,
-              delay: 0.12 + (index % 4) * stagger,
-              ease: "power1.inOut",
-              scrollTrigger: {
-                trigger: tile,
-                start: "top 92%",
-                toggleActions: "play none none none",
-              },
-            }
-          );
-        }
+      // One trigger per batch of tiles entering together, instead of four per tile.
+      // end "max" keeps tiles above the viewport active, so a jump (End key) still reveals them.
+      ScrollTrigger.batch(tiles, {
+        start: "top 92%",
+        end: "max",
+        once: true,
+        onEnter: reveal,
       });
+
+      // Context revert (unmount, Strict Mode re-run) clears the styles; let the next run re-animate.
+      return () => tiles.forEach((tile) => tile.removeAttribute("data-revealed"));
     },
-    { scope: rootRef, dependencies: [visibleCount, variant, mode] }
+    { scope: rootRef, dependencies: [visibleItems, variant, mode] }
   );
 
   if (items.length === 0) {
@@ -231,6 +184,7 @@ export function GalleryBoard({
         {visibleItems.map((item, index) => {
           const size = item.size ?? "md";
           const slot = slots[index];
+          const eager = mode === "full" && index < GALLERY_EAGER_COUNT;
           return (
             <li
               key={`${variant}-${item.id}`}
@@ -269,13 +223,11 @@ export function GalleryBoard({
                   className="absolute inset-0 block overflow-hidden"
                 >
                   <ProtectedImage
-                    src={item.src}
+                    src={item.thumb ?? item.src}
                     alt={item.alt}
-                    loading={
-                      mode === "preview" || item.loadOnDemand
-                        ? "lazy"
-                        : "eager"
-                    }
+                    loading={eager ? "eager" : "lazy"}
+                    fetchPriority={eager ? "high" : "auto"}
+                    decoding="async"
                     className={cn(
                       "h-full w-full object-cover transition duration-700 ease-out",
                       variant === "archive"
@@ -341,37 +293,14 @@ export function GalleryBoard({
         </div>
       ) : null}
 
-      {hasMore ? (
-        <div className="mt-10 flex justify-center sm:mt-12">
-          <button
-            type="button"
-            onClick={() =>
-              setVisibleCount((count) =>
-                Math.min(count + GALLERY_LOAD_MORE_STEP, items.length)
-              )
-            }
-            className={cn(
-              buttonVariants({ variant: "outline", size: "lg" }),
-              CTA_OUTLINE_CLASS,
-              "px-6 motion-safe:hover:scale-[1.03]"
-            )}
-          >
-            โหลดเพิ่ม
-            <span className="ml-2 text-[#f3b8c4]/70">
-              ({items.length - visibleCount})
-            </span>
-          </button>
-        </div>
-      ) : null}
-
       <ImageLightbox
         items={
           mode === "preview"
-            ? lightboxItems.slice(0, visibleCount)
+            ? lightboxItems.slice(0, visibleItems.length)
             : lightboxItems
         }
         activeIndex={activeIndex}
-        onActiveIndexChange={changeLightboxIndex}
+        onActiveIndexChange={setActiveIndex}
         useProtectedImage
         counterLabel={variant === "fan-art" ? "Fan art" : "Moments"}
       />

@@ -1,7 +1,8 @@
 ﻿import type { FanArtItem, GalleryItem, GalleryTileSize } from "@/types/vtuber";
 
-export const GALLERY_LOAD_MORE_STEP = 6;
 export const GALLERY_PREVIEW_COUNT = 8;
+/** First tiles of a full board sit above the fold; everything after lazy-loads. */
+export const GALLERY_EAGER_COUNT = 4;
 
 export const SIZE_CLASS: Record<GalleryTileSize, string> = {
   sm: "col-span-1 row-span-1",
@@ -77,16 +78,4 @@ export function artistCredit(item: GalleryItem) {
   if (!isFanArtItem(item)) return item.credit ?? "";
   const handle = item.artist.handle ? ` · ${item.artist.handle}` : "";
   return `${item.artist.name}${handle}`;
-}
-
-export function initialVisibleCount(
-  items: GalleryItem[],
-  mode: GalleryBoardMode,
-  previewCount = GALLERY_PREVIEW_COUNT
-) {
-  if (mode === "preview") {
-    return Math.min(previewCount, items.length);
-  }
-  const eager = items.filter((item) => !item.loadOnDemand).length;
-  return Math.max(eager || 6, Math.min(12, items.length));
 }

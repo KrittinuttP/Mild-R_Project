@@ -28,6 +28,7 @@ import {
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { buttonVariants } from "@/components/ui/button";
 import { useLiveCovers } from "@/hooks/useLiveCovers";
+import { useLoadMoreOnScroll } from "@/hooks/useLoadMoreOnScroll";
 import {
   gsap,
   registerGsapPlugins,
@@ -524,6 +525,12 @@ export function LiveCoverArchive({
     else setVisibleCount(visible.length + PAGE_STEP);
   };
 
+  const { sentinelRef, auto: autoLoad } = useLoadMoreOnScroll({
+    hasMore: status === "ready" && hasMore,
+    onLoadMore: showMore,
+    resetKey: `${filter}|${year}|${normalizedQuery}|${view}`,
+  });
+
   const matchesInOtherYears =
     year !== "all" && searched.some((c) => matchesFilter(c, filter));
 
@@ -533,31 +540,31 @@ export function LiveCoverArchive({
         "[data-cover-item]:not([data-revealed])",
         gridRef.current
       );
-      tiles.forEach((tile, index) => {
-        tile.setAttribute("data-revealed", "true");
-        if (prefersReducedMotion()) {
-          gsap.set(tile, { autoAlpha: 1 });
-          return;
-        }
-        gsap.fromTo(
-          tile,
-          { autoAlpha: 0, y: 24 },
-          {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.6,
-            delay: (index % 4) * 0.05,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: tile,
-              start: "top 94%",
-              toggleActions: "play none none none",
-            },
-          }
-        );
-      });
+      tiles.forEach((tile) => tile.setAttribute("data-revealed", "true"));
+      if (tiles.length > 0 && prefersReducedMotion()) {
+        gsap.set(tiles, { autoAlpha: 1 });
+      } else if (tiles.length > 0) {
+        gsap.set(tiles, { autoAlpha: 0, y: 24 });
+        // end "max" keeps tiles above the viewport active, so a jump (End key) still reveals them.
+        ScrollTrigger.batch(tiles, {
+          start: "top 94%",
+          end: "max",
+          once: true,
+          onEnter: (batch) =>
+            gsap.to(batch, {
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.6,
+              ease: "power3.out",
+              stagger: 0.05,
+            }),
+        });
+      }
       // Filtering reflows tiles that keep their old triggers; re-measure so they reveal in place.
       ScrollTrigger.refresh();
+
+      // Context revert (unmount, Strict Mode re-run) clears the styles; let the next run re-animate.
+      return () => tiles.forEach((tile) => tile.removeAttribute("data-revealed"));
     },
     {
       scope: gridRef,
@@ -836,7 +843,9 @@ export function LiveCoverArchive({
           </div>
         ) : null}
 
-        {status === "ready" && hasMore ? (
+        {autoLoad ? <div ref={sentinelRef} aria-hidden className="h-px" /> : null}
+
+        {status === "ready" && hasMore && !autoLoad ? (
           <div className="mt-10 flex justify-center sm:mt-12">
             <button
               type="button"

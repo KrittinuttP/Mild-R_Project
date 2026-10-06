@@ -3,13 +3,20 @@
  *
  * Finds images in public/assets/Gallery/{moments,mild} that
  * src/data/mild-r/gallery.json does not reference yet and appends them using
- * the default entry pattern. Existing entries are never touched, so the curated
- * order (and the home preview, which shows the first 8) only changes when
- * edited by hand. Anything that is not already a URL-safe .webp is converted
- * (long edge ≤ 1920) next to its source, and the original is moved to
- * public/assets/Gallery/originals (gitignored).
+ * the default entry pattern. Existing entries are never reordered or rewritten
+ * (only missing width/height/thumb are filled), so the curated order (and the
+ * home preview, which shows the first 8) only changes when edited by hand.
  *
- *   npx tsx scripts/sync-gallery.ts [--dry-run]
+ * Every new upload is kept as-is in originals/gallery (committed, not served).
+ * Anything that is not already a URL-safe .webp is converted (long edge ≤ 1920)
+ * next to its source. Every entry gets a <stem>-thumb.webp (≤ 800) for grid
+ * tiles; the lightbox keeps the full image.
+ *
+ * Runs before `next dev` / `next build`. `npm run dev` also starts it with
+ * `--watch=<pid>`, so images dropped in while the dev server runs are picked up;
+ * the watcher exits when that pid does.
+ *
+ *   npx tsx scripts/sync-gallery.ts [--dry-run] [--watch[=<pid>]]
  *
  * Defaults per new item:
  *   file    moments: NN-<slug>.webp (next free number), mild: <slug>.webp
@@ -21,8 +28,8 @@
  *   loadOnDemand  true (keeps new items after the eager ones, i.e. truly last)
  */
 import { createHash } from "node:crypto";
-import { existsSync } from "node:fs";
-import { mkdir, readdir, readFile, rename, stat, writeFile } from "node:fs/promises";
+import { existsSync, watch as watchDir } from "node:fs";
+import { copyFile, mkdir, readdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import sharp from "sharp";
@@ -30,7 +37,8 @@ import sharp from "sharp";
 import type { GalleryItem, GalleryTileSize } from "../src/types/vtuber";
 
 const ROOT = process.cwd();
-const GALLERY_DIR = path.join(ROOT, "public/assets/Gallery");
+const PUBLIC_DIR = path.join(ROOT, "public");
+const GALLERY_DIR = path.join(PUBLIC_DIR, "assets/Gallery");
 const GALLERY_URL = "/assets/Gallery";
 /** `numbered` folders name files `NN-<slug>`; the number is fixed once assigned. */
 const SOURCE_FOLDERS = [
@@ -38,7 +46,7 @@ const SOURCE_FOLDERS = [
   { folder: "mild", numbered: false },
 ];
 const NUMBER_PREFIX = /^(\d+)-/;
-const ORIGINALS_DIR = path.join(GALLERY_DIR, "originals");
+const ORIGINALS_DIR = path.join(ROOT, "originals/gallery");
 const GALLERY_JSON = path.join(ROOT, "src/data/mild-r/gallery.json");
 
 /** Last hand-curated entry; everything after it follows TAIL_PATTERN. */
@@ -56,10 +64,18 @@ const TAIL_PATTERN: GalleryTileSize[] = [
 const IMAGE_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".avif", ".gif"]);
 const SAFE_NAME = /^[A-Za-z0-9._-]+$/;
 const FULL_EDGE = 1920;
+/** Widest tile is two grid columns (~600 CSS px); 800 covers it on most screens. */
+const THUMB_EDGE = 800;
+const THUMB_QUALITY = 78;
+/** Generated thumbs live next to their image and must never be imported as new items. */
+const THUMB_SUFFIX = "-thumb.webp";
+/** Wait for copies to settle before syncing (Finder / AirDrop write in chunks). */
+const WATCH_DEBOUNCE_MS = 1500;
 const CREDIT_X = "Mild-R · X (@MildRWorldEnd)";
 const CREDIT_YOUTUBE = "Mild-R · YouTube (@MildRWorldEnd)";
 
 const dryRun = process.argv.includes("--dry-run");
+const watchArg = process.argv.find((arg) => arg === "--watch" || arg.startsWith("--watch="));
 
 function slugOf(stem: string) {
   return stem
@@ -91,6 +107,14 @@ function creditOf(stem: string) {
   return /screenshot/i.test(stem) ? CREDIT_YOUTUBE : CREDIT_X;
 }
 
+function isImageName(name: string) {
+  return IMAGE_EXT.has(path.extname(name).toLowerCase()) && !name.endsWith(THUMB_SUFFIX);
+}
+
+function thumbSrcOf(src: string) {
+  return `${src.slice(0, -path.extname(src).length)}${THUMB_SUFFIX}`;
+}
+
 async function shortHash(file: string) {
   return createHash("sha1").update(await readFile(file)).digest("hex").slice(0, 8);
 }
@@ -103,12 +127,19 @@ async function imageSize(file: string) {
   };
 }
 
+/** Copies an upload into ORIGINALS_DIR without overwriting an earlier one. */
+async function keepOriginal(file: string, name: string, slug: string) {
+  await mkdir(ORIGINALS_DIR, { recursive: true });
+  const target = path.join(ORIGINALS_DIR, name);
+  await copyFile(file, existsSync(target) ? path.join(ORIGINALS_DIR, `${slug}-${name}`) : target);
+}
+
 /** Fills width/height on entries that don't have them; returns how many changed. */
 async function backfillSizes(items: GalleryItem[]) {
   let filled = 0;
   for (const item of items) {
     if (item.width && item.height) continue;
-    const file = path.join(ROOT, "public", item.src);
+    const file = path.join(PUBLIC_DIR, item.src);
     if (!item.src.startsWith("/") || !existsSync(file)) continue;
     Object.assign(item, await imageSize(file));
     filled += 1;
@@ -116,10 +147,37 @@ async function backfillSizes(items: GalleryItem[]) {
   return filled;
 }
 
-async function main() {
+/** Creates missing thumbs and points `thumb` at them; returns how many entries changed. */
+async function ensureThumbs(items: GalleryItem[]) {
+  let changed = 0;
+  for (const item of items) {
+    const ext = path.extname(item.src).toLowerCase();
+    if (!item.src.startsWith("/") || !IMAGE_EXT.has(ext) || item.src.endsWith(THUMB_SUFFIX)) continue;
+    const input = path.join(PUBLIC_DIR, item.src);
+    if (!existsSync(input)) continue;
+
+    const thumb = thumbSrcOf(item.src);
+    const output = path.join(PUBLIC_DIR, thumb);
+    if (!existsSync(output)) {
+      if (dryRun) continue;
+      await sharp(input)
+        .rotate()
+        .resize({ width: THUMB_EDGE, height: THUMB_EDGE, fit: "inside", withoutEnlargement: true })
+        .webp({ quality: THUMB_QUALITY })
+        .toFile(output);
+    }
+    if (item.thumb !== thumb) {
+      item.thumb = thumb;
+      changed += 1;
+    }
+  }
+  return changed;
+}
+
+async function sync({ quiet = false } = {}) {
   const items = JSON.parse(await readFile(GALLERY_JSON, "utf8")) as GalleryItem[];
   const filled = await backfillSizes(items);
-  const usedSrc = new Set(items.map((item) => item.src));
+  const usedSrc = new Set(items.flatMap((item) => [item.src, item.thumb].filter(Boolean)));
   const usedIds = new Set(items.map((item) => item.id));
 
   const anchorIndex = items.findIndex((item) => item.id === TAIL_ANCHOR_ID);
@@ -140,22 +198,11 @@ async function main() {
       lastNumber.set(folder, Math.max(0, ...numbers));
     }
     for (const entry of names) {
-      if (!entry.isFile()) continue;
-      if (!IMAGE_EXT.has(path.extname(entry.name).toLowerCase())) continue;
+      if (!entry.isFile() || !isImageName(entry.name)) continue;
       if (usedSrc.has(`${GALLERY_URL}/${folder}/${entry.name}`)) continue;
       const file = path.join(dir, entry.name);
       pending.push({ folder, numbered, dir, name: entry.name, file, mtime: (await stat(file)).mtimeMs });
     }
-  }
-
-  if (pending.length === 0) {
-    if (filled && !dryRun) {
-      await writeFile(GALLERY_JSON, `${JSON.stringify(items, null, 2)}\n`);
-      console.log(`gallery: no new images · filled size on ${filled} entr${filled === 1 ? "y" : "ies"}`);
-    } else {
-      console.log(`gallery: no new images${filled ? ` · ${filled} entries missing size [dry-run]` : ""}`);
-    }
-    return;
   }
 
   pending.sort((a, b) => a.mtime - b.mtime || a.name.localeCompare(b.name));
@@ -190,11 +237,12 @@ async function main() {
     let width: number;
     let height: number;
 
-    if (isSafeWebp && numbered && !dryRun) {
+    if (dryRun) {
       ({ width, height } = await imageSize(file));
-      await rename(file, path.join(dir, outName));
-    } else if (keepInPlace || dryRun) {
+    } else if (isSafeWebp) {
       ({ width, height } = await imageSize(file));
+      await keepOriginal(file, name, slug);
+      if (!keepInPlace) await rename(file, path.join(dir, outName));
     } else {
       const info = await sharp(file)
         .rotate()
@@ -226,16 +274,81 @@ async function main() {
     );
   }
 
+  const next = [...items, ...added];
+  const thumbs = await ensureThumbs(next);
+
   if (dryRun) {
-    console.log(JSON.stringify(added, null, 2));
+    if (added.length) console.log(JSON.stringify(added, null, 2));
+    console.log(`gallery: [dry-run] ${added.length} new · ${filled} missing size`);
     return;
   }
 
-  await writeFile(GALLERY_JSON, `${JSON.stringify([...items, ...added], null, 2)}\n`);
-  console.log(`gallery: added ${added.length} image(s) to ${path.relative(ROOT, GALLERY_JSON)}`);
+  if (added.length || filled || thumbs) {
+    await writeFile(GALLERY_JSON, `${JSON.stringify(next, null, 2)}\n`);
+  }
+  const parts = [
+    added.length && `added ${added.length} image(s)`,
+    filled && `filled size on ${filled}`,
+    thumbs && `${thumbs} thumb(s)`,
+  ].filter(Boolean);
+  if (parts.length) console.log(`gallery: ${parts.join(" · ")}`);
+  else if (!quiet) console.log("gallery: no new images");
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+/** Re-syncs whenever an image lands in a source folder, until `parentPid` exits. */
+function watch(parentPid?: number) {
+  let running = false;
+  let again = false;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  const run = async () => {
+    if (running) {
+      again = true;
+      return;
+    }
+    running = true;
+    try {
+      await sync({ quiet: true });
+    } catch (error) {
+      console.error("gallery:", error);
+    }
+    running = false;
+    if (again) {
+      again = false;
+      schedule();
+    }
+  };
+  const schedule = () => {
+    clearTimeout(timer);
+    timer = setTimeout(run, WATCH_DEBOUNCE_MS);
+  };
+
+  for (const { folder } of SOURCE_FOLDERS) {
+    const dir = path.join(GALLERY_DIR, folder);
+    if (!existsSync(dir)) continue;
+    watchDir(dir, (_event, name) => {
+      if (name && isImageName(name)) schedule();
+    });
+  }
+
+  if (parentPid) {
+    setInterval(() => {
+      try {
+        process.kill(parentPid, 0);
+      } catch {
+        process.exit(0);
+      }
+    }, 2000);
+  }
+  console.log(`gallery: watching ${SOURCE_FOLDERS.map((f) => f.folder).join(", ")}`);
+}
+
+if (watchArg) {
+  const pid = Number(watchArg.split("=")[1]);
+  watch(Number.isInteger(pid) && pid > 0 ? pid : undefined);
+} else {
+  sync().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}
