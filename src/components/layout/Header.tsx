@@ -79,7 +79,7 @@ const NAV_LINKS: NavLink[] = [
     homeHash: "#projects",
     label: "Fan Projects",
   },
-  { kind: "section", hash: "#socials", label: "Connect" },
+  { kind: "section", hash: "#socials", label: "Follow" },
 ];
 
 /** Home-section entry shown first in a page link's dropdown (e.g. Live → #live). */

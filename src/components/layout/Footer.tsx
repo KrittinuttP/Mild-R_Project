@@ -15,7 +15,7 @@ const FOOTER_NAV_GROUPS = [
       { href: "/#top", label: "Profile" },
       { href: "/#lore", label: "Lore" },
       { href: "/#media", label: "Media" },
-      { href: "/#socials", label: "Connect" },
+      { href: "/#socials", label: "Follow" },
     ],
   },
   {

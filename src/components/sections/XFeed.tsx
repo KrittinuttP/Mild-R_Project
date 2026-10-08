@@ -16,7 +16,7 @@ type XFeedProps = {
 
 type TabId = "posts" | "retweets";
 
-/** Timeline column lock — X-like readable width inside Connect max-w-6xl */
+/** Timeline column lock — X-like readable width inside Follow max-w-6xl */
 const FEED_COL = "mx-auto w-full max-w-xl";
 
 function isLikelyImageUrl(url: string) {

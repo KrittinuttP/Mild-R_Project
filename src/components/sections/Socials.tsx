@@ -74,7 +74,7 @@ export function Socials({ data, xPosts = [], xRetweets = [] }: SocialsProps) {
         <ScrollReveal>
           <div className="flex items-center gap-2">
             <Heart className="size-4 text-[#e85a7a]" aria-hidden />
-            <p className={META_CLASS}>Connect</p>
+            <p className={META_CLASS}>Follow</p>
           </div>
           <h2 className={cn("mt-3", DISPLAY_H2_CLASS)}>ติดตาม Mild-R</h2>
           <p className={cn("mt-4 max-w-xl", BODY_CLASS)}>

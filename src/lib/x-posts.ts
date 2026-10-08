@@ -107,7 +107,7 @@ export async function loadXPosts(
   }
 }
 
-/** Connect section bundle: posts tab + retweets tab. */
+/** Follow section bundle: posts tab + retweets tab. */
 export async function loadXFeedTabs(): Promise<{
   posts: XPost[];
   retweets: XPost[];
