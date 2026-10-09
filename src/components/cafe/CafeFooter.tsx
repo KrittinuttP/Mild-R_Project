@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
 
 import { SocialPlatformIcon } from "@/components/icons/SocialPlatformIcon";
 import type { CafePage } from "@/types/vtuber";
@@ -9,12 +8,6 @@ const DEVELOPER = {
   xUrl: "https://x.com/ZAYZHIK_KungV2",
 } as const;
 
-const CAFE_X = {
-  label: "ติดตามข่าวคาเฟ่บน X",
-  handle: "@Mild_Honeycomb",
-  url: "https://x.com/Mild_Honeycomb",
-} as const;
-
 type CafeFooterProps = {
   cafe: CafePage;
 };
@@ -22,14 +15,10 @@ type CafeFooterProps = {
 export function CafeFooter({ cafe }: CafeFooterProps) {
   const year = new Date().getFullYear();
   const masthead = cafe.edition?.masthead ?? cafe.title;
-  const closingCtas = cafe.closing.ctas ?? [];
-  const xFromData = closingCtas.find((cta) => cta.url.includes("x.com"));
-  const followUrl = xFromData?.url ?? CAFE_X.url;
-  const followLabel = xFromData?.label ?? CAFE_X.label;
 
   return (
     <footer className="border-t border-[#9a7b5a]/20 bg-[#07090b] px-5 py-12 text-[#d8d0c4] sm:px-10 sm:py-14 lg:px-16">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-[1280px]">
         <div
           className="h-px bg-gradient-to-r from-transparent via-[#9a7b5a]/40 to-transparent"
           aria-hidden
@@ -52,18 +41,6 @@ export function CafeFooter({ cafe }: CafeFooterProps) {
               หน่วยงานอย่างเป็นทางการ · เว็บโปรโมทนี้ก็เป็นงานแฟนเมดเช่นกัน
             </p>
 
-            <div className="mt-5 flex flex-col gap-3 sm:mt-5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2">
-              <Link
-                href={followUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex w-fit items-center gap-1.5 rounded-2xl border border-[#a84d5f]/45 bg-[#a84d5f]/15 px-3.5 py-2 text-sm text-[#f4ebe3] transition hover:border-[#c46a7a]/60 hover:bg-[#a84d5f]/25"
-              >
-                {followLabel}
-                <span className="text-[#c4b8a8]">({CAFE_X.handle})</span>
-                <ExternalLink className="size-3.5 opacity-70" />
-              </Link>
-            </div>
           </div>
 
           <div className="space-y-3 border-t border-[#9a7b5a]/15 pt-6 md:border-t-0 md:pt-0 md:text-right">

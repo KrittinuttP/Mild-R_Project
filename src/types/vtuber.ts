@@ -564,8 +564,12 @@ export interface CafeDayScheduleSection extends CafeSectionHead {
 /** @deprecated Use CafeDayScheduleSection */
 export type CafeDaySchedule = CafeDayScheduleSection;
 
+export type CafeOperationsKind = "mission" | "teaser" | "preorder";
+
 export interface CafeOperationsItem {
   id: string;
+  /** Where the row is allowed to appear on the board. */
+  kind?: CafeOperationsKind;
   name: string;
   nameLocal?: string;
   detail?: string;
@@ -598,6 +602,32 @@ export interface CafeOperationsSection extends CafeSectionHead {
 
 export interface CafeSignatureMenuSection extends CafeSectionHead {
   items: CafeMenuItem[];
+}
+
+export interface CafePromoSetItem {
+  id: string;
+  name: string;
+  priceLabel?: string;
+  menu?: string[];
+  giveaways?: string[];
+  highlight?: boolean;
+}
+
+export interface CafePromoSetsSection {
+  eyebrow?: string;
+  title: string;
+  note?: string;
+  items: CafePromoSetItem[];
+}
+
+export interface CafePreorder {
+  label: string;
+  startsAt?: string;
+  endsAt?: string;
+  tentative?: boolean;
+  detail?: string;
+  promo?: string;
+  url?: string;
 }
 
 export interface CafeVenueMenuSection extends CafeSectionHead {
@@ -677,11 +707,20 @@ export interface CafePage {
   edition?: CafeEdition;
   heroImage: string;
   heroAlt?: string;
+  /** Transparent character cutout on the cork board. Splash keeps `heroImage`. */
+  heroCutout?: string;
+  /**
+   * Set while the JSON holds sample values. `/cafe` shows it as a fixed ribbon;
+   * remove the field once every value is real.
+   */
+  mockNotice?: string;
   dispatch: CafeDispatchSection;
   daySchedule?: CafeDayScheduleSection;
   /** HQ briefing (doc §8) — replaces plates + highlights */
   operations?: CafeOperationsSection;
   signatureMenu: CafeSignatureMenuSection;
+  promoSets?: CafePromoSetsSection;
+  preorder?: CafePreorder;
   venueMenu?: CafeVenueMenuSection;
   goods?: CafeGoodsSection;
   closing: CafeClosingSection;

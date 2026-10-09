@@ -156,12 +156,17 @@ type CafeCountdownProps = {
   endsAt?: string;
   /** No outer chrome — for embedding inside the overview dossier */
   embedded?: boolean;
+  /** One line, e.g. `51 วัน 03:12:45`, using the same clock as the card. */
+  variant?: "card" | "inline";
+  className?: string;
 };
 
 export function CafeCountdown({
   startsAt,
   endsAt,
   embedded = false,
+  variant = "card",
+  className,
 }: CafeCountdownProps) {
   const startMs = Date.parse(startsAt);
   const endMs = endsAt ? Date.parse(endsAt) : Number.NaN;
@@ -177,6 +182,40 @@ export function CafeCountdown({
     Number.isFinite(endMs) ? endMs : undefined
   );
   const remain = diffTo(startMs, current);
+
+  if (variant === "inline") {
+    const total =
+      now === null
+        ? null
+        : Math.max(0, Math.floor((startMs - now) / 1000));
+    const days = total === null ? 0 : Math.floor(total / 86400);
+    const hours = total === null ? 0 : Math.floor((total % 86400) / 3600);
+    const minutes = total === null ? 0 : Math.floor((total % 3600) / 60);
+    const seconds = total === null ? 0 : total % 60;
+    const pending =
+      total === null
+        ? "\u00a0"
+        : `${days} วัน ${pad(hours, 2)}:${pad(minutes, 2)}:${pad(seconds, 2)}`;
+
+    return (
+      <span
+        className={cn(
+          "inline-block min-w-[12ch] font-[family-name:var(--font-cafe-type)] text-lg font-bold tabular-nums text-[#1a1410]",
+          className
+        )}
+        aria-live="polite"
+        aria-label="นับถอยหลังถึงเวลาเปิดเคส"
+      >
+        {now === null
+          ? "\u00a0"
+          : phase === "pending"
+            ? pending
+            : phase === "open"
+              ? "Case Open"
+              : "Case Closed"}
+      </span>
+    );
+  }
   const live = now !== null;
 
   const span = [

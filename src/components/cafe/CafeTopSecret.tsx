@@ -2,8 +2,8 @@
 
 import { cn } from "@/lib/utils";
 
-const SERIF = "font-[family-name:var(--font-cafe-serif)]";
-const DISPLAY = "font-[family-name:var(--font-display)]";
+const TYPE = "font-[family-name:var(--font-cafe-type)]";
+const HAND = "font-[family-name:var(--font-cafe-hand)]";
 
 type CafeTopSecretProps = {
   title?: string;
@@ -22,7 +22,7 @@ export function CafeTopSecret({
   return (
     <div
       className={cn(
-        "relative overflow-hidden border border-[#a84d5f]/45 bg-[#100c0a]",
+        "relative overflow-hidden border border-dashed border-[#e85a7a]/80 bg-[#14100c]",
         compact ? "min-h-[10rem] px-5 py-8" : "min-h-[14rem] px-6 py-12 sm:px-10",
         className
       )}
@@ -51,25 +51,14 @@ export function CafeTopSecret({
       <div className="relative z-10 flex flex-col items-center text-center">
         <span
           className={cn(
-            DISPLAY,
-            "rotate-[-6deg] border-[3px] border-[#c46a7a] px-4 py-2 text-sm tracking-[0.28em] text-[#c46a7a] uppercase shadow-[4px_6px_0_rgba(0,0,0,0.35)] sm:text-base"
-          )}
-        >
-          Top Secret
-        </span>
-        <p
-          className={cn(
-            SERIF,
-            "mt-6 text-xl font-normal text-[#f4ebe3] sm:text-2xl"
+            TYPE,
+            "rotate-[-6deg] border-[3px] border-[#e85a7a] px-4 py-2 text-sm font-bold tracking-[0.18em] text-[#e85a7a] uppercase"
           )}
         >
           {title}
-        </p>
-        <p className={cn(DISPLAY, "mt-2 text-sm text-[#c4b8a8]")}>
+        </span>
+        <p className={cn(HAND, "mt-6 text-[22px] text-[#f3b8c4]")}>
           {titleLocal}
-        </p>
-        <p className="mt-4 max-w-md text-[0.7rem] leading-relaxed tracking-[0.06em] text-[#9a7b5a]">
-          ข้อมูลส่วนนี้ · ยังไม่เปิดเผย — รอประกาศจากทีม Honeycomb
         </p>
       </div>
     </div>

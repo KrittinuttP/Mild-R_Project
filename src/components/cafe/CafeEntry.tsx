@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 
+import { CAFE_ENTRY_READY_EVENT } from "@/components/cafe/board/useBoardMotion";
 import { CafeSplash } from "@/components/cafe/CafeSplash";
 import { SectionScrollRestore } from "@/components/layout/SectionScrollRestore";
 import type { CafePage } from "@/types/vtuber";
@@ -33,7 +34,12 @@ export function CafeEntry({ cafe }: CafeEntryProps) {
         kicker={edition?.kicker}
         caseNo={edition?.caseNo}
         heroImage={cafe.heroImage}
-        onFinished={() => setReady(true)}
+        onFinished={() => {
+          setReady(true);
+          // Tells the cork board (`useBoardMotion`) the page is now visible.
+          document.documentElement.dataset.cafeEntry = "ready";
+          window.dispatchEvent(new Event(CAFE_ENTRY_READY_EVENT));
+        }}
       />
       <SectionScrollRestore ready={ready} />
     </>

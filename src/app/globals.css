@@ -238,6 +238,82 @@
   animation: ecg-trace var(--heart-ecg) linear infinite;
 }
 
+@keyframes cafe-tape-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@utility animate-cafe-tape {
+  animation: cafe-tape-marquee 36s linear infinite;
+}
+
+/* Cafe board — idle loops. Individual transform properties (translate / rotate / scale)
+   so they stack with the tilt transform and with GSAP entrance tweens. */
+@keyframes cafe-lamp-drift {
+  from {
+    transform: translateX(-80px);
+  }
+  to {
+    transform: translateX(80px);
+  }
+}
+
+@utility animate-cafe-lamp {
+  animation: cafe-lamp-drift 16s ease-in-out infinite alternate;
+}
+
+@keyframes cafe-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -10px;
+  }
+}
+
+@utility animate-cafe-float {
+  animation: cafe-float 4.5s ease-in-out infinite;
+}
+
+@keyframes cafe-beat {
+  0%,
+  100% {
+    scale: 1;
+  }
+  15% {
+    scale: 1.25;
+  }
+  30% {
+    scale: 1;
+  }
+  45% {
+    scale: 1.15;
+  }
+}
+
+@utility animate-cafe-beat {
+  animation: cafe-beat 1.6s ease-in-out infinite;
+}
+
+@keyframes cafe-sway {
+  0%,
+  100% {
+    rotate: -1.3deg;
+  }
+  50% {
+    rotate: 1.3deg;
+  }
+}
+
+@utility animate-cafe-sway {
+  animation: cafe-sway 5s ease-in-out infinite;
+}
+
 @keyframes splash-heartbeat {
   0%,
   100% {
@@ -303,7 +379,12 @@
   .animate-heart-pulse-soft,
   .animate-heart-pulse-soft-delayed,
   .animate-heart-pulse-soft-slow,
-  .animate-ecg-trace {
+  .animate-ecg-trace,
+  .animate-cafe-tape,
+  .animate-cafe-lamp,
+  .animate-cafe-float,
+  .animate-cafe-beat,
+  .animate-cafe-sway {
     animation: none !important;
   }
 

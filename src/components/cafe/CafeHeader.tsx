@@ -17,11 +17,11 @@ type CafeNavLink =
 
 const CAFE_NAV: CafeNavLink[] = [
   { kind: "section", hash: "#overview", label: "Overview" },
-  { kind: "section", hash: "#day-schedule", label: "Schedule" },
-  { kind: "section", hash: "#operations", label: "Ops" },
-  { kind: "section", hash: "#menu", label: "Menu" },
+  { kind: "section", hash: "#menu", label: "Menu · Pre-order" },
+  { kind: "section", hash: "#activities", label: "Activities" },
   { kind: "section", hash: "#goods", label: "Goods" },
-  { kind: "page", href: "/cafe/event", label: "Story" },
+  { kind: "section", hash: "#venue-menu", label: "Venue Menu" },
+  { kind: "section", hash: "#story", label: "Story · Gallery" },
 ];
 
 type CafeHeaderProps = {
@@ -97,7 +97,7 @@ export function CafeHeader({
           : "border-b border-transparent bg-transparent"
       )}
     >
-      <div className="mx-auto flex min-h-14 max-w-6xl items-center justify-between gap-3 px-5 pt-[env(safe-area-inset-top)] sm:h-16 sm:gap-4 sm:px-10 lg:px-16">
+      <div className="mx-auto flex min-h-14 max-w-[1280px] items-center justify-between gap-3 px-5 pt-[env(safe-area-inset-top)] sm:h-16 sm:gap-4 sm:px-8">
         <div className="min-w-0 flex-1">
           <Link
             href="/cafe"
@@ -117,7 +117,7 @@ export function CafeHeader({
           </Link>
           <div className="mt-0.5 flex min-w-0 items-center gap-2 sm:flex">
             {cafe.dispatch.schedule.label ? (
-              <span className="shrink-0 rounded-full border border-[#a84d5f]/35 bg-[#a84d5f]/10 px-2 py-0.5 text-[0.55rem] tracking-[0.14em] text-[#c46a7a] uppercase sm:text-[0.58rem]">
+              <span className="shrink-0 font-[family-name:var(--font-cafe-type)] text-[0.65rem] tracking-[0.14em] text-[#f3b8c4]">
                 {cafe.dispatch.schedule.label}
               </span>
             ) : null}
@@ -165,10 +165,16 @@ export function CafeHeader({
                   }
                   onClick={(event) => handleNavClick(event, href)}
                   className={cn(
-                    "rounded-full px-2.5 py-1 text-[0.8rem] tracking-[0.14em] uppercase transition",
+                    "rounded-full px-2.5 py-1 text-[0.72rem] tracking-[0.12em] uppercase transition",
+                    link.kind === "section" &&
+                      link.hash === "#menu" &&
+                      "text-[#f2c230]",
                     active
                       ? "bg-[#a84d5f]/15 text-[#f4ebe3]"
-                      : "text-[#c4b8a8] hover:bg-white/[0.04] hover:text-[#f4ebe3]"
+                      : "hover:bg-white/[0.04] hover:text-[#f4ebe3]",
+                    !(link.kind === "section" && link.hash === "#menu") &&
+                      !active &&
+                      "text-[#c4b8a8]"
                   )}
                   aria-current={active ? "page" : undefined}
                 >
@@ -221,9 +227,15 @@ export function CafeHeader({
                 }
                 className={cn(
                   "min-h-12 rounded-2xl px-3 py-3.5 text-base tracking-wide uppercase transition",
+                  link.kind === "section" &&
+                    link.hash === "#menu" &&
+                    "text-[#f2c230]",
                   active
                     ? "bg-[#a84d5f]/12 text-[#f4ebe3]"
-                    : "text-[#d8d0c4] hover:bg-white/[0.04] hover:text-[#f4ebe3]"
+                    : "hover:bg-white/[0.04] hover:text-[#f4ebe3]",
+                  !(link.kind === "section" && link.hash === "#menu") &&
+                    !active &&
+                    "text-[#d8d0c4]"
                 )}
                 aria-current={active ? "page" : undefined}
                 onClick={(event) => handleNavClick(event, href)}

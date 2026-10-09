@@ -2,6 +2,7 @@
   "title": "Mild-R: The Unsolved Mystery Cafe",
   "titleLocal": "คาเฟ่ปริศนาที่ยังไม่คลี่คลาย",
   "tagline": "รายงานพิเศษจากสถานที่เกิดเหตุ: คาเฟ่ลึกลับแห่งนี้ เชิญชวนนักสืบฮันนี่ทุกท่าน มาร่วมไขปริศนาจากหลากหลายเมนูในงาน พร้อมช่วยกันคลี่คลายคดีต่างๆ และเก็บกู้หลักฐานจากสถานที่เกิดเหตุนี้",
+  "mockNotice": "ข้อมูลตัวอย่างสำหรับดูดีไซน์ — ราคา เซต ของแถม ลิงก์จอง ลิงก์แผนที่ และรูปโปรโมท ยังไม่ใช่ข้อมูลจริง",
   "status": "upcoming",
   "statusLabel": "CRIME SCENE SECURED",
   "statusLabelLocal": "พื้นที่เกิดเหตุถูกควบคุม",
@@ -14,6 +15,7 @@
   },
   "heroImage": "/assets/mild/kv/Mild-R_Name_Art.png",
   "heroAlt": "Mild-R key visual — The Unsolved Mystery Cafe",
+  "heroCutout": "/assets/mild/kv/Mild-R_KV.png",
   "dispatch": {
     "eyebrow": "Dispatch",
     "stamp": "CONFIDENTIAL",
@@ -29,14 +31,15 @@
       "label": "SOCIEFEE X CHOUXSTORY",
       "detail": "MRT หัวลำโพง (Exit 2)",
       "image": "/assets/cafe/location/CHOUXSTORY.jpg",
-      "imageAlt": "SOCIEFEE × CHOUXSTORY"
+      "imageAlt": "SOCIEFEE × CHOUXSTORY",
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=SOCIEFEE+CHOUXSTORY+%E0%B8%AB%E0%B8%B1%E0%B8%A7%E0%B8%A5%E0%B8%B3%E0%B9%82%E0%B8%9E%E0%B8%87"
     }
   },
   "daySchedule": {
     "eyebrow": "Dossier · Timeline",
     "stamp": "RESTRICTED",
-    "title": "Case Incident Log",
-    "titleLocal": "บันทึกลำดับเหตุการณ์",
+    "title": "Case Incident Log & Missions",
+    "titleLocal": "กิจกรรมในงาน",
     "dateLabel": "2026 · 11 · 29",
     "items": [
       {
@@ -94,17 +97,23 @@
         "items": [
           {
             "id": "caution-tape",
+            "kind": "teaser",
             "name": "The Caution Tape",
             "nameLocal": "ประกาศควบคุมพื้นที่",
             "detail": "ปล่อยภาพกราฟิกขึงเทปเตือนภัยคาดทับอาร์ตเวิร์ก เพื่อแจ้งเตือนพิกัดและเวลาเปิดแฟ้มคดี",
-            "caption": "Teaser · Caution Tape"
+            "caption": "Teaser · Caution Tape",
+            "image": "/assets/cafe/event/02-tape.jpg",
+            "imageAlt": "The Caution Tape (รูปตัวอย่าง)"
           },
           {
             "id": "evidence-board",
+            "kind": "teaser",
             "name": "The Evidence Board",
             "nameLocal": "สปอยล์เบาะแส",
             "detail": "ปล่อยภาพจำลองกระดานโยงเส้นด้ายเพื่อสปอยล์เงาเสบียงและของแจก กระตุ้นการทายปริศนาก่อนลงพื้นที่",
-            "caption": "Teaser · Evidence Board"
+            "caption": "Teaser · Evidence Board",
+            "image": "/assets/cafe/event/03-board.jpg",
+            "imageAlt": "The Evidence Board (รูปตัวอย่าง)"
           }
         ]
       },
@@ -118,17 +127,23 @@
         "items": [
           {
             "id": "evidence-board-mission",
+            "kind": "mission",
             "name": "Evidence Board Mission",
             "nameLocal": "ภารกิจกระดานเบาะแส",
             "detail": "เปิดพื้นที่ให้นักสืบเขียนโพสต์อิตข้อความถึงเป้าหมาย (Mild-R) แล้วนำมาแปะเชื่อมโยงเส้นด้ายบนกระดาน",
-            "caption": "Field · Evidence Board"
+            "caption": "Field · Evidence Board",
+            "image": "/assets/cafe/event/03-board.jpg",
+            "imageAlt": "Evidence Board Mission (รูปตัวอย่าง)"
           },
           {
             "id": "case-file-stamp-rally",
+            "kind": "mission",
             "name": "Secret Case File Rally",
             "nameLocal": "แฟ้มคดีลับนำทาง",
             "detail": "เปลี่ยนแฟ้มคดีหน้างานให้เป็นใบสะสมตราประทับ (Stamp Rally) เพื่อทำภารกิจชิมเสบียงหรือถ่ายภาพแลกของรางวัล",
-            "caption": "Field · Stamp Rally"
+            "caption": "Field · Stamp Rally",
+            "image": "/assets/cafe/event/04-file.jpg",
+            "imageAlt": "Secret Case File Rally (รูปตัวอย่าง)"
           }
         ]
       },
@@ -142,17 +157,23 @@
         "items": [
           {
             "id": "costume-clearance",
+            "kind": "mission",
             "name": "Disguise Privilege",
             "nameLocal": "สิทธิพิเศษจากการพรางตัว",
             "detail": "แต่งกายเข้าธีม (เช่น เสื้อโค้ท หมวกนักสืบ แว่นขยาย) เช็กอินเพื่อรับเบาะแสชิ้นลับหรืออัปเกรดเสบียง",
-            "caption": "Bounty · Disguise"
+            "caption": "Bounty · Disguise",
+            "image": "/assets/cafe/event/01-cover.jpg",
+            "imageAlt": "Disguise Privilege (รูปตัวอย่าง)"
           },
           {
             "id": "preorder-provisions",
+            "kind": "preorder",
             "name": "Pre-order Provisions",
             "nameLocal": "สั่งจองเสบียงล่วงหน้า",
             "detail": "จองชุดเสบียงล่วงหน้าเพื่อการันตีสิทธิ์รับแฟ้มคดีลับและตราประทับพิเศษทันทีที่รายงานตัว",
-            "caption": "Bounty · Pre-order"
+            "caption": "Bounty · Pre-order",
+            "image": "/assets/cafe/event/04-file.jpg",
+            "imageAlt": "Pre-order Provisions (รูปตัวอย่าง)"
           }
         ]
       },
@@ -166,10 +187,13 @@
         "items": [
           {
             "id": "case-hashtag",
+            "kind": "mission",
             "name": "Case Hashtag Mission",
             "nameLocal": "ภารกิจแฮชแท็กประจำคดี",
             "detail": "ถ่ายภาพจุดต่างๆ ในงานโพสต์ลง X พร้อมติดแฮชแท็กเพื่อปลดล็อกแฟ้มภาพดิจิทัล (Digital Wallpaper) หรือลุ้นรับของกลางหลังปิดคดี",
-            "caption": "Social · Hashtag"
+            "caption": "Social · Hashtag",
+            "image": "/assets/cafe/event/01-cover.jpg",
+            "imageAlt": "Case Hashtag Mission (รูปตัวอย่าง)"
           }
         ]
       }
@@ -186,7 +210,7 @@
         "name": "The Unsolved Latte",
         "nameLocal": "ลาเต้แฟ้มปริศนา",
         "description": "เสบียงเครื่องดื่มซิกเนเจอร์ประจำคดีที่รอให้นักสืบฮันนี่มาวิเคราะห์รสสัมผัสที่ซ่อนเร้น",
-        "priceLabel": "CLASSIFIED",
+        "priceLabel": "฿139",
         "image": "/assets/images/gallery-01.svg",
         "imageAlt": "The Unsolved Latte (placeholder)"
       },
@@ -195,7 +219,7 @@
         "name": "Alibi Soda",
         "nameLocal": "โซดาคำให้การ",
         "description": "เสบียงเครื่องดื่มเติมความสดชื่น จำลองขึ้นเพื่อสนับสนุนการแกะรอยและอำนวยความสะดวกในการคลี่คลายคดี",
-        "priceLabel": "CLASSIFIED",
+        "priceLabel": "฿129",
         "image": "/assets/images/gallery-02.svg",
         "imageAlt": "Alibi Soda (placeholder)"
       },
@@ -204,18 +228,74 @@
         "name": "The Investigator's Parfait",
         "nameLocal": "พาเฟต์นักสืบฮันนี่",
         "description": "เสบียงของหวานซึ่งเป็นเป้าหมายชิ้นสุดท้าย ที่นักสืบทุกท่านต้องร่วมกันพิสูจน์รสชาติก่อนปิดแฟ้มคดี",
-        "priceLabel": "CLASSIFIED",
+        "priceLabel": "฿169",
         "image": "/assets/images/gallery-04.svg",
         "imageAlt": "The Investigator's Parfait (placeholder)"
       }
     ]
+  },
+  "promoSets": {
+    "eyebrow": "Provision Sets · Giveaway",
+    "title": "ชุดเสบียงโปรโมชั่น",
+    "note": "แต่ละเซตมีของแถมต่างกัน · เซต C ได้ของแถมมากที่สุด",
+    "items": [
+      {
+        "id": "set-a",
+        "name": "SET A",
+        "priceLabel": "฿259",
+        "menu": [
+          "The Unsolved Latte",
+          "ชิโอะปัง 1 ชิ้น"
+        ],
+        "giveaways": [
+          "โฟโตการ์ดสุ่ม 1 ใบ"
+        ]
+      },
+      {
+        "id": "set-b",
+        "name": "SET B",
+        "priceLabel": "฿289",
+        "menu": [
+          "Alibi Soda",
+          "The Investigator's Parfait"
+        ],
+        "giveaways": [
+          "สติกเกอร์แฟ้มคดี 1 แผ่น"
+        ]
+      },
+      {
+        "id": "set-c",
+        "name": "SET C",
+        "priceLabel": "฿499",
+        "menu": [
+          "The Unsolved Latte",
+          "Alibi Soda",
+          "The Investigator's Parfait"
+        ],
+        "giveaways": [
+          "โฟโตการ์ดสุ่ม 2 ใบ",
+          "สติกเกอร์แฟ้มคดี 1 แผ่น",
+          "ที่รองแก้วลายพิเศษ 1 ชิ้น"
+        ],
+        "highlight": true
+      }
+    ]
+  },
+  "preorder": {
+    "label": "1 – 20 พฤศจิกายน 2026",
+    "startsAt": "2026-11-01T00:00:00+07:00",
+    "endsAt": "2026-11-20T23:59:59+07:00",
+    "tentative": true,
+    "detail": "จองชุดเสบียงล่วงหน้าเพื่อการันตีสิทธิ์รับแฟ้มคดีลับและตราประทับพิเศษทันทีที่รายงานตัว",
+    "promo": "จองล่วงหน้ารับตราประทับพิเศษเพิ่ม 1 ดวง",
+    "url": "https://example.com/mild-r-cafe-preorder"
   },
   "venueMenu": {
     "eyebrow": "Venue Menu",
     "stamp": "HOUSE MENU",
     "title": "Venue Menu",
     "titleLocal": "เมนูร้าน",
-    "note": "เมนูปกติของ SOCIEFEE × CHOUXSTORY — นอกเหนือเสบียงนักสืบ Mild-R · เปิดแฟ้มเพื่อพลิกดูเมนู",
+    "note": "เมนูปกติของ SOCIEFEE × CHOUXSTORY — นอกเหนือเสบียงนักสืบ Mild-R",
     "items": [
       {
         "id": "menu-1",
@@ -271,15 +351,15 @@
         "id": "acrylic-stand",
         "name": "Acrylic Stand",
         "nameLocal": "อะคริลิกสแตนด์",
-        "description": "เบาะแสชิ้นเอกที่ถูกค้นพบ ณ สถานที่เกิดเหตุ — เก็บกู้กลับไปตั้งไว้บนโต๊ะทำงานเพื่อวิเคราะห์และไขปริศนาต่อไป · สถานะ: เบาะแสสำคัญ",
-        "image": "/assets/images/gallery-04.svg",
-        "imageAlt": "Acrylic stand (placeholder)"
+        "description": "เบาะแสชิ้นเอกที่ถูกค้นพบ ณ สถานที่เกิดเหตุ — เก็บกู้กลับไปตั้งไว้บนโต๊ะทำงานเพื่อวิเคราะห์และไขปริศนาต่อไป",
+        "image": "/assets/mild/kv/Mild-R_KV.png",
+        "imageAlt": "Acrylic stand (รูปตัวอย่างจาก KV)"
       },
       {
         "id": "photo-card",
         "name": "Photo Card Set",
         "nameLocal": "ชุดโฟโตการ์ด",
-        "description": "ภาพถ่ายบันทึกร่องรอยและเหตุการณ์จากสถานที่เกิดเหตุ — รวบรวมไว้เป็นเบาะแสในแฟ้มคดีส่วนตัว · สถานะ: เบาะแส",
+        "description": "ภาพถ่ายบันทึกร่องรอยและเหตุการณ์จากสถานที่เกิดเหตุ — รวบรวมไว้เป็นเบาะแสในแฟ้มคดีส่วนตัว",
         "image": "/assets/mild/kv/Mild-R_Name_Art.png",
         "imageAlt": "Photo card set sample from Mild-R KV"
       }
@@ -300,6 +380,6 @@
         "url": "https://x.com/Mild_Honeycomb"
       }
     ],
-    "disclaimer": "คาเฟ่และเว็บโปรโมทนี้เป็นงานแฟนเมดที่แฟนคลับจัดทำเอง — ไม่ใช่ประกาศทางการของ Mild-R / เอเจนซี · รายละเอียดอีเวนต์อาจเปลี่ยน · รูปบางส่วนเป็น placeholder / sample art"
+    "disclaimer": "คาเฟ่และเว็บโปรโมทนี้เป็นงานแฟนเมดที่แฟนคลับจัดทำเอง — ไม่ใช่ประกาศทางการของ Mild-R / เอเจนซี · รายละเอียดอีเวนต์อาจเปลี่ยน"
   }
 }
