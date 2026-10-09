@@ -709,6 +709,8 @@ export interface CafePage {
   heroAlt?: string;
   /** Transparent character cutout on the cork board. Splash keeps `heroImage`. */
   heroCutout?: string;
+  /** Blacked-out `heroCutout`, shown while the Key Visual toggle is off. */
+  heroCutoutSilhouette?: string;
   /**
    * Set while the JSON holds sample values. `/cafe` shows it as a fixed ribbon;
    * remove the field once every value is real.

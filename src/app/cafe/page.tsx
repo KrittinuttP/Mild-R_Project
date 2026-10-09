@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { CafePromo } from "@/components/cafe/CafePromo";
 import { mildRData } from "@/data/vtuber-data";
+import { cafeForVisibility } from "@/lib/cafe-visibility";
 import { loadCafeVisibility } from "@/lib/cafe-visibility-store";
 
 export const metadata: Metadata = {
@@ -13,5 +14,10 @@ export const revalidate = 30;
 
 export default async function CafePage() {
   const visibility = await loadCafeVisibility();
-  return <CafePromo cafe={mildRData.cafe} visibility={visibility} />;
+  return (
+    <CafePromo
+      cafe={cafeForVisibility(mildRData.cafe, visibility)}
+      visibility={visibility}
+    />
+  );
 }

@@ -1,5 +1,8 @@
+import type { CafePage } from "@/types/vtuber";
+
 export const CAFE_SECTION_KEYS = [
   "mainSiteLink",
+  "heroCutout",
   "dispatch",
   "daySchedule",
   "operations",
@@ -25,6 +28,10 @@ export const CAFE_SECTION_META: Record<
   mainSiteLink: {
     label: "Main Site Link",
     labelLocal: "ปุ่มกลับเว็บหลัก · เว็บหลัก →",
+  },
+  heroCutout: {
+    label: "Key Visual",
+    labelLocal: "รูป KV คาเฟ่ (ปิด = ถมดำ)",
   },
   dispatch: {
     label: "Crime Scene Details",
@@ -59,6 +66,7 @@ export const CAFE_SECTION_META: Record<
 export function defaultCafeVisibility(): CafeSectionVisibilityMap {
   return {
     mainSiteLink: true,
+    heroCutout: true,
     dispatch: true,
     daySchedule: true,
     operations: true,
@@ -67,6 +75,19 @@ export function defaultCafeVisibility(): CafeSectionVisibilityMap {
     goods: true,
     closing: true,
   };
+}
+
+/**
+ * The cafe data as the browser may see it. A hidden KV is swapped for its
+ * blacked-out copy on the server, so the real file's URL is never sent.
+ */
+export function cafeForVisibility(
+  cafe: CafePage,
+  visibility: CafeSectionVisibilityMap
+): CafePage {
+  const { heroCutoutSilhouette, ...rest } = cafe;
+  if (visibility.heroCutout) return rest;
+  return { ...rest, heroCutout: heroCutoutSilhouette };
 }
 
 export function isCafeSectionKey(value: string): value is CafeSectionKey {
