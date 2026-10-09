@@ -72,9 +72,17 @@ function BoardThread({
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(board);
+    // The heart sits on the cutout, which has no width until its image loads.
+    const character = board.querySelector('[data-motion="hero-char"]');
+    if (character) observer.observe(character);
+    // Moving the heart only changes its classes, which no resize reports.
+    const moved = new MutationObserver(measure);
+    const heartPin = board.querySelector('[data-pin="heart"]');
+    if (heartPin) moved.observe(heartPin, { attributeFilter: ["class"] });
     window.addEventListener("resize", measure);
     return () => {
       observer.disconnect();
+      moved.disconnect();
       window.removeEventListener("resize", measure);
     };
   }, [boardRef]);
@@ -158,20 +166,19 @@ export function CafeOverview({
         >
           <div className="grid gap-6 p-4 sm:p-6 min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] min-[1100px]:p-8">
             <div className="relative flex justify-center min-[1100px]:block min-[1100px]:self-end">
-              {/* Desktop: the cutout steps out past the left edge of the frame. */}
               <div
                 data-motion="hero-char"
-                className="relative min-[1100px]:-ml-[92px] min-[1100px]:w-max"
+                className="relative min-[1100px]:mx-auto min-[1100px]:w-max"
               >
                 <ProtectedImage
                   src={cutout}
                   alt={cafe.heroAlt ?? cafe.title}
-                  className="animate-cafe-float h-[min(440px,70vw)] w-auto max-w-full object-contain min-[1100px]:h-[min(680px,52vw)] min-[1100px]:max-w-none [filter:drop-shadow(3px_0_0_#f4ebe3)_drop-shadow(-3px_0_0_#f4ebe3)_drop-shadow(0_3px_0_#f4ebe3)_drop-shadow(0_-3px_0_#f4ebe3)_drop-shadow(8px_14px_10px_rgba(0,0,0,.55))]"
+                  className="animate-cafe-float h-[min(440px,70vw)] w-auto max-w-full object-contain min-[1100px]:h-[min(720px,56vw)] min-[1100px]:max-w-none [filter:drop-shadow(3px_0_0_#f4ebe3)_drop-shadow(-3px_0_0_#f4ebe3)_drop-shadow(0_3px_0_#f4ebe3)_drop-shadow(0_-3px_0_#f4ebe3)_drop-shadow(8px_14px_10px_rgba(0,0,0,.55))]"
                 />
                 <p
                   className={cn(
                     HAND,
-                    "absolute bottom-3 left-2 bg-[#f4ebe3]/90 px-2 py-1 text-base text-[#a8323f] shadow-md min-[1100px]:left-[104px]"
+                    "absolute bottom-[12%] -right-14 rotate-[-4deg] whitespace-nowrap bg-[#f4ebe3]/90 px-2 py-1 text-base text-[#a8323f] shadow-md"
                   )}
                 >
                   เป้าหมาย: Mild-R
@@ -179,7 +186,7 @@ export function CafeOverview({
                 <span
                   data-pin="heart"
                   data-motion="hero-heart"
-                  className="absolute top-[42%] left-[58%] z-10 hidden size-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center min-[1100px]:flex"
+                  className="absolute top-[15%] left-[80%] z-10 hidden size-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center min-[1100px]:flex"
                   aria-hidden
                 >
                   <Heart

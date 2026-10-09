@@ -288,14 +288,23 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
       // Initial states are in place — lift the CSS guard that hid the board.
       markReady();
 
-      const play = () => opening.play(0);
+      let fallback: number | undefined;
+      let started = false;
+      // The splash signal and the fallback timer both call this; whichever
+      // comes second must not restart a board that is already open.
+      const play = () => {
+        if (started) return;
+        started = true;
+        window.clearTimeout(fallback);
+        window.removeEventListener(CAFE_ENTRY_READY_EVENT, play);
+        opening.play(0);
+      };
       const replay = () => {
         window.scrollTo(0, 0);
         opening.restart();
       };
       window.addEventListener(CAFE_REPLAY_EVENT, replay);
       const entryReady = document.documentElement.dataset.cafeEntry === "ready";
-      let fallback: number | undefined;
       if (entryReady) {
         play();
       } else {

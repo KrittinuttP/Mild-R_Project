@@ -12,11 +12,12 @@
  * next to its source. Every entry gets a <stem>-thumb.webp (≤ 800) for grid
  * tiles; the lightbox keeps the full image.
  *
- * Runs before `next dev` / `next build`. `npm run dev` also starts it with
- * `--watch=<pid>`, so images dropped in while the dev server runs are picked up;
- * the watcher exits when that pid does.
+ * Runs before `next dev` / `next build`. `npm run dev` runs it as
+ * `--watch -- next dev`: it starts the dev server itself and keeps re-syncing
+ * images dropped in while it runs, exiting together with it. `--watch=<pid>`
+ * instead exits when that pid does.
  *
- *   npx tsx scripts/sync-gallery.ts [--dry-run] [--watch[=<pid>]]
+ *   npx tsx scripts/sync-gallery.ts [--dry-run] [--watch[=<pid>]] [-- <command>]
  *
  * Defaults per new item:
  *   file    moments: NN-<slug>.webp (next free number), mild: <slug>.webp
@@ -27,6 +28,7 @@
  *   width/height  intrinsic pixels (also backfilled on existing entries that lack them)
  *   loadOnDemand  true (keeps new items after the eager ones, i.e. truly last)
  */
+import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, watch as watchDir } from "node:fs";
 import { copyFile, mkdir, readdir, readFile, rename, stat, writeFile } from "node:fs/promises";
@@ -74,8 +76,12 @@ const WATCH_DEBOUNCE_MS = 1500;
 const CREDIT_X = "Mild-R · X (@MildRWorldEnd)";
 const CREDIT_YOUTUBE = "Mild-R · YouTube (@MildRWorldEnd)";
 
-const dryRun = process.argv.includes("--dry-run");
-const watchArg = process.argv.find((arg) => arg === "--watch" || arg.startsWith("--watch="));
+const separatorIndex = process.argv.indexOf("--");
+const ownArgs = separatorIndex === -1 ? process.argv : process.argv.slice(0, separatorIndex);
+const childCommand = separatorIndex === -1 ? [] : process.argv.slice(separatorIndex + 1);
+
+const dryRun = ownArgs.includes("--dry-run");
+const watchArg = ownArgs.find((arg) => arg === "--watch" || arg.startsWith("--watch="));
 
 function slugOf(stem: string) {
   return stem
@@ -343,9 +349,20 @@ function watch(parentPid?: number) {
   console.log(`gallery: watching ${SOURCE_FOLDERS.map((f) => f.folder).join(", ")}`);
 }
 
+/** Runs `command` in this terminal and exits with it (the watcher goes down with it). */
+function runChild(command: string[]) {
+  // One command string rather than (cmd, args) so the shell resolves `next` to next.cmd on Windows.
+  const child = spawn(command.join(" "), { stdio: "inherit", shell: true });
+  child.on("exit", (code, signal) => process.exit(code ?? (signal ? 1 : 0)));
+  for (const signal of ["SIGINT", "SIGTERM"] as const) {
+    process.on(signal, () => child.kill(signal));
+  }
+}
+
 if (watchArg) {
   const pid = Number(watchArg.split("=")[1]);
   watch(Number.isInteger(pid) && pid > 0 ? pid : undefined);
+  if (childCommand.length > 0) runChild(childCommand);
 } else {
   sync().catch((error) => {
     console.error(error);

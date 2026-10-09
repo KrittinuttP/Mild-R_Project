@@ -50,13 +50,13 @@ function PreorderTape({ cafe }: { cafe: CafePage }) {
   const line = `${text} ${text}`;
 
   return (
-    <div className="relative mt-16 overflow-hidden">
+    <div className="relative mt-16 overflow-x-clip">
       <a
         href="#sets"
         aria-label={text}
         data-motion="hero-tape"
         data-hero-intro
-        className="block origin-center -rotate-[1.2deg] border-y-[6px] border-[#1a1410] bg-[#f2c230] py-3 text-[#1a1410] hover:[&_.animate-cafe-tape]:[animation-play-state:paused]"
+        className="-mx-6 block origin-center -rotate-[1.2deg] border-y-[6px] border-[#1a1410] bg-[#f2c230] py-3 text-[#1a1410] hover:[&_.animate-cafe-tape]:[animation-play-state:paused]"
       >
         <span
           className={cn(
