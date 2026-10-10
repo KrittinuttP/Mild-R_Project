@@ -3,7 +3,6 @@
 import {
   useEffect,
   useRef,
-  useState,
   type ReactNode,
   type RefObject,
 } from "react";
@@ -40,12 +39,14 @@ function BoardThread({
 }: {
   boardRef: RefObject<HTMLDivElement | null>;
 }) {
-  const [d, setD] = useState("");
+  const pathRef = useRef<SVGPathElement>(null);
 
   useEffect(() => {
     const board = boardRef.current;
-    if (!board) return;
+    const path = pathRef.current;
+    if (!board || !path) return;
 
+    let drawn = "";
     const measure = () => {
       const box = board.getBoundingClientRect();
       const point = (id: string) => {
@@ -55,51 +56,54 @@ function BoardThread({
         if (rect.width < 1) return null;
         // The SVG fills the padding box, so step in past the wooden frame.
         return {
-          x: rect.left + rect.width / 2 - box.left - board.clientLeft,
-          y: rect.top + rect.height / 2 - box.top - board.clientTop,
+          x: Math.round((rect.left + rect.width / 2 - box.left - board.clientLeft) * 10) / 10,
+          y: Math.round((rect.top + rect.height / 2 - box.top - board.clientTop) * 10) / 10,
         };
       };
       const heart = point("heart");
       const date = point("date");
       const place = point("place");
-      if (!heart || !date || !place) {
-        setD("");
-        return;
-      }
       // One subpath, right → left. Two separate M commands would dash in parallel.
-      setD(
-        `M ${place.x} ${place.y} ${bend(place, date, -12)} ${bend(date, heart, 18)}`
-      );
+      const next =
+        heart && date && place
+          ? `M ${place.x} ${place.y} ${bend(place, date, -12)} ${bend(date, heart, 18)}`
+          : "";
+      if (next === drawn) return;
+      drawn = next;
+      if (next) path.setAttribute("d", next);
+      else path.removeAttribute("d");
     };
 
+    // Pins move without any resize to report: card hover, the float loop, the
+    // opening timeline. Follow them every frame, but only while the board shows.
+    let frame = 0;
+    const follow = () => {
+      measure();
+      frame = requestAnimationFrame(follow);
+    };
+    const onScreen = new IntersectionObserver(([entry]) => {
+      cancelAnimationFrame(frame);
+      if (entry?.isIntersecting) follow();
+    });
+    onScreen.observe(board);
     measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(board);
-    // The heart sits on the cutout, which has no width until its image loads.
-    const character = board.querySelector('[data-motion="hero-char"]');
-    if (character) observer.observe(character);
-    // Moving the heart only changes its classes, which no resize reports.
-    const moved = new MutationObserver(measure);
-    const heartPin = board.querySelector('[data-pin="heart"]');
-    if (heartPin) moved.observe(heartPin, { attributeFilter: ["class"] });
-    window.addEventListener("resize", measure);
     return () => {
-      observer.disconnect();
-      moved.disconnect();
-      window.removeEventListener("resize", measure);
+      onScreen.disconnect();
+      cancelAnimationFrame(frame);
     };
   }, [boardRef]);
 
   // Always rendered so the opening timeline can find the path; `pathLength`
   // lets it draw the thread with a 0–1 dash offset whatever the real length.
+  // `d` is written by the effect above, outside React.
   return (
     <svg
-      className="pointer-events-none absolute inset-0 z-20 hidden h-full w-full overflow-visible min-[1100px]:block"
+      className="pointer-events-none absolute inset-0 z-20 h-full w-full overflow-visible"
       aria-hidden
     >
       <path
+        ref={pathRef}
         data-motion="hero-yarn"
-        d={d || undefined}
         pathLength={1}
         fill="none"
         stroke="#e85a7a"
@@ -198,12 +202,12 @@ export function CafeOverview({
             <div className="relative z-10 flex justify-center min-[1100px]:block min-[1100px]:self-end">
               <div
                 data-motion="hero-char"
-                className="relative min-[1100px]:mx-auto min-[1100px]:w-max"
+                className="animate-cafe-float relative min-[1100px]:mx-auto min-[1100px]:w-max"
               >
                 <ProtectedImage
                   src={cutout}
                   alt={cafe.heroAlt ?? cafe.title}
-                  className="animate-cafe-float h-[min(440px,70vw)] w-auto max-w-full object-contain min-[1100px]:h-[720px] min-[1100px]:max-w-none [filter:drop-shadow(3px_0_0_#f4ebe3)_drop-shadow(-3px_0_0_#f4ebe3)_drop-shadow(0_3px_0_#f4ebe3)_drop-shadow(0_-3px_0_#f4ebe3)_drop-shadow(8px_14px_10px_rgba(0,0,0,.55))]"
+                  className="h-[min(440px,70vw)] w-auto max-w-full object-contain min-[1100px]:h-[720px] min-[1100px]:max-w-none [filter:drop-shadow(3px_0_0_#f4ebe3)_drop-shadow(-3px_0_0_#f4ebe3)_drop-shadow(0_3px_0_#f4ebe3)_drop-shadow(0_-3px_0_#f4ebe3)_drop-shadow(8px_14px_10px_rgba(0,0,0,.55))]"
                 />
                 <p
                   className={cn(
@@ -216,11 +220,11 @@ export function CafeOverview({
                 <span
                   data-pin="heart"
                   data-motion="hero-heart"
-                  className="absolute top-[15%] left-[80%] z-10 hidden size-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center min-[1100px]:flex"
+                  className="absolute top-[15%] left-[80%] z-10 flex size-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center min-[1100px]:size-7"
                   aria-hidden
                 >
                   <Heart
-                    className="animate-cafe-beat size-7 fill-[#e85a7a] text-[#fff5f7]"
+                    className="animate-cafe-beat size-5 fill-[#e85a7a] text-[#fff5f7] min-[1100px]:size-7"
                     style={{ filter: "drop-shadow(0 0 12px rgba(232,90,122,.8))" }}
                   />
                 </span>
