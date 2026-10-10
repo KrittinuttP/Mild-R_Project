@@ -13,7 +13,7 @@ import {
   tiltStyle,
 } from "@/components/cafe/board/pieces";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
-import { isStandInCafeImage } from "@/lib/cafe-board";
+import { isCafeMission, isStandInCafeImage } from "@/lib/cafe-board";
 import { cn } from "@/lib/utils";
 import type { CafePage } from "@/types/vtuber";
 import type { ImageLightboxItem } from "@/components/media/ImageLightbox";
@@ -209,6 +209,8 @@ export function CafeStoryBlock({
 }) {
   const plates: ImageLightboxItem[] = (cafe.operations?.groups ?? [])
     .flatMap((group) => group.items)
+    // Mission photos are shown on the mission board (`CafeActivities`), not twice.
+    .filter((item) => !isCafeMission(item))
     .filter((item) => item.image && !isStandInCafeImage(item.image, item.imageAlt))
     .map((item) => ({
       id: item.id,

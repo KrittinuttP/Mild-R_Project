@@ -30,10 +30,12 @@ export function CafeEntry({ cafe }: CafeEntryProps) {
   return (
     <>
       <CafeSplash
-        masthead={edition?.masthead ?? cafe.title}
+        title={cafe.title}
+        titleLocal={cafe.titleLocal}
         kicker={edition?.kicker}
         caseNo={edition?.caseNo}
-        heroImage={cafe.heroImage}
+        // Already swapped for the blacked-out copy when the KV is hidden.
+        preloadImage={cafe.heroCutout}
         onFinished={() => {
           setReady(true);
           // Tells the cork board (`useBoardMotion`) the page is now visible.

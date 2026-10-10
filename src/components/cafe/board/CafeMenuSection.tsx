@@ -29,7 +29,7 @@ function SetCard({ item }: { item: CafePromoSetItem }) {
       pin="set"
       motion="swing"
       className={cn(
-        "flex flex-col",
+        "flex h-full flex-col",
         highlight &&
           "shadow-[0_0_0_4px_#0a0c0e,0_0_0_7px_#f2c230,0_14px_26px_rgba(0,0,0,0.45)]"
       )}
@@ -186,7 +186,7 @@ export function CafeMenuSection({ cafe, show }: CafeMenuSectionProps) {
                   {sets.note}
                 </p>
               ) : null}
-              <div className="mt-8 grid items-start gap-5 min-[900px]:grid-cols-[1fr_1fr_1.35fr]">
+              <div className="mt-8 grid items-stretch gap-5 min-[900px]:grid-cols-3">
                 {sets.items.map((item) => (
                   <SetCard key={item.id} item={item} />
                 ))}

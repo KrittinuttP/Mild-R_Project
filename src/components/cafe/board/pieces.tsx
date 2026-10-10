@@ -185,6 +185,34 @@ export function EmptyFrame({
   );
 }
 
+/** Cork panel in a wooden frame — the same surface as the overview board. */
+export function CorkBoard({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "relative border-[12px] border-[#2a1c12] min-[1100px]:border-[18px]",
+        className
+      )}
+      style={{
+        backgroundColor: "#8a6a45",
+        backgroundImage:
+          "radial-gradient(circle at 18% 22%, rgba(255,255,255,.16) 0 1px, transparent 1.6px), radial-gradient(circle at 72% 64%, rgba(40,22,8,.28) 0 1px, transparent 1.6px), radial-gradient(circle at 40% 80%, rgba(255,236,210,.18) 0 1px, transparent 1.6px)",
+        backgroundSize: "13px 17px, 19px 23px, 16px 21px",
+        boxShadow:
+          "inset 0 0 0 2px #14100c, inset 0 0 120px 30px rgba(10,8,6,.6), 0 30px 70px rgba(0,0,0,.7)",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export function BoardSection({
   id,
   children,

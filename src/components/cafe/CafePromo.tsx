@@ -142,6 +142,7 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
         cafe={cafe}
         showSchedule={show.daySchedule}
         showMissions={show.operations}
+        onOpen={open}
       />
       <CafeGoodsBlock
         cafe={cafe}

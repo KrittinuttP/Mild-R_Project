@@ -28,11 +28,11 @@ import type { CafePage } from "@/types/vtuber";
 
 type Point = { x: number; y: number };
 
-/** `drop` > 0 hangs the thread down; < 0 lifts it (to clear text under the pins). */
-function sag(from: Point, to: Point, drop = 36) {
+/** Quadratic bend. `drop` > 0 hangs the thread; < 0 lifts it clear of the text. */
+function bend(from: Point, to: Point, drop: number) {
   const x = (from.x + to.x) / 2;
   const y = (from.y + to.y) / 2 + drop;
-  return `M ${from.x} ${from.y} Q ${x} ${y} ${to.x} ${to.y}`;
+  return `Q ${x} ${y} ${to.x} ${to.y}`;
 }
 
 function BoardThread({
@@ -66,7 +66,10 @@ function BoardThread({
         setD("");
         return;
       }
-      setD(`${sag(heart, date, 18)} ${sag(date, place, -12)}`);
+      // One subpath, right → left. Two separate M commands would dash in parallel.
+      setD(
+        `M ${place.x} ${place.y} ${bend(place, date, -12)} ${bend(date, heart, 18)}`
+      );
     };
 
     measure();

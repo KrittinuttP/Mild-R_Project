@@ -372,6 +372,55 @@
   animation: splash-ecg-fill 1.8s ease-out forwards;
 }
 
+/* Cafe splash — pendant lamp. `rotate` (not `transform`) so it stacks with the
+   element's own positioning, same as the cafe board loops above. */
+@keyframes cafe-splash-swing {
+  from {
+    rotate: -6deg;
+  }
+  to {
+    rotate: 6deg;
+  }
+}
+
+@utility animate-cafe-splash-swing {
+  animation: cafe-splash-swing 3.4s ease-in-out infinite alternate;
+}
+
+/* The lamp coming on: three beats, then steady. `useBoardMotion` opens the
+   cork board with the same rhythm. */
+@keyframes cafe-splash-flicker {
+  0% {
+    opacity: 0.5;
+  }
+  20% {
+    opacity: 1;
+  }
+  34% {
+    opacity: 0.15;
+  }
+  56% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0.35;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@utility animate-cafe-splash-flicker {
+  animation: cafe-splash-flicker 0.45s linear forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-cafe-splash-swing,
+  .animate-cafe-splash-flicker {
+    animation: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-heart-pulse,
   .animate-heart-pulse-delayed,
