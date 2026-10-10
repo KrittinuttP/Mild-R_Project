@@ -195,7 +195,7 @@ export function CafeOverview({
           {/* Below 1100px the right column dissolves (`contents`), so its cards join
               this grid: character beside the case sheet, everything else full width. */}
           <div className="grid grid-cols-[auto_minmax(0,1fr)] items-end gap-3 p-3 sm:gap-6 sm:p-6 min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] min-[1100px]:items-stretch min-[1100px]:p-8">
-            <div className="relative flex justify-center min-[1100px]:block min-[1100px]:self-end">
+            <div className="relative z-10 flex justify-center min-[1100px]:block min-[1100px]:self-end">
               <div
                 data-motion="hero-char"
                 className="relative min-[1100px]:mx-auto min-[1100px]:w-max"
@@ -203,12 +203,12 @@ export function CafeOverview({
                 <ProtectedImage
                   src={cutout}
                   alt={cafe.heroAlt ?? cafe.title}
-                  className="animate-cafe-float h-auto w-24 object-contain sm:w-[150px] min-[1100px]:h-[min(720px,56vw)] min-[1100px]:w-auto min-[1100px]:max-w-none [filter:drop-shadow(3px_0_0_#f4ebe3)_drop-shadow(-3px_0_0_#f4ebe3)_drop-shadow(0_3px_0_#f4ebe3)_drop-shadow(0_-3px_0_#f4ebe3)_drop-shadow(8px_14px_10px_rgba(0,0,0,.55))]"
+                  className="animate-cafe-float h-[min(440px,70vw)] w-auto max-w-full object-contain min-[1100px]:h-[720px] min-[1100px]:max-w-none [filter:drop-shadow(3px_0_0_#f4ebe3)_drop-shadow(-3px_0_0_#f4ebe3)_drop-shadow(0_3px_0_#f4ebe3)_drop-shadow(0_-3px_0_#f4ebe3)_drop-shadow(8px_14px_10px_rgba(0,0,0,.55))]"
                 />
                 <p
                   className={cn(
                     HAND,
-                    "absolute bottom-[8%] left-1 rotate-[-4deg] whitespace-nowrap bg-[#f4ebe3]/90 px-1.5 py-0.5 text-sm text-[#a8323f] shadow-md min-[1100px]:bottom-[12%] min-[1100px]:left-auto min-[1100px]:-right-14 min-[1100px]:px-2 min-[1100px]:py-1 min-[1100px]:text-base"
+                    "absolute bottom-[8%] left-1 z-20 rotate-[-4deg] whitespace-nowrap bg-[#f4ebe3]/90 px-1.5 py-0.5 text-sm text-[#a8323f] shadow-md min-[1100px]:bottom-[12%] min-[1100px]:left-auto min-[1100px]:-right-14 min-[1100px]:px-2 min-[1100px]:py-1 min-[1100px]:text-base"
                   )}
                 >
                   เป้าหมาย: Mild-R
