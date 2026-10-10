@@ -147,6 +147,31 @@ export function CafeOverview({
   const follow = cafe.closing.ctas?.[0];
   const cutout = cafe.heroCutout || "/assets/mild/kv/Mild-R_KV.png";
 
+  // The same two buttons render twice: on the case sheet (wide screens) and in
+  // their own card under the date/place notes (narrow screens).
+  const actions = (stacked: boolean) => {
+    const button = stacked
+      ? "flex min-h-12 items-center justify-center px-4 text-[15px]"
+      : "inline-flex min-h-11 items-center px-4 text-sm transition hover:-translate-y-0.5";
+    return (
+      <div className={stacked ? "flex flex-col gap-2" : "flex flex-wrap justify-end gap-2"}>
+        <a href="#sets" className={cn(button, "bg-[#f2c230] font-semibold text-[#1a1410]")}>
+          ดูเซตและจองล่วงหน้า
+        </a>
+        {follow?.url ? (
+          <Link
+            href={follow.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(button, "bg-[#1a1410] text-[#f4ebe3]")}
+          >
+            {follow.label}
+          </Link>
+        ) : null}
+      </div>
+    );
+  };
+
   return (
     <section
       id="overview"
@@ -167,7 +192,9 @@ export function CafeOverview({
               "inset 0 0 0 2px #14100c, inset 0 0 120px 30px rgba(10,8,6,.6), 0 30px 70px rgba(0,0,0,.7)",
           }}
         >
-          <div className="grid gap-6 p-4 sm:p-6 min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] min-[1100px]:p-8">
+          {/* Below 1100px the right column dissolves (`contents`), so its cards join
+              this grid: character beside the case sheet, everything else full width. */}
+          <div className="grid grid-cols-[auto_minmax(0,1fr)] items-end gap-3 p-3 sm:gap-6 sm:p-6 min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] min-[1100px]:items-stretch min-[1100px]:p-8">
             <div className="relative flex justify-center min-[1100px]:block min-[1100px]:self-end">
               <div
                 data-motion="hero-char"
@@ -176,12 +203,12 @@ export function CafeOverview({
                 <ProtectedImage
                   src={cutout}
                   alt={cafe.heroAlt ?? cafe.title}
-                  className="animate-cafe-float h-[min(440px,70vw)] w-auto max-w-full object-contain min-[1100px]:h-[min(720px,56vw)] min-[1100px]:max-w-none [filter:drop-shadow(3px_0_0_#f4ebe3)_drop-shadow(-3px_0_0_#f4ebe3)_drop-shadow(0_3px_0_#f4ebe3)_drop-shadow(0_-3px_0_#f4ebe3)_drop-shadow(8px_14px_10px_rgba(0,0,0,.55))]"
+                  className="animate-cafe-float h-auto w-24 object-contain sm:w-[150px] min-[1100px]:h-[min(720px,56vw)] min-[1100px]:w-auto min-[1100px]:max-w-none [filter:drop-shadow(3px_0_0_#f4ebe3)_drop-shadow(-3px_0_0_#f4ebe3)_drop-shadow(0_3px_0_#f4ebe3)_drop-shadow(0_-3px_0_#f4ebe3)_drop-shadow(8px_14px_10px_rgba(0,0,0,.55))]"
                 />
                 <p
                   className={cn(
                     HAND,
-                    "absolute bottom-[12%] -right-14 rotate-[-4deg] whitespace-nowrap bg-[#f4ebe3]/90 px-2 py-1 text-base text-[#a8323f] shadow-md"
+                    "absolute bottom-[8%] left-1 rotate-[-4deg] whitespace-nowrap bg-[#f4ebe3]/90 px-1.5 py-0.5 text-sm text-[#a8323f] shadow-md min-[1100px]:bottom-[12%] min-[1100px]:left-auto min-[1100px]:-right-14 min-[1100px]:px-2 min-[1100px]:py-1 min-[1100px]:text-base"
                   )}
                 >
                   เป้าหมาย: Mild-R
@@ -200,14 +227,14 @@ export function CafeOverview({
               </div>
             </div>
 
-            <div className="flex min-w-0 flex-col gap-5">
+            <div className="contents min-w-0 flex-col gap-5 min-[1100px]:flex">
               <Paper
                 tilt={-1}
                 pin="title"
                 motion="hero-card"
-                className="px-5 py-6 sm:px-6"
+                className="px-3.5 py-4 sm:px-6 sm:py-6"
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
                   <p className={cn(LABEL, "text-[#5c4636]")}>
                     {edition?.kicker}
                     {edition?.kickerLocal ? ` · ${edition.kickerLocal}` : ""}
@@ -215,7 +242,7 @@ export function CafeOverview({
                   {cafe.statusLabel ? (
                     <Stamp
                       motion="hero-stamp"
-                      className="rotate-[-6deg] shrink-0"
+                      className="max-w-full rotate-[-6deg] min-[1100px]:shrink-0"
                     >
                       {cafe.statusLabel}
                     </Stamp>
@@ -225,53 +252,51 @@ export function CafeOverview({
                   data-motion="hero-title"
                   className={cn(
                     TYPE,
-                    "mt-3 text-3xl leading-[1.05] font-bold text-[#1a1410] sm:text-4xl min-[1100px]:text-5xl"
+                    "mt-3 text-2xl leading-[1.05] font-bold text-[#1a1410] sm:text-4xl min-[1100px]:text-5xl"
                   )}
                 >
                   {cafe.title}
                 </h1>
                 {cafe.titleLocal ? (
-                  <p className={cn(HAND, "mt-2 text-[28px] leading-tight text-[#7a1f2a]")}>
+                  <p className={cn(HAND, "mt-2 text-xl leading-tight text-[#7a1f2a] sm:text-[28px]")}>
                     {cafe.titleLocal}
                   </p>
                 ) : null}
-                {cafe.tagline ? (
-                  <p className="mt-3 max-w-xl text-[14.5px] leading-relaxed text-[#3d3024]">
-                    {cafe.tagline}
-                  </p>
-                ) : null}
-                <div className="mt-5 flex flex-wrap justify-end gap-2">
-                  <a
-                    href="#sets"
-                    className="inline-flex min-h-11 items-center bg-[#f2c230] px-4 text-sm font-semibold text-[#1a1410] transition hover:-translate-y-0.5"
-                  >
-                    ดูเซตและจองล่วงหน้า
-                  </a>
-                  {follow?.url ? (
-                    <Link
-                      href={follow.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex min-h-11 items-center bg-[#1a1410] px-4 text-sm text-[#f4ebe3] transition hover:-translate-y-0.5"
-                    >
-                      {follow.label}
-                    </Link>
+                <div className="hidden min-[1100px]:block">
+                  {cafe.tagline ? (
+                    <p className="mt-3 max-w-xl text-[14.5px] leading-relaxed text-[#3d3024]">
+                      {cafe.tagline}
+                    </p>
                   ) : null}
+                  <div className="mt-5">{actions(false)}</div>
                 </div>
+              </Paper>
+
+              {/* Narrow screens: pitch and buttons move below the notes (`order-2`),
+                  so date and place stay in the first screenful. */}
+              <Paper
+                tilt={0.4}
+                motion="hero-card"
+                className="order-2 col-span-2 px-3.5 py-3.5 sm:px-5 sm:py-5 min-[1100px]:hidden"
+              >
+                {cafe.tagline ? (
+                  <p className="mb-3 text-sm leading-relaxed text-[#3d3024]">{cafe.tagline}</p>
+                ) : null}
+                {actions(true)}
               </Paper>
 
               {showDispatch ? (
                 <>
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="order-1 col-span-2 grid grid-cols-2 gap-3 sm:gap-4">
                   <Paper
                     pin="date"
                     tilt={2}
                     tone="pink"
                     motion="hero-card"
-                    className="px-4 py-5"
+                    className="px-3 py-4 sm:px-4 sm:py-5"
                   >
-                    <p className={cn(HAND, "text-lg text-[#7a1f2a]")}>วันเปิดแฟ้มคดี</p>
-                    <p className={cn(SERIF, "mt-1 text-[2rem] leading-none text-[#1a1410]")}>
+                    <p className={cn(HAND, "text-base text-[#7a1f2a] sm:text-lg")}>วันเปิดแฟ้มคดี</p>
+                    <p className={cn(SERIF, "mt-1 text-xl leading-none whitespace-nowrap text-[#1a1410] sm:text-[2rem]")}>
                       <Redacted>{schedule.label}</Redacted>
                     </p>
                     {schedule.detail ? (
@@ -283,6 +308,7 @@ export function CafeOverview({
                           variant="inline"
                           startsAt={schedule.startsAt}
                           endsAt={schedule.endsAt}
+                          className="text-sm sm:text-lg"
                         />
                       </div>
                     ) : null}
@@ -292,21 +318,21 @@ export function CafeOverview({
                     tilt={-2}
                     tone="mint"
                     motion="hero-card"
-                    className="px-4 py-5"
+                    className="px-3 py-4 sm:px-4 sm:py-5"
                   >
-                    <p className={cn(HAND, "text-lg")}>สถานที่เกิดเหตุ</p>
-                    <p className={cn(SERIF, "mt-1 text-[1.7rem] leading-tight")}>
+                    <p className={cn(HAND, "text-base sm:text-lg")}>สถานที่เกิดเหตุ</p>
+                    <p className={cn(SERIF, "mt-1 text-[17px] leading-tight break-words sm:text-[1.7rem]")}>
                       <Redacted>{location.label}</Redacted>
                     </p>
                     {location.detail ? (
-                      <p className="mt-2 text-sm">{location.detail}</p>
+                      <p className="mt-2 text-xs sm:text-sm">{location.detail}</p>
                     ) : null}
                     {location.mapUrl ? (
                       <a
                         href={location.mapUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold underline-offset-4 hover:underline"
+                        className="mt-1 inline-flex min-h-11 items-center text-sm font-semibold underline-offset-4 hover:underline sm:mt-3"
                       >
                         เปิดแผนที่ →
                       </a>
@@ -318,7 +344,7 @@ export function CafeOverview({
                       type="button"
                       onClick={onOpenVenue}
                       aria-label={`ดูรูป: ${location.imageAlt ?? location.label}`}
-                      className="group block w-full cursor-zoom-in text-left"
+                      className="group order-3 col-span-2 block w-full cursor-zoom-in text-left"
                     >
                       <span
                         data-motion="hero-card"
@@ -331,7 +357,7 @@ export function CafeOverview({
                         <ProtectedImage
                           src={location.image}
                           alt={location.imageAlt ?? location.label}
-                          wrapClassName="block h-[250px] w-full overflow-hidden min-[1100px]:h-[190px]"
+                          wrapClassName="block h-[170px] w-full overflow-hidden sm:h-[250px] min-[1100px]:h-[190px]"
                           className="h-full w-full object-cover grayscale-[.45] transition duration-300 group-hover:grayscale-0"
                         />
                         <span className={cn(TYPE, "block px-3 py-2 text-xs tracking-[0.14em] text-[#5c4636] uppercase")}>
@@ -342,7 +368,9 @@ export function CafeOverview({
                   ) : null}
                 </>
               ) : (
-                <CafeTopSecret titleLocal="ข้อมูลสถานที่และเวลาเกิดเหตุ · ยังไม่เปิดเผย" />
+                <div className="order-1 col-span-2">
+                  <CafeTopSecret titleLocal="ข้อมูลสถานที่และเวลาเกิดเหตุ · ยังไม่เปิดเผย" />
+                </div>
               )}
             </div>
           </div>
