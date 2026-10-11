@@ -1,0 +1,14 @@
+{
+  "campaign": "cafe-hunt-2026",
+  "title": "ตามหาหลักฐาน",
+  "opensAt": null,
+  "closesAt": null,
+  "drawAt": "",
+  "items": [
+    { "id": "ev-1", "name": "หลักฐานชิ้นที่ 1", "place": "", "hint": "" },
+    { "id": "ev-2", "name": "หลักฐานชิ้นที่ 2", "place": "", "hint": "" },
+    { "id": "ev-3", "name": "หลักฐานชิ้นที่ 3", "place": "", "hint": "" },
+    { "id": "ev-4", "name": "หลักฐานชิ้นที่ 4", "place": "", "hint": "" },
+    { "id": "ev-5", "name": "หลักฐานชิ้นที่ 5", "place": "", "hint": "" }
+  ]
+}

@@ -20,8 +20,15 @@ import { loadCafeVisibility } from "@/lib/cafe-visibility-store";
 const newsreader = Newsreader({
   subsets: ["latin"],
   variable: "--font-cafe-serif",
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
+  weight: ["400", "600", "700"],
+  style: "normal",
+});
+
+const newsreaderItalic = Newsreader({
+  subsets: ["latin"],
+  variable: "--font-cafe-serif-italic",
+  weight: ["400", "600", "700"],
+  style: "italic",
 });
 
 const notoSerifThai = Noto_Serif_Thai({
@@ -52,7 +59,7 @@ export default async function CafeLayout({ children }: { children: ReactNode }) 
 
   return (
     <div
-      className={`${newsreader.variable} ${notoSerifThai.variable} ${courierPrime.variable} ${sriracha.variable} flex min-h-full flex-col bg-[#0a0c0e] text-[#d8d0c4]`}
+      className={`${newsreader.variable} ${newsreaderItalic.variable} ${notoSerifThai.variable} ${courierPrime.variable} ${sriracha.variable} flex min-h-full flex-col bg-[#0a0c0e] text-[#d8d0c4]`}
     >
       <MediaProtection />
       <CafeEntry cafe={cafe} />

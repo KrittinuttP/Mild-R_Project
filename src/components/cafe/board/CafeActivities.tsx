@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Link from "next/link";
 
 import { CafeTopSecret } from "@/components/cafe/CafeTopSecret";
 import {
@@ -253,6 +254,32 @@ export function CafeActivities({
               );
             })}
           </ul>
+
+          {/* Way into the evidence hunt (/cafe/hunt) — hidden with the board. */}
+          <div className="relative mt-10 flex flex-col gap-4 bg-[#f4ebe3] px-4 py-4 text-[#1a1410] shadow-[0_14px_26px_rgba(0,0,0,0.45)] sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-5">
+            <div className="min-w-0">
+              <p
+                className={cn(
+                  TYPE,
+                  "text-xs font-bold tracking-[0.14em] text-[#a8323f] uppercase"
+                )}
+              >
+                Evidence Hunt
+              </p>
+              <p className={cn(HAND, "mt-1 text-[23px] leading-tight text-[#7a1f2a]")}>
+                ตามหาหลักฐาน
+              </p>
+              <p className="mt-1 text-sm leading-relaxed text-[#3d3024]">
+                สแกน QR ให้ครบทุกจุดในงาน เก็บตราครบแล้วลงชื่อลุ้นวงล้อ
+              </p>
+            </div>
+            <Link
+              href="/cafe/hunt"
+              className="flex min-h-12 shrink-0 items-center justify-center bg-[#e85a7a] px-5 text-base font-semibold text-[#1a1410] transition hover:bg-[#f3b8c4] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#1a1410]"
+            >
+              เปิดสมุดสะสมหลักฐาน
+            </Link>
+          </div>
         </CorkBoard>
       ) : missions.length > 0 ? (
         <div className="mt-10">

@@ -14,6 +14,7 @@ import type { CafeEventPage, CafeEventPanel } from "@/types/vtuber";
 registerGsapPlugins();
 
 const SERIF = "font-[family-name:var(--font-cafe-serif)]";
+const SERIF_ITALIC = "font-[family-name:var(--font-cafe-serif-italic)]";
 
 /** Hidden until GSAP owns visibility — prevents first-paint flash. */
 const HIDE_UNTIL_SCROLL = "opacity-0";
@@ -101,8 +102,8 @@ function CaseTitleBlock({ event }: { event: CafeEventPage }) {
       ) : null}
       <h1
         className={cn(
-          SERIF,
-          "mt-3 text-3xl font-semibold tracking-tight text-[#f4ebe3] italic sm:text-4xl"
+          SERIF_ITALIC,
+          "mt-3 text-3xl font-semibold tracking-tight text-[#f4ebe3] sm:text-4xl"
         )}
       >
         {event.title}
@@ -330,12 +331,12 @@ export function CafeEventComic({ event }: CafeEventComicProps) {
           >
             <span
               className={cn(
-                SERIF,
-                "text-sm font-medium tracking-[0.12em] text-[#c4b8a8]/75 italic sm:text-base"
+                SERIF_ITALIC,
+                "text-sm font-medium tracking-[0.12em] text-[#c4b8a8]/75 sm:text-base"
               )}
             >
               เลื่อนเพื่อ{" "}
-              <span className="font-semibold not-italic text-[#c4b8a8]/90">
+              <span className="font-[family-name:var(--font-cafe-serif)] font-semibold text-[#c4b8a8]/90">
                 เปิดแฟ้ม
               </span>
             </span>
@@ -367,8 +368,8 @@ export function CafeEventComic({ event }: CafeEventComicProps) {
                 {panel.caption ? (
                   <p
                     className={cn(
-                      SERIF,
-                      "text-base font-semibold text-[#f4ebe3]/90 italic sm:text-lg"
+                      SERIF_ITALIC,
+                      "text-base font-semibold text-[#f4ebe3]/90 sm:text-lg"
                     )}
                   >
                     {panel.caption}

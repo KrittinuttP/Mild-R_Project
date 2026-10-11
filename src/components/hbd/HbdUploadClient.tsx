@@ -8,7 +8,16 @@ import {
   type FormEvent,
 } from "react";
 import Link from "next/link";
-import { Download, Eraser, Loader2, Pencil, Sparkles, Upload, X } from "lucide-react";
+import {
+  Download,
+  Eraser,
+  Gift,
+  Loader2,
+  Pencil,
+  Sparkles,
+  Upload,
+  X,
+} from "lucide-react";
 
 import { BackLink } from "@/components/layout/BackLink";
 
@@ -29,6 +38,16 @@ const DISPLAY = "font-[family-name:var(--font-display)]";
 const HBD_FORM_CACHE_KEY = "mild-r-hbd-upload-draft";
 
 type Phase = "form" | "preview" | "done";
+
+/** What the server did with the lucky-wheel tick (see /api/hbd/submit). */
+type LuckyDrawOutcome = "entered" | "already" | "failed" | "skipped";
+
+const LUCKY_DRAW_DONE_TEXT: Record<LuckyDrawOutcome, string | null> = {
+  entered: "ลงชื่อสุ่มวงล้อ HBD แล้ว นับสิทธิ์เมื่อการ์ดผ่านการตรวจ",
+  already: "บัญชีนี้ลงชื่อสุ่มวงล้อ HBD ไว้แล้ว ได้ 1 สิทธิ์เท่าเดิม",
+  failed: "การ์ดส่งสำเร็จ แต่ลงชื่อสุ่มวงล้อไม่สำเร็จ กรุณาแจ้งทีมงาน",
+  skipped: null,
+};
 
 type CachedFormFields = {
   displayName: string;
@@ -99,6 +118,10 @@ export function HbdUploadClient() {
   const [contactChannel, setContactChannel] =
     useState<HbdContactChannel>("x");
   const [contactHandle, setContactHandle] = useState("");
+  // Opt-in: never restored from the draft cache, so it always starts unticked.
+  const [joinLuckyDraw, setJoinLuckyDraw] = useState(false);
+  const [luckyDrawOutcome, setLuckyDrawOutcome] =
+    useState<LuckyDrawOutcome>("skipped");
   const [cardFile, setCardFile] = useState<File | null>(null);
   const [cardPreviewUrl, setCardPreviewUrl] = useState<string | undefined>();
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -289,6 +312,7 @@ export function HbdUploadClient() {
       body.set("contactHandle", contactHandle.trim());
       body.set("card", card);
       if (avatar) body.set("avatar", avatar);
+      if (joinLuckyDraw) body.set("joinLuckyDraw", "1");
 
       const res = await fetch("/api/hbd/submit", {
         method: "POST",
@@ -297,6 +321,7 @@ export function HbdUploadClient() {
       const data = (await res.json().catch(() => null)) as {
         error?: string;
         ok?: boolean;
+        luckyDraw?: LuckyDrawOutcome;
       } | null;
 
       if (!res.ok) {
@@ -310,6 +335,11 @@ export function HbdUploadClient() {
       setMessage("");
       setContactHandle("");
       setContactChannel("x");
+      // A reply without the field (older server) must not look like an entry.
+      setLuckyDrawOutcome(
+        joinLuckyDraw ? (data?.luckyDraw ?? "failed") : "skipped"
+      );
+      setJoinLuckyDraw(false);
       clearMedia();
 
       setPhase("done");
@@ -331,6 +361,8 @@ export function HbdUploadClient() {
     setMessage("");
     setContactHandle("");
     setContactChannel("x");
+    setJoinLuckyDraw(false);
+    setLuckyDrawOutcome("skipped");
     clearMedia();
   }
 
@@ -580,7 +612,8 @@ export function HbdUploadClient() {
             <section className="rounded-3xl bg-white/[0.03] p-5 ring-1 ring-white/10 sm:p-6">
               <h2 className={labelClass}>ช่องทางติดต่อ *</h2>
               <p className={hintClass}>
-                ข้อมูลติดต่อนี้จะไม่แสดงบนเว็บ ใช้สำหรับติดต่อเมื่อมีปัญหาเท่านั้น
+                ข้อมูลติดต่อนี้จะไม่แสดงบนเว็บ ใช้ติดต่อเมื่อมีปัญหา
+                หรือเมื่อคุณได้รางวัลจากวงล้อ
               </p>
               <div className="mt-3 flex rounded-2xl bg-black/25 p-1 ring-1 ring-white/10">
                 {(["x", "discord"] as const).map((channel) => (
@@ -615,6 +648,36 @@ export function HbdUploadClient() {
                   required
                 />
               </label>
+            </section>
+
+            {/* 7. Lucky wheel — optional, unticked until the visitor chooses */}
+            <section className="overflow-hidden rounded-3xl bg-[#e85a7a]/10 shadow-[0_0_32px_rgba(232,90,122,0.35)] ring-2 ring-[#e85a7a]">
+              <div className="flex items-center gap-2 bg-[#e85a7a] px-5 py-3 text-[#140a0d] sm:px-6">
+                <Gift className="size-4 shrink-0" />
+                <h2 className="text-sm font-medium tracking-wide">
+                  ลุ้นรางวัลจากวงล้อ HBD
+                </h2>
+              </div>
+              <div className="p-5 sm:p-6">
+                <label className="flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-dashed border-[#f3b8c4]/70 bg-black/25 px-4 py-3.5 transition hover:border-[#f3b8c4] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#f7d7de]">
+                  <input
+                    type="checkbox"
+                    checked={joinLuckyDraw}
+                    onChange={(e) => setJoinLuckyDraw(e.target.checked)}
+                    className="size-6 shrink-0 accent-[#e85a7a]"
+                  />
+                  <span className="text-base text-[#fff5f7]">
+                    ติ๊กเพื่อร่วมกิจกรรมสุ่มวงล้อ
+                  </span>
+                </label>
+                <p className="mt-3 text-xs leading-relaxed text-[#f7d7de]/85">
+                  ใช้ชื่อที่แสดงและช่องทางติดต่อข้างบนลงชื่อสุ่มรางวัล
+                  ไม่ต้องกรอกซ้ำ ไม่ติ๊กก็ส่งการ์ดได้ตามปกติ
+                </p>
+                <p className="mt-3 border-t border-white/10 pt-3 text-xs leading-relaxed text-[#f3b8c4]/70">
+                  นับสิทธิ์เมื่อการ์ดผ่านการตรวจ · 1 บัญชีลุ้นได้ 1 สิทธิ์
+                </p>
+              </div>
             </section>
 
             {error ? (
@@ -702,6 +765,17 @@ export function HbdUploadClient() {
                     ไม่มีข้อความอวยพร
                   </p>
                 )}
+                <p
+                  className={cn(
+                    "mt-4 inline-flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs ring-1",
+                    joinLuckyDraw
+                      ? "bg-[#e85a7a]/15 text-[#f7d7de] ring-[#e85a7a]/50"
+                      : "text-[#f3b8c4]/60 ring-white/15"
+                  )}
+                >
+                  <Gift className="size-3.5 shrink-0" />
+                  สุ่มวงล้อ: {joinLuckyDraw ? "ร่วม" : "ไม่ร่วม"}
+                </p>
               </div>
             </article>
 
@@ -752,6 +826,15 @@ export function HbdUploadClient() {
             <p className="mt-3 text-sm leading-relaxed text-[#f3b8c4]/80">
               การ์ดของคุณจะถูกนำไปจัดแสดงในหน้ารวมคำอวยพรเร็วๆ นี้
             </p>
+            {LUCKY_DRAW_DONE_TEXT[luckyDrawOutcome] ? (
+              <p
+                className="mx-auto mt-5 inline-flex max-w-sm items-start gap-2 rounded-2xl bg-[#e85a7a]/12 px-4 py-3 text-left text-sm leading-relaxed text-[#f7d7de] ring-1 ring-[#e85a7a]/30"
+                role="status"
+              >
+                <Gift className="mt-0.5 size-4 shrink-0 text-[#e85a7a]" />
+                {LUCKY_DRAW_DONE_TEXT[luckyDrawOutcome]}
+              </p>
+            ) : null}
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link
                 href="/hbd/2026"

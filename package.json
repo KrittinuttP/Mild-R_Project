@@ -38,6 +38,7 @@
     "backfill:x-live-schedules": "npx tsx --env-file=.env.local scripts/backfill-x-live-schedules.ts",
     "backfill:x-live-covers": "npx tsx --env-file=.env.local scripts/run-x-live-covers.ts",
     "db:migrate:live-x-covers": "npx tsx --env-file=.env.local scripts/apply-sql.ts supabase/migrations/20261003120000_live_stream_x_covers.sql",
+    "db:migrate:lucky-draw": "npx tsx --env-file=.env scripts/apply-sql.ts supabase/migrations/20261011120000_lucky_draw_entries.sql",
     "agent:live-schedule": "npx tsx --env-file=.env.local scripts/run-live-schedule-agent.ts",
     "reprocess:x-live-schedule": "npx tsx --env-file=.env scripts/reprocess-x-live-schedule.ts",
     "cron:x": "npx tsx --env-file=.env.local scripts/setup-x-feed-cron.ts",

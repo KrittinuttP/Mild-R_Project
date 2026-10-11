@@ -19,7 +19,9 @@ export function CafeEntry({ cafe }: CafeEntryProps) {
     pathname.startsWith("/cafe/settings") ||
     pathname.startsWith("/cafe/secret") ||
     pathname.startsWith("/cafe/lab") ||
-    pathname.startsWith("/cafe/event");
+    pathname.startsWith("/cafe/event") ||
+    // The evidence hunt has its own preload (HuntSplash), shown once.
+    pathname.startsWith("/cafe/hunt");
   const [ready, setReady] = useState(skipSplash);
   const edition = cafe.edition;
 

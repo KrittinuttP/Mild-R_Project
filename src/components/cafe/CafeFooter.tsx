@@ -30,7 +30,7 @@ export function CafeFooter({ cafe }: CafeFooterProps) {
               Fan project · Not official
               {cafe.edition?.caseNo ? ` · ${cafe.edition.caseNo}` : ""}
             </p>
-            <p className="mt-2 font-[family-name:var(--font-cafe-serif)] text-xl font-semibold tracking-tight text-[#f4ebe3] italic sm:text-2xl md:text-3xl">
+            <p className="mt-2 font-[family-name:var(--font-cafe-serif-italic)] text-xl font-semibold tracking-tight text-[#f4ebe3] sm:text-2xl md:text-3xl">
               {masthead}
             </p>
             {cafe.titleLocal ? (

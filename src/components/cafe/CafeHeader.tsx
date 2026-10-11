@@ -101,7 +101,7 @@ export function CafeHeader({
         <div className="min-w-0 flex-1">
           <Link
             href="/cafe"
-            className="block truncate font-[family-name:var(--font-cafe-serif)] text-[0.95rem] font-semibold tracking-tight text-[#f4ebe3] italic sm:text-lg"
+            className="block truncate font-[family-name:var(--font-cafe-serif-italic)] text-[0.95rem] font-semibold tracking-tight text-[#f4ebe3] sm:text-lg"
             onClick={(event) => {
               if (onCafeRoot) {
                 event.preventDefault();

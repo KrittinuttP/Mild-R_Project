@@ -10,6 +10,12 @@ import {
   createHbdSubmission,
   HBD_STORAGE_BUCKET,
 } from "@/lib/hbd-submissions-store";
+import {
+  LUCKY_DRAW_CAMPAIGNS,
+  LUCKY_DRAW_LIMITS,
+  validateLuckyDrawContact,
+} from "@/lib/lucky-draw";
+import { createLuckyDrawEntry } from "@/lib/lucky-draw-store";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
@@ -22,6 +28,39 @@ const STORAGE_CACHE_SECONDS = "31536000";
 
 function isContactChannel(value: string): value is HbdContactChannel {
   return value === "x" || value === "discord";
+}
+
+/** Result of the optional lucky-wheel tick, reported next to the card result. */
+type LuckyDrawOutcome = "entered" | "already" | "failed" | "skipped";
+
+/**
+ * Enter the HBD lucky wheel with the contact details of the card just saved.
+ * Never throws: the card is already stored, so a failed entry must not turn
+ * the whole upload into an error.
+ */
+async function enterHbdLuckyDraw(input: {
+  submissionId: string;
+  displayName: string;
+  contactChannel: HbdContactChannel;
+  contactHandle: string;
+}): Promise<LuckyDrawOutcome> {
+  const contact = validateLuckyDrawContact({
+    // Display names have no length limit on this form; entries do.
+    contactName: input.displayName.slice(0, LUCKY_DRAW_LIMITS.nameMax),
+    contactChannel: input.contactChannel,
+    contactHandle: input.contactHandle,
+  });
+  if (!contact.ok) return "failed";
+
+  try {
+    return await createLuckyDrawEntry({
+      ...contact.value,
+      campaign: LUCKY_DRAW_CAMPAIGNS.hbd,
+      sourceRef: input.submissionId,
+    });
+  } catch {
+    return "failed";
+  }
 }
 
 export async function POST(request: Request) {
@@ -45,6 +84,7 @@ export async function POST(request: Request) {
   const contactHandle = String(form.get("contactHandle") ?? "").trim();
   const card = form.get("card");
   const avatar = form.get("avatar");
+  const joinLuckyDraw = String(form.get("joinLuckyDraw") ?? "") === "1";
 
   if (!displayName) {
     return NextResponse.json({ error: "กรุณากรอกชื่อที่แสดง" }, { status: 400 });
@@ -165,10 +205,20 @@ export async function POST(request: Request) {
       avatarUrl,
     });
 
+    const luckyDraw: LuckyDrawOutcome = joinLuckyDraw
+      ? await enterHbdLuckyDraw({
+          submissionId: row.id,
+          displayName,
+          contactChannel: contactChannelRaw,
+          contactHandle,
+        })
+      : "skipped";
+
     return NextResponse.json({
       ok: true,
       id: row.id,
       status: row.status,
+      luckyDraw,
     });
   } catch (error) {
     const paths = [cardPath, avatarPath].filter(Boolean) as string[];

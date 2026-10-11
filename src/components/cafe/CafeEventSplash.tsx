@@ -110,7 +110,7 @@ export function CafeEventSplash({
           Case File
         </p>
 
-        <p className="mt-3 font-[family-name:var(--font-cafe-serif)] text-2xl tracking-[0.04em] text-[#f4ebe3] italic sm:text-3xl">
+        <p className="mt-3 font-[family-name:var(--font-cafe-serif-italic)] text-2xl tracking-[0.04em] text-[#f4ebe3] sm:text-3xl">
           {title}
         </p>
 
