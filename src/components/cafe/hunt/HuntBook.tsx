@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useState, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import {
   CorkBoard,
@@ -13,12 +19,14 @@ import {
 } from "@/components/cafe/board/pieces";
 import { HuntEntryForm } from "@/components/cafe/hunt/HuntEntryForm";
 import { StampMark } from "@/components/cafe/hunt/HuntFrame";
+import { HuntNote, type HuntNoteVariant } from "@/components/cafe/hunt/HuntNote";
 import { HuntNotice } from "@/components/cafe/hunt/HuntNotice";
 import { HuntScanner } from "@/components/cafe/hunt/HuntScanner";
+import { HuntStampModal } from "@/components/cafe/hunt/HuntStampModal";
 import { HuntTicket } from "@/components/cafe/hunt/HuntTicket";
 import { useHuntState } from "@/components/cafe/hunt/useHuntState";
 import type { CafeHuntItem } from "@/lib/cafe-hunt";
-import { EMPTY_HUNT_STATE } from "@/lib/cafe-hunt-storage";
+import { addHuntStamp, EMPTY_HUNT_STATE } from "@/lib/cafe-hunt-storage";
 import { cn } from "@/lib/utils";
 
 /** Browsers inside chat / social apps keep their own storage, apart from Safari or Chrome. */
@@ -40,7 +48,22 @@ function formatTime(iso: string) {
   })} น.`;
 }
 
+const BOOK_PATH = "/cafe/hunt";
+/** Marks the history entry pushed while the camera is open (Back closes it). */
+const SCAN_QUERY = "scan";
+
+function scannerInUrl() {
+  return new URLSearchParams(window.location.search).has(SCAN_QUERY);
+}
+
+/** How the visitor got here when a phone camera app opened a QR link. */
+export type HuntArrival =
+  | { kind: "found"; index: number; token: string }
+  | { kind: "invalid" };
+
 type HuntBookProps = {
+  /** Set by /cafe/hunt/[code]: stamp (or report) once the notice is accepted. */
+  arrival?: HuntArrival;
   huntTitle: string;
   cafeTitle: string;
   drawAt: string;
@@ -49,14 +72,81 @@ type HuntBookProps = {
 };
 
 /** Stamp book: every piece, what is still missing, then the form or the ticket. */
-export function HuntBook({ huntTitle, cafeTitle, drawAt, items, caseNo }: HuntBookProps) {
+export function HuntBook({
+  arrival,
+  huntTitle,
+  cafeTitle,
+  drawAt,
+  items,
+  caseNo,
+}: HuntBookProps) {
   const { state, broken } = useHuntState();
   const current = state ?? EMPTY_HUNT_STATE;
   const inApp = useSyncExternalStore(noSubscription, isInAppBrowser, () => false);
   const [noticeOpen, setNoticeOpen] = useState(false);
   const closeNotice = useCallback(() => setNoticeOpen(false), []);
   const [scannerOpen, setScannerOpen] = useState(false);
-  const closeScanner = useCallback(() => setScannerOpen(false), []);
+  /** Piece stamped on arrival from a camera-app scan; result window open while set. */
+  const [arrivalStamp, setArrivalStamp] = useState<number | null>(null);
+  const [bookNote, setBookNote] = useState<{
+    variant: HuntNoteVariant;
+    number?: number;
+  } | null>(null);
+  const arrivalHandled = useRef(false);
+  const scrollTopAfterClose = useRef(false);
+
+  // The camera gets its own history entry, so the phone's Back gesture
+  // closes it instead of leaving the book.
+  const openScanner = useCallback(() => {
+    setBookNote(null);
+    if (!scannerInUrl()) window.history.pushState(null, "", `?${SCAN_QUERY}`);
+    setScannerOpen(true);
+  }, []);
+
+  const closeScanner = useCallback((next?: "form") => {
+    scrollTopAfterClose.current = next === "form";
+    if (scannerInUrl()) {
+      window.history.back();
+    } else {
+      setScannerOpen(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const onPop = () => {
+      if (scannerInUrl()) return;
+      setScannerOpen(false);
+      if (scrollTopAfterClose.current) {
+        scrollTopAfterClose.current = false;
+        // The entry form sits at the top once every piece is in.
+        window.setTimeout(() => window.scrollTo({ top: 0 }), 0);
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  // Arrived from a phone camera app: stamp straight away (after the storage
+  // notice on a first visit), then show the book's own address so Back and
+  // reload do not repeat the scan.
+  const noticeAccepted = Boolean(state?.noticeAcceptedAt);
+  useEffect(() => {
+    if (!arrival || arrivalHandled.current || !noticeAccepted) return;
+    arrivalHandled.current = true;
+    window.history.replaceState(null, "", BOOK_PATH);
+
+    const item = arrival.kind === "found" ? items[arrival.index] : undefined;
+    if (arrival.kind === "found" && item) {
+      if (addHuntStamp(item.id, arrival.token) === "new") {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- runs once, after the visitor accepted the notice
+        setArrivalStamp(arrival.index);
+      } else {
+        setBookNote({ variant: "already", number: arrival.index + 1 });
+      }
+      return;
+    }
+    setBookNote({ variant: "invalid" });
+  }, [arrival, items, noticeAccepted]);
 
   const total = items.length;
   const count = items.filter((item) => current.stamps[item.id]).length;
@@ -109,6 +199,15 @@ export function HuntBook({ huntTitle, cafeTitle, drawAt, items, caseNo }: HuntBo
           </div>
         )}
       </div>
+
+      {bookNote ? (
+        <HuntNote
+          variant={bookNote.variant}
+          number={bookNote.number}
+          onClose={() => setBookNote(null)}
+          className="mt-6"
+        />
+      ) : null}
 
       {broken ? (
         <p
@@ -184,7 +283,9 @@ export function HuntBook({ huntTitle, cafeTitle, drawAt, items, caseNo }: HuntBo
                 <div className="min-w-0">
                   <p className={cn(TYPE, "text-xs tracking-[0.14em] text-[#5c4636]")}>
                     EX. {label} ·{" "}
-                    {stamp ? `เก็บแล้ว ${formatTime(stamp.at)}` : "ยังไม่พบ"}
+                    <span className="whitespace-nowrap">
+                      {stamp ? `เก็บแล้ว ${formatTime(stamp.at)}` : "ยังไม่พบ"}
+                    </span>
                   </p>
                   {stamp ? (
                     <p className="mt-0.5 text-[15px] leading-[1.4] font-semibold break-words">
@@ -260,7 +361,7 @@ export function HuntBook({ huntTitle, cafeTitle, drawAt, items, caseNo }: HuntBo
         <div className="sticky bottom-0 z-30 -mx-5 mt-6 bg-[linear-gradient(rgba(10,12,14,0),#0a0c0e_38%)] px-5 pt-10 pb-[max(22px,env(safe-area-inset-bottom))] sm:-mx-8 sm:px-8">
           <button
             type="button"
-            onClick={() => setScannerOpen(true)}
+            onClick={openScanner}
             className="flex min-h-[62px] w-full items-center justify-center gap-3 bg-[#e85a7a] px-4 text-[19px] font-semibold text-[#1a1410] shadow-[0_14px_30px_rgba(232,90,122,0.4),0_0_0_4px_rgba(232,90,122,0.18)] transition hover:bg-[#f3b8c4] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#f4ebe3]"
           >
             <svg
@@ -280,7 +381,26 @@ export function HuntBook({ huntTitle, cafeTitle, drawAt, items, caseNo }: HuntBo
       )}
 
       {scannerOpen ? (
-        <HuntScanner count={count} total={total} onClose={closeScanner} />
+        <HuntScanner items={items} onClose={closeScanner} />
+      ) : null}
+      {arrivalStamp !== null && items[arrivalStamp] ? (
+        <HuntStampModal
+          item={items[arrivalStamp]}
+          index={arrivalStamp}
+          stampedIds={items
+            .filter((item) => current.stamps[item.id])
+            .map((item) => item.id)}
+          itemIds={items.map((item) => item.id)}
+          onPrimary={() => {
+            setArrivalStamp(null);
+            if (complete) {
+              window.scrollTo({ top: 0 });
+            } else {
+              openScanner();
+            }
+          }}
+          onBook={() => setArrivalStamp(null)}
+        />
       ) : null}
       {noticeOpen ? <HuntNotice required={false} onClose={closeNotice} /> : null}
     </>

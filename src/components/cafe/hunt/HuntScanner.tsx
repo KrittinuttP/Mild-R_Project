@@ -1,9 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 
-import { HAND, Pin, Stamp, TYPE } from "@/components/cafe/board/pieces";
+import { HAND, Pin, TYPE } from "@/components/cafe/board/pieces";
+import { checkHuntToken } from "@/components/cafe/hunt/hunt-check";
+import { HuntNote, type HuntNoteVariant } from "@/components/cafe/hunt/HuntNote";
+import { HuntStampModal } from "@/components/cafe/hunt/HuntStampModal";
+import { useHuntState } from "@/components/cafe/hunt/useHuntState";
+import type { CafeHuntItem } from "@/lib/cafe-hunt";
+import { addHuntStamp } from "@/lib/cafe-hunt-storage";
 import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +21,8 @@ type Facing = "environment" | "user";
 const SCAN_EVERY_MS = 180;
 /** Frames are shrunk to this many pixels on the long side before decoding. */
 const DECODE_EDGE = 640;
-const WRONG_NOTE_MS = 3500;
+/** How long a result note stays, and how long the same code is ignored. */
+const NOTE_MS = 3500;
 
 const TOKEN_PATH = /^\/cafe\/hunt\/([^/?#]+)\/?$/;
 /** Same rule as CAFE_HUNT_TOKENS: 16+ characters, no spaces or slashes. */
@@ -111,18 +117,20 @@ const OUTLINE_BUTTON =
   "flex min-h-[50px] items-center justify-center gap-2 border-2 border-[#f4ebe3]/70 px-3 text-[15px] text-[#f4ebe3] transition hover:border-[#f4ebe3] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#e85a7a] aria-pressed:bg-[#f4ebe3] aria-pressed:text-[#1a1410]";
 
 type HuntScannerProps = {
-  count: number;
-  total: number;
-  onClose: () => void;
+  items: CafeHuntItem[];
+  /** `form`: every piece is in, the book should show the entry form. */
+  onClose: (next?: "form") => void;
 };
+
+type Note = { variant: HuntNoteVariant; number?: number; key: number };
 
 /**
  * Full-screen camera that reads evidence QR codes inside the page, so every
  * stamp lands in this same browser (scanning with another app can open a
  * different browser with its own storage). Frames never leave the phone.
  */
-export function HuntScanner({ count, total, onClose }: HuntScannerProps) {
-  const router = useRouter();
+export function HuntScanner({ items, onClose }: HuntScannerProps) {
+  const { state: hunt } = useHuntState();
   const rootRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const trackRef = useRef<MediaStreamTrack | null>(null);
@@ -133,34 +141,67 @@ export function HuntScanner({ count, total, onClose }: HuntScannerProps) {
   const [canSwitch, setCanSwitch] = useState(false);
   const [torchAvailable, setTorchAvailable] = useState(false);
   const [torchOn, setTorchOn] = useState(false);
-  const [wrongQr, setWrongQr] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [note, setNote] = useState<Note | null>(null);
+  /** Index of the piece just stamped; the result window is open while set. */
+  const [stampedIndex, setStampedIndex] = useState<number | null>(null);
+  /** No new scans while a code is being checked or the result window is open. */
+  const busyRef = useRef(false);
+  /** The code just handled, ignored until `until` so one QR is read once. */
+  const lastRef = useRef<{ text: string; until: number } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     let stream: MediaStream | null = null;
     let timer = 0;
-    let wrongTimer = 0;
-    let lastWrong: string | null = null;
-    let leaving = false;
+    let noteTimer = 0;
+
+    const showNote = (variant: HuntNoteVariant, number?: number) => {
+      setNote({ variant, number, key: Date.now() });
+      window.clearTimeout(noteTimer);
+      noteTimer = window.setTimeout(() => setNote(null), NOTE_MS);
+    };
+
+    const settle = (text: string) => {
+      busyRef.current = false;
+      lastRef.current = { text, until: Date.now() + NOTE_MS };
+    };
 
     const onText = (text: string) => {
-      if (leaving) return;
+      if (busyRef.current) return;
+      const last = lastRef.current;
+      if (last && last.text === text && Date.now() < last.until) return;
+
       const token = huntTokenFromQr(text);
-      if (token) {
-        leaving = true;
-        navigator.vibrate?.(60);
-        router.push(`/cafe/hunt/${encodeURIComponent(token)}`);
+      if (!token) {
+        showNote("other");
+        settle(text);
         return;
       }
-      // Same wrong code still in view: keep the note, do not restart it.
-      if (text === lastWrong) return;
-      lastWrong = text;
-      setWrongQr(true);
-      window.clearTimeout(wrongTimer);
-      wrongTimer = window.setTimeout(() => {
-        setWrongQr(false);
-        lastWrong = null;
-      }, WRONG_NOTE_MS);
+
+      // Ask the server which piece this code is, then stamp right here.
+      busyRef.current = true;
+      setChecking(true);
+      void checkHuntToken(token).then((result) => {
+        if (cancelled) return;
+        setChecking(false);
+
+        const item = result.kind === "found" ? items[result.index] : undefined;
+        if (result.kind === "found" && item) {
+          if (addHuntStamp(item.id, token) === "new") {
+            navigator.vibrate?.(80);
+            setNote(null);
+            setStampedIndex(result.index);
+            // Stays busy until the result window is closed.
+            lastRef.current = { text, until: Number.POSITIVE_INFINITY };
+            return;
+          }
+          showNote("already", result.index + 1);
+        } else {
+          showNote(result.kind === "unreachable" ? "unreachable" : "invalid");
+        }
+        settle(text);
+      });
     };
 
     const start = async () => {
@@ -221,7 +262,12 @@ export function HuntScanner({ count, total, onClose }: HuntScannerProps) {
         if (cancelled) return;
         let text: string | null = null;
 
-        if (video.readyState >= 2 && video.videoWidth > 0 && context) {
+        if (
+          !busyRef.current &&
+          video.readyState >= 2 &&
+          video.videoWidth > 0 &&
+          context
+        ) {
           try {
             const { sx, sy, side } = aimCrop(video);
             const edge = Math.min(side, DECODE_EDGE);
@@ -259,25 +305,27 @@ export function HuntScanner({ count, total, onClose }: HuntScannerProps) {
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
-      window.clearTimeout(wrongTimer);
+      window.clearTimeout(noteTimer);
+      busyRef.current = false;
       stream?.getTracks().forEach((track) => track.stop());
       trackRef.current = null;
     };
-  }, [facing, attempt, router]);
+  }, [facing, attempt, items]);
 
   // Keep the page behind still, and let Escape close the camera.
   useEffect(() => {
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      // While the result window is open, Escape belongs to it.
+      if (event.key === "Escape" && stampedIndex === null) onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = previous;
       window.removeEventListener("keydown", onKey);
     };
-  }, [onClose]);
+  }, [onClose, stampedIndex]);
 
   // Scan line sweeping the frame.
   useGSAP(
@@ -296,7 +344,7 @@ export function HuntScanner({ count, total, onClose }: HuntScannerProps) {
       });
       return () => media.revert();
     },
-    { scope: rootRef, dependencies: [state], revertOnUpdate: true }
+    { scope: rootRef, dependencies: [state, checking], revertOnUpdate: true }
   );
 
   async function toggleTorch() {
@@ -314,6 +362,19 @@ export function HuntScanner({ count, total, onClose }: HuntScannerProps) {
   }
 
   const failed = state === "blocked" || state === "unsupported";
+  const itemIds = items.map((item) => item.id);
+  const stampedIds = itemIds.filter((id) => hunt?.stamps[id]);
+  const count = stampedIds.length;
+  const total = items.length;
+  const stampedItem = stampedIndex === null ? undefined : items[stampedIndex];
+
+  function scanNext() {
+    setStampedIndex(null);
+    busyRef.current = false;
+    const last = lastRef.current;
+    // The same code is probably still in front of the camera.
+    if (last) last.until = Date.now() + NOTE_MS;
+  }
 
   return (
     <div
@@ -339,7 +400,7 @@ export function HuntScanner({ count, total, onClose }: HuntScannerProps) {
       <header className="relative z-10 flex items-center justify-between gap-3 px-4 pt-[max(14px,env(safe-area-inset-top))] pb-3.5">
         <button
           type="button"
-          onClick={onClose}
+          onClick={() => onClose()}
           autoFocus
           aria-label="ปิดกล้อง"
           className={ROUND_BUTTON}
@@ -439,7 +500,18 @@ export function HuntScanner({ count, total, onClose }: HuntScannerProps) {
                   aria-hidden
                 />
               ))}
-              {state === "scanning" ? (
+              {checking ? (
+                <span
+                  role="status"
+                  className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2.5 border-2 border-[#e85a7a] bg-[#0a0c0e] px-4 py-2.5 text-[15px] font-semibold whitespace-nowrap shadow-[0_10px_24px_rgba(0,0,0,0.5)]"
+                >
+                  <span
+                    className="size-[18px] animate-spin rounded-full border-[3px] border-[#e85a7a]/30 border-t-[#e85a7a] motion-reduce:animate-none"
+                    aria-hidden
+                  />
+                  กำลังตรวจหลักฐาน…
+                </span>
+              ) : state === "scanning" ? (
                 <span
                   data-scan-line
                   className="absolute inset-x-3.5 top-3.5 h-[3px] rounded-full bg-[#e85a7a] shadow-[0_0_14px_3px_rgba(232,90,122,0.75)]"
@@ -457,28 +529,13 @@ export function HuntScanner({ count, total, onClose }: HuntScannerProps) {
               </span>
             </div>
 
-            {wrongQr ? (
-              <div
-                role="status"
-                className="absolute inset-x-5 bottom-4 mx-auto max-w-md -rotate-1 bg-[#f4ebe3] px-4 py-3.5 text-[#1a1410] shadow-[0_16px_30px_rgba(0,0,0,0.55)]"
-              >
-                <Pin />
-                <div className="flex items-start justify-between gap-2.5">
-                  <div className="min-w-0">
-                    <p className="text-base leading-[1.4] font-semibold text-[#7a1f2a]">
-                      QR นี้ไม่ใช่จุดหลักฐาน
-                    </p>
-                    <p className="mt-1 text-sm leading-[1.6] text-[#3d3024]">
-                      มองหา QR ที่มีป้าย EVIDENCE แล้วเล็งใหม่ได้เลย กล้องยังเปิดอยู่
-                    </p>
-                  </div>
-                  <Stamp className="shrink-0 rotate-6 text-center text-[11px] leading-[1.15]">
-                    Not
-                    <br />
-                    Evidence
-                  </Stamp>
-                </div>
-              </div>
+            {note ? (
+              <HuntNote
+                key={note.key}
+                variant={note.variant}
+                number={note.number}
+                className="absolute inset-x-5 bottom-4 mx-auto max-w-md"
+              />
             ) : null}
           </div>
 
@@ -487,10 +544,12 @@ export function HuntScanner({ count, total, onClose }: HuntScannerProps) {
               <p className={cn(HAND, "text-[22px] leading-[1.3]")} aria-live="polite">
                 {state === "starting"
                   ? "กำลังเปิดกล้อง…"
-                  : "เล็งกล้องไปที่ QR ของจุดหลักฐาน"}
+                  : checking
+                    ? "เจอ QR แล้ว ถือนิ่งไว้สักครู่"
+                    : "เล็งกล้องไปที่ QR ของจุดหลักฐาน"}
               </p>
               <p className="mt-1.5 text-sm leading-[1.6] text-[#c4b8a8]">
-                ไม่ต้องกดถ่ายรูป เจอ QR แล้วจะเปิดหน้าหลักฐานให้เอง
+                ไม่ต้องกดอะไร เจอ QR หลักฐานแล้วระบบจะประทับตราให้เอง
               </p>
 
               {torchAvailable || canSwitch ? (
@@ -545,6 +604,16 @@ export function HuntScanner({ count, total, onClose }: HuntScannerProps) {
           </div>
         </>
       )}
+      {stampedItem && stampedIndex !== null ? (
+        <HuntStampModal
+          item={stampedItem}
+          index={stampedIndex}
+          stampedIds={stampedIds}
+          itemIds={itemIds}
+          onPrimary={() => (count === total ? onClose("form") : scanNext())}
+          onBook={() => onClose()}
+        />
+      ) : null}
     </div>
   );
 }

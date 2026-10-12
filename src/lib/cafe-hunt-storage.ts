@@ -137,6 +137,22 @@ export function updateHuntState(
   return !broken;
 }
 
+/**
+ * Stamp one piece of evidence. `already` when this browser holds it from
+ * before (scanning the same point twice never counts twice).
+ */
+export function addHuntStamp(itemId: string, token: string): "new" | "already" {
+  if (parseHuntState(readHuntRaw()).stamps[itemId]) return "already";
+  updateHuntState((state) => ({
+    ...state,
+    stamps: {
+      ...state.stamps,
+      [itemId]: { token, at: new Date().toISOString() },
+    },
+  }));
+  return "new";
+}
+
 /** For `useSyncExternalStore`: also fires when another tab stamps. */
 export function subscribeHuntState(onChange: () => void): () => void {
   window.addEventListener(CHANGE_EVENT, onChange);

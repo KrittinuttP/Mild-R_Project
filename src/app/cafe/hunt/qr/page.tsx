@@ -100,7 +100,7 @@ export default function CafeHuntQrPage() {
         </p>
       ) : null}
 
-      <ul className="mx-auto mt-8 grid max-w-[420px] gap-10 print:mt-0 print:block">
+      <ul className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 print:mt-0 print:block">
         {[...evidence, ...tests].map((card) => (
           <li
             key={card.key}
