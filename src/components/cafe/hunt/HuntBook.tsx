@@ -13,7 +13,7 @@ import { NAME_ART } from "@/components/cafe/hunt/HuntCelebrate";
 import { HuntEntryForm } from "@/components/cafe/hunt/HuntEntryForm";
 import { HuntNote, type HuntNoteVariant } from "@/components/cafe/hunt/HuntNote";
 import { HuntNotice } from "@/components/cafe/hunt/HuntNotice";
-import { HuntPolaroids } from "@/components/cafe/hunt/HuntPolaroids";
+import { HuntThreadStrip } from "@/components/cafe/hunt/HuntThreadStrip";
 import { HuntScanner } from "@/components/cafe/hunt/HuntScanner";
 import { HuntStampModal } from "@/components/cafe/hunt/HuntStampModal";
 import { HuntTicket } from "@/components/cafe/hunt/HuntTicket";
@@ -254,7 +254,7 @@ export function HuntBook({
         </div>
       ) : null}
 
-      <HuntPolaroids items={items} stamps={current.stamps} ready={state !== null} />
+      <HuntThreadStrip items={items} stamps={current.stamps} />
 
       {entry ? null : (
         <section

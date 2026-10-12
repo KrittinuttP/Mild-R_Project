@@ -5,6 +5,8 @@ import { useId, useState, type FormEvent } from "react";
 import { Pin, TYPE } from "@/components/cafe/board/pieces";
 import { updateHuntState } from "@/lib/cafe-hunt-storage";
 import {
+  formatHandleInput,
+  handleForChannel,
   LUCKY_DRAW_LIMITS,
   validateLuckyDrawContact,
   type LuckyDrawChannel,
@@ -163,7 +165,10 @@ export function HuntEntryForm({ tokens }: HuntEntryFormProps) {
                 name="contactChannel"
                 value={option.value}
                 checked={contactChannel === option.value}
-                onChange={() => setContactChannel(option.value)}
+                onChange={() => {
+                  setContactChannel(option.value);
+                  setContactHandle((handle) => handleForChannel(handle, option.value));
+                }}
                 className="size-5 accent-[#a8323f]"
               />
               {option.label}
@@ -186,7 +191,10 @@ export function HuntEntryForm({ tokens }: HuntEntryFormProps) {
           maxLength={LUCKY_DRAW_LIMITS.handleMax}
           placeholder={channel.placeholder}
           value={contactHandle}
-          onChange={(event) => setContactHandle(event.target.value)}
+          onFocus={() => setContactHandle((handle) => handleForChannel(handle, contactChannel))}
+          onChange={(event) =>
+            setContactHandle(formatHandleInput(event.target.value, contactChannel))
+          }
           className={cn(FIELD, TYPE)}
         />
         <p className={HELP}>

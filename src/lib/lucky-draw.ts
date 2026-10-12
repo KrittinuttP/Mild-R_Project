@@ -39,6 +39,29 @@ export function normalizeContactHandle(raw: string): string {
   return raw.replace(/\s+/g, "").replace(/^@+/, "");
 }
 
+/**
+ * What the handle field shows while typing: an X handle always starts with
+ * one "@" (added for the visitor), a Discord name never does. An empty field
+ * stays empty so it can be cleared.
+ */
+export function formatHandleInput(
+  raw: string,
+  channel: LuckyDrawChannel
+): string {
+  const bare = raw.replace(/^\s*@+/, "");
+  if (channel === "discord") return bare;
+  return raw.trim() === "" ? "" : `@${bare}`;
+}
+
+/** Field value when switching channel, or focusing an empty X field. */
+export function handleForChannel(
+  current: string,
+  channel: LuckyDrawChannel
+): string {
+  if (channel === "x" && current.trim() === "") return "@";
+  return formatHandleInput(current, channel);
+}
+
 export type LuckyDrawContactResult =
   | { ok: true; value: LuckyDrawContact }
   | { ok: false; error: string };

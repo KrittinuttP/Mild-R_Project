@@ -92,7 +92,8 @@ export async function POST(request: Request) {
   if (!isContactChannel(contactChannelRaw)) {
     return NextResponse.json({ error: "ช่องทางติดต่อไม่ถูกต้อง" }, { status: 400 });
   }
-  if (!contactHandle) {
+  // "@" alone (the form adds it for X) counts as empty.
+  if (!contactHandle.replace(/^@+/, "").trim()) {
     return NextResponse.json(
       { error: "กรุณากรอกชื่อช่องทางติดต่อ" },
       { status: 400 }

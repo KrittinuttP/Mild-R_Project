@@ -24,6 +24,11 @@ import { BackLink } from "@/components/layout/BackLink";
 import { buttonVariants } from "@/components/ui/button";
 import { shrinkImageFile } from "@/lib/hbd-client-resize";
 import {
+  formatHandleInput,
+  handleForChannel,
+  normalizeContactHandle,
+} from "@/lib/lucky-draw";
+import {
   HBD_AVATAR_DEFAULT,
   HBD_AVATAR_LIMITS,
   HBD_CARD_TEMPLATE,
@@ -253,7 +258,8 @@ export function HbdUploadClient() {
       return "กรุณาอัปโหลดรูปการ์ดจาก template";
     }
     if (!displayName.trim()) return "กรุณากรอกชื่อที่จะแสดงบนเว็บ";
-    if (!contactHandle.trim()) return "กรุณากรอกชื่อช่องทางติดต่อ";
+    // "@" alone (added for X) counts as empty.
+    if (!normalizeContactHandle(contactHandle)) return "กรุณากรอกชื่อช่องทางติดต่อ";
     return null;
   }
 
@@ -620,7 +626,10 @@ export function HbdUploadClient() {
                   <button
                     key={channel}
                     type="button"
-                    onClick={() => setContactChannel(channel)}
+                    onClick={() => {
+                      setContactChannel(channel);
+                      setContactHandle((handle) => handleForChannel(handle, channel));
+                    }}
                     className={cn(
                       "flex-1 rounded-xl px-3 py-2.5 text-sm font-normal transition",
                       contactChannel === channel
@@ -638,7 +647,12 @@ export function HbdUploadClient() {
                 </span>
                 <input
                   value={contactHandle}
-                  onChange={(e) => setContactHandle(e.target.value)}
+                  onFocus={() =>
+                    setContactHandle((handle) => handleForChannel(handle, contactChannel))
+                  }
+                  onChange={(e) =>
+                    setContactHandle(formatHandleInput(e.target.value, contactChannel))
+                  }
                   className={fieldClass}
                   placeholder={
                     contactChannel === "x"
