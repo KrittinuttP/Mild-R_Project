@@ -152,7 +152,7 @@ export function HuntStampModal({
             onClick={onPrimary}
             className="mt-5 flex min-h-14 w-full items-center justify-center gap-2.5 bg-[#e85a7a] px-4 text-lg font-semibold text-[#1a1410] transition hover:bg-[#f3b8c4] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#1a1410]"
           >
-            {complete ? "กรอกชื่อลุ้นวงล้อ" : "สแกนชิ้นต่อไป"}
+            {complete ? "กรอกชื่อลุ้นรับรางวัล" : "สแกนชิ้นต่อไป"}
           </button>
           <button
             type="button"

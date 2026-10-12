@@ -125,7 +125,7 @@ export async function renderTicketImage(
 
   ctx.fillStyle = FADED;
   ctx.font = `400 30px ${fonts.type}`;
-  ctx.fillText("LUCKY WHEEL TICKET", left, paper.y + 110);
+  ctx.fillText("PRIZE DRAW TICKET", left, paper.y + 110);
 
   ctx.fillStyle = INK;
   ctx.font = `600 62px ${fonts.thai}`;
@@ -215,7 +215,7 @@ export async function renderTicketImage(
 
   ctx.fillStyle = FADED;
   ctx.font = `400 30px ${fonts.thai}`;
-  ctx.fillText("หมุนวงล้อ", left, tearY + 80);
+  ctx.fillText("ประกาศผลรางวัล", left, tearY + 80);
   ctx.fillStyle = INK;
   drawFitted(
     ctx,

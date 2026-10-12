@@ -154,7 +154,7 @@ export function HuntBook({
   const entry = current.entry;
 
   const heading = entry
-    ? "ได้สิทธิ์ลุ้นวงล้อแล้ว"
+    ? "ได้สิทธิ์ลุ้นรับรางวัลแล้ว"
     : complete
       ? "เก็บหลักฐานครบแล้ว"
       : "สมุดสะสมหลักฐาน";
@@ -174,7 +174,7 @@ export function HuntBook({
           </h1>
           {complete && !entry ? (
             <p className="mt-1 text-[15px] leading-[1.6] text-[#c4b8a8]">
-              กรอกข้อมูลด้านล่างเพื่อรับสิทธิ์ลุ้นวงล้อ
+              กรอกข้อมูลด้านล่างเพื่อรับสิทธิ์ลุ้นรับรางวัล
             </p>
           ) : null}
           {entry ? (
@@ -227,21 +227,25 @@ export function HuntBook({
 
       {count === 0 ? (
         <section
-          aria-label="วิธีเล่น"
+          aria-label="ขั้นตอนการร่วมกิจกรรม"
           className="relative mt-5 -rotate-[0.6deg] bg-[#f4ebe3] px-4 pt-4 pb-3.5 text-[#1a1410] shadow-[0_14px_26px_rgba(0,0,0,0.45)]"
         >
           <Pin />
           <h2 className={cn(HAND, "text-[19px] text-[#7a1f2a]")}>
-            สแกนจุดไหนก่อนก็ได้
+            ขั้นตอนการร่วมกิจกรรม
           </h2>
-          <ol className="mt-2 list-decimal pl-5 text-sm leading-[1.7] text-[#3d3024]">
-            <li>หา QR ให้ครบ {total} จุดในงาน ไม่ต้องเรียงลำดับ</li>
+          <ol className="mt-2 flex list-decimal flex-col gap-1 pl-5 text-sm leading-[1.7] text-[#3d3024]">
             <li>
-              สแกนแล้วกด{" "}
-              <strong className="font-semibold text-[#1a1410]">ประทับตรา</strong>{" "}
-              ตราจะขึ้นในสมุดนี้
+              ค้นหา QR หลักฐานซึ่งติดตั้งไว้ {total} จุดภายในร้าน
+              โดยสามารถสแกนจุดใดก่อนก็ได้
             </li>
-            <li>ครบ {total} ชิ้น กรอกชื่อเพื่อลุ้นวงล้อ</li>
+            <li>
+              กดปุ่ม{" "}
+              <strong className="font-semibold text-[#1a1410]">สแกน QR หลักฐาน</strong>{" "}
+              ด้านล่าง แล้วเล็งกล้องไปยัง QR
+              ระบบจะประทับตราลงในสมุดให้โดยอัตโนมัติ
+            </li>
+            <li>เมื่อเก็บตราครบ {total} ชิ้น กรุณากรอกข้อมูลเพื่อลุ้นรับรางวัล</li>
           </ol>
         </section>
       ) : null}
@@ -334,7 +338,7 @@ export function HuntBook({
 
       {complete || entry ? null : (
         <section
-          aria-label="สิทธิ์ลุ้นวงล้อ"
+          aria-label="สิทธิ์ลุ้นรับรางวัล"
           className="mt-4 flex items-center gap-3.5 border border-dashed border-[#c4a882]/55 p-3.5"
         >
           <svg
@@ -347,7 +351,7 @@ export function HuntBook({
           </svg>
           <div className="min-w-0">
             <p className="text-[15px] font-semibold text-[#f4ebe3]">
-              ครบ {total} ชิ้นแล้วจะได้ลุ้นวงล้อ
+              ครบ {total} ชิ้นแล้วจะได้ลุ้นรับรางวัล
             </p>
             <p className="mt-0.5 text-[13px] leading-[1.6] text-[#c4b8a8]">
               ฟอร์มจะเปิดให้กรอกทันทีที่ตราครบ

@@ -80,7 +80,7 @@ export function HuntTicket({ entry, huntTitle, cafeTitle, drawAt }: HuntTicketPr
     <>
       <section
         ref={rootRef}
-        aria-label="ใบยืนยันสิทธิ์ลุ้นวงล้อ"
+        aria-label="ใบยืนยันสิทธิ์ลุ้นรับรางวัล"
         className="relative -rotate-1 bg-[#f4ebe3] text-[#1a1410] shadow-[0_18px_34px_rgba(0,0,0,0.55)]"
       >
         <Pin />
@@ -88,7 +88,7 @@ export function HuntTicket({ entry, huntTitle, cafeTitle, drawAt }: HuntTicketPr
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className={cn(TYPE, "text-xs tracking-[0.14em] text-[#5c4636] uppercase")}>
-                Lucky Wheel Ticket
+                Prize Draw Ticket
               </p>
               <h2 className="mt-1 text-[22px] leading-[1.2] font-semibold">
                 ใบยืนยันสิทธิ์
@@ -119,7 +119,7 @@ export function HuntTicket({ entry, huntTitle, cafeTitle, drawAt }: HuntTicketPr
         </div>
 
         <div className="px-[18px] pt-4 pb-5">
-          <p className="text-[13px] text-[#5c4636]">หมุนวงล้อ</p>
+          <p className="text-[13px] text-[#5c4636]">ประกาศผลรางวัล</p>
           <p className="mt-0.5 text-base leading-normal font-semibold">
             {drawAt || "รอประกาศจากทีมงาน"}
           </p>

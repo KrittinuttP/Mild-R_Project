@@ -43,9 +43,9 @@ type Phase = "form" | "preview" | "done";
 type LuckyDrawOutcome = "entered" | "already" | "failed" | "skipped";
 
 const LUCKY_DRAW_DONE_TEXT: Record<LuckyDrawOutcome, string | null> = {
-  entered: "ลงชื่อสุ่มวงล้อ HBD แล้ว นับสิทธิ์เมื่อการ์ดผ่านการตรวจ",
-  already: "บัญชีนี้ลงชื่อสุ่มวงล้อ HBD ไว้แล้ว ได้ 1 สิทธิ์เท่าเดิม",
-  failed: "การ์ดส่งสำเร็จ แต่ลงชื่อสุ่มวงล้อไม่สำเร็จ กรุณาแจ้งทีมงาน",
+  entered: "ลงชื่อลุ้นรับรางวัล HBD แล้ว นับสิทธิ์เมื่อการ์ดผ่านการตรวจ",
+  already: "บัญชีนี้ลงชื่อลุ้นรับรางวัล HBD ไว้แล้ว ได้ 1 สิทธิ์เท่าเดิม",
+  failed: "การ์ดส่งสำเร็จ แต่ลงชื่อลุ้นรับรางวัลไม่สำเร็จ กรุณาแจ้งทีมงาน",
   skipped: null,
 };
 
@@ -585,7 +585,7 @@ export function HbdUploadClient() {
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                     className={fieldClass}
-                    placeholder="ฮันนี่ของมายด์"
+                    placeholder="เช่น ฮันนี่"
                     required
                   />
                   <p className={hintClass}>
@@ -613,7 +613,7 @@ export function HbdUploadClient() {
               <h2 className={labelClass}>ช่องทางติดต่อ *</h2>
               <p className={hintClass}>
                 ข้อมูลติดต่อนี้จะไม่แสดงบนเว็บ ใช้ติดต่อเมื่อมีปัญหา
-                หรือเมื่อคุณได้รางวัลจากวงล้อ
+                หรือเมื่อคุณได้รับรางวัล
               </p>
               <div className="mt-3 flex rounded-2xl bg-black/25 p-1 ring-1 ring-white/10">
                 {(["x", "discord"] as const).map((channel) => (
@@ -642,8 +642,8 @@ export function HbdUploadClient() {
                   className={fieldClass}
                   placeholder={
                     contactChannel === "x"
-                      ? "@handle"
-                      : "username หรือ user#0000"
+                      ? "เช่น @honey_01"
+                      : "เช่น honey_01"
                   }
                   required
                 />
@@ -655,7 +655,7 @@ export function HbdUploadClient() {
               <div className="flex items-center gap-2 bg-[#e85a7a] px-5 py-3 text-[#140a0d] sm:px-6">
                 <Gift className="size-4 shrink-0" />
                 <h2 className="text-sm font-medium tracking-wide">
-                  ลุ้นรางวัลจากวงล้อ HBD
+                  ลุ้นรับรางวัล HBD
                 </h2>
               </div>
               <div className="p-5 sm:p-6">
@@ -667,11 +667,11 @@ export function HbdUploadClient() {
                     className="size-6 shrink-0 accent-[#e85a7a]"
                   />
                   <span className="text-base text-[#fff5f7]">
-                    ติ๊กเพื่อร่วมกิจกรรมสุ่มวงล้อ
+                    ติ๊กเพื่อร่วมกิจกรรมลุ้นรับรางวัล
                   </span>
                 </label>
                 <p className="mt-3 text-xs leading-relaxed text-[#f7d7de]/85">
-                  ใช้ชื่อที่แสดงและช่องทางติดต่อข้างบนลงชื่อสุ่มรางวัล
+                  ใช้ชื่อที่แสดงและช่องทางติดต่อข้างบนลงชื่อลุ้นรับรางวัล
                   ไม่ต้องกรอกซ้ำ ไม่ติ๊กก็ส่งการ์ดได้ตามปกติ
                 </p>
                 <p className="mt-3 border-t border-white/10 pt-3 text-xs leading-relaxed text-[#f3b8c4]/70">
@@ -774,7 +774,7 @@ export function HbdUploadClient() {
                   )}
                 >
                   <Gift className="size-3.5 shrink-0" />
-                  สุ่มวงล้อ: {joinLuckyDraw ? "ร่วม" : "ไม่ร่วม"}
+                  ลุ้นรับรางวัล: {joinLuckyDraw ? "ร่วม" : "ไม่ร่วม"}
                 </p>
               </div>
             </article>

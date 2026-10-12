@@ -9,7 +9,7 @@ import { cafeHunt } from "@/lib/cafe-hunt";
 export const metadata: Metadata = {
   title: `${cafeHunt.title} | ${mildRData.cafe.title}`,
   description:
-    "สมุดสะสมหลักฐาน: สแกน QR ให้ครบทุกจุดในงาน แล้วลงชื่อลุ้นวงล้อ",
+    "สมุดสะสมหลักฐาน: สแกน QR ให้ครบทุกจุดในงาน แล้วลงชื่อลุ้นรับรางวัล",
 };
 
 /** Stamp book. Progress lives in the visitor's browser, so this page is the same for everyone. */

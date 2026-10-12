@@ -26,13 +26,13 @@ const CHANNELS: {
     value: "discord",
     label: "Discord",
     handleLabel: "ชื่อบัญชี Discord",
-    placeholder: "เช่น honeybee_01",
+    placeholder: "เช่น honey_01",
   },
   {
     value: "x",
     label: "X",
     handleLabel: "ชื่อบัญชี X",
-    placeholder: "เช่น @honeybee",
+    placeholder: "เช่น @honey_01",
   },
 ];
 
@@ -118,10 +118,10 @@ export function HuntEntryForm({ tokens }: HuntEntryFormProps) {
     >
       <Pin />
       <p className={cn(TYPE, "text-xs tracking-[0.14em] text-[#5c4636] uppercase")}>
-        Form LD-01 · Lucky Wheel Entry
+        Form LD-01 · Prize Draw Entry
       </p>
       <h2 className="mt-1.5 text-2xl leading-[1.2] font-semibold">
-        ใบลงชื่อลุ้นวงล้อ
+        ใบลงชื่อลุ้นรับรางวัล
       </h2>
 
       <div className="mt-5">
@@ -134,7 +134,7 @@ export function HuntEntryForm({ tokens }: HuntEntryFormProps) {
           type="text"
           autoComplete="nickname"
           maxLength={LUCKY_DRAW_LIMITS.nameMax}
-          placeholder="เช่น ฮันนี่บี"
+          placeholder="เช่น ฮันนี่"
           value={contactName}
           onChange={(event) => setContactName(event.target.value)}
           className={FIELD}
@@ -223,7 +223,7 @@ export function HuntEntryForm({ tokens }: HuntEntryFormProps) {
         disabled={sending}
         className="mt-[22px] flex min-h-14 w-full items-center justify-center bg-[#e85a7a] px-4 text-lg font-semibold text-[#1a1410] transition hover:bg-[#f3b8c4] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#1a1410] disabled:opacity-70"
       >
-        {sending ? "กำลังส่ง…" : "ส่งชื่อลุ้นวงล้อ"}
+        {sending ? "กำลังส่ง…" : "ส่งชื่อลุ้นรับรางวัล"}
       </button>
       <p className="mt-3 text-center text-[13px] leading-[1.6] text-[#5c4636]">
         1 บัญชีลุ้นได้ 1 สิทธิ์ ส่งแล้วแก้ไขไม่ได้
