@@ -9,8 +9,18 @@ export const THAI = "font-[family-name:var(--font-cafe-thai)]";
 export const WALL_LINK =
   "inline-flex min-h-11 items-center text-[15px] font-semibold text-[#f3b8c4] underline underline-offset-4 transition hover:text-[#f4ebe3] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#e85a7a]";
 
-/** Dark wall + lamp glow, one phone-width column. The cafe header is fixed, hence the top padding. */
-export function HuntFrame({ children }: { children: ReactNode }) {
+/**
+ * Dark wall + lamp glow. `phone` = one phone-width column (player pages);
+ * `wide` = full board width for screens (QR sheet). The cafe header is fixed,
+ * hence the top padding.
+ */
+export function HuntFrame({
+  children,
+  width = "phone",
+}: {
+  children: ReactNode;
+  width?: "phone" | "wide";
+}) {
   return (
     <div
       className={cn(THAI, "relative overflow-x-clip text-[#d8d0c4]")}
@@ -21,7 +31,12 @@ export function HuntFrame({ children }: { children: ReactNode }) {
         backgroundSize: "auto, 44px 44px, 44px 44px",
       }}
     >
-      <div className="mx-auto w-full max-w-[560px] px-5 pt-24 pb-20 sm:px-8 sm:pt-28">
+      <div
+        className={cn(
+          "mx-auto w-full px-5 pt-24 pb-20 sm:px-8 sm:pt-28",
+          width === "wide" ? "max-w-[1280px]" : "max-w-[560px]"
+        )}
+      >
         {children}
       </div>
     </div>

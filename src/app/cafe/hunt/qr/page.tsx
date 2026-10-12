@@ -67,8 +67,8 @@ export default function CafeHuntQrPage() {
     : [];
 
   return (
-    <HuntFrame>
-      <div className="print:hidden">
+    <HuntFrame width="wide">
+      <div className="max-w-3xl print:hidden">
         <p className={LABEL}>Evidence Hunt · QR Sheet</p>
         <h1 className={cn(HAND, "mt-1 text-[27px] leading-[1.25] text-[#f4ebe3]")}>
           QR จุดหลักฐานทั้งหมด
@@ -87,24 +87,24 @@ export default function CafeHuntQrPage() {
       </div>
 
       {!base ? (
-        <p role="alert" className="mt-6 border-l-4 border-[#f2c230] bg-[#14100c] px-3.5 py-3 text-sm leading-[1.6] text-[#f4ebe3]">
+        <p role="alert" className="mt-6 max-w-3xl border-l-4 border-[#f2c230] bg-[#14100c] px-3.5 py-3 text-sm leading-[1.6] text-[#f4ebe3]">
           ยังไม่ได้ตั้ง <code className={TYPE}>NEXT_PUBLIC_SITE_URL</code> ในไฟล์ .env
           จึงสร้าง QR ไม่ได้ ตั้งค่าแล้วเปิด npm run dev ใหม่
         </p>
       ) : null}
       {base && !tokens ? (
-        <p role="alert" className="mt-6 border-l-4 border-[#f2c230] bg-[#14100c] px-3.5 py-3 text-sm leading-[1.6] text-[#f4ebe3]">
+        <p role="alert" className="mt-6 max-w-3xl border-l-4 border-[#f2c230] bg-[#14100c] px-3.5 py-3 text-sm leading-[1.6] text-[#f4ebe3]">
           ยังไม่ได้ตั้ง <code className={TYPE}>CAFE_HUNT_TOKENS</code> ให้ครบ{" "}
           {cafeHunt.items.length} รหัส (รหัสละอย่างน้อย 16 ตัวอักษร ไม่ซ้ำกัน)
           จึงยังไม่มี QR หลักฐาน มีแค่ QR สำหรับเทสกรณีผิดด้านล่าง
         </p>
       ) : null}
 
-      <ul className="mt-8 flex flex-col gap-8 print:mt-0 print:block">
+      <ul className="mx-auto mt-8 grid max-w-[420px] gap-10 print:mt-0 print:block">
         {[...evidence, ...tests].map((card) => (
           <li
             key={card.key}
-            className="bg-[#f4ebe3] p-5 text-[#1a1410] shadow-[0_14px_26px_rgba(0,0,0,0.45)] print:break-after-page print:shadow-none"
+            className="flex flex-col bg-[#f4ebe3] p-5 text-[#1a1410] shadow-[0_14px_26px_rgba(0,0,0,0.45)] print:break-after-page print:shadow-none"
           >
             <p className={cn(TYPE, "text-xs font-bold tracking-[0.14em] text-[#a8323f] uppercase")}>
               {card.kicker}

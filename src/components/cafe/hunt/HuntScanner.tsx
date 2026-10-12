@@ -40,9 +40,55 @@ function huntTokenFromQr(text: string): string | null {
   }
 }
 
-type Detector = {
-  detect(source: CanvasImageSource): Promise<{ rawValue: string }[]>;
+type DetectedCode = {
+  rawValue: string;
+  boundingBox?: { x: number; y: number; width: number; height: number };
 };
+
+type Detector = {
+  detect(source: CanvasImageSource): Promise<DetectedCode[]>;
+};
+
+/** Share of the frame's short side that matches the on-screen aim box. */
+const AIM_FRACTION = 0.5;
+
+/**
+ * The sheet shows several codes at once. Reading the whole camera picture
+ * can return the neighbour, so only the square in the middle is decoded.
+ */
+function aimCrop(video: HTMLVideoElement) {
+  const side = Math.round(
+    Math.min(video.videoWidth, video.videoHeight) * AIM_FRACTION
+  );
+  return {
+    sx: Math.round((video.videoWidth - side) / 2),
+    sy: Math.round((video.videoHeight - side) / 2),
+    side,
+  };
+}
+
+function closestCode(
+  codes: DetectedCode[],
+  width: number,
+  height: number
+): string | null {
+  if (codes.length === 0) return null;
+  const cx = width / 2;
+  const cy = height / 2;
+  let best = codes[0];
+  let bestDist = Number.POSITIVE_INFINITY;
+  for (const code of codes) {
+    const box = code.boundingBox;
+    const x = box ? box.x + box.width / 2 : cx;
+    const y = box ? box.y + box.height / 2 : cy;
+    const dist = (x - cx) ** 2 + (y - cy) ** 2;
+    if (dist < bestDist) {
+      best = code;
+      bestDist = dist;
+    }
+  }
+  return best.rawValue;
+}
 
 /** Built-in QR reader (Chrome on Android, among others). null where missing. */
 function nativeDetector(): Detector | null {
@@ -175,24 +221,20 @@ export function HuntScanner({ count, total, onClose }: HuntScannerProps) {
         if (cancelled) return;
         let text: string | null = null;
 
-        if (video.readyState >= 2 && video.videoWidth > 0) {
+        if (video.readyState >= 2 && video.videoWidth > 0 && context) {
           try {
+            const { sx, sy, side } = aimCrop(video);
+            const edge = Math.min(side, DECODE_EDGE);
+            canvas.width = edge;
+            canvas.height = edge;
+            context.drawImage(video, sx, sy, side, side, 0, 0, edge, edge);
             if (detector) {
-              const codes = await detector.detect(video);
-              text = codes[0]?.rawValue ?? null;
-            } else if (decode && context) {
-              const scale = Math.min(
-                1,
-                DECODE_EDGE / Math.max(video.videoWidth, video.videoHeight)
-              );
-              const width = Math.round(video.videoWidth * scale);
-              const height = Math.round(video.videoHeight * scale);
-              canvas.width = width;
-              canvas.height = height;
-              context.drawImage(video, 0, 0, width, height);
-              const frame = context.getImageData(0, 0, width, height);
+              const codes = await detector.detect(canvas);
+              text = closestCode(codes, edge, edge);
+            } else if (decode) {
+              const frame = context.getImageData(0, 0, edge, edge);
               text =
-                decode(frame.data, width, height, {
+                decode(frame.data, edge, edge, {
                   inversionAttempts: "dontInvert",
                 })?.data ?? null;
             }
