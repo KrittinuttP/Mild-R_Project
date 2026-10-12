@@ -20,7 +20,7 @@ React / Next.js (App Router) + Tailwind
 |------|-------------|-------|
 | **โพส** | `tweet`, `quote` | 6 |
 | **รี** | `retweet` | 5 |
-
+.
 ## UI layout
 
 - คอลัมน์ล็อกความกว้าง: `max-w-xl` (~576px) กึ่งกลางใน Connect
