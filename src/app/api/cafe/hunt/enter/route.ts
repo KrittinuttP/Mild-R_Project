@@ -74,10 +74,18 @@ export async function POST(request: Request) {
       ...contact.value,
       campaign: cafeHunt.campaign,
     });
-    return NextResponse.json({
-      ok: true,
-      alreadyEntered: outcome === "already",
-    });
+    if (outcome === "already") {
+      // One right per account (channel + handle, any case, no "@").
+      const channel = contact.value.contactChannel === "x" ? "X" : "Discord";
+      return NextResponse.json(
+        {
+          error: `บัญชี ${channel} "${contact.value.contactHandle}" ลงชื่อลุ้นรับรางวัลไปแล้ว 1 บัญชีลุ้นได้ 1 สิทธิ์ ถ้าเป็นบัญชีของคุณ สิทธิ์เดิมยังอยู่ ไม่ต้องส่งซ้ำ`,
+          code: "already_entered",
+        },
+        { status: 409 }
+      );
+    }
+    return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json(
       { error: "บันทึกรายชื่อไม่สำเร็จ กรุณาลองอีกครั้ง" },

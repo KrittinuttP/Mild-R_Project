@@ -97,7 +97,7 @@ export function HuntEntryForm({ tokens }: HuntEntryFormProps) {
         return;
       }
 
-      // An account that entered before also lands here: it holds the right.
+      // A second entry for the same account is refused above (409).
       updateHuntState((state) => ({
         ...state,
         entry: { ...contact.value, at: new Date().toISOString() },

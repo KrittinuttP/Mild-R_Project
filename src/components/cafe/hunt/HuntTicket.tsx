@@ -1,14 +1,19 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import Link from "next/link";
 
 import { Pin, Stamp, TYPE } from "@/components/cafe/board/pieces";
+import { HuntResetDialog } from "@/components/cafe/hunt/HuntResetDialog";
 import {
   renderTicketImage,
   saveTicketImage,
 } from "@/components/cafe/hunt/ticket-image";
-import type { HuntEntry } from "@/lib/cafe-hunt-storage";
+import {
+  markHuntTicketSaved,
+  resetHuntPlay,
+  type HuntEntry,
+} from "@/lib/cafe-hunt-storage";
 import type { LuckyDrawChannel } from "@/lib/lucky-draw";
 import { cn } from "@/lib/utils";
 
@@ -39,13 +44,31 @@ type HuntTicketProps = {
   huntTitle: string;
   cafeTitle: string;
   drawAt: string;
+  /** Number of pieces, for the "play again" warning. */
+  total: number;
+  /** The ticket image was downloaded on this browser before. */
+  saved: boolean;
 };
 
 /** Confirmation shown after the form was accepted, with "save as image". */
-export function HuntTicket({ entry, huntTitle, cafeTitle, drawAt }: HuntTicketProps) {
+export function HuntTicket({
+  entry,
+  huntTitle,
+  cafeTitle,
+  drawAt,
+  total,
+  saved,
+}: HuntTicketProps) {
   const rootRef = useRef<HTMLElement>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [resetOpen, setResetOpen] = useState(false);
+  const closeReset = useCallback(() => setResetOpen(false), []);
+
+  function playAgain() {
+    resetHuntPlay();
+    window.scrollTo({ top: 0 });
+  }
 
   const channel = CHANNEL_LABEL[entry.contactChannel];
   const sentAt = formatSentAt(entry.at);
@@ -67,8 +90,9 @@ export function HuntTicket({ entry, huntTitle, cafeTitle, drawAt }: HuntTicketPr
         },
         rootRef.current
       );
-      const result = await saveTicketImage(blob, "mild-r-cafe-lucky-ticket.png");
-      if (result === "downloaded") setMessage("บันทึกรูปแล้ว ดูได้ในไฟล์ที่ดาวน์โหลด");
+      saveTicketImage(blob, "mild-r-cafe-prize-ticket.png");
+      markHuntTicketSaved();
+      setMessage("ดาวน์โหลดรูปแล้ว ดูได้ในโฟลเดอร์ดาวน์โหลดของเครื่อง");
     } catch {
       setMessage("บันทึกรูปไม่ได้ในเบราว์เซอร์นี้ ให้จับภาพหน้าจอใบนี้แทน");
     } finally {
@@ -158,6 +182,36 @@ export function HuntTicket({ entry, huntTitle, cafeTitle, drawAt }: HuntTicketPr
       >
         กลับหน้าคาเฟ่
       </Link>
+
+      <button
+        type="button"
+        onClick={() => {
+          setMessage(null);
+          setResetOpen(true);
+        }}
+        className="mx-auto mt-4 flex min-h-11 items-center gap-2 px-2 text-[15px] font-semibold text-[#f3b8c4] underline underline-offset-4 transition hover:text-[#f4ebe3] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#e85a7a]"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          className="size-[18px] shrink-0 fill-none stroke-current stroke-2 [stroke-linecap:round] [stroke-linejoin:round]"
+          aria-hidden
+        >
+          <path d="M4 12 a8 8 0 1 0 2.6 -5.9 M4 4 v4.5 h4.5" />
+        </svg>
+        เริ่มเล่นใหม่
+      </button>
+
+      {resetOpen ? (
+        <HuntResetDialog
+          total={total}
+          saved={saved}
+          saving={saving}
+          saveMessage={message}
+          onSave={saveImage}
+          onConfirm={playAgain}
+          onCancel={closeReset}
+        />
+      ) : null}
     </>
   );
 }

@@ -162,7 +162,7 @@ export function CafeOverview({
   const schedule = cafe.dispatch.schedule;
   const location = cafe.dispatch.location;
   const follow = cafe.closing.ctas?.[0];
-  const cutout = cafe.heroCutout || "/assets/mild/kv/Mild-R_KV.png";
+  const cutout = cafe.heroCutout || "/assets/cafe/kv/KV_cafe.webp";
 
   // The same two buttons render twice: on the case sheet (wide screens) and in
   // their own card under the date/place notes (narrow screens).

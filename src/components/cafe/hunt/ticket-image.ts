@@ -236,38 +236,20 @@ export async function renderTicketImage(
   });
 }
 
-export type SaveTicketResult = "shared" | "downloaded" | "cancelled";
-
 /**
- * Phones: the share sheet (it offers "Save Image" straight to the gallery).
- * Everything else: a normal file download.
+ * Saves the ticket as a PNG file straight away (no share sheet).
+ * iPhone: Safari asks to download, the file lands in Files › Downloads.
+ * Android / computers: the usual Downloads folder.
  */
-export async function saveTicketImage(
-  blob: Blob,
-  filename: string
-): Promise<SaveTicketResult> {
-  const file = new File([blob], filename, { type: "image/png" });
-  const touch = window.matchMedia("(pointer: coarse)").matches;
-
-  if (touch && navigator.canShare?.({ files: [file] })) {
-    try {
-      await navigator.share({ files: [file] });
-      return "shared";
-    } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") {
-        return "cancelled";
-      }
-      // Sharing refused for another reason: fall through to a download.
-    }
-  }
-
+export function saveTicketImage(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
   link.download = filename;
+  link.rel = "noopener";
   document.body.appendChild(link);
   link.click();
   link.remove();
+  // Give the browser time to start the download before the link is freed.
   window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
-  return "downloaded";
 }

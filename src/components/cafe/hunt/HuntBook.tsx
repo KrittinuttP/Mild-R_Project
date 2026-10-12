@@ -8,19 +8,12 @@ import {
   useSyncExternalStore,
 } from "react";
 
-import {
-  CorkBoard,
-  HAND,
-  LABEL,
-  Pin,
-  SERIF,
-  Stamp,
-  TYPE,
-} from "@/components/cafe/board/pieces";
+import { HAND, LABEL, Pin, SERIF, Stamp } from "@/components/cafe/board/pieces";
+import { NAME_ART } from "@/components/cafe/hunt/HuntCelebrate";
 import { HuntEntryForm } from "@/components/cafe/hunt/HuntEntryForm";
-import { StampMark } from "@/components/cafe/hunt/HuntFrame";
 import { HuntNote, type HuntNoteVariant } from "@/components/cafe/hunt/HuntNote";
 import { HuntNotice } from "@/components/cafe/hunt/HuntNotice";
+import { HuntPolaroids } from "@/components/cafe/hunt/HuntPolaroids";
 import { HuntScanner } from "@/components/cafe/hunt/HuntScanner";
 import { HuntStampModal } from "@/components/cafe/hunt/HuntStampModal";
 import { HuntTicket } from "@/components/cafe/hunt/HuntTicket";
@@ -34,19 +27,6 @@ const IN_APP_BROWSER = /\bLine\/|FBAN|FBAV|FB_IAB|Instagram|TikTok|Twitter/i;
 
 const noSubscription = () => () => {};
 const isInAppBrowser = () => IN_APP_BROWSER.test(window.navigator.userAgent);
-
-const TURNS = [-10, 7, -4, 11, -7];
-const TILTS = [-0.5, 0.6, -0.4, 0.5, -0.6];
-
-function formatTime(iso: string) {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "";
-  return `${date.toLocaleTimeString("th-TH", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  })} น.`;
-}
 
 const BOOK_PATH = "/cafe/hunt";
 /** Marks the history entry pushed while the camera is open (Back closes it). */
@@ -153,6 +133,11 @@ export function HuntBook({
   const complete = total > 0 && count === total;
   const entry = current.entry;
 
+  // One piece left: fetch the celebration art now so it is ready on the last scan.
+  useEffect(() => {
+    if (total > 0 && count === total - 1) new window.Image().src = NAME_ART;
+  }, [count, total]);
+
   const heading = entry
     ? "ได้สิทธิ์ลุ้นรับรางวัลแล้ว"
     : complete
@@ -257,6 +242,8 @@ export function HuntBook({
             huntTitle={huntTitle}
             cafeTitle={cafeTitle}
             drawAt={drawAt}
+            total={total}
+            saved={Boolean(current.ticketSavedAt)}
           />
         </div>
       ) : complete ? (
@@ -267,45 +254,7 @@ export function HuntBook({
         </div>
       ) : null}
 
-      <CorkBoard className="mt-[30px] p-3.5">
-        <ul aria-label={`หลักฐานทั้ง ${total} ชิ้น`} className="flex flex-col gap-2.5">
-          {items.map((item, index) => {
-            const stamp = current.stamps[item.id];
-            const number = index + 1;
-            const label = String(number).padStart(2, "0");
-            return (
-              <li
-                key={item.id}
-                className="flex items-center gap-3 bg-[#f4ebe3] px-3 py-2.5 text-[#1a1410] shadow-[0_8px_16px_rgba(0,0,0,0.4)]"
-                style={{ transform: `rotate(${TILTS[index % TILTS.length]}deg)` }}
-              >
-                <StampMark
-                  number={number}
-                  found={Boolean(stamp)}
-                  turn={TURNS[index % TURNS.length]}
-                />
-                <div className="min-w-0">
-                  <p className={cn(TYPE, "text-xs tracking-[0.14em] text-[#5c4636]")}>
-                    EX. {label} ·{" "}
-                    <span className="whitespace-nowrap">
-                      {stamp ? `เก็บแล้ว ${formatTime(stamp.at)}` : "ยังไม่พบ"}
-                    </span>
-                  </p>
-                  {stamp ? (
-                    <p className="mt-0.5 text-[15px] leading-[1.4] font-semibold break-words">
-                      {item.name || `หลักฐานชิ้นที่ ${number}`}
-                    </p>
-                  ) : (
-                    <p className={cn(HAND, "mt-0.5 text-base leading-[1.35] break-words text-[#7a1f2a]")}>
-                      {item.hint ? `คำใบ้: ${item.hint}` : "สแกน QR ของจุดนี้เพื่อเก็บ"}
-                    </p>
-                  )}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      </CorkBoard>
+      <HuntPolaroids items={items} stamps={current.stamps} ready={state !== null} />
 
       {entry ? null : (
         <section

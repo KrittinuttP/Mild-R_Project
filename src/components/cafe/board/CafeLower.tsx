@@ -62,8 +62,16 @@ export function CafeGoodsBlock({
             {goods.items.map((item, index) => {
               const standIn = isStandInCafeImage(item.image, item.imageAlt);
               const plateIndex = plates.findIndex((plate) => plate.id === item.id);
+              const portrait = item.id === "acrylic-stand";
               const frame = standIn ? (
                 <EmptyFrame className="h-full min-h-48 w-full" />
+              ) : portrait ? (
+                <ProtectedImage
+                  src={item.image}
+                  alt={item.imageAlt ?? item.name}
+                  wrapClassName="flex h-[320px] w-full items-center justify-center bg-[#e4d8c4] sm:h-[380px] sm:w-[7.5rem]"
+                  className="h-full w-auto max-w-full object-contain"
+                />
               ) : (
                 <ProtectedImage
                   src={item.image}
@@ -79,7 +87,14 @@ export function CafeGoodsBlock({
                   pin={`goods-${item.id}`}
                   motion="drop"
                 >
-                  <div className="grid sm:grid-cols-[13rem_minmax(0,1fr)]">
+                  <div
+                    className={cn(
+                      "grid",
+                      portrait
+                        ? "sm:grid-cols-[7.5rem_minmax(0,1fr)]"
+                        : "sm:grid-cols-[13rem_minmax(0,1fr)]"
+                    )}
+                  >
                     {standIn || plateIndex < 0 ? (
                       frame
                     ) : (

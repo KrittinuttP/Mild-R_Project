@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 
 import { HAND, Pin, TYPE } from "@/components/cafe/board/pieces";
+import { HuntCelebrate } from "@/components/cafe/hunt/HuntCelebrate";
 import type { CafeHuntItem } from "@/lib/cafe-hunt";
 import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
@@ -23,10 +24,20 @@ type HuntStampModalProps = {
 };
 
 /**
- * Shown right after a scan stamps a new piece. Stays until a button is
- * pressed, so the visitor always sees which piece was collected.
+ * Shown right after a scan stamps a new piece. The last piece gets the
+ * full-screen celebration instead of the stamp window.
  */
-export function HuntStampModal({
+export function HuntStampModal(props: HuntStampModalProps) {
+  const { itemIds, stampedIds, onPrimary, onBook } = props;
+  const complete = itemIds.length > 0 && itemIds.every((id) => stampedIds.includes(id));
+  if (complete) {
+    return <HuntCelebrate total={itemIds.length} onPrimary={onPrimary} onBook={onBook} />;
+  }
+  return <StampWindow {...props} />;
+}
+
+/** Stays until a button is pressed, so the visitor always sees which piece was collected. */
+function StampWindow({
   item,
   index,
   stampedIds,
@@ -39,7 +50,6 @@ export function HuntStampModal({
   const label = String(number).padStart(2, "0");
   const total = itemIds.length;
   const count = itemIds.filter((id) => stampedIds.includes(id)).length;
-  const complete = count === total;
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -92,19 +102,6 @@ export function HuntStampModal({
         </div>
 
         <div className="relative px-5 pt-[22px] pb-5 text-center">
-          {complete ? (
-            <span
-              className={cn(
-                TYPE,
-                "absolute top-4 right-3.5 rotate-[8deg] border-[3px] border-[#e85a7a] px-2 pt-1 pb-0.5 text-xs leading-[1.15] font-bold tracking-[0.12em] text-[#e85a7a]"
-              )}
-              aria-hidden
-            >
-              CASE
-              <br />
-              SOLVED
-            </span>
-          ) : null}
           <span
             data-stamp-mark
             className={cn(
@@ -121,7 +118,7 @@ export function HuntStampModal({
             id="hunt-stamp-title"
             className={cn(HAND, "mt-4 text-[26px] leading-[1.3] text-[#7a1f2a]")}
           >
-            {complete ? `ครบ ${total} ชิ้นแล้ว!` : "ประทับตราแล้ว!"}
+            ประทับตราแล้ว!
           </h2>
           <p className="mt-1 text-base font-semibold break-words">
             {item.name || `หลักฐานชิ้นที่ ${number}`}
@@ -129,7 +126,7 @@ export function HuntStampModal({
 
           <div className="mt-3.5 flex items-center justify-center gap-2.5 text-sm text-[#3d3024]">
             <span>
-              {complete ? `เก็บครบ ${count} จาก ${total}` : `เก็บแล้ว ${count} จาก ${total}`}
+              เก็บแล้ว {count} จาก {total}
             </span>
             <span className="flex gap-1.5" aria-hidden>
               {itemIds.map((id) => (
@@ -152,7 +149,7 @@ export function HuntStampModal({
             onClick={onPrimary}
             className="mt-5 flex min-h-14 w-full items-center justify-center gap-2.5 bg-[#e85a7a] px-4 text-lg font-semibold text-[#1a1410] transition hover:bg-[#f3b8c4] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#1a1410]"
           >
-            {complete ? "กรอกชื่อลุ้นรับรางวัล" : "สแกนชิ้นต่อไป"}
+            สแกนชิ้นต่อไป
           </button>
           <button
             type="button"

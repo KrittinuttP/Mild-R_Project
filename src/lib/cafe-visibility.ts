@@ -86,8 +86,23 @@ export function cafeForVisibility(
   visibility: CafeSectionVisibilityMap
 ): CafePage {
   const { heroCutoutSilhouette, ...rest } = cafe;
-  if (visibility.heroCutout) return rest;
-  return { ...rest, heroCutout: heroCutoutSilhouette };
+  if (visibility.heroCutout || !heroCutoutSilhouette) return rest;
+
+  const color = cafe.heroCutout;
+  return {
+    ...rest,
+    heroCutout: heroCutoutSilhouette,
+    goods: rest.goods
+      ? {
+          ...rest.goods,
+          items: rest.goods.items.map((item) =>
+            item.image === color
+              ? { ...item, image: heroCutoutSilhouette }
+              : item
+          ),
+        }
+      : rest.goods,
+  };
 }
 
 export function isCafeSectionKey(value: string): value is CafeSectionKey {

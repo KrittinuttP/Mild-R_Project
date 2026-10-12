@@ -355,8 +355,8 @@
         "name": "Acrylic Stand",
         "nameLocal": "อะคริลิกสแตนด์",
         "description": "เบาะแสชิ้นเอกที่ถูกค้นพบ ณ สถานที่เกิดเหตุ — เก็บกู้กลับไปตั้งไว้บนโต๊ะทำงานเพื่อวิเคราะห์และไขปริศนาต่อไป",
-        "image": "/assets/mild/kv/Mild-R_KV.png",
-        "imageAlt": "Acrylic stand (รูปตัวอย่างจาก KV)"
+        "image": "/assets/cafe/kv/KV_cafe.webp",
+        "imageAlt": "Acrylic stand (รูปตัวอย่างจาก KV คาเฟ่)"
       },
       {
         "id": "photo-card",

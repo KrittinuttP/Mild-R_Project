@@ -27,6 +27,8 @@ export type HuntState = {
   stamps: Record<string, HuntStamp>;
   /** Set after the lucky-wheel form was accepted by the server. */
   entry: HuntEntry | null;
+  /** When the confirmation ticket was last downloaded as an image. */
+  ticketSavedAt: string | null;
 };
 
 export const EMPTY_HUNT_STATE: HuntState = {
@@ -35,6 +37,7 @@ export const EMPTY_HUNT_STATE: HuntState = {
   noticeAcceptedAt: null,
   stamps: {},
   entry: null,
+  ticketSavedAt: null,
 };
 
 /** Copy used for the rest of the visit when the browser refuses to save. */
@@ -113,6 +116,7 @@ export function parseHuntState(raw: string): HuntState {
     noticeAcceptedAt: text(data.noticeAcceptedAt),
     stamps,
     entry,
+    ticketSavedAt: entry ? text(data.ticketSavedAt) : null,
   };
 }
 
@@ -151,6 +155,28 @@ export function addHuntStamp(itemId: string, token: string): "new" | "already" {
     },
   }));
   return "new";
+}
+
+/** The ticket image was downloaded (the reset warning then stops pushing it). */
+export function markHuntTicketSaved(): void {
+  updateHuntState((state) => ({
+    ...state,
+    ticketSavedAt: new Date().toISOString(),
+  }));
+}
+
+/**
+ * Play again on this browser: drops the stamps, the entry and the ticket.
+ * The entry already sent stays on the server. The preload and the storage
+ * notice were seen, so they are not shown again.
+ */
+export function resetHuntPlay(): boolean {
+  return updateHuntState((state) => ({
+    ...state,
+    stamps: {},
+    entry: null,
+    ticketSavedAt: null,
+  }));
 }
 
 /** For `useSyncExternalStore`: also fires when another tab stamps. */
