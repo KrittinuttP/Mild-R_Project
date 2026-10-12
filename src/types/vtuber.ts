@@ -578,6 +578,8 @@ export interface CafeOperationsItem {
   imageAlt?: string;
   /** Short label under the image (optional) */
   caption?: string;
+  /** Button on the mission card, e.g. into the evidence hunt. */
+  link?: { href: string; label: string };
 }
 
 export interface CafeOperationsGroup {

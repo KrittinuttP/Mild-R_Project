@@ -34,6 +34,19 @@ function bend(from: Point, to: Point, drop: number) {
   return `Q ${x} ${y} ${to.x} ${to.y}`;
 }
 
+
+/**
+ * "เป้าหมาย: Mild-R" tag laid over the KV. Phone (< 1100px) and desktop each
+ * have their own position and size — tune them here independently.
+ * Phone: the KV column is raised (z-30) so the tag sits in front of everything.
+ */
+const TARGET_TAG =
+  "absolute z-20 whitespace-nowrap bg-[#f4ebe3]/90 text-[#a8323f] shadow-md";
+const TARGET_TAG_MOBILE =
+  "bottom-[8%] left-1 rotate-[-4deg] px-1.5 py-0.5 text-sm";
+const TARGET_TAG_DESKTOP =
+  "bottom-[12%] -right-[6%] rotate-[-4deg] px-3 py-1 text-xl";
+
 function BoardThread({
   boardRef,
 }: {
@@ -199,7 +212,7 @@ export function CafeOverview({
           {/* Below 1100px the right column dissolves (`contents`), so its cards join
               this grid: character beside the case sheet, everything else full width. */}
           <div className="grid grid-cols-[auto_minmax(0,1fr)] items-end gap-3 p-3 sm:gap-6 sm:p-6 min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] min-[1100px]:items-stretch min-[1100px]:p-8">
-            <div className="relative flex justify-center min-[1100px]:block min-[1100px]:self-end">
+            <div className="relative z-30 flex justify-center min-[1100px]:z-auto min-[1100px]:block min-[1100px]:self-end">
               <div
                 data-motion="hero-char"
                 className="animate-cafe-float relative min-[1100px]:mx-auto min-[1100px]:w-max"
@@ -209,6 +222,20 @@ export function CafeOverview({
                   alt={cafe.heroAlt ?? cafe.title}
                   className="h-[min(440px,70vw)] w-auto max-w-full object-contain min-[1100px]:h-[720px] min-[1100px]:max-w-none [filter:drop-shadow(3px_0_0_#f4ebe3)_drop-shadow(-3px_0_0_#f4ebe3)_drop-shadow(0_3px_0_#f4ebe3)_drop-shadow(0_-3px_0_#f4ebe3)_drop-shadow(8px_14px_10px_rgba(0,0,0,.55))]"
                 />
+                {/* Same tag twice so phone and desktop can be placed independently. */}
+                <p className={cn(HAND, TARGET_TAG, TARGET_TAG_MOBILE, "min-[1100px]:hidden")}>
+                  เป้าหมาย: Mild-R
+                </p>
+                <p
+                  className={cn(
+                    HAND,
+                    TARGET_TAG,
+                    TARGET_TAG_DESKTOP,
+                    "hidden min-[1100px]:block"
+                  )}
+                >
+                  เป้าหมาย: Mild-R
+                </p>
                 <span
                   data-pin="heart"
                   data-motion="hero-heart"
@@ -230,14 +257,6 @@ export function CafeOverview({
                 motion="hero-card"
                 className="px-3.5 py-4 sm:px-6 sm:py-6"
               >
-                <p
-                  className={cn(
-                    HAND,
-                    "absolute top-14 left-3 z-30 -rotate-6 whitespace-nowrap bg-[#f4ebe3] px-2 py-1 text-sm text-[#a8323f] shadow-[0_10px_18px_rgba(0,0,0,.4)] sm:top-16 sm:left-4 sm:text-base"
-                  )}
-                >
-                  เป้าหมาย: Mild-R
-                </p>
                 <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
                   <p className={cn(LABEL, "text-[#5c4636]")}>
                     {edition?.kicker}

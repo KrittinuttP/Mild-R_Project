@@ -23,10 +23,10 @@
     "title": "Crime Scene Details & Timeframe",
     "titleLocal": "ข้อมูลสถานที่และเวลาเกิดเหตุ",
     "schedule": {
-      "label": "2026 · 11 · 29",
+      "label": "2026 · 12 · 06",
       "detail": "10:00 – 18:00",
-      "startsAt": "2026-11-29T10:00:00+07:00",
-      "endsAt": "2026-11-29T18:00:00+07:00"
+      "startsAt": "2026-12-06T10:00:00+07:00",
+      "endsAt": "2026-12-06T18:00:00+07:00"
     },
     "location": {
       "label": "SOCIEFEE X CHOUXSTORY",
@@ -41,7 +41,7 @@
     "stamp": "RESTRICTED",
     "title": "Case Incident Log & Missions",
     "titleLocal": "กิจกรรมในงาน",
-    "dateLabel": "2026 · 11 · 29",
+    "dateLabel": "2026 · 12 · 06",
     "items": [
       {
         "time": "10:00",
@@ -127,6 +127,14 @@
         "layout": "promo",
         "items": [
           {
+            "id": "provision-run",
+            "kind": "mission",
+            "name": "Provision Run",
+            "nameLocal": "ภารกิจซื้อเสบียง",
+            "detail": "ซื้ออาหารหรือเครื่องดื่มจากเมนูในงาน เพื่อรับ [สิ่งที่ได้รับ]",
+            "caption": "Field · Provisions"
+          },
+          {
             "id": "evidence-board-mission",
             "kind": "mission",
             "name": "Evidence Board Mission",
@@ -141,8 +149,12 @@
             "kind": "mission",
             "name": "Secret Case File Rally",
             "nameLocal": "แฟ้มคดีลับนำทาง",
-            "detail": "เปลี่ยนแฟ้มคดีหน้างานให้เป็นใบสะสมตราประทับ (Stamp Rally) เพื่อทำภารกิจชิมเสบียงหรือถ่ายภาพแลกของรางวัล",
+            "detail": "สแกน QR หลักฐานที่ซ่อนอยู่ 5 จุดในร้าน สะสมตราในแฟ้มคดีออนไลน์ให้ครบ แล้วลงชื่อลุ้นวงล้อ",
             "caption": "Field · Stamp Rally",
+            "link": {
+              "href": "/cafe/hunt",
+              "label": "เปิดสมุดสะสมหลักฐาน"
+            },
             "image": "/assets/cafe/event/04-file.jpg",
             "imageAlt": "Secret Case File Rally (รูปตัวอย่าง)"
           }
@@ -156,16 +168,6 @@
         "detail": "ใช้กิมมิกสืบสวนกระตุ้นยอดขายและการเตรียมตัว",
         "layout": "promo",
         "items": [
-          {
-            "id": "costume-clearance",
-            "kind": "mission",
-            "name": "Disguise Privilege",
-            "nameLocal": "สิทธิพิเศษจากการพรางตัว",
-            "detail": "แต่งกายเข้าธีม (เช่น เสื้อโค้ท หมวกนักสืบ แว่นขยาย) เช็กอินเพื่อรับเบาะแสชิ้นลับหรืออัปเกรดเสบียง",
-            "caption": "Bounty · Disguise",
-            "image": "/assets/cafe/event/01-cover.jpg",
-            "imageAlt": "Disguise Privilege (รูปตัวอย่าง)"
-          },
           {
             "id": "preorder-provisions",
             "kind": "preorder",
@@ -373,7 +375,7 @@
     "titleLocal": "สรุปฉบับนี้",
     "body": [
       "Mild-R: The Unsolved Mystery Cafe คือโปรเจกต์คาเฟ่ที่แฟนคลับ Honeycomb จัดทำเอง — จำลองพื้นที่คาเฟ่ให้กลายเป็นสถานที่เกิดเหตุลึกลับ เชิญชวนนักสืบฮันนี่มาร่วมไขปริศนา คลี่คลายคดี และเก็บกู้หลักฐาน",
-      "เคสถูกกำหนดเปิดวันที่ 2026 · 11 · 29 เวลา 10:00–18:00 ที่ SOCIEFEE × CHOUXSTORY (MRT หัวลำโพง Exit 2) · ติดตามประกาศเพิ่มเติมได้ที่ @Mild_Honeycomb"
+      "เคสถูกกำหนดเปิดวันที่ 2026 · 12 · 06 เวลา 10:00–18:00 ที่ SOCIEFEE × CHOUXSTORY (MRT หัวลำโพง Exit 2) · ติดตามประกาศเพิ่มเติมได้ที่ @Mild_Honeycomb"
     ],
     "ctas": [
       {

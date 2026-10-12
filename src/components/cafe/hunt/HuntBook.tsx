@@ -14,6 +14,7 @@ import {
 import { HuntEntryForm } from "@/components/cafe/hunt/HuntEntryForm";
 import { StampMark } from "@/components/cafe/hunt/HuntFrame";
 import { HuntNotice } from "@/components/cafe/hunt/HuntNotice";
+import { HuntScanner } from "@/components/cafe/hunt/HuntScanner";
 import { HuntTicket } from "@/components/cafe/hunt/HuntTicket";
 import { useHuntState } from "@/components/cafe/hunt/useHuntState";
 import type { CafeHuntItem } from "@/lib/cafe-hunt";
@@ -54,6 +55,8 @@ export function HuntBook({ huntTitle, cafeTitle, drawAt, items, caseNo }: HuntBo
   const inApp = useSyncExternalStore(noSubscription, isInAppBrowser, () => false);
   const [noticeOpen, setNoticeOpen] = useState(false);
   const closeNotice = useCallback(() => setNoticeOpen(false), []);
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const closeScanner = useCallback(() => setScannerOpen(false), []);
 
   const total = items.length;
   const count = items.filter((item) => current.stamps[item.id]).length;
@@ -252,6 +255,33 @@ export function HuntBook({ huntTitle, cafeTitle, drawAt, items, caseNo }: HuntBo
         </section>
       )}
 
+      {complete || entry ? null : (
+        // Sticks to the bottom of the screen while the book scrolls; ends with the book.
+        <div className="sticky bottom-0 z-30 -mx-5 mt-6 bg-[linear-gradient(rgba(10,12,14,0),#0a0c0e_38%)] px-5 pt-10 pb-[max(22px,env(safe-area-inset-bottom))] sm:-mx-8 sm:px-8">
+          <button
+            type="button"
+            onClick={() => setScannerOpen(true)}
+            className="flex min-h-[62px] w-full items-center justify-center gap-3 bg-[#e85a7a] px-4 text-[19px] font-semibold text-[#1a1410] shadow-[0_14px_30px_rgba(232,90,122,0.4),0_0_0_4px_rgba(232,90,122,0.18)] transition hover:bg-[#f3b8c4] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#f4ebe3]"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="size-[26px] shrink-0 fill-none stroke-[#1a1410] stroke-2 [stroke-linecap:round] [stroke-linejoin:round]"
+              aria-hidden
+            >
+              <path d="M4 8 V5 a1 1 0 0 1 1 -1 h3 M16 4 h3 a1 1 0 0 1 1 1 v3 M20 16 v3 a1 1 0 0 1 -1 1 h-3 M8 20 H5 a1 1 0 0 1 -1 -1 v-3" />
+              <path d="M8 8 h3 v3 H8 z M13 13 h3 v3 h-3 z M13 8 h3 M8 13 v3 h3" />
+            </svg>
+            สแกน QR หลักฐาน
+          </button>
+          <p className="mt-2.5 text-center text-[13px] leading-[1.6] text-[#c4b8a8]">
+            เปิดกล้องในหน้านี้ ตราจะเก็บในเบราว์เซอร์เดียวกันเสมอ
+          </p>
+        </div>
+      )}
+
+      {scannerOpen ? (
+        <HuntScanner count={count} total={total} onClose={closeScanner} />
+      ) : null}
       {noticeOpen ? <HuntNotice required={false} onClose={closeNotice} /> : null}
     </>
   );
