@@ -201,11 +201,12 @@ export function HuntCelebrate({ total, onPrimary, onBook }: HuntCelebrateProps) 
             data-ce-solved
             className={cn(
               TYPE,
-              "absolute -bottom-6 left-1/2 w-[236px] -translate-x-1/2 -rotate-[8deg] border-[5px] border-[#e85a7a] bg-[#0a0c0e]/55 pt-2 pb-1 text-center text-[32px] leading-none font-bold tracking-[0.14em] whitespace-nowrap text-[#e85a7a] shadow-[0_0_26px_rgba(232,90,122,0.55)]"
+              "absolute -bottom-6 left-1/2 -translate-x-1/2 -rotate-[8deg] border-[5px] border-[#e85a7a] bg-[#0a0c0e]/55 px-3 pt-2 pb-1 text-center text-[clamp(22px,8.2vw,32px)] leading-none font-bold tracking-[0.14em] whitespace-nowrap text-[#e85a7a] shadow-[0_0_26px_rgba(232,90,122,0.55)]"
             )}
             aria-hidden
           >
-            CASE SOLVED
+            {/* The letter spacing also follows the last letter; pull it back so the text sits centred. */}
+            <span className="-mr-[0.14em]">CASE SOLVED</span>
           </p>
         </div>
 
