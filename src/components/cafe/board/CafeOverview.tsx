@@ -220,7 +220,7 @@ export function CafeOverview({
                 <ProtectedImage
                   src={cutout}
                   alt={cafe.heroAlt ?? cafe.title}
-                  className="h-[min(440px,70vw)] w-auto max-w-full object-contain min-[1100px]:h-[720px] min-[1100px]:max-w-none [filter:drop-shadow(3px_0_0_#f4ebe3)_drop-shadow(-3px_0_0_#f4ebe3)_drop-shadow(0_3px_0_#f4ebe3)_drop-shadow(0_-3px_0_#f4ebe3)_drop-shadow(8px_14px_10px_rgba(0,0,0,.55))]"
+                  className="h-[min(440px,70vw)] w-auto max-w-full object-contain min-[1100px]:h-[720px] min-[1100px]:max-w-none [filter:drop-shadow(8px_14px_10px_rgba(0,0,0,.55))]"
                 />
                 {/* Same tag twice so phone and desktop can be placed independently. */}
                 <p className={cn(HAND, TARGET_TAG, TARGET_TAG_MOBILE, "min-[1100px]:hidden")}>
