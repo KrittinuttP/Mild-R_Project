@@ -1,3 +1,4 @@
+import { isCafeMission } from "@/lib/cafe-board";
 import type { CafePage } from "@/types/vtuber";
 
 export const CAFE_SECTION_KEYS = [
@@ -7,8 +8,10 @@ export const CAFE_SECTION_KEYS = [
   "daySchedule",
   "operations",
   "signatureMenu",
+  "preorder",
   "venueMenu",
   "goods",
+  "caseFile",
   "closing",
 ] as const;
 
@@ -49,6 +52,10 @@ export const CAFE_SECTION_META: Record<
     label: "Investigator's Provisions",
     labelLocal: "แฟ้มรายการเสบียงนักสืบ",
   },
+  preorder: {
+    label: "Pre-order",
+    labelLocal: "เทปเหลือง + กล่องจอง · โชว์เมื่อเมนูเปิด และซ่อนเองหลัง 20 พ.ย. 2026",
+  },
   venueMenu: {
     label: "Venue Menu",
     labelLocal: "เมนูร้าน",
@@ -56,6 +63,10 @@ export const CAFE_SECTION_META: Record<
   goods: {
     label: "The Clue Dossier",
     labelLocal: "แฟ้มรวบรวมเบาะแส",
+  },
+  caseFile: {
+    label: "Case File",
+    labelLocal: "แฟ้มคดี · เว็บตูน /cafe/event (ปิด = เข้าไม่ได้)",
   },
   closing: {
     label: "Closing Note",
@@ -71,37 +82,180 @@ export function defaultCafeVisibility(): CafeSectionVisibilityMap {
     daySchedule: true,
     operations: true,
     signatureMenu: true,
+    preorder: true,
     venueMenu: true,
     goods: true,
+    caseFile: true,
     closing: true,
   };
 }
 
+/** Same length as the real text, so the black bar drawn over it keeps a natural width. */
+function filler(text: string) {
+  return text.replace(/\S/g, "x");
+}
+
+function fill(text?: string) {
+  return text ? filler(text) : text;
+}
+
 /**
- * The cafe data as the browser may see it. A hidden KV is swapped for its
- * blacked-out copy on the server, so the real file's URL is never sent.
+ * The booking tape and box stay up through `endsAt` (20 Nov 2026, 23:59).
+ * A missing end date stays listed; the menu and preorder toggles are separate.
+ */
+export function preorderIsListed(
+  preorder: CafePage["preorder"],
+  now = Date.now()
+): boolean {
+  if (!preorder?.endsAt) return true;
+  const ends = Date.parse(preorder.endsAt);
+  return !Number.isFinite(ends) || now < ends;
+}
+
+/**
+ * Hidden sections keep their layout but lose their content: text becomes
+ * filler, photos, links and dates are dropped, and ids are renumbered.
+ * Section headings stay real.
+ */
+function redactSections(
+  cafe: CafePage,
+  visibility: CafeSectionVisibilityMap
+): CafePage {
+  const out = { ...cafe };
+
+  if (!visibility.dispatch) {
+    const { schedule, location } = cafe.dispatch;
+    out.dispatch = {
+      ...cafe.dispatch,
+      schedule: { label: filler(schedule.label), detail: fill(schedule.detail) },
+      location: { label: filler(location.label), detail: fill(location.detail) },
+    };
+  }
+
+  if (!visibility.daySchedule && cafe.daySchedule) {
+    out.daySchedule = {
+      ...cafe.daySchedule,
+      dateLabel: fill(cafe.daySchedule.dateLabel),
+      items: cafe.daySchedule.items.map((item) => ({
+        time: filler(item.time),
+        title: filler(item.title),
+        titleLocal: fill(item.titleLocal),
+        detail: fill(item.detail),
+      })),
+    };
+  }
+
+  if (!visibility.operations && cafe.operations) {
+    out.operations = {
+      ...cafe.operations,
+      intro: fill(cafe.operations.intro),
+      groups: cafe.operations.groups.map((group) => ({
+        ...group,
+        detail: fill(group.detail),
+        items: group.items.map((item, index) => ({
+          id: `${group.id}-${index + 1}`,
+          kind: isCafeMission(item) ? "mission" : (item.kind ?? "teaser"),
+          name: filler(item.name),
+          nameLocal: fill(item.nameLocal),
+          detail: fill(item.detail),
+        })),
+      })),
+    };
+  }
+
+  if (!visibility.signatureMenu) {
+    out.signatureMenu = {
+      ...cafe.signatureMenu,
+      items: cafe.signatureMenu.items.map((item, index) => ({
+        id: `menu-${index + 1}`,
+        name: filler(item.name),
+        nameLocal: fill(item.nameLocal),
+        description: fill(item.description),
+        priceLabel: fill(item.priceLabel),
+      })),
+    };
+    if (cafe.promoSets) {
+      out.promoSets = {
+        ...cafe.promoSets,
+        note: fill(cafe.promoSets.note),
+        items: cafe.promoSets.items.map((item, index) => ({
+          id: `set-${index + 1}`,
+          name: filler(item.name),
+          priceLabel: fill(item.priceLabel),
+          menu: item.menu?.map(filler),
+          giveaways: item.giveaways?.map(filler),
+          highlight: item.highlight,
+        })),
+      };
+    }
+  }
+
+  const offerPreorder =
+    visibility.signatureMenu &&
+    visibility.preorder &&
+    preorderIsListed(cafe.preorder);
+  if (!offerPreorder) out.preorder = undefined;
+
+  if (!visibility.venueMenu && cafe.venueMenu) {
+    out.venueMenu = {
+      ...cafe.venueMenu,
+      note: fill(cafe.venueMenu.note),
+      items: cafe.venueMenu.items.map((item, index) => ({
+        id: `venue-${index + 1}`,
+        image: "",
+        caption: fill(item.caption),
+        captionLocal: fill(item.captionLocal),
+      })),
+    };
+  }
+
+  if (!visibility.goods && cafe.goods) {
+    out.goods = {
+      ...cafe.goods,
+      items: cafe.goods.items.map((item, index) => ({
+        id: `goods-${index + 1}`,
+        name: filler(item.name),
+        nameLocal: fill(item.nameLocal),
+        description: fill(item.description),
+      })),
+    };
+  }
+
+  // The disclaimer stays real: the footer prints it on every cafe page.
+  if (!visibility.closing) {
+    out.closing = { ...cafe.closing, body: [] };
+  }
+
+  return out;
+}
+
+/**
+ * The cafe data as the browser may see it. Hidden content is replaced on the
+ * server — the KV by its blacked-out copy, hidden sections by filler — so
+ * nothing classified is ever sent.
  */
 export function cafeForVisibility(
   cafe: CafePage,
   visibility: CafeSectionVisibilityMap
 ): CafePage {
   const { heroCutoutSilhouette, ...rest } = cafe;
-  if (visibility.heroCutout || !heroCutoutSilhouette) return rest;
+  const redacted = redactSections(rest, visibility);
+  if (visibility.heroCutout || !heroCutoutSilhouette) return redacted;
 
   const color = cafe.heroCutout;
   return {
-    ...rest,
+    ...redacted,
     heroCutout: heroCutoutSilhouette,
-    goods: rest.goods
+    goods: redacted.goods
       ? {
-          ...rest.goods,
-          items: rest.goods.items.map((item) =>
+          ...redacted.goods,
+          items: redacted.goods.items.map((item) =>
             item.image === color
               ? { ...item, image: heroCutoutSilhouette }
               : item
           ),
         }
-      : rest.goods,
+      : redacted.goods,
   };
 }
 

@@ -67,6 +67,100 @@ export function Stamp({
   );
 }
 
+/**
+ * Text under a black bar that stays. The server has already swapped hidden
+ * text for filler of the same length (`cafeForVisibility`); this only draws it.
+ * `wall` is for text on the dark page, where a black bar would not show.
+ */
+export function Classified({
+  hidden,
+  tone = "paper",
+  children,
+}: {
+  hidden: boolean;
+  tone?: "paper" | "wall";
+  children: ReactNode;
+}) {
+  if (!hidden) return <>{children}</>;
+  return (
+    <>
+      <span
+        className={cn(
+          "break-all text-transparent select-none [-webkit-box-decoration-break:clone] [box-decoration-break:clone]",
+          tone === "paper" ? "bg-[#14100c]" : "bg-[#3a2f27]"
+        )}
+        aria-hidden
+      >
+        {children}
+      </span>
+      <span className="sr-only">ข้อมูลลับ</span>
+    </>
+  );
+}
+
+/**
+ * One dark panel and a stamp, standing in for a whole hidden card.
+ * Give it an aspect ratio or a min height; the panel fills that box.
+ */
+export function SealedFace({
+  className,
+  small = false,
+  letter,
+}: {
+  className?: string;
+  small?: boolean;
+  letter?: string;
+}) {
+  return (
+    <div className={cn("relative", className)}>
+      <EmptyFrame letter={letter} className="absolute inset-0 h-full w-full" />
+      <ClassifiedStamp small={small} />
+      <span className="sr-only">ข้อมูลลับ</span>
+    </div>
+  );
+}
+
+/** One classified panel across a whole hidden section. Headings stay above it. */
+export function SealedZone({
+  id,
+  className,
+}: {
+  id?: string;
+  className?: string;
+}) {
+  return (
+    <div
+      id={id}
+      data-motion="rise"
+      className={cn(
+        "relative mt-10 scroll-mt-24 border border-[rgba(154,123,90,0.45)] shadow-[0_18px_32px_rgba(0,0,0,0.45)]",
+        className
+      )}
+    >
+      <SealedFace className="min-h-64 sm:min-h-80" />
+    </div>
+  );
+}
+
+/** Red stamp across a card whose section is hidden. The card must be `relative`. */
+export function ClassifiedStamp({ small = false }: { small?: boolean }) {
+  return (
+    <span
+      className="pointer-events-none absolute top-1/2 left-1/2 z-20 -translate-x-1/2 -translate-y-1/2 -rotate-12"
+      aria-hidden
+    >
+      <Stamp
+        className={cn(
+          "bg-[#f4ebe3]/85 whitespace-nowrap shadow-[0_2px_8px_rgba(0,0,0,0.25)]",
+          small ? "px-1.5 text-[0.6rem]" : "text-sm"
+        )}
+      >
+        Classified
+      </Stamp>
+    </span>
+  );
+}
+
 type PaperProps = {
   children: ReactNode;
   className?: string;

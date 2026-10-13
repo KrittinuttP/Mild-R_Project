@@ -682,12 +682,12 @@ export interface CafeEventPage {
 
 /** Broadsheet / dossier chrome for `/cafe` */
 export interface CafeEdition {
-  /** e.g. "The Honey Pulse Gazette" */
-  masthead: string;
+  /** Name in the header and footer; falls back to the cafe title. */
+  masthead?: string;
   /** e.g. "SPECIAL EDITION" */
   kicker?: string;
   kickerLocal?: string;
-  /** e.g. "CASE · MR-HP-001" */
+  /** e.g. "CASE · MR-UMC-001" */
   caseNo?: string;
   /** e.g. "Vol. I · No. 1 · Mild-R Fanclub" */
   dateline?: string;
@@ -696,7 +696,7 @@ export interface CafeEdition {
 /**
  * Dedicated cafe promo page (`/cafe`).
  * Content sections mirror Supabase visibility keys:
- * dispatch · daySchedule · operations · signatureMenu · venueMenu · goods · closing
+ * dispatch · daySchedule · operations · signatureMenu · preorder · venueMenu · goods · caseFile · closing
  */
 export interface CafePage {
   title: string;
@@ -713,11 +713,6 @@ export interface CafePage {
   heroCutout?: string;
   /** Blacked-out `heroCutout`, shown while the Key Visual toggle is off. */
   heroCutoutSilhouette?: string;
-  /**
-   * Set while the JSON holds sample values. `/cafe` shows it as a fixed ribbon;
-   * remove the field once every value is real.
-   */
-  mockNotice?: string;
   dispatch: CafeDispatchSection;
   daySchedule?: CafeDayScheduleSection;
   /** HQ briefing (doc §8) — replaces plates + highlights */

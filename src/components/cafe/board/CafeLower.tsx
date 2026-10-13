@@ -1,12 +1,12 @@
 import Link from "next/link";
 
-import { CafeTopSecret } from "@/components/cafe/CafeTopSecret";
 import {
   BoardSection,
   EmptyFrame,
   HAND,
   LABEL,
   Paper,
+  SealedZone,
   SectionHead,
   TILT,
   TYPE,
@@ -17,16 +17,12 @@ import { isCafeMission, isStandInCafeImage } from "@/lib/cafe-board";
 import { cn } from "@/lib/utils";
 import type { CafePage } from "@/types/vtuber";
 import type { ImageLightboxItem } from "@/components/media/ImageLightbox";
-import cafeEvent from "@/data/mild-r/cafe-event.json";
+import type { CafeCaseFileCover } from "@/lib/cafe-case-file";
 
 const GOODS_MARKS = ["Item 01 · Key Clue", "Item 02 · Clue"];
 const POLAROID_TILT = [-2.4, 2, -1.4, 2.6, -2, 1.6];
 
 type OpenPlate = (items: ImageLightboxItem[], index: number, group: string) => void;
-
-const cover = (
-  cafeEvent as { panels: { image?: string; imageAlt?: string }[] }
-).panels.find((panel) => panel.image);
 
 export function CafeGoodsBlock({
   cafe,
@@ -50,14 +46,18 @@ export function CafeGoodsBlock({
 
   return (
     <BoardSection id="goods" className="mt-24">
-      {show ? (
         <div>
-          <SectionHead
-            eyebrow={goods.eyebrow}
-            title={goods.title}
-            titleLocal={goods.titleLocal}
-            stamp={goods.stamp}
-          />
+          {show ? (
+            <SectionHead
+              eyebrow={goods.eyebrow}
+              title={goods.title}
+              titleLocal={goods.titleLocal}
+              stamp={goods.stamp}
+            />
+          ) : (
+            <SealedZone />
+          )}
+          {show ? (
           <div className="mt-10 grid gap-6 lg:grid-cols-2">
             {goods.items.map((item, index) => {
               const standIn = isStandInCafeImage(item.image, item.imageAlt);
@@ -113,14 +113,10 @@ export function CafeGoodsBlock({
                       </p>
                       <h3 className={cn(TYPE, "mt-2 text-lg font-bold")}>{item.name}</h3>
                       {item.nameLocal ? (
-                        <p className={cn(HAND, "mt-1 text-xl text-[#7a1f2a]")}>
-                          {item.nameLocal}
-                        </p>
+                        <p className={cn(HAND, "mt-1 text-xl text-[#7a1f2a]")}>{item.nameLocal}</p>
                       ) : null}
                       {item.description ? (
-                        <p className="mt-2 text-sm leading-relaxed text-[#3d3024]">
-                          {item.description}
-                        </p>
+                        <p className="mt-2 text-sm leading-relaxed text-[#3d3024]">{item.description}</p>
                       ) : null}
                     </div>
                   </div>
@@ -128,10 +124,8 @@ export function CafeGoodsBlock({
               );
             })}
           </div>
+          ) : null}
         </div>
-      ) : (
-        <CafeTopSecret titleLocal="แฟ้มรวบรวมเบาะแส · ยังไม่เปิดเผย" />
-      )}
     </BoardSection>
   );
 }
@@ -158,19 +152,23 @@ export function CafeVenueBlock({
 
   return (
     <BoardSection id="venue-menu" className="mt-24">
-      {show ? (
         <div>
-          <SectionHead
-            eyebrow={venue.eyebrow}
-            title={venue.title}
-            titleLocal={venue.titleLocal}
-            stamp={venue.stamp}
-          />
-          {venue.note ? (
+          {show ? (
+            <SectionHead
+              eyebrow={venue.eyebrow}
+              title={venue.title}
+              titleLocal={venue.titleLocal}
+              stamp={venue.stamp}
+            />
+          ) : (
+            <SealedZone />
+          )}
+          {venue.note && show ? (
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#d8d0c4]">
               {venue.note}
             </p>
           ) : null}
+          {show ? (
           <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
             {venue.items.map((item, index) => (
               <button
@@ -205,20 +203,22 @@ export function CafeVenueBlock({
               </button>
             ))}
           </div>
+          ) : null}
         </div>
-      ) : (
-        <CafeTopSecret titleLocal="เมนูร้าน · ยังไม่เปิดเผย" />
-      )}
     </BoardSection>
   );
 }
 
 export function CafeStoryBlock({
   cafe,
+  cover,
+  showCaseFile,
   showGallery,
   onOpen,
 }: {
   cafe: CafePage;
+  cover: CafeCaseFileCover | null;
+  showCaseFile: boolean;
   showGallery: boolean;
   onOpen: OpenPlate;
 }) {
@@ -237,11 +237,12 @@ export function CafeStoryBlock({
   return (
     <BoardSection id="story" className="mt-24">
       <h2 className="sr-only">Story · Gallery</h2>
+      {showCaseFile ? (
       <div
         data-motion="rise"
         className="grid items-center gap-6 border border-[rgba(154,123,90,0.4)] bg-[#14100c] p-4 sm:grid-cols-[9rem_minmax(0,1fr)] sm:p-6"
       >
-        {cover?.image ? (
+        {cover ? (
           <ProtectedImage
             src={cover.image}
             alt={cover.imageAlt ?? "ปกแฟ้มคดี"}
@@ -263,6 +264,9 @@ export function CafeStoryBlock({
           </Link>
         </div>
       </div>
+      ) : (
+        <SealedZone className="mt-0" />
+      )}
 
       {showGallery && plates.length > 0 ? (
         <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
@@ -312,20 +316,21 @@ export function CafeClosingBlock({
 
   return (
     <BoardSection className="mt-24 mb-24" width="820">
-      {show ? (
         <div data-motion="rise" className="text-center">
-          <SectionHead
-            align="center"
-            eyebrow={closing.eyebrow}
-            title={closing.title}
-            titleLocal={closing.titleLocal}
-          />
-          {paragraph ? (
-            <p className="mt-6 text-base leading-relaxed text-[#d8d0c4]">
-              {paragraph}
-            </p>
+          {show ? (
+            <SectionHead
+              align="center"
+              eyebrow={closing.eyebrow}
+              title={closing.title}
+              titleLocal={closing.titleLocal}
+            />
+          ) : (
+            <SealedZone />
+          )}
+          {show && paragraph ? (
+            <p className="mt-6 text-base leading-relaxed text-[#d8d0c4]">{paragraph}</p>
           ) : null}
-          {follow?.url ? (
+          {show && follow?.url ? (
             <Link
               href={follow.url}
               target="_blank"
@@ -335,15 +340,10 @@ export function CafeClosingBlock({
               {follow.label}
             </Link>
           ) : null}
-          {closing.disclaimer ? (
-            <p className="mt-6 text-xs leading-relaxed text-[#c4b8a8]">
-              {closing.disclaimer}
-            </p>
+          {show && closing.disclaimer ? (
+            <p className="mt-6 text-xs leading-relaxed text-[#c4b8a8]">{closing.disclaimer}</p>
           ) : null}
         </div>
-      ) : (
-        <CafeTopSecret titleLocal="สรุปฉบับนี้ · ยังไม่เปิดเผย" />
-      )}
     </BoardSection>
   );
 }

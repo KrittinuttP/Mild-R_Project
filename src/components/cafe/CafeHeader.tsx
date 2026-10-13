@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
+import { Classified } from "@/components/cafe/board/pieces";
 import { buttonVariants } from "@/components/ui/button";
 import { scrollToHashTarget } from "@/lib/scroll-to-hash";
 import { cn } from "@/lib/utils";
@@ -28,12 +29,15 @@ type CafeHeaderProps = {
   cafe: CafePage;
   mildRHomeHref?: string;
   showMainSiteLink?: boolean;
+  /** The date is the dispatch date, which has its own visibility toggle. */
+  showDate?: boolean;
 };
 
 export function CafeHeader({
   cafe,
   mildRHomeHref = "/",
   showMainSiteLink = true,
+  showDate = true,
 }: CafeHeaderProps) {
   const pathname = usePathname();
   const onCafeRoot = pathname === "/cafe" || pathname === "/cafe/";
@@ -118,7 +122,9 @@ export function CafeHeader({
           <div className="mt-0.5 flex min-w-0 items-center gap-2 sm:flex">
             {cafe.dispatch.schedule.label ? (
               <span className="shrink-0 font-[family-name:var(--font-cafe-type)] text-[0.65rem] tracking-[0.14em] text-[#f3b8c4]">
-                {cafe.dispatch.schedule.label}
+                <Classified hidden={!showDate} tone="wall">
+                  {cafe.dispatch.schedule.label}
+                </Classified>
               </span>
             ) : null}
             {cafe.edition?.caseNo ? (

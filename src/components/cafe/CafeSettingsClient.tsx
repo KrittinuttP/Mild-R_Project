@@ -268,7 +268,7 @@ export function CafeSettingsClient() {
             Cafe Settings
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-[#f7d7de]/80">
-            สลับแล้วบันทึกทันที · ส่วนที่ปิดจะแสดงสถานะ TOP SECRET บนหน้า `/cafe`
+            สลับแล้วบันทึกทันที · ส่วนที่ปิดจะไม่โชว์เนื้อหาบนหน้า `/cafe`
           </p>
         </div>
         <button

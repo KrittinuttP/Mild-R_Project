@@ -1,17 +1,22 @@
+"use client";
+
 import Link from "next/link";
 
-import { CafeTopSecret } from "@/components/cafe/CafeTopSecret";
 import {
   BoardSection,
+  Classified,
   EmptyFrame,
   HAND,
   LABEL,
   Paper,
+  SealedZone,
   SectionHead,
   TYPE,
 } from "@/components/cafe/board/pieces";
+import { useNow } from "@/hooks/useNow";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { isStandInCafeImage, visiblePrice } from "@/lib/cafe-board";
+import { preorderIsListed } from "@/lib/cafe-visibility";
 import { cn } from "@/lib/utils";
 import type { CafePage, CafePromoSetItem } from "@/types/vtuber";
 
@@ -52,8 +57,8 @@ function SetCard({ item }: { item: CafePromoSetItem }) {
               ในเซตมี
             </p>
             <ul className="mt-1 space-y-1 text-sm text-[#3d3024]">
-              {menu.map((line) => (
-                <li key={line}>{line}</li>
+              {menu.map((line, index) => (
+                <li key={`${index}-${line}`}>{line}</li>
               ))}
             </ul>
           </div>
@@ -68,7 +73,7 @@ function SetCard({ item }: { item: CafePromoSetItem }) {
                 const lastHighlight = highlight && index === gifts.length - 1;
                 return (
                   <li
-                    key={line}
+                    key={`${index}-${line}`}
                     className={cn(
                       "bg-[#b9e6e1] px-2 py-1 text-sm text-[#0f4f55] [clip-path:polygon(0_0,calc(100%-8px)_0,100%_50%,calc(100%-8px)_100%,0_100%)]",
                       lastHighlight && "bg-[#f2c230] text-[#1a1410]"
@@ -93,26 +98,35 @@ function SetCard({ item }: { item: CafePromoSetItem }) {
 type CafeMenuSectionProps = {
   cafe: CafePage;
   show: boolean;
+  /** The pick-up day is the dispatch date, which has its own toggle. */
+  showDispatch: boolean;
 };
 
-export function CafeMenuSection({ cafe, show }: CafeMenuSectionProps) {
+export function CafeMenuSection({ cafe, show, showDispatch }: CafeMenuSectionProps) {
   const menu = cafe.signatureMenu;
   const sets = cafe.promoSets;
   const preorder = cafe.preorder;
   const eventDay = cafe.dispatch.schedule.label;
   const priceReady = visiblePrice(preorder?.promo);
+  const hidden = !show;
+  const now = useNow(1000, Boolean(preorder?.endsAt));
+  const preorderOpen = Boolean(preorder) && (now === null || preorderIsListed(preorder, now));
 
   return (
     <BoardSection id="menu" className="mt-24">
-      {show ? (
         <div>
-          <SectionHead
-            eyebrow={menu.eyebrow}
-            title={menu.title}
-            titleLocal={menu.titleLocal}
-            stamp={menu.stamp}
-          />
+          {hidden ? null : (
+            <SectionHead
+              eyebrow={menu.eyebrow}
+              title={menu.title}
+              titleLocal={menu.titleLocal}
+              stamp={menu.stamp}
+            />
+          )}
 
+          {hidden ? (
+            <SealedZone id="sets" />
+          ) : (
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {menu.items.map((item, index) => {
               const letter = LETTERS[index] ?? String(index + 1);
@@ -174,8 +188,9 @@ export function CafeMenuSection({ cafe, show }: CafeMenuSectionProps) {
               );
             })}
           </div>
+          )}
 
-          {sets ? (
+          {!hidden && sets ? (
             <div id="sets" className="mt-16 scroll-mt-24">
               {sets.eyebrow ? <p className={LABEL}>{sets.eyebrow}</p> : null}
               <h3 className="mt-1 font-[family-name:var(--font-cafe-serif)] text-3xl text-[#f4ebe3]">
@@ -194,10 +209,10 @@ export function CafeMenuSection({ cafe, show }: CafeMenuSectionProps) {
             </div>
           ) : null}
 
-          {preorder ? (
+          {preorder && preorderOpen ? (
             <div
               data-motion="rise"
-              className="mt-12 grid overflow-hidden bg-[#f4ebe3] text-[#1a1410] shadow-[0_14px_26px_rgba(0,0,0,0.45)] md:grid-cols-[11rem_minmax(0,1fr)]"
+              className="relative mt-12 grid overflow-hidden bg-[#f4ebe3] text-[#1a1410] shadow-[0_14px_26px_rgba(0,0,0,0.45)] md:grid-cols-[11rem_minmax(0,1fr)]"
             >
               <div className="flex items-center justify-center border-b border-dashed border-[#1a1410]/40 bg-[#f2c230] px-4 py-6 md:border-r md:border-b-0">
                 <p className={cn(TYPE, "text-2xl font-bold tracking-[0.14em]")}>
@@ -227,7 +242,12 @@ export function CafeMenuSection({ cafe, show }: CafeMenuSectionProps) {
                   <div className="mt-4 flex flex-wrap items-end justify-between gap-4 border-t border-[#1a1410]/15 pt-4">
                     <div className={cn(TYPE, "space-y-1 text-xs tracking-[0.08em] uppercase")}>
                       <p>วันเปิดจอง · {preorder.label}</p>
-                      {eventDay ? <p>วันรับของหน้างาน · {eventDay}</p> : null}
+                      {eventDay ? (
+                        <p>
+                          วันรับของหน้างาน ·{" "}
+                          <Classified hidden={!showDispatch}>{eventDay}</Classified>
+                        </p>
+                      ) : null}
                     </div>
                     <Link
                       href={preorder.url}
@@ -243,11 +263,6 @@ export function CafeMenuSection({ cafe, show }: CafeMenuSectionProps) {
             </div>
           ) : null}
         </div>
-      ) : (
-        <div id="sets">
-          <CafeTopSecret titleLocal="แฟ้มรายการเสบียงนักสืบ · ยังไม่เปิดเผย" />
-        </div>
-      )}
     </BoardSection>
   );
 }

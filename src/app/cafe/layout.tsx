@@ -66,6 +66,7 @@ export default async function CafeLayout({ children }: { children: ReactNode }) 
       <CafeHeader
         cafe={cafe}
         showMainSiteLink={visibility.mainSiteLink && !onCafeDomain}
+        showDate={visibility.dispatch}
       />
       <main className="flex-1">{children}</main>
       <CafeFooter cafe={cafe} />

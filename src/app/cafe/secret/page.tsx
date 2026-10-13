@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { CafeSecretClient } from "@/components/cafe/CafeSecretClient";
 import { mildRData } from "@/data/vtuber-data";
+import { caseFileCover } from "@/lib/cafe-case-file";
 
 export const metadata: Metadata = {
   title: "Cafe Secret · Full reveal",
@@ -10,5 +11,5 @@ export const metadata: Metadata = {
 
 /** Secret full-reveal preview — password gate on this page. */
 export default function CafeSecretPage() {
-  return <CafeSecretClient cafe={mildRData.cafe} />;
+  return <CafeSecretClient cafe={mildRData.cafe} caseCover={caseFileCover()} />;
 }

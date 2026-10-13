@@ -18,8 +18,10 @@ import {
   type ImageLightboxItem,
 } from "@/components/media/ImageLightbox";
 import { useNow } from "@/hooks/useNow";
+import type { CafeCaseFileCover } from "@/lib/cafe-case-file";
 import {
   defaultCafeVisibility,
+  preorderIsListed,
   type CafeSectionVisibilityMap,
 } from "@/lib/cafe-visibility";
 import { cn } from "@/lib/utils";
@@ -28,6 +30,8 @@ import type { CafePage } from "@/types/vtuber";
 type CafePromoProps = {
   cafe: CafePage;
   visibility?: CafeSectionVisibilityMap;
+  /** Only passed while the case file is visible. */
+  caseCover?: CafeCaseFileCover | null;
 };
 
 type LightboxState = {
@@ -40,11 +44,7 @@ function PreorderTape({ cafe }: { cafe: CafePage }) {
   const preorder = cafe.preorder;
   const now = useNow(1000, Boolean(preorder?.endsAt));
   if (!preorder?.label) return null;
-
-  const ends = Date.parse(preorder.endsAt ?? "");
-  const open =
-    !Number.isFinite(ends) || now === null || now < ends;
-  if (!open) return null;
+  if (now !== null && !preorderIsListed(preorder, now)) return null;
 
   const text = `PRE-ORDER /// เปิดจองเสบียงล่วงหน้า /// ประมาณ ${preorder.label} /// เซต A · เซต B · เซต C ///`;
   const line = `${text} ${text}`;
@@ -72,7 +72,7 @@ function PreorderTape({ cafe }: { cafe: CafePage }) {
   );
 }
 
-export function CafePromo({ cafe, visibility }: CafePromoProps) {
+export function CafePromo({ cafe, visibility, caseCover }: CafePromoProps) {
   const show = visibility ?? defaultCafeVisibility();
   const rootRef = useRef<HTMLDivElement>(null);
   useBoardMotion(rootRef);
@@ -126,18 +126,11 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
         onOpenVenue={() => open(venuePlate, 0, "Venue")}
       />
       <PreorderTape cafe={cafe} />
-      {cafe.mockNotice ? (
-        <p
-          role="note"
-          className={cn(
-            TYPE,
-            "relative mx-auto mt-12 w-fit max-w-[calc(100%-2.5rem)] border-2 border-dashed border-[#f2c230] px-4 py-2 text-center text-xs leading-relaxed font-bold text-[#f2c230]"
-          )}
-        >
-          {cafe.mockNotice}
-        </p>
-      ) : null}
-      <CafeMenuSection cafe={cafe} show={show.signatureMenu} />
+      <CafeMenuSection
+        cafe={cafe}
+        show={show.signatureMenu}
+        showDispatch={show.dispatch}
+      />
       <CafeActivities
         cafe={cafe}
         showSchedule={show.daySchedule}
@@ -156,6 +149,8 @@ export function CafePromo({ cafe, visibility }: CafePromoProps) {
       />
       <CafeStoryBlock
         cafe={cafe}
+        cover={caseCover ?? null}
+        showCaseFile={show.caseFile}
         showGallery={show.operations}
         onOpen={open}
       />

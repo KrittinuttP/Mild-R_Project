@@ -1,13 +1,13 @@
 import { useState } from "react";
 import Link from "next/link";
 
-import { CafeTopSecret } from "@/components/cafe/CafeTopSecret";
 import {
   BoardSection,
   CorkBoard,
   EmptyFrame,
   HAND,
   Paper,
+  SealedZone,
   SectionHead,
   SERIF,
   Stamp,
@@ -111,7 +111,7 @@ export function CafeActivities({
 
   return (
     <BoardSection id="activities" className="mt-24" width="1080">
-      {schedule ? (
+      {schedule && showSchedule ? (
         <SectionHead
           align="center"
           eyebrow={schedule.eyebrow}
@@ -120,7 +120,9 @@ export function CafeActivities({
         />
       ) : null}
 
-      {showSchedule && schedule ? (
+      {schedule && !showSchedule ? <SealedZone /> : null}
+
+      {schedule && showSchedule ? (
         <ol className="relative mt-12">
           <span
             data-motion="tl-line"
@@ -132,7 +134,7 @@ export function CafeActivities({
             const onLeft = index % 2 === 0;
             return (
               <li
-                key={`${item.time}-${item.title}`}
+                key={`${index}-${item.time}-${item.title}`}
                 data-motion="tl-item"
                 data-side={onLeft ? "left" : "right"}
                 className="relative py-3"
@@ -161,9 +163,7 @@ export function CafeActivities({
                     <p className={cn(HAND, "mt-1 text-xl")}>{item.titleLocal}</p>
                   ) : null}
                   {item.detail ? (
-                    <p className="mt-2 text-sm leading-relaxed text-[#3d3024]">
-                      {item.detail}
-                    </p>
+                    <p className="mt-2 text-sm leading-relaxed text-[#3d3024]">{item.detail}</p>
                   ) : null}
                 </Paper>
                 </div>
@@ -171,13 +171,11 @@ export function CafeActivities({
             );
           })}
         </ol>
-      ) : schedule ? (
-        <div className="mt-10">
-          <CafeTopSecret titleLocal="บันทึกลำดับเหตุการณ์ · ยังไม่เปิดเผย" />
-        </div>
       ) : null}
 
-      {showMissions && missions.length > 0 ? (
+      {missions.length > 0 && !showMissions ? <SealedZone /> : null}
+
+      {missions.length > 0 && showMissions ? (
         <CorkBoard className="mt-14 px-4 pt-6 pb-9 sm:px-7 sm:pt-7 sm:pb-11">
           <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-2.5">
             <h3
@@ -263,10 +261,6 @@ export function CafeActivities({
             })}
           </ul>
         </CorkBoard>
-      ) : missions.length > 0 ? (
-        <div className="mt-10">
-          <CafeTopSecret titleLocal="ภารกิจในงาน · ยังไม่เปิดเผย" />
-        </div>
       ) : null}
     </BoardSection>
   );

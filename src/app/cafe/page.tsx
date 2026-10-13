@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { CafePromo } from "@/components/cafe/CafePromo";
 import { mildRData } from "@/data/vtuber-data";
+import { caseFileCover } from "@/lib/cafe-case-file";
 import { cafeForVisibility } from "@/lib/cafe-visibility";
 import { loadCafeVisibility } from "@/lib/cafe-visibility-store";
 
@@ -18,6 +19,7 @@ export default async function CafePage() {
     <CafePromo
       cafe={cafeForVisibility(mildRData.cafe, visibility)}
       visibility={visibility}
+      caseCover={visibility.caseFile ? caseFileCover() : null}
     />
   );
 }

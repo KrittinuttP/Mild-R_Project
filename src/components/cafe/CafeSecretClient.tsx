@@ -6,6 +6,7 @@ import { Eye, EyeOff, FileLock2, Lock, Unlock } from "lucide-react";
 
 import { CafePromo } from "@/components/cafe/CafePromo";
 import { buttonVariants } from "@/components/ui/button";
+import type { CafeCaseFileCover } from "@/lib/cafe-case-file";
 import { defaultCafeVisibility } from "@/lib/cafe-visibility";
 import { cn } from "@/lib/utils";
 import type { CafePage } from "@/types/vtuber";
@@ -15,9 +16,10 @@ const DISPLAY = "font-[family-name:var(--font-display)]";
 
 type CafeSecretClientProps = {
   cafe: CafePage;
+  caseCover: CafeCaseFileCover | null;
 };
 
-export function CafeSecretClient({ cafe }: CafeSecretClientProps) {
+export function CafeSecretClient({ cafe, caseCover }: CafeSecretClientProps) {
   const [checking, setChecking] = useState(true);
   const [unlocked, setUnlocked] = useState(false);
   const [password, setPassword] = useState("");
@@ -164,7 +166,11 @@ export function CafeSecretClient({ cafe }: CafeSecretClientProps) {
           </Link>
         </div>
       </div>
-      <CafePromo cafe={cafe} visibility={defaultCafeVisibility()} />
+      <CafePromo
+        cafe={cafe}
+        visibility={defaultCafeVisibility()}
+        caseCover={caseCover}
+      />
     </div>
   );
 }

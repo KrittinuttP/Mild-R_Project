@@ -2,15 +2,13 @@
   "title": "Mild-R: The Unsolved Mystery Cafe",
   "titleLocal": "คาเฟ่ปริศนาที่ยังไม่คลี่คลาย",
   "tagline": "รายงานพิเศษจากสถานที่เกิดเหตุ: คาเฟ่ลึกลับแห่งนี้ เชิญชวนนักสืบฮันนี่ทุกท่าน มาร่วมไขปริศนาจากหลากหลายเมนูในงาน พร้อมช่วยกันคลี่คลายคดีต่างๆ และเก็บกู้หลักฐานจากสถานที่เกิดเหตุนี้",
-  "mockNotice": "ข้อมูลตัวอย่างสำหรับดูดีไซน์ — ราคา เซต ของแถม ลิงก์จอง ลิงก์แผนที่ และรูปโปรโมท ยังไม่ใช่ข้อมูลจริง",
   "status": "upcoming",
   "statusLabel": "CRIME SCENE SECURED",
   "statusLabelLocal": "พื้นที่เกิดเหตุถูกควบคุม",
   "edition": {
-    "masthead": "The Honey Pulse Gazette",
     "kicker": "Unsolved Mystery Cafe",
     "kickerLocal": "คาเฟ่ลึกลับ",
-    "caseNo": "CASE · MR-HP-001",
+    "caseNo": "CASE · MR-UMC-001",
     "dateline": "Vol. I · No. 1 · Mild-R Fanclub"
   },
   "heroImage": "/assets/mild/kv/Mild-R_Name_Art.png",

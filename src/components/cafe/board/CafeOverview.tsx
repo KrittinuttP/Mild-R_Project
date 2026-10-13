@@ -10,8 +10,10 @@ import Link from "next/link";
 import { Heart } from "lucide-react";
 
 import { CafeCountdown } from "@/components/cafe/CafeCountdown";
-import { CafeTopSecret } from "@/components/cafe/CafeTopSecret";
 import {
+  Classified,
+  ClassifiedStamp,
+  EmptyFrame,
   HAND,
   LABEL,
   Paper,
@@ -161,6 +163,7 @@ export function CafeOverview({
   const edition = cafe.edition;
   const schedule = cafe.dispatch.schedule;
   const location = cafe.dispatch.location;
+  const hidden = !showDispatch;
   const follow = cafe.closing.ctas?.[0];
   const cutout = cafe.heroCutout || "/assets/cafe/kv/KV_cafe.webp";
 
@@ -173,7 +176,7 @@ export function CafeOverview({
     return (
       <div className={stacked ? "flex flex-col gap-2" : "flex flex-wrap justify-end gap-2"}>
         <a href="#sets" className={cn(button, "bg-[#f2c230] font-semibold text-[#1a1410]")}>
-          ดูเซตและจองล่วงหน้า
+          {cafe.preorder ? "ดูเซตและจองล่วงหน้า" : "ดูเซต"}
         </a>
         {follow?.url ? (
           <Link
@@ -308,8 +311,7 @@ export function CafeOverview({
                 {actions(true)}
               </Paper>
 
-              {showDispatch ? (
-                <>
+              <>
                 <div className="order-1 col-span-2 grid grid-cols-2 gap-3 sm:gap-4">
                   <Paper
                     pin="date"
@@ -318,12 +320,20 @@ export function CafeOverview({
                     motion="hero-card"
                     className="px-3 py-4 sm:px-4 sm:py-5"
                   >
-                    <p className={cn(HAND, "text-base text-[#7a1f2a] sm:text-lg")}>วันเปิดแฟ้มคดี</p>
+                    <p className={cn(HAND, "text-base text-[#7a1f2a] sm:text-lg")}>
+                      <Classified hidden={hidden}>วันเปิดแฟ้มคดี</Classified>
+                    </p>
                     <p className={cn(SERIF, "mt-1 text-xl leading-none whitespace-nowrap text-[#1a1410] sm:text-[2rem]")}>
-                      <Redacted>{schedule.label}</Redacted>
+                      {hidden ? (
+                        <Classified hidden>{schedule.label}</Classified>
+                      ) : (
+                        <Redacted>{schedule.label}</Redacted>
+                      )}
                     </p>
                     {schedule.detail ? (
-                      <p className="mt-2 text-sm text-[#3d3024]">{schedule.detail}</p>
+                      <p className="mt-2 text-sm text-[#3d3024]">
+                        <Classified hidden={hidden}>{schedule.detail}</Classified>
+                      </p>
                     ) : null}
                     {schedule.startsAt ? (
                       <div className="mt-3">
@@ -334,7 +344,12 @@ export function CafeOverview({
                           className="text-sm sm:text-lg"
                         />
                       </div>
+                    ) : hidden ? (
+                      <p className={cn(TYPE, "mt-3 text-sm font-bold sm:text-lg")}>
+                        <Classified hidden>00 วัน 00:00:00</Classified>
+                      </p>
                     ) : null}
+                    {hidden ? <ClassifiedStamp /> : null}
                   </Paper>
                   <Paper
                     pin="place"
@@ -343,12 +358,20 @@ export function CafeOverview({
                     motion="hero-card"
                     className="px-3 py-4 sm:px-4 sm:py-5"
                   >
-                    <p className={cn(HAND, "text-base sm:text-lg")}>สถานที่เกิดเหตุ</p>
+                    <p className={cn(HAND, "text-base sm:text-lg")}>
+                      <Classified hidden={hidden}>สถานที่เกิดเหตุ</Classified>
+                    </p>
                     <p className={cn(SERIF, "mt-1 text-[17px] leading-tight break-words sm:text-[1.7rem]")}>
-                      <Redacted>{location.label}</Redacted>
+                      {hidden ? (
+                        <Classified hidden>{location.label}</Classified>
+                      ) : (
+                        <Redacted>{location.label}</Redacted>
+                      )}
                     </p>
                     {location.detail ? (
-                      <p className="mt-2 text-xs sm:text-sm">{location.detail}</p>
+                      <p className="mt-2 text-xs sm:text-sm">
+                        <Classified hidden={hidden}>{location.detail}</Classified>
+                      </p>
                     ) : null}
                     {location.mapUrl ? (
                       <a
@@ -360,9 +383,25 @@ export function CafeOverview({
                         เปิดแผนที่ →
                       </a>
                     ) : null}
+                    {hidden ? <ClassifiedStamp /> : null}
                   </Paper>
                 </div>
-                  {location.image ? (
+                  {hidden ? (
+                    <div
+                      data-motion="hero-card"
+                      className={cn(
+                        "relative order-3 col-span-2 overflow-hidden bg-[#f4ebe3] text-[#1a1410] shadow-[0_14px_26px_rgba(0,0,0,0.45)]",
+                        TILT
+                      )}
+                      style={tiltStyle(0.6)}
+                    >
+                      <EmptyFrame className="h-[170px] w-full sm:h-[250px] min-[1100px]:h-[190px]" />
+                      <p className={cn(TYPE, "px-3 py-2 text-xs tracking-[0.14em] text-[#5c4636] uppercase")}>
+                        <Classified hidden>Venue · {location.label}</Classified>
+                      </p>
+                      <ClassifiedStamp />
+                    </div>
+                  ) : location.image ? (
                     <button
                       type="button"
                       onClick={onOpenVenue}
@@ -389,12 +428,7 @@ export function CafeOverview({
                       </span>
                     </button>
                   ) : null}
-                </>
-              ) : (
-                <div className="order-1 col-span-2">
-                  <CafeTopSecret titleLocal="ข้อมูลสถานที่และเวลาเกิดเหตุ · ยังไม่เปิดเผย" />
-                </div>
-              )}
+              </>
             </div>
           </div>
 
