@@ -42,6 +42,11 @@ zayzhik-projecct-mildR.json
 
 # original event research images (webp copies live in public/assets/events/gallery)
 /public/assets/events/archive/
+
+# source images kept locally (the site uses the .webp copies)
+/originals/cafe/
+/public/assets/Gallery/originals/
+/public/assets/cafe/kv/*.png
 # vercel
 .vercel
 
