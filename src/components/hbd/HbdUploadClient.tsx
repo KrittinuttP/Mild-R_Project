@@ -9,6 +9,7 @@ import {
 } from "react";
 import Link from "next/link";
 import {
+  Crop,
   Download,
   Eraser,
   Gift,
@@ -20,6 +21,7 @@ import {
 } from "lucide-react";
 
 import { BackLink } from "@/components/layout/BackLink";
+import { useAvatarCrop } from "@/components/upload/useAvatarCrop";
 
 import { buttonVariants } from "@/components/ui/button";
 import { shrinkImageFile } from "@/lib/hbd-client-resize";
@@ -112,7 +114,12 @@ function revokeUrl(url?: string) {
   if (url?.startsWith("blob:")) URL.revokeObjectURL(url);
 }
 
-export function HbdUploadClient() {
+type HbdUploadClientProps = {
+  /** /upload/hbd: no way back to the site, only "send another card". */
+  standalone?: boolean;
+};
+
+export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
   const [phase, setPhase] = useState<Phase>("form");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -141,6 +148,11 @@ export function HbdUploadClient() {
   const avatarUrlRef = useRef<string | undefined>(undefined);
   const cardFileRef = useRef<File | null>(null);
   const avatarFileRef = useRef<File | null>(null);
+  const avatarCrop = useAvatarCrop({
+    maxEdge: HBD_IMAGE_SIZES.avatarClientMaxEdge,
+    maxBytes: HBD_AVATAR_LIMITS.maxBytes,
+    onCropped: (file) => setAvatarMedia(file, URL.createObjectURL(file)),
+  });
 
   useEffect(() => {
     const cached = readFormCache();
@@ -194,6 +206,7 @@ export function HbdUploadClient() {
   function clearMedia() {
     setCardMedia(null, undefined);
     setAvatarMedia(null, undefined);
+    avatarCrop.clear();
     if (cardInputRef.current) cardInputRef.current.value = "";
     if (avatarInputRef.current) avatarInputRef.current.value = "";
   }
@@ -236,7 +249,9 @@ export function HbdUploadClient() {
       return;
     }
 
-    setAvatarMedia(file, URL.createObjectURL(file));
+    // Picking the same photo again must still open the cropper.
+    event.target.value = "";
+    avatarCrop.start(file);
   }
 
   function clearCard() {
@@ -248,6 +263,7 @@ export function HbdUploadClient() {
   function clearAvatar() {
     setError(null);
     setAvatarMedia(null, undefined);
+    avatarCrop.clear();
     if (avatarInputRef.current) avatarInputRef.current.value = "";
   }
 
@@ -386,12 +402,19 @@ export function HbdUploadClient() {
 
   return (
     <div className="relative overflow-hidden">
+      {avatarCrop.dialog}
       <div
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(232,90,122,0.28),transparent_55%),radial-gradient(ellipse_60%_40%_at_80%_60%,rgba(243,184,196,0.08),transparent_50%)]"
         aria-hidden
       />
 
-      <div className="relative mx-auto max-w-6xl px-5 pb-24 pt-28 sm:px-10 sm:pt-32 lg:px-16">
+      <div
+        className={cn(
+          "relative mx-auto max-w-6xl px-5 pb-24 sm:px-10 lg:px-16",
+          // The site header is fixed on the regular page; the standalone page has none.
+          standalone ? "pt-12 sm:pt-16" : "pt-28 sm:pt-32"
+        )}
+      >
         {clearConfirmOpen ? (
           <div
             className="fixed inset-0 z-[80] flex items-center justify-center bg-[#140a0d]/75 p-4 backdrop-blur-sm"
@@ -435,9 +458,11 @@ export function HbdUploadClient() {
           </div>
         ) : null}
 
-        <BackLink href="/hbd/2026" className="mb-8">
-          กลับไปดูคำอวยพร
-        </BackLink>
+        {standalone ? null : (
+          <BackLink href="/hbd/2026" className="mb-8">
+            กลับไปดูคำอวยพร
+          </BackLink>
+        )}
 
         <div className="mx-auto max-w-lg">
         {/* 1. Hero */}
@@ -574,6 +599,16 @@ export function HbdUploadClient() {
                       className="sr-only"
                     />
                   </label>
+                  {avatarFile && avatarCrop.canRecrop ? (
+                    <button
+                      type="button"
+                      onClick={avatarCrop.recrop}
+                      className={cn(softBtnClass, "mt-2")}
+                    >
+                      <Crop className="size-3.5" />
+                      ครอบใหม่
+                    </button>
+                  ) : null}
                   {avatarFile || avatarPreviewUrl ? (
                     <button
                       type="button"
@@ -850,26 +885,41 @@ export function HbdUploadClient() {
               </p>
             ) : null}
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Link
-                href="/hbd/2026"
-                prefetch={false}
-                className={cn(
-                  buttonVariants({ size: "lg" }),
-                  "rounded-2xl border-transparent bg-[#e85a7a] font-normal text-[#140a0d] hover:bg-[#f3b8c4]"
-                )}
-              >
-                ไปดูคำอวยพร
-              </Link>
-              <button
-                type="button"
-                onClick={resetForm}
-                className={cn(
-                  buttonVariants({ variant: "outline", size: "lg" }),
-                  "rounded-2xl border-white/15 text-[#f7d7de] hover:bg-white/5"
-                )}
-              >
-                ส่งอีกใบ
-              </button>
+              {standalone ? (
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className={cn(
+                    buttonVariants({ size: "lg" }),
+                    "rounded-2xl border-transparent bg-[#e85a7a] font-normal text-[#140a0d] hover:bg-[#f3b8c4]"
+                  )}
+                >
+                  ส่งการ์ดอีกใบ
+                </button>
+              ) : (
+                <>
+                <Link
+                  href="/hbd/2026"
+                  prefetch={false}
+                  className={cn(
+                    buttonVariants({ size: "lg" }),
+                    "rounded-2xl border-transparent bg-[#e85a7a] font-normal text-[#140a0d] hover:bg-[#f3b8c4]"
+                  )}
+                >
+                  ไปดูคำอวยพร
+                </Link>
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "lg" }),
+                    "rounded-2xl border-white/15 text-[#f7d7de] hover:bg-white/5"
+                  )}
+                >
+                  ส่งอีกใบ
+                </button>
+                </>
+              )}
             </div>
           </div>
         ) : null}

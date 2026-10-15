@@ -61,16 +61,59 @@ export async function shrinkImageFile(
   ctx.imageSmoothingQuality = "high";
   ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-  const webp = await canvasToBlob(canvas, "image/webp", 0.9);
+  return (await encodeCanvas(canvas, ctx, file.name, 0.9)) ?? file;
+}
+
+/**
+ * WebP, or JPEG on browsers that can't encode WebP. Null when the browser
+ * could not encode at all.
+ */
+async function encodeCanvas(
+  canvas: HTMLCanvasElement,
+  ctx: CanvasRenderingContext2D,
+  name: string,
+  quality: number
+): Promise<File | null> {
+  const webp = await canvasToBlob(canvas, "image/webp", quality);
   if (webp && webp.type === "image/webp") {
-    return new File([webp], renamed(file.name, "webp"), { type: "image/webp" });
+    return new File([webp], renamed(name, "webp"), { type: "image/webp" });
   }
 
   // JPEG has no alpha: paint white behind the image before encoding.
   ctx.globalCompositeOperation = "destination-over";
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  const jpeg = await canvasToBlob(canvas, "image/jpeg", 0.9);
-  if (!jpeg) return file;
-  return new File([jpeg], renamed(file.name, "jpg"), { type: "image/jpeg" });
+  const jpeg = await canvasToBlob(canvas, "image/jpeg", quality);
+  if (!jpeg) return null;
+  return new File([jpeg], renamed(name, "jpg"), { type: "image/jpeg" });
+}
+
+/** Square region of the source image, in source pixels (from react-easy-crop). */
+export type CropArea = { x: number; y: number; width: number; height: number };
+
+/**
+ * Cut the part chosen in the avatar cropper into a square image at most
+ * `maxEdge` wide. Lowers the quality once if the result is over `maxBytes`.
+ */
+export async function cropAvatarFile(
+  file: File,
+  area: CropArea,
+  { maxEdge, maxBytes }: { maxEdge: number; maxBytes: number }
+): Promise<File> {
+  const img = await loadImage(file);
+  const size = Math.max(1, Math.min(maxEdge, Math.round(area.width)));
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("canvas unavailable");
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(img, area.x, area.y, area.width, area.height, 0, 0, size, size);
+
+  for (const quality of [0.9, 0.75]) {
+    const out = await encodeCanvas(canvas, ctx, file.name, quality);
+    if (!out) break;
+    if (out.size <= maxBytes || quality === 0.75) return out;
+  }
+  throw new Error("encode failed");
 }

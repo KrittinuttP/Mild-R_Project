@@ -11,6 +11,7 @@ import {
   Eye,
   EyeOff,
   FileLock2,
+  ImageIcon,
   Lock,
   Radio,
   Settings2,
@@ -65,6 +66,13 @@ const TOOLS: AdminTool[] = [
     icon: Cake,
   },
   {
+    href: "/admin/fanart",
+    title: "Fan art submissions",
+    titleLocal: "อนุมัติแฟนอาร์ต",
+    description: "รายการอัปโหลดจาก /fanart/upload",
+    icon: ImageIcon,
+  },
+  {
     href: "/live/ops/trends",
     title: "Live view trends",
     titleLocal: "สถิติและเทรนด์สตรีม",
@@ -94,6 +102,7 @@ export function AdminHubClient() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pendingHbd, setPendingHbd] = useState(0);
+  const [pendingFanart, setPendingFanart] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -113,6 +122,15 @@ export function AdminHubClient() {
                 pendingCount?: number;
               };
               setPendingHbd(countData.pendingCount ?? 0);
+            }
+            const fanartRes = await fetch(
+              "/api/fanart/admin/submissions?countOnly=1"
+            );
+            if (fanartRes.ok) {
+              const fanartData = (await fanartRes.json()) as {
+                pendingCount?: number;
+              };
+              setPendingFanart(fanartData.pendingCount ?? 0);
             }
           } catch {
             /* ignore */
@@ -291,7 +309,11 @@ export function AdminHubClient() {
         {TOOLS.map((tool) => {
           const Icon = tool.icon;
           const badge =
-            tool.href === "/admin/hbd" ? pendingHbd : (tool.badge ?? 0);
+            tool.href === "/admin/hbd"
+              ? pendingHbd
+              : tool.href === "/admin/fanart"
+                ? pendingFanart
+                : (tool.badge ?? 0);
           return (
             <li key={tool.href}>
               <Link
@@ -346,6 +368,24 @@ export function AdminHubClient() {
         >
           <Cake className="size-3.5 text-[#e85a7a]" />
           <span>หน้าอัปโหลดคำอวยพร HBD (สาธารณะ)</span>
+          <ArrowUpRight className="size-3.5" />
+        </Link>
+        <Link
+          href="/upload/hbd"
+          prefetch={false}
+          className="inline-flex items-center gap-1.5 text-[#f3b8c4]/70 transition hover:text-[#fff5f7]"
+        >
+          <Cake className="size-3.5 text-[#e85a7a]" />
+          <span>ลิงก์อัปโหลด HBD แยก (ไม่มีเมนู)</span>
+          <ArrowUpRight className="size-3.5" />
+        </Link>
+        <Link
+          href="/upload/fanart"
+          prefetch={false}
+          className="inline-flex items-center gap-1.5 text-[#f3b8c4]/70 transition hover:text-[#fff5f7]"
+        >
+          <ImageIcon className="size-3.5 text-[#e85a7a]" />
+          <span>ลิงก์อัปโหลดแฟนอาร์ตแยก (ไม่มีเมนู)</span>
           <ArrowUpRight className="size-3.5" />
         </Link>
       </div>

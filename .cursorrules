@@ -19,6 +19,22 @@ Whenever writing code or suggesting installations, use ONLY this stack. Do NOT s
 4. **UI Components:** shadcn/ui (Buttons, Dialogs, Cards, etc.) — Tailwind-based, customizable, GSAP-friendly
 5. **Icons:** lucide-react
 
+## Library-First Policy
+
+1. Before building a non-trivial feature (image crop, QR, date picker,
+   drag & drop, carousel, etc.), look for a well-maintained library first.
+   Do not hand-roll it unless necessary.
+2. Hand-rolling is allowed only when no suitable library exists, the library
+   conflicts with the Tech Stack (e.g. animation libraries other than GSAP,
+   UI kits other than shadcn/ui), or the code is only a few lines.
+3. When proposing a library, state: name, exact version (released at least
+   2 weeks ago), license, last release / maintenance, React 19 compatibility,
+   and why it beats hand-rolling. Wait for approval before installing.
+4. Pin exact versions in package.json.
+
+The Tech Stack rule above still applies: a library must not replace any part of
+that stack (no Material UI, Bootstrap, Framer Motion, etc.).
+
 ## Project Focus
 
 - Mild-R profile, lore, and related fanclub content

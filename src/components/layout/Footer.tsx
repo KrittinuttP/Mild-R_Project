@@ -37,7 +37,7 @@ const DEVELOPER = {
   xUrl: "https://x.com/ZAYZHIK_KungV2",
 } as const;
 
-function DeveloperCredit() {
+export function DeveloperCredit() {
   return (
     <p className="m-0 inline-flex flex-wrap items-center gap-x-1.5 gap-y-0 leading-none">
       <span>Made with 🩷 by</span>
