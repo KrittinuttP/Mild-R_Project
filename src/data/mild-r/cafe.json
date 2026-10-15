@@ -1,18 +1,18 @@
 {
-  "title": "Mild-R: The Unsolved Mystery Cafe",
-  "titleLocal": "คาเฟ่ปริศนาที่ยังไม่คลี่คลาย",
+  "title": "Mild-R: Sherlock Sweetie",
+  "titleLocal": "คาเฟ่วันเกิดของนักสืบ Mild-R",
   "tagline": "รายงานพิเศษจากสถานที่เกิดเหตุ: คาเฟ่ลึกลับแห่งนี้ เชิญชวนนักสืบฮันนี่ทุกท่าน มาร่วมไขปริศนาจากหลากหลายเมนูในงาน พร้อมช่วยกันคลี่คลายคดีต่างๆ และเก็บกู้หลักฐานจากสถานที่เกิดเหตุนี้",
   "status": "upcoming",
-  "statusLabel": "CRIME SCENE SECURED",
-  "statusLabelLocal": "พื้นที่เกิดเหตุถูกควบคุม",
+  "statusLabel": "CASE FILE · OPEN",
+  "statusLabelLocal": "แฟ้มคดีเปิดแล้ว",
   "edition": {
-    "kicker": "Unsolved Mystery Cafe",
-    "kickerLocal": "คาเฟ่ลึกลับ",
-    "caseNo": "CASE · MR-UMC-001",
+    "kicker": "Birthday Case File",
+    "kickerLocal": "แฟ้มคดีวันเกิด",
+    "caseNo": "CASE No. 0612",
     "dateline": "Vol. I · No. 1 · Mild-R Fanclub"
   },
   "heroImage": "/assets/mild/kv/Mild-R_Name_Art.png",
-  "heroAlt": "Mild-R key visual — The Unsolved Mystery Cafe",
+  "heroAlt": "Mild-R key visual — Sherlock Sweetie",
   "heroCutout": "/assets/cafe/kv/KV_cafe.webp",
   "heroCutoutSilhouette": "/assets/cafe/kv/KV_cafe_shadow.webp",
   "dispatch": {
@@ -137,7 +137,7 @@
             "kind": "mission",
             "name": "Evidence Board Mission",
             "nameLocal": "ภารกิจกระดานเบาะแส",
-            "detail": "เปิดพื้นที่ให้นักสืบเขียนโพสต์อิตข้อความถึงเป้าหมาย (Mild-R) แล้วนำมาแปะเชื่อมโยงเส้นด้ายบนกระดาน",
+            "detail": "เปิดพื้นที่ให้นักสืบเขียนโพสต์อิตข้อความถึงนักสืบ Mild-R แล้วนำมาแปะเชื่อมโยงเส้นด้ายบนกระดาน",
             "caption": "Field · Evidence Board",
             "image": "/assets/cafe/event/03-board.jpg",
             "imageAlt": "Evidence Board Mission (รูปตัวอย่าง)"
@@ -372,7 +372,7 @@
     "title": "Closing Note",
     "titleLocal": "สรุปฉบับนี้",
     "body": [
-      "Mild-R: The Unsolved Mystery Cafe คือโปรเจกต์คาเฟ่ที่แฟนคลับ Honeycomb จัดทำเอง — จำลองพื้นที่คาเฟ่ให้กลายเป็นสถานที่เกิดเหตุลึกลับ เชิญชวนนักสืบฮันนี่มาร่วมไขปริศนา คลี่คลายคดี และเก็บกู้หลักฐาน",
+      "Mild-R: Sherlock Sweetie คือโปรเจกต์คาเฟ่ที่แฟนคลับ Honeycomb จัดทำเอง — จำลองพื้นที่คาเฟ่ให้กลายเป็นสถานที่เกิดเหตุลึกลับ เชิญชวนนักสืบฮันนี่มาร่วมไขปริศนา คลี่คลายคดี และเก็บกู้หลักฐาน",
       "เคสถูกกำหนดเปิดวันที่ 2026 · 12 · 06 เวลา 10:00–18:00 ที่ SOCIEFEE × CHOUXSTORY (MRT หัวลำโพง Exit 2) · ติดตามประกาศเพิ่มเติมได้ที่ @Mild_Honeycomb"
     ],
     "ctas": [

@@ -238,6 +238,33 @@
   animation: ecg-trace var(--heart-ecg) linear infinite;
 }
 
+/* Cafe · Sherlock Sweetie palette (G00 / GB01). Use as `bg-cafe-ground`,
+   `text-cafe-gold/70`, … — keep raw hex out of the cafe components.
+   Contrast (WCAG): cream on ground 12.3, gold on ground 6.3, muted on glow 4.5,
+   ink on cream 13.4, ink on gold 6.9. Pink is for hearts only. */
+@theme static {
+  --color-cafe-ground: #0f2a24;
+  --color-cafe-glow: #1e4a40;
+  --color-cafe-deep: #0a1f1a;
+  --color-cafe-felt: #163a31;
+  --color-cafe-void: #0b1d18;
+  --color-cafe-void-soft: #24463d;
+  --color-cafe-gold: #c9a14a;
+  --color-cafe-gold-soft: #e3c77e;
+  --color-cafe-gold-pale: #e9d9a6;
+  --color-cafe-gold-deep: #7a5c1c;
+  --color-cafe-cream: #f1e6cf;
+  --color-cafe-cream-light: #fbf5e8;
+  --color-cafe-blush: #efd8cc;
+  --color-cafe-text: #ddd4c2;
+  --color-cafe-muted: #b5ad9c;
+  --color-cafe-heart: #f25c9a;
+  --color-cafe-ink: #14211c;
+  --color-cafe-ink-soft: #34433c;
+  --color-cafe-ink-muted: #556159;
+  --color-cafe-forest: #1e4a40;
+}
+
 @keyframes cafe-tape-marquee {
   from {
     transform: translateX(0);

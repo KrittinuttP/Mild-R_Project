@@ -78,12 +78,12 @@ function MenuPlate({
   return (
     <figure
       className={cn(
-        "relative flex min-h-0 flex-1 flex-col border border-[#9a7b5a]/30 bg-[#1a1410] p-2 sm:p-2.5",
+        "relative flex min-h-0 flex-1 flex-col border border-cafe-gold/30 bg-cafe-ink p-2 sm:p-2.5",
         className
       )}
     >
       <div className="mb-1.5 flex items-center justify-between gap-2">
-        <span className="text-[0.58rem] tracking-[0.2em] text-[#c46a7a] uppercase">
+        <span className="text-[0.58rem] tracking-[0.2em] text-cafe-gold-soft uppercase">
           Plate {plateLabel(index)}
         </span>
         {onZoom ? (
@@ -93,7 +93,7 @@ function MenuPlate({
             aria-label={`ขยาย ${item.caption ?? item.imageAlt ?? `แผ่น ${index + 1}`}`}
             className={cn(
               buttonVariants({ variant: "ghost", size: "icon-xs" }),
-              "rounded-none text-[#c4b8a8] hover:bg-[#a84d5f]/20 hover:text-[#f4ebe3]"
+              "rounded-none text-cafe-muted hover:bg-cafe-gold/20 hover:text-cafe-cream"
             )}
           >
             <ZoomIn className="size-3.5" />
@@ -107,11 +107,11 @@ function MenuPlate({
         className="h-full max-h-[52dvh] w-full object-contain md:max-h-[56dvh]"
       />
       <figcaption className="mt-2 min-h-[2.4rem] text-center">
-        <p className={cn(SERIF, "text-sm text-[#f4ebe3] sm:text-base")}>
+        <p className={cn(SERIF, "text-sm text-cafe-cream sm:text-base")}>
           {item.caption ?? `Plate ${plateLabel(index)}`}
         </p>
         {item.captionLocal ? (
-          <p className={cn(DISPLAY, "text-[0.7rem] text-[#c4b8a8] sm:text-xs")}>
+          <p className={cn(DISPLAY, "text-[0.7rem] text-cafe-muted sm:text-xs")}>
             {item.captionLocal}
           </p>
         ) : null}
@@ -123,7 +123,7 @@ function MenuPlate({
 function BookSpine() {
   return (
     <div className="relative z-10 w-3 shrink-0 self-stretch md:w-4" aria-hidden>
-      <div className="absolute inset-y-0 left-1/2 w-[3px] -translate-x-1/2 bg-gradient-to-b from-[#5c4636] via-[#c4a882] to-[#5c4636] opacity-90" />
+      <div className="absolute inset-y-0 left-1/2 w-[3px] -translate-x-1/2 bg-gradient-to-b from-cafe-ink-muted via-cafe-gold-soft to-cafe-ink-muted opacity-90" />
       <div className="pointer-events-none absolute inset-y-0 -left-10 w-10 bg-gradient-to-r from-transparent to-black/40" />
       <div className="pointer-events-none absolute inset-y-0 -right-10 w-10 bg-gradient-to-l from-transparent to-black/40" />
     </div>
@@ -135,7 +135,7 @@ function EmptyLeaf({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "flex h-full min-h-[52dvh] flex-1 bg-[#0e0b09] md:min-h-[56dvh]",
+        "flex h-full min-h-[52dvh] flex-1 bg-cafe-void md:min-h-[56dvh]",
         className
       )}
       aria-hidden
@@ -145,8 +145,8 @@ function EmptyLeaf({ className }: { className?: string }) {
 
 function OddBlankPlate() {
   return (
-    <div className="flex h-full min-h-[52dvh] flex-1 flex-col items-center justify-center border border-dashed border-[#9a7b5a]/30 bg-[#14100c] md:min-h-[56dvh]">
-      <p className="text-[0.65rem] tracking-[0.22em] text-[#9a7b5a] uppercase">
+    <div className="flex h-full min-h-[52dvh] flex-1 flex-col items-center justify-center border border-dashed border-cafe-gold/30 bg-cafe-void md:min-h-[56dvh]">
+      <p className="text-[0.65rem] tracking-[0.22em] text-cafe-gold uppercase">
         Classified
       </p>
     </div>
@@ -171,7 +171,7 @@ function MenuCover({
       type="button"
       onClick={onOpen}
       className={cn(
-        "relative flex h-full min-h-[52dvh] w-full flex-col items-center justify-center overflow-hidden border border-[#9a7b5a]/35 bg-[#14100c] text-left md:min-h-[56dvh]",
+        "relative flex h-full min-h-[52dvh] w-full flex-col items-center justify-center overflow-hidden border border-cafe-gold/35 bg-cafe-void text-left md:min-h-[56dvh]",
         className
       )}
     >
@@ -184,26 +184,26 @@ function MenuCover({
         />
       ) : null}
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#0a0c0e]/40 via-[#0a0c0e]/55 to-[#0a0c0e]/80"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-cafe-ground/40 via-cafe-ground/55 to-cafe-ground/80"
         aria-hidden
       />
       <div
         className={cn(
-          "relative z-10 mx-5 max-w-sm rotate-[-3.5deg] border-[3px] border-[#a84d5f]/55 bg-[#f4ebe3] px-5 py-4 shadow-[6px_10px_0_rgba(0,0,0,0.28)] sm:px-7 sm:py-5"
+          "relative z-10 mx-5 max-w-sm rotate-[-3.5deg] border-[3px] border-cafe-gold/55 bg-cafe-cream px-5 py-4 shadow-[6px_10px_0_rgba(0,0,0,0.28)] sm:px-7 sm:py-5"
         )}
       >
-        <p className="text-[0.58rem] tracking-[0.22em] text-[#a84d5f] uppercase">
+        <p className="text-[0.58rem] tracking-[0.22em] font-bold text-cafe-gold-deep uppercase">
           Venue Menu
         </p>
         <p
           className={cn(
             SERIF,
-            "mt-2 text-xl font-normal leading-tight text-[#1a1410] sm:text-2xl md:text-3xl"
+            "mt-2 text-xl font-normal leading-tight text-cafe-ink sm:text-2xl md:text-3xl"
           )}
         >
           {prettyVenueName(label)}
         </p>
-        <p className={cn(DISPLAY, "mt-2 text-sm text-[#6b5340]")}>
+        <p className={cn(DISPLAY, "mt-2 text-sm text-cafe-ink-muted")}>
           พลิกเพื่อเปิดเมนู
         </p>
       </div>
@@ -415,14 +415,14 @@ export function CafeVenueMenuBook({
     <div id="venue-menu" className="mt-12 sm:mt-16">
       <ScrollReveal variant="editorial">
         <div className="flex flex-wrap items-end justify-between gap-2">
-          <p className="text-[0.65rem] tracking-[0.28em] text-[#9a7b5a] uppercase sm:text-[0.68rem]">
+          <p className="text-[0.65rem] tracking-[0.28em] text-cafe-gold uppercase sm:text-[0.68rem]">
             Evidence Ledger · House Menu
           </p>
         </div>
         <h3
           className={cn(
             SERIF,
-            "mt-3 text-[1.5rem] font-normal text-[#f4ebe3] sm:text-3xl"
+            "mt-3 text-[1.5rem] font-normal text-cafe-cream sm:text-3xl"
           )}
         >
           {menu.title}
@@ -430,7 +430,7 @@ export function CafeVenueMenuBook({
             <span
               className={cn(
                 DISPLAY,
-                "mt-1.5 block text-base font-normal text-[#c4b8a8] sm:text-lg"
+                "mt-1.5 block text-base font-normal text-cafe-muted sm:text-lg"
               )}
             >
               {menu.titleLocal}
@@ -442,25 +442,25 @@ export function CafeVenueMenuBook({
       <ScrollReveal variant="float" delay={0.08}>
         <div
           ref={coverRef}
-          className="relative mt-6 overflow-hidden border border-[#9a7b5a]/30 bg-[#14100c] sm:mt-8"
+          className="relative mt-6 overflow-hidden border border-cafe-gold/30 bg-cafe-void sm:mt-8"
         >
           <div
             className="pointer-events-none absolute inset-y-0 left-0 w-3 bg-[repeating-linear-gradient(180deg,#9a7b5a_0_10px,transparent_10px_18px)] opacity-40 sm:w-4"
             aria-hidden
           />
           <div
-            className="pointer-events-none absolute -right-8 -top-10 size-28 rounded-full border border-[#a84d5f]/35 opacity-50 sm:size-36"
+            className="pointer-events-none absolute -right-8 -top-10 size-28 rounded-full border border-cafe-gold/35 opacity-50 sm:size-36"
             aria-hidden
           />
           <div className="relative grid gap-6 px-5 py-8 pl-8 sm:grid-cols-[1fr_auto] sm:items-end sm:px-10 sm:py-10 sm:pl-12">
             <div>
-              <p className="text-[0.62rem] tracking-[0.22em] text-[#c46a7a] uppercase">
+              <p className="text-[0.62rem] tracking-[0.22em] text-cafe-gold-soft uppercase">
                 Case folder · {items.length} plates
               </p>
               <p
                 className={cn(
                   SERIF,
-                  "mt-3 max-w-xl text-base leading-relaxed text-[#d8d0c4] sm:text-lg"
+                  "mt-3 max-w-xl text-base leading-relaxed text-cafe-text sm:text-lg"
                 )}
               >
                 {menu.note ??
@@ -472,7 +472,7 @@ export function CafeVenueMenuBook({
               onClick={openDossier}
               className={cn(
                 buttonVariants({ size: "lg" }),
-                "rounded-none border-transparent bg-[#a84d5f] text-[#f4ebe3] hover:bg-[#c46a7a]"
+                "rounded-none border-transparent bg-cafe-gold text-cafe-ink hover:bg-cafe-gold-soft"
               )}
             >
               <BookOpen className="size-4" />
@@ -484,7 +484,7 @@ export function CafeVenueMenuBook({
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
-          className="max-h-[96dvh] w-[min(100%,calc(100vw-0.75rem))] max-w-5xl overflow-hidden rounded-none border-[#9a7b5a]/30 bg-[#0a0c0e] p-3 text-[#f4ebe3] md:max-w-6xl md:p-5 lg:max-w-7xl"
+          className="max-h-[96dvh] w-[min(100%,calc(100vw-0.75rem))] max-w-5xl overflow-hidden rounded-none border-cafe-gold/30 bg-cafe-ground p-3 text-cafe-cream md:max-w-6xl md:p-5 lg:max-w-7xl"
           showCloseButton
         >
           <DialogHeader className="pr-10">
@@ -492,7 +492,7 @@ export function CafeVenueMenuBook({
               {menu.title}
               {menu.titleLocal ? ` · ${menu.titleLocal}` : ""}
             </DialogTitle>
-            <DialogDescription className="text-[0.65rem] tracking-[0.2em] text-[#9a7b5a] uppercase">
+            <DialogDescription className="text-[0.65rem] tracking-[0.2em] text-cafe-gold uppercase">
               พลิกรอบสันหนังสือแบบเดียวกัน
             </DialogDescription>
           </DialogHeader>
@@ -514,7 +514,7 @@ export function CafeVenueMenuBook({
             }}
           >
             {spread ? (
-              <div className="flex h-full min-h-[64dvh] w-full items-stretch overflow-hidden bg-[#100c0a] shadow-[inset_0_0_90px_rgba(0,0,0,0.35)]">
+              <div className="flex h-full min-h-[64dvh] w-full items-stretch overflow-hidden bg-cafe-void shadow-[inset_0_0_90px_rgba(0,0,0,0.35)]">
                 <div
                   ref={leftLeafRef}
                   className="flex min-h-0 min-w-0 flex-1 will-change-transform"
@@ -560,7 +560,7 @@ export function CafeVenueMenuBook({
             ) : (
               <div
                 ref={mobileLeafRef}
-                className="flex min-h-[58dvh] w-full will-change-transform overflow-hidden bg-[#100c0a] shadow-[inset_0_0_70px_rgba(0,0,0,0.3)]"
+                className="flex min-h-[58dvh] w-full will-change-transform overflow-hidden bg-cafe-void shadow-[inset_0_0_70px_rgba(0,0,0,0.3)]"
                 style={{ transformStyle: "preserve-3d" }}
               >
                 {onCover ? (
@@ -599,14 +599,14 @@ export function CafeVenueMenuBook({
               disabled={onCover}
               className={cn(
                 buttonVariants({ variant: "ghost", size: "icon" }),
-                "rounded-none border border-[#9a7b5a]/35 text-[#f4ebe3] disabled:opacity-30"
+                "rounded-none border border-cafe-gold/35 text-cafe-cream disabled:opacity-30"
               )}
             >
               <ChevronLeft className="size-5" />
             </button>
 
             <div className="flex min-w-0 flex-1 flex-col items-center gap-2">
-              <p className="text-[0.65rem] tracking-[0.18em] text-[#9a7b5a] uppercase">
+              <p className="text-[0.65rem] tracking-[0.18em] text-cafe-gold uppercase">
                 {onCover
                   ? "Cover · ปกเมนู"
                   : spread
@@ -633,7 +633,7 @@ export function CafeVenueMenuBook({
                       className={cn(
                         "rounded-full transition",
                         i === 0 ? "size-2.5" : "size-2",
-                        i === activeDot ? "bg-[#c46a7a]" : "bg-[#9a7b5a]/35"
+                        i === activeDot ? "bg-cafe-gold-soft" : "bg-cafe-gold/35"
                       )}
                     />
                   );
@@ -650,7 +650,7 @@ export function CafeVenueMenuBook({
               disabled={!onCover && index >= lastStart}
               className={cn(
                 buttonVariants({ variant: "ghost", size: "icon" }),
-                "rounded-none border border-[#9a7b5a]/35 text-[#f4ebe3] disabled:opacity-30"
+                "rounded-none border border-cafe-gold/35 text-cafe-cream disabled:opacity-30"
               )}
             >
               <ChevronRight className="size-5" />

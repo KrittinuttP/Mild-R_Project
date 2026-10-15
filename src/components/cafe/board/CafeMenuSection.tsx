@@ -36,14 +36,14 @@ function SetCard({ item }: { item: CafePromoSetItem }) {
       className={cn(
         "flex h-full flex-col",
         highlight &&
-          "shadow-[0_0_0_4px_#0a0c0e,0_0_0_7px_#f2c230,0_14px_26px_rgba(0,0,0,0.45)]"
+          "shadow-[0_0_0_4px_var(--color-cafe-ground),0_0_0_7px_var(--color-cafe-gold),0_14px_26px_rgba(0,0,0,0.45)]"
       )}
     >
       <header
         className={cn(
           TYPE,
           "flex items-center justify-between gap-3 px-4 py-3 text-sm font-bold tracking-[0.14em]",
-          highlight ? "bg-[#1a1410] text-[#f2c230]" : "bg-[#7a1f2a] text-[#f4ebe3]"
+          highlight ? "bg-cafe-ink text-cafe-gold" : "bg-cafe-forest text-cafe-cream"
         )}
       >
         <span>{item.name}</span>
@@ -53,10 +53,10 @@ function SetCard({ item }: { item: CafePromoSetItem }) {
       <div className="flex flex-1 flex-col gap-3 px-4 py-4">
         {menu.length > 0 ? (
           <div>
-            <p className={cn(TYPE, "text-[0.65rem] tracking-[0.14em] text-[#5c4636] uppercase")}>
+            <p className={cn(TYPE, "text-[0.65rem] tracking-[0.14em] text-cafe-ink-muted uppercase")}>
               ในเซตมี
             </p>
-            <ul className="mt-1 space-y-1 text-sm text-[#3d3024]">
+            <ul className="mt-1 space-y-1 text-sm text-cafe-ink-soft">
               {menu.map((line, index) => (
                 <li key={`${index}-${line}`}>{line}</li>
               ))}
@@ -65,7 +65,7 @@ function SetCard({ item }: { item: CafePromoSetItem }) {
         ) : null}
         {gifts.length > 0 ? (
           <div>
-            <p className={cn(TYPE, "text-[0.65rem] tracking-[0.14em] text-[#5c4636] uppercase")}>
+            <p className={cn(TYPE, "text-[0.65rem] tracking-[0.14em] text-cafe-ink-muted uppercase")}>
               ของแถม · Giveaway
             </p>
             <ul className="mt-2 flex flex-wrap gap-2">
@@ -75,8 +75,8 @@ function SetCard({ item }: { item: CafePromoSetItem }) {
                   <li
                     key={`${index}-${line}`}
                     className={cn(
-                      "bg-[#b9e6e1] px-2 py-1 text-sm text-[#0f4f55] [clip-path:polygon(0_0,calc(100%-8px)_0,100%_50%,calc(100%-8px)_100%,0_100%)]",
-                      lastHighlight && "bg-[#f2c230] text-[#1a1410]"
+                      "bg-cafe-gold-pale px-2 py-1 text-sm text-cafe-ink [clip-path:polygon(0_0,calc(100%-8px)_0,100%_50%,calc(100%-8px)_100%,0_100%)]",
+                      lastHighlight && "bg-cafe-gold text-cafe-ink"
                     )}
                   >
                     {line}
@@ -87,7 +87,7 @@ function SetCard({ item }: { item: CafePromoSetItem }) {
           </div>
         ) : null}
         {highlight ? (
-          <p className={cn(HAND, "mt-auto text-lg text-[#7a1f2a]")}>ได้มากที่สุด</p>
+          <p className={cn(HAND, "mt-auto text-lg text-cafe-forest")}>ได้มากที่สุด</p>
         ) : null}
       </div>
       ) : null}
@@ -149,7 +149,7 @@ export function CafeMenuSection({ cafe, show, showDispatch }: CafeMenuSectionPro
                   <header
                     className={cn(
                       TYPE,
-                      "flex items-center justify-between bg-[#7a1f2a] px-3 py-2 text-xs font-bold tracking-[0.14em] text-[#f4ebe3]"
+                      "flex items-center justify-between bg-cafe-forest px-3 py-2 text-xs font-bold tracking-[0.14em] text-cafe-cream"
                     )}
                   >
                     <span>EVIDENCE</span>
@@ -168,12 +168,12 @@ export function CafeMenuSection({ cafe, show, showDispatch }: CafeMenuSectionPro
                   <div className="px-4 py-4">
                     <h3 className={cn(TYPE, "text-lg font-bold")}>{item.name}</h3>
                     {item.nameLocal ? (
-                      <p className={cn(HAND, "mt-1 text-xl text-[#7a1f2a]")}>
+                      <p className={cn(HAND, "mt-1 text-xl text-cafe-forest")}>
                         {item.nameLocal}
                       </p>
                     ) : null}
                     {item.description ? (
-                      <p className="mt-2 text-sm leading-relaxed text-[#3d3024]">
+                      <p className="mt-2 text-sm leading-relaxed text-cafe-ink-soft">
                         {item.description}
                       </p>
                     ) : null}
@@ -193,11 +193,11 @@ export function CafeMenuSection({ cafe, show, showDispatch }: CafeMenuSectionPro
           {!hidden && sets ? (
             <div id="sets" className="mt-16 scroll-mt-24">
               {sets.eyebrow ? <p className={LABEL}>{sets.eyebrow}</p> : null}
-              <h3 className="mt-1 font-[family-name:var(--font-cafe-serif)] text-3xl text-[#f4ebe3]">
+              <h3 className="mt-1 font-[family-name:var(--font-cafe-serif)] text-3xl text-cafe-cream">
                 {sets.title}
               </h3>
               {sets.note ? (
-                <p className="mt-2 max-w-xl text-sm leading-relaxed text-[#d8d0c4]">
+                <p className="mt-2 max-w-xl text-sm leading-relaxed text-cafe-text">
                   {sets.note}
                 </p>
               ) : null}
@@ -212,9 +212,9 @@ export function CafeMenuSection({ cafe, show, showDispatch }: CafeMenuSectionPro
           {preorder && preorderOpen ? (
             <div
               data-motion="rise"
-              className="relative mt-12 grid overflow-hidden bg-[#f4ebe3] text-[#1a1410] shadow-[0_14px_26px_rgba(0,0,0,0.45)] md:grid-cols-[11rem_minmax(0,1fr)]"
+              className="relative mt-12 grid overflow-hidden bg-cafe-cream text-cafe-ink shadow-[0_14px_26px_rgba(0,0,0,0.45)] md:grid-cols-[11rem_minmax(0,1fr)]"
             >
-              <div className="flex items-center justify-center border-b border-dashed border-[#1a1410]/40 bg-[#f2c230] px-4 py-6 md:border-r md:border-b-0">
+              <div className="flex items-center justify-center border-b border-dashed border-cafe-ink/40 bg-cafe-gold px-4 py-6 md:border-r md:border-b-0">
                 <p className={cn(TYPE, "text-2xl font-bold tracking-[0.14em]")}>
                   PRE-ORDER
                 </p>
@@ -224,22 +224,22 @@ export function CafeMenuSection({ cafe, show, showDispatch }: CafeMenuSectionPro
                   {preorder.label}
                 </p>
                 {preorder.tentative ? (
-                  <p className={cn(HAND, "mt-2 text-lg text-[#7a1f2a]")}>
+                  <p className={cn(HAND, "mt-2 text-lg text-cafe-forest")}>
                     กำหนดการโดยประมาณ — รอประกาศยืนยัน
                   </p>
                 ) : null}
                 {preorder.detail ? (
-                  <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#3d3024]">
+                  <p className="mt-3 max-w-2xl text-sm leading-relaxed text-cafe-ink-soft">
                     {preorder.detail}
                   </p>
                 ) : null}
                 {priceReady ? (
-                  <p className="mt-3 inline-block bg-[#f2c230] px-2 py-1 text-sm font-semibold">
+                  <p className="mt-3 inline-block bg-cafe-gold px-2 py-1 text-sm font-semibold">
                     {priceReady}
                   </p>
                 ) : null}
                 {preorder.url ? (
-                  <div className="mt-4 flex flex-wrap items-end justify-between gap-4 border-t border-[#1a1410]/15 pt-4">
+                  <div className="mt-4 flex flex-wrap items-end justify-between gap-4 border-t border-cafe-ink/15 pt-4">
                     <div className={cn(TYPE, "space-y-1 text-xs tracking-[0.08em] uppercase")}>
                       <p>วันเปิดจอง · {preorder.label}</p>
                       {eventDay ? (
@@ -253,7 +253,7 @@ export function CafeMenuSection({ cafe, show, showDispatch }: CafeMenuSectionPro
                       href={preorder.url}
                       target={preorder.url.startsWith("http") ? "_blank" : undefined}
                       rel={preorder.url.startsWith("http") ? "noopener noreferrer" : undefined}
-                      className="inline-flex min-h-11 items-center bg-[#f2c230] px-4 text-sm font-semibold text-[#1a1410] transition hover:-translate-y-0.5"
+                      className="inline-flex min-h-11 items-center bg-cafe-gold px-4 text-sm font-semibold text-cafe-ink transition hover:-translate-y-0.5"
                     >
                       จองล่วงหน้า
                     </Link>

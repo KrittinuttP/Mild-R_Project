@@ -2,13 +2,17 @@ import type { CSSProperties, ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
-export const SERIF = "font-[family-name:var(--font-cafe-serif)]";
+/** Libre Baskerville for Latin, Noto Serif Thai for Thai in the same run. */
+export const SERIF =
+  "font-[family-name:var(--font-cafe-serif),var(--font-cafe-thai),serif]";
+export const THAI = "font-[family-name:var(--font-cafe-thai),serif]";
 export const TYPE = "font-[family-name:var(--font-cafe-type)]";
 export const HAND = "font-[family-name:var(--font-cafe-hand)]";
 
+/** Small caps label, as "CASE No. 0612" on GB01. */
 export const LABEL = cn(
-  TYPE,
-  "text-xs tracking-[0.14em] text-[#c4a882] uppercase"
+  SERIF,
+  "text-[11px] font-bold tracking-[0.22em] text-cafe-gold uppercase sm:text-xs"
 );
 
 export function tiltStyle(deg: number): CSSProperties {
@@ -28,7 +32,7 @@ export function Pin({ id, className }: PinProps) {
     <span
       data-pin={id}
       className={cn(
-        "absolute top-0 left-1/2 z-10 size-4 -translate-x-1/2 -translate-y-[calc(50%-2px)] rounded-full bg-[radial-gradient(circle_at_35%_35%,#ffd0db,#e85a7a_55%,#a8323f)] shadow-[0_0_12px_rgba(232,90,122,0.8)]",
+        "absolute top-0 left-1/2 z-10 size-4 -translate-x-1/2 -translate-y-[calc(50%-2px)] rounded-full bg-[radial-gradient(circle_at_35%_35%,#f6e4a8,#c9a14a_55%,#7a5c1c)] shadow-[0_0_12px_rgba(201,161,74,0.8)]",
         className
       )}
       aria-hidden
@@ -57,8 +61,8 @@ export function Stamp({
         TYPE,
         "inline-block border-[3px] px-2 py-1 text-xs font-bold tracking-[0.14em] uppercase opacity-90",
         tone === "paper"
-          ? "border-[#a8323f] text-[#a8323f]"
-          : "border-[#e85a7a] text-[#e85a7a]",
+          ? "border-cafe-gold-deep text-cafe-gold-deep"
+          : "border-cafe-gold text-cafe-gold",
         className
       )}
     >
@@ -87,7 +91,7 @@ export function Classified({
       <span
         className={cn(
           "break-all text-transparent select-none [-webkit-box-decoration-break:clone] [box-decoration-break:clone]",
-          tone === "paper" ? "bg-[#14100c]" : "bg-[#3a2f27]"
+          tone === "paper" ? "bg-cafe-void" : "bg-cafe-void-soft"
         )}
         aria-hidden
       >
@@ -133,7 +137,7 @@ export function SealedZone({
       id={id}
       data-motion="rise"
       className={cn(
-        "relative mt-10 scroll-mt-24 border border-[rgba(154,123,90,0.45)] shadow-[0_18px_32px_rgba(0,0,0,0.45)]",
+        "relative mt-10 scroll-mt-24 border border-[rgba(201,161,74,0.45)] shadow-[0_18px_32px_rgba(0,0,0,0.45)]",
         className
       )}
     >
@@ -142,7 +146,7 @@ export function SealedZone({
   );
 }
 
-/** Red stamp across a card whose section is hidden. The card must be `relative`. */
+/** Gold ink stamp across a card whose section is hidden. The card must be `relative`. */
 export function ClassifiedStamp({ small = false }: { small?: boolean }) {
   return (
     <span
@@ -151,7 +155,7 @@ export function ClassifiedStamp({ small = false }: { small?: boolean }) {
     >
       <Stamp
         className={cn(
-          "bg-[#f4ebe3]/85 whitespace-nowrap shadow-[0_2px_8px_rgba(0,0,0,0.25)]",
+          "bg-cafe-cream/85 whitespace-nowrap shadow-[0_2px_8px_rgba(0,0,0,0.25)]",
           small ? "px-1.5 text-[0.6rem]" : "text-sm"
         )}
       >
@@ -173,9 +177,9 @@ type PaperProps = {
 };
 
 const TONE = {
-  paper: "bg-[#f4ebe3] text-[#1a1410]",
-  pink: "bg-[#f3b8c4] text-[#1a1410]",
-  mint: "bg-[#b9e6e1] text-[#0f4f55]",
+  paper: "bg-cafe-cream text-cafe-ink",
+  pink: "bg-cafe-blush text-cafe-ink",
+  mint: "bg-cafe-gold-pale text-cafe-ink",
 };
 
 export function Paper({
@@ -227,17 +231,22 @@ export function SectionHead({
       )}
     >
       <div className={cn(align === "center" && "flex flex-col items-center")}>
-        {eyebrow ? <p className={LABEL}>{eyebrow}</p> : null}
+        {eyebrow ? (
+          <p className={cn(LABEL, "flex items-center gap-2.5")}>
+            <span className="size-1.5 rotate-45 bg-cafe-gold" aria-hidden />
+            {eyebrow}
+          </p>
+        ) : null}
         <h2
           className={cn(
             SERIF,
-            "mt-1 text-[2rem] leading-none font-medium text-[#f4ebe3] sm:text-[2.75rem]"
+            "mt-2 text-[1.85rem] leading-[1.1] font-bold text-cafe-cream sm:text-[2.6rem]"
           )}
         >
           {title}
         </h2>
         {titleLocal ? (
-          <p className={cn(HAND, "mt-2 text-[22px] leading-snug text-[#f3b8c4]")}>
+          <p className={cn(THAI, "mt-2 text-lg leading-snug text-cafe-gold-soft sm:text-xl")}>
             {titleLocal}
           </p>
         ) : null}
@@ -261,17 +270,17 @@ export function EmptyFrame({
   return (
     <div
       className={cn(
-        "flex items-center justify-center bg-[#14100c]",
+        "flex items-center justify-center bg-cafe-void",
         className
       )}
       style={{
         backgroundImage:
-          "repeating-linear-gradient(135deg, transparent 0 12px, rgba(244,235,227,0.05) 12px 13px)",
+          "repeating-linear-gradient(135deg, transparent 0 12px, rgba(241,230,207,0.05) 12px 13px)",
       }}
       aria-hidden
     >
       {letter ? (
-        <span className={cn(TYPE, "text-6xl font-bold text-[#f4ebe3]/80")}>
+        <span className={cn(TYPE, "text-6xl font-bold text-cafe-cream/80")}>
           {letter}
         </span>
       ) : null}
@@ -279,7 +288,22 @@ export function EmptyFrame({
   );
 }
 
-/** Cork panel in a wooden frame — the same surface as the overview board. */
+/**
+ * Green felt evidence board in a dark frame with a gold hairline — the same
+ * surface as the overview board. (Named for the cork board it replaced.)
+ */
+export const FELT_STYLE: CSSProperties = {
+  backgroundColor: "var(--color-cafe-felt)",
+  backgroundImage:
+    "radial-gradient(ellipse at 50% 40%, rgba(30,74,64,.9), transparent 70%), radial-gradient(circle at 18% 22%, rgba(241,230,207,.05) 0 1px, transparent 1.4px), radial-gradient(circle at 72% 64%, rgba(0,0,0,.18) 0 1px, transparent 1.4px)",
+  backgroundSize: "100% 100%, 7px 9px, 9px 11px",
+  boxShadow:
+    "inset 0 0 0 1px rgba(201,161,74,.55), inset 0 0 0 7px var(--color-cafe-void), inset 0 0 0 8px rgba(201,161,74,.25), inset 0 0 110px 24px rgba(5,14,12,.55), 0 30px 70px rgba(0,0,0,.55)",
+};
+
+export const FELT_FRAME =
+  "border-[10px] border-cafe-void outline outline-1 -outline-offset-1 outline-cafe-gold/40 min-[1100px]:border-[16px]";
+
 export function CorkBoard({
   children,
   className,
@@ -288,20 +312,7 @@ export function CorkBoard({
   className?: string;
 }) {
   return (
-    <div
-      className={cn(
-        "relative border-[12px] border-[#2a1c12] min-[1100px]:border-[18px]",
-        className
-      )}
-      style={{
-        backgroundColor: "#8a6a45",
-        backgroundImage:
-          "radial-gradient(circle at 18% 22%, rgba(255,255,255,.16) 0 1px, transparent 1.6px), radial-gradient(circle at 72% 64%, rgba(40,22,8,.28) 0 1px, transparent 1.6px), radial-gradient(circle at 40% 80%, rgba(255,236,210,.18) 0 1px, transparent 1.6px)",
-        backgroundSize: "13px 17px, 19px 23px, 16px 21px",
-        boxShadow:
-          "inset 0 0 0 2px #14100c, inset 0 0 120px 30px rgba(10,8,6,.6), 0 30px 70px rgba(0,0,0,.7)",
-      }}
-    >
+    <div className={cn("relative", FELT_FRAME, className)} style={FELT_STYLE}>
       {children}
     </div>
   );

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 import { Classified } from "@/components/cafe/board/pieces";
+import { SherlockSweetieLogo } from "@/components/cafe/SherlockSweetieLogo";
 import { buttonVariants } from "@/components/ui/button";
 import { scrollToHashTarget } from "@/lib/scroll-to-hash";
 import { cn } from "@/lib/utils";
@@ -97,7 +98,7 @@ export function CafeHeader({
       className={cn(
         "fixed inset-x-0 top-0 z-40 transition-[background-color,backdrop-filter,border-color] duration-300",
         scrolled || open
-          ? "border-b border-[#9a7b5a]/25 bg-[#0a0c0e]/88 backdrop-blur-md"
+          ? "border-b border-cafe-gold/25 bg-cafe-ground/88 backdrop-blur-md"
           : "border-b border-transparent bg-transparent"
       )}
     >
@@ -105,7 +106,8 @@ export function CafeHeader({
         <div className="min-w-0 flex-1">
           <Link
             href="/cafe"
-            className="block truncate font-[family-name:var(--font-cafe-serif-italic)] text-[0.95rem] font-semibold tracking-tight text-[#f4ebe3] sm:text-lg"
+            aria-label={masthead}
+            className="flex min-w-0 text-[15px] sm:text-[17px]"
             onClick={(event) => {
               if (onCafeRoot) {
                 event.preventDefault();
@@ -117,25 +119,25 @@ export function CafeHeader({
               setOpen(false);
             }}
           >
-            {masthead}
+            <SherlockSweetieLogo variant="inline" label={masthead} as="span" />
           </Link>
           <div className="mt-0.5 flex min-w-0 items-center gap-2 sm:flex">
             {cafe.dispatch.schedule.label ? (
-              <span className="shrink-0 font-[family-name:var(--font-cafe-type)] text-[0.65rem] tracking-[0.14em] text-[#f3b8c4]">
+              <span className="shrink-0 font-[family-name:var(--font-cafe-serif)] text-[0.65rem] font-bold tracking-[0.18em] text-cafe-gold-soft">
                 <Classified hidden={!showDate} tone="wall">
                   {cafe.dispatch.schedule.label}
                 </Classified>
               </span>
             ) : null}
             {cafe.edition?.caseNo ? (
-              <span className="hidden truncate text-[0.55rem] tracking-[0.14em] text-[#9a7b5a]/90 uppercase sm:inline sm:text-[0.58rem] sm:tracking-[0.18em]">
+              <span className="hidden truncate font-[family-name:var(--font-cafe-serif)] text-[0.55rem] tracking-[0.14em] text-cafe-gold/90 uppercase sm:inline sm:text-[0.58rem] sm:tracking-[0.18em]">
                 {cafe.edition.caseNo}
               </span>
             ) : null}
             {showHomeLink ? (
               <Link
                 href={mildRHomeHref}
-                className="hidden text-[0.65rem] tracking-[0.18em] text-[#a84d5f] uppercase transition hover:text-[#c46a7a] sm:inline"
+                className="hidden text-[0.65rem] tracking-[0.18em] text-cafe-gold uppercase transition hover:text-cafe-gold-soft sm:inline"
               >
                 เว็บหลัก →
               </Link>
@@ -157,7 +159,7 @@ export function CafeHeader({
               <span key={link.label} className="flex items-center">
                 {index > 0 ? (
                   <span
-                    className="mx-2 text-[#9a7b5a]/40 select-none"
+                    className="mx-2 text-cafe-gold/40 select-none"
                     aria-hidden
                   >
                     ·
@@ -174,13 +176,13 @@ export function CafeHeader({
                     "rounded-full px-2.5 py-1 text-[0.72rem] tracking-[0.12em] uppercase transition",
                     link.kind === "section" &&
                       link.hash === "#menu" &&
-                      "text-[#f2c230]",
+                      "text-cafe-gold",
                     active
-                      ? "bg-[#a84d5f]/15 text-[#f4ebe3]"
-                      : "hover:bg-white/[0.04] hover:text-[#f4ebe3]",
+                      ? "bg-cafe-gold/15 text-cafe-cream"
+                      : "hover:bg-white/[0.04] hover:text-cafe-cream",
                     !(link.kind === "section" && link.hash === "#menu") &&
                       !active &&
-                      "text-[#c4b8a8]"
+                      "text-cafe-muted"
                   )}
                   aria-current={active ? "page" : undefined}
                 >
@@ -195,7 +197,7 @@ export function CafeHeader({
           type="button"
           className={cn(
             buttonVariants({ variant: "ghost", size: "icon" }),
-            "rounded-full text-[#f4ebe3] lg:hidden"
+            "rounded-full text-cafe-cream lg:hidden"
           )}
           aria-expanded={open}
           aria-controls="cafe-mobile-nav"
@@ -209,7 +211,7 @@ export function CafeHeader({
       <div
         id="cafe-mobile-nav"
         className={cn(
-          "border-t border-[#9a7b5a]/20 bg-[#0a0c0e]/95 backdrop-blur-md lg:hidden",
+          "border-t border-cafe-gold/20 bg-cafe-ground/95 backdrop-blur-md lg:hidden",
           open ? "block" : "hidden"
         )}
       >
@@ -235,13 +237,13 @@ export function CafeHeader({
                   "min-h-12 rounded-2xl px-3 py-3.5 text-base tracking-wide uppercase transition",
                   link.kind === "section" &&
                     link.hash === "#menu" &&
-                    "text-[#f2c230]",
+                    "text-cafe-gold",
                   active
-                    ? "bg-[#a84d5f]/12 text-[#f4ebe3]"
-                    : "hover:bg-white/[0.04] hover:text-[#f4ebe3]",
+                    ? "bg-cafe-gold/12 text-cafe-cream"
+                    : "hover:bg-white/[0.04] hover:text-cafe-cream",
                   !(link.kind === "section" && link.hash === "#menu") &&
                     !active &&
-                    "text-[#d8d0c4]"
+                    "text-cafe-text"
                 )}
                 aria-current={active ? "page" : undefined}
                 onClick={(event) => handleNavClick(event, href)}
@@ -253,7 +255,7 @@ export function CafeHeader({
           {showHomeLink ? (
             <Link
               href={mildRHomeHref}
-              className="min-h-12 border-t border-[#9a7b5a]/15 px-3 py-3.5 text-sm tracking-wide text-[#a84d5f] transition hover:text-[#c46a7a]"
+              className="min-h-12 border-t border-cafe-gold/15 px-3 py-3.5 text-sm tracking-wide text-cafe-gold transition hover:text-cafe-gold-soft"
               onClick={() => setOpen(false)}
             >
               เว็บหลัก →

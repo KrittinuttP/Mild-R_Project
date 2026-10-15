@@ -75,7 +75,7 @@ function keepTimeWhileHidden() {
 }
 
 /**
- * Board motion for `/cafe`: one opening timeline for the cork board, then
+ * Board motion for `/cafe`: one opening timeline for the GB01 banner and the felt board, then
  * play-once reveals as each lower section scrolls in. Idle loops are CSS
  * (`animate-cafe-*`); hover is plain transitions.
  *
@@ -114,8 +114,10 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
       function build() {
       const stopHiddenClock = keepTimeWhileHidden();
 
-      // ── Opening timeline (cork board) ──────────────────────────────
+      // ── Opening timeline (GB01 banner, then the felt board) ────────
       const lamp = one('[data-motion="lamp"]');
+      const banner = one('[data-motion="hero-banner"]');
+      const meta = one('[data-motion="hero-meta"]');
       const board = one('[data-motion="hero-board"]');
       const character = one('[data-motion="hero-char"]');
       const heart = one('[data-motion="hero-heart"]');
@@ -143,6 +145,35 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
             ease: "none",
           },
           0
+        );
+      }
+
+      if (banner) {
+        opening.fromTo(
+          banner,
+          { autoAlpha: 0 },
+          {
+            autoAlpha: 1,
+            duration: 0.6,
+            ease: "power1.out",
+            clearProps: "opacity,visibility",
+          },
+          0
+        );
+      }
+
+      if (meta) {
+        opening.fromTo(
+          meta,
+          { autoAlpha: 0, y: 14 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.7,
+            ease: "power2.out",
+            clearProps: "transform,opacity,visibility",
+          },
+          1.35
         );
       }
 
@@ -212,17 +243,18 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
         dropPin(card, at + 0.4, opening);
       });
 
+      // The wordmark is swept in left → right, like the GA1 lens sweep.
       if (title) {
         opening.fromTo(
           title,
-          { clipPath: "inset(0 100% 0 0)" },
+          { clipPath: "inset(-10% 100% -10% 0)" },
           {
-            clipPath: "inset(0 0% 0 0)",
-            duration: 1.5,
-            ease: "steps(34)",
+            clipPath: "inset(-10% 0% -10% 0)",
+            duration: 1.2,
+            ease: "power2.inOut",
             clearProps: "clipPath",
           },
-          2.2
+          0.3
         );
       }
 

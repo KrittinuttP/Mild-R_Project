@@ -40,7 +40,7 @@ export function CafeEntry({ cafe }: CafeEntryProps) {
         preloadImage={cafe.heroCutout}
         onFinished={() => {
           setReady(true);
-          // Tells the cork board (`useBoardMotion`) the page is now visible.
+          // Tells the board (`useBoardMotion`) the page is now visible.
           document.documentElement.dataset.cafeEntry = "ready";
           window.dispatchEvent(new Event(CAFE_ENTRY_READY_EVENT));
         }}

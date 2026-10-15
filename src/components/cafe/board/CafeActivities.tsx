@@ -51,7 +51,7 @@ function MissionPhoto({
     <span
       className={cn(
         TYPE,
-        "absolute bottom-2 left-2 bg-[#f4ebe3] px-2 pt-[3px] pb-px text-xs font-bold tracking-[0.14em] text-[#a8323f] uppercase"
+        "absolute bottom-2 left-2 bg-cafe-cream px-2 pt-[3px] pb-px text-xs font-bold tracking-[0.14em] text-cafe-forest uppercase"
       )}
     >
       {label}
@@ -126,7 +126,7 @@ export function CafeActivities({
         <ol className="relative mt-12">
           <span
             data-motion="tl-line"
-            className="absolute top-0 bottom-0 left-3 w-[2.4px] -translate-x-1/2 bg-[#e85a7a] shadow-[0_0_8px_rgba(232,90,122,0.8)] min-[900px]:left-1/2"
+            className="absolute top-0 bottom-0 left-3 w-[2.4px] -translate-x-1/2 bg-cafe-gold shadow-[0_0_8px_rgba(201,161,74,0.8)] min-[900px]:left-1/2"
             aria-hidden
           />
           {schedule.items.map((item, index) => {
@@ -141,7 +141,7 @@ export function CafeActivities({
               >
                 <span
                   data-tl-node
-                  className="absolute top-8 left-3 size-4 -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_35%_35%,#ffd0db,#e85a7a_55%,#a8323f)] shadow-[0_0_12px_rgba(232,90,122,0.8)] min-[900px]:left-1/2"
+                  className="absolute top-8 left-3 size-4 -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_35%_35%,#f6e4a8,#c9a14a_55%,#7a5c1c)] shadow-[0_0_12px_rgba(201,161,74,0.8)] min-[900px]:left-1/2"
                   aria-hidden
                 />
                 <div
@@ -163,7 +163,7 @@ export function CafeActivities({
                     <p className={cn(HAND, "mt-1 text-xl")}>{item.titleLocal}</p>
                   ) : null}
                   {item.detail ? (
-                    <p className="mt-2 text-sm leading-relaxed text-[#3d3024]">{item.detail}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-cafe-ink-soft">{item.detail}</p>
                   ) : null}
                 </Paper>
                 </div>
@@ -181,12 +181,12 @@ export function CafeActivities({
             <h3
               className={cn(
                 HAND,
-                "-rotate-[1.5deg] bg-[#f4ebe3] px-3.5 pt-2 pb-1.5 text-[26px] leading-snug font-normal text-[#7a1f2a] shadow-[0_8px_16px_rgba(0,0,0,0.4)]"
+                "-rotate-[1.5deg] bg-cafe-cream px-3.5 pt-2 pb-1.5 text-[26px] leading-snug font-normal text-cafe-forest shadow-[0_8px_16px_rgba(0,0,0,0.4)]"
               )}
             >
               ภารกิจที่ร่วมได้ในงาน
             </h3>
-            <Stamp className="rotate-3 bg-[#f4ebe3]/90 text-[13px]">
+            <Stamp className="rotate-3 bg-cafe-cream/90 text-[13px]">
               {missions.length} Missions Open
             </Stamp>
           </div>
@@ -215,10 +215,10 @@ export function CafeActivities({
                         d={low ? "M0 36 L100 0" : "M0 0 L100 36"}
                         vectorEffect="non-scaling-stroke"
                         fill="none"
-                        stroke="#e85a7a"
+                        stroke="#c9a14a"
                         strokeWidth="2.4"
                         strokeLinecap="round"
-                        style={{ filter: "drop-shadow(0 0 3px rgba(232,90,122,.85))" }}
+                        style={{ filter: "drop-shadow(0 0 3px rgba(201,161,74,.85))" }}
                       />
                     </svg>
                   ) : null}
@@ -239,18 +239,18 @@ export function CafeActivities({
                       }
                     />
                     {item.nameLocal ? (
-                      <p className={cn(HAND, "mt-3 text-[23px] leading-tight text-[#7a1f2a]")}>
+                      <p className={cn(HAND, "mt-3 text-[23px] leading-tight text-cafe-forest")}>
                         {item.nameLocal}
                       </p>
                     ) : null}
                     <h4 className={cn(TYPE, "mt-0.5 text-sm font-bold")}>{item.name}</h4>
                     {item.detail ? (
-                      <p className="mt-2 text-sm leading-relaxed text-[#3d3024]">{item.detail}</p>
+                      <p className="mt-2 text-sm leading-relaxed text-cafe-ink-soft">{item.detail}</p>
                     ) : null}
                     {item.link ? (
                       <Link
                         href={item.link.href}
-                        className="mt-3 flex min-h-11 items-center justify-center bg-[#e85a7a] px-3 text-center text-sm font-semibold text-[#1a1410] transition hover:bg-[#f3b8c4] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#1a1410]"
+                        className="mt-3 flex min-h-11 items-center justify-center bg-cafe-gold px-3 text-center text-sm font-semibold text-cafe-ink transition hover:bg-cafe-gold-soft focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-cafe-ink"
                       >
                         {item.link.label}
                       </Link>

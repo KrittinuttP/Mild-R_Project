@@ -86,7 +86,7 @@ export function CafeEventSplash({
   return (
     <div
       className={cn(
-        "fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0a0c0e]",
+        "fixed inset-0 z-[100] flex flex-col items-center justify-center bg-cafe-ground",
         "transition-opacity duration-500 ease-out",
         phase === "exit" ? "pointer-events-none opacity-0" : "opacity-100"
       )}
@@ -96,31 +96,31 @@ export function CafeEventSplash({
       aria-label="กำลังเปิดแฟ้มคดี"
     >
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_35%,rgba(168,77,95,0.16),transparent_55%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_35%,rgba(201,161,74,0.16),transparent_55%)]"
         aria-hidden
       />
 
       <div className="relative flex max-w-md flex-col items-center px-6 text-center">
         <div className="w-full max-w-xs space-y-1" aria-hidden>
-          <div className="border-t-2 border-[#9a7b5a]/45" />
-          <div className="border-t border-[#9a7b5a]/30" />
+          <div className="border-t-2 border-cafe-gold/45" />
+          <div className="border-t border-cafe-gold/30" />
         </div>
 
-        <p className="mt-5 text-[0.62rem] tracking-[0.32em] text-[#c46a7a] uppercase">
+        <p className="mt-5 text-[0.62rem] tracking-[0.32em] text-cafe-gold-soft uppercase">
           Case File
         </p>
 
-        <p className="mt-3 font-[family-name:var(--font-cafe-serif-italic)] text-2xl tracking-[0.04em] text-[#f4ebe3] sm:text-3xl">
+        <p className="mt-3 font-[family-name:var(--font-cafe-serif-italic)] text-2xl tracking-[0.04em] text-cafe-cream sm:text-3xl">
           {title}
         </p>
 
         {titleLocal ? (
-          <p className="mt-2 text-sm text-[#c4b8a8]">{titleLocal}</p>
+          <p className="mt-2 text-sm text-cafe-muted">{titleLocal}</p>
         ) : null}
 
         <span
           className={cn(
-            "mt-6 block text-[#a84d5f]/80",
+            "mt-6 block text-cafe-gold/80",
             phase !== "exit" && "animate-heart-pulse-soft"
           )}
           aria-hidden
@@ -133,15 +133,15 @@ export function CafeEventSplash({
           </svg>
         </span>
 
-        <p className="mt-4 font-[family-name:var(--font-cafe-serif)] text-sm tracking-wide text-[#c4b8a8] sm:text-base">
+        <p className="mt-4 font-[family-name:var(--font-cafe-serif)] text-sm tracking-wide text-cafe-muted sm:text-base">
           Opening case file…
         </p>
 
         <div
-          className="mt-7 h-px w-32 overflow-hidden bg-[#9a7b5a]/25"
+          className="mt-7 h-px w-32 overflow-hidden bg-cafe-gold/25"
           aria-hidden
         >
-          <div className="h-full w-0 animate-splash-bar-long bg-[#a84d5f]" />
+          <div className="h-full w-0 animate-splash-bar-long bg-cafe-gold" />
         </div>
       </div>
     </div>

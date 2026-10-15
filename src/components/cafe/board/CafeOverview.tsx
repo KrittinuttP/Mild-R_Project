@@ -11,14 +11,23 @@ import { Heart } from "lucide-react";
 
 import { CafeCountdown } from "@/components/cafe/CafeCountdown";
 import {
+  CaseGhostMotifs,
+  GoldDiamond,
+  GoldDoubleFrame,
+  SherlockSweetieLogo,
+} from "@/components/cafe/SherlockSweetieLogo";
+import {
   Classified,
   ClassifiedStamp,
   EmptyFrame,
+  FELT_FRAME,
+  FELT_STYLE,
   HAND,
   LABEL,
   Paper,
   SERIF,
   Stamp,
+  THAI,
   TILT,
   TYPE,
   tiltStyle,
@@ -38,16 +47,34 @@ function bend(from: Point, to: Point, drop: number) {
 
 
 /**
- * "เป้าหมาย: Mild-R" tag laid over the KV. Phone (< 1100px) and desktop each
- * have their own position and size — tune them here independently.
+ * "นักสืบ: Mild-R" tag laid over the KV — she is the detective on this case,
+ * never the suspect. Phone (< 1100px) and desktop each have their own
+ * position and size — tune them here independently.
  * Phone: the KV column is raised (z-30) so the tag sits in front of everything.
  */
-const TARGET_TAG =
-  "absolute z-20 whitespace-nowrap bg-[#f4ebe3]/90 text-[#a8323f] shadow-md";
-const TARGET_TAG_MOBILE =
+const DETECTIVE_TAG =
+  "absolute z-20 whitespace-nowrap border border-cafe-gold/70 bg-cafe-cream/95 font-bold text-cafe-forest shadow-md";
+const DETECTIVE_TAG_MOBILE =
   "bottom-[8%] left-1 rotate-[-4deg] px-1.5 py-0.5 text-sm";
-const TARGET_TAG_DESKTOP =
+const DETECTIVE_TAG_DESKTOP =
   "bottom-[12%] -right-[6%] rotate-[-4deg] px-3 py-1 text-xl";
+
+/** "SUN · 06 · 12 · 2026", as on the GB01 banner. Fixed to Bangkok time so server and client agree. */
+function bannerDate(startsAt: string | undefined, fallback: string) {
+  if (!startsAt) return fallback;
+  const date = new Date(startsAt);
+  if (Number.isNaN(date.getTime())) return fallback;
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Bangkok",
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).formatToParts(date);
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((p) => p.type === type)?.value ?? "";
+  return `${part("weekday").toUpperCase()} · ${part("day")} · ${part("month")} · ${part("year")}`;
+}
 
 function BoardThread({
   boardRef,
@@ -121,11 +148,11 @@ function BoardThread({
         data-motion="hero-yarn"
         pathLength={1}
         fill="none"
-        stroke="#e85a7a"
+        stroke="#c9a14a"
         strokeWidth="2.4"
         strokeLinecap="round"
         strokeDasharray={1}
-        style={{ filter: "drop-shadow(0 0 4px rgba(232,90,122,.85))" }}
+        style={{ filter: "drop-shadow(0 0 4px rgba(201,161,74,.85))" }}
       />
     </svg>
   );
@@ -141,7 +168,7 @@ function Redacted({ children }: { children: ReactNode }) {
       {children}
       <span
         data-redact
-        className="absolute -inset-x-1.5 -inset-y-0.5 origin-right bg-[#14100c] [transform:scaleX(0)]"
+        className="absolute -inset-x-1.5 -inset-y-0.5 origin-right bg-cafe-void [transform:scaleX(0)]"
         aria-hidden
       />
     </span>
@@ -167,50 +194,78 @@ export function CafeOverview({
   const follow = cafe.closing.ctas?.[0];
   const cutout = cafe.heroCutout || "/assets/cafe/kv/KV_cafe.webp";
 
-  // The same two buttons render twice: on the case sheet (wide screens) and in
-  // their own card under the date/place notes (narrow screens).
-  const actions = (stacked: boolean) => {
-    const button = stacked
-      ? "flex min-h-12 items-center justify-center px-4 text-[15px]"
-      : "inline-flex min-h-11 items-center px-4 text-sm transition hover:-translate-y-0.5";
-    return (
-      <div className={stacked ? "flex flex-col gap-2" : "flex flex-wrap justify-end gap-2"}>
-        <a href="#sets" className={cn(button, "bg-[#f2c230] font-semibold text-[#1a1410]")}>
-          {cafe.preorder ? "ดูเซตและจองล่วงหน้า" : "ดูเซต"}
-        </a>
-        {follow?.url ? (
-          <Link
-            href={follow.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(button, "bg-[#1a1410] text-[#f4ebe3]")}
-          >
-            {follow.label}
-          </Link>
-        ) : null}
-      </div>
-    );
-  };
+  const dateText = bannerDate(schedule.startsAt, schedule.label);
+  const meta = cn(
+    SERIF,
+    "font-bold whitespace-nowrap text-cafe-cream tracking-[0.18em] sm:tracking-[0.22em]"
+  );
+  const button =
+    "inline-flex min-h-12 items-center justify-center px-6 text-[15px] font-semibold transition hover:-translate-y-0.5 motion-reduce:transition-none";
 
   return (
     <section
       id="overview"
-      className="relative scroll-mt-24 px-5 pt-28 sm:px-8 sm:pt-32"
+      className="relative scroll-mt-24 px-5 pt-20 sm:px-8 sm:pt-24"
     >
       <div className="mx-auto max-w-[1280px]">
+        {/* GB01 web hero: gold double frame, ghost keyhole + lens, centred wordmark. */}
+        <div
+          data-motion="hero-banner"
+          data-hero-intro
+          className="relative isolate flex min-h-[min(640px,calc(100svh-6rem))] flex-col items-center justify-center px-4 py-16 text-center sm:px-10 sm:py-20 lg:min-h-[min(760px,calc(100svh-7rem))]"
+        >
+          <GoldDoubleFrame />
+          <CaseGhostMotifs />
+          {edition?.caseNo ? (
+            <p className={cn(LABEL, "mb-8 lg:absolute lg:top-14 lg:left-16 lg:mb-0")}>
+              {edition.caseNo}
+            </p>
+          ) : null}
+          <SherlockSweetieLogo
+            as="h1"
+            motion="hero-title"
+            label={cafe.title}
+            className="text-[clamp(36px,11.6vw,128px)]"
+          />
+          <div data-motion="hero-meta" className="mt-9 flex flex-col items-center gap-3 sm:mt-11">
+            {/* Phone: one fact per line. sm: date ◆ time, then place. xl: one row, as on GB01. */}
+            <p className="flex flex-col items-center gap-x-4 gap-y-2 text-[13px] sm:flex-row sm:flex-wrap sm:justify-center sm:text-base lg:gap-x-6 lg:text-xl">
+              <span className={meta}>
+                <Classified hidden={hidden} tone="wall">{dateText}</Classified>
+              </span>
+              <GoldDiamond className="hidden sm:inline-block" />
+              <span className={meta}>
+                <Classified hidden={hidden} tone="wall">{schedule.detail ?? ""}</Classified>
+              </span>
+              <GoldDiamond className="hidden xl:inline-block" />
+              <span className={cn(meta, "sm:basis-full xl:basis-auto")}>
+                <Classified hidden={hidden} tone="wall">{location.label}</Classified>
+              </span>
+            </p>
+            <div className="mt-6 flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center">
+              <a href="#sets" className={cn(button, "bg-cafe-gold text-cafe-ink hover:bg-cafe-gold-soft")}>
+                {cafe.preorder ? "ดูเซตและจองล่วงหน้า" : "ดูเซต"}
+              </a>
+              {follow?.url ? (
+                <Link
+                  href={follow.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(button, "border border-cafe-gold/60 text-cafe-cream hover:border-cafe-gold hover:bg-cafe-gold/10")}
+                >
+                  {follow.label}
+                </Link>
+              ) : null}
+            </div>
+          </div>
+        </div>
+
         <div
           ref={boardRef}
           data-motion="hero-board"
           data-hero-intro
-          className="relative border-[12px] border-[#2a1c12] min-[1100px]:border-[20px]"
-          style={{
-            backgroundColor: "#8a6a45",
-            backgroundImage:
-              "radial-gradient(circle at 18% 22%, rgba(255,255,255,.16) 0 1px, transparent 1.6px), radial-gradient(circle at 72% 64%, rgba(40,22,8,.28) 0 1px, transparent 1.6px), radial-gradient(circle at 40% 80%, rgba(255,236,210,.18) 0 1px, transparent 1.6px)",
-            backgroundSize: "13px 17px, 19px 23px, 16px 21px",
-            boxShadow:
-              "inset 0 0 0 2px #14100c, inset 0 0 120px 30px rgba(10,8,6,.6), 0 30px 70px rgba(0,0,0,.7)",
-          }}
+          className={cn("relative mt-10 sm:mt-14", FELT_FRAME)}
+          style={FELT_STYLE}
         >
           {/* Below 1100px the right column dissolves (`contents`), so its cards join
               this grid: character beside the case sheet, everything else full width. */}
@@ -226,18 +281,18 @@ export function CafeOverview({
                   className="h-[min(440px,70vw)] w-auto max-w-full object-contain min-[1100px]:h-[720px] min-[1100px]:max-w-none [filter:drop-shadow(8px_14px_10px_rgba(0,0,0,.55))]"
                 />
                 {/* Same tag twice so phone and desktop can be placed independently. */}
-                <p className={cn(HAND, TARGET_TAG, TARGET_TAG_MOBILE, "min-[1100px]:hidden")}>
-                  เป้าหมาย: Mild-R
+                <p className={cn(THAI, DETECTIVE_TAG, DETECTIVE_TAG_MOBILE, "min-[1100px]:hidden")}>
+                  นักสืบ: Mild-R
                 </p>
                 <p
                   className={cn(
-                    HAND,
-                    TARGET_TAG,
-                    TARGET_TAG_DESKTOP,
+                    THAI,
+                    DETECTIVE_TAG,
+                    DETECTIVE_TAG_DESKTOP,
                     "hidden min-[1100px]:block"
                   )}
                 >
-                  เป้าหมาย: Mild-R
+                  นักสืบ: Mild-R
                 </p>
                 <span
                   data-pin="heart"
@@ -246,8 +301,8 @@ export function CafeOverview({
                   aria-hidden
                 >
                   <Heart
-                    className="animate-cafe-beat size-5 fill-[#e85a7a] text-[#fff5f7] min-[1100px]:size-7"
-                    style={{ filter: "drop-shadow(0 0 12px rgba(232,90,122,.8))" }}
+                    className="animate-cafe-beat size-5 fill-cafe-heart text-cafe-cream-light min-[1100px]:size-7"
+                    style={{ filter: "drop-shadow(0 0 12px rgba(242,92,154,.7))" }}
                   />
                 </span>
               </div>
@@ -261,7 +316,7 @@ export function CafeOverview({
                 className="px-3.5 py-4 sm:px-6 sm:py-6"
               >
                 <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
-                  <p className={cn(LABEL, "text-[#5c4636]")}>
+                  <p className={cn(LABEL, "text-cafe-ink-muted")}>
                     {edition?.kicker}
                     {edition?.kickerLocal ? ` · ${edition.kickerLocal}` : ""}
                   </p>
@@ -274,42 +329,29 @@ export function CafeOverview({
                     </Stamp>
                   ) : null}
                 </div>
-                <h1
-                  data-motion="hero-title"
-                  className={cn(
-                    TYPE,
-                    "mt-3 text-2xl leading-[1.05] font-bold text-[#1a1410] sm:text-4xl min-[1100px]:text-5xl"
-                  )}
-                >
-                  {cafe.title}
-                </h1>
                 {cafe.titleLocal ? (
-                  <p className={cn(HAND, "mt-2 text-xl leading-tight text-[#7a1f2a] sm:text-[28px]")}>
+                  <h2 className={cn(THAI, "mt-3 text-xl leading-snug font-bold text-cafe-forest sm:text-[1.75rem]")}>
                     {cafe.titleLocal}
+                  </h2>
+                ) : null}
+                {cafe.tagline ? (
+                  <p className="mt-3 hidden max-w-xl text-[14.5px] leading-relaxed text-cafe-ink-soft min-[1100px]:block">
+                    {cafe.tagline}
                   </p>
                 ) : null}
-                <div className="hidden min-[1100px]:block">
-                  {cafe.tagline ? (
-                    <p className="mt-3 max-w-xl text-[14.5px] leading-relaxed text-[#3d3024]">
-                      {cafe.tagline}
-                    </p>
-                  ) : null}
-                  <div className="mt-5">{actions(false)}</div>
-                </div>
               </Paper>
 
-              {/* Narrow screens: pitch and buttons move below the notes (`order-2`),
-                  so date and place stay in the first screenful. */}
-              <Paper
-                tilt={0.4}
-                motion="hero-card"
-                className="order-2 col-span-2 px-3.5 py-3.5 sm:px-5 sm:py-5 min-[1100px]:hidden"
-              >
-                {cafe.tagline ? (
-                  <p className="mb-3 text-sm leading-relaxed text-[#3d3024]">{cafe.tagline}</p>
-                ) : null}
-                {actions(true)}
-              </Paper>
+              {/* Narrow screens: the pitch moves below the notes (`order-2`),
+                  so date and place stay together beside the character. */}
+              {cafe.tagline ? (
+                <Paper
+                  tilt={0.4}
+                  motion="hero-card"
+                  className="order-2 col-span-2 px-3.5 py-3.5 sm:px-5 sm:py-5 min-[1100px]:hidden"
+                >
+                  <p className="text-sm leading-relaxed text-cafe-ink-soft">{cafe.tagline}</p>
+                </Paper>
+              ) : null}
 
               <>
                 <div className="order-1 col-span-2 grid grid-cols-2 gap-3 sm:gap-4">
@@ -320,10 +362,10 @@ export function CafeOverview({
                     motion="hero-card"
                     className="px-3 py-4 sm:px-4 sm:py-5"
                   >
-                    <p className={cn(HAND, "text-base text-[#7a1f2a] sm:text-lg")}>
+                    <p className={cn(HAND, "text-base text-cafe-forest sm:text-lg")}>
                       <Classified hidden={hidden}>วันเปิดแฟ้มคดี</Classified>
                     </p>
-                    <p className={cn(SERIF, "mt-1 text-xl leading-none whitespace-nowrap text-[#1a1410] sm:text-[2rem]")}>
+                    <p className={cn(SERIF, "mt-1 text-xl leading-none whitespace-nowrap text-cafe-ink sm:text-[2rem]")}>
                       {hidden ? (
                         <Classified hidden>{schedule.label}</Classified>
                       ) : (
@@ -331,7 +373,7 @@ export function CafeOverview({
                       )}
                     </p>
                     {schedule.detail ? (
-                      <p className="mt-2 text-sm text-[#3d3024]">
+                      <p className="mt-2 text-sm text-cafe-ink-soft">
                         <Classified hidden={hidden}>{schedule.detail}</Classified>
                       </p>
                     ) : null}
@@ -390,13 +432,13 @@ export function CafeOverview({
                     <div
                       data-motion="hero-card"
                       className={cn(
-                        "relative order-3 col-span-2 overflow-hidden bg-[#f4ebe3] text-[#1a1410] shadow-[0_14px_26px_rgba(0,0,0,0.45)]",
+                        "relative order-3 col-span-2 overflow-hidden bg-cafe-cream text-cafe-ink shadow-[0_14px_26px_rgba(0,0,0,0.45)]",
                         TILT
                       )}
                       style={tiltStyle(0.6)}
                     >
                       <EmptyFrame className="h-[170px] w-full sm:h-[250px] min-[1100px]:h-[190px]" />
-                      <p className={cn(TYPE, "px-3 py-2 text-xs tracking-[0.14em] text-[#5c4636] uppercase")}>
+                      <p className={cn(TYPE, "px-3 py-2 text-xs tracking-[0.14em] text-cafe-ink-muted uppercase")}>
                         <Classified hidden>Venue · {location.label}</Classified>
                       </p>
                       <ClassifiedStamp />
@@ -411,7 +453,7 @@ export function CafeOverview({
                       <span
                         data-motion="hero-card"
                         className={cn(
-                          "block overflow-hidden bg-[#f4ebe3] text-[#1a1410] shadow-[0_14px_26px_rgba(0,0,0,0.45)]",
+                          "block overflow-hidden bg-cafe-cream text-cafe-ink shadow-[0_14px_26px_rgba(0,0,0,0.45)]",
                           TILT
                         )}
                         style={tiltStyle(0.6)}
@@ -422,7 +464,7 @@ export function CafeOverview({
                           wrapClassName="block h-[170px] w-full overflow-hidden sm:h-[250px] min-[1100px]:h-[190px]"
                           className="h-full w-full object-cover grayscale-[.45] transition duration-300 group-hover:grayscale-0"
                         />
-                        <span className={cn(TYPE, "block px-3 py-2 text-xs tracking-[0.14em] text-[#5c4636] uppercase")}>
+                        <span className={cn(TYPE, "block px-3 py-2 text-xs tracking-[0.14em] text-cafe-ink-muted uppercase")}>
                           Venue · {location.label}
                         </span>
                       </span>

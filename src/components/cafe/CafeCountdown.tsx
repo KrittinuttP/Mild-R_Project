@@ -110,19 +110,19 @@ function FlipCard({ value, label }: { value: string; label: string }) {
 
   return (
     <div className="min-w-0 text-center" style={{ perspective: "820px" }}>
-      <p className="mb-1.5 text-[0.5rem] tracking-[0.16em] text-[#9a7b5a] uppercase sm:text-[0.58rem] sm:tracking-[0.2em]">
+      <p className="mb-1.5 text-[0.5rem] tracking-[0.16em] text-cafe-gold uppercase sm:text-[0.58rem] sm:tracking-[0.2em]">
         {label}
       </p>
-      <div className="relative overflow-hidden border border-[#9a7b5a]/40 bg-[#0c0a09]">
+      <div className="relative overflow-hidden border border-cafe-gold/40 bg-cafe-void">
         <div
-          className="pointer-events-none absolute inset-x-0 top-1/2 z-[1] h-px bg-[#9a7b5a]/40"
+          className="pointer-events-none absolute inset-x-0 top-1/2 z-[1] h-px bg-cafe-gold/40"
           aria-hidden
         />
         <div
           ref={faceRef}
           className={cn(
             DISPLAY,
-            "px-0.5 py-2 text-[clamp(1.15rem,4.8vw,1.85rem)] leading-none font-normal tabular-nums text-[#fff8f4] will-change-transform sm:py-2.5"
+            "px-0.5 py-2 text-[clamp(1.15rem,4.8vw,1.85rem)] leading-none font-normal tabular-nums text-cafe-cream-light will-change-transform sm:py-2.5"
           )}
         >
           {shown}
@@ -142,7 +142,7 @@ function UnitCell({
   live: boolean;
 }) {
   return (
-    <div className="bg-[#14100c] px-1 py-2 sm:px-2 sm:py-2.5">
+    <div className="bg-cafe-void px-1 py-2 sm:px-2 sm:py-2.5">
       <FlipCard
         value={live ? value : pad(0, value.length)}
         label={label}
@@ -200,7 +200,7 @@ export function CafeCountdown({
     return (
       <span
         className={cn(
-          "inline-block min-w-[12ch] font-[family-name:var(--font-cafe-type)] text-lg font-bold tabular-nums text-[#1a1410]",
+          "inline-block min-w-[12ch] font-[family-name:var(--font-cafe-type)] text-lg font-bold tabular-nums text-cafe-ink",
           className
         )}
         aria-live="polite"
@@ -231,11 +231,11 @@ export function CafeCountdown({
   const clock =
     phase === "pending" ? (
       <div
-        className="border-t border-[#9a7b5a]/30"
+        className="border-t border-cafe-gold/30"
         aria-live="polite"
         aria-label="นับถอยหลังถึงเวลาเปิดเคส"
       >
-        <div className="grid grid-cols-2 gap-px bg-[#9a7b5a]/30">
+        <div className="grid grid-cols-2 gap-px bg-cafe-gold/30">
           {span.map((unit) => (
             <UnitCell
               key={unit.label}
@@ -245,7 +245,7 @@ export function CafeCountdown({
             />
           ))}
         </div>
-        <div className="grid grid-cols-3 gap-px border-t border-[#9a7b5a]/30 bg-[#9a7b5a]/30">
+        <div className="grid grid-cols-3 gap-px border-t border-cafe-gold/30 bg-cafe-gold/30">
           {clockUnits.map((unit) => (
             <UnitCell
               key={unit.label}
@@ -257,16 +257,16 @@ export function CafeCountdown({
         </div>
       </div>
     ) : (
-      <div className="border-t border-[#9a7b5a]/30 px-4 py-4 text-center">
+      <div className="border-t border-cafe-gold/30 px-4 py-4 text-center">
         <p
           className={cn(
             DISPLAY,
-            "text-lg font-normal tracking-tight text-[#f4ebe3] sm:text-xl"
+            "text-lg font-normal tracking-tight text-cafe-cream sm:text-xl"
           )}
         >
           {phase === "open" ? "Case Open" : "Case Closed"}
         </p>
-        <p className="mt-1 text-[0.58rem] tracking-[0.18em] text-[#c46a7a] uppercase">
+        <p className="mt-1 text-[0.58rem] tracking-[0.18em] text-cafe-gold-soft uppercase">
           {phase === "open" ? "Doors are live" : "File archived"}
         </p>
       </div>
@@ -275,17 +275,17 @@ export function CafeCountdown({
   if (embedded) return clock;
 
   return (
-    <div className="mt-3 border border-[#9a7b5a]/40 bg-[#14100c]">
+    <div className="mt-3 border border-cafe-gold/40 bg-cafe-void">
       <div className="flex items-center justify-between gap-2 px-3 py-2 pl-4 sm:px-4">
         <div>
-          <p className="text-[0.52rem] tracking-[0.2em] text-[#9a7b5a] uppercase sm:text-[0.58rem]">
+          <p className="text-[0.52rem] tracking-[0.2em] text-cafe-gold uppercase sm:text-[0.58rem]">
             T-Minus · Doors Open
           </p>
-          <p className={cn(SERIF, "text-base text-[#f4ebe3] sm:text-lg")}>
+          <p className={cn(SERIF, "text-base text-cafe-cream sm:text-lg")}>
             Time Card
           </p>
         </div>
-        <span className="shrink-0 rotate-[-7deg] border border-[#a84d5f]/50 px-1.5 py-0.5 text-[0.52rem] tracking-[0.16em] text-[#c46a7a] uppercase">
+        <span className="shrink-0 rotate-[-7deg] border border-cafe-gold/50 px-1.5 py-0.5 text-[0.52rem] tracking-[0.16em] text-cafe-gold-soft uppercase">
           {phase === "pending" ? "Sealed" : phase === "open" ? "Live" : "Closed"}
         </span>
       </div>

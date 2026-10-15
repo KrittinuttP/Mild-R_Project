@@ -11,7 +11,7 @@ import {
 } from "@/components/cafe/board/CafeLower";
 import { CafeMenuSection } from "@/components/cafe/board/CafeMenuSection";
 import { CafeOverview } from "@/components/cafe/board/CafeOverview";
-import { TYPE } from "@/components/cafe/board/pieces";
+import { SERIF } from "@/components/cafe/board/pieces";
 import { useBoardMotion } from "@/components/cafe/board/useBoardMotion";
 import {
   ImageLightbox,
@@ -46,7 +46,7 @@ function PreorderTape({ cafe }: { cafe: CafePage }) {
   if (!preorder?.label) return null;
   if (now !== null && !preorderIsListed(preorder, now)) return null;
 
-  const text = `PRE-ORDER /// เปิดจองเสบียงล่วงหน้า /// ประมาณ ${preorder.label} /// เซต A · เซต B · เซต C ///`;
+  const text = `PRE-ORDER ◆ เปิดจองเสบียงล่วงหน้า ◆ ประมาณ ${preorder.label} ◆ เซต A · เซต B · เซต C ◆`;
   const line = `${text} ${text}`;
 
   return (
@@ -56,12 +56,12 @@ function PreorderTape({ cafe }: { cafe: CafePage }) {
         aria-label={text}
         data-motion="hero-tape"
         data-hero-intro
-        className="-mx-6 block origin-center -rotate-[1.2deg] border-y-[6px] border-[#1a1410] bg-[#f2c230] py-3 text-[#1a1410] hover:[&_.animate-cafe-tape]:[animation-play-state:paused]"
+        className="-mx-6 block origin-center -rotate-[1.2deg] border-y-2 border-cafe-gold-soft bg-cafe-gold py-3 text-cafe-ink shadow-[0_0_0_4px_var(--color-cafe-ground),0_0_0_5px_rgba(201,161,74,0.5)] hover:[&_.animate-cafe-tape]:[animation-play-state:paused]"
       >
         <span
           className={cn(
-            TYPE,
-            "animate-cafe-tape flex w-max gap-8 text-sm font-bold tracking-[0.14em] uppercase"
+            SERIF,
+            "animate-cafe-tape flex w-max gap-8 text-sm font-bold tracking-[0.18em] uppercase"
           )}
         >
           <span>{line}</span>
@@ -97,15 +97,16 @@ export function CafePromo({ cafe, visibility, caseCover }: CafePromoProps) {
     <div
       ref={rootRef}
       data-hero-root
-      className="relative overflow-x-clip pb-8 font-[family-name:var(--font-cafe-thai)] text-[#d8d0c4]"
+      className="relative overflow-x-clip pb-8 font-[family-name:var(--font-cafe-thai)] text-cafe-text"
       style={{
-        backgroundColor: "#0a0c0e",
+        // GB01 ground: bottle green, lifted to the glow behind the hero.
+        backgroundColor: "var(--color-cafe-ground)",
         backgroundImage:
-          "linear-gradient(rgba(244,235,227,0.022) 1px, transparent 1px), linear-gradient(90deg, rgba(244,235,227,0.022) 1px, transparent 1px)",
-        backgroundSize: "44px 44px, 44px 44px",
+          "radial-gradient(ellipse 120% 900px at 50% 380px, var(--color-cafe-glow) 0%, var(--color-cafe-ground) 72%)",
+        backgroundRepeat: "no-repeat",
       }}
     >
-      {/* Desk lamp: flickers on with the opening timeline, then drifts. */}
+      {/* Soft gold light over the banner: flickers on with the opening timeline, then drifts. */}
       <div
         className="pointer-events-none absolute top-[-300px] left-1/2 size-[1300px] -translate-x-1/2"
         aria-hidden
@@ -116,7 +117,7 @@ export function CafePromo({ cafe, visibility, caseCover }: CafePromoProps) {
           className="animate-cafe-lamp size-full rounded-full"
           style={{
             background:
-              "radial-gradient(circle, rgba(255,206,140,0.2) 0, rgba(255,206,140,0.07) 40%, transparent 66%)",
+              "radial-gradient(circle, rgba(227,199,126,0.1) 0, rgba(227,199,126,0.035) 40%, transparent 66%)",
           }}
         />
       </div>

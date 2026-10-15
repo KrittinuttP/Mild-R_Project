@@ -127,25 +127,25 @@ const TONE = {
     drawerPanel: "bg-[#140a0d]/70",
   },
   cafe: {
-    content: "rounded-none border-[#9a7b5a]/30 bg-[#0a0c0e] text-[#f4ebe3]",
+    content: "rounded-none border-cafe-gold/30 bg-cafe-ground text-cafe-cream",
     overlay: "bg-black/70 supports-backdrop-filter:backdrop-blur-sm",
-    close: "text-[#9a7b5a] hover:bg-[#a84d5f]/20 hover:text-[#f4ebe3]",
+    close: "text-cafe-gold hover:bg-cafe-gold/20 hover:text-cafe-cream",
     title:
-      "font-[family-name:var(--font-cafe-serif)] text-lg leading-snug text-[#f4ebe3] sm:text-xl",
-    description: "text-[0.65rem] tracking-[0.2em] text-[#9a7b5a] uppercase",
-    stage: "rounded-none bg-[#060708]",
+      "font-[family-name:var(--font-cafe-serif),var(--font-cafe-thai),serif] text-lg leading-snug text-cafe-cream sm:text-xl",
+    description: "text-[0.65rem] tracking-[0.2em] text-cafe-gold uppercase",
+    stage: "rounded-none bg-cafe-void",
     ambient: "opacity-60 saturate-125",
     vignette:
-      "bg-[#0a0c0e]/30 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(10,12,14,0.85)_100%)]",
-    nav: "rounded-none border border-[#9a7b5a]/35 bg-[#0a0c0e]/80 text-[#f4ebe3] hover:bg-[#a84d5f]/90 hover:text-[#f4ebe3]",
-    counter: "text-[#9a7b5a]/80",
-    separator: "text-[#9a7b5a]/40",
+      "bg-cafe-ground/30 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(15,42,36,0.85)_100%)]",
+    nav: "rounded-none border border-cafe-gold/35 bg-cafe-ground/80 text-cafe-cream hover:bg-cafe-gold hover:text-cafe-ink",
+    counter: "text-cafe-gold/90",
+    separator: "text-cafe-gold/40",
     drawerHeader:
-      "border-t border-[#9a7b5a]/30 bg-[#0a0c0e]/75 text-[#f4ebe3] hover:bg-[#1a1416]/80",
-    drawerCount: "rounded-none bg-[#a84d5f] text-[#f4ebe3]",
+      "border-t border-cafe-gold/30 bg-cafe-ground/75 text-cafe-cream hover:bg-cafe-glow/80",
+    drawerCount: "rounded-none bg-cafe-gold text-cafe-ink",
     drawerChevron:
-      "rounded-none border-[#9a7b5a]/40 text-[#9a7b5a] group-hover:border-[#a84d5f] group-hover:text-[#f4ebe3]",
-    drawerPanel: "bg-[#0a0c0e]/75",
+      "rounded-none border-cafe-gold/40 text-cafe-gold group-hover:border-cafe-gold-soft group-hover:text-cafe-cream",
+    drawerPanel: "bg-cafe-ground/75",
   },
 } as const;
 

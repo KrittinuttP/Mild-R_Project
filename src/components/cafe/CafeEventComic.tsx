@@ -35,7 +35,7 @@ function PanelLines({ lines }: { lines: string[] }) {
           className={cn(
             SERIF,
             HIDE_UNTIL_SCROLL,
-            "max-w-[20rem] text-[1.05rem] leading-snug tracking-wide text-[#f4ebe3]/92 drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] sm:max-w-[24rem] sm:text-xl"
+            "max-w-[20rem] text-[1.05rem] leading-snug tracking-wide text-cafe-cream/92 drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] sm:max-w-[24rem] sm:text-xl"
           )}
         >
           {line}
@@ -51,7 +51,7 @@ function PanelArt({ panel }: { panel: CafeEventPanel }) {
   const lines = panel.lines?.filter(Boolean) ?? [];
 
   const frame = cn(
-    "relative w-full overflow-hidden border border-[#9a7b5a]/35 bg-[#0a0c0e]",
+    "relative w-full overflow-hidden border border-cafe-gold/35 bg-cafe-ground",
     "h-[85svh] sm:h-[88svh]"
   );
 
@@ -74,13 +74,13 @@ function PanelArt({ panel }: { panel: CafeEventPanel }) {
             className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-6"
             aria-hidden
           >
-            <span className="text-[0.58rem] tracking-[0.22em] text-[#9a7b5a]/85 uppercase">
+            <span className="text-[0.58rem] tracking-[0.22em] text-cafe-gold/85 uppercase">
               Panel TBA
             </span>
           </div>
         )}
         <div
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(10,12,14,0.55)_0%,rgba(10,12,14,0.22)_55%,rgba(10,12,14,0.4)_100%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(15,42,36,0.55)_0%,rgba(15,42,36,0.22)_55%,rgba(15,42,36,0.4)_100%)]"
           aria-hidden
         />
       </div>
@@ -96,20 +96,20 @@ function CaseTitleBlock({ event }: { event: CafeEventPage }) {
       className="mx-auto w-full max-w-md px-5 text-center sm:max-w-lg sm:px-6"
     >
       {event.status ? (
-        <p className="text-[0.58rem] tracking-[0.28em] text-[#c46a7a] uppercase">
+        <p className="text-[0.58rem] tracking-[0.28em] text-cafe-gold-soft uppercase">
           {event.status === "upcoming" ? "CASE PENDING" : event.status}
         </p>
       ) : null}
       <h1
         className={cn(
           SERIF_ITALIC,
-          "mt-3 text-3xl font-semibold tracking-tight text-[#f4ebe3] sm:text-4xl"
+          "mt-3 text-3xl font-semibold tracking-tight text-cafe-cream sm:text-4xl"
         )}
       >
         {event.title}
       </h1>
       {event.titleLocal ? (
-        <p className="mt-2 text-sm text-[#c4b8a8] sm:text-base">
+        <p className="mt-2 text-sm text-cafe-muted sm:text-base">
           {event.titleLocal}
         </p>
       ) : null}
@@ -285,7 +285,7 @@ export function CafeEventComic({ event }: CafeEventComicProps) {
   return (
     <div
       ref={rootRef}
-      className="relative min-h-full bg-[#0a0c0e] text-[#d8d0c4]"
+      className="relative min-h-full bg-cafe-ground text-cafe-text"
     >
       <CafeEventSplash
         title={event.title}
@@ -315,7 +315,7 @@ export function CafeEventComic({ event }: CafeEventComicProps) {
                   className={cn(
                     SERIF,
                     HIDE_UNTIL_SCROLL,
-                    "max-w-[18rem] text-[1.1rem] leading-relaxed tracking-wide text-[#f4ebe3]/88 sm:max-w-[22rem] sm:text-xl"
+                    "max-w-[18rem] text-[1.1rem] leading-relaxed tracking-wide text-cafe-cream/88 sm:max-w-[22rem] sm:text-xl"
                   )}
                 >
                   {line}
@@ -326,22 +326,22 @@ export function CafeEventComic({ event }: CafeEventComicProps) {
 
           <div
             data-scroll-hint
-            className="pointer-events-none absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-1 text-[#9a7b5a]/70"
+            className="pointer-events-none absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-1 text-cafe-gold/70"
             role="status"
           >
             <span
               className={cn(
                 SERIF_ITALIC,
-                "text-sm font-medium tracking-[0.12em] text-[#c4b8a8]/75 sm:text-base"
+                "text-sm font-medium tracking-[0.12em] text-cafe-muted/75 sm:text-base"
               )}
             >
               เลื่อนเพื่อ{" "}
-              <span className="font-[family-name:var(--font-cafe-serif)] font-semibold text-[#c4b8a8]/90">
+              <span className="font-[family-name:var(--font-cafe-serif)] font-semibold text-cafe-muted/90">
                 เปิดแฟ้ม
               </span>
             </span>
             <ChevronDown
-              className="mt-0.5 size-6 text-[#9a7b5a]/80 sm:size-7"
+              className="mt-0.5 size-6 text-cafe-gold/80 sm:size-7"
               aria-hidden
             />
           </div>
@@ -369,19 +369,19 @@ export function CafeEventComic({ event }: CafeEventComicProps) {
                   <p
                     className={cn(
                       SERIF_ITALIC,
-                      "text-base font-semibold text-[#f4ebe3]/90 sm:text-lg"
+                      "text-base font-semibold text-cafe-cream/90 sm:text-lg"
                     )}
                   >
                     {panel.caption}
                   </p>
                 ) : null}
                 {panel.captionLocal ? (
-                  <p className="text-xs tracking-wide text-[#c46a7a] sm:text-sm">
+                  <p className="text-xs tracking-wide text-cafe-gold-soft sm:text-sm">
                     {panel.captionLocal}
                   </p>
                 ) : null}
                 {panel.body ? (
-                  <p className="text-sm leading-relaxed text-[#c4b8a8] sm:text-base">
+                  <p className="text-sm leading-relaxed text-cafe-muted sm:text-base">
                     {panel.body}
                   </p>
                 ) : null}
@@ -392,12 +392,12 @@ export function CafeEventComic({ event }: CafeEventComicProps) {
       </div>
 
       {event.ctaBack ? (
-        <footer className="relative z-10 border-t border-[#9a7b5a]/25 px-5 py-12 text-center sm:py-16">
+        <footer className="relative z-10 border-t border-cafe-gold/25 px-5 py-12 text-center sm:py-16">
           <Link
             href={event.ctaBack.url}
             className={cn(
               buttonVariants({ variant: "outline" }),
-              "rounded-2xl border-[#9a7b5a]/50 bg-transparent px-6 text-[0.7rem] tracking-[0.18em] text-[#f4ebe3] uppercase hover:border-[#c46a7a]/60 hover:bg-[#a84d5f]/15 hover:text-[#f4ebe3]"
+              "rounded-2xl border-cafe-gold/50 bg-transparent px-6 text-[0.7rem] tracking-[0.18em] text-cafe-cream uppercase hover:border-cafe-gold-soft/60 hover:bg-cafe-gold/15 hover:text-cafe-cream"
             )}
           >
             {event.ctaBack.label}
