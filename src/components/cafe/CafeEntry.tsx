@@ -27,6 +27,8 @@ export function CafeEntry({ cafe }: CafeEntryProps) {
     pathname.startsWith("/cafe/secret") ||
     pathname.startsWith("/cafe/lab") ||
     pathname.startsWith("/cafe/event") ||
+    // The countdown pages have their own frame.
+    pathname.startsWith("/cafe/countdown") ||
     // The evidence hunt has its own preload (HuntSplash), shown once.
     pathname.startsWith("/cafe/hunt");
   const [ready, setReady] = useState(skipSplash);

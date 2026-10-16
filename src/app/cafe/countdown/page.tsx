@@ -1,0 +1,61 @@
+import type { Metadata } from "next";
+
+import { CountdownBoard } from "@/components/cafe/countdown/CountdownBoard";
+import { CountdownFooter } from "@/components/cafe/countdown/CountdownFooter";
+import { CountdownFrame } from "@/components/cafe/countdown/CountdownFrame";
+import { KeyholeMark } from "@/components/cafe/countdown/KeyholeMark";
+import { SERIF, THAI } from "@/components/cafe/board/pieces";
+import { COUNTDOWN_TARGETS } from "@/lib/cafe-countdown";
+import { cn } from "@/lib/utils";
+
+// CD1 · counts down to the first teaser. No logo, name, date or case number:
+// nothing here may give the cafe away. Spec and to-do: doc/cafe-countdown.md
+export const metadata: Metadata = {
+  title: "A Case Is Brewing",
+  description: "A new case file is about to be revealed.",
+  robots: { index: false, follow: false, nocache: true },
+};
+
+export default function CafeCountdownPage() {
+  return (
+    <CountdownFrame
+      variant="center"
+      ghost="lens"
+      leftTag="CASE No. ????"
+      rightTag="SEALED"
+    >
+      <div className="relative flex w-full max-w-[1080px] flex-col items-center text-center">
+        <KeyholeMark glow className="h-[clamp(130px,19vw,260px)]" />
+        <h1
+          className={cn(
+            SERIF,
+            "mt-[clamp(32px,3.6vw,52px)] text-[length:clamp(20px,3.2vw,46px)] leading-[1.25] font-bold tracking-[clamp(3px,0.9vw,13px)] text-cafe-cream"
+          )}
+        >
+          A CASE IS BREWING.
+        </h1>
+        <p
+          className={cn(
+            THAI,
+            "mt-2.5 text-[length:clamp(16px,1.8vw,24px)] leading-[1.6] font-medium text-cafe-cream/85"
+          )}
+        >
+          แฟ้มคดีใหม่ กำลังจะถูกเปิดเผย
+        </p>
+        <CountdownBoard
+          targetIso={COUNTDOWN_TARGETS.teaser}
+          eyebrow="THE FILE OPENS IN"
+          size="large"
+          className="mt-[clamp(36px,4.4vw,64px)]"
+          open={{
+            label: "THE FILE IS OPEN",
+            labelTh: "แฟ้มคดีถูกเปิดแล้ว",
+            cta: "ดูทีเซอร์ · WATCH",
+            href: "/cafe/countdown/teaser",
+          }}
+        />
+      </div>
+      <CountdownFooter />
+    </CountdownFrame>
+  );
+}

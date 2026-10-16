@@ -8,6 +8,7 @@ import {
   Shippori_Mincho,
 } from "next/font/google";
 
+import { CafeChromeGate } from "@/components/cafe/CafeChromeGate";
 import { CafeEntry } from "@/components/cafe/CafeEntry";
 import { CafeFooter } from "@/components/cafe/CafeFooter";
 import { CafeHeader } from "@/components/cafe/CafeHeader";
@@ -74,12 +75,16 @@ export default async function CafeLayout({ children }: { children: ReactNode }) 
     >
       <MediaProtection />
       <CafeEntry cafe={cafe} />
-      <CafeHeader
-        cafe={cafe}
-        showMainSiteLink={visibility.mainSiteLink && !onCafeDomain}
-      />
+      <CafeChromeGate>
+        <CafeHeader
+          cafe={cafe}
+          showMainSiteLink={visibility.mainSiteLink && !onCafeDomain}
+        />
+      </CafeChromeGate>
       <main className="flex-1">{children}</main>
-      <CafeFooter cafe={cafe} />
+      <CafeChromeGate>
+        <CafeFooter cafe={cafe} />
+      </CafeChromeGate>
       <BackToTop />
     </div>
   );

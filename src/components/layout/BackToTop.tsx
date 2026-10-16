@@ -8,7 +8,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /** Pages with their own bottom bar, where this button would sit on top of it. */
-const HIDDEN_ON = ["/cafe/hunt"];
+const HIDDEN_ON = ["/cafe/hunt", "/cafe/countdown", "/cafe/countdown/teaser"];
 
 export function BackToTop() {
   const pathname = usePathname();
