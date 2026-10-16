@@ -263,6 +263,10 @@
   --color-cafe-ink-soft: #34433c;
   --color-cafe-ink-muted: #556159;
   --color-cafe-forest: #1e4a40;
+  /* Sealing wax for found evidence (hunt). wax on cream 7.4. */
+  --color-cafe-wax: #9b2d33;
+  --color-cafe-wax-dark: #5e171c;
+  --color-cafe-wax-light: #c4525a;
 }
 
 @keyframes cafe-tape-marquee {

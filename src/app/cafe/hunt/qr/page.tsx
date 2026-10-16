@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
-import { HAND, LABEL, TYPE } from "@/components/cafe/board/pieces";
+import { LABEL, SERIF, TYPE } from "@/components/cafe/board/pieces";
+import { WALL_NOTE } from "@/components/cafe/hunt/HuntFrame";
 import { HuntFrame } from "@/components/cafe/hunt/HuntFrame";
 import { QrCodeSvg } from "@/components/cafe/hunt/QrCodeSvg";
 import { cafeHunt } from "@/lib/cafe-hunt";
@@ -70,15 +71,15 @@ export default function CafeHuntQrPage() {
     <HuntFrame width="wide">
       <div className="max-w-3xl print:hidden">
         <p className={LABEL}>Evidence Hunt · QR Sheet</p>
-        <h1 className={cn(HAND, "mt-1 text-[27px] leading-[1.25] text-[#f4ebe3]")}>
+        <h1 className="mt-1.5 text-[28px] leading-[1.25] font-bold text-cafe-cream">
           QR จุดหลักฐานทั้งหมด
         </h1>
-        <p className="mt-2 text-sm leading-[1.7] text-[#c4b8a8]">
+        <p className="mt-2 text-sm leading-[1.7] text-cafe-muted">
           ลิงก์ใน QR สร้างจาก <code className={TYPE}>NEXT_PUBLIC_SITE_URL</code>
           {base ? (
             <>
               {" "}
-              ตอนนี้คือ <code className={cn(TYPE, "text-[#f3b8c4]")}>{base}</code>
+              ตอนนี้คือ <code className={cn(TYPE, "text-cafe-gold-soft")}>{base}</code>
             </>
           ) : null}{" "}
           ปุ่มสแกนในหน้าเว็บอ่านเฉพาะรหัสในลิงก์ ถึงโดเมนเปลี่ยน QR เดิมก็ยังสแกนได้
@@ -87,13 +88,13 @@ export default function CafeHuntQrPage() {
       </div>
 
       {!base ? (
-        <p role="alert" className="mt-6 max-w-3xl border-l-4 border-[#f2c230] bg-[#14100c] px-3.5 py-3 text-sm leading-[1.6] text-[#f4ebe3]">
+        <p role="alert" className={cn(WALL_NOTE, "mt-6 max-w-3xl")}>
           ยังไม่ได้ตั้ง <code className={TYPE}>NEXT_PUBLIC_SITE_URL</code> ในไฟล์ .env
           จึงสร้าง QR ไม่ได้ ตั้งค่าแล้วเปิด npm run dev ใหม่
         </p>
       ) : null}
       {base && !tokens ? (
-        <p role="alert" className="mt-6 max-w-3xl border-l-4 border-[#f2c230] bg-[#14100c] px-3.5 py-3 text-sm leading-[1.6] text-[#f4ebe3]">
+        <p role="alert" className={cn(WALL_NOTE, "mt-6 max-w-3xl")}>
           ยังไม่ได้ตั้ง <code className={TYPE}>CAFE_HUNT_TOKENS</code> ให้ครบ{" "}
           {cafeHunt.items.length} รหัส (รหัสละอย่างน้อย 16 ตัวอักษร ไม่ซ้ำกัน)
           จึงยังไม่มี QR หลักฐาน มีแค่ QR สำหรับเทสกรณีผิดด้านล่าง
@@ -104,22 +105,22 @@ export default function CafeHuntQrPage() {
         {[...evidence, ...tests].map((card) => (
           <li
             key={card.key}
-            className="flex flex-col bg-[#f4ebe3] p-5 text-[#1a1410] shadow-[0_14px_26px_rgba(0,0,0,0.45)] print:break-after-page print:shadow-none"
+            className="flex flex-col bg-cafe-cream p-5 text-cafe-ink shadow-[0_14px_26px_rgba(0,0,0,0.45)] print:break-after-page print:bg-white print:shadow-none"
           >
-            <p className={cn(TYPE, "text-xs font-bold tracking-[0.14em] text-[#a8323f] uppercase")}>
+            <p className={cn(SERIF, "text-[11px] font-bold tracking-[0.18em] text-cafe-wax uppercase")}>
               {card.kicker}
             </p>
-            <h2 className="mt-1 text-xl leading-[1.3] font-semibold">{card.title}</h2>
+            <h2 className="mt-1 text-xl leading-[1.3] font-bold">{card.title}</h2>
             <QrCodeSvg
               value={card.url}
               label={`QR ${card.kicker} ${card.title}`}
               className="mx-auto mt-4 block aspect-square w-full max-w-[320px]"
             />
-            <p className={cn(TYPE, "mt-3 text-center text-xs break-all text-[#3d3024]")}>
+            <p className={cn(TYPE, "mt-3 text-center text-xs break-all text-cafe-ink-soft")}>
               {card.url}
             </p>
             {card.expect ? (
-              <p className="mt-3 border-t border-dashed border-[#5c4636]/50 pt-3 text-sm leading-[1.6] text-[#3d3024]">
+              <p className="mt-3 border-t border-dashed border-cafe-ink-soft/40 pt-3 text-sm leading-[1.6] text-cafe-ink-soft">
                 ผลที่ควรได้: {card.expect}
               </p>
             ) : null}

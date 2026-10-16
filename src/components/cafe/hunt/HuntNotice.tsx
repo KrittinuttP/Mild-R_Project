@@ -2,10 +2,11 @@
 
 import { useEffect, type ReactNode } from "react";
 
-import { HAND, Pin, Stamp, TYPE } from "@/components/cafe/board/pieces";
+import { LABEL, SERIF, Stamp } from "@/components/cafe/board/pieces";
+import { GOLD_BUTTON, KeyholePlate } from "@/components/cafe/hunt/HuntFrame";
 import { cn } from "@/lib/utils";
 
-const STRONG = "font-semibold text-[#1a1410]";
+const STRONG = "font-bold text-cafe-ink";
 
 const POINTS: ReactNode[] = [
   <>
@@ -47,34 +48,34 @@ export function HuntNotice({ required, onClose }: HuntNoticeProps) {
   }, [required, onClose]);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-[#050607]/65 font-[family-name:var(--font-cafe-thai)] sm:items-center sm:p-6">
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-cafe-deep/75 font-[family-name:var(--font-cafe-thai)] sm:items-center sm:p-6">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="hunt-notice-title"
-        className="relative max-h-full w-full overflow-y-auto bg-[#f4ebe3] px-[22px] pt-[26px] pb-[calc(28px+env(safe-area-inset-bottom))] text-[#1a1410] shadow-[0_-18px_40px_rgba(0,0,0,0.6)] sm:max-w-md sm:pb-7"
+        className="relative max-h-full w-full overflow-y-auto bg-cafe-cream px-[22px] pt-[26px] pb-[calc(28px+env(safe-area-inset-bottom))] text-cafe-ink shadow-[0_-14px_30px_rgba(0,0,0,0.45)] sm:max-w-md sm:pb-7"
       >
-        <Pin />
+        <KeyholePlate className="-top-[15px] left-1/2 -translate-x-1/2" />
         <div className="flex items-center justify-between gap-3">
-          <p className={cn(TYPE, "text-xs tracking-[0.14em] text-[#5c4636] uppercase")}>
+          <p className={cn(LABEL, "text-[10.5px] text-cafe-gold-deep sm:text-[10.5px]")}>
             Read before you start
           </p>
-          <Stamp className="rotate-3">Notice</Stamp>
+          <Stamp className="rotate-3 border-2 border-cafe-wax px-2 py-0.5 text-[10px] text-cafe-wax">Notice</Stamp>
         </div>
         <h2
           id="hunt-notice-title"
-          className={cn(HAND, "mt-2.5 text-[25px] leading-[1.3] text-[#7a1f2a]")}
+          className="mt-1.5 text-[23px] leading-[1.35] font-bold text-cafe-wax"
         >
           ตราประทับจะถูกเก็บไว้ในมือถือเครื่องนี้
         </h2>
 
-        <ul className="mt-4 flex flex-col gap-3 text-[15px] leading-[1.6] text-[#3d3024]">
+        <ul className="mt-4 flex flex-col gap-3 text-[14.5px] leading-[1.65] text-cafe-ink-soft">
           {POINTS.map((point, index) => (
             <li key={index} className="flex gap-3">
               <span
                 className={cn(
-                  TYPE,
-                  "flex size-[26px] shrink-0 items-center justify-center rounded-full border-2 border-[#1a1410] text-sm font-bold text-[#1a1410]"
+                  SERIF,
+                  "mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full border-[1.5px] border-cafe-gold-deep text-[11px] font-bold text-cafe-gold-deep"
                 )}
                 aria-hidden
               >
@@ -89,12 +90,12 @@ export function HuntNotice({ required, onClose }: HuntNoticeProps) {
           type="button"
           autoFocus
           onClick={onClose}
-          className="mt-[22px] flex min-h-[52px] w-full items-center justify-center bg-[#1a1410] px-4 text-base font-semibold text-[#f4ebe3] transition hover:bg-[#3d3024] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#e85a7a]"
+          className={cn(GOLD_BUTTON, "mt-[22px] min-h-[54px] text-base font-bold shadow-[0_8px_18px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,240,200,0.5)] focus-visible:outline-cafe-ink")}
         >
           {required ? "เข้าใจแล้ว เริ่มเก็บหลักฐาน" : "ปิด"}
         </button>
         {required ? (
-          <p className="mt-3 text-center text-[13px] text-[#5c4636]">
+          <p className="mt-3 text-center text-[13px] text-cafe-ink-muted">
             อ่านคำเตือนนี้ซ้ำได้ที่หน้าสมุดสะสม
           </p>
         ) : null}

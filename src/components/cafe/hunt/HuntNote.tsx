@@ -1,4 +1,5 @@
-import { Pin, Stamp, TYPE } from "@/components/cafe/board/pieces";
+import { Pin, Stamp } from "@/components/cafe/board/pieces";
+import { WaxSeal } from "@/components/cafe/hunt/HuntFrame";
 import { cn } from "@/lib/utils";
 
 export type HuntNoteVariant = "already" | "invalid" | "other" | "unreachable";
@@ -10,26 +11,26 @@ const NOTE: Record<
   already: {
     title: "เก็บชิ้นนี้ไปแล้ว",
     body: "หลักฐานชิ้นนี้อยู่ในสมุดแล้ว ไปหาจุดอื่นต่อได้เลย",
-    edge: "border-l-[#0f4f55]",
-    titleColor: "text-[#0f4f55]",
+    edge: "border-l-cafe-forest",
+    titleColor: "text-cafe-forest",
   },
   invalid: {
     title: "QR นี้ใช้ไม่ได้",
     body: "รหัสไม่ตรงกับจุดหลักฐาน ลองสแกนใหม่ ถ้ายังไม่ได้ให้แจ้งทีมงาน",
-    edge: "border-l-[#a8323f]",
-    titleColor: "text-[#7a1f2a]",
+    edge: "border-l-cafe-wax",
+    titleColor: "text-cafe-wax",
   },
   other: {
     title: "QR นี้ไม่ใช่จุดหลักฐาน",
     body: "มองหา QR ที่มีป้าย EVIDENCE แล้วเล็งใหม่ได้เลย",
-    edge: "border-l-[#5c4636]",
-    titleColor: "text-[#7a1f2a]",
+    edge: "border-l-cafe-gold-deep",
+    titleColor: "text-cafe-wax",
   },
   unreachable: {
     title: "ตรวจหลักฐานไม่ได้",
     body: "เช็คอินเทอร์เน็ต แล้วสแกน QR เดิมอีกครั้ง",
-    edge: "border-l-[#f2c230]",
-    titleColor: "text-[#1a1410]",
+    edge: "border-l-cafe-gold",
+    titleColor: "text-cafe-ink",
   },
 };
 
@@ -49,7 +50,7 @@ export function HuntNote({ variant, number, onClose, className }: HuntNoteProps)
     <div
       role="status"
       className={cn(
-        "relative -rotate-[0.6deg] border-l-[6px] bg-[#f4ebe3] px-4 py-3.5 text-[#1a1410] shadow-[0_16px_30px_rgba(0,0,0,0.55)]",
+        "relative -rotate-[0.6deg] border-l-[6px] bg-cafe-cream px-4 py-3.5 text-cafe-ink shadow-[0_16px_30px_rgba(0,0,0,0.55)]",
         note.edge,
         className
       )}
@@ -60,26 +61,22 @@ export function HuntNote({ variant, number, onClose, className }: HuntNoteProps)
           <p className={cn("text-base leading-[1.4] font-semibold", note.titleColor)}>
             {note.title}
           </p>
-          <p className="mt-0.5 text-sm leading-[1.6] text-[#3d3024]">
+          <p className="mt-0.5 text-sm leading-[1.6] text-cafe-ink-soft">
             {variant === "already" && number
               ? `หลักฐานชิ้นที่ ${number} อยู่ในสมุดแล้ว ไปหาจุดอื่นต่อได้เลย`
               : note.body}
           </p>
         </div>
         {variant === "already" && number ? (
-          <span
-            className={cn(
-              TYPE,
-              "flex size-11 shrink-0 -rotate-[10deg] items-center justify-center rounded-full border-[3px] border-[#a8323f] text-[15px] font-bold text-[#a8323f]"
-            )}
-            aria-hidden
-          >
-            {String(number).padStart(2, "0")}
-          </span>
+          <WaxSeal
+            label={String(number).padStart(2, "0")}
+            turn={-10}
+            className="size-12"
+          />
         ) : variant === "invalid" ? (
-          <Stamp className="shrink-0 rotate-6 text-[11px]">Void</Stamp>
+          <Stamp className="shrink-0 rotate-6 border-cafe-wax text-[11px] text-cafe-wax">Void</Stamp>
         ) : variant === "other" ? (
-          <Stamp className="shrink-0 rotate-6 text-center text-[11px] leading-[1.15]">
+          <Stamp className="shrink-0 rotate-6 border-cafe-wax text-center text-[11px] leading-[1.15] text-cafe-wax">
             Not
             <br />
             Evidence
@@ -90,7 +87,7 @@ export function HuntNote({ variant, number, onClose, className }: HuntNoteProps)
             type="button"
             onClick={onClose}
             aria-label="ปิดข้อความ"
-            className="-mt-1.5 -mr-2 flex size-11 shrink-0 items-center justify-center text-[#5c4636] transition hover:text-[#1a1410] focus-visible:outline-[3px] focus-visible:outline-offset-[-3px] focus-visible:outline-[#e85a7a]"
+            className="-mt-1.5 -mr-2 flex size-11 shrink-0 items-center justify-center text-cafe-ink-muted transition hover:text-cafe-ink focus-visible:outline-[3px] focus-visible:outline-offset-[-3px] focus-visible:outline-cafe-gold-deep"
           >
             <svg
               viewBox="0 0 24 24"

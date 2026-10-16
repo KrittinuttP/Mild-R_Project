@@ -1,20 +1,18 @@
-import { CorkBoard, HAND, Pin, TYPE } from "@/components/cafe/board/pieces";
+import { CorkBoard, LABEL, SERIF } from "@/components/cafe/board/pieces";
+import {
+  BrassPin,
+  KeyholeSlot,
+  WaxSeal,
+} from "@/components/cafe/hunt/HuntFrame";
 import type { CafeHuntItem } from "@/lib/cafe-hunt";
 import type { HuntStamp } from "@/lib/cafe-hunt-storage";
 import { cn } from "@/lib/utils";
 
-const CARD_TILTS = [-4, 1.3, 2.7, -1.7, 1.3];
-const STAMP_TURNS = [-12, 8, -6, -5, 10];
-const NOTE_TILTS = [-0.6, 0.6, -0.4, 0.5, -0.5];
+const CARD_TILTS = [-4, 1.5, 2.6, -1.8, 1.2];
+const SEAL_TURNS = [-12, 8, -6, -5, 10];
 
-/** Small pushpin holding a card on the thread. */
-function ThreadPin() {
-  return (
-    <span
-      className="absolute top-0 size-3 rounded-full bg-[radial-gradient(circle_at_35%_35%,#ffd0db,#e85a7a_55%,#a8323f)]"
-      aria-hidden
-    />
-  );
+function exhibit(index: number) {
+  return `EX.${String(index + 1).padStart(2, "0")}`;
 }
 
 type HuntThreadStripProps = {
@@ -23,8 +21,9 @@ type HuntThreadStripProps = {
 };
 
 /**
- * Every piece as a small card on a red thread across the cork board, then a
- * note card with the clue for each piece still missing.
+ * Every piece as a small tag on a gold thread across the felt board (a wax
+ * seal once found), then the clues for the pieces still missing. Until the
+ * team publishes the clues (`hint` empty) the board alone is the list.
  */
 export function HuntThreadStrip({ items, stamps }: HuntThreadStripProps) {
   const total = items.length;
@@ -32,20 +31,26 @@ export function HuntThreadStrip({ items, stamps }: HuntThreadStripProps) {
     .map((item, index) => ({ item, index }))
     .filter(({ item }) => !stamps[item.id]);
   const found = total - missing.length;
+  const clues = missing.some(({ item }) => (item.hint ?? "").trim() !== "");
 
   return (
     <>
-      <CorkBoard className="mt-[30px] px-2.5 pt-3.5 pb-[18px]">
-        <div className="relative">
+      <CorkBoard className="mt-[30px] px-2.5 pt-4 pb-4">
+        <p className={cn(LABEL, "px-1.5 text-[10px] sm:text-[11px]")}>Evidence Board</p>
+        <div className="relative mt-1">
           <svg
-            viewBox="0 0 330 20"
+            viewBox="0 0 340 20"
             preserveAspectRatio="none"
-            className="absolute inset-x-0 top-0 h-5 w-full overflow-visible"
+            className="absolute inset-x-0 top-2 h-5 w-full overflow-visible"
             aria-hidden
           >
             <path
-              d="M8 6 Q 90 16 166 6 T 322 6"
-              className="fill-none stroke-[#e85a7a] stroke-[2.2]"
+              d="M10 6 Q 92 18 170 6 T 330 6"
+              className="fill-none stroke-cafe-gold stroke-[1.8]"
+            />
+            <path
+              d="M10 5.4 Q 92 17.4 170 5.4 T 330 5.4"
+              className="fill-none stroke-[#f6e4a8] stroke-[0.6] opacity-60"
             />
           </svg>
           <ul
@@ -53,92 +58,95 @@ export function HuntThreadStrip({ items, stamps }: HuntThreadStripProps) {
             className="relative flex justify-between"
           >
             {items.map((item, index) => {
-              const stamp = stamps[item.id];
-              const label = String(index + 1).padStart(2, "0");
+              const stamped = Boolean(stamps[item.id]);
               return (
-                <li key={item.id} className="relative flex flex-col items-center pt-3.5">
-                  <ThreadPin />
+                <li
+                  key={item.id}
+                  className="relative flex w-[19%] max-w-[72px] flex-col items-center pt-4"
+                >
+                  <BrassPin className="top-1 size-[11px]" />
                   <div
-                    className="bg-[#f4ebe3] p-[5px] shadow-[0_6px_12px_rgba(0,0,0,0.45)]"
+                    className="flex aspect-[58/64] w-full flex-col items-center justify-center gap-0.5 bg-cafe-cream shadow-[0_6px_12px_rgba(0,0,0,0.45)]"
                     style={{ transform: `rotate(${CARD_TILTS[index % CARD_TILTS.length]}deg)` }}
                   >
-                    {stamp ? (
-                      <span
-                        className={cn(
-                          TYPE,
-                          "flex size-[46px] flex-col items-center justify-center rounded-full border-[3px] border-[#a8323f] font-bold text-[#a8323f] shadow-[inset_0_0_0_3px_#f4ebe3,inset_0_0_0_4px_#a8323f]"
-                        )}
-                        style={{ transform: `rotate(${STAMP_TURNS[index % STAMP_TURNS.length]}deg)` }}
-                        aria-hidden
-                      >
-                        <span className="text-[8px] leading-none tracking-[0.1em]">FOUND</span>
-                        <span className="mt-0.5 text-[15px] leading-none">{label}</span>
-                      </span>
+                    {stamped ? (
+                      <WaxSeal
+                        label={String(index + 1).padStart(2, "0")}
+                        turn={SEAL_TURNS[index % SEAL_TURNS.length]}
+                        className="w-[76%]"
+                      />
                     ) : (
-                      <span
-                        className={cn(
-                          TYPE,
-                          "flex size-[46px] items-center justify-center rounded-full border-2 border-dashed border-[#5c4636] text-[13px] font-bold text-[#8a7560]"
-                        )}
-                        aria-hidden
-                      >
-                        {label}
-                      </span>
+                      <KeyholeSlot className="aspect-square w-[70%]" />
                     )}
+                    <span
+                      className={cn(
+                        SERIF,
+                        "text-[9px] font-bold tracking-[0.12em] text-cafe-ink-muted"
+                      )}
+                      aria-hidden
+                    >
+                      {exhibit(index)}
+                    </span>
                   </div>
                   <span className="sr-only">
-                    หลักฐานชิ้นที่ {index + 1}: {stamp ? "เก็บแล้ว" : "ยังไม่พบ"}
+                    หลักฐานชิ้นที่ {index + 1}: {stamped ? "เก็บแล้ว" : "ยังไม่พบ"}
                   </span>
                 </li>
               );
             })}
           </ul>
         </div>
-        <p
-          className={cn(TYPE, "mt-3.5 text-center text-xs tracking-[0.14em] text-[#f4ebe3]")}
-          aria-hidden
-        >
-          FOUND {found} · MISSING {missing.length}
-        </p>
       </CorkBoard>
 
-      {missing.length > 0 ? (
-        <section aria-labelledby="hunt-missing-title" className="mt-[22px]">
-          <h2
-            id="hunt-missing-title"
-            className={cn(HAND, "text-xl text-[#f4ebe3]")}
-          >
-            ยังต้องตามหาอีก {missing.length} ชิ้น
+      {missing.length > 0 && clues ? (
+        <section
+          aria-labelledby="hunt-clues-title"
+          className="relative mt-[30px] rotate-[0.4deg] bg-cafe-cream px-[18px] pt-5 pb-3 text-cafe-ink shadow-[0_14px_28px_rgba(0,0,0,0.45)]"
+        >
+          <BrassPin className="-top-[9px] left-1/2 size-[18px] -translate-x-1/2" />
+          <p className={cn(LABEL, "text-[10.5px] text-cafe-gold-deep sm:text-[10.5px]")}>
+            Clues · Missing {missing.length}
+          </p>
+          <h2 id="hunt-clues-title" className="mt-0.5 text-[19px] font-bold">
+            คำใบ้ของหลักฐานที่เหลือ
           </h2>
-          <ul className="mt-3 flex flex-col gap-3.5">
-            {missing.map(({ item, index }, order) => (
+          <ul className="mt-2">
+            {missing.map(({ item, index }) => (
               <li
                 key={item.id}
-                className="relative flex items-center gap-3.5 bg-[#f4ebe3] p-3.5 text-[#1a1410] shadow-[0_10px_20px_rgba(0,0,0,0.45)]"
-                style={{ transform: `rotate(${NOTE_TILTS[order % NOTE_TILTS.length]}deg)` }}
+                className="flex items-center gap-3 border-t border-dashed border-cafe-ink-soft/30 py-[11px] first:border-t-0"
               >
-                <Pin />
-                <span
-                  className={cn(
-                    TYPE,
-                    "flex size-16 shrink-0 items-center justify-center rounded-full border-2 border-dashed border-[#5c4636] text-base font-bold text-[#8a7560]"
-                  )}
-                  aria-hidden
-                >
-                  ?
-                </span>
+                <KeyholeSlot className="size-[34px]" />
                 <div className="min-w-0">
-                  <p className={cn(TYPE, "text-xs tracking-[0.14em] text-[#5c4636]")}>
-                    EX. {String(index + 1).padStart(2, "0")} · ยังไม่พบ
+                  <p className={cn(SERIF, "text-[11px] font-bold tracking-[0.14em]")}>
+                    {exhibit(index)}
                   </p>
-                  <p className={cn(HAND, "mt-1 text-[17px] leading-[1.4] break-words text-[#7a1f2a]")}>
-                    {item.hint ? `คำใบ้: ${item.hint}` : "สแกน QR ของจุดนี้เพื่อเก็บ"}
-                  </p>
+                  {(item.hint ?? "").trim() ? (
+                    <p className="mt-0.5 text-[14.5px] leading-normal break-words text-cafe-wax italic">
+                      <span
+                        className={cn(
+                          SERIF,
+                          "mr-1.5 text-[10px] font-bold tracking-[0.16em] text-cafe-gold-deep not-italic"
+                        )}
+                      >
+                        CLUE
+                      </span>
+                      {item.hint}
+                    </p>
+                  ) : (
+                    <p className="text-[13px] leading-normal text-cafe-ink-muted">
+                      ยังไม่มีคำใบ้สำหรับชิ้นนี้
+                    </p>
+                  )}
                 </div>
               </li>
             ))}
           </ul>
         </section>
+      ) : missing.length > 0 && found > 0 ? (
+        <p className="mt-4 text-center text-sm text-cafe-muted">
+          หลักฐานที่เหลืออีก {missing.length} ชิ้นซ่อนอยู่ในร้าน ลองสังเกตรอบ ๆ ดูนะ
+        </p>
       ) : null}
     </>
   );

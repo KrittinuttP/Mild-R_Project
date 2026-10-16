@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
-import { HAND, TYPE } from "@/components/cafe/board/pieces";
-import { THAI } from "@/components/cafe/hunt/HuntFrame";
+import { LABEL, SERIF } from "@/components/cafe/board/pieces";
+import { GOLD_BUTTON, THAI, WaxSeal } from "@/components/cafe/hunt/HuntFrame";
 import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +25,14 @@ const ART_CROP = {
 };
 
 const MINI_TURNS = [-10, 7, -4, 11, -7];
-const CONFETTI_COLORS = ["#e85a7a", "#f3b8c4", "#f2c230", "#b9e6e1", "#f4ebe3"];
+/** Gold leaf, cream paper and a little wax. */
+const CONFETTI_COLORS = [
+  "var(--color-cafe-gold)",
+  "var(--color-cafe-gold-soft)",
+  "var(--color-cafe-cream)",
+  "var(--color-cafe-wax)",
+  "var(--color-cafe-gold-pale)",
+];
 /** Fixed spread so server and client render the same pieces. */
 const CONFETTI = Array.from({ length: 22 }, (_, i) => ({
   left: `${(i * 37 + 11) % 100}%`,
@@ -34,10 +41,10 @@ const CONFETTI = Array.from({ length: 22 }, (_, i) => ({
   wide: i % 2 === 0,
 }));
 const SPARKLES = [
-  { className: "top-[6%] -left-[22%] size-[22px]", fill: "#f2c230" },
-  { className: "top-[2%] -right-[18%] size-[18px]", fill: "#f3b8c4" },
-  { className: "top-[62%] -right-[26%] size-6", fill: "#f2c230" },
-  { className: "top-[70%] -left-[24%] size-4", fill: "#b9e6e1" },
+  { className: "top-[6%] -left-[22%] size-[22px]", fill: "var(--color-cafe-gold-soft)" },
+  { className: "top-[2%] -right-[18%] size-[18px]", fill: "var(--color-cafe-cream)" },
+  { className: "top-[62%] -right-[26%] size-6", fill: "var(--color-cafe-gold)" },
+  { className: "top-[70%] -left-[24%] size-4", fill: "var(--color-cafe-gold-pale)" },
 ];
 
 type HuntCelebrateProps = {
@@ -130,20 +137,18 @@ export function HuntCelebrate({ total, onPrimary, onBook }: HuntCelebrateProps) 
       role="dialog"
       aria-modal="true"
       aria-labelledby="hunt-celebrate-title"
-      className={cn(THAI, "fixed inset-0 z-[110] overflow-x-hidden overflow-y-auto text-[#d8d0c4]")}
+      className={cn(THAI, "fixed inset-0 z-[110] overflow-x-hidden overflow-y-auto bg-cafe-ground text-cafe-text")}
       style={{
-        backgroundColor: "#0a0c0e",
         backgroundImage:
-          "radial-gradient(circle at 50% 28%, rgba(232,90,122,0.32), transparent 55%), linear-gradient(rgba(244,235,227,0.022) 1px, transparent 1px), linear-gradient(90deg, rgba(244,235,227,0.022) 1px, transparent 1px)",
-        backgroundSize: "auto, 44px 44px, 44px 44px",
+          "radial-gradient(circle at 50% 28%, rgba(201,161,74,0.35), transparent 58%)",
       }}
     >
       <div
         data-ce-shake
         className="relative mx-auto flex min-h-full w-full max-w-[420px] flex-col items-center px-6 pt-[max(20px,env(safe-area-inset-top))] pb-[max(20px,env(safe-area-inset-bottom))]"
       >
-        <p className={cn(TYPE, "text-xs tracking-[0.14em] text-[#c4a882]")}>
-          EVIDENCE HUNT · CASE CLOSED
+        <p className={cn(LABEL, "text-[11px]")}>
+          Evidence Hunt · Case Closed
         </p>
 
         <div
@@ -160,7 +165,7 @@ export function HuntCelebrate({ total, onPrimary, onBook }: HuntCelebrateProps) 
               className="size-full rounded-full"
               style={{
                 background:
-                  "repeating-conic-gradient(from 0deg, rgba(243,184,196,0.22) 0deg 9deg, transparent 9deg 24deg)",
+                  "repeating-conic-gradient(from 0deg, rgba(227,199,126,0.18) 0deg 9deg, transparent 9deg 24deg)",
                 maskImage: "radial-gradient(circle, #000 18%, transparent 68%)",
                 WebkitMaskImage: "radial-gradient(circle, #000 18%, transparent 68%)",
               }}
@@ -200,8 +205,8 @@ export function HuntCelebrate({ total, onPrimary, onBook }: HuntCelebrateProps) 
           <p
             data-ce-solved
             className={cn(
-              TYPE,
-              "absolute -bottom-6 left-1/2 -translate-x-1/2 -rotate-[8deg] border-[5px] border-[#e85a7a] bg-[#0a0c0e]/55 px-3 pt-2 pb-1 text-center text-[clamp(22px,8.2vw,32px)] leading-none font-bold tracking-[0.14em] whitespace-nowrap text-[#e85a7a] shadow-[0_0_26px_rgba(232,90,122,0.55)]"
+              SERIF,
+              "absolute -bottom-6 left-1/2 -translate-x-1/2 -rotate-[7deg] border-4 border-double border-cafe-gold bg-cafe-void/75 px-4 pt-2.5 pb-2 text-center text-[clamp(22px,7.6vw,30px)] leading-none font-bold tracking-[0.14em] whitespace-nowrap text-cafe-gold-soft shadow-[0_0_30px_rgba(201,161,74,0.45)]"
             )}
             aria-hidden
           >
@@ -218,13 +223,10 @@ export function HuntCelebrate({ total, onPrimary, onBook }: HuntCelebrateProps) 
             <li
               key={index}
               data-ce-mini
-              className={cn(
-                TYPE,
-                "flex size-[52px] items-center justify-center rounded-full border-[3px] border-[#e85a7a] bg-[#e85a7a]/12 text-lg font-bold text-[#f3b8c4]"
-              )}
+              className="size-[56px]"
               style={{ transform: `rotate(${MINI_TURNS[index % MINI_TURNS.length]}deg)` }}
             >
-              {String(index + 1).padStart(2, "0")}
+              <WaxSeal label={String(index + 1).padStart(2, "0")} className="size-full" />
             </li>
           ))}
         </ul>
@@ -232,14 +234,14 @@ export function HuntCelebrate({ total, onPrimary, onBook }: HuntCelebrateProps) 
         <div data-ce-copy className="mt-6 text-center">
           <h2
             id="hunt-celebrate-title"
-            className={cn(HAND, "text-[34px] leading-[1.25] text-[#f4ebe3]")}
+            className="text-[28px] leading-[1.3] font-bold text-cafe-cream"
           >
-            ปิดคดีสำเร็จ!
+            ปิดคดีได้สำเร็จ!
           </h2>
           <p className="mt-2 text-[15px] leading-[1.7]">
-            เก็บหลักฐานครบทั้ง {total} ชิ้นแล้ว
+            ขอบคุณที่ช่วยนักสืบ Mild-R เก็บหลักฐานครบทั้ง {total} ชิ้น
             <br />
-            กรอกข้อมูลเพื่อลุ้นรับรางวัลได้เลย
+            กรอกชื่อเพื่อลุ้นรับรางวัลได้เลย
           </p>
         </div>
 
@@ -248,16 +250,16 @@ export function HuntCelebrate({ total, onPrimary, onBook }: HuntCelebrateProps) 
             type="button"
             autoFocus
             onClick={onPrimary}
-            className="flex min-h-14 w-full items-center justify-center bg-[#e85a7a] px-4 text-lg font-semibold text-[#1a1410] shadow-[0_0_24px_rgba(232,90,122,0.45)] transition hover:bg-[#f3b8c4] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#f4ebe3]"
+            className={cn(GOLD_BUTTON, "min-h-14 text-lg font-bold")}
           >
             กรอกชื่อลุ้นรับรางวัล
           </button>
           <button
             type="button"
             onClick={onBook}
-            className="mt-2 flex min-h-12 w-full items-center justify-center text-[15px] font-semibold text-[#f3b8c4] underline underline-offset-4 transition hover:text-[#f4ebe3] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#e85a7a]"
+            className="mt-2 flex min-h-12 w-full items-center justify-center text-[15px] font-semibold text-cafe-gold-soft underline underline-offset-4 transition hover:text-cafe-cream focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-cafe-gold"
           >
-            ดูสมุดสะสม
+            ดูสมุดหลักฐาน
           </button>
         </div>
       </div>
@@ -278,7 +280,7 @@ export function HuntCelebrate({ total, onPrimary, onBook }: HuntCelebrateProps) 
 
       <div
         data-ce-flash
-        className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_50%_30%,#fff5f7,rgba(243,184,196,0.6)_60%)] opacity-0"
+        className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_50%_30%,#fffaf0,rgba(227,199,126,0.55)_60%)] opacity-0"
         aria-hidden
       />
     </div>

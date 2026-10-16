@@ -51,7 +51,7 @@ export function HuntShell({
       <div inert={loading || showSplash || showNotice}>{children}</div>
       {/* Covers the page until this browser's progress has been read. */}
       {loading ? (
-        <div className="fixed inset-0 z-[100] bg-[#0a0c0e]" aria-hidden />
+        <div className="fixed inset-0 z-[100] bg-cafe-ground" aria-hidden />
       ) : null}
       {showSplash ? (
         <HuntSplash

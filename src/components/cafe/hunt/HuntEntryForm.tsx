@@ -2,7 +2,8 @@
 
 import { useId, useState, type FormEvent } from "react";
 
-import { Pin, TYPE } from "@/components/cafe/board/pieces";
+import { LABEL, SERIF } from "@/components/cafe/board/pieces";
+import { GOLD_BUTTON, KeyholePlate } from "@/components/cafe/hunt/HuntFrame";
 import { updateHuntState } from "@/lib/cafe-hunt-storage";
 import {
   formatHandleInput,
@@ -14,9 +15,9 @@ import {
 import { cn } from "@/lib/utils";
 
 const FIELD =
-  "mt-1.5 block h-[52px] w-full rounded-none border-2 border-[#1a1410] bg-[#fffaf3] px-3.5 text-base text-[#1a1410] placeholder:text-[#5c4636]/70 focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#e85a7a]";
-const FIELD_LABEL = "block text-[15px] font-semibold text-[#1a1410]";
-const HELP = "mt-1.5 text-[13px] leading-[1.6] text-[#3d3024]";
+  "mt-1.5 block h-[52px] w-full rounded-none border-[1.5px] border-cafe-ink-soft bg-cafe-cream-light px-3.5 text-base text-cafe-ink placeholder:text-cafe-ink-muted/80 focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-cafe-gold-deep";
+const FIELD_LABEL = "block text-[15px] font-bold text-cafe-ink";
+const HELP = "mt-1.5 text-[13px] leading-[1.6] text-cafe-ink-muted";
 
 const CHANNELS: {
   value: LuckyDrawChannel;
@@ -116,13 +117,13 @@ export function HuntEntryForm({ tokens }: HuntEntryFormProps) {
       onSubmit={onSubmit}
       noValidate
       aria-describedby={error ? errorId : undefined}
-      className="relative bg-[#f4ebe3] px-[18px] pt-6 pb-[22px] text-[#1a1410] shadow-[0_18px_34px_rgba(0,0,0,0.55)]"
+      className="relative bg-cafe-cream px-[18px] pt-6 pb-[22px] text-cafe-ink shadow-[0_14px_28px_rgba(0,0,0,0.45)]"
     >
-      <Pin />
-      <p className={cn(TYPE, "text-xs tracking-[0.14em] text-[#5c4636] uppercase")}>
+      <KeyholePlate className="-top-3 left-[22px]" />
+      <p className={cn(LABEL, "pl-[34px] text-[10.5px] text-cafe-gold-deep sm:text-[10.5px]")}>
         Form LD-01 · Prize Draw Entry
       </p>
-      <h2 className="mt-1.5 text-2xl leading-[1.2] font-semibold">
+      <h2 className="mt-1 pl-[34px] text-[22px] leading-[1.25] font-bold">
         ใบลงชื่อลุ้นรับรางวัล
       </h2>
 
@@ -154,10 +155,10 @@ export function HuntEntryForm({ tokens }: HuntEntryFormProps) {
             <label
               key={option.value}
               className={cn(
-                "flex min-h-[52px] cursor-pointer items-center gap-2.5 border-2 border-[#1a1410] px-3.5 text-base has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[#e85a7a]",
+                "flex min-h-[52px] cursor-pointer items-center gap-2.5 px-3.5 text-base has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-cafe-gold-deep",
                 contactChannel === option.value
-                  ? "bg-[#f3b8c4]"
-                  : "bg-[#fffaf3]"
+                  ? "border-2 border-cafe-gold-deep bg-cafe-gold-pale font-semibold"
+                  : "border-[1.5px] border-cafe-ink-soft bg-cafe-cream-light"
               )}
             >
               <input
@@ -169,7 +170,7 @@ export function HuntEntryForm({ tokens }: HuntEntryFormProps) {
                   setContactChannel(option.value);
                   setContactHandle((handle) => handleForChannel(handle, option.value));
                 }}
-                className="size-5 accent-[#a8323f]"
+                className="size-5 accent-cafe-gold-deep"
               />
               {option.label}
             </label>
@@ -195,20 +196,20 @@ export function HuntEntryForm({ tokens }: HuntEntryFormProps) {
           onChange={(event) =>
             setContactHandle(formatHandleInput(event.target.value, contactChannel))
           }
-          className={cn(FIELD, TYPE)}
+          className={cn(FIELD, SERIF, "text-[15px]")}
         />
         <p className={HELP}>
           ทีมงานจะทักไปที่บัญชีนี้ถ้าคุณได้รางวัล ตรวจตัวสะกดให้ถูก
         </p>
       </div>
 
-      <label className="mt-5 flex cursor-pointer items-start gap-3 text-sm leading-[1.6] text-[#3d3024]">
+      <label className="mt-5 flex cursor-pointer items-start gap-3 text-sm leading-[1.6] text-cafe-ink-soft">
         <input
           type="checkbox"
           name="consent"
           checked={consent}
           onChange={(event) => setConsent(event.target.checked)}
-          className="mt-px size-[22px] shrink-0 accent-[#a8323f]"
+          className="mt-px size-[22px] shrink-0 accent-cafe-gold-deep"
         />
         <span>
           ยินยอมให้เก็บชื่อและช่องทางติดต่อนี้
@@ -220,7 +221,7 @@ export function HuntEntryForm({ tokens }: HuntEntryFormProps) {
         <p
           id={errorId}
           role="alert"
-          className="mt-4 border-l-4 border-[#a8323f] bg-[#f3b8c4]/50 px-3 py-2 text-sm leading-[1.6] font-semibold text-[#7a1f2a]"
+          className="mt-4 border-l-4 border-cafe-wax bg-cafe-blush px-3 py-2 text-sm leading-[1.6] font-semibold text-cafe-wax"
         >
           {error}
         </p>
@@ -229,11 +230,11 @@ export function HuntEntryForm({ tokens }: HuntEntryFormProps) {
       <button
         type="submit"
         disabled={sending}
-        className="mt-[22px] flex min-h-14 w-full items-center justify-center bg-[#e85a7a] px-4 text-lg font-semibold text-[#1a1410] transition hover:bg-[#f3b8c4] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#1a1410] disabled:opacity-70"
+        className={cn(GOLD_BUTTON, "mt-[22px] min-h-14 text-lg font-bold shadow-[0_8px_18px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,240,200,0.5)] focus-visible:outline-cafe-ink disabled:opacity-70")}
       >
         {sending ? "กำลังส่ง…" : "ส่งชื่อลุ้นรับรางวัล"}
       </button>
-      <p className="mt-3 text-center text-[13px] leading-[1.6] text-[#5c4636]">
+      <p className="mt-3 text-center text-[13px] leading-[1.6] text-cafe-ink-muted">
         1 บัญชีลุ้นได้ 1 สิทธิ์ ส่งแล้วแก้ไขไม่ได้
       </p>
     </form>

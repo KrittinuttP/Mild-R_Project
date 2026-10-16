@@ -2,8 +2,9 @@
 
 import { useEffect, useRef } from "react";
 
-import { HAND, Pin, TYPE } from "@/components/cafe/board/pieces";
+import { LABEL } from "@/components/cafe/board/pieces";
 import { HuntCelebrate } from "@/components/cafe/hunt/HuntCelebrate";
+import { GOLD_BUTTON, WaxSeal } from "@/components/cafe/hunt/HuntFrame";
 import type { CafeHuntItem } from "@/lib/cafe-hunt";
 import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
@@ -80,83 +81,79 @@ function StampWindow({
   return (
     <div
       ref={rootRef}
-      className="fixed inset-0 z-[110] flex items-center justify-center overflow-y-auto bg-[#050607]/80 px-6 py-10 font-[family-name:var(--font-cafe-thai)]"
+      className="fixed inset-0 z-[110] flex items-center justify-center overflow-y-auto bg-cafe-deep/80 px-6 py-10 font-[family-name:var(--font-cafe-thai)]"
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="hunt-stamp-title"
-        className="relative w-full max-w-sm bg-[#f4ebe3] text-[#1a1410] shadow-[0_24px_50px_rgba(0,0,0,0.6)]"
+        className="relative w-full max-w-sm -rotate-[0.6deg] bg-cafe-cream text-cafe-ink shadow-[0_24px_50px_rgba(0,0,0,0.6)]"
       >
-        <Pin />
-        <div
-          className={cn(
-            TYPE,
-            "flex items-center justify-between bg-[#a8323f] px-4 pt-3 pb-2.5 text-[13px] font-bold tracking-[0.16em] text-[#f4ebe3]"
-          )}
-        >
-          <span>EVIDENCE FOUND</span>
-          <span>
-            EX. {label} / {String(total).padStart(2, "0")}
+        <div className="flex items-center justify-between bg-cafe-ink px-4 pt-[11px] pb-[9px]">
+          <span className={cn(LABEL, "text-[10.5px] sm:text-[10.5px]")}>Evidence Found</span>
+          <span className={cn(LABEL, "text-[10.5px] text-cafe-gold-pale sm:text-[10.5px]")}>
+            {label} / {String(total).padStart(2, "0")}
           </span>
         </div>
 
-        <div className="relative px-5 pt-[22px] pb-5 text-center">
-          <span
-            data-stamp-mark
-            className={cn(
-              TYPE,
-              "mx-auto flex size-[124px] -rotate-12 flex-col items-center justify-center rounded-full border-[5px] border-[#a8323f] font-bold text-[#a8323f] shadow-[inset_0_0_0_5px_#f4ebe3,inset_0_0_0_7px_#a8323f]"
-            )}
-            aria-hidden
-          >
-            <span className="text-base tracking-[0.1em]">FOUND</span>
-            <span className="text-[40px] leading-none">{label}</span>
-          </span>
+        <div className="relative px-[22px] pt-[26px] pb-[22px] text-center">
+          <div data-stamp-mark className="flex justify-center">
+            <WaxSeal label={label} turn={-10} className="size-[132px]" />
+          </div>
 
+          <p className={cn(LABEL, "mt-3.5 text-[10.5px] text-cafe-gold-deep sm:text-[10.5px]")}>
+            Exhibit {label}
+          </p>
           <h2
             id="hunt-stamp-title"
-            className={cn(HAND, "mt-4 text-[26px] leading-[1.3] text-[#7a1f2a]")}
+            className="mt-0.5 text-2xl leading-[1.3] font-bold break-words"
           >
-            ประทับตราแล้ว!
+            เจอ{item.name || `หลักฐานชิ้นที่ ${number}`} แล้ว!
           </h2>
-          <p className="mt-1 text-base font-semibold break-words">
-            {item.name || `หลักฐานชิ้นที่ ${number}`}
-          </p>
+          <p className="mt-1 text-sm text-cafe-ink-muted">ประทับตราลงสมุดเรียบร้อย</p>
 
-          <div className="mt-3.5 flex items-center justify-center gap-2.5 text-sm text-[#3d3024]">
-            <span>
-              เก็บแล้ว {count} จาก {total}
-            </span>
-            <span className="flex gap-1.5" aria-hidden>
-              {itemIds.map((id) => (
-                <span
-                  key={id}
-                  className={cn(
-                    "size-3.5 rounded-full",
-                    stampedIds.includes(id)
-                      ? "bg-[#e85a7a]"
-                      : "border-2 border-dashed border-[#5c4636]"
-                  )}
-                />
-              ))}
-            </span>
+          <div className="mt-4 flex justify-center gap-[7px]" aria-hidden>
+            {itemIds.map((id) => (
+              <span
+                key={id}
+                className={cn(
+                  "size-3 rounded-full",
+                  stampedIds.includes(id)
+                    ? "bg-cafe-wax"
+                    : "border-[1.5px] border-dashed border-cafe-gold-deep"
+                )}
+              />
+            ))}
           </div>
+          <p className="mt-1.5 text-[13.5px] text-cafe-ink-soft">
+            เก็บแล้ว {count} จาก {total} · เหลืออีก {total - count} ชิ้น
+          </p>
 
           <button
             type="button"
             autoFocus
             onClick={onPrimary}
-            className="mt-5 flex min-h-14 w-full items-center justify-center gap-2.5 bg-[#e85a7a] px-4 text-lg font-semibold text-[#1a1410] transition hover:bg-[#f3b8c4] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#1a1410]"
+            className={cn(
+              GOLD_BUTTON,
+              "mt-5 min-h-14 text-lg font-bold shadow-[0_8px_18px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,240,200,0.5)] focus-visible:outline-cafe-ink"
+            )}
           >
+            <svg
+              viewBox="0 0 24 24"
+              className="size-6 shrink-0 fill-none stroke-current stroke-2 [stroke-linecap:round] [stroke-linejoin:round]"
+              aria-hidden
+            >
+              <path d="M4 8 V5 a1 1 0 0 1 1 -1 h3 M16 4 h3 a1 1 0 0 1 1 1 v3 M20 16 v3 a1 1 0 0 1 -1 1 h-3 M8 20 H5 a1 1 0 0 1 -1 -1 v-3" />
+              <path d="M8 8 h3 v3 H8 z M13 13 h3 v3 h-3 z M13 8 h3 M8 13 v3 h3" />
+            </svg>
             สแกนชิ้นต่อไป
           </button>
           <button
             type="button"
             onClick={onBook}
-            className="mt-2.5 flex min-h-[50px] w-full items-center justify-center border-2 border-[#1a1410] px-4 text-base font-semibold text-[#1a1410] transition hover:bg-[#1a1410] hover:text-[#f4ebe3] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#e85a7a]"
+            className="mt-2.5 flex min-h-[50px] w-full items-center justify-center border-[1.5px] border-cafe-ink px-4 text-[15.5px] font-semibold text-cafe-ink transition hover:bg-cafe-ink hover:text-cafe-cream focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-cafe-gold-deep"
           >
-            ดูสมุดสะสม
+            ดูสมุดหลักฐาน
           </button>
         </div>
       </div>

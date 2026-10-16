@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { HAND, Pin, TYPE } from "@/components/cafe/board/pieces";
+import { Pin, SERIF } from "@/components/cafe/board/pieces";
+import { GOLD_BUTTON } from "@/components/cafe/hunt/HuntFrame";
 import { checkHuntToken } from "@/components/cafe/hunt/hunt-check";
 import { HuntNote, type HuntNoteVariant } from "@/components/cafe/hunt/HuntNote";
 import { HuntStampModal } from "@/components/cafe/hunt/HuntStampModal";
@@ -112,9 +113,9 @@ function nativeDetector(): Detector | null {
 }
 
 const ROUND_BUTTON =
-  "flex size-[46px] items-center justify-center rounded-full bg-[#0a0c0e]/75 transition hover:bg-[#0a0c0e] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#e85a7a]";
+  "flex size-[46px] items-center justify-center rounded-full bg-cafe-void/75 transition hover:bg-cafe-void focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-cafe-gold";
 const OUTLINE_BUTTON =
-  "flex min-h-[50px] items-center justify-center gap-2 border-2 border-[#f4ebe3]/70 px-3 text-[15px] text-[#f4ebe3] transition hover:border-[#f4ebe3] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#e85a7a] aria-pressed:bg-[#f4ebe3] aria-pressed:text-[#1a1410]";
+  "flex min-h-[50px] items-center justify-center gap-2 border-[1.5px] border-cafe-gold/65 px-3 text-[15px] text-cafe-cream transition hover:border-cafe-gold focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-cafe-gold aria-pressed:bg-cafe-gold aria-pressed:text-cafe-ink";
 
 type HuntScannerProps = {
   items: CafeHuntItem[];
@@ -382,7 +383,7 @@ export function HuntScanner({ items, onClose }: HuntScannerProps) {
       role="dialog"
       aria-modal="true"
       aria-label="สแกน QR หลักฐาน"
-      className="fixed inset-0 z-[100] flex flex-col overflow-hidden bg-[#0a0c0e] font-[family-name:var(--font-cafe-thai)] text-[#f4ebe3]"
+      className="fixed inset-0 z-[100] flex flex-col overflow-hidden bg-cafe-deep font-[family-name:var(--font-cafe-thai)] text-cafe-cream"
     >
       <video
         ref={videoRef}
@@ -407,17 +408,17 @@ export function HuntScanner({ items, onClose }: HuntScannerProps) {
         >
           <svg
             viewBox="0 0 24 24"
-            className="size-[22px] fill-none stroke-[#f4ebe3] stroke-[2.2] [stroke-linecap:round]"
+            className="size-[22px] fill-none stroke-cafe-cream stroke-[2.2] [stroke-linecap:round]"
             aria-hidden
           >
             <path d="M6 6 L18 18 M18 6 L6 18" />
           </svg>
         </button>
-        <p className={cn(HAND, "text-xl")}>สแกนหลักฐาน</p>
+        <p className="text-lg font-bold">สแกนหลักฐาน</p>
         <p
           className={cn(
-            TYPE,
-            "min-w-[46px] rounded-full bg-[#0a0c0e]/75 px-2.5 pt-1.5 pb-1 text-center text-sm font-bold text-[#f3b8c4]"
+            SERIF,
+            "min-w-[46px] rounded-full bg-cafe-void/75 px-2.5 pt-1.5 pb-1 text-center text-sm font-bold text-cafe-gold-soft"
           )}
           aria-label={`เก็บแล้ว ${count} จาก ${total} ชิ้น`}
         >
@@ -428,25 +429,25 @@ export function HuntScanner({ items, onClose }: HuntScannerProps) {
       {failed ? (
         <div className="relative z-10 flex-1 overflow-y-auto px-5 pt-4 pb-8">
           <div
-            className="mx-auto flex size-[120px] items-center justify-center rounded-[22px] border-[3px] border-dashed border-[#5c4636]"
+            className="mx-auto flex size-[120px] items-center justify-center rounded-[22px] border-[3px] border-dashed border-cafe-gold/45"
             aria-hidden
           >
             <svg
               viewBox="0 0 48 48"
-              className="size-[58px] fill-none stroke-[#c4a882] stroke-[3] [stroke-linecap:round] [stroke-linejoin:round]"
+              className="size-[58px] fill-none stroke-cafe-gold stroke-[3] [stroke-linecap:round] [stroke-linejoin:round]"
             >
               <path d="M8 14 h32 v24 H8 z M18 14 l3 -6 h6 l3 6" />
               <circle cx="24" cy="26" r="7" />
-              <path d="M6 42 L42 6" className="stroke-[#e85a7a]" />
+              <path d="M6 42 L42 6" className="stroke-cafe-wax-light" />
             </svg>
           </div>
 
-          <section className="relative mx-auto mt-7 max-w-md bg-[#f4ebe3] px-[18px] pt-[22px] pb-5 text-[#1a1410] shadow-[0_18px_34px_rgba(0,0,0,0.55)]">
+          <section className="relative mx-auto mt-7 max-w-md bg-cafe-cream px-[18px] pt-[22px] pb-5 text-cafe-ink shadow-[0_14px_28px_rgba(0,0,0,0.45)]">
             <Pin />
-            <h2 className={cn(HAND, "text-[25px] leading-[1.3] text-[#7a1f2a]")}>
+            <h2 className="text-[22px] leading-[1.35] font-bold text-cafe-wax">
               เปิดกล้องในหน้าเว็บไม่ได้
             </h2>
-            <p className="mt-2 text-[15px] leading-[1.6] text-[#3d3024]">
+            <p className="mt-2 text-[15px] leading-[1.6] text-cafe-ink-soft">
               {state === "blocked"
                 ? "เบราว์เซอร์ยังไม่ได้รับอนุญาตให้ใช้กล้อง"
                 : "เบราว์เซอร์นี้เปิดกล้องในหน้าเว็บไม่ได้"}
@@ -454,7 +455,7 @@ export function HuntScanner({ items, onClose }: HuntScannerProps) {
             {state === "blocked" ? (
               <>
                 <p className="mt-4 text-[15px] font-semibold">วิธีอนุญาตใช้กล้อง</p>
-                <p className="mt-1.5 text-sm leading-[1.7] text-[#3d3024]">
+                <p className="mt-1.5 text-sm leading-[1.7] text-cafe-ink-soft">
                   เปิดการตั้งค่าของเว็บไซต์นี้จากแถบที่อยู่เว็บ
                   หาหัวข้อกล้อง แล้วเลือกอนุญาต จากนั้นกดลองอีกครั้ง
                 </p>
@@ -464,7 +465,7 @@ export function HuntScanner({ items, onClose }: HuntScannerProps) {
                     setState("starting");
                     setAttempt((value) => value + 1);
                   }}
-                  className="mt-[18px] flex min-h-[54px] w-full items-center justify-center bg-[#e85a7a] px-4 text-[17px] font-semibold text-[#1a1410] transition hover:bg-[#f3b8c4] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#1a1410]"
+                  className={cn(GOLD_BUTTON, "mt-[18px] min-h-[54px] text-[17px] font-bold shadow-[0_8px_18px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,240,200,0.5)] focus-visible:outline-cafe-ink")}
                 >
                   ลองเปิดกล้องอีกครั้ง
                 </button>
@@ -472,11 +473,11 @@ export function HuntScanner({ items, onClose }: HuntScannerProps) {
             ) : null}
           </section>
 
-          <section className="mx-auto mt-5 max-w-md border-l-4 border-[#b9e6e1] bg-[#14100c] px-4 py-3.5">
-            <p className="text-[15px] font-semibold text-[#f4ebe3]">
+          <section className="mx-auto mt-5 max-w-md border-l-[3px] border-cafe-gold bg-cafe-void/85 px-4 py-3.5">
+            <p className="text-[15px] font-semibold text-cafe-cream">
               ทางสำรอง: ใช้แอปกล้องของมือถือ
             </p>
-            <p className="mt-1 text-sm leading-[1.6] text-[#d8d0c4]">
+            <p className="mt-1 text-sm leading-[1.6] text-cafe-text">
               เปิดแอปกล้อง เล็งที่ QR แล้วแตะลิงก์ที่ขึ้นมา ตราจะเก็บได้เหมือนกัน
               แต่ต้องเปิดใน Safari หรือ Chrome ตัวเดียวกับที่ใช้อยู่ทุกครั้ง
             </p>
@@ -485,7 +486,7 @@ export function HuntScanner({ items, onClose }: HuntScannerProps) {
       ) : (
         <>
           <div className="relative z-0 flex flex-1 items-center justify-center">
-            <div className="relative size-[min(68vw,280px)] rounded-[14px] shadow-[0_0_0_200vmax_rgba(5,6,7,0.66)]">
+            <div className="relative size-[min(68vw,280px)] rounded-[14px] shadow-[0_0_0_200vmax_rgba(5,14,11,0.66)]">
               {(
                 [
                   "top-0 left-0 rounded-tl-[14px] border-t-[5px] border-l-[5px]",
@@ -496,17 +497,17 @@ export function HuntScanner({ items, onClose }: HuntScannerProps) {
               ).map((corner) => (
                 <span
                   key={corner}
-                  className={cn("absolute size-[46px] border-[#e85a7a]", corner)}
+                  className={cn("absolute size-[46px] border-cafe-gold", corner)}
                   aria-hidden
                 />
               ))}
               {checking ? (
                 <span
                   role="status"
-                  className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2.5 border-2 border-[#e85a7a] bg-[#0a0c0e] px-4 py-2.5 text-[15px] font-semibold whitespace-nowrap shadow-[0_10px_24px_rgba(0,0,0,0.5)]"
+                  className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2.5 border-2 border-cafe-gold bg-cafe-void px-4 py-2.5 text-[15px] font-semibold whitespace-nowrap shadow-[0_10px_24px_rgba(0,0,0,0.5)]"
                 >
                   <span
-                    className="size-[18px] animate-spin rounded-full border-[3px] border-[#e85a7a]/30 border-t-[#e85a7a] motion-reduce:animate-none"
+                    className="size-[18px] animate-spin rounded-full border-[3px] border-cafe-gold/30 border-t-cafe-gold motion-reduce:animate-none"
                     aria-hidden
                   />
                   กำลังตรวจหลักฐาน…
@@ -514,14 +515,14 @@ export function HuntScanner({ items, onClose }: HuntScannerProps) {
               ) : state === "scanning" ? (
                 <span
                   data-scan-line
-                  className="absolute inset-x-3.5 top-3.5 h-[3px] rounded-full bg-[#e85a7a] shadow-[0_0_14px_3px_rgba(232,90,122,0.75)]"
+                  className="absolute inset-x-3.5 top-3.5 h-[3px] rounded-full bg-cafe-gold-soft shadow-[0_0_14px_3px_rgba(227,199,126,0.75)]"
                   aria-hidden
                 />
               ) : null}
               <span
                 className={cn(
-                  TYPE,
-                  "absolute -top-[34px] left-1/2 -translate-x-1/2 bg-[#f4ebe3] px-2.5 pt-[3px] pb-px text-[11px] font-bold tracking-[0.16em] whitespace-nowrap text-[#a8323f]"
+                  SERIF,
+                  "absolute -top-[34px] left-1/2 -translate-x-1/2 bg-cafe-cream px-2.5 pt-[3px] pb-px text-[11px] font-bold tracking-[0.16em] whitespace-nowrap text-cafe-gold-deep"
                 )}
                 aria-hidden
               >
@@ -539,16 +540,16 @@ export function HuntScanner({ items, onClose }: HuntScannerProps) {
             ) : null}
           </div>
 
-          <div className="relative z-10 border-t-[3px] border-[#e85a7a] bg-[#0a0c0e] px-5 pt-[22px] pb-[max(26px,env(safe-area-inset-bottom))]">
+          <div className="relative z-10 border-t-[3px] border-cafe-gold bg-cafe-deep px-5 pt-[22px] pb-[max(26px,env(safe-area-inset-bottom))]">
             <div className="mx-auto max-w-md">
-              <p className={cn(HAND, "text-[22px] leading-[1.3]")} aria-live="polite">
+              <p className="text-xl leading-[1.35] font-bold" aria-live="polite">
                 {state === "starting"
                   ? "กำลังเปิดกล้อง…"
                   : checking
                     ? "เจอ QR แล้ว ถือนิ่งไว้สักครู่"
                     : "เล็งกล้องไปที่ QR ของจุดหลักฐาน"}
               </p>
-              <p className="mt-1.5 text-sm leading-[1.6] text-[#c4b8a8]">
+              <p className="mt-1.5 text-sm leading-[1.6] text-cafe-muted">
                 ไม่ต้องกดอะไร เจอ QR หลักฐานแล้วระบบจะประทับตราให้เอง
               </p>
 
