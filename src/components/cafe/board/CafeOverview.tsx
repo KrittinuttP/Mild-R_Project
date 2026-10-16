@@ -226,7 +226,7 @@ function CaseLock({
       aria-hidden
     >
       {sealed ? (
-        <svg viewBox="0 0 100 100" className="size-full">
+        <svg viewBox="0 0 100 100" data-lock-wax className="size-full">
           <defs>
             <radialGradient id={`${id}-wax`} cx=".4" cy=".35">
               <stop offset="0" stopColor="#e3c77e" />
@@ -262,6 +262,15 @@ function CaseLock({
             className="fill-cafe-ink"
           />
         </svg>
+      )}
+      {sealed ? null : (
+        // Light running over the brass once, just before the thread leaves the pin.
+        <span className="absolute inset-0 overflow-hidden rounded-[18%]">
+          <span
+            data-lock-glint
+            className="absolute -inset-y-2 left-0 w-1/3 -translate-x-[260%] rotate-[18deg] bg-[linear-gradient(90deg,transparent,rgba(255,250,225,.95),transparent)]"
+          />
+        </span>
       )}
     </span>
   );
@@ -425,6 +434,15 @@ export function CafeOverview({
           alt={location.imageAlt ?? location.label}
           wrapClassName={cn("block overflow-hidden", frame)}
           className="h-full w-full object-cover grayscale-[.3] transition duration-300 group-hover:grayscale-0"
+        />
+        {/* Sepia haze the photo "develops" out of during the opening (opacity only). */}
+        <span
+          data-motion="develop"
+          className={cn(
+            "pointer-events-none absolute opacity-0 bg-[radial-gradient(circle_at_50%_45%,rgba(120,98,60,.55),rgba(40,32,20,.92))]",
+            wide ? "inset-x-2 top-2 h-28" : "inset-x-1.5 top-1.5 h-16 min-[640px]:inset-x-2 min-[640px]:top-2 min-[640px]:h-32"
+          )}
+          aria-hidden
         />
         <span className={caption}>Venue Photo</span>
       </button>

@@ -17,13 +17,17 @@ const BRAND_FONT =
 function LensGlyph({
   className,
   style,
+  mark,
 }: {
   className?: string;
   style?: CSSProperties;
+  /** Hook for motion: the lens that stands in for the O. */
+  mark?: boolean;
 }) {
   return (
     <svg
       viewBox="0 0 124 148"
+      data-lens={mark ? "" : undefined}
       className={cn("flex-none overflow-visible", className)}
       style={style}
       aria-hidden
@@ -59,13 +63,17 @@ function LensGlyph({
 function KeyholeGlyph({
   className,
   style,
+  mark,
 }: {
   className?: string;
   style?: CSSProperties;
+  /** Hook for motion: the keyhole that stands in for the I (the splash opens through it). */
+  mark?: boolean;
 }) {
   return (
     <svg
       viewBox="0 0 64 148"
+      data-keyhole={mark ? "" : undefined}
       className={cn("flex-none", className)}
       style={style}
       aria-hidden
@@ -93,13 +101,13 @@ function WordLine({ second }: { second?: boolean }) {
       {second ? (
         <>
           <span>SWEET</span>
-          <KeyholeGlyph style={{ width: "0.4328em", height: "1em", marginRight: "0.08em" }} />
+          <KeyholeGlyph mark style={{ width: "0.4328em", height: "1em", marginRight: "0.08em" }} />
           <span>E</span>
         </>
       ) : (
         <>
           <span>SHERL</span>
-          <LensGlyph style={{ width: "0.8375em", height: "1em", margin: "0 0.013em" }} />
+          <LensGlyph mark style={{ width: "0.8375em", height: "1em", margin: "0 0.013em" }} />
           <span>CK</span>
         </>
       )}

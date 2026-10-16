@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 
 import {
   isReloadNavigation,
   wasSoftNavigation,
 } from "@/components/layout/SoftNavMarker";
+import { KeyholeCurtain } from "@/components/cafe/KeyholeCurtain";
 import { SherlockSweetieLogo } from "@/components/cafe/SherlockSweetieLogo";
 import { cn } from "@/lib/utils";
 
@@ -21,10 +22,13 @@ type CafeSplashProps = {
   caseNo?: string;
   /** Art the page shows first; the splash stays up until it has loaded (or times out). */
   preloadImage?: string;
+  /** The page starts showing through the keyhole (before the splash is gone). */
+  onReveal?: () => void;
   onFinished?: () => void;
 };
 
-type Phase = "hold" | "lit" | "exit" | "done";
+/** `open`: leaving through the keyhole. `exit`: plain fade (reduced motion). */
+type Phase = "hold" | "lit" | "open" | "exit" | "done";
 
 /** How far the thread has been pulled (0–1) and how long the move to that point takes. */
 type Thread = { value: number; ms: number };
@@ -62,10 +66,22 @@ export function CafeSplash({
   kicker = "Birthday Case File",
   caseNo,
   preloadImage,
+  onReveal,
   onFinished,
 }: CafeSplashProps) {
   // Start covered — avoid one-frame flash of cafe content before mount effect.
   const [phase, setPhase] = useState<Phase>("hold");
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  const finish = useCallback(() => {
+    setPhase("done");
+    try {
+      sessionStorage.setItem(CAFE_VISITED_KEY, "1");
+    } catch {
+      /* ignore */
+    }
+    onFinished?.();
+  }, [onFinished]);
   const [thread, setThread] = useState<Thread>({ value: 0, ms: 0 });
 
   useEffect(() => {
@@ -118,17 +134,17 @@ export function CafeSplash({
       await sleep(litMs);
       if (cancelled) return;
 
+      // Leave through the keyhole of the wordmark; `KeyholeCurtain` calls
+      // `finish` when the page fills the screen.
+      if (!reduced) {
+        setPhase("open");
+        return;
+      }
+
       setPhase("exit");
       await sleep(exitMs);
       if (cancelled) return;
-
-      setPhase("done");
-      try {
-        sessionStorage.setItem(CAFE_VISITED_KEY, "1");
-      } catch {
-        /* ignore */
-      }
-      onFinished?.();
+      finish();
     };
     void run();
 
@@ -154,18 +170,24 @@ export function CafeSplash({
   const arrived = thread.value >= 1;
   const ease = `${thread.ms}ms cubic-bezier(0.2, 0.7, 0.3, 1)`;
 
+  const opening = phase === "open";
+
   return (
     <div
+      ref={rootRef}
       className={cn(
-        "fixed inset-0 z-[100] overflow-hidden bg-cafe-ground text-cafe-cream",
+        "fixed inset-0 z-[100] overflow-hidden text-cafe-cream",
+        // The curtain paints the room while it opens, so the page can show through.
+        opening ? "bg-transparent" : "bg-cafe-ground",
         "transition-opacity duration-500 ease-out motion-reduce:duration-150",
         phase === "exit" ? "pointer-events-none opacity-0" : "opacity-100"
       )}
       style={
         {
           "--drop": "clamp(64px, 16vh, 150px)",
-          backgroundImage:
-            "radial-gradient(ellipse at 50% 45%, var(--color-cafe-glow) 0%, var(--color-cafe-ground) 72%)",
+          backgroundImage: opening
+            ? "none"
+            : "radial-gradient(ellipse at 50% 45%, var(--color-cafe-glow) 0%, var(--color-cafe-ground) 72%)",
         } as CSSProperties
       }
       role="status"
@@ -173,8 +195,11 @@ export function CafeSplash({
       aria-busy={phase === "hold"}
       aria-label="กำลังเปิดไฟห้องสืบสวน"
     >
+      <KeyholeCurtain open={opening} sourceRef={rootRef} onReveal={onReveal} onDone={finish} />
+
       {/* Pendant lamp — swings from the ceiling; the cone of light swings with it. */}
       <div
+        data-splash-content
         className="animate-cafe-splash-swing absolute top-0 left-1/2 size-0 origin-top-left"
         aria-hidden
       >
@@ -223,6 +248,7 @@ export function CafeSplash({
       </div>
 
       <div
+        data-splash-content
         className="relative flex h-full flex-col items-center px-6 text-center"
         style={{ paddingTop: "calc(var(--drop) + clamp(90px, 20vh, 190px))" }}
       >

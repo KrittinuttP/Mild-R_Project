@@ -65,13 +65,35 @@ function StampWindow({
     () => {
       const media = gsap.matchMedia();
       media.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.from("[data-stamp-mark]", {
-          scale: 1.7,
-          rotate: 8,
-          opacity: 0,
-          duration: 0.45,
-          ease: "back.out(2.2)",
-        });
+        // Wax drops and spreads, then the seal is pressed into it; the paper
+        // gives a little under the press.
+        gsap
+          .timeline()
+          .fromTo(
+            "[data-stamp-blob]",
+            { scale: 0.2, autoAlpha: 0 },
+            { scale: 1.06, autoAlpha: 1, duration: 0.28, ease: "power2.out" }
+          )
+          .to("[data-stamp-blob]", { scale: 1, duration: 0.12, ease: "power1.inOut" })
+          .fromTo(
+            "[data-stamp-seal]",
+            { scale: 1.35, autoAlpha: 0, rotation: 16 },
+            { scale: 1, autoAlpha: 1, rotation: 0, duration: 0.22, ease: "power3.in" },
+            0.3
+          )
+          .fromTo(
+            "[data-stamp-sheet]",
+            { scale: 1 },
+            {
+              keyframes: [
+                { scale: 0.985, duration: 0.06 },
+                { scale: 1, duration: 0.18, ease: "power2.out" },
+              ],
+              clearProps: "scale",
+            },
+            0.52
+          )
+          .set("[data-stamp-blob]", { autoAlpha: 0 });
       });
       return () => media.revert();
     },
@@ -87,6 +109,7 @@ function StampWindow({
         role="dialog"
         aria-modal="true"
         aria-labelledby="hunt-stamp-title"
+        data-stamp-sheet
         className="relative w-full max-w-sm -rotate-[0.6deg] bg-cafe-cream text-cafe-ink shadow-[0_24px_50px_rgba(0,0,0,0.6)]"
       >
         <div className="flex items-center justify-between bg-cafe-ink px-4 pt-[11px] pb-[9px]">
@@ -97,8 +120,16 @@ function StampWindow({
         </div>
 
         <div className="relative px-[22px] pt-[26px] pb-[22px] text-center">
-          <div data-stamp-mark className="flex justify-center">
-            <WaxSeal label={label} turn={-10} className="size-[132px]" />
+          <div className="relative mx-auto size-[132px]">
+            {/* Plain wax that lands first; hidden once the seal is on it. */}
+            <span
+              data-stamp-blob
+              className="invisible absolute inset-[6%] rounded-full bg-[radial-gradient(circle_at_38%_32%,#d35d65,var(--color-cafe-wax)_50%,var(--color-cafe-wax-dark))]"
+              aria-hidden
+            />
+            <div data-stamp-seal className="relative">
+              <WaxSeal label={label} turn={-10} className="size-[132px]" />
+            </div>
           </div>
 
           <p className={cn(LABEL, "mt-3.5 text-[10.5px] text-cafe-gold-deep sm:text-[10.5px]")}>

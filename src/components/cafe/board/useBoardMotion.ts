@@ -81,6 +81,101 @@ function keepTimeWhileHidden() {
 }
 
 /**
+ * A lens travels along the wordmark ahead of its reveal, then shrinks into the
+ * O of SHERLOCK (the logo's own lens, `data-lens`). The travelling copy is a
+ * clone placed beside the title, so the title's clip-path does not cut it.
+ */
+function lensSweep(
+  title: HTMLElement,
+  timeline: gsap.core.Timeline,
+  at: number
+) {
+  const lens = title.querySelector<SVGElement>("[data-lens]");
+  const host = title.parentElement;
+  if (!lens || !host) return;
+
+  host.querySelector("[data-lens-rover]")?.remove();
+  const rover = lens.cloneNode(true) as SVGElement;
+  rover.removeAttribute("data-lens");
+  rover.setAttribute("data-lens-rover", "");
+  rover.setAttribute("aria-hidden", "true");
+  Object.assign(rover.style, {
+    position: "absolute",
+    left: "0",
+    top: "0",
+    margin: "0",
+    pointerEvents: "none",
+    visibility: "hidden",
+    zIndex: "5",
+  });
+  if (getComputedStyle(host).position === "static") host.style.position = "relative";
+  host.appendChild(rover);
+
+  // Measured when the sweep starts: the board is laid out by then.
+  const geometry = () => {
+    const box = host.getBoundingClientRect();
+    const word = title.getBoundingClientRect();
+    const o = lens.getBoundingClientRect();
+    const size = o.height * 1.3;
+    return {
+      size,
+      startX: word.left - box.left - size * 0.6,
+      // Stops just short of the right edge so it never hangs off the board.
+      endX: word.right - box.left - size * 0.75,
+      y: o.top - box.top + o.height / 2 - size / 2,
+      oX: o.left - box.left + o.width / 2 - size / 2,
+      scale: o.height / size,
+    };
+  };
+  let g = geometry();
+  timeline
+    .call(
+      () => {
+        g = geometry();
+        gsap.set(rover, {
+          width: g.size * (124 / 148),
+          height: g.size,
+          x: g.startX,
+          y: g.y,
+          scale: 1,
+          autoAlpha: 1,
+        });
+        gsap.set(lens, { autoAlpha: 0 });
+      },
+      undefined,
+      at
+    )
+    .to(rover, { x: () => g.endX, duration: 1.0, ease: "power2.inOut" }, at)
+    .to(
+      rover,
+      {
+        x: () => g.oX + (g.size - g.size * (124 / 148)) / 2,
+        scale: () => g.scale,
+        transformOrigin: "50% 50%",
+        duration: 0.28,
+        ease: "power2.out",
+      },
+      at + 1.0
+    )
+    .set(rover, { autoAlpha: 0 }, at + 1.3)
+    .set(lens, { clearProps: "opacity,visibility" }, at + 1.3)
+    // Found it: the lens (heart inside) gives one beat in its place.
+    .fromTo(
+      lens,
+      { scale: 1 },
+      {
+        keyframes: [
+          { scale: 1.18, duration: 0.14 },
+          { scale: 1, duration: 0.3 },
+        ],
+        transformOrigin: "50% 50%",
+        clearProps: "transform",
+      },
+      at + 1.32
+    );
+}
+
+/**
  * Board motion for `/cafe`: one opening timeline for the felt board, then
  * play-once reveals as each lower section scrolls in. Idle loops are CSS
  * (`animate-cafe-*`); hover is plain transitions.
@@ -130,9 +225,15 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
       const title = one('[data-motion="hero-title"]');
       const yarn = one('[data-motion="hero-yarn"]');
       const redacts = all("[data-redact]");
-      const stamp = one('[data-motion="hero-stamp"]');
+      // Phone and desktop each have their own copy; only the one on screen plays.
+      const shown = (el: HTMLElement) => el.getClientRects().length > 0;
+      const stamps = all('[data-motion="hero-stamp"]').filter(shown);
       const tape = one('[data-motion="hero-tape"]');
+      const develops = all('[data-motion="develop"]').filter(shown);
+      const glints = all("[data-lock-glint]").filter(shown);
+      const waxes = all("[data-lock-wax]").filter(shown);
 
+      // About 3.3 s from the splash to a finished board (was 4.8 s).
       const opening = gsap.timeline({ paused: true });
 
       if (lamp) {
@@ -153,50 +254,67 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
         );
       }
 
-      if (meta.length > 0) {
+      if (board) {
+        // Opacity only: a filter on the whole board repaints it every frame.
         opening.fromTo(
-          meta,
-          { autoAlpha: 0, y: 14 },
+          board,
+          { autoAlpha: 0 },
           {
             autoAlpha: 1,
-            y: 0,
-            duration: 0.7,
+            duration: 0.8,
             ease: "power2.out",
-            stagger: 0.15,
-            clearProps: "transform,opacity,visibility",
+            clearProps: "opacity,visibility",
           },
-          1.6
+          0.2
         );
       }
 
-      if (board) {
+      // The wordmark is uncovered left → right behind a travelling lens, which
+      // then settles into the O of SHERLOCK.
+      if (title) {
         opening.fromTo(
-          board,
-          { autoAlpha: 0, filter: "brightness(0.1)" },
+          title,
+          { clipPath: "inset(-10% 100% -10% 0)" },
           {
-            autoAlpha: 1,
-            filter: "brightness(1)",
-            duration: 1.2,
-            ease: "power2.out",
-            clearProps: "filter,opacity,visibility",
+            clipPath: "inset(-10% 0% -10% 0)",
+            duration: 1.0,
+            ease: "power2.inOut",
+            clearProps: "clipPath",
           },
           0.5
         );
+        lensSweep(title, opening, 0.5);
       }
 
       if (character) {
         opening.fromTo(
           character,
-          { autoAlpha: 0, y: 160, scaleY: 0.9, transformOrigin: "50% 100%" },
+          { autoAlpha: 0, y: 140, scaleY: 0.92, transformOrigin: "50% 100%" },
           {
             autoAlpha: 1,
             y: 0,
             scaleY: 1,
-            duration: 0.9,
+            duration: 0.8,
             ease: "back.out(1.5)",
             clearProps: "transform,opacity,visibility",
           },
-          1.3
+          0.75
+        );
+      }
+
+      if (meta.length > 0) {
+        opening.fromTo(
+          meta,
+          { autoAlpha: 0, y: 12 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.6,
+            ease: "power2.out",
+            stagger: 0.12,
+            clearProps: "transform,opacity,visibility",
+          },
+          1.1
         );
       }
 
@@ -207,17 +325,17 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
           {
             autoAlpha: 1,
             scale: 1,
-            duration: 0.4,
+            duration: 0.35,
             ease: "back.out(2.4)",
             clearProps: "transform,opacity,visibility",
           },
-          2.1
+          1.3
         );
       }
 
       cards.forEach((card, index) => {
         const tilt = tiltOf(card);
-        const at = 1.6 + index * 0.17;
+        const at = 1.0 + index * 0.15;
         gsap.set(card, { transition: "none" });
         opening.fromTo(
           card,
@@ -226,28 +344,49 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
             autoAlpha: 1,
             scale: 1,
             rotation: tilt,
-            duration: 0.55,
+            duration: 0.5,
             ease: "back.out(1.5)",
             clearProps: CLEAR,
           },
           at
         );
-        // After the card has landed (0.55 s), so the pin does not ride the card's spin.
-        dropPin(card, at + 0.55, opening);
+        // After the card has landed, so the pin does not ride the card's spin.
+        dropPin(card, at + 0.5, opening);
       });
 
-      // The wordmark is swept in left → right, like the GA1 lens sweep.
-      if (title) {
+      // The venue photo develops out of a sepia haze (an overlay fading out).
+      if (develops.length > 0) {
         opening.fromTo(
-          title,
-          { clipPath: "inset(-10% 100% -10% 0)" },
+          develops,
+          { opacity: 1 },
+          { opacity: 0, duration: 1.2, ease: "power1.in" },
+          1.5
+        );
+      }
+
+      // The pin the thread starts from: light runs over the brass, or the wax
+      // seal is pressed (sealed file). Only the inner art moves; the pin's box
+      // stays put because the thread is measured from it.
+      if (glints.length > 0) {
+        opening.fromTo(
+          glints,
+          { xPercent: -260 },
+          { xPercent: 360, duration: 0.4, ease: "power1.inOut" },
+          1.75
+        );
+      }
+      if (waxes.length > 0) {
+        opening.fromTo(
+          waxes,
+          { scale: 1.6, autoAlpha: 0, transformOrigin: "50% 50%" },
           {
-            clipPath: "inset(-10% 0% -10% 0)",
-            duration: 1.2,
-            ease: "power2.inOut",
-            clearProps: "clipPath",
+            scale: 1,
+            autoAlpha: 1,
+            duration: 0.26,
+            ease: "power3.in",
+            clearProps: "transform,opacity,visibility",
           },
-          0.9
+          1.7
         );
       }
 
@@ -257,19 +396,19 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
         opening.call(
           () => window.dispatchEvent(new Event("resize")),
           undefined,
-          2.95
+          1.8
         );
+        // Drawn from the pin towards the heart, ending at her edge.
         opening.to(
           yarn,
           {
             strokeDashoffset: 0,
-            duration: 1.8,
+            duration: 1.1,
             ease: "power1.inOut",
             // The dash runs 1 → 0; whole-pixel rounding would make it jump.
             autoRound: false,
           },
-          // The last pin has settled by ~3.0 s; tie the thread after it.
-          3.0
+          1.85
         );
       }
 
@@ -279,12 +418,12 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
           heart,
           {
             keyframes: [
-              { scale: 1.35, duration: 0.16, ease: "power2.out" },
-              { scale: 1, duration: 0.34, ease: "power2.inOut" },
+              { scale: 1.35, duration: 0.14, ease: "power2.out" },
+              { scale: 1, duration: 0.32, ease: "power2.inOut" },
             ],
             clearProps: "transform",
           },
-          4.75
+          2.95
         );
       }
 
@@ -292,23 +431,23 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
         gsap.set(redacts, { scaleX: 1 });
         opening.to(
           redacts,
-          { scaleX: 0, duration: 0.7, stagger: 0.2, ease: "power3.inOut" },
-          3.4
+          { scaleX: 0, duration: 0.6, stagger: 0.15, ease: "power3.inOut" },
+          2.0
         );
       }
 
-      if (stamp) {
+      if (stamps.length > 0) {
         opening.fromTo(
-          stamp,
+          stamps,
           { autoAlpha: 0, scale: 3 },
           {
             autoAlpha: 0.9,
             scale: 1,
-            duration: 0.45,
+            duration: 0.4,
             ease: "back.out(2)",
             clearProps: "transform,opacity,visibility",
           },
-          3.9
+          2.4
         );
       }
 
@@ -318,11 +457,11 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
           { xPercent: -110 },
           {
             xPercent: 0,
-            duration: 1,
+            duration: 0.8,
             ease: "power3.out",
             clearProps: "transform",
           },
-          4.2
+          2.5
         );
       }
 

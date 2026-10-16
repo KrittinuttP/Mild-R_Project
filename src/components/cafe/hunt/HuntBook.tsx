@@ -276,7 +276,12 @@ export function HuntBook({
         </div>
       ) : null}
 
-      <HuntThreadStrip items={items} stamps={current.stamps} />
+      <HuntThreadStrip
+        items={items}
+        stamps={current.stamps}
+        ready={state !== null}
+        paused={scannerOpen || arrivalStamp !== null}
+      />
 
       {entry ? null : (
         <section
@@ -339,7 +344,7 @@ export function HuntBook({
           <button
             type="button"
             onClick={openScanner}
-            className={cn(GOLD_BUTTON, "min-h-[58px] text-lg font-bold")}
+            className={cn(GOLD_BUTTON, "relative min-h-[58px] overflow-hidden text-lg font-bold")}
           >
             <svg
               viewBox="0 0 24 24"
@@ -350,6 +355,11 @@ export function HuntBook({
               <path d="M8 8 h3 v3 H8 z M13 13 h3 v3 h-3 z M13 8 h3 M8 13 v3 h3" />
             </svg>
             สแกน QR หลักฐาน
+            {/* A short glint every few seconds; CSS only, off with reduced motion. */}
+            <span
+              className="animate-cafe-sheen pointer-events-none absolute inset-y-0 left-0 w-16 bg-[linear-gradient(100deg,transparent,rgba(255,250,225,.7),transparent)] motion-reduce:hidden"
+              aria-hidden
+            />
           </button>
           <p className="mt-2.5 text-center text-[12.5px] leading-[1.6] text-cafe-muted">
             เปิดกล้องในหน้านี้ ตราจะอยู่ในเบราว์เซอร์เดียวกันเสมอ

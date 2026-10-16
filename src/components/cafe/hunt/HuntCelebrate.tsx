@@ -34,7 +34,7 @@ const CONFETTI_COLORS = [
   "var(--color-cafe-gold-pale)",
 ];
 /** Fixed spread so server and client render the same pieces. */
-const CONFETTI = Array.from({ length: 22 }, (_, i) => ({
+const CONFETTI = Array.from({ length: 16 }, (_, i) => ({
   left: `${(i * 37 + 11) % 100}%`,
   color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
   round: i % 3 === 0,
@@ -114,14 +114,18 @@ export function HuntCelebrate({ total, onPrimary, onBook }: HuntCelebrateProps) 
         gsap.utils.toArray<HTMLElement>("[data-ce-confetti]").forEach((piece) => {
           gsap.fromTo(
             piece,
-            { y: -40, x: 0, rotation: 0, opacity: 1 },
+            { y: -40, x: 0, rotation: 0, rotationX: 0, opacity: 1 },
             {
               y: fall,
               x: gsap.utils.random(-60, 60),
-              rotation: gsap.utils.random(360, 900),
+              // Gold leaf: tumbles end over end as it drifts down.
+              rotation: gsap.utils.random(-120, 120),
+              rotationX: gsap.utils.random(360, 900),
               duration: gsap.utils.random(2.2, 3.4),
               delay: 1.62 + gsap.utils.random(0, 0.6),
               ease: "power1.in",
+              // Leaves the screen: hide it so it costs nothing afterwards.
+              onComplete: () => gsap.set(piece, { autoAlpha: 0 }),
             }
           );
         });

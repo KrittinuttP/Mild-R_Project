@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 import { LABEL, SERIF } from "@/components/cafe/board/pieces";
@@ -22,6 +22,7 @@ import {
   type HuntEntry,
 } from "@/lib/cafe-hunt-storage";
 import type { LuckyDrawChannel } from "@/lib/lucky-draw";
+import { gsap } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 
 const CHANNEL_LABEL: Record<LuckyDrawChannel, string> = {
@@ -79,6 +80,32 @@ export function HuntTicket({
 
   const channel = CHANNEL_LABEL[entry.contactChannel];
   const sentAt = formatSentAt(entry.at);
+  const sealRef = useRef<HTMLSpanElement>(null);
+
+  // The ENTERED seal is pressed once, right after the form was accepted;
+  // opening the ticket again later shows it already in place.
+  useEffect(() => {
+    const seal = sealRef.current;
+    const age = Date.now() - Date.parse(entry.at);
+    if (!seal || !(age >= 0 && age < 15_000)) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const tween = gsap.fromTo(
+      seal,
+      { scale: 1.8, autoAlpha: 0, rotation: 14 },
+      {
+        scale: 1,
+        autoAlpha: 1,
+        rotation: 0,
+        duration: 0.45,
+        delay: 0.25,
+        ease: "back.out(2)",
+        clearProps: "transform,opacity,visibility",
+      }
+    );
+    return () => {
+      tween.progress(1).kill();
+    };
+  }, [entry.at]);
 
   async function saveImage() {
     if (!rootRef.current || saving) return;
@@ -125,7 +152,9 @@ export function HuntTicket({
                 ใบยืนยันสิทธิ์
               </h2>
             </div>
-            <WaxSeal top="ENTERED" label="✓" turn={-9} className="-mt-1.5 -mr-1 size-[76px]" />
+            <span ref={sealRef} className="-mt-1.5 -mr-1 block shrink-0">
+              <WaxSeal top="ENTERED" label="✓" turn={-9} className="size-[76px]" />
+            </span>
           </div>
 
           <dl className="mt-[18px] grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2.5 text-[15px] leading-normal">

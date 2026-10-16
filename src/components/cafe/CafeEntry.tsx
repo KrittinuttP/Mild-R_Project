@@ -12,6 +12,13 @@ type CafeEntryProps = {
   cafe: CafePage;
 };
 
+/** Tells the board (`useBoardMotion`) the page is visible — once per load. */
+function announceEntry() {
+  if (document.documentElement.dataset.cafeEntry === "ready") return;
+  document.documentElement.dataset.cafeEntry = "ready";
+  window.dispatchEvent(new Event(CAFE_ENTRY_READY_EVENT));
+}
+
 /** Cafe splash + section scroll restore (gated until splash finishes). */
 export function CafeEntry({ cafe }: CafeEntryProps) {
   const pathname = usePathname();
@@ -38,11 +45,11 @@ export function CafeEntry({ cafe }: CafeEntryProps) {
         caseNo={edition?.caseNo}
         // Already swapped for the blacked-out copy when the KV is hidden.
         preloadImage={cafe.heroCutout}
+        // The board starts opening as soon as it shows through the keyhole.
+        onReveal={announceEntry}
         onFinished={() => {
           setReady(true);
-          // Tells the board (`useBoardMotion`) the page is now visible.
-          document.documentElement.dataset.cafeEntry = "ready";
-          window.dispatchEvent(new Event(CAFE_ENTRY_READY_EVENT));
+          announceEntry();
         }}
       />
       <SectionScrollRestore ready={ready} />

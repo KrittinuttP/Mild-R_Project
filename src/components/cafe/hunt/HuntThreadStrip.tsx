@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useRef, type RefObject } from "react";
+
 import { CorkBoard, LABEL, SERIF } from "@/components/cafe/board/pieces";
 import {
   BrassPin,
@@ -6,6 +10,7 @@ import {
 } from "@/components/cafe/hunt/HuntFrame";
 import type { CafeHuntItem } from "@/lib/cafe-hunt";
 import type { HuntStamp } from "@/lib/cafe-hunt-storage";
+import { gsap } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 
 const CARD_TILTS = [-4, 1.5, 2.6, -1.8, 1.2];
@@ -18,14 +23,110 @@ function exhibit(index: number) {
 type HuntThreadStripProps = {
   items: CafeHuntItem[];
   stamps: Record<string, HuntStamp>;
+  /** A window is open over the board: hold the "new seal" moment until it closes. */
+  paused?: boolean;
+  /** False while this browser's progress is still being read (stamps not known yet). */
+  ready?: boolean;
 };
+
+/**
+ * When a piece is stamped while the book is open, its seal is pressed onto the
+ * board again, the thread tugs and the neighbouring tags swing and settle.
+ * Pieces already in the book when it opens stay still.
+ */
+function useFreshSeal(
+  rootRef: RefObject<HTMLDivElement | null>,
+  stampedIds: string[],
+  paused: boolean,
+  ready: boolean
+) {
+  const seen = useRef<Set<string> | null>(null);
+  const key = stampedIds.join(",");
+
+  useEffect(() => {
+    if (!ready) return;
+    if (seen.current === null) {
+      seen.current = new Set(stampedIds);
+      return;
+    }
+    if (paused) return;
+    const fresh = stampedIds.filter((id) => !seen.current?.has(id));
+    fresh.forEach((id) => seen.current?.add(id));
+    const root = rootRef.current;
+    if (!root || fresh.length === 0) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const tags = gsap.utils.toArray<HTMLElement>("[data-ev]", root);
+    const thread = root.querySelector("[data-ev-thread]");
+    const timeline = gsap.timeline();
+    fresh.forEach((id) => {
+      const at = tags.findIndex((tag) => tag.dataset.ev === id);
+      if (at < 0) return;
+      timeline.fromTo(
+        tags[at].querySelector("[data-ev-seal]"),
+        { scale: 1.5, autoAlpha: 0 },
+        { scale: 1, autoAlpha: 1, duration: 0.3, ease: "power3.in", clearProps: "transform,opacity,visibility" },
+        0
+      );
+      if (thread) {
+        timeline.fromTo(
+          thread,
+          { y: 0 },
+          {
+            keyframes: [
+              { y: 3, duration: 0.08 },
+              { y: -1.5, duration: 0.14 },
+              { y: 0, duration: 0.3, ease: "sine.out" },
+            ],
+            clearProps: "transform",
+          },
+          0.3
+        );
+      }
+      tags.forEach((tag, index) => {
+        const away = Math.abs(index - at);
+        const side = index < at ? -1 : 1;
+        timeline.fromTo(
+          tag,
+          { rotation: 0 },
+          {
+            keyframes: [
+              { rotation: side * Math.max(1.5, 6 - away * 1.6), duration: 0.16 },
+              { rotation: -side * Math.max(0.6, 3 - away * 0.8), duration: 0.28 },
+              { rotation: 0, duration: 0.45, ease: "sine.out" },
+            ],
+            transformOrigin: "50% 6px",
+            clearProps: "transform",
+          },
+          0.3 + away * 0.05
+        );
+      });
+    });
+    return () => {
+      timeline.progress(1).kill();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by the stamped ids
+  }, [key, paused, ready, rootRef]);
+}
 
 /**
  * Every piece as a small tag on a gold thread across the felt board (a wax
  * seal once found), then the clues for the pieces still missing. Until the
  * team publishes the clues (`hint` empty) the board alone is the list.
  */
-export function HuntThreadStrip({ items, stamps }: HuntThreadStripProps) {
+export function HuntThreadStrip({
+  items,
+  stamps,
+  paused = false,
+  ready = true,
+}: HuntThreadStripProps) {
+  const boardRef = useRef<HTMLDivElement>(null);
+  useFreshSeal(
+    boardRef,
+    items.filter((item) => stamps[item.id]).map((item) => item.id),
+    paused,
+    ready
+  );
   const total = items.length;
   const missing = items
     .map((item, index) => ({ item, index }))
@@ -37,8 +138,9 @@ export function HuntThreadStrip({ items, stamps }: HuntThreadStripProps) {
     <>
       <CorkBoard className="mt-[30px] px-2.5 pt-4 pb-4">
         <p className={cn(LABEL, "px-1.5 text-[10px] sm:text-[11px]")}>Evidence Board</p>
-        <div className="relative mt-1">
+        <div ref={boardRef} className="relative mt-1">
           <svg
+            data-ev-thread
             viewBox="0 0 340 20"
             preserveAspectRatio="none"
             className="absolute inset-x-0 top-2 h-5 w-full overflow-visible"
@@ -62,6 +164,7 @@ export function HuntThreadStrip({ items, stamps }: HuntThreadStripProps) {
               return (
                 <li
                   key={item.id}
+                  data-ev={item.id}
                   className="relative flex w-[19%] max-w-[72px] flex-col items-center pt-4"
                 >
                   <BrassPin className="top-1 size-[11px]" />
@@ -70,11 +173,13 @@ export function HuntThreadStrip({ items, stamps }: HuntThreadStripProps) {
                     style={{ transform: `rotate(${CARD_TILTS[index % CARD_TILTS.length]}deg)` }}
                   >
                     {stamped ? (
-                      <WaxSeal
-                        label={String(index + 1).padStart(2, "0")}
-                        turn={SEAL_TURNS[index % SEAL_TURNS.length]}
-                        className="w-[76%]"
-                      />
+                      <span data-ev-seal className="block w-[76%]">
+                        <WaxSeal
+                          label={String(index + 1).padStart(2, "0")}
+                          turn={SEAL_TURNS[index % SEAL_TURNS.length]}
+                          className="w-full"
+                        />
+                      </span>
                     ) : (
                       <KeyholeSlot className="aspect-square w-[70%]" />
                     )}

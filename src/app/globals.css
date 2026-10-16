@@ -318,24 +318,41 @@ body:has([data-cafe-root]) {
   animation: cafe-float 4.5s ease-in-out infinite;
 }
 
+/* One double beat, then a long rest, so the heart lives without stealing the board. */
 @keyframes cafe-beat {
   0%,
+  8%,
   100% {
     scale: 1;
   }
-  15% {
+  2% {
     scale: 1.25;
   }
-  30% {
+  4% {
     scale: 1;
   }
-  45% {
+  6% {
     scale: 1.15;
   }
 }
 
 @utility animate-cafe-beat {
-  animation: cafe-beat 1.6s ease-in-out infinite;
+  animation: cafe-beat 7s ease-in-out infinite;
+}
+
+/* Light running across a gold button: 0.7 s of movement, then a long rest. */
+@keyframes cafe-sheen {
+  0%,
+  86% {
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(520%) skewX(-18deg);
+  }
+}
+
+@utility animate-cafe-sheen {
+  animation: cafe-sheen 5s ease-in-out infinite;
 }
 
 @keyframes cafe-sway {
