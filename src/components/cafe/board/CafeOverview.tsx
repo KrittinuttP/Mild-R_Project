@@ -62,8 +62,10 @@ function caseDate(startsAt: string | undefined) {
 }
 
 /**
- * Where the thread starts and ends. Tags are the `data-pin` ids below; a
- * point whose element is hidden (`display: none`) is skipped.
+ * The pins the thread joins, listed from the heart outward. Tags are the
+ * `data-pin` ids below; a point whose element is hidden (`display: none`) is
+ * skipped. The thread is drawn the other way: it runs in to the heart and
+ * stops at its edge.
  */
 const THREAD_ROUTES = [
   // Desktop: heart → case-file lock → venue polaroid clip.
@@ -72,13 +74,32 @@ const THREAD_ROUTES = [
   ["heart", "lock-m"],
 ] as const;
 
-type Point = { x: number; y: number };
+type Point = { x: number; y: number; r: number };
+
+/** Control point of a bend that hangs `sag` px below the lower end. */
+function bend(from: Point, to: Point, sag: number) {
+  return { x: (from.x + to.x) / 2, y: Math.max(from.y, to.y) + sag };
+}
 
 /** Quadratic bend that hangs `sag` px below the lower end. */
 function hang(from: Point, to: Point, sag: number) {
-  const x = (from.x + to.x) / 2;
-  const y = Math.max(from.y, to.y) + sag;
-  return `Q ${x} ${y} ${to.x} ${to.y}`;
+  const c = bend(from, to, sag);
+  return `Q ${c.x} ${c.y} ${to.x} ${to.y}`;
+}
+
+/** Pull `to` back along the curve's last direction, so the line stops at its rim. */
+function stopShort(from: Point, to: Point, sag: number): Point {
+  const c = bend(from, to, sag);
+  const dx = to.x - c.x;
+  const dy = to.y - c.y;
+  const length = Math.hypot(dx, dy);
+  if (length < 1 || to.r <= 0) return to;
+  const back = Math.min(to.r, length * 0.5);
+  return {
+    x: Math.round((to.x - (dx / length) * back) * 10) / 10,
+    y: Math.round((to.y - (dy / length) * back) * 10) / 10,
+    r: 0,
+  };
 }
 
 function BoardThread({
@@ -105,6 +126,7 @@ function BoardThread({
         return {
           x: Math.round((rect.left + rect.width / 2 - box.left - board.clientLeft) * 10) / 10,
           y: Math.round((rect.top + rect.height / 2 - box.top - board.clientTop) * 10) / 10,
+          r: Math.min(rect.width, rect.height) / 2,
         };
       };
 
@@ -117,13 +139,19 @@ function BoardThread({
           break;
         }
       }
-      // One subpath from the heart outward, so the dash draws from the heart.
+      // One subpath from the far pin in to the heart, so the dash is drawn
+      // towards her and ends at the heart's edge (the heart stays clear of the
+      // line on every layout, whatever sits on top).
+      const route = points.slice().reverse();
+      const last = route.length - 1;
+      const sagOf = (i: number) => (i === last - 1 ? 10 : 14);
+      if (last >= 1) route[last] = stopShort(route[last - 1], route[last], sagOf(last - 1));
       const next =
-        points.length >= 2
-          ? `M ${points[0].x} ${points[0].y} ` +
-            points
+        route.length >= 2
+          ? `M ${route[0].x} ${route[0].y} ` +
+            route
               .slice(1)
-              .map((to, i) => hang(points[i], to, i === 0 ? 10 : 14))
+              .map((to, i) => hang(route[i], to, sagOf(i)))
               .join(" ")
           : "";
       if (next === drawn) return;

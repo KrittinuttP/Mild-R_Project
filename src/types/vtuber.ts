@@ -509,6 +509,8 @@ export interface CafeScheduleItem {
   title: string;
   titleLocal?: string;
   detail?: string;
+  /** Marks a key moment: gold edge and a "Key event" seal on the timeline. */
+  highlight?: boolean;
 }
 
 /** Section heading chrome on `/cafe` (eyebrow, stamp, bilingual title) */

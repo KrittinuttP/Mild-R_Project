@@ -5,21 +5,21 @@ import {
   BoardSection,
   CorkBoard,
   EmptyFrame,
-  HAND,
+  LABEL,
   Paper,
   SealedZone,
   SectionHead,
   SERIF,
   Stamp,
-  TYPE,
+  THAI,
 } from "@/components/cafe/board/pieces";
+import { GOLD_BUTTON } from "@/components/cafe/board/brass";
 import type { ImageLightboxItem } from "@/components/media/ImageLightbox";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { isCafeMission, isStandInCafeImage } from "@/lib/cafe-board";
 import { cn } from "@/lib/utils";
 import type { CafePage } from "@/types/vtuber";
 
-const NOTE_TONE = ["paper", "pink", "paper", "mint", "paper", "pink"] as const;
 const MISSION_TILT = [-2, 1.5, -1, 2] as const;
 
 /** The thread and the high/low stagger assume one row; `lg:grid-cols-4` holds four. */
@@ -47,21 +47,24 @@ function MissionPhoto({
   onOpen?: () => void;
 }) {
   const [failed, setFailed] = useState(false);
+  const empty = !src || failed || !onOpen;
   const tag = (
     <span
       className={cn(
-        TYPE,
-        "absolute bottom-2 left-2 bg-cafe-cream px-2 pt-[3px] pb-px text-xs font-bold tracking-[0.14em] text-cafe-forest uppercase"
+        LABEL,
+        "absolute left-2 bg-cafe-cream px-2 pt-[3px] pb-px text-[10px] text-cafe-gold-deep sm:text-[10px]",
+        // On an empty slot the "Evidence pending" note sits low; keep the tag clear of it.
+        empty ? "top-2" : "bottom-2"
       )}
     >
       {label}
     </span>
   );
 
-  if (!src || failed || !onOpen) {
+  if (empty) {
     return (
       <div className="relative">
-        <EmptyFrame className="aspect-[4/3] w-full" />
+        <EmptyFrame pending className="aspect-[4/3] w-full" />
         {tag}
       </div>
     );
@@ -113,10 +116,10 @@ export function CafeActivities({
     <BoardSection id="activities" className="mt-24" width="1080">
       {schedule && showSchedule ? (
         <SectionHead
-          align="center"
           eyebrow={schedule.eyebrow}
           title={schedule.title}
           titleLocal={schedule.titleLocal}
+          stamp={schedule.stamp ?? `${schedule.items.length} Entries`}
         />
       ) : null}
 
@@ -130,7 +133,6 @@ export function CafeActivities({
             aria-hidden
           />
           {schedule.items.map((item, index) => {
-            const tone = NOTE_TONE[index % NOTE_TONE.length];
             const onLeft = index % 2 === 0;
             return (
               <li
@@ -153,14 +155,35 @@ export function CafeActivities({
                       : "min-[900px]:ml-auto min-[900px]:pl-6"
                   )}
                 >
-                <Paper tilt={onLeft ? -1.5 : 1.5} tone={tone} className="px-4 py-4">
-                  <p className={cn(SERIF, "text-[30px] leading-none")}>{item.time}</p>
-                  <p className={cn(TYPE, "mt-2 text-xs tracking-[0.14em] uppercase")}>
-                    Entry {String(index + 1).padStart(2, "0")}
+                <Paper
+                  tilt={onLeft ? -1 : 1}
+                  className={cn(
+                    "px-4 py-4",
+                    item.highlight && "border-l-[3px] border-cafe-gold"
+                  )}
+                >
+                  {item.highlight ? (
+                    <span
+                      data-tl-seal
+                      className={cn(
+                        LABEL,
+                        "absolute top-3 right-3 rotate-[4deg] border-[1.5px] border-cafe-wax px-1.5 pt-[3px] pb-px text-[9px] text-cafe-wax sm:text-[9px]"
+                      )}
+                    >
+                      Key event
+                    </span>
+                  ) : null}
+                  <p className="flex items-baseline gap-3">
+                    <span className={cn(SERIF, "text-[28px] leading-none font-bold")}>{item.time}</span>
+                    <span className={cn(LABEL, "text-[10px] text-cafe-gold-deep sm:text-[10px]")}>
+                      Entry {String(index + 1).padStart(2, "0")}
+                    </span>
                   </p>
-                  <h3 className={cn(TYPE, "mt-2 text-base font-bold")}>{item.title}</h3>
+                  <h3 className={cn(SERIF, "mt-2.5 text-base font-bold")}>{item.title}</h3>
                   {item.titleLocal ? (
-                    <p className={cn(HAND, "mt-1 text-xl")}>{item.titleLocal}</p>
+                    <p className={cn(THAI, "mt-1 text-lg font-semibold text-cafe-forest")}>
+                      {item.titleLocal}
+                    </p>
                   ) : null}
                   {item.detail ? (
                     <p className="mt-2 text-sm leading-relaxed text-cafe-ink-soft">{item.detail}</p>
@@ -177,16 +200,20 @@ export function CafeActivities({
 
       {missions.length > 0 && showMissions ? (
         <CorkBoard className="mt-14 px-4 pt-6 pb-9 sm:px-7 sm:pt-7 sm:pb-11">
-          <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-2.5">
-            <h3
-              className={cn(
-                HAND,
-                "-rotate-[1.5deg] bg-cafe-cream px-3.5 pt-2 pb-1.5 text-[26px] leading-snug font-normal text-cafe-forest shadow-[0_8px_16px_rgba(0,0,0,0.4)]"
-              )}
-            >
-              ภารกิจที่ร่วมได้ในงาน
-            </h3>
-            <Stamp className="rotate-3 bg-cafe-cream/90 text-[13px]">
+          <div className="flex flex-wrap items-end justify-between gap-x-5 gap-y-3">
+            <div>
+              <p className={cn(LABEL, "flex items-center gap-2.5")}>
+                <span className="size-1.5 rotate-45 bg-cafe-gold" aria-hidden />
+                Field assignments
+              </p>
+              <h3
+                data-motion="lens"
+                className={cn(THAI, "mt-2 text-2xl leading-snug font-bold text-cafe-cream sm:text-3xl")}
+              >
+                ภารกิจที่ร่วมได้ในงาน
+              </h3>
+            </div>
+            <Stamp tone="wall" className="-rotate-2" motion="stamp">
               {missions.length} Missions Open
             </Stamp>
           </div>
@@ -203,6 +230,7 @@ export function CafeActivities({
                 <li key={item.id} className={cn("relative", low && "lg:mt-9")}>
                   {threadOn ? (
                     <svg
+                      data-motion="thread"
                       viewBox="0 0 100 36"
                       preserveAspectRatio="none"
                       className={cn(
@@ -239,18 +267,20 @@ export function CafeActivities({
                       }
                     />
                     {item.nameLocal ? (
-                      <p className={cn(HAND, "mt-3 text-[23px] leading-tight text-cafe-forest")}>
+                      <p className={cn(THAI, "mt-3 text-xl leading-snug font-bold text-cafe-forest")}>
                         {item.nameLocal}
                       </p>
                     ) : null}
-                    <h4 className={cn(TYPE, "mt-0.5 text-sm font-bold")}>{item.name}</h4>
+                    <h4 className={cn(LABEL, "mt-1 text-[10px] text-cafe-ink-muted sm:text-[10px]")}>
+                      {item.name}
+                    </h4>
                     {item.detail ? (
                       <p className="mt-2 text-sm leading-relaxed text-cafe-ink-soft">{item.detail}</p>
                     ) : null}
                     {item.link ? (
                       <Link
                         href={item.link.href}
-                        className="mt-3 flex min-h-11 items-center justify-center bg-cafe-gold px-3 text-center text-sm font-semibold text-cafe-ink transition hover:bg-cafe-gold-soft focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-cafe-ink"
+                        className={cn(GOLD_BUTTON, "mt-3 min-h-11 px-3 text-center text-sm")}
                       >
                         {item.link.label}
                       </Link>

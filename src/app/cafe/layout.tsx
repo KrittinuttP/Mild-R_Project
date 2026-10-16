@@ -1,3 +1,4 @@
+import type { Viewport } from "next";
 import type { ReactNode } from "react";
 import { headers } from "next/headers";
 import {
@@ -5,7 +6,6 @@ import {
   Libre_Baskerville,
   Noto_Serif_Thai,
   Shippori_Mincho,
-  Sriracha,
 } from "next/font/google";
 
 import { CafeEntry } from "@/components/cafe/CafeEntry";
@@ -54,11 +54,10 @@ const courierPrime = Courier_Prime({
   weight: ["400", "700"],
 });
 
-const sriracha = Sriracha({
-  subsets: ["thai", "latin"],
-  variable: "--font-cafe-hand",
-  weight: "400",
-});
+/** Phone browser bar and overscroll in the cafe's green, not the main site's. */
+export const viewport: Viewport = {
+  themeColor: "#0f2a24",
+};
 
 export default async function CafeLayout({ children }: { children: ReactNode }) {
   const visibility = await loadCafeVisibility();
@@ -70,7 +69,8 @@ export default async function CafeLayout({ children }: { children: ReactNode }) 
 
   return (
     <div
-      className={`${libreBaskerville.variable} ${libreBaskervilleItalic.variable} ${shipporiMincho.variable} ${notoSerifThai.variable} ${courierPrime.variable} ${sriracha.variable} flex min-h-full flex-col bg-cafe-ground text-cafe-text`}
+      data-cafe-root
+      className={`${libreBaskerville.variable} ${libreBaskervilleItalic.variable} ${shipporiMincho.variable} ${notoSerifThai.variable} ${courierPrime.variable} flex min-h-full flex-col bg-cafe-ground text-cafe-text`}
     >
       <MediaProtection />
       <CafeEntry cafe={cafe} />

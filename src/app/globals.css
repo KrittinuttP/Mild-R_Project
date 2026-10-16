@@ -269,6 +269,13 @@
   --color-cafe-wax-light: #c4525a;
 }
 
+/* Cafe pages: what shows past the top or bottom when the page is pulled
+   (overscroll) is the green wall too, not the main site's body colour. */
+html:has([data-cafe-root]),
+body:has([data-cafe-root]) {
+  background-color: var(--color-cafe-ground);
+}
+
 @keyframes cafe-tape-marquee {
   from {
     transform: translateX(0);
@@ -343,6 +350,21 @@
 
 @utility animate-cafe-sway {
   animation: cafe-sway 5s ease-in-out infinite;
+}
+
+/* Lamp light passing over an empty evidence slot, then a long rest. */
+@keyframes cafe-sweep {
+  0% {
+    transform: translateX(0);
+  }
+  40%,
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+@utility animate-cafe-sweep {
+  animation: cafe-sweep 6s ease-in-out infinite;
 }
 
 @keyframes splash-heartbeat {
@@ -464,7 +486,8 @@
   .animate-cafe-lamp,
   .animate-cafe-float,
   .animate-cafe-beat,
-  .animate-cafe-sway {
+  .animate-cafe-sway,
+  .animate-cafe-sweep {
     animation: none !important;
   }
 

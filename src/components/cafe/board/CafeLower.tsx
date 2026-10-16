@@ -3,15 +3,16 @@ import Link from "next/link";
 import {
   BoardSection,
   EmptyFrame,
-  HAND,
   LABEL,
   Paper,
   SealedZone,
   SectionHead,
+  SERIF,
+  THAI,
   TILT,
-  TYPE,
   tiltStyle,
 } from "@/components/cafe/board/pieces";
+import { GOLD_BUTTON } from "@/components/cafe/board/brass";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { isCafeMission, isStandInCafeImage } from "@/lib/cafe-board";
 import { cn } from "@/lib/utils";
@@ -64,7 +65,7 @@ export function CafeGoodsBlock({
               const plateIndex = plates.findIndex((plate) => plate.id === item.id);
               const portrait = item.id === "acrylic-stand";
               const frame = standIn ? (
-                <EmptyFrame className="h-full min-h-48 w-full" />
+                <EmptyFrame pending className="h-full min-h-48 w-full" />
               ) : portrait ? (
                 <ProtectedImage
                   src={item.image}
@@ -108,12 +109,14 @@ export function CafeGoodsBlock({
                       </button>
                     )}
                     <div className="px-4 py-4">
-                      <p className={cn(TYPE, "text-xs tracking-[0.14em] text-cafe-ink-muted uppercase")}>
+                      <p className={cn(LABEL, "text-[10px] text-cafe-gold-deep sm:text-[10px]")}>
                         {GOODS_MARKS[index] ?? `Item ${String(index + 1).padStart(2, "0")}`}
                       </p>
-                      <h3 className={cn(TYPE, "mt-2 text-lg font-bold")}>{item.name}</h3>
+                      <h3 className={cn(SERIF, "mt-2 text-lg font-bold")}>{item.name}</h3>
                       {item.nameLocal ? (
-                        <p className={cn(HAND, "mt-1 text-xl text-cafe-forest")}>{item.nameLocal}</p>
+                        <p className={cn(THAI, "mt-1 text-lg font-semibold text-cafe-forest")}>
+                          {item.nameLocal}
+                        </p>
                       ) : null}
                       {item.description ? (
                         <p className="mt-2 text-sm leading-relaxed text-cafe-ink-soft">{item.description}</p>
@@ -191,12 +194,12 @@ export function CafeVenueBlock({
                   className="aspect-[5/7] h-full w-full object-cover grayscale-[.45] transition duration-300 hover:grayscale-0"
                 />
                 {item.caption ? (
-                  <span className={cn(TYPE, "mt-2 block text-center text-[0.65rem] tracking-[0.08em] uppercase")}>
+                  <span className={cn(LABEL, "mt-2 block text-center text-[9px] text-cafe-ink-muted sm:text-[9px]")}>
                     {item.caption}
                   </span>
                 ) : null}
                 {item.captionLocal ? (
-                  <span className={cn(HAND, "block text-center text-sm text-cafe-forest")}>
+                  <span className={cn(THAI, "mt-0.5 block text-center text-sm font-semibold text-cafe-forest")}>
                     {item.captionLocal}
                   </span>
                 ) : null}
@@ -252,13 +255,13 @@ export function CafeStoryBlock({
         ) : null}
         <div>
           <p className={LABEL}>Opening Act</p>
-          <p className="mt-1 font-[family-name:var(--font-cafe-serif)] text-3xl text-cafe-cream">
+          <p data-motion="lens" className={cn(SERIF, "mt-1 text-3xl font-bold text-cafe-cream")}>
             แฟ้มคดี
           </p>
-          <p className={cn(HAND, "mt-1 text-[22px] text-cafe-gold-soft")}>อ่านแบบเว็บตูน</p>
+          <p className={cn(THAI, "mt-1 text-lg text-cafe-gold-soft")}>อ่านแบบเว็บตูน</p>
           <Link
             href="/cafe/event"
-            className="mt-4 inline-flex min-h-11 items-center bg-cafe-gold px-4 text-sm font-semibold text-cafe-ink transition hover:-translate-y-0.5"
+            className={cn(GOLD_BUTTON, "mt-4 inline-flex min-h-11 w-auto px-5 text-sm")}
           >
             อ่านแฟ้มคดี
           </Link>
@@ -291,7 +294,7 @@ export function CafeStoryBlock({
                 className="aspect-[5/7] h-full w-full object-cover grayscale-[.45] transition duration-300 hover:grayscale-0"
               />
               {plate.caption ? (
-                <span className={cn(TYPE, "mt-2 block text-center text-[0.65rem] tracking-[0.08em] uppercase")}>
+                <span className={cn(LABEL, "mt-2 block text-center text-[9px] text-cafe-ink-muted sm:text-[9px]")}>
                   {plate.caption}
                 </span>
               ) : null}

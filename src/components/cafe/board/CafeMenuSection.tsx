@@ -6,13 +6,14 @@ import {
   BoardSection,
   Classified,
   EmptyFrame,
-  HAND,
   LABEL,
   Paper,
   SealedZone,
   SectionHead,
-  TYPE,
+  SERIF,
+  THAI,
 } from "@/components/cafe/board/pieces";
+import { GOLD_BUTTON } from "@/components/cafe/board/brass";
 import { useNow } from "@/hooks/useNow";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { isStandInCafeImage, visiblePrice } from "@/lib/cafe-board";
@@ -41,8 +42,8 @@ function SetCard({ item }: { item: CafePromoSetItem }) {
     >
       <header
         className={cn(
-          TYPE,
-          "flex items-center justify-between gap-3 px-4 py-3 text-sm font-bold tracking-[0.14em]",
+          SERIF,
+          "flex items-center justify-between gap-3 px-4 pt-3 pb-2.5 text-sm font-bold tracking-[0.16em] uppercase",
           highlight ? "bg-cafe-ink text-cafe-gold" : "bg-cafe-forest text-cafe-cream"
         )}
       >
@@ -53,9 +54,7 @@ function SetCard({ item }: { item: CafePromoSetItem }) {
       <div className="flex flex-1 flex-col gap-3 px-4 py-4">
         {menu.length > 0 ? (
           <div>
-            <p className={cn(TYPE, "text-[0.65rem] tracking-[0.14em] text-cafe-ink-muted uppercase")}>
-              ในเซตมี
-            </p>
+            <p className={cn(THAI, "text-xs font-semibold text-cafe-ink-muted")}>ในเซตมี</p>
             <ul className="mt-1 space-y-1 text-sm text-cafe-ink-soft">
               {menu.map((line, index) => (
                 <li key={`${index}-${line}`}>{line}</li>
@@ -65,9 +64,7 @@ function SetCard({ item }: { item: CafePromoSetItem }) {
         ) : null}
         {gifts.length > 0 ? (
           <div>
-            <p className={cn(TYPE, "text-[0.65rem] tracking-[0.14em] text-cafe-ink-muted uppercase")}>
-              ของแถม · Giveaway
-            </p>
+            <p className={cn(THAI, "text-xs font-semibold text-cafe-ink-muted")}>ของแถม · Giveaway</p>
             <ul className="mt-2 flex flex-wrap gap-2">
               {gifts.map((line, index) => {
                 const lastHighlight = highlight && index === gifts.length - 1;
@@ -87,7 +84,7 @@ function SetCard({ item }: { item: CafePromoSetItem }) {
           </div>
         ) : null}
         {highlight ? (
-          <p className={cn(HAND, "mt-auto text-lg text-cafe-forest")}>ได้มากที่สุด</p>
+          <p className={cn(THAI, "mt-auto text-base font-semibold text-cafe-forest")}>ได้มากที่สุด</p>
         ) : null}
       </div>
       ) : null}
@@ -133,42 +130,36 @@ export function CafeMenuSection({ cafe, show, showDispatch }: CafeMenuSectionPro
               const price = visiblePrice(item.priceLabel);
               const standIn = isStandInCafeImage(item.image, item.imageAlt);
               return (
-                // Sway lives on the wrapper: the bag itself is tweened by GSAP,
-                // and the two must not share one element's transform.
-                <div
-                  key={item.id}
-                  className="animate-cafe-sway origin-top hover:[animation-play-state:paused]"
-                  style={{ animationDelay: `${index * -1.6}s` }}
-                >
                 <Paper
+                  key={item.id}
                   pin={`ex-${item.id}`}
-                  tilt={index === 1 ? -2 : 2}
+                  plate
+                  tilt={index === 1 ? -1.2 : 1.2}
                   motion="swing"
-                  className="rounded-b-2xl"
+                  className="px-2.5 pt-2.5 pb-4"
                 >
-                  <header
-                    className={cn(
-                      TYPE,
-                      "flex items-center justify-between bg-cafe-forest px-3 py-2 text-xs font-bold tracking-[0.14em] text-cafe-cream"
-                    )}
-                  >
-                    <span>EVIDENCE</span>
-                    <span>EX. {letter}</span>
+                  <header className="flex items-center justify-between gap-3 border-b border-cafe-gold-deep/35 px-1 pt-1.5 pb-2">
+                    <span className={cn(LABEL, "text-[10px] text-cafe-gold-deep sm:text-[10px]")}>
+                      Exhibit {letter}
+                    </span>
+                    <span className={cn(LABEL, "text-[10px] text-cafe-ink-muted sm:text-[10px]")}>
+                      Evidence ledger
+                    </span>
                   </header>
                   {standIn ? (
-                    <EmptyFrame letter={letter} className="aspect-[4/3]" />
+                    <EmptyFrame pending className="mt-2.5 aspect-[4/3] w-full" />
                   ) : (
                     <ProtectedImage
                       src={item.image}
                       alt={item.imageAlt ?? item.name}
-                      wrapClassName="block aspect-[4/3] w-full overflow-hidden"
+                      wrapClassName="mt-2.5 block aspect-[4/3] w-full overflow-hidden"
                       className="aspect-[4/3] h-full w-full object-cover"
                     />
                   )}
-                  <div className="px-4 py-4">
-                    <h3 className={cn(TYPE, "text-lg font-bold")}>{item.name}</h3>
+                  <div className="px-1.5 pt-3.5">
+                    <h3 className={cn(SERIF, "text-lg leading-snug font-bold")}>{item.name}</h3>
                     {item.nameLocal ? (
-                      <p className={cn(HAND, "mt-1 text-xl text-cafe-forest")}>
+                      <p className={cn(THAI, "mt-1 text-[17px] font-semibold text-cafe-forest")}>
                         {item.nameLocal}
                       </p>
                     ) : null}
@@ -178,13 +169,15 @@ export function CafeMenuSection({ cafe, show, showDispatch }: CafeMenuSectionPro
                       </p>
                     ) : null}
                     {price ? (
-                      <p className={cn(TYPE, "mt-3 text-xs tracking-[0.14em] uppercase")}>
-                        PRICE: {price}
+                      <p className="mt-3 flex items-baseline justify-between border-t border-dashed border-cafe-ink/30 pt-2.5">
+                        <span className={cn(LABEL, "text-[10px] text-cafe-ink-muted sm:text-[10px]")}>
+                          Price
+                        </span>
+                        <span className={cn(SERIF, "text-xl font-bold")}>{price}</span>
                       </p>
                     ) : null}
                   </div>
                 </Paper>
-                </div>
               );
             })}
           </div>
@@ -193,7 +186,7 @@ export function CafeMenuSection({ cafe, show, showDispatch }: CafeMenuSectionPro
           {!hidden && sets ? (
             <div id="sets" className="mt-16 scroll-mt-24">
               {sets.eyebrow ? <p className={LABEL}>{sets.eyebrow}</p> : null}
-              <h3 className="mt-1 font-[family-name:var(--font-cafe-serif)] text-3xl text-cafe-cream">
+              <h3 data-motion="lens" className={cn(SERIF, "mt-1 text-3xl font-bold text-cafe-cream")}>
                 {sets.title}
               </h3>
               {sets.note ? (
@@ -215,16 +208,16 @@ export function CafeMenuSection({ cafe, show, showDispatch }: CafeMenuSectionPro
               className="relative mt-12 grid overflow-hidden bg-cafe-cream text-cafe-ink shadow-[0_14px_26px_rgba(0,0,0,0.45)] md:grid-cols-[11rem_minmax(0,1fr)]"
             >
               <div className="flex items-center justify-center border-b border-dashed border-cafe-ink/40 bg-cafe-gold px-4 py-6 md:border-r md:border-b-0">
-                <p className={cn(TYPE, "text-2xl font-bold tracking-[0.14em]")}>
+                <p className={cn(SERIF, "text-2xl font-bold tracking-[0.16em]")}>
                   PRE-ORDER
                 </p>
               </div>
               <div className="px-5 py-5 sm:px-6">
-                <p className="font-[family-name:var(--font-cafe-serif)] text-[2.1rem] leading-none">
+                <p className={cn(SERIF, "text-[2.1rem] leading-tight font-bold")}>
                   {preorder.label}
                 </p>
                 {preorder.tentative ? (
-                  <p className={cn(HAND, "mt-2 text-lg text-cafe-forest")}>
+                  <p className={cn(THAI, "mt-2 text-base font-semibold text-cafe-forest")}>
                     กำหนดการโดยประมาณ — รอประกาศยืนยัน
                   </p>
                 ) : null}
@@ -240,7 +233,7 @@ export function CafeMenuSection({ cafe, show, showDispatch }: CafeMenuSectionPro
                 ) : null}
                 {preorder.url ? (
                   <div className="mt-4 flex flex-wrap items-end justify-between gap-4 border-t border-cafe-ink/15 pt-4">
-                    <div className={cn(TYPE, "space-y-1 text-xs tracking-[0.08em] uppercase")}>
+                    <div className={cn(THAI, "space-y-1 text-sm text-cafe-ink-soft")}>
                       <p>วันเปิดจอง · {preorder.label}</p>
                       {eventDay ? (
                         <p>
@@ -253,7 +246,7 @@ export function CafeMenuSection({ cafe, show, showDispatch }: CafeMenuSectionPro
                       href={preorder.url}
                       target={preorder.url.startsWith("http") ? "_blank" : undefined}
                       rel={preorder.url.startsWith("http") ? "noopener noreferrer" : undefined}
-                      className="inline-flex min-h-11 items-center bg-cafe-gold px-4 text-sm font-semibold text-cafe-ink transition hover:-translate-y-0.5"
+                      className={cn(GOLD_BUTTON, "inline-flex min-h-11 w-auto px-5 text-sm")}
                     >
                       จองล่วงหน้า
                     </Link>

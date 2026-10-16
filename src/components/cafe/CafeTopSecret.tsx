@@ -2,8 +2,8 @@
 
 import { cn } from "@/lib/utils";
 
-const TYPE = "font-[family-name:var(--font-cafe-type)]";
-const HAND = "font-[family-name:var(--font-cafe-hand)]";
+const SERIF = "font-[family-name:var(--font-cafe-serif),var(--font-cafe-thai),serif]";
+const THAI = "font-[family-name:var(--font-cafe-thai),serif]";
 
 type CafeTopSecretProps = {
   title?: string;
@@ -51,13 +51,13 @@ export function CafeTopSecret({
       <div className="relative z-10 flex flex-col items-center text-center">
         <span
           className={cn(
-            TYPE,
-            "rotate-[-6deg] border-[3px] border-cafe-gold px-4 py-2 text-sm font-bold tracking-[0.18em] text-cafe-gold uppercase"
+            SERIF,
+            "rotate-[-6deg] border-2 border-cafe-gold px-4 py-2 text-sm font-bold tracking-[0.18em] text-cafe-gold uppercase"
           )}
         >
           {title}
         </span>
-        <p className={cn(HAND, "mt-6 text-[22px] text-cafe-gold-soft")}>
+        <p className={cn(THAI, "mt-6 text-lg text-cafe-gold-soft")}>
           {titleLocal}
         </p>
       </div>

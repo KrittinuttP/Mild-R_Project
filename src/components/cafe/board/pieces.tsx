@@ -1,13 +1,14 @@
 import type { CSSProperties, ReactNode } from "react";
 
+import { BrassPin, KEYHOLE, KeyholePlate } from "@/components/cafe/board/brass";
 import { cn } from "@/lib/utils";
 
 /** Libre Baskerville for Latin, Noto Serif Thai for Thai in the same run. */
 export const SERIF =
   "font-[family-name:var(--font-cafe-serif),var(--font-cafe-thai),serif]";
 export const THAI = "font-[family-name:var(--font-cafe-thai),serif]";
+/** Monospace — only for codes, links and the countdown digits, not for display text. */
 export const TYPE = "font-[family-name:var(--font-cafe-type)]";
-export const HAND = "font-[family-name:var(--font-cafe-hand)]";
 
 /** Small caps label, as "CASE No. 0612" on GB01. */
 export const LABEL = cn(
@@ -29,13 +30,9 @@ type PinProps = {
 
 export function Pin({ id, className }: PinProps) {
   return (
-    <span
-      data-pin={id}
-      className={cn(
-        "absolute top-0 left-1/2 z-10 size-4 -translate-x-1/2 -translate-y-[calc(50%-2px)] rounded-full bg-[radial-gradient(circle_at_35%_35%,#f6e4a8,#c9a14a_55%,#7a5c1c)] shadow-[0_0_12px_rgba(201,161,74,0.8)]",
-        className
-      )}
-      aria-hidden
+    <BrassPin
+      id={id}
+      className={cn("top-0 left-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2", className)}
     />
   );
 }
@@ -58,8 +55,8 @@ export function Stamp({
     <span
       data-motion={motion}
       className={cn(
-        TYPE,
-        "inline-block border-[3px] px-2 py-1 text-xs font-bold tracking-[0.14em] uppercase opacity-90",
+        SERIF,
+        "inline-block border-2 px-2 pt-1 pb-0.5 text-[11px] font-bold tracking-[0.2em] uppercase opacity-90",
         tone === "paper"
           ? "border-cafe-gold-deep text-cafe-gold-deep"
           : "border-cafe-gold text-cafe-gold",
@@ -169,6 +166,8 @@ type PaperProps = {
   children: ReactNode;
   className?: string;
   pin?: string;
+  /** Hang the paper on a brass keyhole plate instead of a pushpin. */
+  plate?: boolean;
   tilt?: number;
   tone?: "paper" | "pink" | "mint";
   /** Entrance hook read by `useBoardMotion` (`data-motion`). */
@@ -186,6 +185,7 @@ export function Paper({
   children,
   className,
   pin,
+  plate = false,
   tilt = 0,
   tone = "paper",
   motion,
@@ -202,7 +202,11 @@ export function Paper({
       )}
       style={{ ...tiltStyle(tilt), ...style }}
     >
-      {pin ? <Pin id={pin} /> : null}
+      {pin && plate ? (
+        <KeyholePlate id={pin} className="top-0 left-1/2 -translate-x-1/2 -translate-y-[60%]" />
+      ) : pin ? (
+        <Pin id={pin} />
+      ) : null}
       {children}
     </article>
   );
@@ -238,6 +242,7 @@ export function SectionHead({
           </p>
         ) : null}
         <h2
+          data-motion="lens"
           className={cn(
             SERIF,
             "mt-2 text-[1.85rem] leading-[1.1] font-bold text-cafe-cream sm:text-[2.6rem]"
@@ -260,29 +265,57 @@ export function SectionHead({
   );
 }
 
+/**
+ * Felt panel with a faint keyhole where a picture is not ready (or is
+ * classified). `pending` adds "Evidence pending" and a slow lamp sweep, so an
+ * empty slot does not look like a broken image.
+ */
 export function EmptyFrame({
   letter,
+  pending = false,
   className,
 }: {
   letter?: string;
+  pending?: boolean;
   className?: string;
 }) {
   return (
     <div
       className={cn(
-        "flex items-center justify-center bg-cafe-void",
+        "relative flex flex-col items-center justify-center overflow-hidden bg-cafe-felt px-3 text-center",
         className
       )}
       style={{
         backgroundImage:
-          "repeating-linear-gradient(135deg, transparent 0 12px, rgba(241,230,207,0.05) 12px 13px)",
+          "radial-gradient(circle at 50% 42%, rgba(201,161,74,0.16), transparent 62%)",
+        boxShadow:
+          "inset 0 0 0 1px rgba(201,161,74,0.35), inset 0 0 0 5px var(--color-cafe-felt), inset 0 0 0 6px rgba(201,161,74,0.22)",
       }}
-      aria-hidden
+      aria-hidden={!pending}
     >
+      <span className="flex aspect-square w-[min(4rem,38%)] items-center justify-center rounded-full border-[1.5px] border-dashed border-cafe-gold/60">
+        <svg viewBox="0 0 64 148" className="h-auto w-[24%] fill-cafe-gold/55" aria-hidden>
+          <path d={KEYHOLE} />
+        </svg>
+      </span>
       {letter ? (
-        <span className={cn(TYPE, "text-6xl font-bold text-cafe-cream/80")}>
-          {letter}
+        <span className={cn(LABEL, "mt-3 text-[10px] text-cafe-gold/80 sm:text-[10px]")}>
+          Exhibit {letter}
         </span>
+      ) : null}
+      {pending ? (
+        <>
+          <span className={cn(LABEL, "mt-3 text-[10px] text-cafe-gold/85 sm:text-[10px]")}>
+            Evidence pending
+          </span>
+          <span className={cn(THAI, "mt-1 text-xs text-cafe-muted")}>
+            ภาพจริงจะอัปเดตเร็ว ๆ นี้
+          </span>
+          <span
+            className="animate-cafe-sweep pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 bg-[linear-gradient(100deg,transparent,rgba(233,207,134,0.14),transparent)]"
+            aria-hidden
+          />
+        </>
       ) : null}
     </div>
   );

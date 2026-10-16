@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Lock, Unlock, Eye, EyeOff, FileLock2, Home, Settings2, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Eye, EyeOff, FileLock2, Home, Lock, Settings2, Unlock } from "lucide-react";
 
-import { BackLink } from "@/components/layout/BackLink";
-import { buttonVariants } from "@/components/ui/button";
+import { GOLD_BUTTON, KeyholePlate } from "@/components/cafe/board/brass";
+import { LABEL, SERIF, THAI } from "@/components/cafe/board/pieces";
 import {
   CAFE_CONTENT_SECTION_KEYS,
   CAFE_SECTION_META,
@@ -13,18 +13,25 @@ import {
   type CafeSectionKey,
   type CafeSectionVisibilityMap,
 } from "@/lib/cafe-visibility";
-import {
-  CTA_OUTLINE_CLASS,
-  CTA_PRIMARY_CLASS,
-  DISPLAY_H1_CLASS,
-  GLASS_CARD_CLASS,
-  META_CLASS,
-  META_MUTED_CLASS,
-} from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 
-const SERIF = "font-[family-name:var(--font-cafe-serif)]";
-const DISPLAY = "font-[family-name:var(--font-display)]";
+/** Cream paper of the cafe board. */
+const PAPER =
+  "relative bg-cafe-cream text-cafe-ink shadow-[0_18px_34px_rgba(0,0,0,0.5)]";
+/** Text link back to the board, on the green wall. */
+const WALL_LINK =
+  "inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-cafe-gold-soft underline underline-offset-4 transition hover:text-cafe-cream focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-cafe-gold";
+/** Visible / hidden switch: gold when declassified, wax red when top secret. */
+function switchClass(visible: boolean) {
+  return cn(
+    LABEL,
+    "shrink-0 border-2 px-3.5 pt-2 pb-1.5 text-[10px] transition disabled:opacity-50 sm:text-[10px]",
+    "focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-cafe-gold",
+    visible
+      ? "border-cafe-gold-deep bg-cafe-gold text-cafe-ink hover:bg-cafe-gold-soft"
+      : "border-cafe-wax bg-transparent text-cafe-wax hover:bg-cafe-wax/10"
+  );
+}
 
 type SectionRow = {
   key: CafeSectionKey;
@@ -165,79 +172,77 @@ export function CafeSettingsClient() {
   if (checking) {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 text-center">
-        <span className="size-3 rounded-full bg-[#e85a7a] animate-ping" />
-        <p className="text-sm font-medium tracking-[0.2em] text-[#f3b8c4]/70 uppercase">
-          Checking clearance…
-        </p>
+        <span className="size-3 animate-ping rounded-full bg-cafe-gold" />
+        <p className={LABEL}>Checking clearance…</p>
       </div>
     );
   }
 
   if (!unlocked) {
     return (
-      <div className="mx-auto max-w-md pt-8">
-        <form
-          onSubmit={unlock}
-          className="relative overflow-hidden rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#220e18]/95 via-[#1a0c12]/90 to-[#140a0d] p-7 shadow-[0_20px_50px_rgba(0,0,0,0.6)] sm:p-9"
-        >
-          <div className="flex items-center gap-3.5">
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-[#e85a7a]/40 bg-[#e85a7a]/15 text-[#e85a7a] shadow-[0_0_16px_rgba(232,90,122,0.3)]">
-              <Lock className="size-6" />
-            </div>
-            <div>
-              <p className={META_MUTED_CLASS}>Restricted Access</p>
-              <h1 className={cn(SERIF, "text-2xl text-[#fff5f7]")}>
-                Cafe Settings
-              </h1>
-            </div>
+      <div className="mx-auto max-w-md pt-10">
+        <form onSubmit={unlock} className={cn(PAPER, "px-6 pt-8 pb-6 sm:px-8")}>
+          <KeyholePlate className="top-0 left-1/2 -translate-x-1/2 -translate-y-[60%]" />
+          <div className="flex items-center justify-between gap-3">
+            <p className={cn(LABEL, "text-[10px] text-cafe-gold-deep sm:text-[10px]")}>
+              Restricted access
+            </p>
+            <span
+              className={cn(
+                LABEL,
+                "rotate-[4deg] border-2 border-cafe-wax px-2 pt-1 pb-0.5 text-[10px] text-cafe-wax sm:text-[10px]"
+              )}
+            >
+              Staff only
+            </span>
           </div>
-          <p className="mt-4 text-sm leading-relaxed text-[#f7d7de]/80">
+          <h1 className={cn(SERIF, "mt-3 text-[1.7rem] font-bold")}>Cafe Settings</h1>
+          <p className="mt-2 text-sm leading-relaxed text-cafe-ink-soft">
             ใส่รหัสทีมเพื่อเปิด/ปิดส่วนแสดงผลบนหน้าคาเฟ่
           </p>
           <label className="mt-6 block">
-            <span className={META_CLASS}>Clearance code</span>
-            <div className="relative mt-2 flex items-center">
+            <span className={cn(LABEL, "text-[10px] text-cafe-ink-muted sm:text-[10px]")}>
+              Clearance code
+            </span>
+            <span className="relative mt-2 flex items-center">
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 autoComplete="current-password"
                 placeholder="ป้อนรหัสผ่านทีม…"
-                className="w-full rounded-2xl border border-[#f3b8c4]/20 bg-[#12070c]/90 px-4 py-3 text-sm text-[#fff5f7] placeholder-[#f3b8c4]/30 outline-none transition focus:border-[#e85a7a]/70 focus:ring-2 focus:ring-[#e85a7a]/20"
+                className="h-12 w-full border-2 border-cafe-ink bg-cafe-cream-light px-3.5 pr-11 text-base text-cafe-ink placeholder:text-cafe-ink-muted/70 focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-cafe-gold"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 p-1.5 text-[#f3b8c4]/60 transition hover:text-[#fff5f7]"
+                className="absolute right-1.5 flex size-9 items-center justify-center text-cafe-ink-muted transition hover:text-cafe-ink"
                 aria-label={showPassword ? "ซ่อนรหัส" : "แสดงรหัส"}
               >
-                {showPassword ? (
-                  <EyeOff className="size-4" />
-                ) : (
-                  <Eye className="size-4" />
-                )}
+                {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
-            </div>
+            </span>
           </label>
           {error ? (
-            <div className="mt-3.5 flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3.5 py-2 text-xs text-red-200">
-              <span className="size-1.5 rounded-full bg-red-400" />
+            <p
+              role="alert"
+              className="mt-3.5 border-l-[3px] border-cafe-wax bg-cafe-wax/10 px-3 py-2 text-sm font-semibold text-cafe-wax"
+            >
               {error}
-            </div>
+            </p>
           ) : null}
-          <button
-            type="submit"
-            className={cn(
-              buttonVariants({ size: "lg" }),
-              CTA_PRIMARY_CLASS,
-              "mt-6 flex w-full items-center justify-center gap-2 font-semibold"
-            )}
-          >
+          <button type="submit" className={cn(GOLD_BUTTON, "mt-6 min-h-[52px] text-base")}>
             <Unlock className="size-4" />
             ปลดล็อก
           </button>
-          <div className="mt-5 border-t border-[#f3b8c4]/10 pt-4 text-center">
-            <BackLink href="/cafe">กลับหน้าคาเฟ่</BackLink>
+          <div className="mt-4 text-center">
+            <Link
+              href="/cafe"
+              className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-cafe-forest underline underline-offset-4 transition hover:text-cafe-ink"
+            >
+              <ArrowLeft className="size-4" />
+              กลับหน้าคาเฟ่
+            </Link>
           </div>
         </form>
       </div>
@@ -254,50 +259,50 @@ export function CafeSettingsClient() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <BackLink href="/cafe" className="mb-4">
+      <Link href="/cafe" className={WALL_LINK}>
+        <ArrowLeft className="size-4" />
         กลับหน้าคาเฟ่
-      </BackLink>
+      </Link>
 
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#f3b8c4]/12 pb-6">
+      <div className="mt-4 flex flex-wrap items-end justify-between gap-4 border-b border-cafe-gold/25 pb-6">
         <div>
-          <div className="flex items-center gap-2">
-            <Settings2 className="size-4 text-[#e85a7a]" />
-            <p className={META_CLASS}>Case Control · Visibility</p>
-          </div>
-          <h1 className={cn(SERIF, "mt-1.5 text-3xl text-[#fff5f7] sm:text-4xl")}>
+          <p className={cn(LABEL, "flex items-center gap-2")}>
+            <Settings2 className="size-3.5" aria-hidden />
+            Case control · Visibility
+          </p>
+          <h1 className={cn(SERIF, "mt-2 text-3xl font-bold text-cafe-cream sm:text-4xl")}>
             Cafe Settings
           </h1>
-          <p className="mt-2 text-sm leading-relaxed text-[#f7d7de]/80">
-            สลับแล้วบันทึกทันที · ส่วนที่ปิดจะไม่โชว์เนื้อหาบนหน้า `/cafe`
+          <p className="mt-2 text-sm leading-relaxed text-cafe-text">
+            สลับแล้วบันทึกทันที · ส่วนที่ปิดจะไม่โชว์เนื้อหาบนหน้า /cafe
           </p>
         </div>
         <button
           type="button"
           onClick={lock}
-          className={cn(
-            buttonVariants({ variant: "outline", size: "sm" }),
-            CTA_OUTLINE_CLASS,
-            "inline-flex items-center gap-1.5"
-          )}
+          className="inline-flex min-h-11 items-center gap-1.5 border-2 border-cafe-gold/60 px-3.5 text-sm font-semibold text-cafe-gold-soft transition hover:border-cafe-gold hover:bg-cafe-gold/10 hover:text-cafe-cream focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-cafe-gold"
         >
           <Lock className="size-3.5" />
           ล็อกเซสชัน
         </button>
       </div>
 
-      {/* 🧭 Master Navigation Toggle */}
-      <div className="relative mt-8 overflow-hidden rounded-3xl border border-[#e85a7a]/40 bg-gradient-to-br from-[#2a101f] via-[#1a0c13] to-[#12070c] p-5 shadow-[0_12px_32px_rgba(232,90,122,0.15)] sm:p-6">
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex min-w-0 items-start gap-4">
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-[#e85a7a]/40 bg-[#e85a7a]/20 shadow-[0_0_16px_rgba(232,90,122,0.3)]">
-              <Home className="size-5 text-[#fff5f7]" />
-            </div>
+      {/* Master navigation toggle */}
+      <div className={cn(PAPER, "mt-10 px-5 pt-7 pb-5 sm:px-6")}>
+        <KeyholePlate className="top-0 left-1/2 -translate-x-1/2 -translate-y-[60%]" />
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-start gap-3.5">
+            <span className="flex size-11 shrink-0 items-center justify-center bg-cafe-forest text-cafe-gold-soft">
+              <Home className="size-5" aria-hidden />
+            </span>
             <div className="min-w-0">
-              <p className={META_CLASS}>Navigation Control</p>
-              <p className={cn(SERIF, "mt-1 text-lg text-[#fff5f7] sm:text-xl")}>
+              <p className={cn(LABEL, "text-[10px] text-cafe-gold-deep sm:text-[10px]")}>
+                Navigation control
+              </p>
+              <p className={cn(SERIF, "mt-1 text-lg font-bold sm:text-xl")}>
                 {CAFE_SECTION_META.mainSiteLink.label}
               </p>
-              <p className="mt-0.5 text-xs text-[#f3b8c4]/70">
+              <p className={cn(THAI, "mt-0.5 text-sm text-cafe-ink-soft")}>
                 {CAFE_SECTION_META.mainSiteLink.labelLocal}
               </p>
             </div>
@@ -308,38 +313,26 @@ export function CafeSettingsClient() {
             aria-checked={mainSiteVisible}
             disabled={loadingSections || savingKey === "mainSiteLink"}
             onClick={() => onToggle("mainSiteLink")}
-            className={cn(
-              "relative shrink-0 rounded-full border px-5 py-2.5 text-xs font-bold tracking-wider uppercase transition disabled:opacity-50 sm:min-w-[8.5rem]",
-              mainSiteVisible
-                ? "border-emerald-400/60 bg-emerald-500/20 text-emerald-100 shadow-[0_0_20px_rgba(16,185,129,0.3)]"
-                : "border-[#e85a7a]/60 bg-[#e85a7a]/20 text-[#fff5f7] shadow-[0_0_20px_rgba(232,90,122,0.25)]"
-            )}
+            className={cn(switchClass(mainSiteVisible), "min-h-11 sm:min-w-[9rem]")}
           >
             {savingKey === "mainSiteLink"
               ? "กำลังบันทึก…"
               : mainSiteVisible
-                ? "✓ แสดง (Visible)"
-                : "✕ ซ่อน (Hidden)"}
+                ? "✓ Visible · แสดง"
+                : "✕ Hidden · ซ่อน"}
           </button>
         </div>
       </div>
 
-      <p className={cn(META_CLASS, "mt-8")}>
-        Content Sections ({contentSections.length})
-      </p>
+      <p className={cn(LABEL, "mt-10")}>Content sections ({contentSections.length})</p>
 
-      {/* 📋 Content Section Toggles */}
-      <ul className="mt-3 space-y-3">
+      {/* Content section toggles */}
+      <ul className={cn(PAPER, "mt-3 divide-y divide-cafe-ink/12 px-4 sm:px-5")}>
         {contentSections.map((section) => (
-          <li
-            key={section.key}
-            className="flex items-center justify-between gap-4 rounded-2xl border border-[#f3b8c4]/15 bg-gradient-to-r from-[#1f0d16]/80 to-[#14080e]/90 p-4 transition hover:border-[#e85a7a]/40 sm:px-5"
-          >
+          <li key={section.key} className="flex items-center justify-between gap-4 py-3.5">
             <div className="min-w-0">
-              <p className={cn(SERIF, "text-base font-medium text-[#fff5f7]")}>
-                {section.label}
-              </p>
-              <p className="text-xs text-[#e85a7a]">{section.labelLocal}</p>
+              <p className={cn(SERIF, "text-base font-bold")}>{section.label}</p>
+              <p className={cn(THAI, "text-sm text-cafe-forest")}>{section.labelLocal}</p>
             </div>
             <button
               type="button"
@@ -347,12 +340,7 @@ export function CafeSettingsClient() {
               aria-checked={section.visible}
               disabled={loadingSections || savingKey === section.key}
               onClick={() => onToggle(section.key)}
-              className={cn(
-                "shrink-0 rounded-full border px-4 py-1.5 text-xs font-bold tracking-wide uppercase transition disabled:opacity-50",
-                section.visible
-                  ? "border-emerald-400/50 bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/25"
-                  : "border-[#e85a7a]/50 bg-[#e85a7a]/15 text-[#f3b8c4] hover:bg-[#e85a7a]/25"
-              )}
+              className={cn(switchClass(section.visible), "min-h-10 min-w-[8.5rem]")}
             >
               {savingKey === section.key
                 ? "กำลังบันทึก…"
@@ -365,37 +353,32 @@ export function CafeSettingsClient() {
       </ul>
 
       {error ? (
-        <div className="mt-4 flex items-center gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 p-3.5 text-xs text-red-200">
-          <span className="size-1.5 rounded-full bg-red-400" />
+        <p
+          role="alert"
+          className="mt-4 border-l-[3px] border-cafe-wax-light bg-cafe-deep/85 px-3.5 py-3 text-sm text-cafe-cream"
+        >
           {error}
-        </div>
+        </p>
       ) : null}
 
       {status ? (
-        <div className="mt-4 flex items-center gap-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs text-emerald-200 animate-in fade-in">
-          <CheckCircle2 className="size-4 text-emerald-400" />
+        <p
+          role="status"
+          className="mt-4 flex items-center gap-2 border-l-[3px] border-cafe-gold bg-cafe-deep/85 px-3.5 py-3 text-sm text-cafe-text"
+        >
+          <CheckCircle2 className="size-4 shrink-0 text-cafe-gold" aria-hidden />
           {status}
-        </div>
+        </p>
       ) : null}
 
       <div className="mt-10 flex flex-wrap gap-3">
         <Link
           href="/admin"
-          className={cn(
-            buttonVariants({ variant: "outline", size: "lg" }),
-            CTA_OUTLINE_CLASS
-          )}
+          className="inline-flex min-h-11 items-center border-2 border-cafe-gold/60 px-4 text-sm font-semibold text-cafe-gold-soft transition hover:border-cafe-gold hover:bg-cafe-gold/10 hover:text-cafe-cream focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-cafe-gold"
         >
           Control desk
         </Link>
-        <Link
-          href="/cafe/secret"
-          className={cn(
-            buttonVariants({ size: "lg" }),
-            CTA_PRIMARY_CLASS,
-            "inline-flex items-center gap-2 font-semibold"
-          )}
-        >
+        <Link href="/cafe/secret" className={cn(GOLD_BUTTON, "inline-flex min-h-11 w-auto px-5 text-sm")}>
           <FileLock2 className="size-4" />
           Secret · เปิดทุกอย่าง
         </Link>

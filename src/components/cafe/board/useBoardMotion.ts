@@ -21,16 +21,22 @@ function tiltOf(el: Element) {
   return Number.isFinite(value) ? value : 0;
 }
 
+/** Pins the hero's gold thread is tied to (see `THREAD_ROUTES` in CafeOverview). */
+const THREAD_ANCHORS = new Set(["heart", "lock", "lock-m", "venue"]);
+
 function dropPin(card: Element, at: number, timeline?: gsap.core.Timeline) {
   const pin = card.querySelector<HTMLElement>("[data-pin]");
   if (!pin) return;
-  const from = { autoAlpha: 0, y: -40, scale: 2.2 };
+  // A pin holding the thread must not move on its own: the thread follows it
+  // every frame, so any drop shows as a jolt. It rides its card and fades in.
+  const anchor = THREAD_ANCHORS.has(pin.dataset.pin ?? "");
+  // Other brass is set into the paper: a soft fade and short drop, no overshoot.
+  const from = anchor ? { autoAlpha: 0 } : { autoAlpha: 0, y: -12, scale: 1.12 };
   const to = {
     autoAlpha: 1,
-    y: 0,
-    scale: 1,
-    duration: 0.32,
-    ease: "back.out(2.2)",
+    ...(anchor ? {} : { y: 0, scale: 1 }),
+    duration: anchor ? 0.3 : 0.4,
+    ease: anchor ? "power1.out" : "power3.out",
     clearProps: "transform,opacity,visibility",
   };
   if (timeline) timeline.fromTo(pin, from, to, at);
@@ -226,7 +232,8 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
           },
           at
         );
-        dropPin(card, at + 0.4, opening);
+        // After the card has landed (0.55 s), so the pin does not ride the card's spin.
+        dropPin(card, at + 0.55, opening);
       });
 
       // The wordmark is swept in left → right, like the GA1 lens sweep.
@@ -250,7 +257,7 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
         opening.call(
           () => window.dispatchEvent(new Event("resize")),
           undefined,
-          2.75
+          2.95
         );
         opening.to(
           yarn,
@@ -261,7 +268,23 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
             // The dash runs 1 → 0; whole-pixel rounding would make it jump.
             autoRound: false,
           },
-          2.8
+          // The last pin has settled by ~3.0 s; tie the thread after it.
+          3.0
+        );
+      }
+
+      // The thread reaches the heart: one beat to say it arrived.
+      if (yarn && heart) {
+        opening.to(
+          heart,
+          {
+            keyframes: [
+              { scale: 1.35, duration: 0.16, ease: "power2.out" },
+              { scale: 1, duration: 0.34, ease: "power2.inOut" },
+            ],
+            clearProps: "transform",
+          },
+          4.75
         );
       }
 
@@ -335,7 +358,7 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
       const batch = (
         selector: string,
         enter: (el: HTMLElement, delay: number) => void,
-        step = 0.12
+        step = 0.08
       ) => {
         const targets = all(selector);
         if (targets.length === 0) return;
@@ -354,44 +377,40 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
         gsap.set(el, { transition: "none" });
         gsap.fromTo(
           el,
-          { autoAlpha: 0, y: -22, scale: 1.07, rotation: tilt * 4 },
+          { autoAlpha: 0, y: -16, scale: 1.03, rotation: tilt * 2.5 },
           {
             autoAlpha: 1,
             y: 0,
             scale: 1,
             rotation: tilt,
-            duration: 0.6,
+            duration: 0.5,
             delay,
-            ease: "back.out(1.4)",
+            ease: "power3.out",
             clearProps: CLEAR,
           }
         );
-        dropPin(el, delay + 0.38);
+        dropPin(el, delay + 0.3);
       });
 
-      // Evidence bags and set cards swing in from their pin.
-      batch(
-        '[data-motion="swing"]',
-        (el, delay) => {
-          const tilt = tiltOf(el);
-          gsap.set(el, { transition: "none" });
-          gsap.fromTo(
-            el,
-            { autoAlpha: 0, y: -20, rotation: tilt - 9 },
-            {
-              autoAlpha: 1,
-              y: 0,
-              rotation: tilt,
-              duration: 0.9,
-              delay,
-              ease: "elastic.out(1, 0.5)",
-              clearProps: CLEAR,
-            }
-          );
-          dropPin(el, delay + 0.2);
-        },
-        0.15
-      );
+      // Exhibit and set cards are hung from their pin: one settle, then still.
+      batch('[data-motion="swing"]', (el, delay) => {
+        const tilt = tiltOf(el);
+        gsap.set(el, { transition: "none", transformOrigin: "50% 0%" });
+        gsap.fromTo(
+          el,
+          { autoAlpha: 0, y: -14, rotation: tilt - 4 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            rotation: tilt,
+            duration: 0.55,
+            delay,
+            ease: "back.out(1.6)",
+            clearProps: CLEAR,
+          }
+        );
+        dropPin(el, delay + 0.18);
+      });
 
       batch('[data-motion="rise"]', (el, delay) => {
         gsap.fromTo(
@@ -409,19 +428,67 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
       });
 
       batch('[data-motion="stamp"]', (el, delay) => {
-        gsap.fromTo(
-          el,
-          { autoAlpha: 0, scale: 3 },
-          {
-            autoAlpha: 0.9,
+        gsap
+          .timeline({ delay: delay + 0.35 })
+          .fromTo(
+            el,
+            { autoAlpha: 0, scale: 1.45, filter: "blur(1.5px)" },
+            {
+              autoAlpha: 0.9,
+              scale: 0.96,
+              filter: "blur(0px)",
+              duration: 0.2,
+              ease: "power3.in",
+            }
+          )
+          .to(el, {
             scale: 1,
-            duration: 0.45,
-            delay: delay + 0.3,
-            ease: "back.out(2)",
-            clearProps: "transform,opacity,visibility",
-          }
-        );
+            duration: 0.18,
+            ease: "power2.out",
+            clearProps: "transform,opacity,visibility,filter",
+          });
       });
+
+      // Section titles are swept in left → right, like the wordmark in the opening.
+      const lenses = all('[data-motion="lens"]');
+      if (lenses.length > 0) {
+        gsap.set(lenses, { clipPath: "inset(-20% 100% -20% 0)" });
+        ScrollTrigger.batch(lenses, {
+          start: "top 88%",
+          once: true,
+          onEnter: (els) =>
+            gsap.to(els, {
+              clipPath: "inset(-20% 0% -20% 0)",
+              duration: 0.85,
+              ease: "power2.inOut",
+              stagger: 0.08,
+              clearProps: "clipPath",
+            }),
+        });
+      }
+
+      // Mission board: the gold thread is drawn pin to pin after the cards hang.
+      const threads = all('[data-motion="thread"]');
+      const threadBoard = threads[0]?.closest("ul");
+      if (threads.length > 0 && threadBoard) {
+        // Each segment is unveiled left → right (a dash offset would not
+        // survive the stretched, non-scaling stroke of these small SVGs).
+        gsap.set(threads, { clipPath: "inset(-20% 100% -20% 0)" });
+        ScrollTrigger.create({
+          trigger: threadBoard,
+          start: "top 80%",
+          once: true,
+          onEnter: () =>
+            gsap.to(threads, {
+              clipPath: "inset(-20% 0% -20% 0)",
+              duration: 0.35,
+              ease: "none",
+              stagger: 0.35,
+              delay: 0.5,
+              clearProps: "clipPath",
+            }),
+        });
+      }
 
       // ── Timeline: the thread follows the scroll, entries land as it passes ──
       const line = one('[data-motion="tl-line"]');
@@ -449,6 +516,8 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
         const fromLeft = item.dataset.side === "left";
         if (node) gsap.set(node, { autoAlpha: 0, scale: 0 });
         if (note) gsap.set(note, { autoAlpha: 0 });
+        const sealMark = note?.querySelector<HTMLElement>("[data-tl-seal]");
+        if (sealMark) gsap.set(sealMark, { autoAlpha: 0 });
 
         ScrollTrigger.create({
           trigger: item,
@@ -456,13 +525,39 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
           once: true,
           onEnter: () => {
             if (node) {
-              gsap.to(node, {
-                autoAlpha: 1,
-                scale: 1,
-                duration: 0.3,
-                ease: "back.out(2.4)",
-                clearProps: "transform,opacity,visibility",
-              });
+              gsap
+                .timeline()
+                .to(node, {
+                  autoAlpha: 1,
+                  scale: 1,
+                  duration: 0.3,
+                  ease: "back.out(2.4)",
+                })
+                .fromTo(
+                  node,
+                  { boxShadow: "0 0 0 0 rgba(233,207,134,0.9)" },
+                  {
+                    boxShadow: "0 0 0 10px rgba(233,207,134,0)",
+                    duration: 0.6,
+                    ease: "power2.out",
+                    clearProps: "transform,opacity,visibility,boxShadow",
+                  }
+                );
+            }
+            const seal = note?.querySelector<HTMLElement>("[data-tl-seal]");
+            if (seal) {
+              gsap.fromTo(
+                seal,
+                { autoAlpha: 0, scale: 1.6 },
+                {
+                  autoAlpha: 1,
+                  scale: 1,
+                  duration: 0.24,
+                  delay: 0.7,
+                  ease: "power3.in",
+                  clearProps: "transform,opacity,visibility",
+                }
+              );
             }
             if (note) {
               const tilt = tiltOf(note);
