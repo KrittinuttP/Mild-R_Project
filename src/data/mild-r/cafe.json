@@ -1,10 +1,12 @@
 {
   "title": "Mild-R: Sherlock Sweetie",
   "titleLocal": "คาเฟ่วันเกิดของนักสืบ Mild-R",
+  "lede": "คาเฟ่ธีมนักสืบ · ไขปริศนาจากเมนู · เก็บหลักฐาน · ฉลองวันเกิด Mild-R",
   "tagline": "รายงานพิเศษจากสถานที่เกิดเหตุ: คาเฟ่ลึกลับแห่งนี้ เชิญชวนนักสืบฮันนี่ทุกท่าน มาร่วมไขปริศนาจากหลากหลายเมนูในงาน พร้อมช่วยกันคลี่คลายคดีต่างๆ และเก็บกู้หลักฐานจากสถานที่เกิดเหตุนี้",
   "status": "upcoming",
   "statusLabel": "CASE FILE · OPEN",
   "statusLabelLocal": "แฟ้มคดีเปิดแล้ว",
+  "statusLabelSealed": "CASE FILE · SEALED",
   "edition": {
     "kicker": "Birthday Case File",
     "kickerLocal": "แฟ้มคดีวันเกิด",

@@ -196,35 +196,26 @@ export function SherlockSweetieLogo({
   );
 }
 
-/** Faint keyhole and lens behind a hero, as on the GB01 banner (5% gold). */
-export function CaseGhostMotifs({ className }: { className?: string }) {
+/** Faint keyhole and lens behind a hero, as on the GB01 banner (4–5% gold). */
+export function CaseGhostMotifs({
+  className,
+  only,
+}: {
+  className?: string;
+  /** Draw just one of the two marks. */
+  only?: "lens" | "keyhole";
+}) {
   return (
     <div
       className={cn("pointer-events-none absolute inset-0 overflow-hidden", className)}
       aria-hidden
     >
-      <KeyholeGlyph className="absolute top-[18%] left-[7%] aspect-[64/148] h-[62%] w-auto opacity-[0.05]" />
-      <LensGlyph className="absolute top-[14%] right-[3%] aspect-[124/148] h-[66%] w-auto opacity-[0.05]" />
+      {only !== "lens" ? (
+        <KeyholeGlyph className="absolute top-[18%] left-[7%] aspect-[64/148] h-[62%] w-auto opacity-[0.04]" />
+      ) : null}
+      {only !== "keyhole" ? (
+        <LensGlyph className="absolute top-[3%] right-[2%] aspect-[124/148] h-[40%] w-auto opacity-[0.04]" />
+      ) : null}
     </div>
-  );
-}
-
-/** The gold double frame inset from the edges of a GB01-style panel. */
-export function GoldDoubleFrame({ className }: { className?: string }) {
-  return (
-    <div className={cn("pointer-events-none absolute inset-0", className)} aria-hidden>
-      <div className="absolute inset-3 border border-cafe-gold/35 sm:inset-5 lg:inset-7" />
-      <div className="absolute inset-[18px] border border-cafe-gold/[0.18] sm:inset-[26px] lg:inset-9" />
-    </div>
-  );
-}
-
-/** ◆ divider used between the date, time and place. */
-export function GoldDiamond({ className }: { className?: string }) {
-  return (
-    <span
-      className={cn("inline-block size-[0.36em] flex-none rotate-45 bg-cafe-gold", className)}
-      aria-hidden
-    />
   );
 }

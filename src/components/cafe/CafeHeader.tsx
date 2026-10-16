@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
-import { Classified } from "@/components/cafe/board/pieces";
 import { SherlockSweetieLogo } from "@/components/cafe/SherlockSweetieLogo";
 import { buttonVariants } from "@/components/ui/button";
 import { scrollToHashTarget } from "@/lib/scroll-to-hash";
@@ -30,15 +29,12 @@ type CafeHeaderProps = {
   cafe: CafePage;
   mildRHomeHref?: string;
   showMainSiteLink?: boolean;
-  /** The date is the dispatch date, which has its own visibility toggle. */
-  showDate?: boolean;
 };
 
 export function CafeHeader({
   cafe,
   mildRHomeHref = "/",
   showMainSiteLink = true,
-  showDate = true,
 }: CafeHeaderProps) {
   const pathname = usePathname();
   const onCafeRoot = pathname === "/cafe" || pathname === "/cafe/";
@@ -121,32 +117,19 @@ export function CafeHeader({
           >
             <SherlockSweetieLogo variant="inline" label={masthead} as="span" />
           </Link>
-          <div className="mt-0.5 flex min-w-0 items-center gap-2 sm:flex">
-            {cafe.dispatch.schedule.label ? (
-              <span className="shrink-0 font-[family-name:var(--font-cafe-serif)] text-[0.65rem] font-bold tracking-[0.18em] text-cafe-gold-soft">
-                <Classified hidden={!showDate} tone="wall">
-                  {cafe.dispatch.schedule.label}
-                </Classified>
-              </span>
-            ) : null}
-            {cafe.edition?.caseNo ? (
-              <span className="hidden truncate font-[family-name:var(--font-cafe-serif)] text-[0.55rem] tracking-[0.14em] text-cafe-gold/90 uppercase sm:inline sm:text-[0.58rem] sm:tracking-[0.18em]">
-                {cafe.edition.caseNo}
-              </span>
-            ) : null}
-            {showHomeLink ? (
-              <Link
-                href={mildRHomeHref}
-                className="hidden text-[0.65rem] tracking-[0.18em] text-cafe-gold uppercase transition hover:text-cafe-gold-soft sm:inline"
-              >
-                เว็บหลัก →
-              </Link>
-            ) : null}
-          </div>
+          {/* Date and case no. live on the overview board, not here. */}
+          {showHomeLink ? (
+            <Link
+              href={mildRHomeHref}
+              className="mt-0.5 hidden text-[0.65rem] tracking-[0.18em] text-cafe-gold uppercase transition hover:text-cafe-gold-soft sm:inline-block"
+            >
+              เว็บหลัก →
+            </Link>
+          ) : null}
         </div>
 
         <nav
-          className="hidden items-center gap-1 lg:flex"
+          className="hidden items-center gap-1 min-[1180px]:flex"
           aria-label="Cafe"
         >
           {CAFE_NAV.map((link, index) => {
@@ -197,7 +180,7 @@ export function CafeHeader({
           type="button"
           className={cn(
             buttonVariants({ variant: "ghost", size: "icon" }),
-            "rounded-full text-cafe-cream lg:hidden"
+            "rounded-full text-cafe-cream min-[1180px]:hidden"
           )}
           aria-expanded={open}
           aria-controls="cafe-mobile-nav"
@@ -211,7 +194,7 @@ export function CafeHeader({
       <div
         id="cafe-mobile-nav"
         className={cn(
-          "border-t border-cafe-gold/20 bg-cafe-ground/95 backdrop-blur-md lg:hidden",
+          "border-t border-cafe-gold/20 bg-cafe-ground/95 backdrop-blur-md min-[1180px]:hidden",
           open ? "block" : "hidden"
         )}
       >

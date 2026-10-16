@@ -75,7 +75,7 @@ function keepTimeWhileHidden() {
 }
 
 /**
- * Board motion for `/cafe`: one opening timeline for the GB01 banner and the felt board, then
+ * Board motion for `/cafe`: one opening timeline for the felt board, then
  * play-once reveals as each lower section scrolls in. Idle loops are CSS
  * (`animate-cafe-*`); hover is plain transitions.
  *
@@ -114,10 +114,9 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
       function build() {
       const stopHiddenClock = keepTimeWhileHidden();
 
-      // ── Opening timeline (GB01 banner, then the felt board) ────────
+      // ── Opening timeline (felt board: wordmark, cards, thread) ─────
       const lamp = one('[data-motion="lamp"]');
-      const banner = one('[data-motion="hero-banner"]');
-      const meta = one('[data-motion="hero-meta"]');
+      const meta = all('[data-motion="hero-meta"]');
       const board = one('[data-motion="hero-board"]');
       const character = one('[data-motion="hero-char"]');
       const heart = one('[data-motion="hero-heart"]');
@@ -148,21 +147,7 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
         );
       }
 
-      if (banner) {
-        opening.fromTo(
-          banner,
-          { autoAlpha: 0 },
-          {
-            autoAlpha: 1,
-            duration: 0.6,
-            ease: "power1.out",
-            clearProps: "opacity,visibility",
-          },
-          0
-        );
-      }
-
-      if (meta) {
+      if (meta.length > 0) {
         opening.fromTo(
           meta,
           { autoAlpha: 0, y: 14 },
@@ -171,9 +156,10 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
             y: 0,
             duration: 0.7,
             ease: "power2.out",
+            stagger: 0.15,
             clearProps: "transform,opacity,visibility",
           },
-          1.35
+          1.6
         );
       }
 
@@ -254,7 +240,7 @@ export function useBoardMotion(rootRef: RefObject<HTMLElement | null>) {
             ease: "power2.inOut",
             clearProps: "clipPath",
           },
-          0.3
+          0.9
         );
       }
 

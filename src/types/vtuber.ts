@@ -702,9 +702,13 @@ export interface CafePage {
   title: string;
   titleLocal?: string;
   tagline: string;
+  /** One line under the wordmark on the overview board. */
+  lede?: string;
   status: ProjectStatus;
   statusLabel?: string;
   statusLabelLocal?: string;
+  /** Stamp on the case file while the dispatch (date / place) is hidden. */
+  statusLabelSealed?: string;
   /** Newspaper / Sherlock editorial frame */
   edition?: CafeEdition;
   heroImage: string;
