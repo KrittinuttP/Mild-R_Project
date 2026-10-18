@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 
 import { CountdownBoard } from "@/components/cafe/countdown/CountdownBoard";
 import { CountdownFooter } from "@/components/cafe/countdown/CountdownFooter";
 import { CountdownFrame } from "@/components/cafe/countdown/CountdownFrame";
 import { KeyholeMark } from "@/components/cafe/countdown/KeyholeMark";
 import { SERIF, THAI } from "@/components/cafe/board/pieces";
-import { COUNTDOWN_TARGETS } from "@/lib/cafe-countdown";
+import { CAFE_GATE_TIMES_HEADER, decodeGateTimes } from "@/lib/cafe-gate";
 import { cn } from "@/lib/utils";
 
 // CD1 · counts down to the first teaser. No logo, name, date or case number:
@@ -16,7 +17,9 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false, nocache: true },
 };
 
-export default function CafeCountdownPage() {
+export default async function CafeCountdownPage() {
+  // Switch times set in /cafe/settings, passed on by proxy.ts.
+  const { teaserAt } = decodeGateTimes((await headers()).get(CAFE_GATE_TIMES_HEADER));
   return (
     <CountdownFrame
       variant="center"
@@ -43,7 +46,7 @@ export default function CafeCountdownPage() {
           แฟ้มคดีใหม่ กำลังจะถูกเปิดเผย
         </p>
         <CountdownBoard
-          targetIso={COUNTDOWN_TARGETS.teaser}
+          targetMs={teaserAt}
           eyebrow="THE FILE OPENS IN"
           size="large"
           className="mt-[clamp(36px,4.4vw,64px)]"
@@ -51,7 +54,6 @@ export default function CafeCountdownPage() {
             label: "THE FILE IS OPEN",
             labelTh: "แฟ้มคดีถูกเปิดแล้ว",
             cta: "ดูทีเซอร์ · WATCH",
-            href: "/cafe/countdown/teaser",
           }}
         />
       </div>

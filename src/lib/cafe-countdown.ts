@@ -1,10 +1,18 @@
 /**
  * Countdown pages shown before the cafe opens:
  * `/cafe/countdown` (CD1) and `/cafe/countdown/teaser` (CD2).
+ * Which one a visitor gets is decided in `cafe-gate.ts`.
  * Spec and to-do: doc/cafe-countdown.md
  *
- * Both times carry the +07:00 offset, so every visitor counts to the same
- * instant whatever their device timezone is.
+ * Server-only data: import this from pages, layouts and `proxy.ts`, never
+ * from a client component, so the dates stay out of the browser bundles.
+ * Browser helpers live in `cafe-countdown-view.ts`.
+ */
+
+/**
+ * Default switch times. The team can move them in /cafe/settings (stored in
+ * `mild_r.cafe_gate`); these apply until then, or when the database cannot
+ * be read. Both carry +07:00 so every visitor counts to the same instant.
  */
 export const COUNTDOWN_TARGETS = {
   /** CD1 ends here and the first teaser (CD2) takes over. */
@@ -19,29 +27,20 @@ export const COUNTDOWN_TARGETS = {
  */
 export const FIRST_TEASER_YOUTUBE_ID = "";
 
-export type CountdownParts = {
-  days: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
-};
+export const COUNTDOWN_PATH = "/cafe/countdown";
+export const TEASER_PATH = "/cafe/countdown/teaser";
 
-/** Whole seconds left → days / hours / minutes / seconds. */
-export function splitRemaining(totalSeconds: number): CountdownParts {
-  const total = Math.max(0, Math.floor(totalSeconds));
-  return {
-    days: Math.floor(total / 86400),
-    hours: Math.floor((total % 86400) / 3600),
-    minutes: Math.floor((total % 3600) / 60),
-    seconds: total % 60,
-  };
-}
+/**
+ * Request header from `proxy.ts` to the cafe layout: `full` when the visitor
+ * may get the site chrome (splash, menu, footer), anything else for a bare
+ * page. The chrome is client components fed the whole cafe data, so it must
+ * stay out of the countdown pages and out of every page while the cafe is
+ * locked. The proxy always overwrites it.
+ */
+export const CAFE_CHROME_HEADER = "x-cafe-chrome";
 
-export function isYoutubeId(value: string): boolean {
-  return /^[\w-]{11}$/.test(value);
-}
-
-/** Privacy-enhanced embed; only requested after the visitor presses play. */
-export function youtubeEmbedSrc(id: string): string {
-  return `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1`;
+/** CD1, CD2 and anything below them. */
+export function isCountdownPath(pathname: string) {
+  const path = pathname.toLowerCase();
+  return path === COUNTDOWN_PATH || path.startsWith(`${COUNTDOWN_PATH}/`);
 }

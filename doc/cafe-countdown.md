@@ -1,9 +1,9 @@
 # 09 · Countdown Pages — Spec & To-Do
 
-> สถานะ (2026-10-16): **สร้างหน้า CD1/CD2 เสร็จแล้ว (B, C, D)** ตรวจในเบราว์เซอร์แล้วทั้งเดสก์ท็อปและ 390px · ยังไม่ได้เชื่อมเวลาสลับหน้า (E) · ยังไม่ได้ทำ QA อัตโนมัติ (F) · ยังไม่ commit
+> สถานะ (2026-10-18): **สร้างหน้า CD1/CD2 เสร็จแล้ว (B, C, D)** และ commit แล้ว (`253222d`) · **แก้ข้อมูลคาเฟ่หลุดในซอร์สแล้ว** (D2) · **ล็อกหน้าตามเวลา + ตั้งค่าในหน้า settings เสร็จแล้ว (E)** — รอรัน `npm run db:migrate:cafe-gate` · ยังไม่ได้ทำ QA อัตโนมัติ (F)
 > ไฟล์ใหม่: `src/lib/cafe-countdown.ts` (เป้าหมายเวลา + `FIRST_TEASER_YOUTUBE_ID`), `src/components/cafe/countdown/*` (`CountdownBoard`, `CountdownFrame`, `CountdownFooter`, `KeyholeMark`, `TeaserPlayer`), `src/components/cafe/CafeChromeGate.tsx` · แก้: `cafe/layout.tsx`, `CafeEntry.tsx`, `BackToTop.tsx`, `globals.css` (เพิ่ม `--color-cafe-drop`)
 > ดีไซน์ต้นแบบ: ไฟล์ดีไซน์หน้า **Countdown (Sample)** → บอร์ด `CD1Countdown`, `CD1Mobile`, `CD2Teaser`, `CD2Mobile`
-> โค้ด: Mac `~/Project/Mild-r` (branch `main`) · ยังไม่ commit
+> โค้ด: `~/Mild-R_Project` (branch `main`)
 
 ## 1. หน้าเปล่าที่สร้างไว้
 
@@ -39,7 +39,7 @@
 ## 3. To-Do
 
 ### A. ต้องตัดสินใจ / ต้องได้ข้อมูลก่อน
-- [ ] **ลิงก์ YouTube ทีเซอร์แรก** (ยังไม่มี ใส่ช่องว่างไว้) + ต้องมี fallback เมื่อลิงก์ว่าง (กรอบ "เร็ว ๆ นี้")
+- [ ] **ลิงก์ YouTube ทีเซอร์แรก** (ยังไม่มี ใส่ช่องว่างไว้) · fallback เมื่อลิงก์ว่าง (กรอบ "เร็ว ๆ นี้") ทำแล้ว
 - [ ] **ชื่อโดเมน/URL ของหน้า CD1**: ถ้าเป็น `…r-project.vercel.app` คนเห็นลิงก์จะเดาได้ทันทีว่าเป็นงาน Mild-R → ถ้าอยากปิดความลับก่อนวันที่ 23 ควรใช้โดเมน/path ที่เป็นกลาง (ดู `CAFE_HOST` ใน `src/lib/cafe-host.ts`)
 - [ ] ชื่อแฟนคลับในข้อความจริง: footer เว็บเดิมใช้ "Honeycomb" แต่คลังข้อมูลใช้ "ฮันนี่ (Honey)" → เช็กให้ตรงกัน
 - [ ] วันที่ **เปิดชื่อผู้จัดทำ** (ถอดแถบเซ็นเซอร์) — เสนอ 30 ต.ค. พร้อมเฉลยปริศนา
@@ -69,12 +69,31 @@
 - [x] ซ่อน `CafeHeader`/`CafeFooter` บนหน้า countdown (ไม่งั้นเมนูเผยโครงเว็บและ footer ซ้ำกับของหน้า) — ทางที่แก้น้อยสุดคือเช็ก pathname แบบเดียวกับ `CafeEntry`
 - [x] ตรวจ `cafe-host.ts` / `proxy.ts`: `/cafe/*` ผ่านเกตโดเมนอยู่แล้ว ไม่ต้องแก้
 
-### E. เชื่อมเวลา / สลับหน้าอัตโนมัติ (ยังไม่ทำ ตามที่สั่ง)
-- [ ] ตัดสินใจแหล่งความจริงของ "ตอนนี้อยู่ช่วงไหน": (1) เทียบเวลาฝั่ง server กับ 2 วันที่ข้างบน หรือ (2) ใช้ระบบ visibility ที่มี (`cafe-visibility-store`, สลับในหน้า `/cafe/settings`) เพื่อกดเปิดเองได้ · **แนะนำใช้เวลา server เป็นหลัก + ปุ่มบังคับในหน้า settings เผื่อฉุกเฉิน**
-- [ ] ที่สลับ: `src/proxy.ts` (rewrite/redirect `/cafe` → `/cafe/countdown` หรือ `/cafe/countdown/teaser` ตามช่วงเวลา) หรือเช็กใน `app/cafe/page.tsx` · หมายเหตุ `revalidate = 30` ของหน้า `/cafe` ต้องไม่ cache ผลสลับข้ามช่วงเวลา
-- [ ] ข้ามการสลับให้ `/cafe/secret`, `/cafe/settings`, `/cafe/lab` (เจ้าของยังเปิดดูเว็บจริงล่วงหน้าได้)
-- [ ] ทางทดสอบเวลา (เช่น query `?now=` ที่เปิดเฉพาะ dev / หลังรหัสผ่าน) เพื่อไม่ต้องรอถึงวันจริง
-- [ ] เมื่อ CD2 ครบเวลา: ไปหน้า `/cafe` ที่เปิดข้อมูลเต็ม และให้ `visibility` ตรงกับที่ต้องการเปิดวันที่ 30
+### D2. กันข้อมูลหลุดในซอร์ส (ทำแล้ว 2026-10-16)
+- [x] `proxy.ts` ส่ง header `x-cafe-chrome` (`CAFE_CHROME_HEADER`) → `cafe/layout.tsx` ไม่ render `CafeEntry`/`CafeHeader`/`CafeFooter` และไม่โหลดข้อมูลคาเฟ่ เมื่อเป็นหน้า countdown **หรือคาเฟ่ยังล็อก** (เช่นหน้า login ของ settings) · เดิมข้อมูลคาเฟ่ทั้งก้อนติดไปใน RSC payload แม้ซ่อนบนจอ
+- [x] ตัวนับรับ `targetMs` (ตัวเลข) แทนข้อความ ISO → "18:12" ไม่อยู่ในซอร์ส · ปุ่มตอนครบเวลาไป `/cafe` เสมอ (server เลือกหน้าเอง) · ปุ่มเป็น `<a>` (โหลดเต็มหน้า) เพราะ layout ไม่ render ใหม่ตอนเปลี่ยนหน้าแบบ client
+- [x] `/cafe/secret` เดิมส่งข้อมูลคาเฟ่ทั้งหมดไปกับหน้าแม้ยังไม่ใส่รหัส (ล็อกแค่ฝั่ง client) → ตอนนี้ส่งข้อมูลเฉพาะเมื่อ server เห็นคุกกี้ทีม · ใส่รหัสแล้วโหลดหน้าใหม่
+- [x] แยกตัวช่วยฝั่ง browser ไป `src/lib/cafe-countdown-view.ts` · `cafe-countdown.ts` เป็นข้อมูลฝั่ง server (ห้าม import จาก client component)
+- ผลตรวจ HTML ที่ localhost:3001: CD1 ไม่พบ Mild-R / Sherlock / 0612 / ZAYZHIK / 18:12 / path ของ CD2 / ข้อมูลภารกิจ-เมนู · CD2 เหลือเฉพาะโลโก้ + CASE No. 0612 ที่ตั้งใจแสดง
+- [ ] **ค้าง:** ไฟล์ JS ของ layout ยังติดมากับหน้า countdown (โค้ดคอมโพเนนต์ ไม่ใช่ข้อมูล) เช่นค่าเริ่มต้น `label="Mild-R: Sherlock Sweetie"` ของ `SherlockSweetieLogo` → แก้ถาวรด้วย route group: ย้ายหน้าคาเฟ่ไป `app/cafe/(site)/` ที่มี layout ของเมนู/footer แยก
+
+### E. ล็อกหน้าตามเวลา (ทำแล้ว 2026-10-18)
+กฎทั้งหมดอยู่ใน `src/lib/cafe-gate.ts` (ฟังก์ชันล้วน เทสได้) · `proxy.ts` เรียกใช้กับ `/cafe*` และ `/api/cafe*` เท่านั้น
+
+| ช่วง | `/cafe` แสดง (URL ไม่เปลี่ยน) | หน้าอื่นใน `/cafe/*` | hunt (`auto`) |
+|---|---|---|---|
+| ① ก่อน `teaser_at` | CD1 (rewrite) · `/cafe/countdown` เปิดตรงได้ | 307 → `/cafe` | ล็อก (หน้า → `/cafe`, API 404) |
+| ② `teaser_at` – `open_at` | CD2 (rewrite) · `/cafe/countdown/teaser` เปิดตรงได้ | 307 → `/cafe` (รวม CD1) | ล็อก |
+| ③ หลัง `open_at` | คาเฟ่จริง | เปิดทุกหน้า · CD1/CD2 → `/cafe` | เปิด |
+
+- **ลำดับการตัดสินช่วง:** env `CAFE_PHASE` (dev/preview เท่านั้น) → ค่า `phase` ใน DB (`auto` = ตามเวลา) → เวลา server เทียบ `teaser_at` / `open_at`
+- **ไม่ล็อกเลย:** `/cafe/settings`, `/cafe/secret`, `/cafe/lab`, `/api/cafe/settings*`, `/api/cafe/gate` · **คนที่ปลดล็อกด้วยรหัสทีม** (คุกกี้ `mild_r_site_admin`) เห็นคาเฟ่จริงทุกช่วง → ดูแบบผู้ชมให้ใช้หน้าต่างไม่ระบุตัวตน
+- **DB:** ตาราง `mild_r.cafe_gate` (key/value: `phase`, `hunt`, `teaser_at`, `open_at`) + view `public.mild_r_cafe_gate` · migration `20261018120000_cafe_gate.sql` → **รัน `npm run db:migrate:cafe-gate` หนึ่งครั้ง** · ถ้ายังไม่รัน/DB ล่ม ใช้เวลาในโค้ด (`COUNTDOWN_TARGETS`) แทน ไม่เปิดก่อนเวลา
+- **Performance:** proxy อ่าน DB ด้วย REST call เดียว timeout 1.5 วินาที จำไว้ 30 วินาทีต่อ instance (อ่านพลาดจำ 5 วินาที แล้วใช้ค่าดีล่าสุด) · หน้า CD รับเวลาผ่าน header `x-cafe-gate-times` ไม่อ่าน DB ซ้ำ · หน้าเว็บหลักนอก `/cafe` ไม่แตะ DB
+- **หน้า settings:** การ์ด Page lock แสดงเวลา server, ช่วงที่แสดงอยู่ + ที่มา, นับถอยหลังถึงการสลับถัดไป · ตั้งเวลา 2 จุด (เวลาไทย GMT+7), โหมด `/cafe` (`auto`/บังคับ CD1/บังคับ CD2/เปิด), โหมด hunt (`auto`/เปิด/ล็อก) · ค่าที่ทำให้เปิดก่อนเวลาต้องกดยืนยัน 2 ครั้ง · API `PUT /api/cafe/gate` ตรวจรหัสทีม + เช็ก `teaser_at < open_at`
+- **env ทดสอบ** (อ่านเฉพาะ `next dev` และ `VERCEL_ENV=preview`, production ไม่สนใจ): `CAFE_GATE_BYPASS=1` ไม่สนการล็อก · `CAFE_PHASE=countdown|teaser|open` บังคับช่วง
+- เทสกฎ 62 กรณี (เวลา/ขอบเวลา, DB override, env, hunt, ทุก path × ทุกช่วง × ทีม/bypass) ผ่าน · ตรวจบน 3001: `/cafe` = CD1, หน้าอื่น 307, hunt API 404, ซอร์ส `/cafe` ไม่มี Mild-R/Sherlock/0612
+- [ ] หลังรัน migration: เข้า settings ตรวจการ์ด Page lock + ลองบันทึก · ลองหน้าต่างไม่ระบุตัวตน
 
 ### F. QA
 - [ ] Playwright (POM) + `page.clock` ตรึงเวลา: ไกลเป้าหมาย / เหลือ 1 วินาที / ครบเวลา / เลยเวลาแล้ว / โหลดหน้าแล้ว tick ทีละวินาที
@@ -82,7 +101,7 @@
 - [ ] viewport 360 / 390 / 768 / 1280 / 1920 · ไม่มี horizontal scroll · ตัวนับ 4 ช่องไม่ตกบรรทัดบน 360px
 - [ ] contrast (cream/ground, gold/ground), `prefers-reduced-motion`, tab/keyboard ถึงปุ่มและเล่นวิดีโอได้, screen reader อ่านตัวนับไม่รัว
 - [ ] `npm run lint` (รวม `check-route-case.mjs`) และ `npm run build`
-- [ ] ตรวจว่า CD1 ไม่หลุดคำว่า Mild-R / Sherlock Sweetie / 0612 ทั้งใน HTML, metadata, OG, `<title>` และ alt
+- [ ] ตรวจว่า CD1 ไม่หลุดคำว่า Mild-R / Sherlock Sweetie / 0612 ทั้งใน HTML, metadata, OG, `<title>` และ alt — HTML/metadata/title ผ่านแล้ว (dev) · เหลือไฟล์ JS (ดู D2) และตรวจซ้ำบน build จริง
 
 ### G. วันเปิด (30 ต.ค.) — เช็กลิสต์สั้น
 - [ ] สลับเป็น `/cafe` จริง · ใส่ทีเซอร์จริง

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, CheckCircle2, Eye, EyeOff, FileLock2, Home, Lock, Settings2, Unlock } from "lucide-react";
 
 import { GOLD_BUTTON, KeyholePlate } from "@/components/cafe/board/brass";
+import { CafeGatePanel } from "@/components/cafe/CafeGatePanel";
 import { LABEL, SERIF, THAI } from "@/components/cafe/board/pieces";
 import {
   CAFE_CONTENT_SECTION_KEYS,
@@ -286,6 +287,9 @@ export function CafeSettingsClient() {
           ล็อกเซสชัน
         </button>
       </div>
+
+      {/* Page lock by time (CD1 → CD2 → cafe) */}
+      <CafeGatePanel />
 
       {/* Master navigation toggle */}
       <div className={cn(PAPER, "mt-10 px-5 pt-7 pb-5 sm:px-6")}>

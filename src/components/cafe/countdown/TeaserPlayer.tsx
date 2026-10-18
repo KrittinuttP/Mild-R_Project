@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { SERIF, THAI } from "@/components/cafe/board/pieces";
 import { KeyholeMark } from "@/components/cafe/countdown/KeyholeMark";
-import { isYoutubeId, youtubeEmbedSrc } from "@/lib/cafe-countdown";
+import { isYoutubeId, youtubeEmbedSrc } from "@/lib/cafe-countdown-view";
 import { cn } from "@/lib/utils";
 
 const CORNER = cn(

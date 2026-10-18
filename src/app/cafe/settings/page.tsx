@@ -4,6 +4,8 @@ import { CafeSettingsClient } from "@/components/cafe/CafeSettingsClient";
 
 export const metadata: Metadata = {
   title: "Cafe Settings",
+  // Own description so the site-wide one (which names the event) is not used.
+  description: "Staff only.",
   robots: { index: false, follow: false, nocache: true },
 };
 

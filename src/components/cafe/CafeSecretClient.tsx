@@ -15,7 +15,8 @@ const SERIF = "font-[family-name:var(--font-cafe-serif)]";
 const DISPLAY = "font-[family-name:var(--font-display)]";
 
 type CafeSecretClientProps = {
-  cafe: CafePage;
+  /** Null until the server has seen the team cookie (see the page). */
+  cafe: CafePage | null;
   caseCover: CafeCaseFileCover | null;
 };
 
@@ -33,7 +34,8 @@ export function CafeSecretClient({ cafe, caseCover }: CafeSecretClientProps) {
       try {
         const res = await fetch("/api/cafe/settings/unlock");
         const data = (await res.json()) as { unlocked?: boolean };
-        if (!cancelled && data.unlocked) setUnlocked(true);
+        // Only open when the server already sent the data with this page.
+        if (!cancelled && data.unlocked && cafe) setUnlocked(true);
       } catch {
         /* ignore */
       } finally {
@@ -43,7 +45,7 @@ export function CafeSecretClient({ cafe, caseCover }: CafeSecretClientProps) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [cafe]);
 
   async function unlock(event: FormEvent) {
     event.preventDefault();
@@ -60,11 +62,14 @@ export function CafeSecretClient({ cafe, caseCover }: CafeSecretClientProps) {
           error?: string;
         } | null;
         setError(data?.error ?? "ปลดล็อกไม่สำเร็จ");
+        setSubmitting(false);
         return;
       }
       setPassword("");
-      setUnlocked(true);
-    } finally {
+      // Reload so the server sends the cafe data now that the cookie is set.
+      window.location.reload();
+    } catch {
+      setError("ปลดล็อกไม่สำเร็จ");
       setSubmitting(false);
     }
   }
@@ -149,6 +154,8 @@ export function CafeSecretClient({ cafe, caseCover }: CafeSecretClientProps) {
       </div>
     );
   }
+
+  if (!cafe) return null;
 
   return (
     <div>

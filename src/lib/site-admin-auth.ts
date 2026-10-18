@@ -73,7 +73,11 @@ export function verifySiteAdminPassword(input: string) {
 
 export async function isSiteAdminUnlocked() {
   const jar = await cookies();
-  const value = jar.get(SITE_ADMIN_COOKIE)?.value;
+  return isSiteAdminToken(jar.get(SITE_ADMIN_COOKIE)?.value);
+}
+
+/** Same check from a raw cookie value, for `proxy.ts` (no `cookies()` there). */
+export function isSiteAdminToken(value: string | undefined) {
   return value ? isValidToken(value) : false;
 }
 

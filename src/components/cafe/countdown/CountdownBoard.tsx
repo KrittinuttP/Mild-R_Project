@@ -1,33 +1,37 @@
 "use client";
 
-import Link from "next/link";
-
 import { GOLD_BUTTON } from "@/components/cafe/board/brass";
 import { SERIF, THAI } from "@/components/cafe/board/pieces";
 import { useNow } from "@/hooks/useNow";
-import { splitRemaining, type CountdownParts } from "@/lib/cafe-countdown";
+import { splitRemaining, type CountdownParts } from "@/lib/cafe-countdown-view";
 import { cn } from "@/lib/utils";
 
 type Phase = "pending" | "counting" | "reached";
 
 /**
- * Time left to `targetIso`, from the visitor's clock but against a fixed
+ * Time left to `targetMs`, from the visitor's clock but against a fixed
  * instant. `pending` until the page is mounted, so server and client markup
  * match.
  */
-function useCountdown(targetIso: string): {
+function useCountdown(targetMs: number): {
   phase: Phase;
   parts: CountdownParts | null;
 } {
   const now = useNow(1000);
-  const targetMs = Date.parse(targetIso);
-  if (now === null || Number.isNaN(targetMs)) {
+  if (now === null || !Number.isFinite(targetMs)) {
     return { phase: "pending", parts: null };
   }
   const seconds = Math.floor((targetMs - now) / 1000);
   if (seconds <= 0) return { phase: "reached", parts: null };
   return { phase: "counting", parts: splitRemaining(seconds) };
 }
+
+/**
+ * Where the button goes once the time is up: always `/cafe`, and the server
+ * decides which page that is now (lib/cafe-gate.ts). So CD1's source never
+ * names the next page.
+ */
+const NEXT_PAGE = "/cafe";
 
 const UNITS = [
   { key: "days", en: "DAYS", th: "วัน" },
@@ -51,8 +55,12 @@ const SIZES = {
 } as const;
 
 type CountdownBoardProps = {
-  /** ISO time with offset, e.g. `2026-10-23T18:12:00+07:00`. */
-  targetIso: string;
+  /**
+   * Epoch ms to count to (from the page lock, see `lib/cafe-gate`).
+   * A number rather than ISO text, so the clock time is not spelled out in
+   * the page source.
+   */
+  targetMs: number;
   /** Line above the timer, with a rule on each side. */
   eyebrow: string;
   eyebrowTh?: string;
@@ -60,7 +68,7 @@ type CountdownBoardProps = {
   dateLine?: string;
   size: keyof typeof SIZES;
   /** What replaces the timer when the time is up. */
-  open: { label: string; labelTh: string; cta: string; href: string };
+  open: { label: string; labelTh: string; cta: string };
   className?: string;
 };
 
@@ -69,7 +77,7 @@ function pad(value: number) {
 }
 
 export function CountdownBoard({
-  targetIso,
+  targetMs,
   eyebrow,
   eyebrowTh,
   dateLine,
@@ -77,7 +85,7 @@ export function CountdownBoard({
   open,
   className,
 }: CountdownBoardProps) {
-  const { phase, parts } = useCountdown(targetIso);
+  const { phase, parts } = useCountdown(targetMs);
   const s = SIZES[size];
 
   if (phase === "reached") {
@@ -99,8 +107,11 @@ export function CountdownBoard({
         >
           {open.labelTh}
         </p>
-        <Link
-          href={open.href}
+        {/* A full page load, not a client-side move: the cafe layout only
+            decides on the server whether to show the site menu, so the next
+            page needs a fresh request to get it right. */}
+        <a
+          href={NEXT_PAGE}
           className={cn(
             GOLD_BUTTON,
             SERIF,
@@ -108,7 +119,7 @@ export function CountdownBoard({
           )}
         >
           {open.cta}
-        </Link>
+        </a>
       </div>
     );
   }
@@ -194,17 +205,17 @@ export function CountdownBoard({
 }
 
 type CountdownStatusTagProps = {
-  targetIso: string;
+  targetMs: number;
   sealed: string;
   open: string;
 };
 
 /** Corner tag that flips from SEALED to OPEN when the time is up. */
 export function CountdownStatusTag({
-  targetIso,
+  targetMs,
   sealed,
   open,
 }: CountdownStatusTagProps) {
-  const { phase } = useCountdown(targetIso);
+  const { phase } = useCountdown(targetMs);
   return <>{phase === "reached" ? open : sealed}</>;
 }

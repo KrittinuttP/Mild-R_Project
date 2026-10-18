@@ -15,6 +15,7 @@ import { CafeHeader } from "@/components/cafe/CafeHeader";
 import { BackToTop } from "@/components/layout/BackToTop";
 import { MediaProtection } from "@/components/media/MediaProtection";
 import { mildRData } from "@/data/vtuber-data";
+import { CAFE_CHROME_HEADER } from "@/lib/cafe-countdown";
 import { isCafePromotionHost } from "@/lib/cafe-host";
 import { cafeForVisibility } from "@/lib/cafe-visibility";
 import { loadCafeVisibility } from "@/lib/cafe-visibility-store";
@@ -60,19 +61,32 @@ export const viewport: Viewport = {
   themeColor: "#0f2a24",
 };
 
+const ROOT_CLASS = `${libreBaskerville.variable} ${libreBaskervilleItalic.variable} ${shipporiMincho.variable} ${notoSerifThai.variable} ${courierPrime.variable} flex min-h-full flex-col bg-cafe-ground text-cafe-text`;
+
 export default async function CafeLayout({ children }: { children: ReactNode }) {
+  const requestHeaders = await headers();
+
+  // Bare on the countdown pages (they bring their own frame) and on every
+  // page while the cafe is locked (e.g. the settings login): the splash,
+  // menu and footer are client components that would carry the whole cafe
+  // data into the page source even while hidden. Decided in proxy.ts.
+  if (requestHeaders.get(CAFE_CHROME_HEADER) !== "full") {
+    return (
+      <div data-cafe-root className={ROOT_CLASS}>
+        <MediaProtection />
+        <main className="flex-1">{children}</main>
+      </div>
+    );
+  }
+
   const visibility = await loadCafeVisibility();
   const cafe = cafeForVisibility(mildRData.cafe, visibility);
-  const requestHeaders = await headers();
   const onCafeDomain = isCafePromotionHost(
     requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host")
   );
 
   return (
-    <div
-      data-cafe-root
-      className={`${libreBaskerville.variable} ${libreBaskervilleItalic.variable} ${shipporiMincho.variable} ${notoSerifThai.variable} ${courierPrime.variable} flex min-h-full flex-col bg-cafe-ground text-cafe-text`}
-    >
+    <div data-cafe-root className={ROOT_CLASS}>
       <MediaProtection />
       <CafeEntry cafe={cafe} />
       <CafeChromeGate>

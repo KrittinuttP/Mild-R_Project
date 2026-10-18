@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 
 import { SERIF, THAI } from "@/components/cafe/board/pieces";
 import {
@@ -9,10 +10,12 @@ import { CountdownFooter } from "@/components/cafe/countdown/CountdownFooter";
 import { CountdownFrame } from "@/components/cafe/countdown/CountdownFrame";
 import { TeaserPlayer } from "@/components/cafe/countdown/TeaserPlayer";
 import { SherlockSweetieLogo } from "@/components/cafe/SherlockSweetieLogo";
+import { FIRST_TEASER_YOUTUBE_ID } from "@/lib/cafe-countdown";
 import {
-  COUNTDOWN_TARGETS,
-  FIRST_TEASER_YOUTUBE_ID,
-} from "@/lib/cafe-countdown";
+  bangkokDateLine,
+  CAFE_GATE_TIMES_HEADER,
+  decodeGateTimes,
+} from "@/lib/cafe-gate";
 import { cn } from "@/lib/utils";
 
 // CD2 · logo + first teaser, counts down to the cafe opening.
@@ -23,7 +26,9 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false, nocache: true },
 };
 
-export default function CafeCountdownTeaserPage() {
+export default async function CafeCountdownTeaserPage() {
+  // Switch times set in /cafe/settings, passed on by proxy.ts.
+  const { openAt } = decodeGateTimes((await headers()).get(CAFE_GATE_TIMES_HEADER));
   return (
     <CountdownFrame
       variant="top"
@@ -31,7 +36,7 @@ export default function CafeCountdownTeaserPage() {
       leftTag="CASE No. 0612"
       rightTag={
         <CountdownStatusTag
-          targetIso={COUNTDOWN_TARGETS.open}
+          targetMs={openAt}
           sealed="SEALED"
           open="OPEN"
         />
@@ -44,17 +49,16 @@ export default function CafeCountdownTeaserPage() {
           className="text-[length:clamp(40px,7vw,104px)]"
         />
         <CountdownBoard
-          targetIso={COUNTDOWN_TARGETS.open}
+          targetMs={openAt}
           eyebrow="CASE FILE OPENS IN"
           eyebrowTh="แฟ้มคดีจะเปิดใน"
-          dateLine="30 · 10 · 2026"
+          dateLine={bangkokDateLine(openAt)}
           size="regular"
           className="mt-[clamp(40px,4.4vw,64px)]"
           open={{
             label: "CASE FILE · OPEN",
             labelTh: "แฟ้มคดีเปิดแล้ว",
             cta: "เข้าสู่คาเฟ่ · ENTER",
-            href: "/cafe",
           }}
         />
         <div
