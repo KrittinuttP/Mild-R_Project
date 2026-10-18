@@ -87,6 +87,14 @@
 | ③ หลัง `open_at` | คาเฟ่จริง | เปิดทุกหน้า · CD1/CD2 → `/cafe` | เปิด |
 
 - **บนโดเมนคาเฟ่ (`CAFE_HOST`, เช่น `cafe.mildhoneycomb.com`):** หน้าแรก `/` แสดงหน้าคาเฟ่ตามช่วง (rewrite ไม่เปลี่ยน URL) · หน้าที่ถูกล็อกและหน้าเว็บหลักเด้งกลับ `/` · `/cafe` ยังเปิดได้เหมือนเดิม · `CafeHeader` นับ `/` เป็นหน้าแรกคาเฟ่ (ลิงก์ `#section` เลื่อนในหน้า)
+- **โดเมนแยกตามงาน** (`src/lib/cafe-host.ts`, env ใน `.env.example`): ทุกโดเมนแสดงหน้าของตัวเองที่ `/` · หน้าอื่นเด้ง `/` · API อื่น 404
+  | env | โดเมน | `/` แสดง | เปิดได้เพิ่ม |
+  |---|---|---|---|
+  | `CAFE_HOST` | `cafe.mildhoneycomb.com` | `/cafe` (ตามล็อกเวลา) | `/cafe/*`, `/api/cafe/*` |
+  | `FANART_HOST` | `fanart.mildhoneycomb.com` | `/upload/fanart` | `/api/fanart/submit` |
+  | `HBD_HOST` | `hbd.mildhoneycomb.com` | `/upload/hbd` | `/api/hbd/submit` |
+  | `ADMIN_HOST` | `admin.mildhoneycomb.com` | `/admin` | `/admin/*`, `/live/ops*`, `/cafe/settings`, `/cafe/secret`, `/upload/*`, `/api/*` |
+  คุกกี้ทีมแยกตามโดเมน → ใส่รหัสใหม่ในแต่ละโดเมนที่ใช้
 - **ลำดับการตัดสินช่วง:** env `CAFE_PHASE` (dev/preview เท่านั้น) → ค่า `phase` ใน DB (`auto` = ตามเวลา) → เวลา server เทียบ `teaser_at` / `open_at`
 - **ไม่ล็อกเลย:** `/cafe/settings`, `/cafe/secret`, `/cafe/lab`, `/api/cafe/settings*`, `/api/cafe/gate` · **คนที่ปลดล็อกด้วยรหัสทีม** (คุกกี้ `mild_r_site_admin`) เห็นคาเฟ่จริงทุกช่วง → ดูแบบผู้ชมให้ใช้หน้าต่างไม่ระบุตัวตน
 - **DB:** ตาราง `mild_r.cafe_gate` (key/value: `phase`, `hunt`, `teaser_at`, `open_at`) + view `public.mild_r_cafe_gate` · migration `20261018120000_cafe_gate.sql` → **รัน `npm run db:migrate:cafe-gate` หนึ่งครั้ง** · ถ้ายังไม่รัน/DB ล่ม ใช้เวลาในโค้ด (`COUNTDOWN_TARGETS`) แทน ไม่เปิดก่อนเวลา

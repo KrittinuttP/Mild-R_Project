@@ -113,8 +113,8 @@ export function AdminFanartClient() {
           </h1>
           <p className="mt-2 text-sm text-[#f7d7de]/75">
             รายการจาก{" "}
-            <Link href="/fanart/upload" className="text-[#f3b8c4] underline">
-              /fanart/upload
+            <Link href="/upload/fanart" className="text-[#f3b8c4] underline">
+              /upload/fanart
             </Link>
           </p>
         </div>

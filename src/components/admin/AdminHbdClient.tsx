@@ -228,7 +228,7 @@ export function AdminHbdClient() {
           </div>
 
           <Link
-            href="/hbd/2026/upload"
+            href="/upload/hbd"
             target="_blank"
             className={cn(
               buttonVariants({ variant: "outline", size: "sm" }),

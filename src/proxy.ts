@@ -10,24 +10,26 @@ import {
   resolveGate,
 } from "@/lib/cafe-gate";
 import { loadGate } from "@/lib/cafe-gate-store";
-import { isCafePromotionHost, isCafePublicPath } from "@/lib/cafe-host";
+import {
+  isPathAllowedOnSite,
+  SITE_HOME,
+  siteForHost,
+  type HostSite,
+} from "@/lib/cafe-host";
 import { isSiteAdminToken, SITE_ADMIN_COOKIE } from "@/lib/site-admin-auth";
 
-function isOnCafeHost(request: NextRequest) {
-  return isCafePromotionHost(
-    request.headers.get("x-forwarded-host") ?? request.headers.get("host")
-  );
+function siteOf(request: NextRequest) {
+  return siteForHost(request.headers.get("x-forwarded-host") ?? request.headers.get("host"));
 }
 
 /**
- * On the cafe promotion domain, only cafe pages and cafe APIs are reachable.
- * Everything else goes back to the cafe home (`/`, which shows /cafe), so the
- * main site stays unpublished until its own domain is attached (and
- * CAFE_HOST does not include that domain).
+ * On a single-purpose domain (lib/cafe-host.ts) only that part of the site is
+ * reachable. Other pages go back to the domain's home `/`, other APIs 404, so
+ * the main site stays unpublished until its own domain is attached.
  */
-function cafeGate(request: NextRequest) {
+function siteGate(request: NextRequest, site: HostSite) {
   const { pathname } = request.nextUrl;
-  if (isCafePublicPath(pathname)) return null;
+  if (isPathAllowedOnSite(site, pathname)) return null;
 
   if (pathname.toLowerCase().startsWith("/api/")) {
     return NextResponse.json({ error: "not found" }, { status: 404 });
@@ -92,13 +94,20 @@ async function cafePageLock(request: NextRequest, pathname: string, onCafeHost: 
 /** All page routes are lowercase; redirect mixed-case URLs (e.g. /HBD/2026 → /hbd/2026). */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const onCafeHost = isOnCafeHost(request);
+  const site = siteOf(request);
+  const onCafeHost = site === "cafe";
 
-  // cafe.example.com/ shows the cafe (whichever page the lock picks) at `/`.
-  if (onCafeHost && pathname === "/") return cafePageLock(request, "/cafe", true);
+  if (site && pathname === "/") {
+    // cafe.example.com/ shows the cafe (whichever page the lock picks) at `/`.
+    if (onCafeHost) return cafePageLock(request, SITE_HOME.cafe, true);
+    // fanart. / hbd. / admin. show their page at `/`.
+    const url = request.nextUrl.clone();
+    url.pathname = SITE_HOME[site];
+    return NextResponse.rewrite(url);
+  }
 
-  if (onCafeHost) {
-    const gated = cafeGate(request);
+  if (site) {
+    const gated = siteGate(request, site);
     if (gated) return gated;
   }
 
