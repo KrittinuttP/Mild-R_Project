@@ -12,8 +12,9 @@ import { cn } from "@/lib/utils";
 // CD1 · counts down to the first teaser. No logo, name, date or case number:
 // nothing here may give the cafe away. Spec and to-do: doc/cafe-countdown.md
 export const metadata: Metadata = {
-  title: "A Case Is Brewing",
-  description: "A new case file is about to be revealed.",
+  // Tab title stays vaguer than the page itself: no "case", no theme yet.
+  title: "Something Is Brewing",
+  description: "Something new is on its way.",
   robots: { index: false, follow: false, nocache: true },
 };
 
@@ -24,7 +25,7 @@ export default async function CafeCountdownPage() {
     <CountdownFrame
       variant="center"
       ghost="lens"
-      leftTag="CASE No. ????"
+      leftTag="No. ????"
       rightTag="SEALED"
     >
       <div className="relative flex w-full max-w-[1080px] flex-col items-center text-center">
@@ -35,7 +36,7 @@ export default async function CafeCountdownPage() {
             "mt-[clamp(32px,3.6vw,52px)] text-[length:clamp(20px,3.2vw,46px)] leading-[1.25] font-bold tracking-[clamp(3px,0.9vw,13px)] text-cafe-cream"
           )}
         >
-          A CASE IS BREWING.
+          SOMETHING IS BREWING.
         </h1>
         <p
           className={cn(
@@ -43,7 +44,7 @@ export default async function CafeCountdownPage() {
             "mt-2.5 text-[length:clamp(16px,1.8vw,24px)] leading-[1.6] font-medium text-cafe-cream/85"
           )}
         >
-          แฟ้มคดีใหม่ กำลังจะถูกเปิดเผย
+          บางอย่างกำลังจะถูกเปิดเผย
         </p>
         <CountdownBoard
           targetMs={teaserAt}
@@ -52,7 +53,7 @@ export default async function CafeCountdownPage() {
           className="mt-[clamp(36px,4.4vw,64px)]"
           open={{
             label: "THE FILE IS OPEN",
-            labelTh: "แฟ้มคดีถูกเปิดแล้ว",
+            labelTh: "แฟ้มถูกเปิดแล้ว",
             cta: "ดูทีเซอร์ · WATCH",
           }}
         />

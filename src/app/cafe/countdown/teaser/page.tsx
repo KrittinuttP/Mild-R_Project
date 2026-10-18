@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 // CD2 · logo + first teaser, counts down to the cafe opening.
 // Spec and to-do: doc/cafe-countdown.md
 export const metadata: Metadata = {
-  title: "Mild-R: Sherlock Sweetie | Birthday Case File",
+  title: "Mild-R: Sherlock Sweetie",
   description: "The case file opens soon.",
   robots: { index: false, follow: false, nocache: true },
 };

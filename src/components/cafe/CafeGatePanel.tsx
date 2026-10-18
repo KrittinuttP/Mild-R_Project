@@ -17,7 +17,7 @@ const PAPER = "relative bg-cafe-cream text-cafe-ink shadow-[0_18px_34px_rgba(0,0
 const BKK_OFFSET_MS = 7 * 60 * 60 * 1000;
 
 const PHASE_NAME: Record<CafePhase, string> = {
-  countdown: "CD1 · A Case Is Brewing",
+  countdown: "CD1 · Something Is Brewing",
   teaser: "CD2 · โลโก้ + ทีเซอร์แรก",
   open: "คาเฟ่จริง · เปิดแล้ว",
 };
