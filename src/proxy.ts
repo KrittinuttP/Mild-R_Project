@@ -13,15 +13,19 @@ import { loadGate } from "@/lib/cafe-gate-store";
 import { isCafePromotionHost, isCafePublicPath } from "@/lib/cafe-host";
 import { isSiteAdminToken, SITE_ADMIN_COOKIE } from "@/lib/site-admin-auth";
 
+function isOnCafeHost(request: NextRequest) {
+  return isCafePromotionHost(
+    request.headers.get("x-forwarded-host") ?? request.headers.get("host")
+  );
+}
+
 /**
  * On the cafe promotion domain, only cafe pages and cafe APIs are reachable.
- * Everything else goes back to /cafe, so the main site stays unpublished
- * until its own domain is attached (and CAFE_HOST does not include that domain).
+ * Everything else goes back to the cafe home (`/`, which shows /cafe), so the
+ * main site stays unpublished until its own domain is attached (and
+ * CAFE_HOST does not include that domain).
  */
 function cafeGate(request: NextRequest) {
-  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
-  if (!isCafePromotionHost(host)) return null;
-
   const { pathname } = request.nextUrl;
   if (isCafePublicPath(pathname)) return null;
 
@@ -30,7 +34,7 @@ function cafeGate(request: NextRequest) {
   }
 
   const url = request.nextUrl.clone();
-  url.pathname = "/cafe";
+  url.pathname = "/";
   url.search = "";
   return NextResponse.redirect(url, 307);
 }
@@ -44,9 +48,11 @@ function noStore<T extends NextResponse>(response: T) {
 /**
  * Cafe page lock by time / team override / test env (rules: lib/cafe-gate.ts).
  * Only /cafe and /api/cafe pay for it: one cached read, refreshed every 30 s.
+ *
+ * `pathname` is the cafe path to judge; on the cafe domain the bare `/` is
+ * judged as `/cafe` and served under `/` so the address bar stays clean.
  */
-async function cafePageLock(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+async function cafePageLock(request: NextRequest, pathname: string, onCafeHost: boolean) {
   const { config } = await loadGate();
   const state = resolveGate(config, readGateEnv(process.env), Date.now());
   const isTeam = isSiteAdminToken(request.cookies.get(SITE_ADMIN_COOKIE)?.value);
@@ -57,7 +63,8 @@ async function cafePageLock(request: NextRequest) {
   }
   if (decision.kind === "redirect") {
     const url = request.nextUrl.clone();
-    url.pathname = decision.to;
+    // On the cafe domain the cafe home is `/`.
+    url.pathname = onCafeHost && decision.to === "/cafe" ? "/" : decision.to;
     url.search = "";
     return noStore(NextResponse.redirect(url, 307));
   }
@@ -73,20 +80,28 @@ async function cafePageLock(request: NextRequest) {
   requestHeaders.set(CAFE_GATE_TIMES_HEADER, encodeGateTimes(config));
   const init = { request: { headers: requestHeaders } };
 
-  if (decision.kind === "rewrite") {
+  if (rendered !== request.nextUrl.pathname) {
     const url = request.nextUrl.clone();
-    url.pathname = decision.to;
-    return noStore(NextResponse.rewrite(url, init));
+    url.pathname = rendered;
+    const response = NextResponse.rewrite(url, init);
+    return decision.kind === "rewrite" ? noStore(response) : response;
   }
   return NextResponse.next(init);
 }
 
 /** All page routes are lowercase; redirect mixed-case URLs (e.g. /HBD/2026 → /hbd/2026). */
 export async function proxy(request: NextRequest) {
-  const gated = cafeGate(request);
-  if (gated) return gated;
-
   const { pathname } = request.nextUrl;
+  const onCafeHost = isOnCafeHost(request);
+
+  // cafe.example.com/ shows the cafe (whichever page the lock picks) at `/`.
+  if (onCafeHost && pathname === "/") return cafePageLock(request, "/cafe", true);
+
+  if (onCafeHost) {
+    const gated = cafeGate(request);
+    if (gated) return gated;
+  }
+
   const isApi = pathname.startsWith("/api/");
 
   if (!isApi && pathname !== pathname.toLowerCase()) {
@@ -95,7 +110,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
-  if (isGatedPath(pathname)) return cafePageLock(request);
+  if (isGatedPath(pathname)) return cafePageLock(request, pathname, onCafeHost);
 }
 
 export const config = {

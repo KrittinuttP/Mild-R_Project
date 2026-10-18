@@ -37,7 +37,8 @@ export function CafeHeader({
   showMainSiteLink = true,
 }: CafeHeaderProps) {
   const pathname = usePathname();
-  const onCafeRoot = pathname === "/cafe" || pathname === "/cafe/";
+  // `/` too: on the cafe domain the home is served at `/` (see proxy.ts).
+  const onCafeRoot = pathname === "/" || pathname === "/cafe" || pathname === "/cafe/";
   const onEventPage =
     pathname === "/cafe/event" || pathname === "/cafe/event/";
   const onSecretPreview =

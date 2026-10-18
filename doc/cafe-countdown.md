@@ -86,6 +86,7 @@
 | ② `teaser_at` – `open_at` | CD2 (rewrite) · `/cafe/countdown/teaser` เปิดตรงได้ | 307 → `/cafe` (รวม CD1) | ล็อก |
 | ③ หลัง `open_at` | คาเฟ่จริง | เปิดทุกหน้า · CD1/CD2 → `/cafe` | เปิด |
 
+- **บนโดเมนคาเฟ่ (`CAFE_HOST`, เช่น `cafe.mildhoneycomb.com`):** หน้าแรก `/` แสดงหน้าคาเฟ่ตามช่วง (rewrite ไม่เปลี่ยน URL) · หน้าที่ถูกล็อกและหน้าเว็บหลักเด้งกลับ `/` · `/cafe` ยังเปิดได้เหมือนเดิม · `CafeHeader` นับ `/` เป็นหน้าแรกคาเฟ่ (ลิงก์ `#section` เลื่อนในหน้า)
 - **ลำดับการตัดสินช่วง:** env `CAFE_PHASE` (dev/preview เท่านั้น) → ค่า `phase` ใน DB (`auto` = ตามเวลา) → เวลา server เทียบ `teaser_at` / `open_at`
 - **ไม่ล็อกเลย:** `/cafe/settings`, `/cafe/secret`, `/cafe/lab`, `/api/cafe/settings*`, `/api/cafe/gate` · **คนที่ปลดล็อกด้วยรหัสทีม** (คุกกี้ `mild_r_site_admin`) เห็นคาเฟ่จริงทุกช่วง → ดูแบบผู้ชมให้ใช้หน้าต่างไม่ระบุตัวตน
 - **DB:** ตาราง `mild_r.cafe_gate` (key/value: `phase`, `hunt`, `teaser_at`, `open_at`) + view `public.mild_r_cafe_gate` · migration `20261018120000_cafe_gate.sql` → **รัน `npm run db:migrate:cafe-gate` หนึ่งครั้ง** · ถ้ายังไม่รัน/DB ล่ม ใช้เวลาในโค้ด (`COUNTDOWN_TARGETS`) แทน ไม่เปิดก่อนเวลา
