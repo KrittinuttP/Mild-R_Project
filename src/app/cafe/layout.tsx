@@ -97,7 +97,7 @@ export default async function CafeLayout({ children }: { children: ReactNode }) 
       </CafeChromeGate>
       <main className="flex-1">{children}</main>
       <CafeChromeGate>
-        <CafeFooter cafe={cafe} />
+        <CafeFooter />
       </CafeChromeGate>
       <BackToTop />
     </div>

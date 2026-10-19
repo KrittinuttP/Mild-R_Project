@@ -490,6 +490,8 @@ export interface CafeVenueMenuItem {
   imageAlt?: string;
   caption?: string;
   captionLocal?: string;
+  /** Book tab this page belongs to (e.g. "เครื่องดื่ม"). Pages of one group sit next to each other. */
+  group?: string;
 }
 
 /** @deprecated Use CafeVenueMenuItem */
@@ -502,6 +504,10 @@ export interface CafeGoodsItem {
   description?: string;
   image?: string;
   imageAlt?: string;
+  /** "giveaway" = comes with a provision set (see `CafeSetGift.goodsId`). Default "sale". */
+  kind?: "sale" | "giveaway";
+  /** Sale price, shown only while `CafeGoodsSection.saleListed` is on. */
+  priceLabel?: string;
 }
 
 export interface CafeScheduleItem {
@@ -608,18 +614,28 @@ export interface CafeSignatureMenuSection extends CafeSectionHead {
   items: CafeMenuItem[];
 }
 
+/** One giveaway in a provision set. `goodsId` links it to its card in the clue dossier. */
+export interface CafeSetGift {
+  name: string;
+  qty?: number;
+  goodsId?: string;
+}
+
 export interface CafePromoSetItem {
   id: string;
   name: string;
   priceLabel?: string;
+  /** Set promo art (or a photo of the set). Empty = "Evidence pending" frame. */
+  image?: string;
+  imageAlt?: string;
   menu?: string[];
+  gifts?: CafeSetGift[];
+  /** @deprecated Plain-text giveaways; used only when `gifts` is empty. */
   giveaways?: string[];
   highlight?: boolean;
 }
 
-export interface CafePromoSetsSection {
-  eyebrow?: string;
-  title: string;
+export interface CafePromoSetsSection extends CafeSectionHead {
   note?: string;
   items: CafePromoSetItem[];
 }
@@ -643,6 +659,11 @@ export interface CafeVenueMenuSection extends CafeSectionHead {
 export type CafeOtherMenu = CafeVenueMenuSection;
 
 export interface CafeGoodsSection extends CafeSectionHead {
+  /**
+   * Items for sale are announced later. While this is off they are removed on
+   * the server (`cafeForVisibility`) and only giveaways are listed.
+   */
+  saleListed?: boolean;
   items: CafeGoodsItem[];
 }
 

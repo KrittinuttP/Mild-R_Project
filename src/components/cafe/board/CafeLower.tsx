@@ -1,5 +1,9 @@
-import Link from "next/link";
+"use client";
 
+import Link from "next/link";
+import { useState } from "react";
+
+import { CafeVenueBook } from "@/components/cafe/board/CafeVenueBook";
 import {
   BoardSection,
   EmptyFrame,
@@ -9,21 +13,128 @@ import {
   SectionHead,
   SERIF,
   THAI,
-  TILT,
-  tiltStyle,
 } from "@/components/cafe/board/pieces";
 import { GOLD_BUTTON } from "@/components/cafe/board/brass";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
-import { isCafeMission, isStandInCafeImage } from "@/lib/cafe-board";
+import { isStandInCafeImage, setLetter, visiblePrice } from "@/lib/cafe-board";
 import { cn } from "@/lib/utils";
-import type { CafePage } from "@/types/vtuber";
+import type { CafeGoodsItem, CafePage } from "@/types/vtuber";
 import type { ImageLightboxItem } from "@/components/media/ImageLightbox";
 import type { CafeCaseFileCover } from "@/lib/cafe-case-file";
 
-const GOODS_MARKS = ["Item 01 · Key Clue", "Item 02 · Clue"];
-const POLAROID_TILT = [-2.4, 2, -1.4, 2.6, -2, 1.6];
-
 type OpenPlate = (items: ImageLightboxItem[], index: number, group: string) => void;
+
+type SetMark = { setId: string; letter: string; qty?: number };
+
+/** goodsId → the sets that give it away, from the provision sets (single source of truth). */
+function giveawayMarks(cafe: CafePage) {
+  const marks = new Map<string, SetMark[]>();
+  (cafe.promoSets?.items ?? []).forEach((set, index) => {
+    const letter = setLetter(set.name, index);
+    (set.gifts ?? []).forEach((gift) => {
+      if (!gift.goodsId) return;
+      const list = marks.get(gift.goodsId) ?? [];
+      list.push({ setId: set.id, letter, qty: gift.qty });
+      marks.set(gift.goodsId, list);
+    });
+  });
+  return marks;
+}
+
+function DossierCard({
+  item,
+  marks,
+  showKind,
+  onZoom,
+  tilt,
+}: {
+  item: CafeGoodsItem;
+  marks: SetMark[];
+  showKind: boolean;
+  onZoom: (() => void) | null;
+  tilt: number;
+}) {
+  const sale = item.kind !== "giveaway";
+  const price = sale ? visiblePrice(item.priceLabel) : "";
+  const standIn = isStandInCafeImage(item.image, item.imageAlt);
+  const frame = standIn ? (
+    <EmptyFrame pending className="aspect-square w-full" />
+  ) : (
+    <ProtectedImage
+      src={item.image}
+      alt={item.imageAlt ?? item.name}
+      wrapClassName="block aspect-square w-full overflow-hidden"
+      className="h-full w-full object-cover"
+    />
+  );
+
+  return (
+    <Paper tilt={tilt} motion="drop" className="flex h-full flex-col p-2 pb-3">
+      <div className="relative">
+        {onZoom ? (
+          <button
+            type="button"
+            className="block w-full cursor-zoom-in"
+            aria-label={`ดูรูป: ${item.imageAlt ?? item.name}`}
+            onClick={onZoom}
+          >
+            {frame}
+          </button>
+        ) : (
+          frame
+        )}
+        {showKind ? (
+          <span
+            className={cn(
+              LABEL,
+              "absolute top-2 left-2 px-2 py-0.5 text-[9px] sm:text-[9px]",
+              sale ? "bg-cafe-forest text-cafe-cream" : "bg-cafe-gold text-cafe-ink"
+            )}
+          >
+            {sale ? "For sale" : "Giveaway"}
+          </span>
+        ) : null}
+      </div>
+      <div className="flex flex-1 flex-col px-1 pt-2.5">
+        <p className={cn(LABEL, "text-[9.5px] text-cafe-gold-deep sm:text-[9.5px]")}>{item.name}</p>
+        <h3 className={cn(THAI, "mt-1 text-[15px] leading-snug font-bold sm:text-base")}>
+          {item.nameLocal ?? item.name}
+        </h3>
+        {item.description ? (
+          <p className="mt-1.5 hidden text-[13px] leading-relaxed text-cafe-ink-soft sm:block">
+            {item.description}
+          </p>
+        ) : null}
+        {price || marks.length > 0 ? (
+          <div className="mt-auto space-y-1.5 pt-2.5">
+            <div className="border-t border-dashed border-cafe-ink/30 pt-2.5">
+              {price ? (
+                <p className="flex items-baseline justify-between">
+                  <span className={cn(LABEL, "text-[9.5px] text-cafe-ink-muted sm:text-[9.5px]")}>Price</span>
+                  <span className={cn(SERIF, "text-lg font-bold")}>{price}</span>
+                </p>
+              ) : null}
+              {marks.length > 0 ? (
+                <p className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-xs text-cafe-ink-muted">ได้ในเซต</span>
+                  {marks.map((mark) => (
+                    <span
+                      key={mark.setId}
+                      className="bg-cafe-forest px-1.5 py-0.5 text-[11.5px] font-semibold text-cafe-cream"
+                    >
+                      {mark.letter}
+                      {mark.qty ? ` ×${mark.qty}` : ""}
+                    </span>
+                  ))}
+                </p>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </Paper>
+  );
+}
 
 export function CafeGoodsBlock({
   cafe,
@@ -34,10 +145,33 @@ export function CafeGoodsBlock({
   show: boolean;
   onOpen: OpenPlate;
 }) {
+  const [filter, setFilter] = useState("all");
   const goods = cafe.goods;
   if (!goods) return null;
-  const plates: ImageLightboxItem[] = goods.items
-    .filter((item) => !isStandInCafeImage(item.image, item.imageAlt) && item.image)
+
+  // Sale items stay off until they are announced (the server drops them too).
+  const saleListed = Boolean(goods.saleListed);
+  const items = goods.items.filter((item) => saleListed || item.kind === "giveaway");
+  const marks = giveawayMarks(cafe);
+  const sets = (cafe.promoSets?.items ?? []).map((set, index) => ({
+    id: set.id,
+    label: `เซต ${setLetter(set.name, index)}`,
+    count: items.filter((item) => marks.get(item.id)?.some((mark) => mark.setId === set.id)).length,
+  }));
+  const saleCount = items.filter((item) => item.kind !== "giveaway").length;
+  const filters = [
+    { id: "all", label: "ทั้งหมด", count: items.length },
+    ...sets.filter((set) => set.count > 0),
+    ...(saleListed && saleCount > 0 ? [{ id: "sale", label: "ของขาย", count: saleCount }] : []),
+  ];
+  const current = filters.some((entry) => entry.id === filter) ? filter : "all";
+  const visible = items.filter((item) => {
+    if (current === "all") return true;
+    if (current === "sale") return item.kind !== "giveaway";
+    return marks.get(item.id)?.some((mark) => mark.setId === current) ?? false;
+  });
+  const plates: ImageLightboxItem[] = visible
+    .filter((item) => item.image && !isStandInCafeImage(item.image, item.imageAlt))
     .map((item) => ({
       id: item.id,
       src: item.image as string,
@@ -47,88 +181,70 @@ export function CafeGoodsBlock({
 
   return (
     <BoardSection id="goods" className="mt-24">
-        <div>
-          {show ? (
-            <SectionHead
-              eyebrow={goods.eyebrow}
-              title={goods.title}
-              titleLocal={goods.titleLocal}
-              stamp={goods.stamp}
-            />
-          ) : (
-            <SealedZone />
-          )}
-          {show ? (
-          <div className="mt-10 grid gap-6 lg:grid-cols-2">
-            {goods.items.map((item, index) => {
-              const standIn = isStandInCafeImage(item.image, item.imageAlt);
-              const plateIndex = plates.findIndex((plate) => plate.id === item.id);
-              const portrait = item.id === "acrylic-stand";
-              const frame = standIn ? (
-                <EmptyFrame pending className="h-full min-h-48 w-full" />
-              ) : portrait ? (
-                <ProtectedImage
-                  src={item.image}
-                  alt={item.imageAlt ?? item.name}
-                  wrapClassName="flex h-[320px] w-full items-center justify-center bg-cafe-cream sm:h-[380px] sm:w-[7.5rem]"
-                  className="h-full w-auto max-w-full object-contain"
-                />
-              ) : (
-                <ProtectedImage
-                  src={item.image}
-                  alt={item.imageAlt ?? item.name}
-                  wrapClassName="block h-full min-h-48 w-full overflow-hidden"
-                  className="h-full min-h-48 w-full object-cover grayscale-[.45] transition duration-300 hover:grayscale-0"
-                />
-              );
-              return (
-                <Paper
-                  key={item.id}
-                  tilt={index % 2 === 0 ? -1 : 1}
-                  pin={`goods-${item.id}`}
-                  motion="drop"
-                >
-                  <div
-                    className={cn(
-                      "grid",
-                      portrait
-                        ? "sm:grid-cols-[7.5rem_minmax(0,1fr)]"
-                        : "sm:grid-cols-[13rem_minmax(0,1fr)]"
-                    )}
-                  >
-                    {standIn || plateIndex < 0 ? (
-                      frame
-                    ) : (
-                      <button
-                        type="button"
-                        className="cursor-zoom-in text-left"
-                        aria-label={`ดูรูป: ${item.imageAlt ?? item.name}`}
-                        onClick={() => onOpen(plates, plateIndex, goods.title)}
-                      >
-                        {frame}
-                      </button>
-                    )}
-                    <div className="px-4 py-4">
-                      <p className={cn(LABEL, "text-[10px] text-cafe-gold-deep sm:text-[10px]")}>
-                        {GOODS_MARKS[index] ?? `Item ${String(index + 1).padStart(2, "0")}`}
-                      </p>
-                      <h3 className={cn(SERIF, "mt-2 text-lg font-bold")}>{item.name}</h3>
-                      {item.nameLocal ? (
-                        <p className={cn(THAI, "mt-1 text-lg font-semibold text-cafe-forest")}>
-                          {item.nameLocal}
-                        </p>
-                      ) : null}
-                      {item.description ? (
-                        <p className="mt-2 text-sm leading-relaxed text-cafe-ink-soft">{item.description}</p>
-                      ) : null}
-                    </div>
-                  </div>
-                </Paper>
-              );
-            })}
-          </div>
-          ) : null}
-        </div>
+      <div>
+        {show ? (
+          <SectionHead
+            eyebrow={goods.eyebrow}
+            title={goods.title}
+            titleLocal={goods.titleLocal}
+            stamp={goods.stamp}
+          />
+        ) : (
+          <SealedZone />
+        )}
+        {show ? (
+          <>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-cafe-text">
+              {saleListed
+                ? "ของที่ระลึกทั้งหมดของคดีนี้ — ทั้งของขาย และของแถมจากชุดเสบียง"
+                : "ของแถมจากชุดเสบียงทั้งหมด · เลือกเซตเพื่อดูว่าได้อะไรบ้าง"}
+            </p>
+            {filters.length > 1 ? (
+              <div role="group" aria-label="กรองของที่ระลึก" className="mt-6 flex flex-wrap gap-2">
+                {filters.map((entry) => {
+                  const on = entry.id === current;
+                  return (
+                    <button
+                      key={entry.id}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() => setFilter(entry.id)}
+                      className={cn(
+                        "min-h-10 border px-3.5 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cafe-cream",
+                        on
+                          ? "border-cafe-gold bg-cafe-gold text-cafe-ink"
+                          : "border-cafe-gold/50 text-cafe-text hover:border-cafe-gold"
+                      )}
+                    >
+                      {entry.label} <span className="font-normal opacity-70">{entry.count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
+            <div
+              className={cn(
+                "mt-6 grid grid-cols-2 gap-3.5 sm:gap-5 lg:grid-cols-4",
+                items.length === 5 && "xl:grid-cols-5"
+              )}
+            >
+              {visible.map((item, index) => {
+                const plateIndex = plates.findIndex((plate) => plate.id === item.id);
+                return (
+                  <DossierCard
+                    key={item.id}
+                    item={item}
+                    marks={marks.get(item.id) ?? []}
+                    showKind={saleListed}
+                    tilt={index % 2 === 0 ? -0.6 : 0.6}
+                    onZoom={plateIndex < 0 ? null : () => onOpen(plates, plateIndex, goods.title)}
+                  />
+                );
+              })}
+            </div>
+          </>
+        ) : null}
+      </div>
     </BoardSection>
   );
 }
@@ -155,153 +271,78 @@ export function CafeVenueBlock({
 
   return (
     <BoardSection id="venue-menu" className="mt-24">
-        <div>
-          {show ? (
-            <SectionHead
-              eyebrow={venue.eyebrow}
-              title={venue.title}
-              titleLocal={venue.titleLocal}
-              stamp={venue.stamp}
-            />
-          ) : (
-            <SealedZone />
-          )}
-          {venue.note && show ? (
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-cafe-text">
-              {venue.note}
-            </p>
-          ) : null}
-          {show ? (
-          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            {venue.items.map((item, index) => (
-              <button
-                key={item.id}
-                type="button"
-                data-motion="drop"
-                aria-label={`ดูรูป: ${item.imageAlt ?? item.caption ?? item.id}`}
-                onClick={() => onOpen(plates, index, venue.title)}
-                className={cn(
-                  "cursor-zoom-in bg-cafe-cream p-2 pb-3 text-left text-cafe-ink shadow-[0_14px_26px_rgba(0,0,0,0.45)]",
-                  TILT,
-                  "hover:[transform:rotate(0deg)_scale(1.08)]"
-                )}
-                style={tiltStyle(POLAROID_TILT[index % POLAROID_TILT.length])}
-              >
-                <ProtectedImage
-                  src={item.image}
-                  alt={item.imageAlt ?? item.caption ?? ""}
-                  wrapClassName="block aspect-[5/7] w-full overflow-hidden"
-                  className="aspect-[5/7] h-full w-full object-cover grayscale-[.45] transition duration-300 hover:grayscale-0"
-                />
-                {item.caption ? (
-                  <span className={cn(LABEL, "mt-2 block text-center text-[9px] text-cafe-ink-muted sm:text-[9px]")}>
-                    {item.caption}
-                  </span>
-                ) : null}
-                {item.captionLocal ? (
-                  <span className={cn(THAI, "mt-0.5 block text-center text-sm font-semibold text-cafe-forest")}>
-                    {item.captionLocal}
-                  </span>
-                ) : null}
-              </button>
-            ))}
-          </div>
-          ) : null}
-        </div>
+      <div>
+        {show ? (
+          <SectionHead
+            eyebrow={venue.eyebrow}
+            title={venue.title}
+            titleLocal={venue.titleLocal}
+            stamp={venue.stamp}
+          />
+        ) : (
+          <SealedZone />
+        )}
+        {venue.note && show ? (
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-cafe-text">{venue.note}</p>
+        ) : null}
+        {show ? (
+          <CafeVenueBook
+            items={venue.items}
+            onZoom={(index) => onOpen(plates, index, venue.title)}
+          />
+        ) : null}
+      </div>
     </BoardSection>
   );
 }
 
+/** Full-width banner into the webtoon: cover art faded behind, copy and button centred. */
 export function CafeStoryBlock({
-  cafe,
   cover,
   showCaseFile,
-  showGallery,
-  onOpen,
 }: {
-  cafe: CafePage;
   cover: CafeCaseFileCover | null;
   showCaseFile: boolean;
-  showGallery: boolean;
-  onOpen: OpenPlate;
 }) {
-  const plates: ImageLightboxItem[] = (cafe.operations?.groups ?? [])
-    .flatMap((group) => group.items)
-    // Mission photos are shown on the mission board (`CafeActivities`), not twice.
-    .filter((item) => !isCafeMission(item))
-    .filter((item) => item.image && !isStandInCafeImage(item.image, item.imageAlt))
-    .map((item) => ({
-      id: item.id,
-      src: item.image as string,
-      alt: item.imageAlt ?? item.caption ?? item.name,
-      caption: item.caption,
-    }));
-
   return (
     <BoardSection id="story" className="mt-24">
-      <h2 className="sr-only">Story · Gallery</h2>
+      <h2 className="sr-only">Story · แฟ้มคดี</h2>
       {showCaseFile ? (
-      <div
-        data-motion="rise"
-        className="grid items-center gap-6 border border-[rgba(201,161,74,0.4)] bg-cafe-void p-4 sm:grid-cols-[9rem_minmax(0,1fr)] sm:p-6"
-      >
-        {cover ? (
-          <ProtectedImage
-            src={cover.image}
-            alt={cover.imageAlt ?? "ปกแฟ้มคดี"}
-            wrapClassName="mx-auto block w-36 -rotate-2 overflow-hidden shadow-[0_14px_26px_rgba(0,0,0,0.45)]"
-            className="aspect-[3/4] w-full object-cover"
+        <Link
+          href="/cafe/event"
+          data-motion="rise"
+          className="group relative flex min-h-[250px] items-center justify-center overflow-hidden border border-cafe-gold/45 bg-cafe-ink text-center focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cafe-cream sm:min-h-[280px]"
+        >
+          {cover ? (
+            <ProtectedImage
+              src={cover.image}
+              alt=""
+              aria-hidden
+              wrapClassName="pointer-events-none absolute inset-0 block"
+              className="size-full object-cover opacity-40 grayscale-[.3] transition duration-500 group-hover:scale-[1.03] group-hover:opacity-50"
+            />
+          ) : null}
+          <span
+            aria-hidden
+            className="absolute inset-0 bg-[radial-gradient(ellipse_70%_90%_at_50%_50%,rgba(10,31,26,0.55),rgba(10,31,26,0.92))]"
           />
-        ) : null}
-        <div>
-          <p className={LABEL}>Opening Act</p>
-          <p data-motion="lens" className={cn(SERIF, "mt-1 text-3xl font-bold text-cafe-cream")}>
-            แฟ้มคดี
-          </p>
-          <p className={cn(THAI, "mt-1 text-lg text-cafe-gold-soft")}>อ่านแบบเว็บตูน</p>
-          <Link
-            href="/cafe/event"
-            className={cn(GOLD_BUTTON, "mt-4 inline-flex min-h-11 w-auto px-5 text-sm")}
-          >
-            อ่านแฟ้มคดี
-          </Link>
-        </div>
-      </div>
+          <span aria-hidden className="absolute inset-2.5 border border-cafe-gold/25" />
+          <div className="relative px-5 py-7">
+            <p className={LABEL}>Opening Act</p>
+            <p data-motion="lens" className={cn(THAI, "mt-2 text-3xl font-bold text-cafe-cream sm:text-4xl")}>
+              แฟ้มคดี
+            </p>
+            <p className={cn(THAI, "mt-1.5 text-base text-cafe-gold-soft sm:text-lg")}>
+              อ่านเรื่องเปิดคดีแบบเว็บตูน ก่อนลงพื้นที่จริง
+            </p>
+            <span className={cn(GOLD_BUTTON, "mx-auto mt-5 inline-flex min-h-11 w-auto px-5 text-sm")}>
+              อ่านแฟ้มคดี →
+            </span>
+          </div>
+        </Link>
       ) : (
         <SealedZone className="mt-0" />
       )}
-
-      {showGallery && plates.length > 0 ? (
-        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {plates.map((plate, index) => (
-            <button
-              key={plate.id}
-              type="button"
-              data-motion="drop"
-              aria-label={`ดูรูป: ${plate.alt}`}
-              onClick={() => onOpen(plates, index, "Gallery")}
-              className={cn(
-                "cursor-zoom-in bg-cafe-cream p-2 pb-3 text-left text-cafe-ink shadow-[0_14px_26px_rgba(0,0,0,0.45)]",
-                TILT,
-                "hover:[transform:rotate(0deg)_scale(1.08)]"
-              )}
-              style={tiltStyle(POLAROID_TILT[index % POLAROID_TILT.length])}
-            >
-              <ProtectedImage
-                src={plate.src}
-                alt={plate.alt}
-                wrapClassName="block aspect-[5/7] w-full overflow-hidden"
-                className="aspect-[5/7] h-full w-full object-cover grayscale-[.45] transition duration-300 hover:grayscale-0"
-              />
-              {plate.caption ? (
-                <span className={cn(LABEL, "mt-2 block text-center text-[9px] text-cafe-ink-muted sm:text-[9px]")}>
-                  {plate.caption}
-                </span>
-              ) : null}
-            </button>
-          ))}
-        </div>
-      ) : null}
     </BoardSection>
   );
 }

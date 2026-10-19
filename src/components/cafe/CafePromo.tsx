@@ -132,6 +132,11 @@ export function CafePromo({ cafe, visibility, caseCover }: CafePromoProps) {
         show={show.signatureMenu}
         showDispatch={show.dispatch}
       />
+      <CafeVenueBlock
+        cafe={cafe}
+        show={show.venueMenu}
+        onOpen={open}
+      />
       <CafeActivities
         cafe={cafe}
         showSchedule={show.daySchedule}
@@ -143,18 +148,7 @@ export function CafePromo({ cafe, visibility, caseCover }: CafePromoProps) {
         show={show.goods}
         onOpen={open}
       />
-      <CafeVenueBlock
-        cafe={cafe}
-        show={show.venueMenu}
-        onOpen={open}
-      />
-      <CafeStoryBlock
-        cafe={cafe}
-        cover={caseCover ?? null}
-        showCaseFile={show.caseFile}
-        showGallery={show.operations}
-        onOpen={open}
-      />
+      <CafeStoryBlock cover={caseCover ?? null} showCaseFile={show.caseFile} />
       <CafeClosingBlock cafe={cafe} show={show.closing} />
       <ImageLightbox
         tone="cafe"

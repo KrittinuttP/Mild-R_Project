@@ -26,3 +26,10 @@ export function isCafeMission(item: Pick<CafeOperationsItem, "id" | "kind">) {
   if (item.kind) return false;
   return MISSION_IDS.has(item.id);
 }
+
+/** "SET A" → "A"; falls back to A, B, C… by position. */
+export function setLetter(name: string, index: number) {
+  const last = name.trim().split(/\s+/).pop() ?? "";
+  if (/^[A-Z]$/i.test(last)) return last.toUpperCase();
+  return String.fromCharCode(65 + index);
+}

@@ -1,8 +1,8 @@
 {
   "title": "Mild-R: Sherlock Sweetie",
   "titleLocal": "คาเฟ่วันเกิดของนักสืบ Mild-R",
-  "lede": "คาเฟ่ธีมนักสืบ · ไขปริศนาจากเมนู · เก็บหลักฐาน · ฉลองวันเกิด Mild-R",
-  "tagline": "รายงานพิเศษจากสถานที่เกิดเหตุ: คาเฟ่ลึกลับแห่งนี้ เชิญชวนนักสืบฮันนี่ทุกท่าน มาร่วมไขปริศนาจากหลากหลายเมนูในงาน พร้อมช่วยกันคลี่คลายคดีต่างๆ และเก็บกู้หลักฐานจากสถานที่เกิดเหตุนี้",
+  "lede": "ปริศนาคดีสุดลึกลับกำลังรอผู้ไขอยู่ ขอเชิญนักสืบทุกคน มาตามหาหลักฐานและไขคดีไปด้วยกัน",
+  "tagline": "ปริศนาคดีสุดลึกลับกำลังรอผู้ไขอยู่! ขอเชิญนักสืบทุกคนมาตามหาหลักฐานและไขคดีไปด้วยกันที่ Mild-R Cafe มาเป็นส่วนหนึ่งของการสืบสวนครั้งนี้กันนะ",
   "status": "upcoming",
   "statusLabel": "CASE FILE · OPEN",
   "statusLabelLocal": "แฟ้มคดีเปิดแล้ว",
@@ -238,8 +238,10 @@
     ]
   },
   "promoSets": {
-    "eyebrow": "Provision Sets · Giveaway",
-    "title": "ชุดเสบียงโปรโมชั่น",
+    "eyebrow": "Provision Sets",
+    "stamp": "SETS A–C",
+    "title": "Sets & Giveaways",
+    "titleLocal": "ชุดเสบียงโปรโมชั่น",
     "note": "แต่ละเซตมีของแถมต่างกัน · เซต C ได้ของแถมมากที่สุด",
     "items": [
       {
@@ -250,8 +252,12 @@
           "The Unsolved Latte",
           "ชิโอะปัง 1 ชิ้น"
         ],
-        "giveaways": [
-          "โฟโตการ์ดสุ่ม 1 ใบ"
+        "gifts": [
+          {
+            "name": "โฟโตการ์ดสุ่ม",
+            "qty": 1,
+            "goodsId": "random-photocard"
+          }
         ]
       },
       {
@@ -262,8 +268,12 @@
           "Alibi Soda",
           "The Investigator's Parfait"
         ],
-        "giveaways": [
-          "สติกเกอร์แฟ้มคดี 1 แผ่น"
+        "gifts": [
+          {
+            "name": "สติกเกอร์แฟ้มคดี",
+            "qty": 1,
+            "goodsId": "case-sticker"
+          }
         ]
       },
       {
@@ -275,10 +285,22 @@
           "Alibi Soda",
           "The Investigator's Parfait"
         ],
-        "giveaways": [
-          "โฟโตการ์ดสุ่ม 2 ใบ",
-          "สติกเกอร์แฟ้มคดี 1 แผ่น",
-          "ที่รองแก้วลายพิเศษ 1 ชิ้น"
+        "gifts": [
+          {
+            "name": "โฟโตการ์ดสุ่ม",
+            "qty": 2,
+            "goodsId": "random-photocard"
+          },
+          {
+            "name": "สติกเกอร์แฟ้มคดี",
+            "qty": 1,
+            "goodsId": "case-sticker"
+          },
+          {
+            "name": "ที่รองแก้วลายพิเศษ",
+            "qty": 1,
+            "goodsId": "special-coaster"
+          }
         ],
         "highlight": true
       }
@@ -305,42 +327,48 @@
         "image": "/assets/cafe/other_menu/menu_1.jpg",
         "imageAlt": "SOCIEFEE × CHOUXSTORY · Drink Menu",
         "caption": "Drink Menu",
-        "captionLocal": "เมนูเครื่องดื่ม"
+        "captionLocal": "เมนูเครื่องดื่ม",
+        "group": "เครื่องดื่ม"
       },
       {
         "id": "menu-2",
         "image": "/assets/cafe/other_menu/menu_2.jpg",
         "imageAlt": "SOCIEFEE Kitchen · What's On The Menu",
         "caption": "Kitchen Menu",
-        "captionLocal": "เมนูครัว"
-      },
-      {
-        "id": "menu-3",
-        "image": "/assets/cafe/other_menu/menu_3.jpg",
-        "imageAlt": "Shio Pan · ชิโอะปัง",
-        "caption": "Shio Pan",
-        "captionLocal": "ชิโอะปัง"
-      },
-      {
-        "id": "menu-4",
-        "image": "/assets/cafe/other_menu/menu_4.jpg",
-        "imageAlt": "Shio-pan Ham-Cheese",
-        "caption": "Shio-pan Ham-Cheese",
-        "captionLocal": "ชิโอะปังแฮมชีส"
-      },
-      {
-        "id": "menu-5",
-        "image": "/assets/cafe/other_menu/menu_5.jpg",
-        "imageAlt": "Toasted Shokupan Ham & Cheese",
-        "caption": "Shokupan Ham & Cheese",
-        "captionLocal": "โชคุปังแฮมชีส"
+        "captionLocal": "เมนูครัว",
+        "group": "อาหาร"
       },
       {
         "id": "menu-6",
         "image": "/assets/cafe/other_menu/menu_6.jpg",
         "imageAlt": "SOCIEFEE × CHOUXSTORY · Main Menu",
         "caption": "Main Menu",
-        "captionLocal": "เมนูจานหลัก"
+        "captionLocal": "เมนูจานหลัก",
+        "group": "อาหาร"
+      },
+      {
+        "id": "menu-3",
+        "image": "/assets/cafe/other_menu/menu_3.jpg",
+        "imageAlt": "Shio Pan · ชิโอะปัง",
+        "caption": "Shio Pan",
+        "captionLocal": "ชิโอะปัง",
+        "group": "ขนมปัง"
+      },
+      {
+        "id": "menu-4",
+        "image": "/assets/cafe/other_menu/menu_4.jpg",
+        "imageAlt": "Shio-pan Ham-Cheese",
+        "caption": "Shio-pan Ham-Cheese",
+        "captionLocal": "ชิโอะปังแฮมชีส",
+        "group": "ขนมปัง"
+      },
+      {
+        "id": "menu-5",
+        "image": "/assets/cafe/other_menu/menu_5.jpg",
+        "imageAlt": "Toasted Shokupan Ham & Cheese",
+        "caption": "Shokupan Ham & Cheese",
+        "captionLocal": "โชคุปังแฮมชีส",
+        "group": "ขนมปัง"
       }
     ]
   },
@@ -349,6 +377,7 @@
     "stamp": "CLUE DOSSIER",
     "title": "The Clue Dossier",
     "titleLocal": "แฟ้มรวบรวมเบาะแส",
+    "saleListed": false,
     "items": [
       {
         "id": "acrylic-stand",
@@ -356,7 +385,8 @@
         "nameLocal": "อะคริลิกสแตนด์",
         "description": "เบาะแสชิ้นเอกที่ถูกค้นพบ ณ สถานที่เกิดเหตุ — เก็บกู้กลับไปตั้งไว้บนโต๊ะทำงานเพื่อวิเคราะห์และไขปริศนาต่อไป",
         "image": "/assets/cafe/kv/KV_cafe.webp",
-        "imageAlt": "Acrylic stand (รูปตัวอย่างจาก KV คาเฟ่)"
+        "imageAlt": "Acrylic stand (รูปตัวอย่างจาก KV คาเฟ่)",
+        "kind": "sale"
       },
       {
         "id": "photo-card",
@@ -364,7 +394,29 @@
         "nameLocal": "ชุดโฟโตการ์ด",
         "description": "ภาพถ่ายบันทึกร่องรอยและเหตุการณ์จากสถานที่เกิดเหตุ — รวบรวมไว้เป็นเบาะแสในแฟ้มคดีส่วนตัว",
         "image": "/assets/mild/kv/Mild-R_Name_Art.png",
-        "imageAlt": "Photo card set sample from Mild-R KV"
+        "imageAlt": "Photo card set sample from Mild-R KV",
+        "kind": "sale"
+      },
+      {
+        "id": "random-photocard",
+        "kind": "giveaway",
+        "name": "Photo Card · Random",
+        "nameLocal": "โฟโตการ์ดสุ่ม",
+        "description": "การ์ดภาพนักสืบ Mild-R สุ่มลาย"
+      },
+      {
+        "id": "case-sticker",
+        "kind": "giveaway",
+        "name": "Case Sticker",
+        "nameLocal": "สติกเกอร์แฟ้มคดี",
+        "description": "สติกเกอร์ลายหลักฐานประจำคดี"
+      },
+      {
+        "id": "special-coaster",
+        "kind": "giveaway",
+        "name": "Coaster",
+        "nameLocal": "ที่รองแก้วลายพิเศษ",
+        "description": "ที่รองแก้วลายพิเศษ เฉพาะเซต C"
       }
     ]
   },
@@ -374,7 +426,7 @@
     "title": "Closing Note",
     "titleLocal": "สรุปฉบับนี้",
     "body": [
-      "Mild-R: Sherlock Sweetie คือโปรเจกต์คาเฟ่ที่แฟนคลับ Honeycomb จัดทำเอง — จำลองพื้นที่คาเฟ่ให้กลายเป็นสถานที่เกิดเหตุลึกลับ เชิญชวนนักสืบฮันนี่มาร่วมไขปริศนา คลี่คลายคดี และเก็บกู้หลักฐาน",
+      "Mild-R: Sherlock Sweetie คือโปรเจกต์คาเฟ่ที่แฟนคลับจัดทำเอง — จำลองคาเฟ่ให้กลายเป็นสถานที่เกิดเหตุลึกลับ ที่ซ่อนปริศนาไว้รอนักสืบทุกคนมาตามหาหลักฐานและไขคดีไปด้วยกัน มาเป็นส่วนหนึ่งของการสืบสวนครั้งนี้กันนะ",
       "เคสถูกกำหนดเปิดวันที่ 2026 · 12 · 06 เวลา 10:00–18:00 ที่ SOCIEFEE × CHOUXSTORY (MRT หัวลำโพง Exit 2) · ติดตามประกาศเพิ่มเติมได้ที่ @Mild_Honeycomb"
     ],
     "ctas": [
@@ -383,6 +435,6 @@
         "url": "https://x.com/Mild_Honeycomb"
       }
     ],
-    "disclaimer": "คาเฟ่และเว็บโปรโมทนี้เป็นงานแฟนเมดที่แฟนคลับจัดทำเอง — ไม่ใช่ประกาศทางการของ Mild-R / เอเจนซี · รายละเอียดอีเวนต์อาจเปลี่ยน"
+    "disclaimer": "คาเฟ่และเว็บไซต์นี้แฟนคลับจัดทำเอง รายละเอียดงานอาจมีการเปลี่ยนแปลง"
   }
 }

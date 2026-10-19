@@ -19,10 +19,10 @@ type CafeNavLink =
 const CAFE_NAV: CafeNavLink[] = [
   { kind: "section", hash: "#overview", label: "Overview" },
   { kind: "section", hash: "#menu", label: "Menu · Pre-order" },
-  { kind: "section", hash: "#activities", label: "Activities" },
-  { kind: "section", hash: "#goods", label: "Goods" },
   { kind: "section", hash: "#venue-menu", label: "Venue Menu" },
-  { kind: "section", hash: "#story", label: "Story · Gallery" },
+  { kind: "section", hash: "#activities", label: "Activities" },
+  { kind: "section", hash: "#goods", label: "Clue Dossier" },
+  { kind: "section", hash: "#story", label: "Story" },
 ];
 
 type CafeHeaderProps = {

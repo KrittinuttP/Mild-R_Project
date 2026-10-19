@@ -183,6 +183,8 @@ function redactSections(
           name: filler(item.name),
           priceLabel: fill(item.priceLabel),
           menu: item.menu?.map(filler),
+          // No image and no link into the dossier: only the shape of the list.
+          gifts: item.gifts?.map((gift) => ({ name: filler(gift.name), qty: gift.qty })),
           giveaways: item.giveaways?.map(filler),
           highlight: item.highlight,
         })),
@@ -205,6 +207,7 @@ function redactSections(
         image: "",
         caption: fill(item.caption),
         captionLocal: fill(item.captionLocal),
+        group: fill(item.group),
       })),
     };
   }
@@ -214,6 +217,7 @@ function redactSections(
       ...cafe.goods,
       items: cafe.goods.items.map((item, index) => ({
         id: `goods-${index + 1}`,
+        kind: item.kind,
         name: filler(item.name),
         nameLocal: fill(item.nameLocal),
         description: fill(item.description),
@@ -238,7 +242,18 @@ export function cafeForVisibility(
   cafe: CafePage,
   visibility: CafeSectionVisibilityMap
 ): CafePage {
-  const { heroCutoutSilhouette, ...rest } = cafe;
+  const { heroCutoutSilhouette, ...listed } = cafe;
+  // Goods for sale are not announced yet: drop them before anything is sent.
+  const rest =
+    listed.goods && !listed.goods.saleListed
+      ? {
+          ...listed,
+          goods: {
+            ...listed.goods,
+            items: listed.goods.items.filter((item) => item.kind === "giveaway"),
+          },
+        }
+      : listed;
   const redacted = redactSections(rest, visibility);
   if (visibility.heroCutout || !heroCutoutSilhouette) return redacted;
 
