@@ -65,6 +65,33 @@ migrate: `npm run db:migrate:cafe-operations`
 
 ---
 
+## การป้องกันไฟล์ KV
+
+ไฟล์ตัวละครพื้นหลังโปร่งใส (`public/assets/cafe/kv/KV_cafe.webp`) มีอยู่ที่เว็บที่เดียว จึงกันไว้ 3 ชั้น
+
+- **เปิดไฟล์ตรงๆ ไม่ได้:** `src/proxy.ts` (`protectedImage`) ให้ไฟล์ในโฟลเดอร์ `/assets/cafe/kv/` ผ่านเฉพาะตอนหน้าเว็บของเราโหลดเป็นรูป เปิดในแท็บใหม่ พิมพ์ลิงก์เอง `fetch()` หรือเว็บอื่นดึงไปแสดง ได้ 404
+- **กดบันทึกรูปไม่ได้:** คลิกขวาและลากรูปถูกกันใน `MediaProtection` ส่วนกดค้างบน iPhone กันด้วย `-webkit-touch-callout: none` ใน `globals.css`
+- **ลายน้ำที่มองไม่เห็น:** ฝังรหัส `MHC-KV26` ด้วย `scripts/kv-watermark.py` (ใช้แค่ numpy กับ Pillow) ขนาดไฟล์ 455×1440
+
+ไฟล์ต้นฉบับที่ไม่มีลายน้ำอยู่ที่ `assets-private/cafe/kv/KV_cafe.original.webp` (อยู่ใน `.gitignore` ไม่ขึ้น git ต้องสำรองเอง)
+
+เปลี่ยน KV ใหม่:
+
+```
+python3 scripts/kv-watermark.py embed assets-private/cafe/kv/<ต้นฉบับ> public/assets/cafe/kv/KV_cafe.webp
+```
+
+ตรวจรูปที่สงสัยว่าเป็นของเรา (ถ้ารูปถูกย่อหรือขยาย ใส่ขนาดเดิมด้วย):
+
+```
+python3 scripts/kv-watermark.py verify <ไฟล์ที่เจอ> --size 455x1440
+```
+
+ขึ้น `MATCH` = เป็นไฟล์ของเรา · ผลเทส: อ่านได้หลังบันทึกซ้ำเป็น WebP/JPEG (คุณภาพ 60 ขึ้นไป) ย่อเหลือ 40–75% ขยาย 150% และวางบนพื้นสี · อ่านไม่ได้เมื่อถูกครอป
+ห้ามแก้ค่า `KEY`, `BLOCK`, `STEP`, `COEFS` ในสคริปต์หลังปล่อยรูปแล้ว ไม่อย่างนั้นอ่านรูปเก่าไม่ได้
+
+---
+
 ## Animation
 
 ตัวคุมอยู่ที่ `src/components/cafe/board/useBoardMotion.ts` เรียกครั้งเดียวจาก `CafePromo`

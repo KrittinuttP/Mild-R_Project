@@ -134,9 +134,12 @@
   html[data-live-banner] {
     scroll-padding-top: 2.25rem;
   }
-  img {
+  img,
+  [data-protect-media] {
     -webkit-user-drag: none;
     user-select: none;
+    /* iOS long-press "Save to Photos"; right-click and drag are blocked in MediaProtection. */
+    -webkit-touch-callout: none;
   }
 }
 

@@ -53,3 +53,8 @@ zayzhik-projecct-mildR.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Clean originals of published images (no watermark). Never under public/.
+/assets-private/
+
+__pycache__/

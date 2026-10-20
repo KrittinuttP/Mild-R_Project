@@ -91,9 +91,39 @@ async function cafePageLock(request: NextRequest, pathname: string, onCafeHost: 
   return NextResponse.next(init);
 }
 
+/** The KV cutout exists only on this site; it may be drawn by our pages, not opened. */
+const PROTECTED_IMAGE_PREFIX = "/assets/cafe/kv/";
+
+/**
+ * Browsers say why they fetch (`Sec-Fetch-Dest`) and from where
+ * (`Sec-Fetch-Site`). An <img> on our own pages passes; opening the file in a
+ * tab, typing its address, or another site embedding it gets a 404. Requests
+ * without these headers (old browsers, server-side fetches) still pass: this
+ * stops casual saving, not a determined copy (the file carries an invisible
+ * watermark for that, see scripts/kv-watermark.py).
+ */
+function protectedImage(request: NextRequest) {
+  const dest = request.headers.get("sec-fetch-dest");
+  const from = request.headers.get("sec-fetch-site");
+  const blocked =
+    (dest !== null && dest !== "image") ||
+    (from !== null && from !== "same-origin" && from !== "same-site");
+  if (blocked) {
+    return new NextResponse(null, {
+      status: 404,
+      headers: { "Cache-Control": "private, no-store" },
+    });
+  }
+  const response = NextResponse.next();
+  // Any cache in between must keep the image and the 404 apart.
+  response.headers.set("Vary", "Sec-Fetch-Dest, Sec-Fetch-Site");
+  return response;
+}
+
 /** All page routes are lowercase; redirect mixed-case URLs (e.g. /HBD/2026 → /hbd/2026). */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  if (pathname.startsWith(PROTECTED_IMAGE_PREFIX)) return protectedImage(request);
   const site = siteOf(request);
   const onCafeHost = site === "cafe";
 
@@ -125,5 +155,6 @@ export async function proxy(request: NextRequest) {
 export const config = {
   // Include /api so the cafe domain can refuse main-site APIs.
   // Skip Next internals and files with an extension (images, fonts).
-  matcher: ["/((?!_next/|.*\\.[\\w]+$).*)"],
+  // The KV folder is the one exception: its files pass through protectedImage.
+  matcher: ["/((?!_next/|.*\\.[\\w]+$).*)", "/assets/cafe/kv/:path*"],
 };
