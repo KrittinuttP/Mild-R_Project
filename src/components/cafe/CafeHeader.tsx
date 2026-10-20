@@ -7,6 +7,8 @@ import { Menu, X } from "lucide-react";
 
 import { SherlockSweetieLogo } from "@/components/cafe/SherlockSweetieLogo";
 import { buttonVariants } from "@/components/ui/button";
+import { useNow } from "@/hooks/useNow";
+import { preorderIsListed } from "@/lib/cafe-visibility";
 import { scrollToHashTarget } from "@/lib/scroll-to-hash";
 import { cn } from "@/lib/utils";
 import type { CafePage } from "@/types/vtuber";
@@ -47,6 +49,16 @@ export function CafeHeader({
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const masthead = cafe.edition?.masthead ?? cafe.title;
+  // "Pre-order" in the menu link only while booking is open (the server drops
+  // the preorder before it starts); checked each minute to drop it at closing.
+  const now = useNow(60_000, Boolean(cafe.preorder));
+  const bookingOpen =
+    Boolean(cafe.preorder) && (now === null || preorderIsListed(cafe.preorder, now));
+  const nav = CAFE_NAV.map((link) =>
+    link.kind === "section" && link.hash === "#menu" && !bookingOpen
+      ? { ...link, label: "Menu" }
+      : link
+  );
 
   const resolveHref = (link: CafeNavLink) => {
     if (link.kind === "section") {
@@ -133,7 +145,7 @@ export function CafeHeader({
           className="hidden items-center gap-1 min-[1180px]:flex"
           aria-label="Cafe"
         >
-          {CAFE_NAV.map((link, index) => {
+          {nav.map((link, index) => {
             const href = resolveHref(link);
             const active =
               link.kind === "page" &&
@@ -203,7 +215,7 @@ export function CafeHeader({
           className="mx-auto flex max-w-6xl flex-col gap-0.5 px-5 py-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6"
           aria-label="Cafe mobile"
         >
-          {CAFE_NAV.map((link) => {
+          {nav.map((link) => {
             const href = resolveHref(link);
             const active =
               link.kind === "page" &&

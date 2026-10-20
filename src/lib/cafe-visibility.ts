@@ -54,7 +54,7 @@ export const CAFE_SECTION_META: Record<
   },
   preorder: {
     label: "Pre-order",
-    labelLocal: "เทปเหลือง + กล่องจอง · โชว์เมื่อเมนูเปิด และซ่อนเองหลัง 20 พ.ย. 2026",
+    labelLocal: "เทปเหลือง ตั๋วจอง และปุ่มจอง · ต้องเปิดเมนูด้วย · โชว์เองตามช่วงจองใน cafe.json (startsAt ถึง endsAt). 2026",
   },
   venueMenu: {
     label: "Venue Menu",
@@ -62,7 +62,7 @@ export const CAFE_SECTION_META: Record<
   },
   goods: {
     label: "The Clue Dossier",
-    labelLocal: "แฟ้มรวบรวมเบาะแส",
+    labelLocal: "ของแถม · แฟ้มรวบรวมเบาะแส และรายการของแถมในการ์ดเซต",
   },
   caseFile: {
     label: "Case File",
@@ -100,16 +100,47 @@ function fill(text?: string) {
 }
 
 /**
- * The booking tape and box stay up through `endsAt` (20 Nov 2026, 23:59).
- * A missing end date stays listed; the menu and preorder toggles are separate.
+ * The booking tape, ticket and buttons show only from `startsAt` until
+ * `endsAt` (16 Nov 2026 12:00 – 30 Nov 2026 23:59, Bangkok). Before the
+ * start the server drops the preorder entirely, so nothing about it reaches
+ * the page source. A missing date leaves that side open.
  */
 export function preorderIsListed(
   preorder: CafePage["preorder"],
   now = Date.now()
 ): boolean {
-  if (!preorder?.endsAt) return true;
-  const ends = Date.parse(preorder.endsAt);
+  if (!preorder) return false;
+  const starts = preorder.startsAt ? Date.parse(preorder.startsAt) : Number.NaN;
+  if (Number.isFinite(starts) && now < starts) return false;
+  const ends = preorder.endsAt ? Date.parse(preorder.endsAt) : Number.NaN;
   return !Number.isFinite(ends) || now < ends;
+}
+
+const BANGKOK_DAY = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Bangkok",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+/** Bangkok calendar day as a whole-day number, so day differences ignore the clock time. */
+function bangkokDayNumber(ms: number) {
+  const [year, month, day] = BANGKOK_DAY.format(ms).split("-").map(Number);
+  return Date.UTC(year, month - 1, day) / 86_400_000;
+}
+
+/**
+ * Calendar days of booking left after today, Bangkok time: 0 on the closing
+ * day. `null` when there is no valid end date or booking is not open.
+ */
+export function preorderDaysLeft(
+  preorder: CafePage["preorder"],
+  now: number
+): number | null {
+  if (!preorder?.endsAt || !preorderIsListed(preorder, now)) return null;
+  const ends = Date.parse(preorder.endsAt);
+  if (!Number.isFinite(ends)) return null;
+  return Math.max(0, bangkokDayNumber(ends) - bangkokDayNumber(now));
 }
 
 /**
@@ -192,11 +223,38 @@ function redactSections(
     }
   }
 
+  // Giveaways have their own reveal day: the goods toggle covers the
+  // dossier and the gift lists on the set cards together.
+  if (visibility.signatureMenu && !visibility.goods && out.promoSets) {
+    out.promoSets = {
+      ...out.promoSets,
+      items: out.promoSets.items.map((item) => ({
+        ...item,
+        gifts: item.gifts?.map((gift) => ({ name: filler(gift.name) })),
+        giveaways: item.giveaways?.map(filler),
+      })),
+    };
+  }
+
   const offerPreorder =
     visibility.signatureMenu &&
     visibility.preorder &&
     preorderIsListed(cafe.preorder);
-  if (!offerPreorder) out.preorder = undefined;
+  if (!offerPreorder) {
+    out.preorder = undefined;
+    // The pre-order card in the activities would announce the booking early.
+    if (out.operations) {
+      out.operations = {
+        ...out.operations,
+        groups: out.operations.groups
+          .map((group) => ({
+            ...group,
+            items: group.items.filter((item) => item.kind !== "preorder"),
+          }))
+          .filter((group) => group.items.length > 0),
+      };
+    }
+  }
 
   if (!visibility.venueMenu && cafe.venueMenu) {
     out.venueMenu = {

@@ -21,6 +21,7 @@ import { useNow } from "@/hooks/useNow";
 import type { CafeCaseFileCover } from "@/lib/cafe-case-file";
 import {
   defaultCafeVisibility,
+  preorderDaysLeft,
   preorderIsListed,
   type CafeSectionVisibilityMap,
 } from "@/lib/cafe-visibility";
@@ -42,11 +43,15 @@ type LightboxState = {
 
 function PreorderTape({ cafe }: { cafe: CafePage }) {
   const preorder = cafe.preorder;
-  const now = useNow(1000, Boolean(preorder?.endsAt));
+  const now = useNow(1000, Boolean(preorder?.startsAt || preorder?.endsAt));
   if (!preorder?.label) return null;
   if (now !== null && !preorderIsListed(preorder, now)) return null;
 
-  const text = `PRE-ORDER ◆ เปิดจองเสบียงล่วงหน้า ◆ ประมาณ ${preorder.label} ◆ เซต A · เซต B · เซต C ◆`;
+  // Blank until the client clock is known, so server and client markup match.
+  const daysLeft = now === null ? null : preorderDaysLeft(preorder, now);
+  const left =
+    daysLeft === null ? "" : daysLeft === 0 ? "วันสุดท้าย ◆ " : `เหลือเวลาจองอีก ${daysLeft} วัน ◆ `;
+  const text = `PRE-ORDER ◆ เปิดจองเสบียงล่วงหน้า ◆ ${preorder.label} ◆ ${left}เซต A · เซต B · เซต C ◆`;
   const line = `${text} ${text}`;
 
   return (
@@ -131,6 +136,7 @@ export function CafePromo({ cafe, visibility, caseCover }: CafePromoProps) {
         cafe={cafe}
         show={show.signatureMenu}
         showDispatch={show.dispatch}
+        showGifts={show.goods}
       />
       <CafeVenueBlock
         cafe={cafe}

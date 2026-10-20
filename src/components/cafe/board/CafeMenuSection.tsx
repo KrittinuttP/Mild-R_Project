@@ -15,6 +15,7 @@ import {
   THAI,
 } from "@/components/cafe/board/pieces";
 import { GOLD_BUTTON } from "@/components/cafe/board/brass";
+import { PreorderCountdown } from "@/components/cafe/board/PreorderCountdown";
 import { useNow } from "@/hooks/useNow";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { isStandInCafeImage, setLetter, visiblePrice } from "@/lib/cafe-board";
@@ -38,10 +39,13 @@ function SetListBox({
   title,
   rows,
   tone,
+  hidden = false,
 }: {
   title: string;
   rows: GiftRow[];
   tone: "menu" | "gift";
+  /** Giveaways not announced yet: the server sent filler, drawn as black bars. */
+  hidden?: boolean;
 }) {
   return (
     <div
@@ -61,9 +65,9 @@ function SetListBox({
             className="flex items-baseline justify-between gap-2 border-b border-dotted border-cafe-ink/20 py-1.5"
           >
             <span className={cn(tone === "menu" ? SERIF : THAI, "text-sm leading-snug text-cafe-ink")}>
-              {row.name}
+              <Classified hidden={hidden}>{row.name}</Classified>
             </span>
-            {row.qty ? (
+            {row.qty && !hidden ? (
               <span className={cn(SERIF, "shrink-0 text-sm font-bold")}>×{row.qty}</span>
             ) : null}
           </li>
@@ -79,11 +83,13 @@ function SetCard({
   item,
   index,
   cta,
+  giftsHidden,
   flat = false,
 }: {
   item: CafePromoSetItem;
   index: number;
   cta: SetCta;
+  giftsHidden: boolean;
   /** Inside the mobile tabs: no tilt, no pin, no scroll motion. */
   flat?: boolean;
 }) {
@@ -145,7 +151,7 @@ function SetCard({
         {menu.length > 0 ? (
           <SetListBox title="เมนูในเซต" rows={menu.map((name) => ({ name }))} tone="menu" />
         ) : null}
-        {gifts.length > 0 ? <SetListBox title="ของแถม" rows={gifts} tone="gift" /> : null}
+        {gifts.length > 0 ? <SetListBox title="ของแถม" rows={gifts} tone="gift" hidden={giftsHidden} /> : null}
       </div>
       {cta ? (
         <div className="border-t border-dashed border-cafe-ink/30 bg-cafe-ink/[0.07] px-3 pt-3 pb-3.5">
@@ -164,7 +170,15 @@ function SetCard({
 }
 
 /** Mobile: one set at a time. Each tab carries its price, so prices compare without switching. */
-function SetTabs({ items, cta }: { items: CafePromoSetItem[]; cta: SetCta }) {
+function SetTabs({
+  items,
+  cta,
+  giftsHidden,
+}: {
+  items: CafePromoSetItem[];
+  cta: SetCta;
+  giftsHidden: boolean;
+}) {
   if (items.length === 0) return null;
   return (
     <Tabs.Root defaultValue={items[0].id} className="mt-8 min-[900px]:hidden">
@@ -191,7 +205,7 @@ function SetTabs({ items, cta }: { items: CafePromoSetItem[]; cta: SetCta }) {
       </Tabs.List>
       {items.map((item, index) => (
         <Tabs.Panel key={item.id} value={item.id} className="mt-4">
-          <SetCard item={item} index={index} cta={cta} flat />
+          <SetCard item={item} index={index} cta={cta} giftsHidden={giftsHidden} flat />
         </Tabs.Panel>
       ))}
       <p className="mt-3 text-center text-xs text-cafe-muted">แตะแท็บด้านบนเพื่อดูเซตอื่น</p>
@@ -204,9 +218,11 @@ type CafeMenuSectionProps = {
   show: boolean;
   /** The pick-up day is the dispatch date, which has its own toggle. */
   showDispatch: boolean;
+  /** Giveaways follow the goods (dossier) toggle, revealed after the menu. */
+  showGifts: boolean;
 };
 
-export function CafeMenuSection({ cafe, show, showDispatch }: CafeMenuSectionProps) {
+export function CafeMenuSection({ cafe, show, showDispatch, showGifts }: CafeMenuSectionProps) {
   const menu = cafe.signatureMenu;
   const sets = cafe.promoSets;
   const preorder = cafe.preorder;
@@ -220,7 +236,8 @@ export function CafeMenuSection({ cafe, show, showDispatch }: CafeMenuSectionPro
     : preorder.url
       ? { href: preorder.url, external: preorder.url.startsWith("http") }
       : { href: "#preorder", external: false };
-  const hasDossier = (cafe.goods?.items ?? []).some((item) => item.kind === "giveaway");
+  const hasDossier =
+    showGifts && (cafe.goods?.items ?? []).some((item) => item.kind === "giveaway");
 
   return (
     <BoardSection id="menu" className="mt-24">
@@ -317,10 +334,16 @@ export function CafeMenuSection({ cafe, show, showDispatch }: CafeMenuSectionPro
               ) : null}
               <div className="mt-8 hidden items-stretch gap-5 min-[900px]:grid min-[900px]:grid-cols-3">
                 {sets.items.map((item, index) => (
-                  <SetCard key={item.id} item={item} index={index} cta={setCta} />
+                  <SetCard
+                    key={item.id}
+                    item={item}
+                    index={index}
+                    cta={setCta}
+                    giftsHidden={!showGifts}
+                  />
                 ))}
               </div>
-              <SetTabs items={sets.items} cta={setCta} />
+              <SetTabs items={sets.items} cta={setCta} giftsHidden={!showGifts} />
             </div>
           ) : null}
 
@@ -339,6 +362,14 @@ export function CafeMenuSection({ cafe, show, showDispatch }: CafeMenuSectionPro
                 <p className={cn(SERIF, "text-[2.1rem] leading-tight font-bold")}>
                   {preorder.label}
                 </p>
+                {preorder.endsAt ? (
+                  <p className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <span className={cn(THAI, "text-sm font-semibold text-cafe-forest")}>
+                      ปิดจองในอีก
+                    </span>
+                    <PreorderCountdown endsAt={preorder.endsAt} />
+                  </p>
+                ) : null}
                 {preorder.tentative ? (
                   <p className={cn(THAI, "mt-2 text-base font-semibold text-cafe-forest")}>
                     กำหนดการโดยประมาณ — รอประกาศยืนยัน

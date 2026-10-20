@@ -26,8 +26,17 @@ import {
   THAI,
 } from "@/components/cafe/board/pieces";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
+import { useNow } from "@/hooks/useNow";
+import { preorderIsListed } from "@/lib/cafe-visibility";
 import { cn } from "@/lib/utils";
 import type { CafePage } from "@/types/vtuber";
+
+/** Mentions booking only while it is open; its own clock keeps the board from re-rendering. */
+function SetsButtonLabel({ preorder }: { preorder: CafePage["preorder"] }) {
+  const now = useNow(1000, Boolean(preorder));
+  const open = Boolean(preorder) && (now === null || preorderIsListed(preorder, now));
+  return <>{open ? "ดูเซตและจองล่วงหน้า" : "ดูเซต"}</>;
+}
 
 /*
  * Overview = one felt board (design H1 on desktop, H2 on phones):
@@ -687,7 +696,7 @@ export function CafeOverview({
                   href="#sets"
                   className="inline-flex min-h-12 items-center justify-center bg-cafe-gold px-6 text-[15px] font-semibold text-cafe-ink transition hover:-translate-y-0.5 hover:bg-cafe-gold-soft motion-reduce:transition-none"
                 >
-                  {cafe.preorder ? "ดูเซตและจองล่วงหน้า" : "ดูเซต"}
+                  <SetsButtonLabel preorder={cafe.preorder} />
                 </a>
                 {follow?.url ? (
                   <Link
