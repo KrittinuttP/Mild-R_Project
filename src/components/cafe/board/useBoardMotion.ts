@@ -22,7 +22,26 @@ function tiltOf(el: Element) {
 }
 
 /** Pins the hero's gold thread is tied to (see `THREAD_ROUTES` in CafeOverview). */
-const THREAD_ANCHORS = new Set(["heart", "lock", "lock-m", "venue"]);
+const THREAD_ANCHORS = new Set(["heart", "lock", "lock-m", "venue", "venue-m"]);
+
+/**
+ * The CSS `translate` of an element (`-translate-x-1/2 -translate-y-[60%]`…)
+ * as GSAP offsets. While GSAP owns the transform it writes `translate: none`
+ * and only part of the offset survives (the Y percentage is lost), so a
+ * centred pin jumped during its drop and snapped back at the end. Passing
+ * the offset explicitly keeps the pin where it sits.
+ */
+function cssTranslate(el: HTMLElement) {
+  const out = { x: 0, y: 0, xPercent: 0, yPercent: 0 };
+  const value = getComputedStyle(el).translate;
+  if (!value || value === "none") return out;
+  const [rawX = "0", rawY = "0"] = value.split(/\s+/);
+  if (rawX.endsWith("%")) out.xPercent = parseFloat(rawX) || 0;
+  else out.x = parseFloat(rawX) || 0;
+  if (rawY.endsWith("%")) out.yPercent = parseFloat(rawY) || 0;
+  else out.y = parseFloat(rawY) || 0;
+  return out;
+}
 
 function dropPin(card: Element, at: number, timeline?: gsap.core.Timeline) {
   const pin = card.querySelector<HTMLElement>("[data-pin]");
@@ -31,13 +50,17 @@ function dropPin(card: Element, at: number, timeline?: gsap.core.Timeline) {
   // every frame, so any drop shows as a jolt. It rides its card and fades in.
   const anchor = THREAD_ANCHORS.has(pin.dataset.pin ?? "");
   // Other brass is set into the paper: a soft fade and short drop, no overshoot.
-  const from = anchor ? { autoAlpha: 0 } : { autoAlpha: 0, y: -12, scale: 1.12 };
+  const rest = anchor ? null : cssTranslate(pin);
+  const from = rest
+    ? { autoAlpha: 0, ...rest, y: rest.y - 12, scale: 1.12 }
+    : { autoAlpha: 0 };
   const to = {
     autoAlpha: 1,
-    ...(anchor ? {} : { y: 0, scale: 1 }),
+    ...(rest ? { ...rest, scale: 1 } : {}),
     duration: anchor ? 0.3 : 0.4,
     ease: anchor ? "power1.out" : "power3.out",
-    clearProps: "transform,opacity,visibility",
+    // Hand position back to the CSS, including the `translate`/`scale` GSAP set.
+    clearProps: "transform,translate,rotate,scale,opacity,visibility",
   };
   if (timeline) timeline.fromTo(pin, from, to, at);
   else gsap.fromTo(pin, from, { ...to, delay: at });

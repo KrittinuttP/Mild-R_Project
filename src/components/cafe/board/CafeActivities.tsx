@@ -141,10 +141,43 @@ export function CafeActivities({
                 data-side={onLeft ? "left" : "right"}
                 className="relative py-3"
               >
+                {/* 900px+: a short gold line from the card to the node, and the time on the other side. */}
+                <span
+                  aria-hidden
+                  className={cn(
+                    "absolute top-[2.45rem] hidden h-px w-16 min-[900px]:block",
+                    onLeft
+                      ? "left-[calc(50%-4rem)] bg-[linear-gradient(90deg,rgba(201,161,74,0.15),rgba(201,161,74,0.75))]"
+                      : "left-1/2 bg-[linear-gradient(270deg,rgba(201,161,74,0.15),rgba(201,161,74,0.75))]"
+                  )}
+                />
+                <p
+                  className={cn(
+                    "absolute top-6 hidden min-[900px]:block",
+                    onLeft ? "left-[calc(50%+1.75rem)] text-left" : "right-[calc(50%+1.75rem)] text-right"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      SERIF,
+                      "block text-[30px] leading-none font-bold",
+                      item.highlight ? "text-cafe-gold-soft" : "text-cafe-cream"
+                    )}
+                  >
+                    {item.time}
+                  </span>
+                  <span className={cn(LABEL, "mt-1.5 block text-[10px] sm:text-[10px]")}>
+                    Entry {String(index + 1).padStart(2, "0")}
+                  </span>
+                </p>
                 <span
                   data-tl-node
-                  className="absolute top-8 left-3 size-4 -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_35%_35%,#f6e4a8,#c9a14a_55%,#7a5c1c)] shadow-[0_0_12px_rgba(201,161,74,0.8)] min-[900px]:left-1/2"
+                  className="absolute top-[17px] left-3 size-4 -translate-x-1/2 rounded-full min-[900px]:top-8 bg-[radial-gradient(circle_at_35%_35%,#f6e4a8,#c9a14a_55%,#7a5c1c)] shadow-[0_0_12px_rgba(201,161,74,0.8)] min-[900px]:left-1/2"
                   aria-hidden
+                />
+                <span
+                  aria-hidden
+                  className="absolute top-[25px] left-[22px] h-px w-3 bg-cafe-gold/70 min-[900px]:hidden"
                 />
                 <div
                   data-tl-note
@@ -155,10 +188,25 @@ export function CafeActivities({
                       : "min-[900px]:ml-auto min-[900px]:pl-6"
                   )}
                 >
+                {/* Phone: time and entry ride the thread, above the card (900px+ has them across the line). */}
+                <p className="flex items-baseline gap-2.5 min-[900px]:hidden">
+                  <span
+                    className={cn(
+                      SERIF,
+                      "text-[26px] leading-none font-bold",
+                      item.highlight ? "text-cafe-gold-soft" : "text-cafe-cream"
+                    )}
+                  >
+                    {item.time}
+                  </span>
+                  <span className={cn(LABEL, "text-[10px] sm:text-[10px]")}>
+                    Entry {String(index + 1).padStart(2, "0")}
+                  </span>
+                </p>
                 <Paper
                   tilt={onLeft ? -1 : 1}
                   className={cn(
-                    "px-4 py-4",
+                    "mt-2.5 px-4 py-4 min-[900px]:mt-0",
                     item.highlight && "border-l-[3px] border-cafe-gold"
                   )}
                 >
@@ -173,13 +221,15 @@ export function CafeActivities({
                       Key event
                     </span>
                   ) : null}
-                  <p className="flex items-baseline gap-3">
-                    <span className={cn(SERIF, "text-[28px] leading-none font-bold")}>{item.time}</span>
-                    <span className={cn(LABEL, "text-[10px] text-cafe-gold-deep sm:text-[10px]")}>
-                      Entry {String(index + 1).padStart(2, "0")}
-                    </span>
-                  </p>
-                  <h3 className={cn(SERIF, "mt-2.5 text-base font-bold")}>{item.title}</h3>
+                  <h3
+                    className={cn(
+                      SERIF,
+                      "text-base font-bold",
+                      item.highlight && "pr-20"
+                    )}
+                  >
+                    {item.title}
+                  </h3>
                   {item.titleLocal ? (
                     <p className={cn(THAI, "mt-1 text-lg font-semibold text-cafe-forest")}>
                       {item.titleLocal}

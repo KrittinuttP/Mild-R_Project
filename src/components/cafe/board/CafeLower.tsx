@@ -379,7 +379,7 @@ export function CafeClosingBlock({
               href={follow.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-6 inline-flex min-h-11 items-center bg-cafe-ink px-4 text-sm text-cafe-cream transition hover:-translate-y-0.5"
+              className="mt-6 inline-flex min-h-12 items-center justify-center border border-cafe-gold/60 px-6 text-[15px] font-semibold text-cafe-cream transition hover:-translate-y-0.5 hover:border-cafe-gold hover:bg-cafe-gold/10 motion-reduce:transition-none"
             >
               {follow.label}
             </Link>

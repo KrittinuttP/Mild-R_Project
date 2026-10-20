@@ -39,7 +39,7 @@ export async function POST(request: Request, context: RouteContext) {
         : await rejectFanartSubmission(id);
     return NextResponse.json({ ok: true, submission });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "อัปเดตไม่สำเร็จ";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[fanart] admin request failed", error);
+    return NextResponse.json({ error: "อัปเดตไม่สำเร็จ" }, { status: 500 });
   }
 }

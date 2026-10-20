@@ -1,173 +1,132 @@
 import { NextResponse } from "next/server";
 
+import { FANART_LIMITS } from "@/lib/fanart-upload";
 import {
-  FANART_AVATAR_LIMITS,
-  FANART_LIMITS,
-  type FanartContactChannel,
-} from "@/lib/fanart-upload";
-import {
-  createFanartSubmission,
+  DuplicateOriginalError,
+  FANART_ORIGINALS_BUCKET,
   FANART_STORAGE_BUCKET,
+  createFanartSubmission,
+  findFanartSubmissionByOriginal,
 } from "@/lib/fanart-submissions-store";
-import { processHbdAvatar, processHbdCard } from "@/lib/hbd-image";
+import { processFanartOriginal } from "@/lib/fanart-image";
+import { verifyFanartTicket } from "@/lib/fanart-ticket";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 export const runtime = "nodejs";
+/** Decoding a 15 MB original and making the WebP copy can take a few seconds. */
+export const maxDuration = 60;
 
-const ALLOWED_IMAGE = new Set(["image/jpeg", "image/png", "image/webp"]);
 const STORAGE_CACHE_SECONDS = "31536000";
+const TRY_AGAIN = "บันทึกรูปไม่สำเร็จ กรุณากด ลองใหม่";
 
-function isContactChannel(value: string): value is FanartContactChannel {
-  return value === "x" || value === "discord";
+function fail(error: string, status = 400, code?: string) {
+  return NextResponse.json(code ? { error, code } : { error }, { status });
 }
 
+/**
+ * Step 2 of sending fan art, once per picture after the browser has put the
+ * original in storage: checks the file really is an image, makes the WebP
+ * copy for admin and saves the row. Safe to call again for the same picture.
+ */
 export async function POST(request: Request) {
   if (!isSupabaseConfigured() || !process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
-    return NextResponse.json(
-      { error: "ระบบอัปโหลดยังไม่พร้อม (Supabase)" },
-      { status: 503 }
-    );
+    return fail("ระบบรับแฟนอาร์ตยังไม่พร้อม กรุณาลองใหม่ภายหลัง", 503);
   }
 
-  let form: FormData;
+  let body: { ticket?: unknown; index?: unknown };
   try {
-    form = await request.formData();
+    body = (await request.json()) as typeof body;
   } catch {
-    return NextResponse.json({ error: "Invalid form data" }, { status: 400 });
+    return fail("ข้อมูลที่ส่งมาไม่ถูกต้อง");
   }
 
-  const displayName = String(form.get("displayName") ?? "").trim();
-  const contactChannelRaw = String(form.get("contactChannel") ?? "").trim();
-  const contactHandle = String(form.get("contactHandle") ?? "").trim();
-  const art = form.get("art");
-  const avatar = form.get("avatar");
+  const check = verifyFanartTicket(body.ticket);
+  if (!check.ok) {
+    return check.reason === "expired"
+      ? fail("หมดเวลาส่งรอบนี้แล้ว กรุณากลับไปแก้ไขแล้วส่งใหม่", 410, "expired")
+      : fail("ข้อมูลที่ส่งมาไม่ถูกต้อง", 400, "invalid");
+  }
+  const { ticket } = check;
+  const index = Number(body.index);
+  const originalPath = Number.isInteger(index) ? ticket.paths[index] : undefined;
+  if (!originalPath) return fail("ข้อมูลที่ส่งมาไม่ถูกต้อง");
 
-  if (!displayName) {
-    return NextResponse.json({ error: "กรุณากรอกชื่อที่แสดง" }, { status: 400 });
-  }
-  if (!isContactChannel(contactChannelRaw)) {
-    return NextResponse.json({ error: "ช่องทางติดต่อไม่ถูกต้อง" }, { status: 400 });
-  }
-  if (!contactHandle.replace(/^@+/, "").trim()) {
-    return NextResponse.json(
-      { error: "กรุณากรอกชื่อช่องทางติดต่อ" },
-      { status: 400 }
-    );
-  }
-  if (!(art instanceof File) || art.size === 0) {
-    return NextResponse.json({ error: "กรุณาอัปโหลดรูปแฟนอาร์ต" }, { status: 400 });
-  }
-  if (!ALLOWED_IMAGE.has(art.type)) {
-    return NextResponse.json(
-      { error: "รูปต้องเป็น JPEG / PNG / WebP" },
-      { status: 400 }
-    );
-  }
-  if (art.size > FANART_LIMITS.maxBytes) {
-    return NextResponse.json(
-      { error: "ไฟล์รูปใหญ่เกินไป (สูงสุด 5 MB)" },
-      { status: 400 }
-    );
-  }
-
-  if (avatar instanceof File && avatar.size > 0) {
-    if (!ALLOWED_IMAGE.has(avatar.type)) {
-      return NextResponse.json(
-        { error: "รูปโปรไฟล์ต้องเป็น JPEG / PNG / WebP" },
-        { status: 400 }
-      );
-    }
-    if (avatar.size > FANART_AVATAR_LIMITS.maxBytes) {
-      return NextResponse.json(
-        { error: "ไฟล์รูปโปรไฟล์ใหญ่เกินไป (สูงสุด 2 MB)" },
-        { status: 400 }
-      );
-    }
-  }
-
-  let artImage: Awaited<ReturnType<typeof processHbdCard>>;
-  let avatarImage: Awaited<ReturnType<typeof processHbdAvatar>> | null = null;
   try {
-    artImage = await processHbdCard(Buffer.from(await art.arrayBuffer()));
-    if (avatar instanceof File && avatar.size > 0) {
-      avatarImage = await processHbdAvatar(Buffer.from(await avatar.arrayBuffer()));
-    }
-  } catch {
-    return NextResponse.json(
-      { error: "อ่านไฟล์รูปไม่ได้ — ลองบันทึกเป็น JPEG / PNG แล้วอัปใหม่" },
-      { status: 400 }
-    );
+    const existing = await findFanartSubmissionByOriginal(originalPath);
+    if (existing) return NextResponse.json({ ok: true, id: existing.id });
+  } catch (error) {
+    console.error("[fanart] lookup failed", error);
+    return fail(TRY_AGAIN, 503);
   }
 
   const supabase = createAdminClient();
-  const id = crypto.randomUUID();
-  const artPath = `art/${id}.${artImage.extension}`;
+  const originals = supabase.storage.from(FANART_ORIGINALS_BUCKET);
 
-  const { error: artUploadError } = await supabase.storage
-    .from(FANART_STORAGE_BUCKET)
-    .upload(artPath, artImage.buffer, {
-      contentType: artImage.contentType,
-      cacheControl: STORAGE_CACHE_SECONDS,
-      upsert: false,
-    });
+  const { data: blob, error: downloadError } = await originals.download(originalPath);
+  if (downloadError || !blob) {
+    return fail("ยังไม่พบไฟล์ที่อัปโหลด กรุณากด ลองใหม่", 404, "missing");
+  }
+  if (blob.size > FANART_LIMITS.maxOriginalBytes) {
+    await originals.remove([originalPath]);
+    return fail("ไฟล์รูปใหญ่เกินไป", 400, "unreadable");
+  }
 
-  if (artUploadError) {
-    return NextResponse.json(
-      { error: `อัปโหลดรูปไม่สำเร็จ: ${artUploadError.message}` },
-      { status: 500 }
+  let processed: Awaited<ReturnType<typeof processFanartOriginal>>;
+  try {
+    processed = await processFanartOriginal(Buffer.from(await blob.arrayBuffer()));
+  } catch {
+    await originals.remove([originalPath]);
+    return fail(
+      "อ่านไฟล์รูปนี้ไม่ได้ ลองบันทึกเป็น JPEG หรือ PNG แล้วเลือกใหม่",
+      400,
+      "unreadable"
     );
   }
 
-  const { data: artPublic } = supabase.storage
+  const id = crypto.randomUUID();
+  const artPath = `art/${id}.${processed.card.extension}`;
+  const { error: artError } = await supabase.storage
     .from(FANART_STORAGE_BUCKET)
-    .getPublicUrl(artPath);
-
-  let avatarPath: string | null = null;
-  let avatarUrl: string | null = null;
-
-  if (avatarImage) {
-    avatarPath = `avatars/${id}.${avatarImage.extension}`;
-    const { error: avatarUploadError } = await supabase.storage
-      .from(FANART_STORAGE_BUCKET)
-      .upload(avatarPath, avatarImage.buffer, {
-        contentType: avatarImage.contentType,
-        cacheControl: STORAGE_CACHE_SECONDS,
-        upsert: false,
-      });
-
-    if (avatarUploadError) {
-      await supabase.storage.from(FANART_STORAGE_BUCKET).remove([artPath]);
-      return NextResponse.json(
-        { error: `อัปโหลดรูปโปรไฟล์ไม่สำเร็จ: ${avatarUploadError.message}` },
-        { status: 500 }
-      );
-    }
-
-    const { data: avatarPublic } = supabase.storage
-      .from(FANART_STORAGE_BUCKET)
-      .getPublicUrl(avatarPath);
-    avatarUrl = avatarPublic.publicUrl;
+    .upload(artPath, processed.card.buffer, {
+      contentType: processed.card.contentType,
+      cacheControl: STORAGE_CACHE_SECONDS,
+      upsert: false,
+    });
+  if (artError) {
+    console.error("[fanart] card upload failed", artError.message);
+    return fail(TRY_AGAIN, 502);
   }
+  const artUrl = supabase.storage.from(FANART_STORAGE_BUCKET).getPublicUrl(artPath).data.publicUrl;
 
   try {
     const row = await createFanartSubmission({
-      displayName,
-      contactChannel: contactChannelRaw,
-      contactHandle: contactHandle.replace(/^@+/, "").trim(),
+      id,
+      displayName: ticket.displayName,
+      contactChannel: ticket.channel,
+      contactHandle: ticket.handle,
       artPath,
-      artUrl: artPublic.publicUrl,
-      avatarPath,
-      avatarUrl,
+      artUrl,
+      avatarPath: ticket.avatarPath,
+      avatarUrl: ticket.avatarUrl,
+      originalPath,
+      originalBytes: blob.size,
+      originalType: processed.info.type,
+      width: processed.info.width,
+      height: processed.info.height,
+      batchId: ticket.batchId,
+      consentAt: ticket.consentAt,
+      consentVersion: ticket.consentVersion,
     });
-
-    return NextResponse.json({ ok: true, id: row.id, status: row.status });
+    return NextResponse.json({ ok: true, id: row.id });
   } catch (error) {
-    const paths = [artPath, avatarPath].filter(Boolean) as string[];
-    if (paths.length) {
-      await supabase.storage.from(FANART_STORAGE_BUCKET).remove(paths);
+    await supabase.storage.from(FANART_STORAGE_BUCKET).remove([artPath]);
+    if (error instanceof DuplicateOriginalError) {
+      // A retry raced the first request; that one saved the row.
+      const existing = await findFanartSubmissionByOriginal(originalPath).catch(() => null);
+      if (existing) return NextResponse.json({ ok: true, id: existing.id });
     }
-    const messageText = error instanceof Error ? error.message : "บันทึกไม่สำเร็จ";
-    return NextResponse.json({ error: messageText }, { status: 500 });
+    console.error("[fanart] insert failed", error);
+    return fail(TRY_AGAIN, 500);
   }
 }

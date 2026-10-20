@@ -213,6 +213,49 @@ function SetTabs({
   );
 }
 
+const CLOSE_DAY = new Intl.DateTimeFormat("th-TH", {
+  timeZone: "Asia/Bangkok",
+  day: "numeric",
+  month: "short",
+});
+const CLOSE_TIME = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Asia/Bangkok",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
+const THAI_WEEKDAY: Record<string, string> = {
+  Sun: "อา.",
+  Mon: "จ.",
+  Tue: "อ.",
+  Wed: "พ.",
+  Thu: "พฤ.",
+  Fri: "ศ.",
+  Sat: "ส.",
+};
+const DAY_PARTS = new Intl.DateTimeFormat("en-US", {
+  timeZone: "Asia/Bangkok",
+  weekday: "short",
+  year: "numeric",
+});
+
+/** "อา. 6 ธ.ค. 2026" (Bangkok, Gregorian year) for Thai sentences; labels use "06 DEC 2026". */
+function thaiDay(iso?: string) {
+  const at = iso ? Date.parse(iso) : Number.NaN;
+  if (!Number.isFinite(at)) return null;
+  const parts = DAY_PARTS.formatToParts(at);
+  const part = (type: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === type)?.value ?? "";
+  return `${THAI_WEEKDAY[part("weekday")] ?? ""} ${CLOSE_DAY.format(at)} ${part("year")}`.trim();
+}
+
+/** "ปิดรับจอง 30 พ.ย. 23:59 น." from `endsAt` (Bangkok time); the headline keeps dates only. */
+function closingLine(endsAt?: string) {
+  const ends = endsAt ? Date.parse(endsAt) : Number.NaN;
+  if (!Number.isFinite(ends)) return null;
+  return `ปิดรับจอง ${CLOSE_DAY.format(ends)} ${CLOSE_TIME.format(ends)} น.`;
+}
+
 type CafeMenuSectionProps = {
   cafe: CafePage;
   show: boolean;
@@ -226,7 +269,7 @@ export function CafeMenuSection({ cafe, show, showDispatch, showGifts }: CafeMen
   const menu = cafe.signatureMenu;
   const sets = cafe.promoSets;
   const preorder = cafe.preorder;
-  const eventDay = cafe.dispatch.schedule.label;
+  const eventDay = thaiDay(cafe.dispatch.schedule.startsAt) ?? cafe.dispatch.schedule.label;
   const priceReady = visiblePrice(preorder?.promo);
   const hidden = !show;
   const now = useNow(1000, Boolean(preorder?.endsAt));
@@ -359,7 +402,7 @@ export function CafeMenuSection({ cafe, show, showDispatch, showGifts }: CafeMen
                 </p>
               </div>
               <div className="px-5 py-5 sm:px-6">
-                <p className={cn(SERIF, "text-[2.1rem] leading-tight font-bold")}>
+                <p className={cn(SERIF, "text-[1.7rem] leading-tight font-bold min-[400px]:text-[2.1rem]")}>
                   {preorder.label}
                 </p>
                 {preorder.endsAt ? (
@@ -368,6 +411,11 @@ export function CafeMenuSection({ cafe, show, showDispatch, showGifts }: CafeMen
                       ปิดจองในอีก
                     </span>
                     <PreorderCountdown endsAt={preorder.endsAt} />
+                  </p>
+                ) : null}
+                {closingLine(preorder.endsAt) ? (
+                  <p className={cn(THAI, "mt-1.5 text-sm font-semibold text-cafe-ink-soft")}>
+                    {closingLine(preorder.endsAt)}
                   </p>
                 ) : null}
                 {preorder.tentative ? (

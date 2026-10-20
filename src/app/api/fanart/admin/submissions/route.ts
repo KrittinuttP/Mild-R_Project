@@ -48,7 +48,7 @@ export async function GET(request: Request) {
     ]);
     return NextResponse.json({ submissions, pendingCount });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "โหลดรายการไม่สำเร็จ";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[fanart] admin request failed", error);
+    return NextResponse.json({ error: "โหลดรายการไม่สำเร็จ" }, { status: 500 });
   }
 }

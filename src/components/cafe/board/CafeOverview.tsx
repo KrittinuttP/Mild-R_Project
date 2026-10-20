@@ -24,6 +24,8 @@ import {
   SERIF,
   Stamp,
   THAI,
+  TILT,
+  tiltStyle,
 } from "@/components/cafe/board/pieces";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { useNow } from "@/hooks/useNow";
@@ -50,7 +52,7 @@ function SetsButtonLabel({ preorder }: { preorder: CafePage["preorder"] }) {
  * is `hidden`, so pins measured by `BoardThread` are always the visible ones.
  */
 
-/** "SUN · 06 · 12 · 2026". Fixed to Bangkok time so server and client agree. */
+/** "SUN · 06 DEC 2026" (date part "06 DEC 2026"). Fixed to Bangkok time so server and client agree. */
 function caseDate(startsAt: string | undefined) {
   if (!startsAt) return null;
   const date = new Date(startsAt);
@@ -59,14 +61,14 @@ function caseDate(startsAt: string | undefined) {
     timeZone: "Asia/Bangkok",
     weekday: "short",
     day: "2-digit",
-    month: "2-digit",
+    month: "short",
     year: "numeric",
   }).formatToParts(date);
   const part = (type: Intl.DateTimeFormatPartTypes) =>
     parts.find((p) => p.type === type)?.value ?? "";
   return {
     weekday: part("weekday").toUpperCase(),
-    date: `${part("day")} · ${part("month")} · ${part("year")}`,
+    date: `${part("day")} ${part("month").toUpperCase()} ${part("year")}`,
   };
 }
 
@@ -79,8 +81,8 @@ function caseDate(startsAt: string | undefined) {
 const THREAD_ROUTES = [
   // Desktop: heart → case-file lock → venue polaroid clip.
   ["heart", "lock", "venue"],
-  // Phone: heart → lock on the date note.
-  ["heart", "lock-m"],
+  // Phone: heart → clip of the venue polaroid pinned beside her.
+  ["heart", "venue-m"],
 ] as const;
 
 type Point = { x: number; y: number; r: number };
@@ -397,28 +399,17 @@ export function CafeOverview({
     ) : null;
 
   // Venue polaroid. Clicking opens the venue photo in the lightbox.
-  const venue = (variant: "wide" | "note") => {
+  const venue = (variant: "wide" | "phone") => {
     const wide = variant === "wide";
-    const frame = wide ? "h-28 w-full" : "h-16 w-full min-[640px]:h-32";
+    const frame = wide ? "h-28 w-full" : "h-28 w-full min-[640px]:h-40";
     const caption = cn(
       SERIF,
-      "mt-1.5 block text-center tracking-[0.16em] text-cafe-ink-soft uppercase",
-      wide ? "text-[9px]" : "text-[7px] min-[640px]:text-[9px]"
+      "mt-1.5 block text-center text-[9px] tracking-[0.16em] text-cafe-ink-soft uppercase"
     );
-    const clip = (
-      <Clip
-        id={wide ? "venue" : undefined}
-        className={wide ? "-top-5 left-4 h-12" : "-top-3.5 left-2.5 h-8 w-3 min-[640px]:-top-5 min-[640px]:h-11 min-[640px]:w-4"}
-      />
-    );
+    const clip = <Clip id={wide ? "venue" : "venue-m"} className="-top-5 left-4 h-12" />;
     if (hidden) {
       return (
-        <span
-          className={cn(
-            "relative block bg-cafe-cream-light shadow-[0_14px_24px_rgba(0,0,0,0.45)]",
-            wide ? "p-2 pb-1.5" : "p-1.5 pb-1 min-[640px]:p-2 min-[640px]:pb-1.5"
-          )}
-        >
+        <span className="relative block bg-cafe-cream-light p-2 pb-1.5 shadow-[0_14px_24px_rgba(0,0,0,0.45)]">
           {clip}
           <EmptyFrame className={frame} />
           <span className={caption}>Venue · Classified</span>
@@ -432,10 +423,7 @@ export function CafeOverview({
         type="button"
         onClick={onOpenVenue}
         aria-label={`ดูรูป: ${location.imageAlt ?? location.label}`}
-        className={cn(
-          "group relative block w-full cursor-zoom-in bg-cafe-cream-light text-left shadow-[0_14px_24px_rgba(0,0,0,0.45)] transition hover:-translate-y-0.5 motion-reduce:transition-none",
-          wide ? "p-2 pb-1.5" : "p-1.5 pb-1 min-[640px]:p-2 min-[640px]:pb-1.5"
-        )}
+        className="group relative block w-full cursor-zoom-in bg-cafe-cream-light p-2 pb-1.5 text-left shadow-[0_14px_24px_rgba(0,0,0,0.45)] transition hover:-translate-y-0.5 motion-reduce:transition-none"
       >
         {clip}
         <ProtectedImage
@@ -448,8 +436,8 @@ export function CafeOverview({
         <span
           data-motion="develop"
           className={cn(
-            "pointer-events-none absolute opacity-0 bg-[radial-gradient(circle_at_50%_45%,rgba(120,98,60,.55),rgba(40,32,20,.92))]",
-            wide ? "inset-x-2 top-2 h-28" : "inset-x-1.5 top-1.5 h-16 min-[640px]:inset-x-2 min-[640px]:top-2 min-[640px]:h-32"
+            "pointer-events-none absolute inset-x-2 top-2 opacity-0 bg-[radial-gradient(circle_at_50%_45%,rgba(120,98,60,.55),rgba(40,32,20,.92))]",
+            frame
           )}
           aria-hidden
         />
@@ -465,6 +453,64 @@ export function CafeOverview({
   ) : (
     schedule.label
   );
+
+  // Date · time · scene · access. Phone rows are narrower and leave no room for the polaroid.
+  const facts = (phone: boolean) => {
+    const row = cn(
+      "grid items-baseline py-2.5",
+      phone ? "grid-cols-[4.5rem_minmax(0,1fr)] gap-2" : "grid-cols-[5.5rem_minmax(0,1fr)] gap-3"
+    );
+    const value = cn(VALUE, phone ? "text-[15px] leading-snug" : "text-[17px]");
+    const besidePhoto = phone ? "" : "pr-36";
+    return (
+      <dl className="divide-y divide-dashed divide-cafe-ink/20">
+        <div className={cn(row, besidePhoto)}>
+          <dt className={KEY}>Date</dt>
+          <dd className={value}>
+            <Fact hidden={hidden} reveal>
+              {dateValue}
+            </Fact>
+            <div className="mt-1.5">{countdownChip(phone ? "text-[12px]" : "text-[12.5px]")}</div>
+          </dd>
+        </div>
+        <div className={cn(row, besidePhoto)}>
+          <dt className={KEY}>Time</dt>
+          <dd className={value}>
+            <Fact hidden={hidden}>{schedule.detail ?? "—"}</Fact>
+          </dd>
+        </div>
+        <div className={row}>
+          <dt className={KEY}>Scene</dt>
+          <dd className={cn(value, "break-words")}>
+            <Fact hidden={hidden} reveal>
+              {location.label}
+            </Fact>
+          </dd>
+        </div>
+        {location.detail || location.mapUrl ? (
+          <div className={cn(row, "items-center py-1.5")}>
+            <dt className={KEY}>Access</dt>
+            <dd className={cn("flex flex-wrap items-center gap-x-2 text-cafe-ink-soft", phone ? "text-[13px]" : "text-[13.5px]")}>
+              {location.detail ? <Fact hidden={hidden}>{location.detail}</Fact> : null}
+              {location.detail && location.mapUrl && !hidden ? <span aria-hidden>·</span> : null}
+              {mapLink(cn("min-h-9 whitespace-nowrap", phone ? "text-[13px]" : "text-[13.5px]"))}
+            </dd>
+          </div>
+        ) : null}
+      </dl>
+    );
+  };
+
+  const caseTab = edition?.caseNo ? (
+    <span
+      className={cn(
+        SERIF,
+        "absolute -top-7 left-14 flex h-7 items-center rounded-t bg-cafe-cream px-4 text-[11px] font-bold tracking-[0.22em] text-cafe-gold-deep uppercase"
+      )}
+    >
+      {edition.caseNo}
+    </span>
+  ) : null;
 
   return (
     <section
@@ -531,58 +577,15 @@ export function CafeOverview({
                 </div>
               </div>
 
-              {/* Phone case notes: date (lock + countdown) and scene (venue photo). */}
-              <div className={cn("flex flex-col gap-3.5 pb-1.5 min-[640px]:w-full min-[640px]:max-w-[480px] min-[640px]:gap-7", "min-[1100px]:hidden")}>
-                <Paper
-                  tilt={1.5}
-                  motion="hero-card"
-                  className="px-3 pt-5 pb-3 min-[640px]:px-6 min-[640px]:pt-7 min-[640px]:pb-5"
+              {/* Phone: the venue polaroid pinned beside her; the thread runs from her heart to its clip. */}
+              <div className={cn("self-start pt-10 min-[640px]:pt-16", "min-[1100px]:hidden")}>
+                <div
+                  data-motion="hero-card"
+                  className={cn(TILT, "mx-auto w-full max-w-[11rem] min-[640px]:max-w-[16rem]")}
+                  style={tiltStyle(5)}
                 >
-                  <CaseLock id="lock-m" sealed={hidden} className="top-0 left-1" />
-                  <p className={KEY}>Date</p>
-                  <p className={cn(VALUE, "mt-1 text-[15px] leading-tight min-[640px]:text-[22px]")}>
-                    <Fact hidden={hidden} reveal>
-                      {when ? when.date : schedule.label}
-                    </Fact>
-                  </p>
-                  <p className="mt-1 text-[11.5px] text-cafe-ink-soft min-[640px]:text-sm">
-                    <Fact hidden={hidden}>
-                      {when ? `${when.weekday} · ` : ""}
-                      {schedule.detail ? `${schedule.detail} น.` : ""}
-                    </Fact>
-                  </p>
-                  <div className="mt-2 min-[640px]:mt-3">{countdownChip("text-[11px] min-[640px]:text-sm")}</div>
-                  {hidden ? <ClassifiedStamp small /> : null}
-                </Paper>
-                <Paper
-                  tilt={-1.5}
-                  pin="scene-m"
-                  motion="hero-card"
-                  className="px-3 pt-4 pb-3 min-[640px]:px-6 min-[640px]:pt-6 min-[640px]:pb-6"
-                >
-                  <p className={KEY}>Scene</p>
-                  <p className={cn(VALUE, "mt-1 text-[14.5px] leading-tight break-words min-[640px]:text-xl")}>
-                    <Fact hidden={hidden} reveal>
-                      {location.label}
-                    </Fact>
-                  </p>
-                  {location.detail ? (
-                    <p className="mt-1 text-[11.5px] text-cafe-ink-soft min-[640px]:text-sm">
-                      <Fact hidden={hidden}>{location.detail}</Fact>
-                    </p>
-                  ) : null}
-                  {mapLink("min-h-9 text-xs min-[640px]:min-h-11 min-[640px]:text-sm")}
-                  <div className="mt-2.5 rotate-[-2deg] min-[640px]:mt-4 min-[640px]:max-w-[80%]">{venue("note")}</div>
-                  {hidden ? <ClassifiedStamp small /> : null}
-                  {statusLabel ? (
-                    <Stamp
-                      motion="hero-stamp"
-                      className="absolute -right-2 -bottom-4 z-20 rotate-[-7deg] bg-cafe-cream/90 px-1.5 text-[9px] whitespace-nowrap min-[640px]:-right-4 min-[640px]:-bottom-5 min-[640px]:px-2 min-[640px]:text-xs"
-                    >
-                      {statusLabel}
-                    </Stamp>
-                  ) : null}
-                </Paper>
+                  {venue("phone")}
+                </div>
               </div>
             </div>
 
@@ -623,57 +626,12 @@ export function CafeOverview({
                 )}
               >
                 <CaseLock id="lock" sealed={hidden} className="top-0.5 left-8" />
-                {edition?.caseNo ? (
-                  <span
-                    className={cn(
-                      SERIF,
-                      "absolute -top-7 left-14 flex h-7 items-center rounded-t bg-cafe-cream px-4 text-[11px] font-bold tracking-[0.22em] text-cafe-gold-deep uppercase"
-                    )}
-                  >
-                    {edition.caseNo}
-                  </span>
-                ) : null}
+                {caseTab}
                 <div className="absolute -top-6 -right-10 z-20 w-44 rotate-[5deg]">
                   {venue("wide")}
                 </div>
 
-                <dl className="divide-y divide-dashed divide-cafe-ink/20">
-                  <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-baseline gap-3 py-2.5 pr-36">
-                    <dt className={KEY}>Date</dt>
-                    <dd className={cn(VALUE, "text-[17px]")}>
-                      <Fact hidden={hidden} reveal>
-                        {dateValue}
-                      </Fact>
-                      <div className="mt-1.5">{countdownChip("text-[12.5px]")}</div>
-                    </dd>
-                  </div>
-                  <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-baseline gap-3 py-2.5 pr-36">
-                    <dt className={KEY}>Time</dt>
-                    <dd className={cn(VALUE, "text-[17px]")}>
-                      <Fact hidden={hidden}>{schedule.detail ?? "—"}</Fact>
-                    </dd>
-                  </div>
-                  <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-baseline gap-3 py-2.5">
-                    <dt className={KEY}>Scene</dt>
-                    <dd className={cn(VALUE, "text-[17px]")}>
-                      <Fact hidden={hidden} reveal>
-                        {location.label}
-                      </Fact>
-                    </dd>
-                  </div>
-                  {location.detail || location.mapUrl ? (
-                    <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-center gap-3 py-1.5">
-                      <dt className={KEY}>Access</dt>
-                      <dd className="flex flex-wrap items-center gap-x-2 text-[13.5px] text-cafe-ink-soft">
-                        {location.detail ? (
-                          <Fact hidden={hidden}>{location.detail}</Fact>
-                        ) : null}
-                        {location.detail && location.mapUrl && !hidden ? <span aria-hidden>·</span> : null}
-                        {mapLink("min-h-9 text-[13.5px]")}
-                      </dd>
-                    </div>
-                  ) : null}
-                </dl>
+                {facts(false)}
                 {hidden ? <ClassifiedStamp /> : null}
                 {statusLabel ? (
                   <Stamp
@@ -685,10 +643,33 @@ export function CafeOverview({
                 ) : null}
               </Paper>
 
+              {/* Phone case file: the same facts as desktop, full width and upright enough to read. */}
+              <Paper
+                tilt={0.6}
+                motion="hero-card"
+                className={cn(
+                  "order-3 mt-12 w-full px-4 pt-5 pb-6 min-[640px]:mx-auto min-[640px]:max-w-[560px] min-[640px]:px-6",
+                  "min-[1100px]:hidden"
+                )}
+              >
+                <CaseLock id="lock-m" sealed={hidden} className="top-0.5 left-7" />
+                {caseTab}
+                {facts(true)}
+                {hidden ? <ClassifiedStamp small /> : null}
+                {statusLabel ? (
+                  <Stamp
+                    motion="hero-stamp"
+                    className="absolute right-3 -bottom-4 z-20 rotate-[-7deg] bg-cafe-cream/90 px-1.5 text-[10px] whitespace-nowrap min-[640px]:text-xs"
+                  >
+                    {statusLabel}
+                  </Stamp>
+                ) : null}
+              </Paper>
+
               <div
                 data-motion="hero-meta"
                 className={cn(
-                  "order-3 mt-7 flex flex-col gap-3 min-[640px]:mt-12 min-[640px]:flex-row min-[640px]:justify-center",
+                  "order-4 mt-9 flex flex-col gap-3 min-[640px]:mt-12 min-[640px]:flex-row min-[640px]:justify-center",
                   "min-[1100px]:order-none min-[1100px]:mt-10 min-[1100px]:flex-row min-[1100px]:justify-center"
                 )}
               >

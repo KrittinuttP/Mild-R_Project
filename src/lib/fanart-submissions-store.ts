@@ -1,7 +1,12 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { FanartContactChannel } from "@/lib/fanart-upload";
 
+/** Public: the 2048 px WebP copies and avatars. */
 export const FANART_STORAGE_BUCKET = "fanart-uploads";
+/** Private: originals kept for printing. */
+export const FANART_ORIGINALS_BUCKET = "fanart-originals";
+
+const VIEW = "mild_r_fanart_submissions";
 
 export type FanartSubmissionStatus =
   | "pending"
@@ -22,17 +27,43 @@ export type FanartSubmissionRow = {
   created_at: string;
   approved_at: string | null;
   reviewed_at: string | null;
+  /** Null for submissions made before originals were kept. */
+  original_path: string | null;
+  original_bytes: number | null;
+  original_type: string | null;
+  width: number | null;
+  height: number | null;
+  batch_id: string | null;
+  consent_at: string | null;
+  consent_version: string | null;
 };
 
 export type CreateFanartSubmissionInput = {
+  id: string;
   displayName: string;
   contactChannel: FanartContactChannel;
   contactHandle: string;
   artPath: string;
   artUrl: string;
-  avatarPath?: string | null;
-  avatarUrl?: string | null;
+  avatarPath: string | null;
+  avatarUrl: string | null;
+  originalPath: string;
+  originalBytes: number;
+  originalType: string;
+  width: number;
+  height: number;
+  batchId: string;
+  consentAt: string;
+  consentVersion: string;
 };
+
+function nullableNumber(value: unknown): number | null {
+  return typeof value === "number" ? value : value == null ? null : Number(value);
+}
+
+function nullableString(value: unknown): string | null {
+  return value == null ? null : String(value);
+}
 
 function mapRow(row: Record<string, unknown>): FanartSubmissionRow {
   return {
@@ -42,12 +73,20 @@ function mapRow(row: Record<string, unknown>): FanartSubmissionRow {
     contact_handle: String(row.contact_handle),
     art_path: String(row.art_path),
     art_url: String(row.art_url),
-    avatar_path: (row.avatar_path as string | null) ?? null,
-    avatar_url: (row.avatar_url as string | null) ?? null,
+    avatar_path: nullableString(row.avatar_path),
+    avatar_url: nullableString(row.avatar_url),
     status: row.status as FanartSubmissionStatus,
     created_at: String(row.created_at),
-    approved_at: (row.approved_at as string | null) ?? null,
-    reviewed_at: (row.reviewed_at as string | null) ?? null,
+    approved_at: nullableString(row.approved_at),
+    reviewed_at: nullableString(row.reviewed_at),
+    original_path: nullableString(row.original_path),
+    original_bytes: nullableNumber(row.original_bytes),
+    original_type: nullableString(row.original_type),
+    width: nullableNumber(row.width),
+    height: nullableNumber(row.height),
+    batch_id: nullableString(row.batch_id),
+    consent_at: nullableString(row.consent_at),
+    consent_version: nullableString(row.consent_version),
   };
 }
 
@@ -55,7 +94,7 @@ export async function countPendingFanartSubmissions(): Promise<number> {
   try {
     const supabase = createAdminClient();
     const { count, error } = await supabase
-      .from("mild_r_fanart_submissions")
+      .from(VIEW)
       .select("id", { count: "exact", head: true })
       .eq("status", "pending");
     if (error) return 0;
@@ -70,7 +109,7 @@ export async function listFanartSubmissions(
 ): Promise<FanartSubmissionRow[]> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
-    .from("mild_r_fanart_submissions")
+    .from(VIEW)
     .select("*")
     .in("status", statuses)
     .order("created_at", { ascending: false });
@@ -78,26 +117,69 @@ export async function listFanartSubmissions(
   return (data ?? []).map((row) => mapRow(row as Record<string, unknown>));
 }
 
+export async function getFanartSubmission(id: string): Promise<FanartSubmissionRow | null> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase.from(VIEW).select("*").eq("id", id).maybeSingle();
+  if (error) throw new Error(error.message);
+  return data ? mapRow(data as Record<string, unknown>) : null;
+}
+
+export async function findFanartSubmissionByOriginal(
+  originalPath: string
+): Promise<FanartSubmissionRow | null> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from(VIEW)
+    .select("*")
+    .eq("original_path", originalPath)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return data ? mapRow(data as Record<string, unknown>) : null;
+}
+
+/** Postgres unique_violation: another request already saved this original. */
+export class DuplicateOriginalError extends Error {}
+
 export async function createFanartSubmission(
   input: CreateFanartSubmissionInput
 ): Promise<FanartSubmissionRow> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
-    .from("mild_r_fanart_submissions")
+    .from(VIEW)
     .insert({
+      id: input.id,
       display_name: input.displayName,
       contact_channel: input.contactChannel,
       contact_handle: input.contactHandle,
       art_path: input.artPath,
       art_url: input.artUrl,
-      avatar_path: input.avatarPath ?? null,
-      avatar_url: input.avatarUrl ?? null,
+      avatar_path: input.avatarPath,
+      avatar_url: input.avatarUrl,
       status: "pending",
+      original_path: input.originalPath,
+      original_bytes: input.originalBytes,
+      original_type: input.originalType,
+      width: input.width,
+      height: input.height,
+      batch_id: input.batchId,
+      consent_at: input.consentAt,
+      consent_version: input.consentVersion,
     })
     .select("*")
     .single();
-  if (error) throw new Error(error.message);
+  if (error) {
+    if (error.code === "23505") throw new DuplicateOriginalError(error.message);
+    throw new Error(error.message);
+  }
   return mapRow(data as Record<string, unknown>);
+}
+
+/** Bytes stored across every bucket (Free plan storage is project-wide). */
+export async function getStorageUsedBytes(): Promise<number> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase.rpc("mild_r_storage_used_bytes");
+  if (error) throw new Error(error.message);
+  return Number(data ?? 0);
 }
 
 export async function approveFanartSubmission(
@@ -106,7 +188,7 @@ export async function approveFanartSubmission(
   const supabase = createAdminClient();
   const now = new Date().toISOString();
   const { data, error } = await supabase
-    .from("mild_r_fanart_submissions")
+    .from(VIEW)
     .update({ status: "approved", approved_at: now, reviewed_at: now })
     .eq("id", id)
     .eq("status", "pending")
@@ -116,18 +198,32 @@ export async function approveFanartSubmission(
   return mapRow(data as Record<string, unknown>);
 }
 
+/**
+ * Rejected pictures are not used, so their print original is deleted to free
+ * storage. The small WebP copy stays as the record of what was sent.
+ */
 export async function rejectFanartSubmission(
   id: string
 ): Promise<FanartSubmissionRow> {
   const supabase = createAdminClient();
   const now = new Date().toISOString();
   const { data, error } = await supabase
-    .from("mild_r_fanart_submissions")
+    .from(VIEW)
     .update({ status: "rejected", reviewed_at: now })
     .eq("id", id)
     .eq("status", "pending")
     .select("*")
     .single();
   if (error) throw new Error(error.message);
-  return mapRow(data as Record<string, unknown>);
+  const row = mapRow(data as Record<string, unknown>);
+
+  if (row.original_path) {
+    const { error: removeError } = await supabase.storage
+      .from(FANART_ORIGINALS_BUCKET)
+      .remove([row.original_path]);
+    if (removeError) {
+      console.error("[fanart] could not delete rejected original", row.id, removeError.message);
+    }
+  }
+  return row;
 }
