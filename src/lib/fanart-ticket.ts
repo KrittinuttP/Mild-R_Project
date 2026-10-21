@@ -1,6 +1,6 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 
-import type { FanartContactChannel } from "@/lib/fanart-upload";
+import type { FanartContactChannel, FanartCredit } from "@/lib/fanart-upload";
 
 /**
  * Server-only. What /api/fanart/upload-url checked, signed so each
@@ -16,6 +16,8 @@ export type FanartTicket = {
   avatarUrl: string | null;
   /** Object paths in the fanart-originals bucket, in the fan's order. */
   paths: string[];
+  /** Credit per picture, same order as `paths`. */
+  credits: FanartCredit[];
   consentAt: string;
   consentVersion: string;
   /** Unix ms. */
@@ -61,7 +63,9 @@ export function verifyFanartTicket(raw: unknown): TicketCheck {
   } catch {
     return { ok: false, reason: "invalid" };
   }
-  if (ticket.v !== 1 || !Array.isArray(ticket.paths)) return { ok: false, reason: "invalid" };
+  if (ticket.v !== 1 || !Array.isArray(ticket.paths) || !Array.isArray(ticket.credits)) {
+    return { ok: false, reason: "invalid" };
+  }
   if (Date.now() > ticket.exp) return { ok: false, reason: "expired" };
   return { ok: true, ticket };
 }

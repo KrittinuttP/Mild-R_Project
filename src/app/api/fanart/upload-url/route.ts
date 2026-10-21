@@ -5,9 +5,10 @@ import {
   FANART_CONSENT,
   FANART_LIMITS,
   checkContactHandle,
+  checkCredit,
   checkDisplayName,
-  isContactChannel,
   isFanartMimeType,
+  type FanartCredit,
   type FanartMimeType,
 } from "@/lib/fanart-upload";
 import {
@@ -67,6 +68,35 @@ function readFileClaims(raw: FormDataEntryValue | null): FileClaim[] | string {
 }
 
 /**
+ * One credit per picture. A missing or empty entry means the fan's own X
+ * account, which is also the default on the form.
+ */
+function readCredits(raw: FormDataEntryValue | null, count: number, handle: string): FanartCredit[] | string {
+  let parsed: unknown = [];
+  if (raw !== null) {
+    try {
+      parsed = JSON.parse(String(raw));
+    } catch {
+      return "เครดิตไม่ถูกต้อง";
+    }
+  }
+  if (!Array.isArray(parsed) || parsed.length > count) return "เครดิตไม่ถูกต้อง";
+  const credits: FanartCredit[] = [];
+  for (let index = 0; index < count; index += 1) {
+    const item = parsed[index] as { type?: unknown; value?: unknown } | null | undefined;
+    const value = typeof item?.value === "string" ? item.value : "";
+    if (!item || !value.trim()) {
+      credits.push({ type: "x", value: handle });
+      continue;
+    }
+    const checked = checkCredit(String(item.type ?? ""), value);
+    if ("error" in checked) return `รูปที่ ${index + 1} · ${checked.error}`;
+    credits.push(checked.credit);
+  }
+  return credits;
+}
+
+/**
  * Step 1 of sending fan art: checks the form and hands back one signed upload
  * URL per picture plus a signed ticket for /api/fanart/submit.
  */
@@ -89,13 +119,16 @@ export async function POST(request: Request) {
   const name = checkDisplayName(String(form.get("displayName") ?? ""));
   if ("error" in name) return fail(name.error);
 
-  const channel = String(form.get("contactChannel") ?? "");
-  if (!isContactChannel(channel)) return fail("ช่องทางติดต่อไม่ถูกต้อง");
+  // Contact is an X account only (Discord was dropped on 2026-10-21).
+  const channel = "x" as const;
   const handle = checkContactHandle(channel, String(form.get("contactHandle") ?? ""));
   if ("error" in handle) return fail(handle.error);
 
   const claims = readFileClaims(form.get("files"));
   if (typeof claims === "string") return fail(claims);
+
+  const credits = readCredits(form.get("credits"), claims.length, handle.handle);
+  if (typeof credits === "string") return fail(credits);
 
   const avatar = form.get("avatar");
   const hasAvatar = avatar instanceof File && avatar.size > 0;
@@ -164,6 +197,7 @@ export async function POST(request: Request) {
     avatarPath,
     avatarUrl,
     paths: uploads.map((upload) => upload.path),
+    credits,
     consentAt: new Date().toISOString(),
     consentVersion: FANART_CONSENT.version,
     exp: Date.now() + FANART_TICKET_TTL_MS,

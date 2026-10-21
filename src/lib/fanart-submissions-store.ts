@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { FanartContactChannel } from "@/lib/fanart-upload";
+import type { FanartContactChannel, FanartCreditType } from "@/lib/fanart-upload";
 
 /** Public: the 2048 px WebP copies and avatars. */
 export const FANART_STORAGE_BUCKET = "fanart-uploads";
@@ -36,6 +36,9 @@ export type FanartSubmissionRow = {
   batch_id: string | null;
   consent_at: string | null;
   consent_version: string | null;
+  /** Null for submissions made before credits: the contact handle is the credit. */
+  credit_type: FanartCreditType | null;
+  credit_value: string | null;
 };
 
 export type CreateFanartSubmissionInput = {
@@ -55,6 +58,8 @@ export type CreateFanartSubmissionInput = {
   batchId: string;
   consentAt: string;
   consentVersion: string;
+  creditType: FanartCreditType;
+  creditValue: string;
 };
 
 function nullableNumber(value: unknown): number | null {
@@ -87,6 +92,8 @@ function mapRow(row: Record<string, unknown>): FanartSubmissionRow {
     batch_id: nullableString(row.batch_id),
     consent_at: nullableString(row.consent_at),
     consent_version: nullableString(row.consent_version),
+    credit_type: (nullableString(row.credit_type) as FanartCreditType | null) ?? null,
+    credit_value: nullableString(row.credit_value),
   };
 }
 
@@ -164,6 +171,8 @@ export async function createFanartSubmission(
       batch_id: input.batchId,
       consent_at: input.consentAt,
       consent_version: input.consentVersion,
+      credit_type: input.creditType,
+      credit_value: input.creditValue,
     })
     .select("*")
     .single();

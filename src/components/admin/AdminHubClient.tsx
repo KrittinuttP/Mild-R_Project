@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Activity,
   ArrowLeft,
@@ -22,6 +23,7 @@ import {
 
 import { BackLink } from "@/components/layout/BackLink";
 import { buttonVariants } from "@/components/ui/button";
+import { safeAdminNext } from "@/lib/admin-next";
 import {
   CTA_OUTLINE_CLASS,
   CTA_PRIMARY_CLASS,
@@ -95,7 +97,13 @@ const TOOLS: AdminTool[] = [
   },
 ];
 
+/** `?next=` from a page that sent the visitor here to unlock. */
+function nextAdminPage() {
+  return safeAdminNext(new URLSearchParams(window.location.search).get("next"));
+}
+
 export function AdminHubClient() {
+  const router = useRouter();
   const [unlocked, setUnlocked] = useState(false);
   const [checking, setChecking] = useState(true);
   const [password, setPassword] = useState("");
@@ -112,6 +120,11 @@ export function AdminHubClient() {
         const data = (await res.json()) as { unlocked?: boolean };
         if (cancelled) return;
         if (data.unlocked) {
+          const next = nextAdminPage();
+          if (next) {
+            router.replace(next);
+            return;
+          }
           setUnlocked(true);
           try {
             const countRes = await fetch(
@@ -145,7 +158,7 @@ export function AdminHubClient() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [router]);
 
   async function unlock(event: FormEvent) {
     event.preventDefault();
@@ -163,6 +176,11 @@ export function AdminHubClient() {
       return;
     }
     setPassword("");
+    const next = nextAdminPage();
+    if (next) {
+      router.replace(next);
+      return;
+    }
     setUnlocked(true);
     try {
       const countRes = await fetch("/api/hbd/admin/submissions?countOnly=1");

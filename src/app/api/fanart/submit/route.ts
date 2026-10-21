@@ -117,6 +117,8 @@ export async function POST(request: Request) {
       batchId: ticket.batchId,
       consentAt: ticket.consentAt,
       consentVersion: ticket.consentVersion,
+      creditType: ticket.credits[index]?.type ?? "x",
+      creditValue: ticket.credits[index]?.value ?? ticket.handle,
     });
     return NextResponse.json({ ok: true, id: row.id });
   } catch (error) {
@@ -127,6 +129,13 @@ export async function POST(request: Request) {
       if (existing) return NextResponse.json({ ok: true, id: existing.id });
     }
     console.error("[fanart] insert failed", error);
+    // Local dev only: show why, so a missing migration is obvious.
+    if (process.env.NODE_ENV === "development") {
+      return NextResponse.json(
+        { error: TRY_AGAIN, detail: error instanceof Error ? error.message : String(error) },
+        { status: 500 }
+      );
+    }
     return fail(TRY_AGAIN, 500);
   }
 }
