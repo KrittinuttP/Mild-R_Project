@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 
 import { GalleryBoard } from "@/components/gallery/GalleryBoard";
@@ -38,6 +39,8 @@ type GallerySectionProps = {
   viewAllHref?: string;
   backHref?: string;
   backLabel?: string;
+  /** Shown instead of the board when there are no items. */
+  empty?: ReactNode;
   className?: string;
 };
 
@@ -55,6 +58,7 @@ export function GallerySection({
   viewAllHref,
   backHref,
   backLabel = "กลับหน้าแรก",
+  empty,
   className,
 }: GallerySectionProps) {
   const size: HeadingSize = headingSize ?? (mode === "full" ? "h1" : "h2");
@@ -105,12 +109,16 @@ export function GallerySection({
           ) : null}
         </ScrollReveal>
 
-        <GalleryBoard
-          items={items}
-          variant={variant}
-          mode={mode}
-          viewAllHref={viewAllHref}
-        />
+        {items.length === 0 && empty ? (
+          empty
+        ) : (
+          <GalleryBoard
+            items={items}
+            variant={variant}
+            mode={mode}
+            viewAllHref={viewAllHref}
+          />
+        )}
       </div>
     </section>
   );

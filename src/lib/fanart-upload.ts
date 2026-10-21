@@ -32,6 +32,8 @@ export const FANART_AVATAR_LIMITS = {
 
 export const FANART_IMAGE_SIZES = {
   artMaxEdge: 2048,
+  /** Gallery tile; the lightbox uses the 2048 px copy. */
+  thumbMaxEdge: 720,
   avatarSize: 512,
   avatarClientMaxEdge: 1024,
 } as const;

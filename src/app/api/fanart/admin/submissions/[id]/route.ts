@@ -1,8 +1,11 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
 import {
   approveFanartSubmission,
+  deleteFanartSubmission,
   rejectFanartSubmission,
+  setFanartHidden,
 } from "@/lib/fanart-submissions-store";
 import { isSiteAdminUnlocked } from "@/lib/site-admin-auth";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -10,7 +13,15 @@ import { isSupabaseConfigured } from "@/lib/supabase/env";
 export const runtime = "nodejs";
 
 type RouteContext = { params: Promise<{ id: string }> };
-type Action = "approve" | "reject";
+
+const ACTIONS = ["approve", "reject", "hide", "unhide", "delete"] as const;
+type Action = (typeof ACTIONS)[number];
+
+/** Pages that show approved fan art. */
+function refreshGallery() {
+  revalidatePath("/gallery/fanart");
+  revalidatePath("/");
+}
 
 export async function POST(request: Request, context: RouteContext) {
   if (!(await isSiteAdminUnlocked())) {
@@ -30,16 +41,31 @@ export async function POST(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const action: Action = body.action === "reject" ? "reject" : "approve";
+  const action = ACTIONS.find((name) => name === body.action) as Action | undefined;
+  if (!action) return NextResponse.json({ error: "ไม่รู้จักคำสั่งนี้" }, { status: 400 });
 
   try {
-    const submission =
-      action === "approve"
-        ? await approveFanartSubmission(id)
-        : await rejectFanartSubmission(id);
-    return NextResponse.json({ ok: true, submission });
+    switch (action) {
+      case "approve":
+        await approveFanartSubmission(id);
+        break;
+      case "reject":
+        await rejectFanartSubmission(id);
+        break;
+      case "hide":
+        await setFanartHidden(id, true);
+        break;
+      case "unhide":
+        await setFanartHidden(id, false);
+        break;
+      case "delete":
+        await deleteFanartSubmission(id);
+        break;
+    }
+    if (action !== "reject") refreshGallery();
+    return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("[fanart] admin request failed", error);
+    console.error("[fanart] admin request failed", action, error);
     return NextResponse.json({ error: "อัปเดตไม่สำเร็จ" }, { status: 500 });
   }
 }

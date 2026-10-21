@@ -99,6 +99,21 @@ export async function POST(request: Request) {
   }
   const artUrl = supabase.storage.from(FANART_STORAGE_BUCKET).getPublicUrl(artPath).data.publicUrl;
 
+  const thumbPath = `thumbs/${id}.${processed.thumb.extension}`;
+  const { error: thumbError } = await supabase.storage
+    .from(FANART_STORAGE_BUCKET)
+    .upload(thumbPath, processed.thumb.buffer, {
+      contentType: processed.thumb.contentType,
+      cacheControl: STORAGE_CACHE_SECONDS,
+      upsert: false,
+    });
+  if (thumbError) {
+    console.error("[fanart] thumb upload failed", thumbError.message);
+    await supabase.storage.from(FANART_STORAGE_BUCKET).remove([artPath]);
+    return fail(TRY_AGAIN, 502);
+  }
+  const thumbUrl = supabase.storage.from(FANART_STORAGE_BUCKET).getPublicUrl(thumbPath).data.publicUrl;
+
   try {
     const row = await createFanartSubmission({
       id,
@@ -107,6 +122,8 @@ export async function POST(request: Request) {
       contactHandle: ticket.handle,
       artPath,
       artUrl,
+      thumbPath,
+      thumbUrl,
       avatarPath: ticket.avatarPath,
       avatarUrl: ticket.avatarUrl,
       originalPath,
@@ -122,7 +139,7 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ ok: true, id: row.id });
   } catch (error) {
-    await supabase.storage.from(FANART_STORAGE_BUCKET).remove([artPath]);
+    await supabase.storage.from(FANART_STORAGE_BUCKET).remove([artPath, thumbPath]);
     if (error instanceof DuplicateOriginalError) {
       // A retry raced the first request; that one saved the row.
       const existing = await findFanartSubmissionByOriginal(originalPath).catch(() => null);

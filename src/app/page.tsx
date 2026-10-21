@@ -16,6 +16,7 @@ import { Membership } from "@/components/sections/Membership";
 import { Projects } from "@/components/sections/Projects";
 import { Socials } from "@/components/sections/Socials";
 import { getEventsBoard, mildRData } from "@/data/vtuber-data";
+import { listGalleryFanArt } from "@/lib/fanart-submissions-store";
 import { surroundingWeeksRangeYmdBangkok } from "@/lib/events";
 import {
   loadLiveStreamsInRange,
@@ -38,8 +39,8 @@ async function loadInitialLiveSchedule(): Promise<InitialLiveSchedule | null> {
 }
 
 export default async function Home() {
-  const [{ posts: xPosts, retweets: xRetweets }, initialLiveSchedule] =
-    await Promise.all([loadXFeedTabs(), loadInitialLiveSchedule()]);
+  const [{ posts: xPosts, retweets: xRetweets }, initialLiveSchedule, fanArt] =
+    await Promise.all([loadXFeedTabs(), loadInitialLiveSchedule(), listGalleryFanArt(24)]);
 
   return (
     <>
@@ -56,7 +57,7 @@ export default async function Home() {
         <LiveTeaser initialLiveSchedule={initialLiveSchedule} />
         <Media data={mildRData} />
         <EventsTeaser board={getEventsBoard()} />
-        <Gallery data={mildRData} />
+        <Gallery data={mildRData} fanArt={fanArt} />
         <Projects data={mildRData} />
         <Socials data={mildRData} xPosts={xPosts} xRetweets={xRetweets} />
       </main>

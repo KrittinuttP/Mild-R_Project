@@ -27,11 +27,12 @@ export type FanartCard = {
 
 /**
  * Checks that an uploaded original is a real JPEG / PNG / WebP and makes the
- * 2048 px WebP copy shown in admin. Throws when the file cannot be decoded.
+ * 2048 px WebP copy (admin, lightbox) and a 720 px one (gallery tiles).
+ * Throws when the file cannot be decoded.
  */
 export async function processFanartOriginal(
   input: Buffer
-): Promise<{ info: FanartOriginalInfo; card: FanartCard }> {
+): Promise<{ info: FanartOriginalInfo; card: FanartCard; thumb: FanartCard }> {
   const image = sharp(input, { limitInputPixels: MAX_INPUT_PIXELS, failOn: "error" });
   const meta = await image.metadata();
   const type = meta.format ? FORMAT_TO_MIME[meta.format] : undefined;
@@ -52,5 +53,15 @@ export async function processFanartOriginal(
     .webp({ quality: 85, effort: 5 })
     .toBuffer();
 
-  return { info, card: { buffer, contentType: "image/webp", extension: "webp" } };
+  const thumbEdge = FANART_IMAGE_SIZES.thumbMaxEdge;
+  const thumb = await sharp(buffer)
+    .resize({ width: thumbEdge, height: thumbEdge, fit: "inside", withoutEnlargement: true })
+    .webp({ quality: 80, effort: 5 })
+    .toBuffer();
+
+  return {
+    info,
+    card: { buffer, contentType: "image/webp", extension: "webp" },
+    thumb: { buffer: thumb, contentType: "image/webp", extension: "webp" },
+  };
 }

@@ -13,7 +13,7 @@ export const runtime = "nodejs";
 const TAB_STATUSES: Record<string, FanartSubmissionStatus[]> = {
   pending: ["pending"],
   approved: ["approved"],
-  hidden: ["hidden", "rejected"],
+  hidden: ["hidden"],
 };
 
 export async function GET(request: Request) {

@@ -1,5 +1,12 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { FanartContactChannel, FanartCreditType } from "@/lib/fanart-upload";
+import {
+  creditHref,
+  creditLabel,
+  type FanartContactChannel,
+  type FanartCredit,
+  type FanartCreditType,
+} from "@/lib/fanart-upload";
+import type { FanArtItem, GalleryTileSize } from "@/types/vtuber";
 
 /** Public: the 2048 px WebP copies and avatars. */
 export const FANART_STORAGE_BUCKET = "fanart-uploads";
@@ -39,6 +46,9 @@ export type FanartSubmissionRow = {
   /** Null for submissions made before credits: the contact handle is the credit. */
   credit_type: FanartCreditType | null;
   credit_value: string | null;
+  /** 720 px WebP for gallery tiles; null for pictures sent before thumbnails. */
+  thumb_path: string | null;
+  thumb_url: string | null;
 };
 
 export type CreateFanartSubmissionInput = {
@@ -48,6 +58,8 @@ export type CreateFanartSubmissionInput = {
   contactHandle: string;
   artPath: string;
   artUrl: string;
+  thumbPath: string;
+  thumbUrl: string;
   avatarPath: string | null;
   avatarUrl: string | null;
   originalPath: string;
@@ -94,6 +106,8 @@ function mapRow(row: Record<string, unknown>): FanartSubmissionRow {
     consent_version: nullableString(row.consent_version),
     credit_type: (nullableString(row.credit_type) as FanartCreditType | null) ?? null,
     credit_value: nullableString(row.credit_value),
+    thumb_path: nullableString(row.thumb_path),
+    thumb_url: nullableString(row.thumb_url),
   };
 }
 
@@ -160,6 +174,8 @@ export async function createFanartSubmission(
       contact_handle: input.contactHandle,
       art_path: input.artPath,
       art_url: input.artUrl,
+      thumb_path: input.thumbPath,
+      thumb_url: input.thumbUrl,
       avatar_path: input.avatarPath,
       avatar_url: input.avatarUrl,
       status: "pending",
@@ -235,4 +251,97 @@ export async function rejectFanartSubmission(
     }
   }
   return row;
+}
+
+/** Approved → hidden (off the gallery, kept) or hidden → approved. */
+export async function setFanartHidden(id: string, hidden: boolean): Promise<FanartSubmissionRow> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from(VIEW)
+    .update({ status: hidden ? "hidden" : "approved", reviewed_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("status", hidden ? "approved" : "hidden")
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+  return mapRow(data as Record<string, unknown>);
+}
+
+/**
+ * Deletes a submission for good: the row, its WebP copies and the print
+ * original. The avatar goes too unless another picture of the batch uses it.
+ */
+export async function deleteFanartSubmission(id: string): Promise<void> {
+  const supabase = createAdminClient();
+  const row = await getFanartSubmission(id);
+  if (!row) throw new Error("not found");
+
+  const { error } = await supabase.from(VIEW).delete().eq("id", id);
+  if (error) throw new Error(error.message);
+
+  const publicPaths = [row.art_path, row.thumb_path].filter(Boolean) as string[];
+  if (row.avatar_path) {
+    const { count } = await supabase
+      .from(VIEW)
+      .select("id", { count: "exact", head: true })
+      .eq("avatar_path", row.avatar_path);
+    if (!count) publicPaths.push(row.avatar_path);
+  }
+  const removals = [
+    publicPaths.length ? supabase.storage.from(FANART_STORAGE_BUCKET).remove(publicPaths) : null,
+    row.original_path ? supabase.storage.from(FANART_ORIGINALS_BUCKET).remove([row.original_path]) : null,
+  ];
+  for (const result of await Promise.all(removals)) {
+    if (result?.error) console.error("[fanart] could not delete file", id, result.error.message);
+  }
+}
+
+/** Tile shape from the picture's own proportions. */
+function tileSize(width: number | null, height: number | null): GalleryTileSize {
+  if (!width || !height) return "md";
+  const ratio = height / width;
+  if (ratio >= 1.3) return "tall";
+  if (ratio <= 0.72) return "wide";
+  return "md";
+}
+
+/**
+ * Approved fan art for the public gallery, newest first. Contact details are
+ * not included. Empty when Supabase is not reachable (the page still renders).
+ */
+export async function listGalleryFanArt(limit = 200): Promise<FanArtItem[]> {
+  try {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from(VIEW)
+      .select("*")
+      .eq("status", "approved")
+      .order("approved_at", { ascending: false })
+      .limit(limit);
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((raw) => {
+      const row = mapRow(raw as Record<string, unknown>);
+      const credit: FanartCredit =
+        row.credit_type && row.credit_value
+          ? { type: row.credit_type, value: row.credit_value }
+          : { type: "x", value: row.contact_handle };
+      return {
+        id: `fanart-${row.id}`,
+        src: row.art_url,
+        thumb: row.thumb_url ?? undefined,
+        alt: `แฟนอาร์ต Mild-R โดย ${row.display_name}`,
+        size: tileSize(row.width, row.height),
+        width: row.width ?? undefined,
+        height: row.height ?? undefined,
+        artist: {
+          name: row.display_name,
+          handle: creditLabel(credit),
+          url: creditHref(credit),
+        },
+      };
+    });
+  } catch (error) {
+    console.error("[fanart] gallery list failed", error);
+    return [];
+  }
 }

@@ -1,19 +1,22 @@
 import { Images, Palette } from "lucide-react";
 
+import { FanArtEmpty } from "@/components/gallery/FanArtEmpty";
 import { GallerySection } from "@/components/gallery/GallerySection";
 import { LiveCoverArchive } from "@/components/gallery/LiveCoverArchive";
 import { cn } from "@/lib/utils";
-import type { VtuberProfile } from "@/types/vtuber";
+import type { FanArtItem, VtuberProfile } from "@/types/vtuber";
 
 /** Darker than the Live section above so the Archive group reads as its own block. */
 const ARCHIVE_BG_CLASS = "bg-[#0c0508]";
 
 type GalleryProps = {
   data: VtuberProfile;
+  /** Approved fan art from the upload form (lib/fanart-submissions-store). */
+  fanArt: FanArtItem[];
 };
 
 /** Home preview: Moments + Live covers, then Fan art. */
-export function Gallery({ data }: GalleryProps) {
+export function Gallery({ data, fanArt }: GalleryProps) {
   return (
     <>
       <GallerySection
@@ -40,10 +43,11 @@ export function Gallery({ data }: GalleryProps) {
         icon={Palette}
         title="แฟนอาร์ต"
         description="แฟนอาร์ต Mild-R จากฮันนี่"
-        items={data.fanArt}
+        items={fanArt}
         variant="fan-art"
         mode="preview"
         viewAllHref="/gallery/fanart"
+        empty={<FanArtEmpty />}
       />
     </>
   );

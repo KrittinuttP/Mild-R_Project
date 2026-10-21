@@ -22,13 +22,36 @@ import {
 } from "@/lib/fanart-upload";
 import { cn } from "@/lib/utils";
 
-type Tab = "pending" | "approved";
-type Action = "approve" | "reject";
+type Tab = "pending" | "approved" | "hidden";
+type Action = "approve" | "reject" | "hide" | "unhide" | "delete";
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "pending", label: "รออนุมัติ" },
   { key: "approved", label: "อนุมัติแล้ว" },
+  { key: "hidden", label: "ซ่อนไว้" },
 ];
+
+const EMPTY_TEXT: Record<Tab, string> = {
+  pending: "ยังไม่มีรูปที่รออนุมัติ",
+  approved: "ยังไม่มีรูปที่อนุมัติแล้ว",
+  hidden: "ไม่มีรูปที่ซ่อนไว้",
+};
+
+const WORKING_VERB: Record<Action, string> = {
+  approve: "กำลังอนุมัติ",
+  reject: "กำลังปฏิเสธ",
+  hide: "กำลังซ่อน",
+  unhide: "กำลังเอากลับขึ้นเว็บ",
+  delete: "กำลังลบ",
+};
+
+const DONE_TEXT: Record<Action, (count: number) => string> = {
+  approve: (count) => `อนุมัติแล้ว ${count} รูป · ขึ้นหน้าแฟนอาร์ตแล้ว`,
+  reject: (count) => `ปฏิเสธแล้ว ${count} รูป · ลบต้นฉบับแล้ว`,
+  hide: (count) => `ซ่อนแล้ว ${count} รูป · ดูได้ที่แท็บ "ซ่อนไว้"`,
+  unhide: (count) => `เอากลับขึ้นหน้าแฟนอาร์ตแล้ว ${count} รูป`,
+  delete: (count) => `ลบถาวรแล้ว ${count} รูป`,
+};
 
 /** Thai month names with the same year (2026) as the rest of the site. */
 const DATE_TIME = new Intl.DateTimeFormat("th-TH-u-ca-gregory", {
@@ -192,6 +215,8 @@ export function AdminFanartClient() {
   const [busy, setBusy] = useState<string | null>(null);
   /** Id (or batch key) waiting for a second click to reject. */
   const [confirmReject, setConfirmReject] = useState<string | null>(null);
+  /** Id waiting for a second click to delete for good. */
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   /** "กำลังรวมไฟล์ 3 / 12" while a ZIP is being built. */
   const [zipProgress, setZipProgress] = useState<string | null>(null);
   const [working, setWorking] = useState<Working | null>(null);
@@ -265,6 +290,7 @@ export function AdminFanartClient() {
   async function act(ids: string[], action: Action, busyKey: string) {
     setBusy(busyKey);
     setConfirmReject(null);
+    setConfirmDelete(null);
     setError(null);
     setWorking({ key: busyKey, ids, action, done: 0 });
     const doneIds: string[] = [];
@@ -287,11 +313,7 @@ export function AdminFanartClient() {
       }
       await load(tab);
       if (doneIds.length > 0) {
-        showNotice(
-          action === "approve"
-            ? `อนุมัติแล้ว ${doneIds.length} รูป`
-            : `ปฏิเสธแล้ว ${doneIds.length} รูป · ลบต้นฉบับแล้ว`
-        );
+        showNotice(DONE_TEXT[action](doneIds.length));
       }
     } catch {
       setError("อัปเดตไม่สำเร็จ กรุณาลองใหม่");
@@ -356,6 +378,7 @@ export function AdminFanartClient() {
     if (next === tab && !listLoading) return;
     setTab(next);
     setConfirmReject(null);
+    setConfirmDelete(null);
     setViewing(null);
     setListLoading(true);
     try {
@@ -370,7 +393,7 @@ export function AdminFanartClient() {
   /** Label for an approve / reject button while its request runs. */
   function workingLabel(key: string, action: Action): string | null {
     if (!working || working.key !== key || working.action !== action) return null;
-    const verb = action === "approve" ? "กำลังอนุมัติ" : "กำลังปฏิเสธ";
+    const verb = WORKING_VERB[action];
     return working.ids.length > 1
       ? `${verb} ${Math.min(working.done + 1, working.ids.length)} / ${working.ids.length}…`
       : `${verb}…`;
@@ -540,7 +563,7 @@ export function AdminFanartClient() {
         </p>
       ) : batches.length === 0 ? (
         <p className="mt-8 text-sm text-[#f3b8c4]/80">
-          {tab === "pending" ? "ยังไม่มีรูปที่รออนุมัติ" : "ยังไม่มีรูปที่อนุมัติแล้ว"}
+          {EMPTY_TEXT[tab]}
         </p>
       ) : (
         <div className="mt-6 space-y-6">
@@ -708,7 +731,33 @@ export function AdminFanartClient() {
                                     (rejecting ? "ยืนยันปฏิเสธ (ลบต้นฉบับ)" : "ปฏิเสธ")}
                                 </button>
                               </>
-                            ) : null}
+                            ) : (
+                              <>
+                                <button
+                                  type="button"
+                                  disabled={busy !== null}
+                                  onClick={() => act([item.id], tab === "approved" ? "hide" : "unhide", item.id)}
+                                  className={OUTLINE}
+                                >
+                                  {workingLabel(item.id, tab === "approved" ? "hide" : "unhide") ? <Spinner /> : null}
+                                  {workingLabel(item.id, tab === "approved" ? "hide" : "unhide") ??
+                                    (tab === "approved" ? "ซ่อนจากหน้าเว็บ" : "แสดงอีกครั้ง")}
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={busy !== null}
+                                  onClick={() => {
+                                    if (confirmDelete === item.id) void act([item.id], "delete", item.id);
+                                    else setConfirmDelete(item.id);
+                                  }}
+                                  className={cn(OUTLINE, confirmDelete === item.id && DANGER)}
+                                >
+                                  {workingLabel(item.id, "delete") ? <Spinner /> : null}
+                                  {workingLabel(item.id, "delete") ??
+                                    (confirmDelete === item.id ? "ยืนยันลบถาวร" : "ลบ")}
+                                </button>
+                              </>
+                            )}
                           </div>
                         </div>
                       </li>
@@ -716,7 +765,7 @@ export function AdminFanartClient() {
                   })}
                 </ul>
 
-                {(tab === "pending" && batch.items.length > 1) || batchOriginals.length > 1 ? (
+                {batch.items.length > 1 || batchOriginals.length > 1 ? (
                   <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-white/10 pt-4">
                     {batchOriginals.length > 1 ? (
                       <button
@@ -759,6 +808,18 @@ export function AdminFanartClient() {
                         (confirmReject === batch.key ? "ยืนยันปฏิเสธทั้งชุด (ลบต้นฉบับ)" : "ปฏิเสธทั้งชุด")}
                     </button>
                       </>
+                    ) : null}
+                    {tab !== "pending" && batch.items.length > 1 ? (
+                      <button
+                        type="button"
+                        disabled={busy !== null}
+                        onClick={() => act(ids, tab === "approved" ? "hide" : "unhide", batch.key)}
+                        className={OUTLINE}
+                      >
+                        {batchBusy ? <Spinner /> : null}
+                        {workingLabel(batch.key, tab === "approved" ? "hide" : "unhide") ??
+                          (tab === "approved" ? `ซ่อนทั้งชุด (${ids.length})` : `แสดงทั้งชุด (${ids.length})`)}
+                      </button>
                     ) : null}
                   </div>
                 ) : null}

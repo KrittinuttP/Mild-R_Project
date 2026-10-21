@@ -28,6 +28,7 @@
     "db:migrate:fanart-submissions": "npx tsx --env-file=.env scripts/apply-sql.ts supabase/migrations/20261013000000_fanart_submissions.sql",
     "db:migrate:fanart-originals": "npx tsx --env-file=.env scripts/apply-sql.ts supabase/migrations/20261020000000_fanart_originals.sql",
     "db:migrate:fanart-credits": "npx tsx --env-file=.env scripts/apply-sql.ts supabase/migrations/20261021000000_fanart_credits.sql",
+    "db:migrate:fanart-thumbs": "npx tsx --env-file=.env scripts/apply-sql.ts supabase/migrations/20261021120000_fanart_thumbs.sql",
     "db:migrate:hbd-wishes-public": "npx tsx --env-file=.env scripts/apply-sql.ts supabase/migrations/20260825121000_hbd_wishes_public_view.sql",
     "db:migrate:hbd-private-contact": "npx tsx --env-file=.env scripts/apply-sql.ts supabase/migrations/20260825122000_hbd_submissions_private_contact.sql",
     "db:migrate:hbd-wishes-definer": "npx tsx --env-file=.env scripts/apply-sql.ts supabase/migrations/20260825123000_hbd_wishes_public_security_definer.sql",
