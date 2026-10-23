@@ -323,6 +323,22 @@ body:has([data-cafe-root]) {
   animation: cafe-float 4.5s ease-in-out infinite;
 }
 
+/* CD2 scroll hint arrow: a soft 6px bob that starts after 3s, once the
+   visitor has had a moment with the logo and timer. */
+@keyframes cafe-nudge {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 6px;
+  }
+}
+
+@utility animate-cafe-nudge {
+  animation: cafe-nudge 2s ease-in-out 3s infinite;
+}
+
 /* One double beat, then a long rest, so the heart lives without stealing the board. */
 @keyframes cafe-beat {
   0%,
@@ -507,6 +523,7 @@ body:has([data-cafe-root]) {
   .animate-cafe-tape,
   .animate-cafe-lamp,
   .animate-cafe-float,
+  .animate-cafe-nudge,
   .animate-cafe-beat,
   .animate-cafe-sway,
   .animate-cafe-sweep {

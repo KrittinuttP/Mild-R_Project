@@ -46,11 +46,16 @@ const SIZES = {
     gap: "gap-[clamp(8px,1.4vw,20px)]",
     box: "w-[clamp(72px,10.5vw,156px)] pt-[clamp(12px,1.4vw,22px)] pb-[clamp(10px,1.2vw,18px)]",
     digit: "text-[length:clamp(32px,5.4vw,80px)]",
+    timerMt: "mt-[clamp(14px,1.8vw,24px)]",
+    dateMt: "mt-[clamp(22px,2.4vw,32px)]",
   },
   regular: {
     gap: "gap-[clamp(8px,1.3vw,18px)]",
     box: "w-[clamp(72px,9.4vw,140px)] pt-[clamp(12px,1.3vw,20px)] pb-[clamp(10px,1.1vw,16px)]",
-    digit: "text-[length:clamp(30px,4.8vw,72px)]",
+    digit: "text-[length:clamp(30px,min(4.8vw,6svh),72px)]",
+    // CD2 also shrinks with screen height so the logo keeps the first view.
+    timerMt: "mt-[clamp(12px,min(1.8vw,2svh),24px)]",
+    dateMt: "mt-[clamp(16px,min(2.4vw,2.6svh),32px)]",
   },
 } as const;
 
@@ -150,7 +155,8 @@ export function CountdownBoard({
         role="timer"
         aria-label={eyebrow}
         className={cn(
-          "mt-[clamp(14px,1.8vw,24px)] flex",
+          "flex",
+          s.timerMt,
           s.gap
         )}
       >
@@ -194,7 +200,8 @@ export function CountdownBoard({
         <p
           className={cn(
             SERIF,
-            "mt-[clamp(22px,2.4vw,32px)] text-[length:clamp(12px,1.15vw,16px)] font-bold tracking-[0.22em] whitespace-nowrap text-cafe-cream"
+            s.dateMt,
+            "text-[length:clamp(12px,1.15vw,16px)] font-bold tracking-[0.22em] whitespace-nowrap text-cafe-cream"
           )}
         >
           {dateLine}

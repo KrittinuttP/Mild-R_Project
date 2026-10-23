@@ -25,7 +25,8 @@ export const COUNTDOWN_TARGETS = {
  * YouTube video id (the 11 characters after `v=`) of the first teaser.
  * Leave it empty until the teaser is uploaded: CD2 then shows "coming soon".
  */
-export const FIRST_TEASER_YOUTUBE_ID = "";
+// https://youtu.be/QZG6Jfk8K5E · goes public on the channel 23 Oct 18:00 (CD2 opens 18:12)
+export const FIRST_TEASER_YOUTUBE_ID = "QZG6Jfk8K5E";
 
 export const COUNTDOWN_PATH = "/cafe/countdown";
 export const TEASER_PATH = "/cafe/countdown/teaser";

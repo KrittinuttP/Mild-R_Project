@@ -8,7 +8,9 @@ import {
 } from "@/components/cafe/countdown/CountdownBoard";
 import { CountdownFooter } from "@/components/cafe/countdown/CountdownFooter";
 import { CountdownFrame } from "@/components/cafe/countdown/CountdownFrame";
+import { ScrollToTeaser } from "@/components/cafe/countdown/ScrollToTeaser";
 import { TeaserPlayer } from "@/components/cafe/countdown/TeaserPlayer";
+import { CAFE_DEVELOPER } from "@/components/cafe/FanmadeCredit";
 import { SherlockSweetieLogo } from "@/components/cafe/SherlockSweetieLogo";
 import { FIRST_TEASER_YOUTUBE_ID } from "@/lib/cafe-countdown";
 import {
@@ -25,6 +27,8 @@ export const metadata: Metadata = {
   description: "The case file opens soon.",
   robots: { index: false, follow: false, nocache: true },
 };
+
+const TEASER_SECTION_ID = "first-teaser";
 
 export default async function CafeCountdownTeaserPage() {
   // Switch times set in /cafe/settings, passed on by proxy.ts.
@@ -46,7 +50,7 @@ export default async function CafeCountdownTeaserPage() {
         <SherlockSweetieLogo
           as="h1"
           label="Mild-R: Sherlock Sweetie — Birthday Case File"
-          className="text-[length:clamp(40px,7vw,104px)]"
+          className="text-[length:clamp(40px,min(7vw,11svh),104px)]"
         />
         <CountdownBoard
           targetMs={openAt}
@@ -54,7 +58,7 @@ export default async function CafeCountdownTeaserPage() {
           eyebrowTh="แฟ้มคดีจะเปิดใน"
           dateLine={bangkokDateLine(openAt)}
           size="regular"
-          className="mt-[clamp(40px,4.4vw,64px)]"
+          className="mt-[clamp(24px,min(4.4vw,4svh),64px)]"
           open={{
             label: "CASE FILE · OPEN",
             labelTh: "แฟ้มคดีเปิดแล้ว",
@@ -69,7 +73,13 @@ export default async function CafeCountdownTeaserPage() {
           <span className="size-2 rotate-45 bg-cafe-gold" />
           <span className="h-px flex-1 bg-cafe-gold/35" />
         </div>
+        <section
+          id={TEASER_SECTION_ID}
+          aria-labelledby={`${TEASER_SECTION_ID}-title`}
+          className="flex w-full flex-col items-center"
+        >
         <h2
+          id={`${TEASER_SECTION_ID}-title`}
           className={cn(
             SERIF,
             "mt-[clamp(28px,3vw,40px)] pl-[0.36em] text-[length:clamp(13px,1.25vw,18px)] font-bold tracking-[0.36em] text-cafe-gold"
@@ -83,11 +93,14 @@ export default async function CafeCountdownTeaserPage() {
             "mt-1 text-[length:clamp(14px,1.2vw,17px)] leading-[1.6] text-cafe-cream/85"
           )}
         >
-          ทีเซอร์แรก · หลักฐานชิ้นแรกของคดี
+          หลักฐานชิ้นแรกของคดี
         </p>
         <TeaserPlayer videoId={FIRST_TEASER_YOUTUBE_ID} />
+        </section>
       </div>
-      <CountdownFooter />
+      <ScrollToTeaser targetId={TEASER_SECTION_ID} />
+      {/* CD2: the logo is out, so the credit is no longer blacked out. */}
+      <CountdownFooter creator={CAFE_DEVELOPER} />
     </CountdownFrame>
   );
 }

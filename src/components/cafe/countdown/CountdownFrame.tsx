@@ -9,11 +9,15 @@ const TAG = cn(
   "absolute top-[clamp(32px,4vw,56px)] text-[length:clamp(11px,1vw,15px)] font-bold tracking-[0.32em] whitespace-nowrap text-cafe-gold"
 );
 
-/** CD1 centres its content; CD2 reads top to bottom (logo, timer, teaser). */
+/**
+ * CD1 centres its content; CD2 reads top to bottom (logo, timer, teaser).
+ * CD2 sizes also follow screen height so the timer and its date fit the first
+ * view on laptops (1280x720 up), leaving room for the scroll hint.
+ */
 const VARIANT = {
   center:
     "justify-center pt-[clamp(88px,9vw,120px)] pb-[clamp(150px,11vw,168px)] bg-[radial-gradient(ellipse_at_50%_42%,var(--color-cafe-glow)_0%,var(--color-cafe-ground)_72%)]",
-  top: "pt-[clamp(96px,8vw,120px)] pb-[clamp(176px,12vw,188px)] bg-[radial-gradient(ellipse_80%_60%_at_50%_22%,var(--color-cafe-glow)_0%,var(--color-cafe-ground)_78%)]",
+  top: "pt-[clamp(80px,min(8vw,12svh),120px)] pb-[clamp(176px,12vw,188px)] bg-[radial-gradient(ellipse_80%_60%_at_50%_22%,var(--color-cafe-glow)_0%,var(--color-cafe-ground)_78%)]",
 } as const;
 
 type CountdownFrameProps = {
