@@ -110,7 +110,7 @@ export async function POST(request: Request) {
   }
   if (card.size > HBD_CARD_TEMPLATE.maxBytes) {
     return NextResponse.json(
-      { error: "ไฟล์การ์ดใหญ่เกินไป (สูงสุด 5 MB)" },
+      { error: `ไฟล์การ์ดใหญ่เกินไป (สูงสุด ${HBD_CARD_TEMPLATE.maxBytes / 1024 / 1024} MB)` },
       { status: 400 }
     );
   }
@@ -124,7 +124,7 @@ export async function POST(request: Request) {
     }
     if (avatar.size > HBD_AVATAR_LIMITS.maxBytes) {
       return NextResponse.json(
-        { error: "ไฟล์ avatar ใหญ่เกินไป (สูงสุด 2 MB)" },
+        { error: `ไฟล์ avatar ใหญ่เกินไป (สูงสุด ${HBD_AVATAR_LIMITS.maxBytes / 1024 / 1024} MB)` },
         { status: 400 }
       );
     }

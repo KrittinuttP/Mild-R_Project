@@ -23,7 +23,7 @@
 ## Backend
 
 - Table: `mild_r.hbd_submissions` (+ view `public.mild_r_hbd_submissions`)
-- Storage bucket: `hbd-uploads` (JPEG/PNG/WebP · ≤ 5 MB)
+- Storage bucket: `hbd-uploads` (JPEG/PNG/WebP · การ์ด ≤ 3 MB, avatar ≤ 1 MB หลังย่อในเบราว์เซอร์ · รวมกันต้องไม่เกิน 4.5 MB ที่ Vercel รับต่อคำขอ)
 - Migrate: `npm run db:migrate:hbd-submissions`
 - Admin auth: cookie ร่วม `/admin` (`SITE_ADMIN_PASSWORD` + `SITE_ADMIN_SECRET` บังคับตั้ง ไม่มีค่า default — ดู `.env.example`)
 

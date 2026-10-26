@@ -72,7 +72,8 @@ function under(path: string, base: string) {
  */
 const SITE_PATHS: Record<HostSite, string[]> = {
   cafe: ["/cafe", "/api/cafe"],
-  fanart: ["/upload/fanart", "/api/fanart/submit"],
+  // upload-url hands out the signed upload links, submit records the entry.
+  fanart: ["/upload/fanart", "/api/fanart/upload-url", "/api/fanart/submit"],
   hbd: ["/upload/hbd", "/api/hbd/submit"],
   admin: [
     "/admin",

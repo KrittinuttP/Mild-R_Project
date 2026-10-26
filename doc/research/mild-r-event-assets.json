@@ -3,13 +3,214 @@
   "scope": "56 unique X posts supplied by the user, 8 linked posts in the Lumina campaign thread, 6 unique Facebook posts supplied by the user, 2 linked Ticketmelon event pages, and 7 official YouTube video pages; one further YouTube recap is linked from an X post",
   "notes": "Image research manifest for the local event archive. The event gallery JSON is generated from these local image paths; every source retains its original URL.",
   "totals": {
-    "eventCollections": 16,
+    "eventCollections": 17,
     "supportingCollections": 2,
-    "sources": 79,
-    "images": 104,
-    "imageBytes": 119278916
+    "sources": 91,
+    "images": 115,
+    "imageBytes": 122880771
   },
   "collections": [
+    {
+      "id": "lumina-expo13-halloween-2026",
+      "title": "Expo 13",
+      "collectionType": "event",
+      "imageCount": 11,
+      "suggestedCover": "/assets/events/archive/lumina-expo13-halloween-2026/2113596044080460113-01-HVT_9Csa0AATekG.jpg",
+      "sources": [
+        {
+          "url": "https://x.com/LuminaVProject/status/2113596044080460113",
+          "publishedAt": "2026-10-23T18:39+07:00",
+          "text": "ครั้งแรกของค่าย! กับโปรเจกต์สร้างเกม! 🎮 \nฮาโลวีนนี้ขอชวนทุกคนมาร่วมเป็นส่วนหนึ่งในการเนรมิตโปรเจกต์เกมให้เป็นจริง! 👻✨\n\nวิธีสนับสนุนง่ายๆ เพียงร่วมโดเนท หรือเลือกสนับสนุนแพ็กเกจใน Tier ต่างๆ นอกจากจะได้ช่วยระดมทุนสร้างเกมแล้ว ยังได้รับ Benefit สุดพิเศษตามเทียร์ที่คุณเลือกอีกด้วย! 🎁\n\nร่วมโดเนทให้ VTuber ที่คุณรัก และอ่านรายละเอียดแพ็กเกจได้ที่ : lumina-halloween.easydonate.app\n\n🗓️ ระยะเวลากิจกรรม: 23 ต.ค. 26 - 6 พ.ย. 26\n\nอ่านส่วนอื่นต่อในคอมเมนต์ (ส่วน1/11)",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-expo13-halloween-2026/2113596044080460113-01-HVT_9Csa0AATekG.jpg",
+              "width": 1200,
+              "height": 1200,
+              "bytes": 213200,
+              "sha256": "515559764b45126bfa909d1a7a78c6544b5068f218df5a33b99570f109b57cc2",
+              "kind": "post-image",
+              "mediaKey": "HVT_9Csa0AATekG",
+              "remoteUrl": "https://pbs.twimg.com/media/HVT_9Csa0AATekG.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/LuminaVProject/status/2113596044797710792",
+          "publishedAt": "2026-10-23T18:39+07:00",
+          "text": "ตัวอย่างลาย chibi ที่หลอนระดับตำนาน (ส่วน2/11)",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-expo13-halloween-2026/2113596044797710792-01-HVT_9DEbsAAewdQ.jpg",
+              "width": 1200,
+              "height": 1200,
+              "bytes": 343982,
+              "sha256": "0f3471074cb0eadc715ebea72a1a3a9d05229ab3043e0e494e8d171d9ae6c39a",
+              "kind": "post-image",
+              "mediaKey": "HVT_9DEbsAAewdQ",
+              "remoteUrl": "https://pbs.twimg.com/media/HVT_9DEbsAAewdQ.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/LuminaVProject/status/2113596045426839966",
+          "publishedAt": "2026-10-23T18:39+07:00",
+          "text": "ตัวอย่างลาย chibi ที่หลอนจนโลกระเบิด (ส่วน3/11)",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-expo13-halloween-2026/2113596045426839966-01-HVT_9DNbYAAwJ0l.jpg",
+              "width": 1200,
+              "height": 1200,
+              "bytes": 360015,
+              "sha256": "c150c4e898f74239c65aec3e256088bf08dad62fe1b20df3fb3067aa3d285b49",
+              "kind": "post-image",
+              "mediaKey": "HVT_9DNbYAAwJ0l",
+              "remoteUrl": "https://pbs.twimg.com/media/HVT_9DNbYAAwJ0l.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/LuminaVProject/status/2113596046076961149",
+          "publishedAt": "2026-10-23T18:39+07:00",
+          "text": "ตัวอย่างลาย chibi ที่หลอนจนต้องพึ่งสิ่งศักดิ์สิทธิ์ (ส่วน4/11)",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-expo13-halloween-2026/2113596046076961149-01-HVT_9DIbUAAuvKO.jpg",
+              "width": 1200,
+              "height": 1200,
+              "bytes": 346323,
+              "sha256": "4bd2f5871a9f6a8d486bde2f82b4e84ea2b3408917a7467110e7a09a3746fb11",
+              "kind": "post-image",
+              "mediaKey": "HVT_9DIbUAAuvKO",
+              "remoteUrl": "https://pbs.twimg.com/media/HVT_9DIbUAAuvKO.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/LuminaVProject/status/2113596046760726684",
+          "publishedAt": "2026-10-23T18:39+07:00",
+          "text": "ตัวอย่างลาย chibi ที่หลอนจนต้องกรี๊ดให้เสียงสูงถึงฟ้า (ส่วน5/11)",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-expo13-halloween-2026/2113596046760726684-01-HVT_9DNa0AAoOfp.jpg",
+              "width": 1200,
+              "height": 1200,
+              "bytes": 341062,
+              "sha256": "6a148dc8385089800d304ef3608b1888cbd7b5b227a647f832c38f5dd0124ba4",
+              "kind": "post-image",
+              "mediaKey": "HVT_9DNa0AAoOfp",
+              "remoteUrl": "https://pbs.twimg.com/media/HVT_9DNa0AAoOfp.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/LuminaVProject/status/2113596047716974768",
+          "publishedAt": "2026-10-23T18:39+07:00",
+          "text": "📍Tier 1 : Game & Badge  \nสิทธิ์การซื้อ : ไม่จำกัดจำนวน\nราคา : 300 บาท\nสิ่งที่คุณจะได้รับ\n⭐️Steam Key ของเกม\n⭐️เข็มกลัด ขนาด 3.2 cm\nมีให้เลือก 19 ลาย\n\n📍Tier 2 : Keychain \nสิทธิ์การซื้อ : ไม่จำกัดจำนวน\nราคา : 900 บาท\nสิ่งที่คุณจะได้รับ\n⭐️พวงกุญแจแบบ Lenticular (เอียงภาพเพื่อเปลี่ยนเป็นหน้าตกใจ) ขนาด 4 cm\nมีให้เลือก 19 ลาย\n⭐️Steam Key ของเกม\n⭐️เข็มกลัด ขนาด 3.2 cm\nมีให้เลือก 19 ลาย\n\n(ส่วน6/11)",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-expo13-halloween-2026/2113596047716974768-01-HVT_9DHbQAAyTlS.jpg",
+              "width": 1005,
+              "height": 1007,
+              "bytes": 706399,
+              "sha256": "b95d7bb2344a3f59841274051ef0554f9f3ff9abf67b1bc7a346330fa163c27b",
+              "kind": "post-image",
+              "mediaKey": "HVT_9DHbQAAyTlS",
+              "remoteUrl": "https://pbs.twimg.com/media/HVT_9DHbQAAyTlS.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/LuminaVProject/status/2113596048782364922",
+          "publishedAt": "2026-10-23T18:39+07:00",
+          "text": "📍Tier 3 : Voice Pack  \nสิทธิ์การซื้อ : ไม่จำกัดจำนวน\nราคา : 1,800 บาท\nสิ่งที่คุณจะได้รับ\n⭐️ไฟล์เสียงเรียกชื่อ ธีม \"มาหลอกคุณ\"\nคุณสามารถเลือก Vtuber ได้ 1 คน (จะได้รับเป็นรูปแบบแฟลชไดร์ฟ)\n⭐️พวงกุญแจแบบ Lenticular (เอียงภาพเพื่อเปลี่ยนเป็นหน้าตกใจ) ขนาด 4 cm\nมีให้เลือก 19 ลาย\n⭐️Steam Key ของเกม\n⭐️เข็มกลัด ขนาด 3.2 cm\nมีให้เลือก 19 ลาย\n\n📍Tier 4 : Special Bag\nสิทธิ์การซื้อ : ไม่จำกัดจำนวน\nราคา : 3,500 บาท\nสิ่งที่คุณจะได้รับ\n⭐️กระเป๋า Itabag พิมพ์ลายขยับเปลี่ยนภาพได้ 2 ลาย ขนาด 16x11 นิ้ว\n⭐️ชื่อคุณเครดิตในเกม (1 สิทธิ์ต่อ 1 คนเท่านั้น)\n⭐️ไฟล์เสียงเรียกชื่อ ธีม \"มาหลอกคุณ\" (จะได้รับเป็นรูปแบบแฟลชไดร์ฟ)\n⭐️พวงกุญแจแบบ Lenticular (เอียงภาพเพื่อเปลี่ยนเป็นหน้าตกใจ) ขนาด 4 cm\nมีให้เลือก 19 ลาย \n⭐️Steam Key ของเกม\n⭐️เข็มกลัด ขนาด 3.2 cm\nมีให้เลือก 19 ลาย\n(ใน Tier 4 เลือกได้ 2 ลาย แต่ข้อความจะถูกส่งถึงวีทูปเบอร์คนแรกที่คุณเลือกเท่านั้น)\n\n(ส่วน7/11)",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-expo13-halloween-2026/2113596048782364922-01-HVT_9DLa8AA7650.jpg",
+              "width": 1005,
+              "height": 1007,
+              "bytes": 226573,
+              "sha256": "b120e5c73c2249142eb2504221b7e45a2f94f6521e3ec5f29a47648c597c62c1",
+              "kind": "post-image",
+              "mediaKey": "HVT_9DLa8AA7650",
+              "remoteUrl": "https://pbs.twimg.com/media/HVT_9DLa8AA7650.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/LuminaVProject/status/2113596049885384758",
+          "publishedAt": "2026-10-23T18:39+07:00",
+          "text": "📍Tier 5 : Name an Achievement \nสิทธิ์การซื้อ : 20 สิทธิ์\nราคา : 4,500 บาท\nสิ่งที่คุณจะได้รับ\n⭐️ร่วมออกแบบชื่อ Achievement ในเกม\n*การออกแบบทั้งหมดต้องได้รับการอนุมัติจากผู้พัฒนา เราขอสงวนสิทธิ์ในการปรับเปลี่ยน แก้ไข หรือออกแบบใหม่เพื่อให้เข้ากับสไตล์งานภาพ เนื้อเรื่อง โทนของเกม และข้อจำกัดทางเทคนิค เนื้อหาที่ไม่เหมาะสม หยาบคาย หรือละเมิดลิขสิทธิ์จะถูกปฏิเสธ\n⭐️รางวัล Tier 1 - Tier 4\n\n📍Tier 6 : 2D Prop Design \nสิทธิ์การซื้อ : 20 สิทธิ์\nราคา : 7,000\nสิ่งที่คุณจะได้รับ\n⭐️ร่วมออกแบบพร็อพหรือของตกแต่ง 2D ในเกม (เช่น บริเวณทางเดินหรือพื้นที่ต่างๆในเกม)\n*การออกแบบทั้งหมดต้องได้รับการอนุมัติจากผู้พัฒนา เราขอสงวนสิทธิ์ในการปรับเปลี่ยน แก้ไข หรือออกแบบใหม่เพื่อให้เข้ากับสไตล์งานภาพ เนื้อเรื่อง โทนของเกม และข้อจำกัดทางเทคนิค เนื้อหาที่ไม่เหมาะสม หยาบคาย หรือละเมิดลิขสิทธิ์จะถูกปฏิเสธ\n⭐️รางวัล Tier 1 - Tier 4\n\n📍Tier 7 : 2D Anomaly Design\nสิทธิ์การซื้อ : 20 สิทธิ์\nราคา : 10,000 บาท\nสิ่งที่คุณจะได้รับ\n⭐️ร่วมออกแบบการจับผิดภาพ 2D Anomaly\n*การออกแบบทั้งหมดต้องได้รับการอนุมัติจากผู้พัฒนา เราขอสงวนสิทธิ์ในการปรับเปลี่ยน แก้ไข หรือออกแบบใหม่เพื่อให้เข้ากับสไตล์งานภาพ เนื้อเรื่อง โทนของเกม และข้อจำกัดทางเทคนิค เนื้อหาที่ไม่เหมาะสม หยาบคาย หรือละเมิดลิขสิทธิ์จะถูกปฏิเสธ\n⭐️รางวัล Tier 1 - Tier 4\n\n📍Tier 8 : VTuber Voice Anomaly\nสิทธิ์การซื้อ : 5 สิทธิ์\nราคา : 15,000 บาท\nสิ่งที่คุณจะได้รับ\n⭐️Vtuber ที่คุณเลือกมาเป็นเสียง Anomaly หรือเสียงผีในเกมในแนวทางที่คุณเสนอ\nสามารถให้เป็นแนวทางหรือตัวเลือกได้แต่ไม่สามารถบังคับให้น้องพูดคำตามที่กำหนดได้\nVTuber ที่ท่านเลือกอาจจะได้พากย์เป็นมอนสเตอร์ หรือเสียง Anomaly ในเกม ตามความเหมาะสมของเนื้อหาและธีม (Theme) ของเกม\n*การออกแบบทั้งหมดต้องได้รับการอนุมัติจากผู้พัฒนา เราขอสงวนสิทธิ์ในการปรับเปลี่ยน แก้ไข หรือออกแบบใหม่เพื่อให้เข้ากับสไตล์งานภาพ เนื้อเรื่อง โทนของเกม และข้อจำกัดทางเทคนิค เนื้อหาที่ไม่เหมาะสม หยาบคาย หรือละเมิดลิขสิทธิ์จะถูกปฏิเสธ\n⭐️รางวัล Tier 1 - Tier 4\n\n(ส่วน 8/11)",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-expo13-halloween-2026/2113596049885384758-01-HVT_9DKaIAAo3ay.jpg",
+              "width": 1005,
+              "height": 1007,
+              "bytes": 277461,
+              "sha256": "9cc1ebc5a5b9b621e1be5a3e2b0fc33d116601813b1f91a6be4311c145bbbdcc",
+              "kind": "post-image",
+              "mediaKey": "HVT_9DKaIAAo3ay",
+              "remoteUrl": "https://pbs.twimg.com/media/HVT_9DKaIAAo3ay.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/LuminaVProject/status/2113596050866864411",
+          "publishedAt": "2026-10-23T18:39+07:00",
+          "text": "📍Tier 9 : VTuber Design a Boss  \nโควตาการซื้อ : 2 สิทธิ์\nราคา : 20,000 บาท\nสิ่งที่คุณจะได้รับ\n⭐️ Vtuber ที่คุณเลือกได้มาช่วยออกแบบบอสในเกม\nบอสจะถูกออกแบบจาก Vtuber ที่ท่านเลือกตามความเหมาะสม และความสอดคล้องตามเนื้อเรื่องและ Theme ในเกม และท่านไม่สามารถเลือกแบบบอสให้ Vtuber ได้\n⭐️ Concept Sheet ที่ Vtuber ออกเบบพร้อมลายเซ็นดิจิตอล\n⭐️ รางวัล Tier 1 - Tier 4\n\n📍Tier 10 : Special Anomaly Design\nโควตาการซื้อ : 8 สิทธิ์\nราคา : 30,000 บาท\nสิ่งที่คุณจะได้รับ\n⭐️ ร่วมออกแบบ Anomaly กิมมิคพิเศษ\n*การออกแบบทั้งหมดต้องได้รับการอนุมัติจากผู้พัฒนา เราขอสงวนสิทธิ์ในการปรับเปลี่ยน แก้ไข หรือออกแบบใหม่เพื่อให้เข้ากับสไตล์งานภาพ เนื้อเรื่อง โทนของเกม และข้อจำกัดทางเทคนิค เนื้อหาที่ไม่เหมาะสม หยาบคาย หรือละเมิดลิขสิทธิ์จะถูกปฏิเสธ\n*ไม่สามารถเป็น 3D โมเดลวีทูปเบอร์\n⭐️ รางวัล Tier 1 - Tier 4\n\n📍Tier 11 : Your Own Boss Design\nโควตาการซื้อ : 1 สิทธิ์\nราคา : 100,000 บาท\nสิ่งที่คุณจะได้รับ\n⭐️ ร่วมออกแบบบอสในเกม \n*การออกแบบทั้งหมดต้องได้รับการอนุมัติจากผู้พัฒนา เราขอสงวนสิทธิ์ในการปรับเปลี่ยน แก้ไข หรือออกแบบใหม่เพื่อให้เข้ากับสไตล์งานภาพ เนื้อเรื่อง โทนของเกม และข้อจำกัดทางเทคนิค เนื้อหาที่ไม่เหมาะสม หยาบคาย หรือละเมิดลิขสิทธิ์จะถูกปฏิเสธ\n⭐️ Concept sheet  ของบอสพร้อมลายเซ็นดิจิตอล Vtuber ทุกคนในค่าย\n⭐️ รางวัล Tier 1 - Tier 4\n\n(ส่วน9/11)",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-expo13-halloween-2026/2113596050866864411-01-HVT_9DfbQAAJU98.jpg",
+              "width": 1005,
+              "height": 1007,
+              "bytes": 260955,
+              "sha256": "26298ffabaf2aaa01733b87350f801ef32866e0ee8b375a16873863113d4dfdc",
+              "kind": "post-image",
+              "mediaKey": "HVT_9DfbQAAJU98",
+              "remoteUrl": "https://pbs.twimg.com/media/HVT_9DfbQAAJU98.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/LuminaVProject/status/2113596051617681670",
+          "publishedAt": "2026-10-23T18:39+07:00",
+          "text": "Milestone โปรเจกต์เกมแรก! ยิ่งซัพพอร์ตเยอะ เกมยิ่งมันส์! 🎮👻 \n\nเมื่อถึง Milestone แล้ว Milestone อันใหม่จะเพิ่มขึ้นมาตามลำดับขั้น\nถ้าอยากให้เกมมีอะไรที่น่าตื่นเต้นมากขึ้น มาร่วมระดมทุนและปลดล็อกฟีเจอร์เด็ดๆไปด้วยกันเถอะ!\n\n(ส่วน10/11)",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-expo13-halloween-2026/2113596051617681670-01-HVT_9DPaIAAqFfZ.jpg",
+              "width": 1005,
+              "height": 1007,
+              "bytes": 248248,
+              "sha256": "f690dcd4dd56bb1cfb31e852bb804ef067e7cc2d88213f17422ce5feb43aba2c",
+              "kind": "post-image",
+              "mediaKey": "HVT_9DPaIAAqFfZ",
+              "remoteUrl": "https://pbs.twimg.com/media/HVT_9DPaIAAqFfZ.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://x.com/LuminaVProject/status/2113596052523692359",
+          "publishedAt": "2026-10-23T18:39+07:00",
+          "text": "สุดพิเศษสำหรับ Top Donate! \nรับไปเลย “หนังสือ Pop Up”\n\nในนี้จะมีพวกภาพอื่นๆของ campaign รวมอยู่ด้วย เช่น ภาพในเกม และแถมลายเซ็น digital ของ Vtuber ที่คุณเป็น Top Donate\n⭐️หนังสือมีจำนวนประมาณ 30 หน้า มี 1 หน้าที่ Pop Up\n⭐️การคำนวณยอด Top Donate จะนับรวมเงินโดเนทและยอดสั่งซื้อแพ็กเกจที่มีการระบุเลือก Vtuber\nเช่น คุณโดเนทให้ Lilibelle จำนวนเงิน 100 บาท\nและคุณมีการซื้อแพ็กเก็จใน Tier 2  ราคา 900 บาท เลือกลายเข็มกลัดเป็นลายของ Lilibelle และเลือกพวงกุญแจเป็นลาย Mikael \nยอดเงินจะถูกแบ่งออกเป็นตามนี้\nยอดโดเนท 100 บาทเข้าช่อง Lilibelle\nยอดเข็มกลัด 300 บาทเข้าช่อง Lilibelle\nยอดพวงกุญแจ 600 บาทเข้าช่อง Mikael\n\n(ส่วน11/11)",
+          "images": [
+            {
+              "path": "/assets/events/archive/lumina-expo13-halloween-2026/2113596052523692359-01-HVT_9DVaEAAcZTR.jpg",
+              "width": 1200,
+              "height": 1200,
+              "bytes": 277637,
+              "sha256": "c7a836cd1aff242e88014fd7fffae7b1d90c46c4fe9cfeec7c7450fe239bcd3d",
+              "kind": "post-image",
+              "mediaKey": "HVT_9DVaEAAcZTR",
+              "remoteUrl": "https://pbs.twimg.com/media/HVT_9DVaEAAcZTR.jpg?name=orig"
+            }
+          ]
+        },
+        {
+          "url": "https://lumina-halloween.easydonate.app/",
+          "text": "หน้าระดมทุน Expo 13 เกม Anomaly Horror ของ Lumina · เป้าหมาย ฿200,000 · Developer: Aiya Games",
+          "images": []
+        }
+      ]
+    },
     {
       "id": "lumina-clip-meme-2026",
       "title": "Lumina Clip Meme Contest 2026",

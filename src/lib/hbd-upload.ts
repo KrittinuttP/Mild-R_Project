@@ -7,8 +7,12 @@ export const HBD_CARD_TEMPLATE = {
   suggestedHeight: 1350,
   /** Max file the browser accepts from the picker (shrunk before upload). */
   maxSourceBytes: 20 * 1024 * 1024,
-  /** Max file the API accepts (after in-browser shrink). */
-  maxBytes: 5 * 1024 * 1024,
+  /**
+   * Max file the API accepts (after in-browser shrink). Card and avatar go to
+   * /api/hbd/submit in one request, and Vercel refuses a request body over
+   * 4.5 MB, so card + avatar stay at 4 MB together.
+   */
+  maxBytes: 3 * 1024 * 1024,
   accept: "image/jpeg,image/png,image/webp",
 } as const;
 
@@ -16,7 +20,8 @@ export const HBD_AVATAR_DEFAULT = "/assets/hbd/default-avatar.png";
 
 export const HBD_AVATAR_LIMITS = {
   maxSourceBytes: 10 * 1024 * 1024,
-  maxBytes: 2 * 1024 * 1024,
+  /** Shares the 4.5 MB request with the card (see HBD_CARD_TEMPLATE.maxBytes). */
+  maxBytes: 1 * 1024 * 1024,
   accept: "image/jpeg,image/png,image/webp",
 } as const;
 
