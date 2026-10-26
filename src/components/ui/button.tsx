@@ -18,6 +18,11 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
         link: "text-primary underline-offset-4 hover:underline",
+        /* Project R · CI A+ (doc/project-r-implementation.md §1) */
+        "r-primary":
+          "rounded-full bg-r-pri text-r-on-pri hover:bg-r-pri-hover hover:shadow-[0_8px_24px_rgba(242,67,125,0.35)] active:bg-r-pri-active focus-visible:border-transparent focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-solid focus-visible:outline-r-acc disabled:bg-white/8 disabled:text-r-text/40 disabled:opacity-100",
+        "r-outline":
+          "rounded-full border-r-text-2/35 bg-transparent text-r-text hover:border-r-pri/60 hover:bg-r-pri/10 active:bg-r-pri/20 focus-visible:border-r-text-2/35 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-solid focus-visible:outline-r-acc",
       },
       size: {
         default:
@@ -31,6 +36,9 @@ const buttonVariants = cva(
         "icon-sm":
           "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
         "icon-lg": "size-9",
+        /* Project R · 48px pill */
+        "r-lg":
+          "h-12 gap-2 px-6 text-[0.9375rem] has-data-[icon=inline-end]:pr-5 has-data-[icon=inline-start]:pl-5",
       },
     },
     defaultVariants: {

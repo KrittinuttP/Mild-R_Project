@@ -3,11 +3,8 @@ import { Images, Palette } from "lucide-react";
 import { FanArtEmpty } from "@/components/gallery/FanArtEmpty";
 import { GallerySection } from "@/components/gallery/GallerySection";
 import { LiveCoverArchive } from "@/components/gallery/LiveCoverArchive";
-import { cn } from "@/lib/utils";
 import type { FanArtItem, VtuberProfile } from "@/types/vtuber";
-
-/** Darker than the Live section above so the Archive group reads as its own block. */
-const ARCHIVE_BG_CLASS = "bg-[#0c0508]";
+import { SectionGlow } from "@/components/common/SectionGlow";
 
 type GalleryProps = {
   data: VtuberProfile;
@@ -18,7 +15,9 @@ type GalleryProps = {
 /** Home preview: Moments + Live covers, then Fan art. */
 export function Gallery({ data, fanArt }: GalleryProps) {
   return (
-    <>
+    <div className="relative">
+      <SectionGlow />
+      <div aria-hidden className="r-hairline absolute inset-x-0 top-0" />
       <GallerySection
         id="gallery"
         eyebrow="Moments"
@@ -30,12 +29,12 @@ export function Gallery({ data, fanArt }: GalleryProps) {
         mode="preview"
         viewAllHref="/gallery/archive"
         showTopFade={false}
-        className={cn(ARCHIVE_BG_CLASS, "border-t border-[#f3b8c4]/10")}
+        className="bg-transparent"
       />
       <LiveCoverArchive
         mode="preview"
         viewAllHref="/gallery/live"
-        className={ARCHIVE_BG_CLASS}
+        className="bg-transparent"
       />
       <GallerySection
         id="fan-art"
@@ -48,7 +47,9 @@ export function Gallery({ data, fanArt }: GalleryProps) {
         mode="preview"
         viewAllHref="/gallery/fanart"
         empty={<FanArtEmpty />}
+        showTopFade={false}
+        className="bg-transparent"
       />
-    </>
+    </div>
   );
 }

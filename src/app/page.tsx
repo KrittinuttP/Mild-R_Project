@@ -5,7 +5,7 @@ import { HomeEntry } from "@/components/layout/HomeEntry";
 import { MediaProtection } from "@/components/media/MediaProtection";
 import { EventsTeaser } from "@/components/sections/EventsTeaser";
 import { Gallery } from "@/components/sections/Gallery";
-import { HeroProfileScroll } from "@/components/sections/HeroProfileScroll";
+import { HomeHero } from "@/components/sections/HomeHero";
 import {
   LiveTeaser,
   type InitialLiveSchedule,
@@ -50,15 +50,16 @@ export default async function Home() {
         oshiMark={mildRData.fan.oshiMark}
       />
       <Header data={mildRData} />
-      <main className="flex-1 bg-[#140a0d]">
-        <HeroProfileScroll data={mildRData} />
-        <Membership data={mildRData} />
-        <Lore data={mildRData} />
+      {/* Section order = project R (doc/project-r-implementation.md §2) */}
+      <main className="flex-1 bg-r-bg">
+        <HomeHero data={mildRData} />
         <LiveTeaser initialLiveSchedule={initialLiveSchedule} />
+        <Lore data={mildRData} />
         <Media data={mildRData} />
-        <EventsTeaser board={getEventsBoard()} />
         <Gallery data={mildRData} fanArt={fanArt} />
+        <EventsTeaser board={getEventsBoard()} />
         <Projects data={mildRData} />
+        <Membership data={mildRData} />
         <Socials data={mildRData} xPosts={xPosts} xRetweets={xRetweets} />
       </main>
       <Footer data={mildRData} />

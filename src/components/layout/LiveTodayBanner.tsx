@@ -228,8 +228,8 @@ export function LiveTodayBanner() {
       {showCover && coverUrl ? (
         <span
           className={cn(
-            "relative hidden aspect-video h-7 shrink-0 overflow-hidden rounded-[5px] border bg-[#10070b] sm:block",
-            isLive ? "border-[#e85a7a]/80" : "border-[#f3b8c4]/20"
+            "relative hidden aspect-video h-7 shrink-0 overflow-hidden rounded-[5px] border bg-r-bg sm:block",
+            isLive ? "border-r-pri/80" : "border-r-text-2/20"
           )}
         >
           <ProtectedImage
@@ -241,30 +241,27 @@ export function LiveTodayBanner() {
             className="absolute inset-0 h-full w-full object-cover"
           />
           {isLive ? (
-            <span className="absolute top-0.5 right-0.5 size-1.5 rounded-full bg-[#e85a7a] ring-1 ring-[#140a0d]" />
+            <span className="absolute top-0.5 right-0.5 size-1.5 rounded-full bg-r-pri ring-1 ring-r-bg" />
           ) : null}
         </span>
       ) : null}
 
       {isLive ? (
-        <span className="inline-flex shrink-0 items-center gap-1 rounded-sm bg-[#e85a7a] px-1.5 py-px text-[0.6rem] font-semibold tracking-[0.14em] text-white">
-          <span className="relative flex size-1.5">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-white opacity-75 motion-reduce:animate-none" />
-            <span className="relative inline-flex size-1.5 rounded-full bg-white" />
-          </span>
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-r-pri px-2 py-px text-[0.6rem] font-semibold tracking-[0.14em] text-r-on-pri">
+          <span className="r-ping-fast size-1.5 rounded-full bg-r-on-pri" aria-hidden />
           LIVE
         </span>
       ) : (
         <span
           className={cn(
             "inline-flex shrink-0 items-center gap-1.5 tabular-nums",
-            awaitingStart ? "text-[#e85a7a]" : "text-[#f3b8c4]/75"
+            awaitingStart ? "text-r-pri" : "text-r-text-3"
           )}
         >
           <span
             className={cn(
-              "size-1.5 rounded-full bg-[#e85a7a]",
-              glow && "animate-pulse motion-reduce:animate-none"
+              "size-1.5 rounded-full bg-r-pri",
+              glow ? "r-ping-fast" : "r-ping"
             )}
             aria-hidden
           />
@@ -273,15 +270,15 @@ export function LiveTodayBanner() {
           ) : (
             <span>
               ไลฟ์วันนี้
-              {time ? <span className="font-medium text-[#fff5f7]/90"> {time}</span> : null}
+              {time ? <span className="font-medium text-r-text/90"> {time}</span> : null}
             </span>
           )}
         </span>
       )}
 
       {isLive || clock ? (
-        <span className="inline-flex shrink-0 items-baseline gap-1.5 border-l border-[#f3b8c4]/15 pl-2.5">
-          <span className={cn("text-[0.7rem]", isLive ? "text-[#f7d7de]" : "text-[#f3b8c4]/55")}>
+        <span className="inline-flex shrink-0 items-baseline gap-1.5 border-l border-r-text-2/15 pl-2.5">
+          <span className={cn("text-[0.7rem]", isLive ? "text-r-text" : "text-r-text-3")}>
             {isLive ? "กำลังไลฟ์" : "เริ่มใน"}
           </span>
           {clock ? (
@@ -289,8 +286,8 @@ export function LiveTodayBanner() {
               className={cn(
                 "font-[family-name:var(--font-display)] text-sm leading-none font-medium tracking-[0.04em] tabular-nums sm:text-base",
                 startingSoon
-                  ? "text-[#ff8fa8] [text-shadow:0_0_14px_rgba(232,90,122,0.55)]"
-                  : "text-[#fff5f7]"
+                  ? "text-r-pri-hover [text-shadow:0_0_14px_color-mix(in_srgb,var(--r-pri)_55%,transparent)]"
+                  : "text-r-text"
               )}
             >
               {clock}
@@ -299,15 +296,15 @@ export function LiveTodayBanner() {
         </span>
       ) : null}
 
-      <span className="min-w-0 truncate text-[#fff5f7]/85 transition group-hover:text-white">
+      <span className="min-w-0 truncate text-r-text/85 transition group-hover:text-r-text">
         {title}
-        {guest ? <span className="text-[#f3b8c4]/60"> · ช่อง {guest}</span> : null}
-        {slot.isMember ? <span className="text-[#f3b8c4]/60"> · Member</span> : null}
+        {guest ? <span className="text-r-text-3"> · ช่อง {guest}</span> : null}
+        {slot.isMember ? <span className="text-r-text-3"> · Member</span> : null}
       </span>
       {extra > 0 ? (
-        <span className="shrink-0 text-[#f3b8c4]/60">+{extra} ไลฟ์</span>
+        <span className="shrink-0 text-r-text-3">+{extra} ไลฟ์</span>
       ) : null}
-      <span className="ml-auto hidden shrink-0 items-center gap-1 text-[#e85a7a] transition group-hover:gap-1.5 sm:inline-flex">
+      <span className="ml-auto hidden shrink-0 items-center gap-1 text-r-pri transition group-hover:gap-1.5 sm:inline-flex">
         {cta}
         <ArrowUpRight className="size-3.5" aria-hidden />
       </span>
@@ -315,16 +312,16 @@ export function LiveTodayBanner() {
   );
 
   const linkClass =
-    "group flex min-w-0 flex-1 items-center gap-2.5 py-2 focus-visible:outline-none focus-visible:underline";
+    "group flex min-w-0 flex-1 items-center gap-2.5 py-2 focus-visible:underline focus-visible:outline-none";
 
   return (
     <div ref={wrapRef} className="overflow-hidden">
       <div
         className={cn(
-          "border-t border-b border-t-[#f3b8c4]/[0.06] bg-gradient-to-r backdrop-blur-md",
+          "border-t border-b border-t-r-text-2/[0.06] backdrop-blur-md",
           isLive
-            ? "border-b-[#e85a7a]/35 from-[#1c0a11]/95 via-[#2a0f19]/92 to-[#3a1422]/90"
-            : "border-b-[#e85a7a]/20 from-[#140a0d]/95 via-[#1a0c12]/92 to-[#2a1018]/90"
+            ? "border-b-r-pri/40 bg-[linear-gradient(90deg,color-mix(in_srgb,var(--r-pri)_18%,var(--r-bg))_0%,color-mix(in_srgb,var(--r-bg)_95%,transparent)_70%)]"
+            : "border-b-r-pri/20 bg-[linear-gradient(90deg,color-mix(in_srgb,var(--r-bg)_95%,transparent),color-mix(in_srgb,var(--r-pri)_8%,var(--r-bg))_100%)]"
         )}
       >
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-5 text-xs sm:px-10 sm:text-sm lg:px-16">
@@ -341,7 +338,7 @@ export function LiveTodayBanner() {
             type="button"
             onClick={dismiss}
             aria-label="ปิดแบนเนอร์ไลฟ์วันนี้"
-            className="-mr-2 inline-flex size-8 shrink-0 items-center justify-center rounded-full text-[#f3b8c4]/60 transition hover:bg-[#e85a7a]/15 hover:text-[#fff5f7]"
+            className="-mr-2 inline-flex size-8 shrink-0 items-center justify-center rounded-full text-r-text-3 transition hover:bg-r-pri/15 hover:text-r-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-r-acc"
           >
             <X className="size-3.5" aria-hidden />
           </button>

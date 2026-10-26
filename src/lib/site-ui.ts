@@ -69,3 +69,52 @@ export const CTA_OUTLINE_CLASS =
 /** Cover modals: frosted close control */
 export const MODAL_CLOSE_BUTTON_CLASS =
   "top-3 right-3 z-30 size-10 rounded-full border border-[#140a0d]/50 bg-white/15 text-[#140a0d] shadow-[0_8px_24px_rgba(0,0,0,0.3)] backdrop-blur-md hover:border-[#140a0d]/70 hover:bg-white/25 hover:text-[#1a0c12] [&_svg]:size-5";
+
+/* ── Project R · CI A+ (doc/project-r-implementation.md §1) ─────────
+   New home sections use these; the classes above stay for pages not yet moved. */
+
+/** Small uppercase label above a section title — mint */
+export const R_EYEBROW_CLASS = "text-xs uppercase tracking-[0.24em] text-r-acc";
+
+export const R_H2_CLASS =
+  "font-[family-name:var(--font-display)] text-3xl font-normal leading-tight tracking-normal text-r-text md:text-4xl";
+
+export const R_H3_CLASS =
+  "font-[family-name:var(--font-display)] text-lg font-normal leading-snug tracking-normal text-r-text sm:text-xl";
+
+export const R_BODY_CLASS = "text-[0.9375rem] leading-relaxed text-r-text-2";
+
+/** Dates, captions, helper text */
+export const R_META_CLASS = "text-xs text-r-text-3 sm:text-sm";
+
+/** Card with the diagonal pink/mint wash (globals.css `.r-card`) */
+export const R_CARD_CLASS = "r-card rounded-3xl";
+
+const R_FOCUS =
+  "focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-solid focus-visible:outline-r-acc";
+
+/** Primary button · normal / hover / active / focus / disabled */
+export const R_CTA_PRIMARY_CLASS = [
+  "inline-flex h-12 items-center justify-center gap-2 rounded-full px-6 text-[0.9375rem] font-medium transition-[background-color,box-shadow]",
+  "bg-r-pri text-r-on-pri hover:bg-r-pri-hover hover:shadow-[0_8px_24px_rgba(242,67,125,0.35)] active:bg-r-pri-active",
+  "disabled:pointer-events-none disabled:bg-white/8 disabled:text-r-text/40 disabled:shadow-none",
+  R_FOCUS,
+].join(" ");
+
+/** Outline button */
+export const R_CTA_OUTLINE_CLASS = [
+  "inline-flex h-12 items-center justify-center gap-2 rounded-full px-6 text-[0.9375rem] transition-colors",
+  "border border-r-text-2/35 text-r-text hover:border-r-pri/60 hover:bg-r-pri/10 active:bg-r-pri/20",
+  "disabled:pointer-events-none disabled:opacity-40",
+  R_FOCUS,
+].join(" ");
+
+/** Solid chips / tags — never gradient */
+export const R_CHIP_PRI_CLASS =
+  "inline-flex h-6 items-center rounded-full bg-r-pri px-2.5 text-xs font-medium text-r-on-pri";
+
+export const R_CHIP_ACC_CLASS =
+  "inline-flex h-6 items-center rounded-full bg-r-acc px-2.5 text-xs font-medium text-r-on-acc";
+
+export const R_CHIP_SOFT_CLASS =
+  "inline-flex h-6 items-center rounded-full bg-white/[0.04] px-2.5 text-xs text-r-text-2 ring-1 ring-r-line ring-inset";

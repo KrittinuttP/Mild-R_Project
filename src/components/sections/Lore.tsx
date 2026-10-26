@@ -1,12 +1,14 @@
 "use client";
 
 import { useRef } from "react";
-import { BookOpen } from "lucide-react";
+import {  } from "lucide-react";
 
 import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
-import { BODY_CLASS, DISPLAY_H2_CLASS, DISPLAY_H3_CLASS, META_CLASS } from "@/lib/site-ui";
+import { BODY_CLASS, DISPLAY_H2_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { VtuberProfile } from "@/types/vtuber";
+import { Section } from "@/components/common/Section";
+import { SectionHeader } from "@/components/common/SectionHeader";
 
 registerGsapPlugins();
 
@@ -101,87 +103,66 @@ export function Lore({ data }: LoreProps) {
   );
 
   return (
-    <section
-      ref={rootRef}
-      id="lore"
-      className="relative scroll-mt-20 overflow-hidden bg-[#10080c] px-5 py-20 text-[#fff5f7] sm:scroll-mt-24 sm:px-10 sm:py-28 lg:px-16"
-    >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#140a0d] to-transparent" />
+    <Section ref={rootRef} id="lore" className="overflow-hidden">
+      <SectionHeader eyebrow="About · Lore" title="รู้จัก Mild-R" description={data.lore.theme || undefined} />
 
-      <div className="relative mx-auto max-w-6xl">
-        <div className="max-w-2xl">
-          <div className="flex items-center gap-2">
-            <BookOpen className="size-4 text-[#e85a7a]" aria-hidden />
-            <p className={META_CLASS}>Lore</p>
-          </div>
-          <h2 className={cn("mt-3", DISPLAY_H2_CLASS)}>
-            เรื่องราวหลังภัย
-          </h2>
-          {data.lore.theme ? (
-            <p className="mt-4 text-sm tracking-wide text-[#e85a7a]/90">
-              {data.lore.theme}
-            </p>
-          ) : null}
-        </div>
-
-        <div className="mt-8 max-w-2xl space-y-5 sm:mt-12 sm:space-y-6">
-          {data.lore.paragraphs.map((paragraph) => (
-            <p
-              key={paragraph}
-              data-lore-paragraph
-              className={cn("max-w-xl", BODY_CLASS, "md:text-lg")}
-            >
-              {paragraph}
-            </p>
-          ))}
-        </div>
-
-        {chapters.length > 0 ? (
-          <div
-            data-lore-track
-            className="relative mt-16 grid gap-0 sm:mt-24 lg:grid-cols-[4rem_1fr]"
+      <div className="mt-8 max-w-2xl space-y-5 sm:mt-12 sm:space-y-6">
+        {data.lore.paragraphs.map((paragraph) => (
+          <p
+            key={paragraph}
+            data-lore-paragraph
+            className={cn("max-w-xl", BODY_CLASS, "md:text-lg")}
           >
-            <div className="relative hidden lg:block" aria-hidden>
-              {/* Full-height timeline — spans every chapter to the last */}
-              <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-[#f3b8c4]/15" />
-              <div
-                data-lore-progress
-                className="absolute inset-y-0 left-1/2 w-px origin-top -translate-x-1/2 bg-[#e85a7a]"
-              />
-            </div>
-
-            <div className="space-y-5 sm:space-y-6">
-              {chapters.map((chapter, index) => (
-                <article
-                  key={chapter.id}
-                  data-lore-chapter
-                  className="min-h-0 rounded-3xl border border-[#f3b8c4]/12 bg-[#1a0c12]/60 px-5 py-10 sm:min-h-[50vh] sm:px-8 sm:py-14 lg:min-h-[70vh] lg:py-20"
-                >
-                  <div
-                    data-lore-chapter-inner
-                    className="grid gap-4 sm:gap-6 md:grid-cols-[7rem_1fr] md:gap-10"
-                  >
-                    <span
-                      data-lore-index
-                      className="font-[family-name:var(--font-display)] text-3xl font-normal text-[#e85a7a]/80 sm:text-4xl"
-                    >
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <div>
-                      <h3 className={DISPLAY_H2_CLASS}>
-                        {chapter.title}
-                      </h3>
-                      <p className={cn("mt-4 max-w-xl sm:mt-6", BODY_CLASS, "md:text-lg")}>
-                        {chapter.body}
-                      </p>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        ) : null}
+            {paragraph}
+          </p>
+        ))}
       </div>
-    </section>
+
+      {chapters.length > 0 ? (
+        <div
+          data-lore-track
+          className="relative mt-16 grid gap-0 sm:mt-24 lg:grid-cols-[4rem_1fr]"
+        >
+          <div className="relative hidden lg:block" aria-hidden>
+            {/* Full-height timeline — spans every chapter to the last */}
+            <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-[#f3b8c4]/15" />
+            <div
+              data-lore-progress
+              className="absolute inset-y-0 left-1/2 w-px origin-top -translate-x-1/2 bg-[#e85a7a]"
+            />
+          </div>
+
+          <div className="space-y-5 sm:space-y-6">
+            {chapters.map((chapter, index) => (
+              <article
+                key={chapter.id}
+                data-lore-chapter
+                className="min-h-0 rounded-3xl border border-[#f3b8c4]/12 bg-[#1a0c12]/60 px-5 py-10 sm:min-h-[50vh] sm:px-8 sm:py-14 lg:min-h-[70vh] lg:py-20"
+              >
+                <div
+                  data-lore-chapter-inner
+                  className="grid gap-4 sm:gap-6 md:grid-cols-[7rem_1fr] md:gap-10"
+                >
+                  <span
+                    data-lore-index
+                    className="font-[family-name:var(--font-display)] text-3xl font-normal text-[#e85a7a]/80 sm:text-4xl"
+                  >
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <div>
+                    <h3 className={DISPLAY_H2_CLASS}>
+                      {chapter.title}
+                    </h3>
+                    <p className={cn("mt-4 max-w-xl sm:mt-6", BODY_CLASS, "md:text-lg")}>
+                      {chapter.body}
+                    </p>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </Section>
   );
 }

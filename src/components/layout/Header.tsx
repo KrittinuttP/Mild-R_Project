@@ -37,8 +37,8 @@ const NAV_LINKS: NavLink[] = [
     children: [
       // Hero+Profile scrollytelling starts at #top (desktop profile pin breaks #profile)
       { label: "แนะนำตัว", href: "/#top" },
-      { label: "Member", href: "/#member" },
       { label: "Lore", href: "/#lore" },
+      { label: "Member", href: "/#member" },
     ],
   },
   {
@@ -212,14 +212,14 @@ export function Header({ data }: HeaderProps) {
       className={cn(
         "fixed inset-x-0 top-0 z-40 transition-[background-color,backdrop-filter,border-color] duration-300",
         scrolled || open
-          ? "border-b border-[#f3b8c4]/10 bg-[#140a0d]/80 backdrop-blur-md"
+          ? "border-b border-r-text-2/10 bg-r-bg/80 backdrop-blur-md"
           : "border-b border-transparent bg-transparent"
       )}
     >
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5 pt-[env(safe-area-inset-top)] sm:h-16 sm:px-10 lg:px-16">
         <Link
           href={onHome ? "#top" : "/"}
-          className="font-[family-name:var(--font-display)] text-base font-normal tracking-normal text-[#fff5f7] sm:text-lg"
+          className="font-[family-name:var(--font-display)] text-base font-normal tracking-normal text-r-text sm:text-lg"
           onClick={(event) => {
             if (onHome) {
               event.preventDefault();
@@ -232,7 +232,7 @@ export function Header({ data }: HeaderProps) {
           }}
         >
           {data.basic.name}
-          <span className="ml-1.5 text-sm font-medium text-[#e85a7a] sm:ml-2">
+          <span className="ml-1.5 text-sm font-medium text-r-pri sm:ml-2">
             {data.fan.oshiMark}
           </span>
         </Link>
@@ -245,8 +245,8 @@ export function Header({ data }: HeaderProps) {
           {NAV_LINKS.map((link) => {
             const href = resolveHref(link);
             const linkClass = cn(
-              "text-sm tracking-wide transition hover:text-[#fff5f7]",
-              isActive(link) ? "text-[#fff5f7]" : "text-[#f7d7de]/80"
+              "text-sm tracking-wide transition hover:text-r-text",
+              isActive(link) ? "text-r-text" : "text-r-text/80"
             );
 
             if (link.children?.length) {
@@ -295,16 +295,16 @@ export function Header({ data }: HeaderProps) {
                       menuOpen ? "visible opacity-100" : "invisible opacity-0"
                     )}
                   >
-                    <ul className="min-w-44 rounded-xl border border-[#f3b8c4]/15 bg-[#140a0d]/95 p-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.45)] backdrop-blur-md">
+                    <ul className="min-w-44 rounded-xl border border-r-text-2/15 bg-r-bg/95 p-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.45)] backdrop-blur-md">
                       {homeHash ? (
-                        <li className="mb-1 border-b border-[#f3b8c4]/10 pb-1">
+                        <li className="mb-1 border-b border-r-text-2/10 pb-1">
                           <Link
                             href={homeSectionHref(homeHash)}
                             onClick={(event) => {
                               closeMenu();
                               handleNavClick(event, homeSectionHref(homeHash));
                             }}
-                            className="block whitespace-nowrap rounded-lg px-3 py-2 text-sm text-[#f7d7de]/80 transition hover:bg-[#e85a7a]/15 hover:text-[#fff5f7] focus-visible:bg-[#e85a7a]/15 focus-visible:outline-none"
+                            className="block whitespace-nowrap rounded-lg px-3 py-2 text-sm text-r-text/80 transition hover:bg-r-pri/15 hover:text-r-text focus-visible:bg-r-pri/15 focus-visible:outline-none"
                           >
                             {link.label}
                           </Link>
@@ -322,8 +322,8 @@ export function Header({ data }: HeaderProps) {
                                 handleNavClick(event, child.href);
                               }}
                               className={cn(
-                                "block whitespace-nowrap rounded-lg px-3 py-2 text-sm transition hover:bg-[#e85a7a]/15 hover:text-[#fff5f7] focus-visible:bg-[#e85a7a]/15 focus-visible:outline-none",
-                                childActive ? "text-[#fff5f7]" : "text-[#f7d7de]/80"
+                                "block whitespace-nowrap rounded-lg px-3 py-2 text-sm transition hover:bg-r-pri/15 hover:text-r-text focus-visible:bg-r-pri/15 focus-visible:outline-none",
+                                childActive ? "text-r-text" : "text-r-text/80"
                               )}
                             >
                               {child.label}
@@ -354,7 +354,7 @@ export function Header({ data }: HeaderProps) {
           type="button"
           className={cn(
             buttonVariants({ variant: "ghost", size: "icon" }),
-            "text-[#fff5f7] md:hidden"
+            "text-r-text md:hidden"
           )}
           aria-expanded={open}
           aria-controls="mobile-nav"
@@ -383,7 +383,7 @@ export function Header({ data }: HeaderProps) {
         id="mobile-nav"
         className={cn(
           // Page scroll is locked while open, so the panel must scroll itself (header is h-14 / sm:h-16).
-          "max-h-[calc(100dvh-3.5rem)] overflow-y-auto overscroll-contain border-t border-[#f3b8c4]/10 bg-[#140a0d]/95 sm:max-h-[calc(100dvh-4rem)] md:hidden",
+          "max-h-[calc(100dvh-3.5rem)] overflow-y-auto overscroll-contain border-t border-r-text-2/10 bg-r-bg/95 sm:max-h-[calc(100dvh-4rem)] md:hidden",
           open ? "block" : "hidden"
         )}
       >
@@ -416,8 +416,8 @@ export function Header({ data }: HeaderProps) {
                       )
                     }
                     className={cn(
-                      "flex min-h-12 items-center justify-between py-3.5 text-left text-base transition hover:text-[#fff5f7]",
-                      expanded || isActive(link) ? "text-[#fff5f7]" : "text-[#f7d7de]"
+                      "flex min-h-12 items-center justify-between py-3.5 text-left text-base transition hover:text-r-text",
+                      expanded || isActive(link) ? "text-r-text" : "text-r-text"
                     )}
                   >
                     {link.label}
@@ -438,17 +438,17 @@ export function Header({ data }: HeaderProps) {
                     )}
                   >
                     <div className="overflow-hidden">
-                      <div className="mb-1 flex flex-col border-l border-[#f3b8c4]/15 pl-4">
+                      <div className="mb-1 flex flex-col border-l border-r-text-2/15 pl-4">
                         {subLinks.map((child) => (
                           <Link
                             key={child.href}
                             href={child.href}
                             aria-current={pathname === child.href ? "page" : undefined}
                             className={cn(
-                              "min-h-11 py-3 text-sm transition hover:text-[#fff5f7]",
+                              "min-h-11 py-3 text-sm transition hover:text-r-text",
                               pathname === child.href
-                                ? "text-[#fff5f7]"
-                                : "text-[#f7d7de]/70"
+                                ? "text-r-text"
+                                : "text-r-text/70"
                             )}
                             onClick={(event) => handleNavClick(event, child.href)}
                           >
@@ -466,7 +466,7 @@ export function Header({ data }: HeaderProps) {
               <Link
                 key={link.label}
                 href={href}
-                className="flex min-h-12 items-center py-3.5 text-base text-[#f7d7de] transition hover:text-[#fff5f7]"
+                className="flex min-h-12 items-center py-3.5 text-base text-r-text transition hover:text-r-text"
                 onClick={(event) => handleNavClick(event, href)}
               >
                 {link.label}
