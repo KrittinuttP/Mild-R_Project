@@ -1,139 +1,50 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
-import {
-  Check,
-  ChevronDown,
-  ExternalLink,
-  History,
-  Play,
-  Smartphone,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowRight, Clock, ExternalLink, Lightbulb, Play, Smartphone, type LucideIcon } from "lucide-react";
 
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
-import { buttonVariants } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetBody,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { useVideos } from "@/hooks/useVideos";
-import { groupMediaByCategory } from "@/lib/media";
-import {
-  CTA_OUTLINE_CLASS,
-  DISPLAY_H3_CLASS,
-  META_MUTED_CLASS,
-} from "@/lib/site-ui";
-import { videoSubtitle } from "@/lib/video-format";
-import {
-  getYoutubeEmbedUrl,
-  getYoutubeThumbnailUrl,
-  getYoutubeVideoId,
-} from "@/lib/youtube";
-import { cn } from "@/lib/utils";
-import type { MediaCategory, MediaClip, VtuberProfile } from "@/types/vtuber";
-import type { VideoItem } from "@/types/video";
 import { Section } from "@/components/common/Section";
 import { SectionHeader } from "@/components/common/SectionHeader";
+import { ProtectedImage } from "@/components/media/ProtectedImage";
+import { useVideos } from "@/hooks/useVideos";
+import { groupMediaClips, MEDIA_CATEGORY_LABEL, type MediaGroupId } from "@/lib/media";
+import { R_CTA_OUTLINE_CLASS, R_CTA_PRIMARY_CLASS } from "@/lib/site-ui";
+import { cn } from "@/lib/utils";
+import { getYoutubeEmbedUrl, getYoutubePosterUrl, getYoutubeThumbnailUrl, getYoutubeVideoId } from "@/lib/youtube";
+import type { MediaClip, VtuberProfile } from "@/types/vtuber";
+import type { VideoItem } from "@/types/video";
 
 type MediaProps = {
   data: VtuberProfile;
 };
 
-type DynamicTabId = "latest" | "shorts";
-type TabId = MediaCategory | DynamicTabId;
+/* ── tabs ─────────────────────────────────────────────────────────── */
 
-type DynamicTab = {
-  id: DynamicTabId;
-  label: string;
-  labelLocal: string;
-  icon: LucideIcon;
-  query: string;
-};
+type DynamicTabId = "latest" | "shorts";
+type TabId = MediaGroupId | DynamicTabId;
 
 const DYNAMIC_TAB_LIMIT = 8;
-
-const DYNAMIC_TABS: DynamicTab[] = [
-  {
-    id: "latest",
-    label: "Latest",
-    labelLocal: "คลิปล่าสุด",
-    icon: History,
-    query: `kind=video,premiere&limit=${DYNAMIC_TAB_LIMIT}`,
-  },
-  {
-    id: "shorts",
-    label: "Shorts",
-    labelLocal: "คลิปสั้น",
-    icon: Smartphone,
-    query: `kind=short&limit=${DYNAMIC_TAB_LIMIT}`,
-  },
+const DYNAMIC_TABS: Array<{ id: DynamicTabId; label: string; icon: LucideIcon; query: string }> = [
+  { id: "latest", label: "คลิปล่าสุด", icon: Clock, query: `kind=video,premiere&limit=${DYNAMIC_TAB_LIMIT}` },
+  { id: "shorts", label: "Shorts", icon: Smartphone, query: `kind=short&limit=${DYNAMIC_TAB_LIMIT}` },
 ];
 
-/** Curated clips and fetched videos share one player + playlist. */
-type PlayerClip = {
-  id: string;
-  title: string;
-  titleLocal?: string;
-  description?: string;
-  youtubeUrl: string;
-  embed: boolean;
-};
-
-function fromCurated(clip: MediaClip): PlayerClip {
-  return {
-    id: clip.id,
-    title: clip.title,
-    titleLocal: clip.titleLocal,
-    description: clip.description,
-    youtubeUrl: clip.youtubeUrl,
-    embed: Boolean(clip.embedExternal),
-  };
-}
-
-function fromVideo(video: VideoItem): PlayerClip {
-  return {
-    id: video.videoId,
-    title: video.title,
-    titleLocal: videoSubtitle(video),
-    youtubeUrl: video.youtubeUrl,
-    embed: video.embeddable,
-  };
-}
-
-function isDynamicTab(tab: TabId): tab is DynamicTabId {
-  return DYNAMIC_TABS.some((t) => t.id === tab);
-}
-
-function pickInitialClip(clips: MediaClip[]) {
-  return clips.find((clip) => clip.featured) ?? clips[0] ?? null;
-}
-
-type TabOption = {
-  id: TabId;
-  icon: LucideIcon;
-  label: string;
-  sublabel: string;
-};
-
-const TAB_BUTTON_CLASS =
-  "shrink-0 rounded-xl px-4 py-2.5 text-left transition sm:min-w-[7rem] lg:grow";
-
-function TabButton({
+function TabChip({
   selected,
   icon: Icon,
   label,
-  sublabel,
+  count,
+  mint = false,
   onClick,
 }: {
   selected: boolean;
   icon: LucideIcon;
   label: string;
-  sublabel: string;
+  count?: number;
+  /** auto-updating tabs (latest · Shorts) get a mint icon */
+  mint?: boolean;
   onClick: () => void;
 }) {
   return (
@@ -143,395 +54,581 @@ function TabButton({
       aria-selected={selected}
       onClick={onClick}
       className={cn(
-        TAB_BUTTON_CLASS,
+        "inline-flex shrink-0 items-center gap-[7px] rounded-full py-[7px] pr-3.5 pl-[11px] text-[0.8125rem] whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc",
         selected
-          ? "bg-[#e85a7a] text-[#140a0d] shadow-sm"
-          : "text-[#f3b8c4]/70 hover:bg-white/5 hover:text-[#f7d7de]"
+          ? "bg-r-pri text-r-on-pri"
+          : "text-r-text/85 ring-1 ring-r-text-2/15 ring-inset hover:bg-white/[0.04] hover:text-r-text"
       )}
     >
-      <span className="block lg:mx-auto lg:w-fit">
-        <span className="flex items-center gap-2">
-          <Icon
-            className={cn(
-              "size-4 shrink-0",
-              selected ? "text-[#140a0d]" : "text-[#f3b8c4]/55"
-            )}
-            aria-hidden
-          />
-          <span className="text-sm font-medium tracking-wide">{label}</span>
-        </span>
-        <span
-          className={cn(
-            "mt-0.5 block pl-6 text-xs",
-            selected ? "text-[#140a0d]/70" : "text-[#f3b8c4]/50"
-          )}
-        >
-          {sublabel}
-        </span>
-      </span>
+      <Icon aria-hidden className={cn("size-3.5", selected ? "text-r-on-pri" : mint ? "text-r-acc" : "text-r-text-2")} />
+      {label}
+      {count !== undefined ? <span className="opacity-60">{count}</span> : null}
     </button>
   );
 }
 
+/* ── one shape for curated clips and fetched videos ──────────────── */
+
+type PlayerClip = {
+  id: string;
+  title: string;
+  /** Chip on the poster, e.g. "เพลงประจำตัว · Original Song" */
+  tag: string;
+  /** Line under the poster title, e.g. "รักษาหัวใจ · 19 May 2024" */
+  subtitle: string;
+  /** One line in the playlist, e.g. "ออริจินัล · รักษาหัวใจ · Original song MV" */
+  meta: string;
+  /** "รู้ไหม …" chip under the player */
+  funFact?: string;
+  youtubeUrl: string;
+  videoId: string | null;
+  embed: boolean;
+  /** Original songs / covers say "ดู MV", everything else "เล่นคลิป". */
+  isMusic: boolean;
+  thumbUrl: string | null;
+  posterUrl: string | null;
+};
+
+/** "19 May 2024" for a `YYYY-MM-DD` date (dates stay in English). */
+function formatYmd(ymd: string | null | undefined) {
+  if (!ymd || !/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return null;
+  const [y, m, d] = ymd.split("-").map(Number);
+  return new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", day: "numeric", month: "short", year: "numeric" }).format(
+    new Date(Date.UTC(y, m - 1, d, 12))
+  );
+}
+
+const join = (...parts: Array<string | null | undefined>) => parts.filter(Boolean).join(" · ");
+
+function fromCurated(clip: MediaClip, originalSong: VtuberProfile["basic"]["originalSong"]): PlayerClip {
+  const videoId = getYoutubeVideoId(clip.youtubeUrl);
+  const category = MEDIA_CATEGORY_LABEL[clip.category];
+  // The signature song carries its release date and fun fact from basic.json.
+  const isSignature = Boolean(originalSong?.url && videoId && getYoutubeVideoId(originalSong.url) === videoId);
+  return {
+    id: clip.id,
+    title: clip.title,
+    tag: clip.category === "original" ? `เพลงประจำตัว · ${category.en}` : category.local,
+    subtitle: join(clip.titleLocal, isSignature ? formatYmd(originalSong?.releasedAt) : null),
+    meta: join(category.local, clip.titleLocal, clip.description),
+    funFact: isSignature && originalSong?.note ? `รู้ไหม ${originalSong.note}` : undefined,
+    youtubeUrl: clip.youtubeUrl,
+    videoId,
+    embed: Boolean(clip.embedExternal && videoId),
+    isMusic: clip.category === "original" || clip.category === "cover",
+    thumbUrl: videoId ? getYoutubeThumbnailUrl(videoId) : null,
+    posterUrl: videoId ? getYoutubePosterUrl(videoId) : null,
+  };
+}
+
+function fromVideo(video: VideoItem): PlayerClip {
+  const meta = join(video.channelLabel, formatYmd(video.date), video.durationLabel);
+  return {
+    id: video.videoId,
+    title: video.title,
+    tag: video.kind === "short" ? "Shorts" : video.kind === "premiere" ? "Premiere" : "คลิปล่าสุด",
+    subtitle: join(video.channelLabel, formatYmd(video.date)),
+    meta,
+    youtubeUrl: video.youtubeUrl,
+    videoId: video.videoId,
+    embed: video.embeddable,
+    isMusic: false,
+    thumbUrl: video.thumbUrl,
+    posterUrl: video.coverUrl,
+  };
+}
+
+/* ── player pieces ───────────────────────────────────────────────── */
+
+const IFRAME_ALLOW =
+  "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+
+function YoutubeFrame({ clip }: { clip: PlayerClip }) {
+  return (
+    <iframe
+      key={clip.videoId}
+      title={clip.title}
+      src={getYoutubeEmbedUrl(clip.videoId!, true)}
+      className="absolute inset-0 size-full"
+      allow={IFRAME_ALLOW}
+      allowFullScreen
+      referrerPolicy="strict-origin-when-cross-origin"
+    />
+  );
+}
+
+/** Poster image; drops to `hqdefault` when the video has no 1280px poster. */
+function Poster({ clip, className }: { clip: PlayerClip; className?: string }) {
+  const [src, setSrc] = useState(clip.posterUrl);
+  if (!src) return null;
+  return (
+    <ProtectedImage
+      src={src}
+      alt=""
+      onError={() => {
+        if (clip.videoId && src !== getYoutubePosterUrl(clip.videoId, "hq")) setSrc(getYoutubePosterUrl(clip.videoId, "hq"));
+      }}
+      className={cn("absolute inset-0 size-full object-cover", className)}
+    />
+  );
+}
+
+const STAGE_FRAME =
+  "relative overflow-hidden rounded-3xl bg-r-bg shadow-[0_40px_80px_-45px_color-mix(in_srgb,var(--r-pri)_60%,transparent)] ring-1 ring-r-text-2/15";
+
+/** Big player: poster with title + play, the YouTube player once played, or a YouTube-only card. */
+function Stage({
+  clip,
+  position,
+  total,
+  playing,
+  onPlay,
+}: {
+  clip: PlayerClip;
+  position: number;
+  total: number;
+  playing: boolean;
+  onPlay: () => void;
+}) {
+  if (playing && clip.embed) {
+    return (
+      <div className={cn(STAGE_FRAME, "aspect-video")}>
+        <YoutubeFrame clip={clip} />
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn(STAGE_FRAME, "min-h-[300px] md:aspect-video md:min-h-0")}>
+      <Poster key={clip.id} clip={clip} className="object-[center_30%]" />
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-[linear-gradient(0deg,color-mix(in_srgb,var(--r-bg)_92%,transparent)_0%,color-mix(in_srgb,var(--r-bg)_60%,transparent)_55%,color-mix(in_srgb,var(--r-bg)_10%,transparent)_100%)] md:bg-[linear-gradient(90deg,color-mix(in_srgb,var(--r-bg)_95%,transparent)_0%,color-mix(in_srgb,var(--r-bg)_70%,transparent)_40%,color-mix(in_srgb,var(--r-bg)_5%,transparent)_75%)]"
+      />
+      <span className="absolute top-3.5 right-3.5 rounded-full bg-r-bg/75 px-[11px] py-1 text-[0.71875rem] text-r-text/85 tabular-nums">
+        {position} / {total}
+      </span>
+      <div className="absolute inset-x-5 bottom-5 md:inset-x-8 md:top-1/2 md:bottom-auto md:max-w-[400px] md:-translate-y-1/2">
+        <span className="inline-flex rounded-full bg-white/[0.04] px-2.5 py-[3px] text-[0.71875rem] text-r-text-2 ring-1 ring-r-text-2/15 ring-inset backdrop-blur-sm">
+          {clip.tag}
+        </span>
+        <p className="mt-3 line-clamp-2 font-[family-name:var(--font-display)] text-[2.125rem] leading-[1.1] font-light text-r-text md:text-[2.75rem]">
+          {clip.title}
+        </p>
+        {clip.subtitle ? (
+          <p className="mt-1.5 line-clamp-1 font-[family-name:var(--font-display)] text-base text-r-text-2">{clip.subtitle}</p>
+        ) : null}
+        <div className="mt-[18px] flex flex-wrap items-center gap-3">
+          {clip.embed ? (
+            <>
+              <button type="button" onClick={onPlay} className={R_CTA_PRIMARY_CLASS}>
+                <Play aria-hidden className="size-[13px] fill-current" />
+                {clip.isMusic ? "ดู MV" : "เล่นคลิป"}
+              </button>
+            </>
+          ) : (
+            <>
+              <a href={clip.youtubeUrl} target="_blank" rel="noopener noreferrer" className={R_CTA_OUTLINE_CLASS}>
+                ดูบน YouTube
+                <ExternalLink aria-hidden className="size-4" />
+              </a>
+              <span className="inline-flex items-center gap-1.5 text-xs text-r-text-2">
+                <ExternalLink aria-hidden className="size-3" />
+                คลิปนี้เปิดดูได้บน YouTube เท่านั้น
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OpenOnYoutube({ href }: { href: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-1.5 rounded text-[0.8125rem] text-r-text-2 transition-colors hover:text-r-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc"
+    >
+      เปิดบน YouTube
+      <ExternalLink aria-hidden className="size-3.5" />
+    </a>
+  );
+}
+
+/* ── playlist ────────────────────────────────────────────────────── */
+
+const PANEL = "r-card rounded-3xl p-3 md:p-3.5";
+/** Rows that fit before the list scrolls: 4 on phones, 6 from tablet up. */
+const VISIBLE_ROWS = { phone: 4, wide: 6 } as const;
+
+function PlaylistPanel({
+  title,
+  clips,
+  activeId,
+  onSelect,
+  status,
+  onRetry,
+}: {
+  title: string;
+  clips: PlayerClip[];
+  activeId: string | null;
+  onSelect: (id: string) => void;
+  status: "ready" | "loading" | "error";
+  onRetry: () => void;
+}) {
+  const hasExternal = clips.some((clip) => !clip.embed);
+  const morePhone = clips.length - VISIBLE_ROWS.phone;
+  const moreWide = clips.length - VISIBLE_ROWS.wide;
+
+  return (
+    <div className={PANEL}>
+      <div className="flex items-baseline justify-between gap-3 px-1.5 pt-0.5 pb-3">
+        <p className="font-[family-name:var(--font-display)] text-base text-r-text">เพลย์ลิสต์ · {title}</p>
+        {status === "ready" ? <span className="text-xs text-r-text-3">{clips.length} คลิป</span> : null}
+      </div>
+
+      {status === "error" ? (
+        <div className="flex flex-wrap items-center gap-3 px-2 py-3">
+          <p className="text-sm text-r-text-3">โหลดคลิปไม่สำเร็จ</p>
+          <button type="button" onClick={onRetry} className={cn(R_CTA_OUTLINE_CLASS, "h-10")}>
+            ลองใหม่
+          </button>
+        </div>
+      ) : status === "loading" ? (
+        <ul aria-busy="true" className="flex flex-col gap-1">
+          {Array.from({ length: 4 }, (_, i) => (
+            <li key={i} className="flex items-center gap-3 p-2">
+              <span className="w-[18px]" />
+              <span className="aspect-video w-[104px] shrink-0 animate-pulse rounded-[10px] bg-white/[0.05] md:w-[120px]" />
+              <span className="flex-1 space-y-2">
+                <span className="block h-3.5 w-4/5 animate-pulse rounded bg-white/[0.05]" />
+                <span className="block h-3 w-2/5 animate-pulse rounded bg-white/[0.05]" />
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : clips.length === 0 ? (
+        <p className="px-2 py-3 text-sm text-r-text-3">ยังไม่มีคลิปในหมวดนี้</p>
+      ) : (
+        <>
+          <ul className="flex max-h-[312px] flex-col gap-1 overflow-y-auto [scrollbar-color:color-mix(in_srgb,var(--r-text-2)_35%,transparent)_transparent] [scrollbar-width:thin] md:max-h-[520px]">
+            {clips.map((clip, index) => {
+              const selected = clip.id === activeId;
+              return (
+                <li key={clip.id}>
+                  <button
+                    type="button"
+                    aria-current={selected || undefined}
+                    onClick={() => onSelect(clip.id)}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-2xl p-2 text-left transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-r-acc",
+                      selected ? "bg-r-pri/10 ring-1 ring-r-pri/35 ring-inset" : "hover:bg-white/[0.03]"
+                    )}
+                  >
+                    <span className={cn("w-[18px] shrink-0 text-center text-xs", selected ? "text-r-pri" : "text-r-text-3")}>
+                      {selected ? "▶" : index + 1}
+                    </span>
+                    <span className="relative aspect-video w-[104px] shrink-0 overflow-hidden rounded-[10px] bg-[linear-gradient(140deg,color-mix(in_srgb,var(--r-pri)_22%,var(--r-bg)),var(--r-bg))] ring-1 ring-r-text-2/15 md:w-[120px]">
+                      {clip.thumbUrl ? (
+                        <ProtectedImage src={clip.thumbUrl} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
+                      ) : null}
+                      <span className="absolute top-1/2 left-1/2 flex size-[34px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-r-bg/60 text-r-text">
+                        <Play aria-hidden className="size-3 fill-current" />
+                      </span>
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="line-clamp-2 font-[family-name:var(--font-display)] text-sm leading-[1.35] text-r-text">
+                        {clip.title}
+                      </span>
+                      <span className="mt-[3px] block truncate text-xs text-r-text-3">{clip.meta}</span>
+                    </span>
+                    {!clip.embed ? (
+                      <ExternalLink aria-label="เปิดบน YouTube" className="size-3.5 shrink-0 text-r-text-2 opacity-85" />
+                    ) : null}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          {morePhone > 0 || hasExternal ? (
+            <p className="mx-1.5 mt-2.5 mb-0.5 flex justify-between gap-3 text-[0.78125rem] text-r-text-2">
+              <span>
+                {morePhone > 0 ? <span className="md:hidden">ดูอีก {morePhone} คลิป ↓</span> : null}
+                {moreWide > 0 ? <span className="hidden md:inline">เลื่อนดูอีก {moreWide} คลิป ↓</span> : null}
+              </span>
+              {hasExternal ? (
+                <span className="inline-flex items-center gap-[5px] text-r-text-3">
+                  <ExternalLink aria-hidden className="size-3" /> = เปิดบน YouTube
+                </span>
+              ) : null}
+            </p>
+          ) : null}
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ── Shorts ──────────────────────────────────────────────────────── */
+
+function ShortsBoard({
+  shorts,
+  status,
+  onRetry,
+}: {
+  shorts: PlayerClip[];
+  status: "ready" | "loading" | "error";
+  onRetry: () => void;
+}) {
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const active = shorts.find((s) => s.id === activeId) ?? shorts[0] ?? null;
+
+  function select(id: string) {
+    setActiveId(id);
+    setPlaying(false);
+  }
+
+  return (
+    <div className="grid grid-cols-1 items-center gap-[22px] lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
+      <div className="relative mx-auto aspect-[9/16] w-[min(222px,64vw)] overflow-hidden rounded-[22px] bg-[radial-gradient(circle_at_50%_30%,color-mix(in_srgb,var(--r-pri)_35%,var(--r-bg)),var(--r-bg)_70%)] ring-2 ring-r-pri lg:w-[252px]">
+        {active && playing && active.embed ? (
+          <YoutubeFrame clip={active} />
+        ) : (
+          <>
+            {active ? <Poster key={active.id} clip={active} /> : null}
+            <span aria-hidden className="absolute inset-0 bg-gradient-to-b from-r-bg/40 via-transparent to-r-bg/85" />
+            <span className="absolute top-3 left-3 inline-flex items-center gap-1 text-xs text-r-acc">
+              <Smartphone aria-hidden className="size-3.5" /> Shorts
+            </span>
+            {active ? (
+              active.embed ? (
+                <button
+                  type="button"
+                  onClick={() => setPlaying(true)}
+                  aria-label={`เล่น ${active.title}`}
+                  className="absolute top-1/2 left-1/2 flex size-[54px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-r-pri text-r-on-pri transition-colors hover:bg-r-pri-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-r-acc"
+                >
+                  <Play aria-hidden className="size-5 fill-current" />
+                </button>
+              ) : (
+                <a
+                  href={active.youtubeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`ดู ${active.title} บน YouTube`}
+                  className="absolute top-1/2 left-1/2 flex size-[54px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-r-pri text-r-on-pri"
+                >
+                  <ExternalLink aria-hidden className="size-5" />
+                </a>
+              )
+            ) : null}
+            {active ? (
+              <span className="absolute inset-x-3 bottom-3">
+                <span className="line-clamp-2 text-[0.8125rem] leading-snug text-r-text">{active.title}</span>
+                <span className="mt-0.5 block truncate text-[0.6875rem] text-r-text-3">{active.subtitle}</span>
+              </span>
+            ) : null}
+          </>
+        )}
+      </div>
+
+      <div className={cn(PANEL, "md:p-[18px]")}>
+        <div className="flex items-baseline justify-between gap-3 px-1 pb-3.5">
+          <p className="inline-flex items-center gap-2 font-[family-name:var(--font-display)] text-base text-r-text">
+            <Smartphone aria-hidden className="size-4 text-r-acc" /> Shorts ล่าสุด
+          </p>
+        </div>
+        {status === "error" ? (
+          <div className="flex flex-wrap items-center gap-3 px-1 py-3">
+            <p className="text-sm text-r-text-3">โหลดคลิปไม่สำเร็จ</p>
+            <button type="button" onClick={onRetry} className={cn(R_CTA_OUTLINE_CLASS, "h-10")}>
+              ลองใหม่
+            </button>
+          </div>
+        ) : status === "ready" && shorts.length === 0 ? (
+          <p className="px-1 py-3 text-sm text-r-text-3">ยังไม่มี Shorts</p>
+        ) : (
+          <ul
+            aria-busy={status === "loading" || undefined}
+            className="-mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-4 lg:overflow-visible lg:px-0"
+          >
+            {(status === "loading" ? Array.from({ length: DYNAMIC_TAB_LIMIT }, () => null) : shorts).map((short, i) => (
+              <li key={short?.id ?? i} className="w-[84px] shrink-0 snap-start lg:w-auto">
+                {short ? (
+                  <button
+                    type="button"
+                    onClick={() => select(short.id)}
+                    aria-current={short.id === active?.id || undefined}
+                    title={short.title}
+                    className={cn(
+                      "relative block aspect-[9/16] w-full overflow-hidden rounded-xl bg-[linear-gradient(160deg,color-mix(in_srgb,var(--r-pri)_20%,var(--r-bg)),var(--r-bg))] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc",
+                      short.id === active?.id ? "ring-2 ring-r-pri" : "ring-1 ring-r-text-2/15 hover:ring-r-pri/45"
+                    )}
+                  >
+                    {short.thumbUrl ? (
+                      <ProtectedImage src={short.thumbUrl} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
+                    ) : null}
+                    <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-r-text drop-shadow">
+                      <Play aria-hidden className="size-3 fill-current" />
+                    </span>
+                  </button>
+                ) : (
+                  <span className="block aspect-[9/16] w-full animate-pulse rounded-xl bg-white/[0.05]" />
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+        <p className="mt-3 px-1 text-[0.78125rem] text-r-text-2 lg:hidden">ปัด / เลื่อนเพื่อดูคลิปถัดไป</p>
+      </div>
+    </div>
+  );
+}
+
+/* ── section ─────────────────────────────────────────────────────── */
+
+function ArchiveLink({ className }: { className?: string }) {
+  return (
+    <Link href="/media" className={cn(R_CTA_OUTLINE_CLASS, className)}>
+      คลังคลิปทั้งหมด
+      <ArrowRight aria-hidden className="size-3.5" />
+    </Link>
+  );
+}
+
+function TabsRow({ children }: { children: ReactNode }) {
+  return (
+    <div
+      role="tablist"
+      aria-label="หมวดคลิป"
+      className="-mx-5 flex items-center gap-2 overflow-x-auto px-5 py-0.5 [scrollbar-width:none] sm:-mx-10 sm:px-10 lg:mx-0 lg:flex-wrap lg:px-0 [&::-webkit-scrollbar]:hidden"
+    >
+      {children}
+    </div>
+  );
+}
+
+/**
+ * Home · คลิปและเพลง (project R · Media6): category tabs, a big player with the clip's
+ * poster (plays in place when YouTube allows it) and the playlist; Shorts get a phone frame.
+ */
 export function Media({ data }: MediaProps) {
-  const clips = data.media;
-  const groups = useMemo(() => groupMediaByCategory(clips), [clips]);
-  const initialClip = pickInitialClip(clips);
-  const [activeTab, setActiveTab] = useState<TabId>(
-    () => initialClip?.category ?? groups[0]?.id ?? "latest"
-  );
-  const [activeId, setActiveId] = useState(() => initialClip?.id ?? "");
-  const [tabSheetOpen, setTabSheetOpen] = useState(false);
+  const originalSong = data.basic.originalSong;
+  const groups = useMemo(() => groupMediaClips(data.media), [data.media]);
+  const [activeTab, setActiveTab] = useState<TabId>("all");
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [playing, setPlaying] = useState(false);
 
-  const tabs = useMemo<TabOption[]>(
-    () => [
-      ...groups.map((group) => ({
-        id: group.id,
-        icon: group.icon,
-        label: group.label,
-        sublabel: group.labelLocal
-          ? `${group.labelLocal} · ${group.clips.length}`
-          : `${group.clips.length} คลิป`,
-      })),
-      ...DYNAMIC_TABS.map((tab) => ({
-        id: tab.id,
-        icon: tab.icon,
-        label: tab.label,
-        sublabel: tab.labelLocal,
-      })),
-    ],
-    [groups]
-  );
-  const activeTabOption = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
+  const dynamicTab = DYNAMIC_TABS.find((t) => t.id === activeTab);
+  const { videos, status: videosStatus, retry } = useVideos(Boolean(dynamicTab), dynamicTab?.query ?? "");
+  const group = groups.find((g) => g.id === activeTab) ?? groups[0];
 
-  const dynamicTab = isDynamicTab(activeTab)
-    ? DYNAMIC_TABS.find((t) => t.id === activeTab)
-    : undefined;
-  const {
-    videos,
-    status: videosStatus,
-    retry: retryVideos,
-  } = useVideos(Boolean(dynamicTab), dynamicTab?.query ?? "");
+  const playlist = useMemo<PlayerClip[]>(() => {
+    if (dynamicTab) return videos.map(fromVideo);
+    const clips = group?.clips ?? [];
+    // ทั้งหมด opens on the featured clip (Heart Cure), the other tabs keep data order.
+    const featured = group?.id === "all" ? clips.find((c) => c.featured) : undefined;
+    const ordered = featured ? [featured, ...clips.filter((c) => c !== featured)] : clips;
+    return ordered.map((clip) => fromCurated(clip, originalSong));
+  }, [dynamicTab, videos, group, originalSong]);
 
-  const curatedGroup = dynamicTab
-    ? undefined
-    : (groups.find((group) => group.id === activeTab) ?? groups[0]);
-
-  const playlist = useMemo<PlayerClip[]>(
-    () =>
-      dynamicTab
-        ? videos.map(fromVideo)
-        : (curatedGroup?.clips ?? []).map(fromCurated),
-    [dynamicTab, videos, curatedGroup]
-  );
-  const active = playlist.find((clip) => clip.id === activeId) ?? playlist[0] ?? null;
-  const playlistLabel = dynamicTab?.label ?? curatedGroup?.label;
-  const loadingVideos = Boolean(dynamicTab) && videosStatus !== "ready";
-
-  const videoId = getYoutubeVideoId(active?.youtubeUrl);
-  const canEmbed = Boolean(active?.embed && videoId);
-  const youtubeSocial = data.socials.find((s) => s.platform === "youtube");
+  const status: "ready" | "loading" | "error" = !dynamicTab
+    ? "ready"
+    : videosStatus === "error"
+      ? "error"
+      : videosStatus === "ready"
+        ? "ready"
+        : "loading";
+  const activeIndex = Math.max(0, playlist.findIndex((clip) => clip.id === activeId));
+  const active = playlist[activeIndex] ?? null;
 
   function selectTab(tab: TabId) {
     if (tab === activeTab) return;
     setActiveTab(tab);
-    const group = groups.find((g) => g.id === tab);
-    setActiveId(group?.clips[0]?.id ?? "");
+    setActiveId(null);
+    setPlaying(false);
   }
 
-  if (clips.length === 0) return null;
+  function selectClip(id: string) {
+    setActiveId(id);
+    setPlaying(false);
+  }
+
+  if (groups.length === 0) return null;
 
   return (
     <Section id="media">
       <ScrollReveal>
-        <SectionHeader eyebrow="Media" title="คลิปและเพลง" />
+        <SectionHeader eyebrow="Media" title="คลิปและเพลง" action={<ArchiveLink className="hidden md:inline-flex" />} />
       </ScrollReveal>
 
-      <ScrollReveal className="mt-8 sm:mt-10">
-        {activeTabOption ? (
-          <button
-            type="button"
-            onClick={() => setTabSheetOpen(true)}
-            aria-haspopup="dialog"
-            className="flex w-full items-center gap-3 rounded-2xl bg-black/25 px-4 py-3 text-left ring-1 ring-white/10 transition active:bg-black/35 sm:hidden"
-          >
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#e85a7a] text-[#140a0d]">
-              <activeTabOption.icon className="size-4" aria-hidden />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-[0.65rem] tracking-[0.12em] text-[#f3b8c4]/55 uppercase">
-                หมวดคลิป
-              </span>
-              <span className="block truncate text-sm font-medium text-[#fff5f7]">
-                {activeTabOption.label}
-                <span className="ml-2 font-normal text-[#f3b8c4]/60">
-                  {activeTabOption.sublabel}
-                </span>
-              </span>
-            </span>
-            <ChevronDown className="size-4 shrink-0 text-[#f3b8c4]/70" aria-hidden />
-          </button>
-        ) : null}
-
-        <div
-          role="tablist"
-          aria-label="หมวดคลิป"
-          className="hidden gap-1.5 overflow-x-auto rounded-2xl bg-black/25 p-1 ring-1 ring-white/10 [scrollbar-width:none] sm:flex [&::-webkit-scrollbar]:hidden"
-        >
-          {tabs.map((tab) => (
-            <TabButton
-              key={tab.id}
-              selected={tab.id === activeTab}
-              icon={tab.icon}
-              label={tab.label}
-              sublabel={tab.sublabel}
-              onClick={() => selectTab(tab.id)}
+      <ScrollReveal className="mt-[22px]">
+        <TabsRow>
+          {groups.map((g) => (
+            <TabChip
+              key={g.id}
+              selected={g.id === activeTab}
+              icon={g.icon}
+              label={g.label}
+              count={g.clips.length}
+              onClick={() => selectTab(g.id)}
             />
           ))}
-        </div>
+          <span aria-hidden className="mx-1 h-[22px] w-px shrink-0 bg-r-text-2/15" />
+          {DYNAMIC_TABS.map((t) => (
+            <TabChip key={t.id} selected={t.id === activeTab} icon={t.icon} label={t.label} mint onClick={() => selectTab(t.id)} />
+          ))}
+        </TabsRow>
       </ScrollReveal>
 
-      <Sheet open={tabSheetOpen} onOpenChange={setTabSheetOpen}>
-        <SheetContent>
-          <SheetHeader>
-            <SheetTitle>เลือกหมวดคลิป</SheetTitle>
-          </SheetHeader>
-          <SheetBody>
-            <ul className="space-y-1 pb-2">
-              {tabs.map((tab) => {
-                const selected = tab.id === activeTab;
-                return (
-                  <li key={tab.id}>
-                    <button
-                      type="button"
-                      aria-pressed={selected}
-                      onClick={() => {
-                        selectTab(tab.id);
-                        setTabSheetOpen(false);
-                      }}
-                      className={cn(
-                        "flex min-h-14 w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition",
-                        selected
-                          ? "bg-[#e85a7a]/15 text-[#fff5f7]"
-                          : "text-[#f7d7de]/85 active:bg-white/[0.06]"
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "flex size-9 shrink-0 items-center justify-center rounded-xl",
-                          selected ? "bg-[#e85a7a] text-[#140a0d]" : "bg-white/[0.05] text-[#f3b8c4]/70"
-                        )}
-                      >
-                        <tab.icon className="size-4" aria-hidden />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-medium">{tab.label}</span>
-                        <span className="block text-xs text-[#f3b8c4]/55">{tab.sublabel}</span>
-                      </span>
-                      {selected ? <Check className="size-4 shrink-0 text-[#e85a7a]" aria-hidden /> : null}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </SheetBody>
-        </SheetContent>
-      </Sheet>
-
-      <div className="mt-8 grid gap-8 lg:mt-10 lg:grid-cols-[1.35fr_0.65fr] lg:gap-10">
-        <ScrollReveal>
-          <div className="relative aspect-video overflow-hidden rounded-3xl bg-[#0e0609] ring-1 ring-[#f3b8c4]/15">
-            {canEmbed && videoId ? (
-              <iframe
-                key={videoId}
-                title={active?.title ?? "YouTube video"}
-                src={getYoutubeEmbedUrl(videoId)}
-                className="absolute inset-0 h-full w-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="strict-origin-when-cross-origin"
-              />
-            ) : active?.youtubeUrl ? (
-              <Link
-                href={active.youtubeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group absolute inset-0"
-                aria-label={`เปิด ${active.title} บน YouTube`}
-              >
-                {videoId ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={getYoutubeThumbnailUrl(videoId)}
-                    alt=""
-                    className="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+      <ScrollReveal className="mt-5">
+        {activeTab === "shorts" ? (
+          <ShortsBoard shorts={playlist} status={status} onRetry={retry} />
+        ) : (
+          <div className="grid grid-cols-1 items-start gap-[22px] lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
+            <div className="min-w-0">
+              {active ? (
+                <>
+                  <Stage
+                    clip={active}
+                    position={activeIndex + 1}
+                    total={playlist.length}
+                    playing={playing}
+                    onPlay={() => setPlaying(true)}
                   />
-                ) : (
-                  <span className="absolute inset-0 bg-[#0e0609]" />
-                )}
-                <span className="absolute inset-0 bg-[#10070b]/45 transition group-hover:bg-[#10070b]/35" />
-                <span className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center">
-                  <span className="flex size-16 items-center justify-center rounded-full bg-[#e85a7a] text-white shadow-lg transition group-hover:scale-105 sm:size-20">
-                    <Play className="size-7 fill-current sm:size-8" />
-                  </span>
-                  <span className="inline-flex items-center gap-2 text-sm font-medium text-[#fff5f7] sm:text-base">
-                    ดูบน YouTube
-                    <ExternalLink className="size-4 opacity-80" />
-                  </span>
-                </span>
-              </Link>
-            ) : loadingVideos ? (
-              <div className="absolute inset-0 animate-pulse bg-[#1a0c12]" />
-            ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center">
-                <Play className="size-10 text-[#e85a7a]/80" />
-                <p className="text-sm text-[#f3b8c4]/75">ไม่มีลิงก์คลิป</p>
-              </div>
-            )}
-          </div>
-
-          {active ? (
-            <div className="mt-5 border-t border-[#f3b8c4]/15 pt-5">
-              <h3 className={DISPLAY_H3_CLASS}>
-                {active.title}
-                {active.titleLocal ? (
-                  <span className="mt-1 block text-base font-medium text-[#f3b8c4]/75">
-                    {active.titleLocal}
-                  </span>
-                ) : null}
-              </h3>
-              {active.description ? (
-                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#f7d7de]/80 sm:text-base">
-                  {active.description}
-                </p>
-              ) : null}
-            </div>
-          ) : null}
-        </ScrollReveal>
-
-        <div className="flex flex-col gap-6">
-          <ScrollReveal>
-            <h3 className={META_MUTED_CLASS}>
-              Playlist
-              {playlistLabel ? (
-                <span className="ml-2 tracking-normal text-[#f3b8c4]/50 normal-case">
-                  {playlistLabel}
-                </span>
-              ) : null}
-            </h3>
-
-            <ul className="mt-4 max-h-[min(28rem,55vh)] space-y-2 overflow-y-auto rounded-3xl border border-[#f3b8c4]/12 bg-[#1a0c12]/40 p-2 [scrollbar-color:rgba(243,184,196,0.35)_transparent] [scrollbar-width:thin]">
-              {dynamicTab && videosStatus === "error" ? (
-                <li className="flex flex-wrap items-center gap-3 px-3 py-3">
-                  <p className="text-sm text-[#f3b8c4]/60">โหลดคลิปไม่สำเร็จ</p>
-                  <button
-                    type="button"
-                    onClick={retryVideos}
-                    className={cn(
-                      buttonVariants({ variant: "outline", size: "sm" }),
-                      CTA_OUTLINE_CLASS
+                  <div className="mt-3.5 flex flex-wrap items-center justify-between gap-3">
+                    {active.funFact ? (
+                      <span className="inline-flex items-center gap-2 rounded-[14px] bg-r-pri/10 px-[13px] py-2 text-[0.8125rem] text-r-text-2">
+                        <Lightbulb aria-hidden className="size-3.5 text-r-pri" />
+                        {active.funFact}
+                      </span>
+                    ) : (
+                      <span className="min-w-0 truncate text-[0.8125rem] text-r-text-3">{active.meta}</span>
                     )}
-                  >
-                    ลองใหม่
-                  </button>
-                </li>
-              ) : loadingVideos ? (
-                Array.from({ length: 4 }, (_, i) => (
-                  <li key={i} className="flex min-h-14 items-start gap-3 px-3 py-3">
-                    <span className="mt-1 size-4 shrink-0 animate-pulse rounded bg-[#241019]" />
-                    <span className="flex-1 space-y-2">
-                      <span className="block h-3.5 w-4/5 animate-pulse rounded bg-[#241019]" />
-                      <span className="block h-3 w-2/5 animate-pulse rounded bg-[#241019]" />
-                    </span>
-                  </li>
-                ))
-              ) : playlist.length === 0 ? (
-                <li className="px-3 py-3 text-sm text-[#f3b8c4]/60">ยังไม่มีคลิปในหมวดนี้</li>
+                    <OpenOnYoutube href={active.youtubeUrl} />
+                  </div>
+                </>
               ) : (
-                playlist.map((clip) => {
-                  const selected = clip.id === active?.id;
-                  return (
-                    <li key={clip.id}>
-                      <button
-                        type="button"
-                        onClick={() => setActiveId(clip.id)}
-                        className={cn(
-                          "flex w-full min-h-14 items-start gap-3 rounded-2xl px-3 py-3 text-left transition",
-                          selected
-                            ? "bg-[#e85a7a]/15 text-[#fff5f7]"
-                            : "text-[#f7d7de]/80 hover:bg-white/[0.04] hover:text-[#fff5f7]"
-                        )}
-                      >
-                        <Play
-                          className={cn(
-                            "mt-1 size-4 shrink-0",
-                            selected ? "text-[#e85a7a]" : "text-[#f3b8c4]/55"
-                          )}
-                        />
-                        <span>
-                          <span className="block text-sm font-medium sm:text-base">
-                            {clip.title}
-                          </span>
-                          {clip.titleLocal ? (
-                            <span className="mt-0.5 block text-xs text-[#f3b8c4]/65 sm:text-sm">
-                              {clip.titleLocal}
-                            </span>
-                          ) : null}
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })
+                <div className={cn(STAGE_FRAME, "aspect-video", status === "loading" && "animate-pulse")} />
               )}
-            </ul>
-          </ScrollReveal>
+            </div>
+            <PlaylistPanel
+              title={dynamicTab?.label ?? group?.label ?? ""}
+              clips={playlist}
+              activeId={active?.id ?? null}
+              onSelect={selectClip}
+              status={status}
+              onRetry={retry}
+            />
+          </div>
+        )}
+      </ScrollReveal>
 
-          <ScrollReveal className="space-y-3">
-            {active?.youtubeUrl ? (
-              <Link
-                href={active.youtubeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(
-                  buttonVariants({ variant: "outline", size: "lg" }),
-                  CTA_OUTLINE_CLASS,
-                  "w-full justify-between"
-                )}
-              >
-                เปิดคลิปนี้บน YouTube
-                <ExternalLink className="size-4 opacity-70" />
-              </Link>
-            ) : null}
-
-            <Link
-              href="/media"
-              className={cn(
-                buttonVariants({ variant: "ghost", size: "lg" }),
-                "w-full justify-between text-[#f3b8c4]/80 hover:text-[#fff5f7]"
-              )}
-            >
-              คลังคลิปทั้งหมด
-              <span aria-hidden>→</span>
-            </Link>
-
-            {youtubeSocial ? (
-              <Link
-                href={youtubeSocial.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "lg" }),
-                  "w-full justify-between text-[#f3b8c4]/80 hover:text-[#fff5f7]"
-                )}
-              >
-                ช่อง {youtubeSocial.handle ?? "YouTube"}
-                <ExternalLink className="size-4 opacity-70" />
-              </Link>
-            ) : null}
-          </ScrollReveal>
-        </div>
-      </div>
+      <ArchiveLink className="mt-6 md:hidden" />
     </Section>
   );
 }

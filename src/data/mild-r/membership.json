@@ -1,6 +1,6 @@
 {
   "title": "MyHoney · สมาชิกช่อง",
-  "description": "มาเป็น MyHoney ของมาย รับป้ายชานมข้างชื่อ อีโมจิเฉพาะช่อง และไลฟ์พิเศษที่มีแค่สมาชิกเท่านั้น",
+  "description": "มาเป็น MyHoney ของมายด์ รับป้ายชานมข้างชื่อ อีโมจิเฉพาะช่อง และไลฟ์พิเศษที่มีแค่สมาชิกเท่านั้น",
   "joinUrl": "https://www.youtube.com/@MildRWorldEnd/join",
   "introVideoUrl": "https://www.youtube.com/watch?v=oX6vSIMJUbs",
   "tiers": [
@@ -13,7 +13,7 @@
         { "icon": "😊", "label": "อีโมจิเฉพาะช่องสำหรับความคิดเห็นและแชทสด" },
         { "icon": "⭐", "label": "ไลฟ์พิเศษเฉพาะ Members" },
         { "icon": "🤭", "label": "ไลฟ์แนว Request" },
-        { "icon": "🎮", "label": "เล่นเกมกับมาย" },
+        { "icon": "🎮", "label": "เล่นเกมกับมายด์" },
         { "icon": "💭", "label": "โพสพิเศษเฉพาะ Member" }
       ]
     },
@@ -21,7 +21,7 @@
       "id": "very-sweet",
       "name": "MyHoneyหวานมาก",
       "priceThb": 300,
-      "perks": [{ "icon": "📜", "label": "ได้เห็นไดอารี่มาย" }]
+      "perks": [{ "icon": "📜", "label": "ได้เห็นไดอารี่มายด์" }]
     },
     {
       "id": "heartfelt",
@@ -49,15 +49,15 @@
   ],
   "emojis": [
     { "id": "syringe", "src": "/assets/membership/emoji/01-syringe.webp", "alt": "เข็มฉีดยา" },
-    { "id": "sweat", "src": "/assets/membership/emoji/02-sweat.webp", "alt": "มายเหงื่อตก" },
-    { "id": "heart", "src": "/assets/membership/emoji/03-heart.webp", "alt": "มายกอดหัวใจ" },
-    { "id": "happy", "src": "/assets/membership/emoji/04-happy.webp", "alt": "มายยิ้มแก้มแดง" },
-    { "id": "knocked-out", "src": "/assets/membership/emoji/05-knocked-out.webp", "alt": "มายนอนหมดแรง" },
-    { "id": "boba-shock", "src": "/assets/membership/emoji/06-boba-shock.webp", "alt": "มายช็อกกับชานม" },
+    { "id": "sweat", "src": "/assets/membership/emoji/02-sweat.webp", "alt": "มายด์เหงื่อตก" },
+    { "id": "heart", "src": "/assets/membership/emoji/03-heart.webp", "alt": "มายด์กอดหัวใจ" },
+    { "id": "happy", "src": "/assets/membership/emoji/04-happy.webp", "alt": "มายด์ยิ้มแก้มแดง" },
+    { "id": "knocked-out", "src": "/assets/membership/emoji/05-knocked-out.webp", "alt": "มายด์นอนหมดแรง" },
+    { "id": "boba-shock", "src": "/assets/membership/emoji/06-boba-shock.webp", "alt": "มายด์ช็อกกับชานม" },
     { "id": "85iyd", "src": "/assets/membership/emoji/07-85iyd.webp", "alt": "85IYD" },
-    { "id": "yellow-hood", "src": "/assets/membership/emoji/08-yellow-hood.webp", "alt": "มายในชุดคลุมสีเหลือง" },
+    { "id": "yellow-hood", "src": "/assets/membership/emoji/08-yellow-hood.webp", "alt": "มายด์ในชุดคลุมสีเหลือง" },
     { "id": "pudding-poke", "src": "/assets/membership/emoji/09-pudding-poke.webp", "alt": "จิ้มพุดดิ้งหัวใจ" },
-    { "id": "head-pat", "src": "/assets/membership/emoji/10-head-pat.webp", "alt": "มายโดนลูบหัว" },
+    { "id": "head-pat", "src": "/assets/membership/emoji/10-head-pat.webp", "alt": "มายด์โดนลูบหัว" },
     { "id": "nueh", "src": "/assets/membership/emoji/11-nueh.webp", "alt": "เหน่อห์" },
     { "id": "dont-win", "src": "/assets/membership/emoji/12-dont-win.webp", "alt": "อย่าวิน" }
   ]

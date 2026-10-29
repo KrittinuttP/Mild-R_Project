@@ -58,10 +58,15 @@ export interface CharacterDesign {
   /** Mama / Papa nicknames (optional labels) */
   illustratorLabel?: string;
   riggerLabel?: string;
+  /** What Mama / Papa made, shown under the name (Thai) */
+  illustratorRoleLocal?: string;
+  riggerRoleLocal?: string;
   credits?: StaffCredit[];
   /** Group label for eye companions */
   companionGroupName?: string;
   companionGroupNameLocal?: string;
+  /** One-line caption for the companion group */
+  companionGroupTagline?: string;
   companions?: CharacterCompanion[];
   notes?: string;
 }
@@ -69,6 +74,8 @@ export interface CharacterDesign {
 export interface LoreBlock {
   summary: string;
   theme?: string;
+  /** Pull quote for the STORY box (home · About) */
+  quote?: string;
   paragraphs: string[];
   chapters?: Array<{
     id: string;
@@ -166,9 +173,24 @@ export interface VtuberBasic {
   agency: string;
   greeting: string;
   catchphrase?: string;
+  /** Home hero · one-time "tap me" bubble (once per visit). */
+  tapHint?: string;
+  /** Home hero · lines the bubble picks from on each tap — the first one always shows on tap 1. */
+  tapLines?: string[];
+  /** Home hero · secret line on every 12th tap (12 Dec). */
+  tapSecret?: string;
+  /** Home hero · "she noticed you" box — mouse resting on her, or no tap yet on a phone. Default "…". */
+  tapIdle?: string;
+  /**
+   * Home hero · mouse rubbed left–right over her head. A list = one line per pat
+   * (1st pat → [0], 2nd → [1] …); the last line repeats from then on.
+   */
+  tapPat?: string | string[];
   debutDate: string;
   /** Species / identity tag, e.g. "Mutant" */
   species?: string;
+  /** Thai label for the species, e.g. "มนุษย์กลายพันธุ์" */
+  speciesLocal?: string;
   /** Height in centimeters */
   heightCm?: number;
   /** Month-day without year, ISO-ish `MM-DD` */

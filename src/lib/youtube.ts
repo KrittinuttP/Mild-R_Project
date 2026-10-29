@@ -34,6 +34,11 @@ export function getYoutubeThumbnailUrl(videoId: string) {
   return `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
 }
 
+/** Large poster (1280×720 when the video has one — fall back to `hqdefault` on error). */
+export function getYoutubePosterUrl(videoId: string, size: "max" | "hq" = "max") {
+  return `https://i.ytimg.com/vi/${videoId}/${size === "max" ? "maxresdefault" : "hqdefault"}.jpg`;
+}
+
 /** Standard embed URL — prefer youtube.com over nocookie (fewer player config errors). */
 export function getYoutubeEmbedUrl(videoId: string, autoplay = false) {
   const params = new URLSearchParams({

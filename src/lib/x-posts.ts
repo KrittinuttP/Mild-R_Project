@@ -113,7 +113,7 @@ export async function loadXFeedTabs(): Promise<{
   retweets: XPost[];
 }> {
   const [posts, retweets] = await Promise.all([
-    loadXPosts({ limit: 6, types: ["tweet", "quote"] }),
+    loadXPosts({ limit: 10, types: ["tweet", "quote"] }),
     loadXPosts({ limit: 5, types: ["retweet"] }),
   ]);
   return { posts, retweets };

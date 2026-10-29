@@ -1,296 +1,366 @@
 "use client";
 
-import { useState } from "react";
-import { ExternalLink, Heart, Repeat2 } from "lucide-react";
+import { Fragment, useRef, useState, type ReactNode } from "react";
+import { ChevronRight, ChevronUp, ExternalLink, Heart, Repeat2 } from "lucide-react";
 
 import { ImageLightbox } from "@/components/media/ImageLightbox";
-import { META_MUTED_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { XPost, XQuotedTweet } from "@/types/x-post";
 
 type XFeedProps = {
   posts: XPost[];
   retweets: XPost[];
+  profileUrl: string;
   className?: string;
 };
 
 type TabId = "posts" | "retweets";
 
-/** Timeline column lock — X-like readable width inside Follow max-w-6xl */
-const FEED_COL = "mx-auto w-full max-w-xl";
+/** Tablet/desktop box: 3 first, then +3, then the rest (FW1-b). */
+const WIDE_STEPS = [3, 3];
+/** Phones: 2 first, then everything else at once (FO1-b). */
+const PHONE_FIRST = 2;
 
 function isLikelyImageUrl(url: string) {
   const u = url.toLowerCase();
-  return (
-    u.includes("pbs.twimg.com") ||
-    u.includes("twimg.com") ||
-    u.includes("video.twimg.com") ||
-    /\.(jpe?g|png|webp|gif)(\?|$)/i.test(u)
-  );
+  return u.includes("twimg.com") || /\.(jpe?g|png|webp|gif)(\?|$)/i.test(u);
 }
 
 function firstImageUrl(urls: string[] | null | undefined) {
   return (urls ?? []).find((u) => u && isLikelyImageUrl(u)) ?? null;
 }
 
+/** "25 Oct" in Bangkok time (dates stay in English). */
 function formatPostedAt(iso: string | null) {
   if (!iso) return null;
-  try {
-    return new Intl.DateTimeFormat("th-TH", {
-      timeZone: "Asia/Bangkok",
-      day: "numeric",
-      month: "short",
-    }).format(new Date(iso));
-  } catch {
-    return null;
-  }
+  const ms = Date.parse(iso);
+  if (!Number.isFinite(ms)) return null;
+  return new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Bangkok", day: "numeric", month: "short" }).format(ms);
+}
+
+/** Post text with #hashtags in pink. */
+function RichText({ text }: { text: string }) {
+  const parts = text.split(/(#[\p{L}\p{N}_]+)/u);
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.startsWith("#") ? (
+          <span key={i} className="text-r-pri">
+            {part}
+          </span>
+        ) : (
+          <Fragment key={i}>{part}</Fragment>
+        )
+      )}
+    </>
+  );
 }
 
 function QuoteCard({ nested }: { nested: XQuotedTweet }) {
   return (
-    <div className="mt-2.5 rounded-xl border border-[#f3b8c4]/15 bg-[#140a0d]/40 px-3 py-2.5">
-      <p className="text-[0.8rem] text-[#f3b8c4]/70">
-        <span className="font-medium text-[#fff5f7]/90">
-          {nested.author_name ?? "ผู้ใช้"}
-        </span>
-        {nested.author_username ? (
-          <span className="text-[#f3b8c4]/45"> @{nested.author_username}</span>
-        ) : null}
+    <div className="mt-3 rounded-[14px] bg-r-bg/50 px-3.5 py-2.5 ring-1 ring-r-text-2/15 ring-inset">
+      <p className="text-[0.8125rem] text-r-text-3">
+        <span className="text-r-text/90">{nested.author_name ?? "ผู้ใช้"}</span>
+        {nested.author_username ? <span> @{nested.author_username}</span> : null}
       </p>
       {nested.text ? (
-        <p className="mt-1 line-clamp-4 whitespace-pre-wrap text-[0.85rem] leading-snug text-[#f7d7de]/80">
-          {nested.text}
-        </p>
+        <p className="mt-1 line-clamp-4 text-sm leading-snug whitespace-pre-wrap text-r-text/80">{nested.text}</p>
       ) : null}
     </div>
   );
 }
 
-function PostCard({
-  post,
-  variant,
-  onOpenImage,
-}: {
-  post: XPost;
-  variant: TabId;
-  onOpenImage: (url: string) => void;
-}) {
+function PostCard({ post, tab, onOpenImage, fallbackUrl }: { post: XPost; tab: TabId; onOpenImage: (url: string) => void; fallbackUrl: string }) {
   const dateLabel = formatPostedAt(post.posted_at);
-  const href = post.original_url || "https://x.com/MildRWorldEnd";
+  const href = post.original_url || fallbackUrl;
+  const retweet = post.post_type === "retweet";
   const media =
-    firstImageUrl(post.media_urls) ||
-    (post.post_type === "retweet" || post.is_quote
-      ? firstImageUrl(post.quoted_tweet?.media_urls)
-      : null);
-  const showQuote =
-    post.is_quote && post.quoted_tweet && post.post_type !== "retweet";
-
-  const bodyText =
-    post.post_type === "retweet"
-      ? post.quoted_tweet?.text || post.text
-      : post.text;
+    firstImageUrl(post.media_urls) || (retweet || post.is_quote ? firstImageUrl(post.quoted_tweet?.media_urls) : null);
+  const showQuote = post.is_quote && post.quoted_tweet && !retweet;
+  const bodyText = retweet ? post.quoted_tweet?.text || post.text : post.text;
 
   return (
-    <article className="rounded-2xl border border-[#f3b8c4]/20 bg-[#1a0c12]/55 transition hover:border-[#e85a7a]/35 hover:bg-[#1a0c12]/80">
-      <div className="flex gap-3 p-3.5 sm:p-4">
-        <div className="shrink-0">
-          {post.author_avatar ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={post.author_avatar}
-              alt=""
-              className="size-10 rounded-full object-cover"
-              loading="lazy"
-              referrerPolicy="no-referrer"
-            />
-          ) : (
-            <span className="block size-10 rounded-full bg-[#e85a7a]/20" />
-          )}
+    <article className="rounded-[20px] bg-r-bg/55 px-4 py-4 ring-1 ring-r-text-2/18 ring-inset sm:px-5 sm:py-[18px]">
+      {tab === "retweets" ? (
+        <p className="mb-2 flex items-center gap-1 text-xs text-r-text-3">
+          <Repeat2 aria-hidden className="size-3.5" />
+          รีโพสต์
+        </p>
+      ) : null}
+      <div className="flex items-center gap-3">
+        {post.author_avatar ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={post.author_avatar}
+            alt=""
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            className="size-10 shrink-0 rounded-full bg-r-text object-cover object-[50%_20%]"
+          />
+        ) : (
+          <span aria-hidden className="size-10 shrink-0 rounded-full bg-r-pri/20" />
+        )}
+        <div className="min-w-0">
+          <p className="truncate text-[0.9375rem] font-semibold text-r-text">{post.author_name ?? "Mild-R"}</p>
+          <p className="truncate text-[0.8125rem] text-r-text-3">
+            {[post.author_username ? `@${post.author_username}` : null, dateLabel].filter(Boolean).join(" · ")}
+          </p>
         </div>
+      </div>
 
-        <div className="min-w-0 flex-1">
-          {variant === "retweets" ? (
-            <p className="mb-0.5 flex items-center gap-1 text-xs text-[#f3b8c4]/55">
-              <Repeat2 className="size-3.5" aria-hidden />
-              Mild-R รีทวีต
-            </p>
-          ) : null}
+      {bodyText ? (
+        <p className="mt-3 text-[0.9375rem] leading-[1.7] whitespace-pre-wrap text-r-text/92">
+          <RichText text={bodyText} />
+        </p>
+      ) : null}
 
-          <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-[0.95rem] leading-tight">
-            <span className="font-bold text-[#fff5f7]">
-              {post.author_name ?? "Mild-R"}
-            </span>
-            {post.author_username ? (
-              <span className="text-[#f3b8c4]/50">@{post.author_username}</span>
-            ) : null}
-            {dateLabel ? (
-              <>
-                <span className="text-[#f3b8c4]/35">·</span>
-                <span className="text-[#f3b8c4]/50">{dateLabel}</span>
-              </>
-            ) : null}
-          </div>
+      {showQuote && post.quoted_tweet ? <QuoteCard nested={post.quoted_tweet} /> : null}
 
-          {bodyText ? (
-            <p className="mt-1 whitespace-pre-wrap text-[0.95rem] leading-relaxed text-[#f7d7de]/92">
-              {bodyText}
-            </p>
-          ) : null}
+      {media ? (
+        <button
+          type="button"
+          onClick={() => onOpenImage(media)}
+          aria-label="ดูรูปขนาดใหญ่"
+          className="mt-3 block w-full overflow-hidden rounded-[14px] bg-r-bg ring-1 ring-r-text-2/15 ring-inset focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={media} alt="" loading="lazy" referrerPolicy="no-referrer" className="mx-auto max-h-[420px] w-full object-contain" />
+        </button>
+      ) : null}
 
-          {showQuote && post.quoted_tweet ? (
-            <QuoteCard nested={post.quoted_tweet} />
-          ) : null}
-
-          {media ? (
-            <button
-              type="button"
-              onClick={() => onOpenImage(media)}
-              className="mt-2.5 block w-full overflow-hidden rounded-xl border border-[#f3b8c4]/12 bg-[#12070c] text-left transition hover:border-[#e85a7a]/35"
-              aria-label="ดูรูปขนาดใหญ่"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={media}
-                alt=""
-                className="max-h-48 w-full object-cover sm:max-h-56"
-                loading="lazy"
-                referrerPolicy="no-referrer"
-              />
-            </button>
-          ) : null}
-
-          <div className="mt-3 flex items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-3 text-xs text-[#f3b8c4]/55">
-              {post.likes_count != null ? (
-                <span className="inline-flex items-center gap-1.5">
-                  <Heart className="size-3.5 shrink-0" aria-hidden />
-                  {post.likes_count.toLocaleString("th-TH")}
-                </span>
-              ) : null}
-              {post.retweets_count != null ? (
-                <span className="inline-flex items-center gap-1.5">
-                  <Repeat2 className="size-3.5 shrink-0" aria-hidden />
-                  {post.retweets_count.toLocaleString("th-TH")}
-                </span>
-              ) : null}
-            </div>
-            <a
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[#e85a7a]/40 bg-[#e85a7a]/15 px-2.5 py-1 text-[0.7rem] font-medium text-[#f3b8c4] transition hover:border-[#e85a7a]/65 hover:bg-[#e85a7a]/25 hover:text-[#fff5f7] sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-xs"
-            >
-              ดูบน X
-              <ExternalLink className="size-3 sm:size-3.5" aria-hidden />
-            </a>
-          </div>
-        </div>
+      <div className="mt-3 flex items-center justify-between gap-3 text-[0.8125rem] text-r-text-3">
+        <span className="inline-flex gap-3.5">
+          <span className="inline-flex items-center gap-[5px]">
+            <Heart aria-hidden className="size-3.5" />
+            {post.likes_count != null ? post.likes_count.toLocaleString("en-US") : "—"}
+          </span>
+          <span className="inline-flex items-center gap-[5px]">
+            <Repeat2 aria-hidden className="size-3.5" />
+            {post.retweets_count != null ? post.retweets_count.toLocaleString("en-US") : "—"}
+          </span>
+        </span>
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-[5px] rounded text-r-text-2 transition-colors hover:text-r-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc"
+        >
+          ดูบน X
+          <ExternalLink aria-hidden className="size-3.5" />
+        </a>
       </div>
     </article>
   );
 }
 
-export function XFeed({ posts, retweets, className }: XFeedProps) {
+function MoreButton({ onClick, title, hint }: { onClick: () => void; title: string; hint: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex h-[58px] w-full flex-col items-center justify-center gap-0.5 rounded-2xl bg-white/[0.02] text-sm text-r-text ring-1 ring-r-text-2/15 ring-inset transition-colors hover:bg-r-pri/8 hover:ring-r-pri/35 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc"
+    >
+      <span className="inline-flex items-center gap-2">
+        {title}
+        <ChevronRight aria-hidden className="size-4 rotate-90" />
+      </span>
+      <span className="text-xs text-r-text-3">{hint}</span>
+    </button>
+  );
+}
+
+function ProfileButton({ href }: { href: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="mt-3.5 flex h-[46px] items-center justify-center gap-2 rounded-2xl bg-r-pri/10 text-sm text-r-text ring-1 ring-r-pri/30 ring-inset transition-colors hover:bg-r-pri/18 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc"
+    >
+      เปิดโปรไฟล์บน X
+      <ExternalLink aria-hidden className="size-3.5" />
+    </a>
+  );
+}
+
+const XLogo = () => (
+  <svg viewBox="0 0 24 24" aria-hidden className="size-4 fill-current">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
+
+/** Feed header: title + posts / reposts switch. */
+function FeedHeader({ tab, setTab, posts, retweets }: { tab: TabId; setTab: (t: TabId) => void; posts: number; retweets: number }) {
+  const tabBtn = (id: TabId, label: string, count: number) => (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={tab === id}
+      onClick={() => setTab(id)}
+      className={cn(
+        "rounded-full px-4 py-1.5 text-[0.8125rem] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc",
+        tab === id ? "bg-r-pri text-r-on-pri" : "text-r-text/85 hover:text-r-text"
+      )}
+    >
+      {label} <span className="opacity-60">{count}</span>
+    </button>
+  );
+  return (
+    <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <h3 className="inline-flex items-center gap-[9px] font-[family-name:var(--font-display)] text-lg text-r-text">
+          <span className="text-r-text-2">
+            <XLogo />
+          </span>
+          อัปเดตจาก X
+        </h3>
+      </div>
+      <div role="tablist" aria-label="ฟีด X" className="inline-flex gap-1 rounded-full p-1 ring-1 ring-r-text-2/15 ring-inset">
+        {tabBtn("posts", "โพสต์", posts)}
+        {tabBtn("retweets", "รีโพสต์", retweets)}
+      </div>
+    </div>
+  );
+}
+
+function EmptyFeed({ tab }: { tab: TabId }) {
+  return (
+    <p className="rounded-2xl border border-dashed border-r-text-2/20 px-5 py-10 text-center text-sm text-r-text-3">
+      {tab === "posts" ? "ยังไม่มีโพสต์ในคลัง" : "ยังไม่มีรีโพสต์ในคลัง — จะขึ้นเมื่อดึงเจอรายการใหม่"}
+    </p>
+  );
+}
+
+/**
+ * Follow · X feed (project R). Tablet/desktop: a 600 px scroll box that grows 3 → +3 → rest.
+ * Phones: no inner scroll — 2 posts, then the rest at once with a sticky "ย่อฟีด" pill.
+ */
+export function XFeed({ posts, retweets, profileUrl, className }: XFeedProps) {
   const [tab, setTab] = useState<TabId>("posts");
+  const [wideCount, setWideCount] = useState(WIDE_STEPS[0]);
+  const [phoneOpen, setPhoneOpen] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const phoneTopRef = useRef<HTMLDivElement>(null);
+  const wideBoxRef = useRef<HTMLDivElement>(null);
   const items = tab === "posts" ? posts : retweets;
+  const total = items.length;
+
+  function switchTab(next: TabId) {
+    // Same tab again: back to the newest post (desktop box), nothing else changes.
+    if (next === tab) {
+      wideBoxRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    setTab(next);
+    setWideCount(WIDE_STEPS[0]);
+    setPhoneOpen(false);
+    // New tab always opens on its newest post, not mid-list from the other tab.
+    wideBoxRef.current?.scrollTo({ top: 0 });
+  }
+
+  const card = (post: XPost) => (
+    <li key={post.tweet_id}>
+      <PostCard post={post} tab={tab} onOpenImage={setLightboxUrl} fallbackUrl={profileUrl} />
+    </li>
+  );
+  const done = (text: string): ReactNode => (
+    <p className="py-1 text-center text-[0.78125rem] text-r-text-3">
+      ครบ {total} {tab === "posts" ? "โพสต์" : "รีโพสต์"}ล่าสุดแล้ว · {text}
+    </p>
+  );
+
+  // wide: next step size (3, then whatever is left)
+  const step = wideCount < WIDE_STEPS[0] + WIDE_STEPS[1] ? WIDE_STEPS[1] : total - wideCount;
+  const nextCount = Math.min(total, wideCount + step);
 
   return (
-    <div className={cn(className)}>
-      <div className={cn(FEED_COL)}>
-        <div>
-          <h3 className={META_MUTED_CLASS}>อัปเดตจาก X</h3>
-          <p className="mt-1 text-xs text-[#f3b8c4]/50">
-            พรีวิวในเว็บ · กด「ดูบน X」เพื่อเปิดโพสต์นั้น
+    <div className={className}>
+      {/* tablet + desktop */}
+      <div className="hidden lg:block">
+        <div className="rounded-[26px] bg-white/[0.015] p-[22px] ring-1 ring-r-text-2/15 ring-inset">
+          <FeedHeader tab={tab} setTab={switchTab} posts={posts.length} retweets={retweets.length} />
+          {total === 0 ? (
+            <EmptyFeed tab={tab} />
+          ) : (
+            <div className="relative -mr-2">
+              <div
+                ref={wideBoxRef}
+                tabIndex={0}
+                role="region"
+                aria-label="ฟีด X เลื่อนดูได้"
+                className="h-[600px] overflow-y-auto overscroll-contain pr-2.5 [scrollbar-color:color-mix(in_srgb,var(--r-pri)_45%,transparent)_transparent] [scrollbar-width:thin] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc"
+              >
+                <ul className="flex flex-col gap-3.5 pb-11">
+                  {items.slice(0, wideCount).map(card)}
+                  <li>
+                    {wideCount < total ? (
+                      <MoreButton
+                        onClick={() => setWideCount(nextCount)}
+                        title="ดูเพิ่มเติม"
+                        hint={`โหลดอีก ${nextCount - wideCount} โพสต์ · ${wideCount + 1}–${nextCount}`}
+                      />
+                    ) : (
+                      done("ดูต่อบน X")
+                    )}
+                  </li>
+                </ul>
+              </div>
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 right-[18px] bottom-0 h-14 rounded-b-[20px] bg-gradient-to-t from-r-bg to-transparent"
+              />
+            </div>
+          )}
+        </div>
+        {total > 0 ? (
+          <p className="mt-2.5 text-right text-xs text-r-text-3">
+            แสดง {Math.min(wideCount, total)} จาก {total}
           </p>
-        </div>
-
-        <div
-          className="mt-3 flex gap-1 rounded-full border border-[#f3b8c4]/15 bg-[#140a0d]/60 p-1"
-          role="tablist"
-          aria-label="ฟีด X"
-        >
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === "posts"}
-            onClick={() => setTab("posts")}
-            className={cn(
-              "flex-1 rounded-full px-3 py-2 text-sm font-medium transition",
-              tab === "posts"
-                ? "bg-[#e85a7a]/20 text-[#fff5f7] ring-1 ring-[#e85a7a]/35"
-                : "text-[#f3b8c4]/65 hover:text-[#fff5f7]"
-            )}
-          >
-            โพส
-            <span className="ml-1.5 text-xs opacity-60">{posts.length}</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === "retweets"}
-            onClick={() => setTab("retweets")}
-            className={cn(
-              "flex-1 rounded-full px-3 py-2 text-sm font-medium transition",
-              tab === "retweets"
-                ? "bg-[#e85a7a]/20 text-[#fff5f7] ring-1 ring-[#e85a7a]/35"
-                : "text-[#f3b8c4]/65 hover:text-[#fff5f7]"
-            )}
-          >
-            รี
-            <span className="ml-1.5 text-xs opacity-60">{retweets.length}</span>
-          </button>
-        </div>
+        ) : null}
+        <ProfileButton href={profileUrl} />
       </div>
 
-      <div className={cn(FEED_COL, "mt-3 space-y-3")} role="tabpanel">
-        {items.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-[#f3b8c4]/20 px-5 py-10 text-center">
-            <p className="text-sm text-[#f3b8c4]/70">
-              {tab === "posts"
-                ? "ยังไม่มีโพสต์ในคลัง"
-                : "ยังไม่มีรีทวีตในคลัง — จะโชว์เมื่อ sync เจอรายการใหม่"}
-            </p>
-          </div>
+      {/* phones + tablets: no box inside the page scroll */}
+      <div ref={phoneTopRef} className="scroll-mt-24 lg:hidden">
+        <FeedHeader tab={tab} setTab={switchTab} posts={posts.length} retweets={retweets.length} />
+        {total === 0 ? (
+          <EmptyFeed tab={tab} />
         ) : (
-          <ul className="space-y-3">
-            {items.map((post) => (
-              <li key={post.tweet_id}>
-                <PostCard
-                  post={post}
-                  variant={tab}
-                  onOpenImage={setLightboxUrl}
-                />
-              </li>
-            ))}
+          <ul className="flex flex-col gap-3">
+            {items.slice(0, PHONE_FIRST).map(card)}
+            {total > PHONE_FIRST ? (
+              phoneOpen ? (
+                <>
+                  <li className="sticky top-20 z-10 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPhoneOpen(false);
+                        phoneTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }}
+                      className="inline-flex h-[38px] items-center gap-2 rounded-full bg-r-bg/92 px-[18px] text-[0.8125rem] text-r-text shadow-[0_8px_24px_rgb(0_0_0/0.4)] ring-1 ring-r-pri/40 ring-inset backdrop-blur-md"
+                    >
+                      <ChevronUp aria-hidden className="size-4" />
+                      ย่อฟีด · เหลือ {PHONE_FIRST} โพสต์
+                    </button>
+                  </li>
+                  {items.slice(PHONE_FIRST).map(card)}
+                  <li>{done("อ่านต่อบน X")}</li>
+                </>
+              ) : (
+                <li>
+                  <MoreButton onClick={() => setPhoneOpen(true)} title="ดูเพิ่มเติม" hint={`อีก ${total - PHONE_FIRST} โพสต์ · เลื่อนอ่านต่อได้ยาวๆ`} />
+                </li>
+              )
+            ) : null}
           </ul>
         )}
-
-        <a
-          href="https://x.com/MildRWorldEnd"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 rounded-2xl border border-[#f3b8c4]/22 bg-[#e85a7a]/10 px-4 py-3.5 text-sm font-medium text-[#f3b8c4] transition hover:border-[#e85a7a]/45 hover:bg-[#e85a7a]/18 hover:text-[#fff5f7]"
-        >
-          เปิดโปรไฟล์บน X
-          <ExternalLink className="size-3.5 opacity-80" aria-hidden />
-        </a>
+        <ProfileButton href={profileUrl} />
       </div>
 
       <ImageLightbox
         tone="mild-r"
-        items={
-          lightboxUrl
-            ? [
-                {
-                  id: lightboxUrl,
-                  src: lightboxUrl,
-                  alt: "รูปจากโพสต์ X",
-                  caption: "รูปจากโพสต์ X",
-                },
-              ]
-            : []
-        }
+        items={lightboxUrl ? [{ id: lightboxUrl, src: lightboxUrl, alt: "รูปจากโพสต์ X", caption: "รูปจากโพสต์ X" }] : []}
         activeIndex={lightboxUrl ? 0 : null}
         onActiveIndexChange={(index) => {
           if (index === null) setLightboxUrl(null);

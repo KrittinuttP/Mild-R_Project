@@ -132,6 +132,22 @@ export function formatEnglishDate(iso: string): string {
   });
 }
 
+const EN_MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/**
+ * "28 Jun", "4–5 Jul", "23 Oct – 6 Nov" (project R cards · no year).
+ * Built by hand so server and browser never disagree. Spans across years add the years.
+ */
+export function formatEventDateRangeEn(event: Pick<CalendarEvent, "date" | "endDate">): string {
+  const [y1, m1, d1] = event.date.split("-").map(Number);
+  const one = (d: number, m: number) => `${d} ${EN_MONTHS_SHORT[(m ?? 1) - 1]}`;
+  if (!event.endDate || event.endDate === event.date) return one(d1, m1);
+  const [y2, m2, d2] = event.endDate.split("-").map(Number);
+  if (y1 !== y2) return `${one(d1, m1)} ${y1} – ${one(d2, m2)} ${y2}`;
+  if (m1 !== m2) return `${one(d1, m1)} – ${one(d2, m2)}`;
+  return `${d1}–${d2} ${EN_MONTHS_SHORT[m2 - 1]}`;
+}
+
 export function sortLiveWeeks(weeks: LiveWeek[]): LiveWeek[] {
   return [...weeks].sort((a, b) =>
     a.weekStart < b.weekStart ? -1 : a.weekStart > b.weekStart ? 1 : 0

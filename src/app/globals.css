@@ -99,7 +99,7 @@
   --heart-ecg: calc(var(--heart-beat) * 3); /* 4.35s — shorter loop, still beat-locked */
 
   /* Project R · CI A+ — pink top-left ↘ mint bottom-right, flat floor */
-  --r-bg: #120d16;
+  --r-bg: #140a0d; /* A+ ไวน์ (27 Oct) · เดิม CI A+ #120d16 */
   --r-surface: rgb(255 255 255 / 0.025);
   --r-pri: #f2437d;
   --r-pri-hover: #ff4f8b;
@@ -474,6 +474,46 @@ body:has([data-cafe-root]) {
   animation: splash-bar 1.8s ease-out forwards;
 }
 
+/* Home splash · thin loading line (light runs left → right) */
+@keyframes splash-shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+@utility animate-splash-shimmer {
+  animation: splash-shimmer 0.9s ease-in-out infinite;
+}
+
+/* Home splash · the heart's last bounce after the ECG line finishes (SiteSplash BEAT_MS) */
+@keyframes splash-final-beat {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.18);
+  }
+  65% {
+    transform: scale(0.97);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@utility animate-splash-final-beat {
+  animation: splash-final-beat 0.4s ease-out both;
+  transform-origin: 50% 55%;
+}
+
+/* Home splash · ECG inside the heart, redrawn every run (SiteSplash RUN_MS) */
+@utility animate-splash-ecg-loop {
+  animation: splash-ecg-fill 0.9s ease-out infinite;
+}
+
 @keyframes splash-ecg-fill {
   from {
     stroke-dashoffset: 1000;
@@ -589,7 +629,7 @@ body:has([data-cafe-root]) {
 @layer components {
   .r-glow {
     --r-glow-a: 7%;
-    --r-glow-b: 10%;
+    --r-glow-b: 16%;
     --r-glow-size: 110% 50%;
     background:
       radial-gradient(ellipse var(--r-glow-size) at 0% 0%, color-mix(in srgb, var(--r-pri) var(--r-glow-a), transparent), transparent 72%),
@@ -597,12 +637,12 @@ body:has([data-cafe-root]) {
   }
   .r-glow[data-strong] {
     --r-glow-a: 12%;
-    --r-glow-b: 14%;
+    --r-glow-b: 20%;
   }
   .r-glow[data-hero] {
     background:
       radial-gradient(ellipse 62% 72% at 0% 0%, color-mix(in srgb, var(--r-pri) 36%, transparent), transparent 70%),
-      radial-gradient(ellipse 58% 70% at 100% 100%, color-mix(in srgb, var(--r-acc) 30%, transparent), transparent 70%);
+      radial-gradient(ellipse 58% 70% at 100% 100%, color-mix(in srgb, var(--r-acc) 40%, transparent), transparent 70%);
   }
   @media (min-width: 48rem) {
     .r-glow {
@@ -613,7 +653,7 @@ body:has([data-cafe-root]) {
   .r-card {
     background:
       linear-gradient(135deg, color-mix(in srgb, var(--r-pri) 7%, transparent), transparent 58%),
-      linear-gradient(315deg, color-mix(in srgb, var(--r-acc) 8%, transparent), transparent 58%),
+      linear-gradient(315deg, color-mix(in srgb, var(--r-acc) 12%, transparent), transparent 58%),
       var(--r-surface);
     box-shadow: inset 0 0 0 1px var(--r-line);
   }
@@ -631,6 +671,18 @@ body:has([data-cafe-root]) {
     background:
       linear-gradient(var(--r-ring-fill, var(--r-bg)), var(--r-ring-fill, var(--r-bg))) padding-box,
       linear-gradient(100deg, var(--r-pri), var(--r-nurse), var(--r-acc)) border-box;
+  }
+
+  /* About · "day N since debut" stamp — tilted gradient ring with a mint inner line */
+  .r-day-badge {
+    border: 2px solid transparent;
+    background:
+      linear-gradient(color-mix(in srgb, var(--r-bg) 95%, transparent), color-mix(in srgb, var(--r-bg) 95%, transparent)) padding-box,
+      conic-gradient(from 200deg, var(--r-pri), var(--r-nurse), var(--r-acc), var(--r-nurse), var(--r-pri)) border-box;
+    box-shadow:
+      inset 0 0 0 4px color-mix(in srgb, var(--r-bg) 85%, transparent),
+      inset 0 0 0 5px color-mix(in srgb, var(--r-acc) 35%, transparent),
+      0 0 24px color-mix(in srgb, var(--r-acc) 15%, transparent);
   }
 
   /* Live dot · ring pulse (1.2s normal · 0.8s live / about to start) */
@@ -723,5 +775,183 @@ body:has([data-cafe-root]) {
   .r-ecg-run {
     animation: none;
     stroke-dasharray: none;
+  }
+}
+
+/* ---------- Project R · Hero (doc/project-r-implementation.md · เฟส 4) ---------- */
+
+/* phone / tablet turned sideways (short screen) — hero switches to copy-left / character-right */
+@custom-variant short (@media (max-height: 500px) and (orientation: landscape));
+
+@theme inline {
+  --font-r-name: var(--font-name), ui-serif, serif;
+  --font-r-mono: var(--font-courier), ui-monospace, monospace;
+}
+
+@layer components {
+  /* Running text · loops without a gap (Ticker) */
+  .r-ticker-mask {
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  .r-ticker {
+    animation: r-ticker var(--r-ticker-dur, 12s) linear infinite;
+    will-change: transform;
+  }
+  /* pause while hovered or while its link has keyboard focus */
+  .r-ticker-mask:hover .r-ticker,
+  :focus-visible .r-ticker {
+    animation-play-state: paused;
+  }
+
+  /* Light sweep across the featured tier card (Member · Rx 1) */
+  .r-shine {
+    animation: r-shine 3.6s ease-in-out infinite;
+  }
+
+  /* Hero SCROLL chevron · soft nudge down, slower than the heartbeat; waits for the intro */
+  .r-nudge {
+    animation: r-nudge 1.8s ease-in-out 1.2s infinite;
+  }
+
+  /* Blinking dot / milestone number */
+  .r-blink {
+    animation: r-blink 1.2s steps(1) infinite;
+  }
+
+  /* Tap the character → ring + ♥ ใจโยก~ */
+  .r-tap-ring {
+    animation: r-tap-ring 0.45s ease-out both;
+  }
+  .r-bubble {
+    animation: r-bubble 1.25s ease-out both;
+  }
+
+  /* ON AIR · screen edge breathes pink */
+  .r-onair-glow::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    pointer-events: none;
+    animation: r-onair-glow 2.2s ease-in-out infinite;
+  }
+}
+
+@keyframes r-ticker {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes r-shine {
+  0% {
+    transform: translateX(-120%);
+  }
+  60%,
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+@keyframes r-nudge {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+@keyframes r-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* soft press ripple under the finger · ~75 px at most */
+@keyframes r-tap-ring {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+}
+
+@keyframes r-bubble {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.5);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.08);
+  }
+  18% {
+    transform: translateY(0) scale(1);
+  }
+  72% {
+    opacity: 1;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+}
+
+@keyframes r-onair-glow {
+  0%,
+  100% {
+    box-shadow: inset 0 0 0 0 color-mix(in srgb, var(--r-pri) 0%, transparent);
+  }
+  50% {
+    box-shadow: inset 0 0 80px 0 color-mix(in srgb, var(--r-pri) 22%, transparent);
+  }
+}
+
+@keyframes r-bubble-still {
+  0%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* running text stands still and cuts off with … */
+  .r-ticker {
+    animation: none;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .r-ticker-copy,
+  .r-ticker-sep {
+    display: none;
+  }
+  .r-ticker-mask {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .r-blink,
+  .r-nudge,
+  .r-shine,
+  .r-tap-ring,
+  .r-onair-glow::after {
+    animation: none;
+  }
+  /* bubble: no hop, shows ~1 s then fades */
+  .r-bubble {
+    animation: r-bubble-still 1.25s linear both;
   }
 }

@@ -99,7 +99,7 @@ export default async function CafeLayout({ children }: { children: ReactNode }) 
       <CafeChromeGate>
         <CafeFooter />
       </CafeChromeGate>
-      <BackToTop />
+      <BackToTop tone="cafe" />
     </div>
   );
 }

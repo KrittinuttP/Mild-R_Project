@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 
 import { ProtectedImage } from "@/components/media/ProtectedImage";
@@ -11,6 +12,8 @@ export type CreditEntry = {
   role: string;
   person: CreditPerson;
   zone: CreditZone;
+  /** What they made, in Thai (Mama / Papa only) */
+  note?: string;
 };
 
 function isLoadingCredit(id: string, role: string) {
@@ -29,12 +32,14 @@ export function getCreditZones(design: CharacterDesign): Record<
       role: design.illustratorLabel ?? "Illustrator",
       person: design.illustrator,
       zone: "art",
+      note: design.illustratorRoleLocal,
     },
     {
       id: "rigger",
       role: design.riggerLabel ?? "Rigger",
       person: design.rigger,
       zone: "art",
+      note: design.riggerRoleLocal,
     },
   ];
 
@@ -90,7 +95,8 @@ const LABEL_MAX: Record<AvatarSize, string> = {
 type DesignCreditsProps = {
   design: CharacterDesign;
   zones?: CreditZone[];
-  variant?: "list" | "strip";
+  /** `aplus` = Project R home card (CI A+) — ART | CREDITS | LOADING columns */
+  variant?: "list" | "strip" | "aplus";
   size?: AvatarSize;
   align?: "start" | "end";
   className?: string;
@@ -208,6 +214,10 @@ export function DesignCredits({
 
   if (activeZones.length === 0) return null;
 
+  if (variant === "aplus") {
+    return <AplusCredits grouped={grouped} zones={activeZones} className={className} />;
+  }
+
   if (variant === "strip") {
     const compact = size === "sm";
 
@@ -323,6 +333,136 @@ export function DesignCredits({
               );
             })}
           </ul>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── CI A+ · Project R home (About · ทีมผู้สร้าง) ─────────────────── */
+
+const APLUS_ZONE_LABEL = "text-xs tracking-[0.24em] text-r-pri uppercase";
+
+function AplusPersonLink({ entry, className, children }: { entry: CreditEntry; className?: string; children: ReactNode }) {
+  const title = `${entry.role} · ${entry.person.handle ?? entry.person.name}`;
+  if (!entry.person.url) {
+    return (
+      <div className={className} title={title}>
+        {children}
+      </div>
+    );
+  }
+  return (
+    <Link
+      href={entry.person.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={title}
+      className={cn(
+        "rounded-2xl transition-opacity hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-r-acc",
+        className
+      )}
+    >
+      {children}
+    </Link>
+  );
+}
+
+function AplusAvatar({ entry, big = false }: { entry: CreditEntry; big?: boolean }) {
+  const dim = big ? "size-[68px]" : "size-12";
+  const ring = big
+    ? "ring-[1.5px] ring-r-acc ring-offset-2 ring-offset-r-bg"
+    : "ring-[1.5px] ring-r-text-2/15";
+  return entry.person.image ? (
+    <ProtectedImage
+      src={entry.person.image}
+      alt=""
+      loading="lazy"
+      className={cn(dim, ring, "shrink-0 rounded-full object-cover")}
+    />
+  ) : (
+    <span
+      aria-hidden
+      className={cn(dim, ring, "inline-flex shrink-0 items-center justify-center rounded-full bg-white/5 text-sm text-r-text-2")}
+    >
+      {entry.person.name.slice(0, 1).toUpperCase()}
+    </span>
+  );
+}
+
+function AplusCredits({
+  grouped,
+  zones,
+  className,
+}: {
+  grouped: Record<CreditZone, CreditEntry[]>;
+  zones: CreditZone[];
+  className?: string;
+}) {
+  const cols: Record<CreditZone, string> = {
+    art: "lg:flex-[2.3]",
+    audio: "lg:flex-[1.75]",
+    loading: "lg:flex-[1.2]",
+  };
+
+  return (
+    <div
+      className={cn(
+        "flex flex-col gap-6 lg:flex-row lg:items-start",
+        // dividers between zones: horizontal on phones, vertical on desktop
+        "[&>*+*]:border-t [&>*+*]:border-r-text-2/15 [&>*+*]:pt-6 lg:[&>*+*]:border-t-0 lg:[&>*+*]:border-l lg:[&>*+*]:pt-0 lg:[&>*+*]:pl-6 lg:[&>*+*]:self-stretch",
+        className
+      )}
+    >
+      {zones.map((zone) => (
+        <div key={zone} className={cn("min-w-0", cols[zone])}>
+          <p className={cn(APLUS_ZONE_LABEL, zone === "art" ? "mb-4 lg:mb-[18px]" : "mb-3.5")}>{ZONE_LABEL[zone]}</p>
+
+          {zone === "art" ? (
+            <ul className="grid grid-cols-2 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-5">
+              {grouped.art.map((entry) => (
+                <li key={entry.id} className="min-w-0">
+                  <AplusPersonLink
+                    entry={entry}
+                    className="flex flex-col items-center gap-2.5 text-center lg:flex-row lg:gap-3.5 lg:text-left"
+                  >
+                    <AplusAvatar entry={entry} big />
+                    <span className="min-w-0">
+                      <span className="block text-[0.6875rem] tracking-[0.22em] text-r-pri uppercase">{entry.role}</span>
+                      <span className="mt-0.5 block text-[0.9375rem] break-words text-r-text sm:text-base">
+                        {entry.person.name}
+                      </span>
+                      {entry.note ? <span className="mt-0.5 block text-[0.8125rem] text-r-text-2">{entry.note}</span> : null}
+                    </span>
+                  </AplusPersonLink>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <ul
+              className={cn(
+                "grid gap-2.5",
+                zone === "audio"
+                  ? "grid-cols-3"
+                  : // phones: loading's two people sit centred, same column width as CREDITS
+                    "mx-auto w-2/3 grid-cols-2 lg:mx-0 lg:w-auto"
+              )}
+            >
+              {grouped[zone].map((entry) => (
+                <li key={entry.id} className="min-w-0">
+                  <AplusPersonLink entry={entry} className="block text-center">
+                    <span className="flex justify-center">
+                      <AplusAvatar entry={entry} />
+                    </span>
+                    <span className="mt-2 block text-xs leading-snug [overflow-wrap:anywhere] text-r-text">
+                      {entry.person.name}
+                    </span>
+                    <span className="mt-0.5 block text-[0.6875rem] leading-snug text-r-pri">{entry.role}</span>
+                  </AplusPersonLink>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       ))}
     </div>

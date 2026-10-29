@@ -5,23 +5,24 @@ import Link from "next/link";
 import { ArrowUpRight, X } from "lucide-react";
 
 import { ProtectedImage } from "@/components/media/ProtectedImage";
+import { useLiveSlots } from "@/hooks/useLiveSlots";
 import { useNow } from "@/hooks/useNow";
-import { flattenLiveSlots } from "@/lib/events";
 import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
 import { getSlotCoverUrl } from "@/lib/live-cover";
+import {
+  actualStartMs,
+  formatClock,
+  HOUR_MS,
+  isNearStart,
+  pickTodaySlots,
+  slotStartMs,
+  slotTimeLabel,
+} from "@/lib/live-today";
 import { bangkokDateFromIso } from "@/lib/live-preview-match";
 import { cn } from "@/lib/utils";
-import type { LiveSlot, LiveWeek } from "@/types/vtuber";
 
 registerGsapPlugins();
 
-const REFRESH_MS = 2 * 60_000;
-/** Poll faster around start time so the badge flips to LIVE soon after the tracker sees it. */
-const FAST_REFRESH_MS = 30_000;
-const FAST_REFRESH_LEAD_MS = 10 * 60_000;
-const HOUR_MS = 60 * 60 * 1000;
-/** Upcoming slots this far past their start time are treated as stale data. */
-const STALE_UPCOMING_MS = 3 * HOUR_MS;
 const DISMISS_KEY = "mild-r:live-banner-dismissed";
 const DISMISS_EVENT = "mild-r:live-banner-dismissed";
 
@@ -51,103 +52,11 @@ function dismissForDay(day: string) {
   window.dispatchEvent(new Event(DISMISS_EVENT));
 }
 
-function slotTimeLabel(slot: LiveSlot): string | null {
-  const time = slot.scheduledUpdated ?? slot.scheduledLabel ?? slot.time;
-  return /^\d{1,2}:\d{2}$/.test(time) ? time : null;
-}
-
-/** Bangkok (UTC+7) wall-clock start of the slot, in epoch ms. */
-function slotStartMs(slot: LiveSlot): number | null {
-  const time = slotTimeLabel(slot);
-  if (!time) return null;
-  const [y, m, d] = slot.date.split("-").map(Number);
-  const [h, min] = time.split(":").map(Number);
-  return Date.UTC(y, m - 1, d, h - 7, min);
-}
-
-function actualStartMs(slot: LiveSlot): number | null {
-  const time = slot.actualStartLabel;
-  if (!time || !/^\d{1,2}:\d{2}$/.test(time)) return null;
-  const [y, m, d] = slot.date.split("-").map(Number);
-  const [h, min] = time.split(":").map(Number);
-  return Date.UTC(y, m - 1, d, h - 7, min);
-}
-
-/** `H:MM:SS` from one hour up, `MM:SS` below. */
-function formatClock(ms: number): string {
-  const total = Math.max(0, Math.floor(ms / 1000));
-  const h = Math.floor(total / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = total % 60;
-  const mmss = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-  return h > 0 ? `${h}:${mmss}` : mmss;
-}
-
-/** Today's live first, then upcoming by start time; ended/cancelled/stale dropped. */
-function pickTodaySlots(slots: LiveSlot[], today: string, nowMs: number) {
-  return slots
-    .filter((slot) => {
-      if (slot.date !== today) return false;
-      if (slot.status === "live") return true;
-      if (slot.status === "ended" || slot.status === "cancelled") return false;
-      const start = slotStartMs(slot);
-      return start === null || start + STALE_UPCOMING_MS > nowMs;
-    })
-    .sort((a, b) => {
-      const liveRank = Number(b.status === "live") - Number(a.status === "live");
-      if (liveRank) return liveRank;
-      const aStart = slotStartMs(a) ?? Number.POSITIVE_INFINITY;
-      const bStart = slotStartMs(b) ?? Number.POSITIVE_INFINITY;
-      return aStart - bStart || a.time.localeCompare(b.time);
-    });
-}
-
-/** An upcoming slot is close to (or past) its start but not yet marked live. */
-function isNearStart(slot: LiveSlot, nowMs: number) {
-  if (slot.status === "live") return false;
-  const start = slotStartMs(slot);
-  return start !== null && nowMs >= start - FAST_REFRESH_LEAD_MS;
-}
-
+/** Today's slots from the shared schedule hook; polls faster near a start time. */
 function useTodayLiveSlots(today: string | null, nowMs: number | null) {
-  const [loaded, setLoaded] = useState<{ day: string; slots: LiveSlot[] } | null>(
-    null
+  return useLiveSlots(today, today, (slots) =>
+    Boolean(today && nowMs !== null && pickTodaySlots(slots, today, nowMs).some((slot) => isNearStart(slot, nowMs)))
   );
-
-  const current = loaded?.day === today ? loaded.slots : null;
-  const fast = Boolean(
-    today &&
-      nowMs !== null &&
-      current &&
-      pickTodaySlots(current, today, nowMs).some((slot) => isNearStart(slot, nowMs))
-  );
-
-  useEffect(() => {
-    if (!today) return;
-    let cancelled = false;
-
-    const load = async () => {
-      try {
-        const qs = new URLSearchParams({ from: today, to: today });
-        const res = await fetch(`/api/live/schedule?${qs}`);
-        if (!res.ok) return;
-        const data = (await res.json()) as { weeks?: LiveWeek[] };
-        if (cancelled || !Array.isArray(data.weeks)) return;
-        setLoaded({ day: today, slots: flattenLiveSlots(data.weeks) });
-      } catch {
-        /* the banner is optional — stay hidden on network errors */
-      }
-    };
-
-    void load();
-    const id = window.setInterval(load, fast ? FAST_REFRESH_MS : REFRESH_MS);
-    return () => {
-      cancelled = true;
-      window.clearInterval(id);
-    };
-  }, [today, fast]);
-
-  return current;
 }
 
 /** Slim "live today" strip under the header; dismissible per Bangkok day. */

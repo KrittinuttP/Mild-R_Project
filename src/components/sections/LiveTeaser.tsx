@@ -2,24 +2,17 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
-import {
-  LiveScheduleError,
-  LiveScheduleSkeleton,
-} from "@/components/events/LiveScheduleSkeleton";
-import { LiveWeekTable } from "@/components/events/LiveWeekTable";
-import { buttonVariants } from "@/components/ui/button";
-import { useLiveSchedule } from "@/hooks/useLiveSchedule";
-import { surroundingWeeksRangeYmd } from "@/lib/events";
-import {
-  CTA_OUTLINE_CLASS,
-} from "@/lib/site-ui";
-import { cn } from "@/lib/utils";
-import type { LiveWeek } from "@/types/vtuber";
 import { Section } from "@/components/common/Section";
 import { SectionHeader } from "@/components/common/SectionHeader";
+import { LiveWeekTable, LiveWeekTableSkeleton } from "@/components/events/LiveWeekTable";
+import { useLiveSchedule } from "@/hooks/useLiveSchedule";
+import { surroundingWeeksRangeYmd } from "@/lib/events";
+import { R_CTA_OUTLINE_CLASS } from "@/lib/site-ui";
+import { cn } from "@/lib/utils";
+import type { LiveWeek } from "@/types/vtuber";
 
 export type InitialLiveSchedule = {
   from: string;
@@ -29,32 +22,25 @@ export type InitialLiveSchedule = {
 
 type LiveTeaserProps = {
   initialLiveSchedule?: InitialLiveSchedule | null;
+  /** Kept for callers. Channel chips on the /live table come from each slot. */
+  ownChannelLabel: string;
 };
 
+/** Home · ตารางไลฟ์: the /live week table, recolored to the homepage CI. */
 export function LiveTeaser({ initialLiveSchedule }: LiveTeaserProps) {
   const initialFrom = initialLiveSchedule?.from;
   const initialTo = initialLiveSchedule?.to;
   const teaserRange = useMemo(
-    () =>
-      initialFrom && initialTo
-        ? { from: initialFrom, to: initialTo }
-        : surroundingWeeksRangeYmd(),
+    () => (initialFrom && initialTo ? { from: initialFrom, to: initialTo } : surroundingWeeksRangeYmd()),
     [initialFrom, initialTo]
   );
-  const { weeks: teaserWeeks, status, error, retry } = useLiveSchedule(
-    teaserRange,
-    { initialWeeks: initialLiveSchedule?.weeks ?? null }
-  );
+  const { weeks: teaserWeeks, status, error, retry } = useLiveSchedule(teaserRange, {
+    initialWeeks: initialLiveSchedule?.weeks ?? null,
+  });
 
   const displayWeeks = useMemo(() => {
     if (teaserWeeks.length > 0) return teaserWeeks;
-    return [
-      {
-        id: `empty-${teaserRange.from}`,
-        weekStart: teaserRange.from,
-        slots: [],
-      },
-    ];
+    return [{ id: `empty-${teaserRange.from}`, weekStart: teaserRange.from, slots: [] }];
   }, [teaserWeeks, teaserRange.from]);
 
   return (
@@ -63,28 +49,26 @@ export function LiveTeaser({ initialLiveSchedule }: LiveTeaserProps) {
         <SectionHeader eyebrow="Live" title="ตารางไลฟ์" />
       </ScrollReveal>
 
-      <ScrollReveal delay={0.06} className="mt-8 sm:mt-10">
+      <ScrollReveal delay={0.06} className="mt-6">
         {status === "loading" ? (
-          <LiveScheduleSkeleton variant="compact" />
+          <LiveWeekTableSkeleton />
         ) : status === "error" ? (
-          <LiveScheduleError message={error} onRetry={retry} />
-        ) : (
-          <div className="transition-opacity duration-500 ease-out">
-            <LiveWeekTable weeks={displayWeeks} compact blankEmptyDays weekRange={teaserRange} />
+          <div role="alert" className="r-card rounded-3xl px-5 py-10 text-center sm:px-8">
+            <p className="font-[family-name:var(--font-display)] text-lg text-r-text sm:text-xl">โหลดตารางไลฟ์ไม่สำเร็จ</p>
+            {error ? <p className="mt-2 text-sm text-r-text-3">{error}</p> : null}
+            <button type="button" onClick={retry} className={cn(R_CTA_OUTLINE_CLASS, "mt-5")}>
+              ลองอีกครั้ง
+            </button>
           </div>
+        ) : (
+          <LiveWeekTable weeks={displayWeeks} weekRange={teaserRange} blankEmptyDays tone="aplus" />
         )}
       </ScrollReveal>
 
-      <ScrollReveal delay={0.1} className="mt-8 sm:mt-10">
-        <Link
-          href="/live"
-          className={cn(
-            buttonVariants({ size: "lg", variant: "outline" }),
-            CTA_OUTLINE_CLASS
-          )}
-        >
+      <ScrollReveal delay={0.1} className="mt-6">
+        <Link href="/live" className={R_CTA_OUTLINE_CLASS}>
           ดูตารางไลฟ์ทั้งหมด
-          <ArrowUpRight className="size-4" />
+          <ArrowRight aria-hidden className="size-3.5" />
         </Link>
       </ScrollReveal>
     </Section>

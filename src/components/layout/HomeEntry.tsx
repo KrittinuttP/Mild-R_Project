@@ -19,6 +19,8 @@ export function HomeEntry({ name, oshiMark }: HomeEntryProps) {
       <SiteSplash
         name={name}
         oshiMark={oshiMark}
+        // scroll to `/#section` while the splash still covers the page, so the fade reveals it in place
+        onCovered={() => setReady(true)}
         onFinished={() => setReady(true)}
       />
       <SectionScrollRestore ready={ready} />

@@ -13,7 +13,7 @@ const FOOTER_NAV_GROUPS = [
     title: "Home",
     links: [
       { href: "/#top", label: "Profile" },
-      { href: "/#lore", label: "Lore" },
+      { href: "/#lore", label: "About" },
       { href: "/#media", label: "Media" },
       { href: "/#socials", label: "Follow" },
     ],
@@ -45,7 +45,7 @@ export function DeveloperCredit() {
         href={DEVELOPER.xUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="group inline-flex items-center gap-1 transition hover:text-[#e85a7a]"
+        className="group inline-flex items-center gap-1 rounded transition hover:text-r-pri focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc"
       >
         <span>{DEVELOPER.name}</span>
         <SocialPlatformIcon
@@ -65,7 +65,7 @@ export function Footer({ data }: FooterProps) {
   );
 
   const disclaimer = (
-    <p className="text-xs leading-relaxed text-[#f3b8c4]/50 sm:text-sm sm:text-[#f3b8c4]/55">
+    <p className="text-xs leading-relaxed text-r-text-3 sm:text-sm">
       Unofficial fanclub site for {data.fan.fanName} {data.fan.oshiMark}. All
       rights to {data.basic.name} and related assets belong to their respective
       owners.
@@ -73,14 +73,15 @@ export function Footer({ data }: FooterProps) {
   );
 
   return (
-    <footer className="border-t border-[#f3b8c4]/10 bg-[#0e0609] px-5 py-12 pb-[max(3rem,env(safe-area-inset-bottom))] text-[#fff5f7] sm:px-10 sm:py-16 lg:px-16">
+    <footer className="relative bg-[color-mix(in_srgb,var(--r-bg)_80%,black)] px-5 py-12 pb-[max(3rem,env(safe-area-inset-bottom))] text-r-text sm:px-10 sm:py-16 lg:px-16">
+      <div aria-hidden className="r-hairline absolute inset-x-0 top-0" />
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between md:gap-12">
           <div>
             <p className="font-[family-name:var(--font-display)] text-2xl font-normal tracking-normal sm:text-3xl">
-              {data.basic.name}
+              {data.basic.name} <span aria-hidden className="text-xl sm:text-2xl">{data.fan.oshiMark}</span>
             </p>
-            <p className="mt-2 text-sm text-[#f3b8c4]/70">
+            <p className="mt-2 text-sm text-r-text-3">
               {data.basic.unit} · {data.basic.agency}
             </p>
 
@@ -93,7 +94,7 @@ export function Footer({ data }: FooterProps) {
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={social.label}
-                      className="inline-flex size-10 items-center justify-center text-[#f7d7de]/85 transition hover:text-[#e85a7a] sm:size-auto sm:justify-start sm:gap-1.5"
+                      className="inline-flex size-10 items-center justify-center rounded text-r-text/85 transition hover:text-r-pri sm:size-auto sm:justify-start sm:gap-1.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc"
                     >
                       <SocialPlatformIcon
                         platform={social.platform}
@@ -116,13 +117,13 @@ export function Footer({ data }: FooterProps) {
                 key={group.title}
                 className="flex flex-col gap-1 text-sm md:items-end"
               >
-                <span className="text-xs text-[#e85a7a]/85">{group.title}</span>
+                <span className="text-xs tracking-[0.2em] text-r-acc uppercase">{group.title}</span>
                 <ul className="flex flex-wrap gap-x-4 gap-y-1 md:justify-end">
                   {group.links.map((link) => (
                     <li key={link.href}>
                       <Link
                         href={link.href}
-                        className="text-[#f7d7de]/85 transition hover:text-[#e85a7a]"
+                        className="rounded text-r-text/85 transition hover:text-r-pri focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc"
                       >
                         {link.label}
                       </Link>
@@ -136,10 +137,10 @@ export function Footer({ data }: FooterProps) {
           </nav>
         </div>
 
-        <div className="mt-10 space-y-4 border-t border-[#f3b8c4]/10 pt-8">
+        <div className="mt-10 space-y-4 border-t border-r-text-2/10 pt-8">
           <div className="hidden md:block">{disclaimer}</div>
 
-          <div className="flex flex-col gap-3 text-xs leading-none tracking-wide text-[#f3b8c4]/45 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-6 sm:gap-y-2">
+          <div className="flex flex-col gap-3 text-xs leading-none tracking-wide text-r-text-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-6 sm:gap-y-2">
             <p className="m-0 inline-flex items-center gap-1.5 leading-none">
               <span>© {year} Fan-made · Not affiliated with Lumina Project</span>
               <Link
@@ -147,7 +148,7 @@ export function Footer({ data }: FooterProps) {
                 prefetch={false}
                 rel="nofollow"
                 aria-label="Admin"
-                className="inline-flex text-[#f3b8c4]/20 transition hover:text-[#e85a7a]"
+                className="inline-flex rounded text-r-text-2/25 transition hover:text-r-pri focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc"
               >
                 <KeyRound className="size-3" aria-hidden />
               </Link>

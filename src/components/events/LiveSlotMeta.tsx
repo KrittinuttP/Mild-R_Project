@@ -72,6 +72,7 @@ export function LiveSourceBadges({
   showMember = true,
   /** Smaller calendar pill size (channel name only, same as other compact badges). */
   compactChannel = false,
+  tone = "legacy",
 }: {
   isOwnChannel?: boolean;
   sourceTitle?: string | null;
@@ -83,6 +84,8 @@ export function LiveSourceBadges({
   showCollab?: boolean;
   showMember?: boolean;
   compactChannel?: boolean;
+  /** Homepage table uses the CI pink for the own-channel chip. /live stays on the legacy chip. */
+  tone?: "legacy" | "aplus";
 }) {
   const pill = compactChannel
     ? LIVE_BADGE_PILL_COMPACT
@@ -92,7 +95,16 @@ export function LiveSourceBadges({
 
   const channel =
     showChannel && isOwnChannel ? (
-      <span className={cn(pill, LIVE_BADGE_MILD)}>Mild-R</span>
+      <span
+        className={cn(
+          pill,
+          tone === "aplus"
+            ? "border-r-pri/45 bg-r-pri/14 text-r-text uppercase"
+            : LIVE_BADGE_MILD
+        )}
+      >
+        Mild-R
+      </span>
     ) : showChannel && sourceTitle ? (
       <span
         title={sourceTitle}
@@ -202,6 +214,7 @@ export function LiveDayChannelBadges({
   size = "sm",
   /** Calendar: sit beside day number; compact pill size. */
   compact = false,
+  tone = "legacy",
 }: {
   slots: {
     isOwnChannel?: boolean;
@@ -213,6 +226,7 @@ export function LiveDayChannelBadges({
   className?: string;
   size?: "sm" | "md";
   compact?: boolean;
+  tone?: "legacy" | "aplus";
 }) {
   const displaySlots = preferOwnChannelSlots(slots);
   const hasOwn = displaySlots.some((s) => s.isOwnChannel);
@@ -245,6 +259,7 @@ export function LiveDayChannelBadges({
           showCollab={false}
           size={size}
           compactChannel={compact}
+          tone={tone}
         />
       ) : null}
       {guestTitles.map((title) => (
@@ -254,6 +269,7 @@ export function LiveDayChannelBadges({
           showCollab={false}
           size={size}
           compactChannel={compact}
+          tone={tone}
         />
       ))}
     </div>

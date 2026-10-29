@@ -6,6 +6,7 @@
     "image": "/assets/image/profile/atwomaru.jpg"
   },
   "illustratorLabel": "Mama",
+  "illustratorRoleLocal": "ออกแบบตัวละคร",
   "rigger": {
     "name": "karamomokitchen",
     "handle": "@karamomokitchen",
@@ -13,8 +14,10 @@
     "image": "/assets/image/profile/karamomokitchen.jpg"
   },
   "riggerLabel": "Papa",
+  "riggerRoleLocal": "ริกโมเดล",
   "companionGroupName": "LoVe",
   "companionGroupNameLocal": "โลวี่",
+  "companionGroupTagline": "น้องลูกตาสองข้างของมายด์",
   "companions": [
     {
       "id": "lo",
