@@ -580,9 +580,8 @@ export async function loadLiveStreamsInRange(
       }
     }
 
-    return [...byId.values()].sort(
-      (a, b) => liveStreamSortKey(b) - liveStreamSortKey(a)
-    );
+    // Cover history too, so the live detail modal can show old covers.
+    return await withThumbnails(supabase, [...byId.values()]);
   } catch (err) {
     console.error("[live_streams_range]", err);
     return [];

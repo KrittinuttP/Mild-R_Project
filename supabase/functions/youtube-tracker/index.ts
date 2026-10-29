@@ -375,14 +375,22 @@ async function removeMatchingPreviews(reals: StreamRow[]) {
 const CANCEL_AFTER_MS = 3 * 60 * 60 * 1000;
 const BUCKET = "live-thumbs";
 
-function normalizeThumbSource(url: string | null | undefined) {
-  if (!url) return "";
-  try {
-    const u = new URL(url);
-    return `${u.origin}${u.pathname}`;
-  } catch {
-    return url;
-  }
+/** SHA-256 hex of an image — YouTube keeps the thumbnail URL when a cover changes, so compare bytes. */
+async function sha256Hex(bytes: Uint8Array) {
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Plain YouTube thumbnail URLs get a cache-buster so the CDN hands over the current cover. */
+function freshThumbUrl(url: string) {
+  return url.includes("?") ? url : `${url}?t=${Date.now()}`;
+}
+
+async function fetchImage(url: string) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const contentType = res.headers.get("content-type")?.split(";")[0] || "image/jpeg";
+  return { bytes: new Uint8Array(await res.arrayBuffer()), contentType };
 }
 
 function isThumbLocked(row: StreamRow) {
@@ -404,7 +412,7 @@ async function archiveThumbnails(streams: StreamRow[]) {
     try {
       const { data: current, error: curErr } = await supabase
         .from("mild_r_live_stream_thumbnails")
-        .select("id, source_url")
+        .select("id, public_url, content_hash")
         .eq("video_id", row.video_id)
         .eq("is_current", true)
         .maybeSingle();
@@ -417,29 +425,39 @@ async function archiveThumbnails(streams: StreamRow[]) {
       const locked = isThumbLocked(row);
       if (locked && current) continue;
 
-      if (
-        current &&
-        normalizeThumbSource(current.source_url as string | null) ===
-          normalizeThumbSource(sourceUrl)
-      ) {
+      let image: { bytes: Uint8Array; contentType: string };
+      try {
+        image = await fetchImage(freshThumbUrl(sourceUrl));
+      } catch (err) {
+        console.error(`thumb fetch ${row.video_id}:`, err instanceof Error ? err.message : err);
         continue;
+      }
+      const hash = await sha256Hex(image.bytes);
+
+      if (current) {
+        let currentHash = current.content_hash as string | null;
+        if (!currentHash) {
+          // Archived before content hashes existed: hash the stored copy once and keep it.
+          try {
+            currentHash = await sha256Hex((await fetchImage(current.public_url as string)).bytes);
+            await supabase
+              .from("mild_r_live_stream_thumbnails")
+              .update({ content_hash: currentHash })
+              .eq("id", current.id);
+          } catch (err) {
+            console.error(`thumb rehash ${row.video_id}:`, err instanceof Error ? err.message : err);
+            continue;
+          }
+        }
+        if (currentHash === hash) continue;
       }
 
-      const imgRes = await fetch(sourceUrl);
-      if (!imgRes.ok) {
-        console.error(
-          `thumb fetch ${row.video_id}: HTTP ${imgRes.status}`
-        );
-        continue;
-      }
-      const contentType =
-        imgRes.headers.get("content-type")?.split(";")[0] || "image/jpeg";
+      const { contentType, bytes } = image;
       const ext = contentType.includes("png")
         ? "png"
         : contentType.includes("webp")
           ? "webp"
           : "jpg";
-      const bytes = new Uint8Array(await imgRes.arrayBuffer());
       const path = `${row.video_id}/${Date.now()}.${ext}`;
 
       const { error: upErr } = await supabase.storage
@@ -472,6 +490,7 @@ async function archiveThumbnails(streams: StreamRow[]) {
           storage_path: path,
           public_url: publicUrl,
           source_url: sourceUrl,
+          content_hash: hash,
           is_current: true,
         });
 
@@ -484,6 +503,7 @@ async function archiveThumbnails(streams: StreamRow[]) {
         .from("mild_r_live_streams")
         .update({ thumbnail_cached_url: publicUrl })
         .eq("video_id", row.video_id);
+      if (current) console.log(`🖼️ ปกใหม่ ${row.video_id} (เก็บปกเดิมไว้ในประวัติ)`);
     } catch (err) {
       console.error(
         `thumb archive ${row.video_id}:`,
