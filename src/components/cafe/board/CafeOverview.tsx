@@ -566,6 +566,7 @@ export function CafeOverview({
                   <span
                     data-pin="heart"
                     data-motion="hero-heart"
+                    style={cafe.heroCutoutPin}
                     className="absolute top-[15%] left-[80%] z-10 flex size-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center min-[1100px]:size-7"
                     aria-hidden
                   >

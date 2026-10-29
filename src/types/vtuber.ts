@@ -743,6 +743,9 @@ export interface CafeEdition {
  * Content sections mirror Supabase visibility keys:
  * dispatch · daySchedule · operations · signatureMenu · preorder · venueMenu · goods · caseFile · closing
  */
+/** Where the heart pin sits on the cafe cutout: `top` / `left` as CSS percentages. */
+export type CafeHeroPin = { top: string; left: string };
+
 export interface CafePage {
   title: string;
   titleLocal?: string;
@@ -760,8 +763,14 @@ export interface CafePage {
   heroAlt?: string;
   /** Transparent character cutout on the cork board. Splash keeps `heroImage`. */
   heroCutout?: string;
-  /** Blacked-out `heroCutout`, shown while the Key Visual toggle is off. */
+  /** Blacked-out `heroCutout`, shown while the Key Visual mode is "hidden". */
   heroCutoutSilhouette?: string;
+  /** Partly revealed `heroCutout`, shown while the Key Visual mode is "spoil". */
+  heroCutoutSpoil?: string;
+  /** Heart pin on the spoil cutout (it is wider than the KV), as CSS percentages. */
+  heroCutoutSpoilPin?: CafeHeroPin;
+  /** Heart pin on the cutout being shown; set by `cafeForVisibility`. Default 15% / 80%. */
+  heroCutoutPin?: CafeHeroPin;
   dispatch: CafeDispatchSection;
   daySchedule?: CafeDayScheduleSection;
   /** HQ briefing (doc §8) — replaces plates + highlights */

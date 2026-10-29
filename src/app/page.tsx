@@ -24,6 +24,8 @@ import {
 } from "@/lib/live-streams";
 import { resolveGate, readGateEnv } from "@/lib/cafe-gate";
 import { loadGate } from "@/lib/cafe-gate-store";
+import { cafeForVisibility } from "@/lib/cafe-visibility";
+import { loadCafeVisibility } from "@/lib/cafe-visibility-store";
 import { loadVideos } from "@/lib/videos";
 import { loadXFeedTabs } from "@/lib/x-posts";
 import type { HeroPost, HeroPremiere } from "@/hooks/useHeroStatus";
@@ -50,20 +52,26 @@ async function loadHeroPremieres(): Promise<HeroPremiere[]> {
     .map((v) => ({ title: v.title, url: v.youtubeUrl, startIso: `${v.date}T${v.time}:00+07:00` }));
 }
 
-/** The cafe KV stays hidden until the cafe opens (same lock as /cafe: clock or team override). */
-async function loadCafeOpen(): Promise<boolean> {
+/**
+ * Cover of the cafe card. Nothing until the cafe opens (same lock as /cafe:
+ * clock or team override); after that the same cutout /cafe shows, so the
+ * Key Visual mode (silhouette / spoil / full) applies here too.
+ */
+async function loadCafeCover(): Promise<string | null> {
   const { config } = await loadGate();
-  return resolveGate(config, readGateEnv(process.env), Date.now()).phase === "open";
+  if (resolveGate(config, readGateEnv(process.env), Date.now()).phase !== "open") return null;
+  const visibility = await loadCafeVisibility();
+  return cafeForVisibility(mildRData.cafe, visibility).heroCutout ?? null;
 }
 
 export default async function Home() {
-  const [{ posts: xPosts, retweets: xRetweets }, initialLiveSchedule, fanArt, heroPremieres, cafeOpen] =
+  const [{ posts: xPosts, retweets: xRetweets }, initialLiveSchedule, fanArt, heroPremieres, cafeCover] =
     await Promise.all([
       loadXFeedTabs(),
       loadInitialLiveSchedule(),
       listGalleryFanArt(24),
       loadHeroPremieres(),
-      loadCafeOpen(),
+      loadCafeCover(),
     ]);
 
   const heroPosts: HeroPost[] = xPosts
@@ -96,7 +104,7 @@ export default async function Home() {
         <Media data={mildRData} />
         <Gallery data={mildRData} fanArt={fanArt} />
         <EventsTeaser board={getEventsBoard()} />
-        <Projects data={mildRData} cafeOpen={cafeOpen} />
+        <Projects data={mildRData} cafeCover={cafeCover} />
         <Membership data={mildRData} />
         <Socials data={mildRData} xPosts={xPosts} xRetweets={xRetweets} />
       </main>

@@ -15,10 +15,11 @@ import type { ProjectItem, ProjectStatus, VtuberProfile } from "@/types/vtuber";
 type ProjectsProps = {
   data: VtuberProfile;
   /**
-   * The cafe has opened (cafe gate phase "open", from 30 Oct 18:12 unless the team moves it).
-   * Until then the cafe card never shows the KV.
+   * Cover of the cafe card: the cutout `/cafe` shows (full KV, spoil or
+   * silhouette, per the Key Visual mode), and only once the cafe has opened
+   * (gate phase "open"). `null` before then, so the card never shows the KV early.
    */
-  cafeOpen: boolean;
+  cafeCover: string | null;
 };
 
 const STATUS: Record<ProjectStatus, { label: string; className: string }> = {
@@ -71,9 +72,9 @@ function whenLine(project: ProjectItem, data: VtuberProfile): string | null {
   }
 }
 
-/** Cover per card: the cafe shows its KV only once the cafe has opened. */
-function coverOf(project: ProjectItem, data: VtuberProfile, cafeOpen: boolean): string | null {
-  if (project.category.toLowerCase() === "cafe") return cafeOpen ? data.cafe.heroCutout ?? null : null;
+/** Cover per card: the cafe card shows the same cutout as `/cafe`, once the cafe has opened. */
+function coverOf(project: ProjectItem, cafeCover: string | null): string | null {
+  if (project.category.toLowerCase() === "cafe") return cafeCover;
   return project.cover;
 }
 
@@ -113,10 +114,10 @@ function Cover({ src, category, className }: { src: string | null; category: Ret
   );
 }
 
-function ProjectCardR({ project, data, cafeOpen }: { project: ProjectItem; data: VtuberProfile; cafeOpen: boolean }) {
+function ProjectCardR({ project, data, cafeCover }: { project: ProjectItem; data: VtuberProfile; cafeCover: string | null }) {
   const category = categoryOf(project);
   const Icon = category.icon;
-  const cover = coverOf(project, data, cafeOpen);
+  const cover = coverOf(project, cafeCover);
   const when = whenLine(project, data);
   const href = `/projects/${project.slug}`;
   const cta = project.ctas?.find((c) => c.url.includes("upload")) ?? project.cta;
@@ -191,7 +192,7 @@ function AllProjectsLink({ className }: { className?: string }) {
 }
 
 /** Home · โปรเจกต์แฟนคลับ (project R · PJ1). */
-export function Projects({ data, cafeOpen }: ProjectsProps) {
+export function Projects({ data, cafeCover }: ProjectsProps) {
   if (PROJECTS_COMING_SOON) {
     return (
       <Section id="projects">
@@ -226,7 +227,7 @@ export function Projects({ data, cafeOpen }: ProjectsProps) {
         <ul className="grid grid-cols-1 gap-2.5 md:grid-cols-3 md:gap-5">
           {projects.map((project) => (
             <li key={project.id} className="min-w-0">
-              <ProjectCardR project={project} data={data} cafeOpen={cafeOpen} />
+              <ProjectCardR project={project} data={data} cafeCover={cafeCover} />
             </li>
           ))}
         </ul>

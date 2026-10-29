@@ -4,6 +4,7 @@ import type { CafePage } from "@/types/vtuber";
 export const CAFE_SECTION_KEYS = [
   "mainSiteLink",
   "heroCutout",
+  "kvSpoil",
   "dispatch",
   "daySchedule",
   "operations",
@@ -17,10 +18,38 @@ export const CAFE_SECTION_KEYS = [
 
 export type CafeSectionKey = (typeof CAFE_SECTION_KEYS)[number];
 
-/** Content blocks on `/cafe` (excludes chrome / nav toggles). */
+/**
+ * Content blocks on `/cafe` (excludes chrome / nav toggles). `kvSpoil` is not
+ * a block of its own: it is the middle step of the Key Visual mode.
+ */
 export const CAFE_CONTENT_SECTION_KEYS = CAFE_SECTION_KEYS.filter(
-  (key) => key !== "mainSiteLink"
-) as Exclude<CafeSectionKey, "mainSiteLink">[];
+  (key) => key !== "mainSiteLink" && key !== "kvSpoil"
+) as Exclude<CafeSectionKey, "mainSiteLink" | "kvSpoil">[];
+
+/**
+ * Key Visual on the cafe board, from most to least hidden:
+ * `hidden` blacked-out silhouette · `spoil` partly revealed · `full` the KV.
+ * Stored as two switches (`heroCutout`, `kvSpoil`) so the settings table
+ * keeps one boolean per row; `heroCutout` on always means the full KV.
+ */
+export const KV_MODES = ["hidden", "spoil", "full"] as const;
+export type KvMode = (typeof KV_MODES)[number];
+
+export const KV_MODE_META: Record<KvMode, { label: string; labelLocal: string }> = {
+  hidden: { label: "Top Secret", labelLocal: "ถมดำ" },
+  spoil: { label: "Spoil", labelLocal: "สปอย" },
+  full: { label: "Declassified", labelLocal: "KV เต็ม" },
+};
+
+export function kvModeOf(visibility: CafeSectionVisibilityMap): KvMode {
+  if (visibility.heroCutout) return "full";
+  return visibility.kvSpoil ? "spoil" : "hidden";
+}
+
+/** The two switches to save for a Key Visual mode. */
+export function kvModeSwitches(mode: KvMode): Pick<CafeSectionVisibilityMap, "heroCutout" | "kvSpoil"> {
+  return { heroCutout: mode === "full", kvSpoil: mode === "spoil" };
+}
 
 export type CafeSectionVisibilityMap = Record<CafeSectionKey, boolean>;
 
@@ -34,7 +63,11 @@ export const CAFE_SECTION_META: Record<
   },
   heroCutout: {
     label: "Key Visual",
-    labelLocal: "รูป KV คาเฟ่ (ปิด = ถมดำ)",
+    labelLocal: "รูป KV คาเฟ่ · ถมดำ / สปอย / KV เต็ม",
+  },
+  kvSpoil: {
+    label: "Key Visual · Spoil",
+    labelLocal: "โหมดสปอยของรูป KV (ใช้เมื่อ KV เต็มยังปิดอยู่)",
   },
   dispatch: {
     label: "Crime Scene Details",
@@ -78,6 +111,8 @@ export function defaultCafeVisibility(): CafeSectionVisibilityMap {
   return {
     mainSiteLink: true,
     heroCutout: true,
+    // No saved row yet: the Key Visual falls back to spoil, not the silhouette.
+    kvSpoil: true,
     dispatch: true,
     daySchedule: true,
     operations: true,
@@ -293,14 +328,14 @@ function redactSections(
 
 /**
  * The cafe data as the browser may see it. Hidden content is replaced on the
- * server — the KV by its blacked-out copy, hidden sections by filler — so
- * nothing classified is ever sent.
+ * server — the KV by its spoil or blacked-out copy, hidden sections by
+ * filler — so nothing classified is ever sent.
  */
 export function cafeForVisibility(
   cafe: CafePage,
   visibility: CafeSectionVisibilityMap
 ): CafePage {
-  const { heroCutoutSilhouette, ...listed } = cafe;
+  const { heroCutoutSilhouette, heroCutoutSpoil, heroCutoutSpoilPin, ...listed } = cafe;
   // Goods for sale are not announced yet: drop them before anything is sent.
   const rest =
     listed.goods && !listed.goods.saleListed
@@ -313,19 +348,28 @@ export function cafeForVisibility(
         }
       : listed;
   const redacted = redactSections(rest, visibility);
-  if (visibility.heroCutout || !heroCutoutSilhouette) return redacted;
+  const mode = kvModeOf(visibility);
+  const shown =
+    mode === "full"
+      ? undefined
+      : mode === "spoil"
+        ? (heroCutoutSpoil ?? heroCutoutSilhouette)
+        : heroCutoutSilhouette;
+  if (!shown) return redacted;
 
+  // The goods sample cut from the KV follows the board, so the full KV
+  // never reaches the page through it either.
   const color = cafe.heroCutout;
   return {
     ...redacted,
-    heroCutout: heroCutoutSilhouette,
+    heroCutout: shown,
+    // The spoil cutout is wider, so its heart sits elsewhere on the figure.
+    heroCutoutPin: shown === heroCutoutSpoil ? heroCutoutSpoilPin : undefined,
     goods: redacted.goods
       ? {
           ...redacted.goods,
           items: redacted.goods.items.map((item) =>
-            item.image === color
-              ? { ...item, image: heroCutoutSilhouette }
-              : item
+            item.image === color ? { ...item, image: shown } : item
           ),
         }
       : redacted.goods,

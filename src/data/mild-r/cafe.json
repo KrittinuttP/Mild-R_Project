@@ -17,6 +17,8 @@
   "heroAlt": "Mild-R key visual — Sherlock Sweetie",
   "heroCutout": "/assets/cafe/kv/KV_cafe.webp",
   "heroCutoutSilhouette": "/assets/cafe/kv/KV_cafe_shadow.webp",
+  "heroCutoutSpoil": "/assets/cafe/kv/KV_cafe_spoil.webp",
+  "heroCutoutSpoilPin": { "top": "17%", "left": "66%" },
   "dispatch": {
     "eyebrow": "Dispatch",
     "stamp": "CONFIDENTIAL",

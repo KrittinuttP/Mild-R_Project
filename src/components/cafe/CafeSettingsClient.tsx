@@ -11,8 +11,13 @@ import {
   CAFE_CONTENT_SECTION_KEYS,
   CAFE_SECTION_META,
   defaultCafeVisibility,
+  KV_MODE_META,
+  KV_MODES,
+  kvModeOf,
+  kvModeSwitches,
   type CafeSectionKey,
   type CafeSectionVisibilityMap,
+  type KvMode,
 } from "@/lib/cafe-visibility";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +36,20 @@ function switchClass(visible: boolean) {
     visible
       ? "border-cafe-gold-deep bg-cafe-gold text-cafe-ink hover:bg-cafe-gold-soft"
       : "border-cafe-wax bg-transparent text-cafe-wax hover:bg-cafe-wax/10"
+  );
+}
+
+/** One step of the Key Visual mode: gold when chosen, wax red when it is the silhouette. */
+function kvStepClass(active: boolean, mode: KvMode) {
+  return cn(
+    LABEL,
+    "flex-1 border-2 px-2.5 pt-2 pb-1.5 text-[10px] transition disabled:opacity-50 sm:text-[10px]",
+    "focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-cafe-gold",
+    !active
+      ? "border-cafe-ink/25 bg-transparent text-cafe-ink-soft hover:border-cafe-gold-deep hover:text-cafe-ink"
+      : mode === "hidden"
+        ? "border-cafe-wax bg-cafe-wax text-cafe-cream"
+        : "border-cafe-gold-deep bg-cafe-gold text-cafe-ink"
   );
 }
 
@@ -124,6 +143,43 @@ export function CafeSettingsClient() {
     });
     setUnlocked(false);
     setVisibility(defaultCafeVisibility());
+  }
+
+  /** Key Visual has three steps, saved as its two switches in one request. */
+  async function onKvMode(mode: KvMode) {
+    if (kvModeOf(visibility) === mode) return;
+    const switches = kvModeSwitches(mode);
+    const previous = visibility;
+    setVisibility({ ...visibility, ...switches });
+    setError(null);
+    setSavingKey("heroCutout");
+    setStatus(null);
+
+    try {
+      const res = await fetch("/api/cafe/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ visibility: switches }),
+      });
+      const data = (await res.json()) as {
+        visibility?: CafeSectionVisibilityMap;
+        error?: string;
+      };
+      if (!res.ok) {
+        setVisibility(previous);
+        setError(data.error ?? "บันทึกไม่สำเร็จ");
+        return;
+      }
+      if (data.visibility) setVisibility(data.visibility);
+      setStatus(`Key Visual · ${KV_MODE_META[mode].label} (${KV_MODE_META[mode].labelLocal})`);
+      if (flashTimer.current) window.clearTimeout(flashTimer.current);
+      flashTimer.current = window.setTimeout(() => setStatus(null), 2500);
+    } catch {
+      setVisibility(previous);
+      setError("บันทึกไม่สำเร็จ");
+    } finally {
+      setSavingKey(null);
+    }
   }
 
   async function onToggle(key: CafeSectionKey) {
@@ -332,7 +388,43 @@ export function CafeSettingsClient() {
 
       {/* Content section toggles */}
       <ul className={cn(PAPER, "mt-3 divide-y divide-cafe-ink/12 px-4 sm:px-5")}>
-        {contentSections.map((section) => (
+        {contentSections.map((section) =>
+          section.key === "heroCutout" ? (
+            <li
+              key={section.key}
+              className="flex flex-col gap-3 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+            >
+              <div className="min-w-0">
+                <p className={cn(SERIF, "text-base font-bold")}>{section.label}</p>
+                <p className={cn(THAI, "text-sm text-cafe-forest")}>{section.labelLocal}</p>
+              </div>
+              <div
+                role="radiogroup"
+                aria-label="Key Visual mode"
+                className="flex w-full shrink-0 gap-1.5 sm:w-auto sm:min-w-[17rem]"
+              >
+                {KV_MODES.map((mode) => {
+                  const active = kvModeOf(visibility) === mode;
+                  return (
+                    <button
+                      key={mode}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      disabled={loadingSections || savingKey === "heroCutout"}
+                      onClick={() => onKvMode(mode)}
+                      className={cn(kvStepClass(active, mode), "min-h-10")}
+                    >
+                      {KV_MODE_META[mode].label}
+                      <span className={cn(THAI, "mt-0.5 block text-[11px] tracking-normal normal-case")}>
+                        {KV_MODE_META[mode].labelLocal}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </li>
+          ) : (
           <li key={section.key} className="flex items-center justify-between gap-4 py-3.5">
             <div className="min-w-0">
               <p className={cn(SERIF, "text-base font-bold")}>{section.label}</p>
@@ -353,7 +445,8 @@ export function CafeSettingsClient() {
                   : "Top Secret"}
             </button>
           </li>
-        ))}
+          )
+        )}
       </ul>
 
       {error ? (
