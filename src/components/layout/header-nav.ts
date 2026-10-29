@@ -3,6 +3,7 @@ import {
   CalendarDays,
   Camera,
   Crown,
+  Images,
   MonitorPlay,
   Palette,
   Radio,
@@ -78,11 +79,15 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: "/gallery",
     sections: ["gallery"],
     routes: ["/fanart"],
-    children: GALLERY_CATEGORIES.map((category) => ({
-      label: category.label,
-      href: category.href,
-      icon: GALLERY_ICONS[category.key],
-    })),
+    children: [
+      // Home Gallery section (latest Moments · fan art · live covers).
+      { label: "ล่าสุด", href: "/#gallery", homeHash: "#gallery", icon: Images },
+      ...GALLERY_CATEGORIES.map((category) => ({
+        label: category.label,
+        href: category.href,
+        icon: GALLERY_ICONS[category.key],
+      })),
+    ],
     footer: { label: "ดู Gallery ทั้งหมด", href: "/gallery" },
   },
   { key: "events", label: "Events", href: "/events", homeHash: "#events", sections: ["events"] },

@@ -9,6 +9,7 @@ import { RChip } from "@/components/common/RChip";
 import { Section } from "@/components/common/Section";
 import { SectionHeader } from "@/components/common/SectionHeader";
 import { artistCredit, isFanArtItem, sortGalleryItems } from "@/components/gallery/gallery-utils";
+import { LiveCoverLightbox } from "@/components/gallery/LiveCoverLightbox";
 import { ImageLightbox, type ImageLightboxItem } from "@/components/media/ImageLightbox";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { useLiveCovers } from "@/hooks/useLiveCovers";
@@ -79,7 +80,18 @@ function BlockHeading({ icon: Icon, title, count }: { icon: LucideIcon; title: s
 }
 
 /** "อีก 32 รูป · ดูทั้งหมด ›" over the last tile (or on its own tile). */
-function MoreOverlay({ href, label, children }: { href: string; label: string; children?: ReactNode }) {
+function MoreOverlay({
+  href,
+  label,
+  icon,
+  children,
+}: {
+  href: string;
+  label: string;
+  /** Shown above the label (never behind it). */
+  icon?: ReactNode;
+  children?: ReactNode;
+}) {
   return (
     <Link
       href={href}
@@ -87,6 +99,7 @@ function MoreOverlay({ href, label, children }: { href: string; label: string; c
     >
       {children}
       <span className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 rounded-xl bg-r-bg/60 ring-[1.5px] ring-r-pri/45 ring-inset transition-colors group-hover:bg-r-bg/45">
+        {icon ? <span className="mb-1.5 text-r-pri/70 transition-colors group-hover:text-r-pri">{icon}</span> : null}
         <span className="font-[family-name:var(--font-display)] text-base leading-tight text-r-text">{label}</span>
         <span className="inline-flex items-center gap-0.5 text-[0.71875rem] text-r-text-2">
           ดูทั้งหมด <ChevronRight aria-hidden className="size-3" />
@@ -146,14 +159,16 @@ function ArtistTag({ item }: { item: FanArtItem }) {
 function PictureBoard<T extends GalleryItem>({
   items: rawItems,
   viewAllHref,
-  unit,
+  moreLabel,
+  moreIcon,
   counterLabel,
   renderFooter,
 }: {
   items: T[];
   viewAllHref: string;
-  /** "รูป" / "ชิ้น" */
-  unit: string;
+  /** Last tile, same look as the live covers row: icon + "…ทั้งหมด" + "ดูทั้งหมด ›". */
+  moreLabel: string;
+  moreIcon: LucideIcon;
   counterLabel: string;
   renderFooter?: (item: T) => ReactNode;
 }) {
@@ -177,6 +192,8 @@ function PictureBoard<T extends GalleryItem>({
 
   const wideMore = items.length - WIDE_COUNT;
   const phoneMore = items.length - PHONE_COUNT;
+  const MoreIcon = moreIcon;
+  const moreIconNode = <MoreIcon aria-hidden className="size-5" />;
   const footer = (item: T) => renderFooter?.(item);
 
   return (
@@ -190,7 +207,7 @@ function PictureBoard<T extends GalleryItem>({
               const last = c === columns.length - 1 && r === column.length - 1;
               const index = wideShown.indexOf(item);
               return last && wideMore > 0 ? (
-                <MoreOverlay key={item.id} href={viewAllHref} label={`อีก ${wideMore} ${unit}`}>
+                <MoreOverlay key={item.id} href={viewAllHref} label={moreLabel} icon={moreIconNode}>
                   <span className={cn("relative block", shape)}>
                     <ProtectedImage src={item.thumb ?? item.src} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
                   </span>
@@ -216,7 +233,7 @@ function PictureBoard<T extends GalleryItem>({
           const cls = i === 0 ? "col-span-2 row-span-2 aspect-square" : "aspect-square";
           return last && phoneMore > 0 ? (
             <div key={item.id} className={cls}>
-              <MoreOverlay href={viewAllHref} label={`อีก ${phoneMore} ${unit}`}>
+              <MoreOverlay href={viewAllHref} label={moreLabel} icon={moreIconNode}>
                 <span className="relative block aspect-square">
                   <ProtectedImage src={item.thumb ?? item.src} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
                 </span>
@@ -293,8 +310,11 @@ const COVER_FRAME = "relative block aspect-video overflow-hidden rounded-xl ring
 function LiveCovers({ ownChannelLabel }: { ownChannelLabel: string }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [near, setNear] = useState(false);
-  const { covers, status, retry } = useLiveCovers(near, { kind: "latest", limit: COVER_COUNT });
+  const { covers, status, retry } = useLiveCovers(near, { kind: "latest", limit: COVER_COUNT + 1 });
   const [active, setActive] = useState<number | null>(null);
+  const shownCovers = covers.slice(0, COVER_COUNT);
+  const phoneBackdrop = covers[COVER_COUNT - 1] ?? null;
+  const wideBackdrop = covers[COVER_COUNT] ?? null;
 
   // Load only when the block is about to scroll into view.
   useEffect(() => {
@@ -310,11 +330,6 @@ function LiveCovers({ ownChannelLabel }: { ownChannelLabel: string }) {
     return () => io.disconnect();
   }, [near]);
 
-  const lightboxItems = useMemo<ImageLightboxItem[]>(
-    () => covers.map((c) => ({ id: c.videoId, src: c.coverUrl, alt: c.title, caption: c.title })),
-    [covers]
-  );
-  const activeCover = active === null ? null : covers[active];
 
   return (
     <div ref={rootRef}>
@@ -335,7 +350,7 @@ function LiveCovers({ ownChannelLabel }: { ownChannelLabel: string }) {
                   <span className="block aspect-video animate-pulse rounded-xl bg-white/[0.05]" />
                 </li>
               ))
-            : covers.map((cover, i) => (
+            : shownCovers.map((cover, i) => (
                 // phones show 3 covers + the "all covers" tile (2 × 2)
                 <li key={cover.videoId} className={cn("min-w-0", i === COVER_COUNT - 1 && "max-md:hidden")}>
                   <button
@@ -362,25 +377,24 @@ function LiveCovers({ ownChannelLabel }: { ownChannelLabel: string }) {
                 </li>
               ))}
           <li>
-            <MoreOverlay href="/gallery/live" label="ปกไลฟ์ทั้งหมด">
+            <MoreOverlay href="/gallery/live" label="ปกไลฟ์ทั้งหมด" icon={<Radio aria-hidden className="size-5" />}>
               <span className={cn(COVER_FRAME, "bg-[linear-gradient(135deg,color-mix(in_srgb,var(--r-pri)_10%,var(--r-bg)),color-mix(in_srgb,var(--r-pri)_20%,var(--r-bg)))]")}>
-                <Radio aria-hidden className="absolute top-1/2 left-1/2 size-5 -translate-x-1/2 -translate-y-1/2 text-r-text/30" />
+                {/* Backdrop = the next cover not shown in the row (4th on phones, 5th from tablet up),
+                    softly blurred so its own title art does not fight the label. */}
+                {phoneBackdrop ? (
+                  <ProtectedImage src={phoneBackdrop.thumbUrl} alt="" loading="lazy" className="absolute inset-0 size-full scale-110 object-cover blur-[3px] md:hidden" />
+                ) : null}
+                {wideBackdrop ? (
+                  <ProtectedImage src={wideBackdrop.thumbUrl} alt="" loading="lazy" className="absolute inset-0 hidden size-full scale-110 object-cover blur-[3px] md:block" />
+                ) : null}
               </span>
             </MoreOverlay>
           </li>
         </ul>
       )}
 
-      <ImageLightbox
-        items={lightboxItems}
-        activeIndex={active}
-        onActiveIndexChange={setActive}
-        useProtectedImage
-        aspect="video"
-        prevLabel="ปกก่อนหน้า"
-        nextLabel="ปกถัดไป"
-        subtitle={activeCover ? <CoverChips item={activeCover} ownChannelLabel={ownChannelLabel} /> : null}
-      />
+      {/* Same viewer as /gallery/live: HD + every cover version + YouTube link. */}
+      <LiveCoverLightbox covers={shownCovers} activeIndex={active} onActiveIndexChange={setActive} />
     </div>
   );
 }
@@ -408,7 +422,13 @@ export function Gallery({ data, fanArt }: GalleryProps) {
         <ScrollReveal className={BLOCK}>
           <BlockHeading icon={Images} title="ช่วงเวลาของมายด์" count={`${data.gallery.length} รูป`} />
           <div className="mt-4">
-            <PictureBoard items={data.gallery} viewAllHref="/gallery/archive" unit="รูป" counterLabel="Moments" />
+            <PictureBoard
+              items={data.gallery}
+              viewAllHref="/gallery/archive"
+              moreLabel="รูปทั้งหมด"
+              moreIcon={Images}
+              counterLabel="Moments"
+            />
           </div>
         </ScrollReveal>
 
@@ -422,7 +442,8 @@ export function Gallery({ data, fanArt }: GalleryProps) {
                 <PictureBoard
                   items={fanArt}
                   viewAllHref="/gallery/fanart"
-                  unit="ชิ้น"
+                  moreLabel="แฟนอาร์ตทั้งหมด"
+                  moreIcon={Palette}
                   counterLabel="Fan art"
                   renderFooter={fanArtFirst}
                 />
