@@ -343,12 +343,15 @@ const CHIP =
 type CafeOverviewProps = {
   cafe: CafePage;
   showDispatch: boolean;
+  /** The "view sets" button jumps to #sets, so it only shows while the sets do. */
+  showSets: boolean;
   onOpenVenue: () => void;
 };
 
 export function CafeOverview({
   cafe,
   showDispatch,
+  showSets,
   onOpenVenue,
 }: CafeOverviewProps) {
   const boardRef = useRef<HTMLDivElement>(null);
@@ -674,12 +677,14 @@ export function CafeOverview({
                   "min-[1100px]:order-none min-[1100px]:mt-10 min-[1100px]:flex-row min-[1100px]:justify-center"
                 )}
               >
-                <a
-                  href="#sets"
-                  className="inline-flex min-h-12 items-center justify-center bg-cafe-gold px-6 text-[15px] font-semibold text-cafe-ink transition hover:-translate-y-0.5 hover:bg-cafe-gold-soft motion-reduce:transition-none"
-                >
-                  <SetsButtonLabel preorder={cafe.preorder} />
-                </a>
+                {showSets ? (
+                  <a
+                    href="#sets"
+                    className="inline-flex min-h-12 items-center justify-center bg-cafe-gold px-6 text-[15px] font-semibold text-cafe-ink transition hover:-translate-y-0.5 hover:bg-cafe-gold-soft motion-reduce:transition-none"
+                  >
+                    <SetsButtonLabel preorder={cafe.preorder} />
+                  </a>
+                ) : null}
                 {follow?.url ? (
                   <Link
                     href={follow.url}

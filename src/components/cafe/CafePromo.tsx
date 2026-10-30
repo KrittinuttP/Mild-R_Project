@@ -129,6 +129,8 @@ export function CafePromo({ cafe, visibility, caseCover }: CafePromoProps) {
       <CafeOverview
         cafe={cafe}
         showDispatch={show.dispatch}
+        // Same rule as the sets block in CafeMenuSection: menu on and at least one set.
+        showSets={show.signatureMenu && (cafe.promoSets?.items.length ?? 0) > 0}
         onOpenVenue={() => open(venuePlate, 0, "Venue")}
       />
       <PreorderTape cafe={cafe} />
