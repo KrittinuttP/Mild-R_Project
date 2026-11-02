@@ -1,21 +1,14 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans_Thai, Noto_Sans_Thai } from "next/font/google";
 
 import { SoftNavMarker } from "@/components/layout/SoftNavMarker";
 
+import "@/fonts/site-fonts.css";
 import "./globals.css";
 
-const notoSansThai = Noto_Sans_Thai({
-  variable: "--font-sans",
-  subsets: ["thai", "latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const ibmPlexSansThai = IBM_Plex_Sans_Thai({
-  variable: "--font-display",
-  subsets: ["thai", "latin"],
-  weight: ["300", "400", "500", "600"],
-});
+// Self-hosted fonts (src/fonts/site-fonts.css): Noto Sans Thai 400–700 → --font-sans,
+// IBM Plex Sans Thai 300–600 → --font-display. Same files next/font/google used to fetch.
+const notoSansThai = { variable: "font-v-sans" } as const;
+const ibmPlexSansThai = { variable: "font-v-display" } as const;
 
 export const metadata: Metadata = {
   title: "Mild-R | Lumina-World-End Fanclub",

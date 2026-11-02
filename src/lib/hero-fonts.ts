@@ -1,22 +1,12 @@
-import { Courier_Prime, Sansita_Swashed } from "next/font/google";
-
 /**
- * Fonts used only by the home hero (Project R) — loaded here, not in the root layout,
- * so other pages don't preload them. Applied as CSS variables on the hero <section>.
+ * Fonts used by the home hero, header logo, splash and standalone upload bar (Project R).
+ * Self-hosted: the font files and @font-face rules live in `src/fonts/site-fonts.css`
+ * (imported by the root layout). `@font-face` files only download where the font is used.
+ * Each `variable` is a class that sets the CSS variable, like next/font's `.variable`.
  */
 
-/** Name "Mild-R" · close to the logo lettering · OFL */
-export const heroNameFont = Sansita_Swashed({
-  variable: "--font-name",
-  subsets: ["latin"],
-  weight: ["700", "800"],
-  display: "swap",
-});
+/** Name "Mild-R" · close to the logo lettering · OFL · sets --font-name */
+export const heroNameFont = { variable: "font-v-name" } as const;
 
-/** Monitor readouts + unit label */
-export const heroMonoFont = Courier_Prime({
-  variable: "--font-courier",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  display: "swap",
-});
+/** Monitor readouts + unit label · sets --font-courier */
+export const heroMonoFont = { variable: "font-v-courier" } as const;

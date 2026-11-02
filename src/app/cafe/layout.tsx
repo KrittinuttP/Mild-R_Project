@@ -1,12 +1,6 @@
 import type { Viewport } from "next";
 import type { ReactNode } from "react";
 import { headers } from "next/headers";
-import {
-  Courier_Prime,
-  Libre_Baskerville,
-  Noto_Serif_Thai,
-  Shippori_Mincho,
-} from "next/font/google";
 
 import { CafeChromeGate } from "@/components/cafe/CafeChromeGate";
 import { CafeEntry } from "@/components/cafe/CafeEntry";
@@ -20,41 +14,18 @@ import { isCafePromotionHost } from "@/lib/cafe-host";
 import { cafeForVisibility } from "@/lib/cafe-visibility";
 import { loadCafeVisibility } from "@/lib/cafe-visibility-store";
 
+import "@/fonts/cafe-fonts.css";
+
 // Sherlock Sweetie brand face (G00 / GB01). No Thai glyphs — `SERIF` in
 // board/pieces.tsx chains --font-cafe-thai after it for Thai text.
-const libreBaskerville = Libre_Baskerville({
-  subsets: ["latin"],
-  variable: "--font-cafe-serif",
-  weight: ["400", "700"],
-  style: "normal",
-});
-
-const libreBaskervilleItalic = Libre_Baskerville({
-  subsets: ["latin"],
-  variable: "--font-cafe-serif-italic",
-  weight: "400",
-  style: "italic",
-});
-
-// Only the katakana line under the logo uses it, so it is not preloaded.
-const shipporiMincho = Shippori_Mincho({
-  subsets: ["latin"],
-  variable: "--font-cafe-jp",
-  weight: "400",
-  preload: false,
-});
-
-const notoSerifThai = Noto_Serif_Thai({
-  subsets: ["thai", "latin"],
-  variable: "--font-cafe-thai",
-  weight: ["400", "600", "700"],
-});
-
-const courierPrime = Courier_Prime({
-  subsets: ["latin"],
-  variable: "--font-cafe-type",
-  weight: ["400", "700"],
-});
+// Self-hosted fonts (src/fonts/cafe-fonts.css), same files next/font/google used to fetch:
+// Libre Baskerville 400/700 + italic 400, Shippori Mincho 400, Noto Serif Thai 400/600/700,
+// Courier Prime 400/700 (its faces are declared in site-fonts.css).
+const libreBaskerville = { variable: "font-v-cafe-serif" } as const;
+const libreBaskervilleItalic = { variable: "font-v-cafe-serif-italic" } as const;
+const shipporiMincho = { variable: "font-v-cafe-jp" } as const;
+const notoSerifThai = { variable: "font-v-cafe-thai" } as const;
+const courierPrime = { variable: "font-v-cafe-type" } as const;
 
 /** Phone browser bar and overscroll in the cafe's green, not the main site's. */
 export const viewport: Viewport = {
