@@ -1,6 +1,6 @@
 /**
- * Apply SQL migration file using DATABASE_URL from .env.local
- *   npx tsx --env-file=.env.local scripts/apply-sql.ts supabase/migrations/....sql
+ * Apply SQL migration file using DATABASE_URL from .env
+ *   npx tsx --env-file=.env scripts/apply-sql.ts supabase/migrations/....sql
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -10,7 +10,7 @@ async function main() {
   const file = process.argv[2];
   if (!file) {
     console.error(
-      "Usage: tsx --env-file=.env.local scripts/apply-sql.ts <file.sql>"
+      "Usage: tsx --env-file=.env scripts/apply-sql.ts <file.sql>"
     );
     process.exit(1);
   }

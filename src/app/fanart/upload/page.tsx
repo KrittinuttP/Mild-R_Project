@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { MediaProtection } from "@/components/media/MediaProtection";
 import { mildRData } from "@/data/vtuber-data";
+import { getFanartUsage } from "@/lib/fanart-usage";
 
 export const metadata: Metadata = {
   title: "ส่งแฟนอาร์ต | Mild-R",
@@ -18,7 +19,7 @@ export default function FanartUploadPage() {
       <MediaProtection />
       <Header data={mildRData} />
       <main className="flex-1 bg-[#140a0d] text-[#f7d7de]">
-        <FanartUploadClient />
+        <FanartUploadClient usage={getFanartUsage()} />
       </main>
       <Footer data={mildRData} />
       <BackToTop />

@@ -49,7 +49,8 @@ function openAction(project: ProjectItem) {
 function navProject(project: ProjectItem, data: VtuberProfile): NavProject {
   const category = project.category.toLowerCase();
   const action = openAction(project);
-  const title = category === "hbd" && project.year ? `HBD ${project.year}` : (project.titleLocal && project.title.length > 22 ? project.titleLocal : project.title);
+  // Projects go by their own name (e.g. "Mild-R: Sherlock Sweetie"), never the Thai one on its own.
+  const title = category === "hbd" && project.year ? `HBD ${project.year}` : project.title;
   const kind = [CATEGORY_LABEL[category] ?? project.category, project.year].filter(Boolean).join(" · ");
 
   let meta = kind;

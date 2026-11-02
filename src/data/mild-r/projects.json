@@ -2,8 +2,8 @@
   {
     "id": "cafe",
     "slug": "cafe",
-    "title": "Mild-R: The Unsolved Mystery Cafe",
-    "titleLocal": "คาเฟ่ปริศนาที่ยังไม่คลี่คลาย",
+    "title": "Mild-R: Sherlock Sweetie",
+    "titleLocal": "คาเฟ่วันเกิดของนักสืบ Mild-R",
     "summary": "คาเฟ่ธีมสถานที่เกิดเหตุลึกลับที่แฟนคลับ Honeycomb จัดทำเอง — ไขปริศนาจากเมนู เก็บกู้เบาะแส และโซนถ่ายรูป",
     "cover": "/assets/images/gallery-02.svg",
     "status": "upcoming",
@@ -15,7 +15,7 @@
       "Secret Case File · แฟ้มคดีลับแจกนักสืบฮันนี่"
     ],
     "body": [
-      "Mild-R: The Unsolved Mystery Cafe เป็นโปรเจกต์คาเฟ่ที่แฟนคลับจัดทำเองภายใต้ธีมสถานที่เกิดเหตุลึกลับ — ไม่ใช่โครงการทางการ",
+      "Mild-R: Sherlock Sweetie เป็นโปรเจกต์คาเฟ่ที่แฟนคลับจัดทำเองภายใต้ธีมสถานที่เกิดเหตุลึกลับ — ไม่ใช่โครงการทางการ",
       "ดูโปรโมทเต็มที่หน้า Cafe และติดตามข่าวคาเฟ่ได้ที่ @Mild_Honeycomb บน X"
     ],
     "cta": {

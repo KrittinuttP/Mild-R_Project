@@ -589,6 +589,7 @@ export function AdminFanartClient() {
                       <p className="truncate font-medium text-[#fff5f7]">{first.display_name}</p>
                       <p className="truncate text-sm text-[#f3b8c4]/80">
                         {first.contact_channel === "x" ? `X · @${first.contact_handle}` : `Discord · ${first.contact_handle}`}
+                        {first.contact_discord ? ` · Discord · ${first.contact_discord}` : ""}
                       </p>
                     </div>
                   </div>

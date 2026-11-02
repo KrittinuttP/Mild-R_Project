@@ -9,7 +9,8 @@ import {
   type FormEvent,
   type ReactNode,
 } from "react";
-import { Check, Crop, Link2, Upload, X } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, Cake, Check, Coffee, Crop, Link2, Pencil, Shield, Upload, X } from "lucide-react";
 
 import { useAvatarCrop } from "@/components/upload/useAvatarCrop";
 import {
@@ -31,32 +32,33 @@ import {
   type FanartCredit,
   type FanartCreditType,
 } from "@/lib/fanart-upload";
+import {
+  R_CARD_CLASS,
+  R_CTA_OUTLINE_CLASS,
+  R_CTA_PRIMARY_CLASS,
+  R_EYEBROW_CLASS,
+} from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 
 const DISPLAY = "font-[family-name:var(--font-display)]";
 const FOCUS =
-  "outline-none focus-visible:ring-2 focus-visible:ring-[#f3b8c4] focus-visible:ring-offset-2 focus-visible:ring-offset-[#140a0d]";
-const CARD = "rounded-3xl bg-white/[0.03] p-5 ring-1 ring-white/10 sm:p-6";
+  "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-r-acc";
+const CARD = cn(R_CARD_CLASS, "p-5 sm:p-[22px]");
 const INPUT =
-  "w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-[#f7d7de] outline-none placeholder:text-[#f3b8c4]/40 focus:border-[#e85a7a]/60 aria-[invalid=true]:border-[#ff8fa6]";
-const BTN = cn(
-  "flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#e85a7a] px-4 text-[15px] font-semibold text-[#140a0d] transition-colors hover:bg-[#f3b8c4] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:bg-[#e85a7a]",
-  FOCUS
-);
-const BTN_OUTLINE = cn(
-  "flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/[0.03] px-4 text-[15px] text-[#f7d7de] transition-colors hover:border-white/30 disabled:cursor-not-allowed disabled:opacity-45",
-  FOCUS
-);
+  "h-12 w-full rounded-[14px] bg-white/[0.04] px-4 text-[15px] text-r-text ring-1 ring-white/10 outline-none ring-inset placeholder:text-r-text-2/45 focus:ring-r-pri/60 aria-[invalid=true]:ring-[#ff8fb0]";
+const BTN = cn(R_CTA_PRIMARY_CLASS, "w-full");
+const BTN_OUTLINE = cn(R_CTA_OUTLINE_CLASS, "w-full");
 const BTN_SMALL = cn(
-  "inline-flex min-h-9 flex-none items-center justify-center gap-1.5 rounded-xl px-3 text-[13px] transition-colors",
+  "inline-flex min-h-9 flex-none items-center justify-center gap-1.5 rounded-full px-4 text-[13px] transition-colors",
   FOCUS
 );
 const LINK_BTN = cn(
-  "min-h-8 rounded-md text-[12.5px] text-[#f3b8c4] underline underline-offset-[3px] hover:text-[#fff5f7]",
+  "min-h-8 rounded-md text-[13px] text-r-text-2 underline decoration-r-pri/70 underline-offset-4 hover:text-r-text",
   FOCUS
 );
-const HINT = "text-xs text-[#f3b8c4]/60";
-const LABEL = "block text-sm text-[#f7d7de]/90";
+const HINT = "text-xs text-r-text-3";
+const LABEL = "block text-[0.90625rem] text-r-text";
+const ERROR_TEXT = "text-[#ff8fb0]";
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ?? "";
 const UNDO_MS = 6000;
 
@@ -86,8 +88,11 @@ type Session = {
   keys: string[];
 };
 
-/** Credit being typed: for all pictures ("all") or one picture (its key). */
-type Draft = { target: string; type: FanartCreditType; value: string; error?: string };
+/** Credit being typed for one picture (its key); `all` = use it for every picture. */
+type Draft = { target: string; type: FanartCreditType; value: string; all?: boolean; error?: string };
+
+/** Where the picture is used, shown beside the form on wide screens. */
+export type FanartUsage = { cafeTitle: string; birthdayLabel: string };
 
 let keySeed = 0;
 function nextKey() {
@@ -98,7 +103,7 @@ function nextKey() {
 function uploadErrorText(error: unknown): { message: string; retryable: boolean } {
   if (error instanceof FanartUploadError) {
     if (error.status === 0) return { message: "เชื่อมต่อไม่ได้ กรุณากด ลองใหม่", retryable: true };
-    if (error.status === 413) return { message: "ไฟล์ใหญ่เกินไป", retryable: false };
+    if (error.status === 413) return { message: "ไฟล์ใหญ่เกินไป (รูปละไม่เกิน 40 MB)", retryable: false };
   }
   return { message: "อัปโหลดไม่สำเร็จ กรุณากด ลองใหม่", retryable: true };
 }
@@ -108,20 +113,36 @@ function Spinner({ className }: { className?: string }) {
     <span
       aria-hidden
       className={cn(
-        "inline-block size-5 animate-spin rounded-full border-2 border-[#f3b8c4]/30 border-t-[#e85a7a]",
+        "inline-block size-5 animate-spin rounded-full border-2 border-r-text-2/30 border-t-r-pri",
         className
       )}
     />
   );
 }
 
-function StepTitle({ n, id, children, aside }: { n: number; id: string; children: ReactNode; aside?: ReactNode }) {
+/** Section title; the number turns mint once the section is complete. */
+function StepTitle({
+  n,
+  id,
+  done,
+  children,
+  aside,
+}: {
+  n: number;
+  id: string;
+  done: boolean;
+  children: ReactNode;
+  aside?: ReactNode;
+}) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <h2 id={id} className={cn(DISPLAY, "flex items-center gap-2.5 text-[17px] font-medium text-[#fff5f7]")}>
+      <h2 id={id} className={cn(DISPLAY, "flex items-center gap-2.5 text-lg font-normal text-r-text")}>
         <span
           aria-hidden
-          className="flex size-[26px] flex-none items-center justify-center rounded-full bg-[#e85a7a] font-sans text-[13px] font-semibold text-[#140a0d]"
+          className={cn(
+            "flex size-[26px] flex-none items-center justify-center rounded-full font-sans text-[13px] font-bold transition-colors",
+            done ? "bg-r-acc text-r-on-acc" : "bg-r-pri text-r-on-pri"
+          )}
         >
           {n}
         </span>
@@ -144,9 +165,12 @@ function CreditLine({ credit, className }: { credit: FanartCredit; className?: s
 type FanartUploadClientProps = {
   /** /upload/fanart: the standalone page without the site header. */
   standalone?: boolean;
+  usage: FanartUsage;
 };
 
-export function FanartUploadClient({ standalone = false }: FanartUploadClientProps) {
+const SECTION_KEYS = ["about", "art", "consent"] as const;
+
+export function FanartUploadClient({ standalone = false, usage }: FanartUploadClientProps) {
   const ids = useId();
   const artInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -165,6 +189,11 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState("");
   const [contactHandle, setContactHandle] = useState("");
+  const [contactDiscord, setContactDiscord] = useState("");
+  /** After "ส่งรูปเพิ่ม": section ① shows one line until the fan taps "แก้ไข". */
+  const [aboutCollapsed, setAboutCollapsed] = useState(false);
+  /** Form section in view, for the step list beside the form (wide screens). */
+  const [activeSection, setActiveSection] = useState(0);
   /** Credit for every picture; null = the fan's own X account. */
   const [allCredit, setAllCredit] = useState<FanartCredit | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -201,6 +230,34 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [running]);
+
+  // Highlight the section being read: the last one whose top passed 40% of the screen.
+  useEffect(() => {
+    if (phase !== "form") return;
+    const update = () => {
+      const line = window.innerHeight * 0.4;
+      let current = 0;
+      SECTION_KEYS.forEach((key, index) => {
+        const el = document.getElementById(`${ids}-${key}-section`);
+        if (el && el.getBoundingClientRect().top <= line) current = index;
+      });
+      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+      setActiveSection(atBottom ? SECTION_KEYS.length - 1 : current);
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [phase, ids]);
+
+  function goToSection(index: number) {
+    document
+      .getElementById(`${ids}-${SECTION_KEYS[index]}-section`)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   function patchItem(key: string, patch: Partial<Item>) {
     setItems((list) => list.map((item) => (item.key === key ? { ...item, ...patch } : item)));
@@ -338,6 +395,20 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
   const shownName = "name" in nameCheck ? nameCheck.name : "";
   /** Credit used by pictures without their own. */
   const baseCredit = allCredit ?? ownCredit;
+  const discordText = contactDiscord.trim();
+  const discordCheck = discordText ? checkContactHandle("discord", discordText) : null;
+  const discordHandle = discordCheck && "handle" in discordCheck ? discordCheck.handle : "";
+
+  /** Credit shown for a picture and where it comes from. */
+  function creditOf(item: Item): { credit: FanartCredit | null; source: "mine" | "artist" | "none" } {
+    const credit = item.credit ?? baseCredit;
+    if (!credit) return { credit: null, source: "none" };
+    const own =
+      ownCredit !== null &&
+      credit.type === "x" &&
+      credit.value.toLowerCase() === ownCredit.value.toLowerCase();
+    return { credit, source: own ? "mine" : "artist" };
+  }
 
   function openDraft(target: string) {
     const current = target === "all" ? baseCredit : (itemsRef.current.find((item) => item.key === target)?.credit ?? baseCredit);
@@ -347,10 +418,16 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
   /** Saves the open credit editor. False when what was typed is not valid. */
   function commitDraft(): boolean {
     if (!draft) return true;
+    const clearOwnCredits = () =>
+      setItems((list) => list.map((item) => (item.credit ? { ...item, credit: undefined } : item)));
     if (!draft.value.trim()) {
       // Empty = go back to the default.
-      if (draft.target === "all") setAllCredit(null);
-      else patchItem(draft.target, { credit: undefined });
+      if (draft.all) {
+        setAllCredit(null);
+        clearOwnCredits();
+      } else {
+        patchItem(draft.target, { credit: undefined });
+      }
       setDraft(null);
       return true;
     }
@@ -359,9 +436,10 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
       setDraft({ ...draft, error: checked.error.replace(/^เครดิต: /, "") });
       return false;
     }
-    if (draft.target === "all") {
+    if (draft.all) {
       const same = ownCredit && checked.credit.type === "x" && checked.credit.value.toLowerCase() === ownCredit.value.toLowerCase();
       setAllCredit(same ? null : checked.credit);
+      clearOwnCredits();
     } else {
       patchItem(draft.target, { credit: checked.credit });
     }
@@ -373,6 +451,7 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
     if (!commitDraft()) return "เครดิตที่กำลังแก้ยังไม่ถูกต้อง";
     if ("error" in nameCheck) return nameCheck.error;
     if ("error" in handleCheck) return handleCheck.error;
+    if (discordCheck && "error" in discordCheck) return discordCheck.error;
     if (!items.length) return "กรุณาเลือกรูปแฟนอาร์ตอย่างน้อย 1 รูป";
     if (items.some((item) => item.preparing)) return "รอเตรียมรูปให้เสร็จก่อน";
     if (!consent) {
@@ -454,6 +533,7 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
     const body = new FormData();
     body.set("displayName", displayName);
     body.set("contactHandle", contactHandle);
+    body.set("contactDiscord", discordHandle);
     body.set("consent", consent ? "yes" : "no");
     body.set("files", JSON.stringify(list.map((item) => ({ size: item.file.size, type: item.file.type }))));
     // null = the fan's own X account (decided on the server).
@@ -524,6 +604,7 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
     setConsent(false);
     setConsentError(false);
     setFormError(null);
+    setAboutCollapsed(true);
     sessionRef.current = null;
     setPhase("form");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -531,142 +612,254 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
 
   const preparing = items.some((item) => item.preparing);
   const errorBox = formError ? (
-    <p role="alert" className="rounded-2xl bg-[#e85a7a]/12 px-4 py-3 text-sm text-[#f7d7de] ring-1 ring-[#e85a7a]/30">
+    <p role="alert" className="rounded-2xl bg-r-pri/12 px-4 py-3 text-sm text-r-text ring-1 ring-r-pri/35 ring-inset">
       {formError}
     </p>
   ) : null;
 
-  const header = (sub: string) => (
-    <header className="text-center">
-      <p className="inline-flex rounded-full bg-[#e85a7a]/15 px-3 py-1 text-[0.7rem] tracking-[0.2em] text-[#f3b8c4] uppercase">
-        Fan art
-      </p>
-      <h1 className={cn(DISPLAY, "mt-4 text-3xl font-normal tracking-tight text-[#fff5f7] sm:text-4xl")}>
+  const header = (sub: string, align: "left" | "center" = "center") => (
+    <header className={align === "center" ? "text-center" : undefined}>
+      <p className={R_EYEBROW_CLASS}>Fan art</p>
+      <h1 className={cn(DISPLAY, "mt-2.5 text-[1.875rem] leading-tight font-normal text-r-text sm:text-[2.125rem]")}>
         ส่งแฟนอาร์ต
       </h1>
       {sub ? (
-        <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-[#f3b8c4]/80 sm:text-base">{sub}</p>
+        <p className={cn("mt-3 text-[0.9375rem] leading-relaxed text-r-text-2", align === "center" && "mx-auto max-w-md")}>
+          {sub}
+        </p>
       ) : null}
     </header>
   );
 
-  /** Two-way switch + input for a credit, used for "all pictures" and for one picture. */
-  const creditEditor = (current: Draft, title: string, resetLabel: string, onReset: () => void) => (
-    <div className="space-y-2">
-      <p className={HINT}>{title}</p>
-      <div className="grid grid-cols-2 gap-2" role="group" aria-label="ชนิดเครดิต">
-        {(["x", "url"] as const).map((type) => (
-          <button
-            key={type}
-            type="button"
-            aria-pressed={current.type === type}
-            onClick={() => setDraft({ ...current, type, value: type === current.type ? current.value : "", error: undefined })}
-            className={cn(
-              "flex min-h-9 items-center justify-center gap-1.5 rounded-[14px] border text-[13px] transition-colors",
-              FOCUS,
-              current.type === type
-                ? "border-[#e85a7a] bg-[#e85a7a]/15 text-[#fff5f7]"
-                : "border-white/15 text-[#f3b8c4] hover:border-white/30"
-            )}
-          >
-            {type === "x" ? "@ บัญชี X" : (
-              <>
-                <Link2 className="size-3.5" aria-hidden />
-                ลิงก์เว็บ
-              </>
-            )}
-          </button>
-        ))}
-      </div>
-      <div className="relative">
-        {current.type === "x" ? (
-          <span className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-sm text-[#f3b8c4]/60">@</span>
-        ) : null}
-        <input
-          value={current.value}
-          aria-label={current.type === "x" ? "บัญชี X ของคนวาด" : "ลิงก์ผลงาน"}
-          aria-invalid={Boolean(current.error)}
-          inputMode={current.type === "url" ? "url" : undefined}
-          autoCapitalize="none"
-          autoCorrect="off"
-          spellCheck={false}
-          maxLength={current.type === "x" ? FANART_TEXT_LIMITS.handle : FANART_TEXT_LIMITS.creditUrl}
-          placeholder={current.type === "x" ? "honeyartist" : "https://www.pixiv.net/artworks/…"}
-          onChange={(event) =>
-            setDraft({
-              ...current,
-              value: current.type === "x" ? event.target.value.replace(/^@+/, "") : event.target.value,
-              error: undefined,
-            })
-          }
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              event.preventDefault();
-              commitDraft();
+  const aboutDone = "name" in nameCheck && "handle" in handleCheck && !(discordCheck && "error" in discordCheck);
+  const artDone = items.length > 0 && !preparing;
+  const steps = [
+    {
+      title: "เกี่ยวกับคุณ",
+      sub: "name" in nameCheck && "handle" in handleCheck ? `${shownName} · @${handleCheck.handle}` : "ยังไม่ได้กรอก",
+      done: aboutDone,
+    },
+    { title: "แฟนอาร์ต", sub: `${items.length} / ${FANART_LIMITS.maxFiles} รูป`, done: artDone },
+    { title: "การนำผลงานไปใช้", sub: consent ? "ยินยอมแล้ว" : "ยังไม่ได้ติ๊ก", done: consent },
+  ];
+
+  /** Credit editor for one picture, opened from its "แก้เครดิต" link. */
+  const creditEditor = (current: Draft, index: number, item: Item) => {
+    const resetLabel = item.credit ? "ใช้เครดิตเดียวกับรูปอื่น" : allCredit ? "ใช้บัญชี X ของฉัน" : null;
+    return (
+      <div className="mt-3 space-y-2.5 rounded-2xl bg-r-pri/[0.06] p-3.5 ring-1 ring-r-pri/30 ring-inset">
+        <div>
+          <p className="text-sm text-r-text">เครดิตเฉพาะรูปที่ {index + 1}</p>
+          <p className={cn(HINT, "mt-0.5")}>ชื่อหรือลิงก์ที่จะแสดงคู่กับรูป</p>
+        </div>
+        <div className="grid grid-cols-2 gap-2" role="group" aria-label="ชนิดเครดิต">
+          {(["x", "url"] as const).map((type) => (
+            <button
+              key={type}
+              type="button"
+              aria-pressed={current.type === type}
+              onClick={() => setDraft({ ...current, type, value: type === current.type ? current.value : "", error: undefined })}
+              className={cn(
+                "flex min-h-9 items-center justify-center gap-1.5 rounded-full text-[13px] ring-1 transition-colors ring-inset",
+                FOCUS,
+                current.type === type
+                  ? "bg-r-pri/15 text-r-text ring-r-pri"
+                  : "text-r-text-2 ring-white/15 hover:ring-white/30"
+              )}
+            >
+              {type === "x" ? (
+                "@ บัญชี X"
+              ) : (
+                <>
+                  <Link2 className="size-3.5" aria-hidden />
+                  ลิงก์เว็บ
+                </>
+              )}
+            </button>
+          ))}
+        </div>
+        <div className="relative">
+          {current.type === "x" ? (
+            <span className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-sm text-r-text-3">@</span>
+          ) : null}
+          <input
+            value={current.value}
+            aria-label={current.type === "x" ? "บัญชี X ของคนวาด" : "ลิงก์ผลงาน"}
+            aria-invalid={Boolean(current.error)}
+            inputMode={current.type === "url" ? "url" : undefined}
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            maxLength={current.type === "x" ? FANART_TEXT_LIMITS.handle : FANART_TEXT_LIMITS.creditUrl}
+            placeholder={current.type === "x" ? "honeyartist" : "https://www.pixiv.net/artworks/…"}
+            onChange={(event) =>
+              setDraft({
+                ...current,
+                value: current.type === "x" ? event.target.value.replace(/^@+/, "") : event.target.value,
+                error: undefined,
+              })
             }
-          }}
-          className={cn(INPUT, current.type === "x" && "pl-8")}
-        />
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                commitDraft();
+              }
+            }}
+            className={cn(INPUT, current.type === "x" && "pl-8")}
+          />
+        </div>
+        {current.error ? <p className={cn("text-xs", ERROR_TEXT)}>{current.error}</p> : null}
+        {items.length > 1 ? (
+          <label className="flex min-h-8 cursor-pointer items-center gap-2.5 text-[13px] text-r-text-2">
+            <input
+              type="checkbox"
+              checked={Boolean(current.all)}
+              onChange={(event) => setDraft({ ...current, all: event.target.checked })}
+              className="size-4 flex-none accent-r-pri"
+            />
+            ใช้เครดิตนี้กับทุกรูป
+          </label>
+        ) : null}
+        <div className="flex items-center justify-between gap-3">
+          {resetLabel ? (
+            <button
+              type="button"
+              onClick={() => {
+                if (item.credit) patchItem(item.key, { credit: undefined });
+                else setAllCredit(null);
+                setDraft(null);
+              }}
+              className={LINK_BTN}
+            >
+              {resetLabel}
+            </button>
+          ) : (
+            <span />
+          )}
+          <button
+            type="button"
+            onClick={() => commitDraft()}
+            className={cn(BTN_SMALL, "bg-r-pri font-semibold text-r-on-pri hover:bg-r-pri-hover")}
+          >
+            เสร็จ
+          </button>
+        </div>
       </div>
-      {current.error ? <p className="text-xs text-[#ff8fa6]">{current.error}</p> : null}
-      <div className="flex items-center justify-between gap-3">
-        <button type="button" onClick={onReset} className={LINK_BTN}>
-          {resetLabel}
-        </button>
-        <button
-          type="button"
-          onClick={() => commitDraft()}
-          className={cn(BTN_SMALL, "bg-[#e85a7a] px-4 font-semibold text-[#140a0d] hover:bg-[#f3b8c4]")}
-        >
-          เสร็จ
-        </button>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const nameLength = [...displayName].length;
+  const handleInput = (
+    <div className="relative">
+      <span className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-sm text-r-text-3">@</span>
+      <input
+        id={`${ids}-handle`}
+        value={contactHandle}
+        maxLength={FANART_TEXT_LIMITS.handle + 1}
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
+        aria-describedby={`${ids}-handle-hint`}
+        onChange={(event) => setContactHandle(event.target.value.replace(/^@+/, ""))}
+        placeholder="honeyartist"
+        className={cn(INPUT, "pl-8")}
+      />
+    </div>
+  );
+  const aboutCompact = (
+    <section
+      id={`${ids}-about-section`}
+      className={cn(CARD, "flex scroll-mt-24 items-center gap-3 py-4 sm:py-4")}
+      aria-labelledby={`${ids}-about`}
+    >
+      <span
+        aria-hidden
+        className="flex size-[26px] flex-none items-center justify-center rounded-full bg-r-acc text-[13px] font-bold text-r-on-acc"
+      >
+        1
+      </span>
+      {avatarPreviewUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={avatarPreviewUrl} alt="" className="size-9 flex-none rounded-full object-cover" />
+      ) : null}
+      <div className="min-w-0 flex-1">
+        <h2 id={`${ids}-about`} className="truncate text-[15px] text-r-text">
+          <span className="sr-only">เกี่ยวกับคุณ: </span>
+          {shownName}
+        </h2>
+        <p className="truncate text-[12.5px] text-r-text-3">
+          @{"handle" in handleCheck ? handleCheck.handle : contactHandle}
+          {discordHandle ? ` · Discord · ${discordHandle}` : ""}
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={() => setAboutCollapsed(false)}
+        className={cn("min-h-9 flex-none rounded-full px-2 text-sm text-r-pri hover:text-r-pri-hover", FOCUS)}
+      >
+        แก้ไข
+      </button>
+    </section>
+  );
   const aboutSection = (
-    <section className={CARD} aria-labelledby={`${ids}-about`}>
-      <StepTitle n={1} id={`${ids}-about`}>
+    <section id={`${ids}-about-section`} className={cn(CARD, "scroll-mt-24")} aria-labelledby={`${ids}-about`}>
+      <StepTitle n={1} id={`${ids}-about`} done={aboutDone}>
         เกี่ยวกับคุณ
       </StepTitle>
-      <label htmlFor={`${ids}-name`} className={cn(LABEL, "mt-[18px]")}>
-        ชื่อที่แสดง<span className="text-[#e85a7a]"> *</span>
-      </label>
-      <div className="relative mt-2">
-        <input
-          id={`${ids}-name`}
-          value={displayName}
-          maxLength={FANART_TEXT_LIMITS.displayName}
-          autoComplete="nickname"
-          onChange={(event) => setDisplayName(event.target.value)}
-          placeholder="เช่น ฮันนี่"
-          className={cn(INPUT, "pr-14")}
-        />
-        <span className="pointer-events-none absolute top-1/2 right-3.5 -translate-y-1/2 text-[11px] text-[#f3b8c4]/55">
-          {nameLength}/{FANART_TEXT_LIMITS.displayName}
-        </span>
+      <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-3">
+        <div>
+          <div className="lg:min-h-[2.625rem]">
+            <label htmlFor={`${ids}-name`} className={LABEL}>
+              ชื่อที่แสดง<span className="text-r-pri"> *</span>
+            </label>
+          </div>
+          <div className="relative mt-1.5">
+            <input
+              id={`${ids}-name`}
+              value={displayName}
+              maxLength={FANART_TEXT_LIMITS.displayName}
+              autoComplete="nickname"
+              onChange={(event) => setDisplayName(event.target.value)}
+              placeholder="เช่น ฮันนี่"
+              className={cn(INPUT, "pr-14")}
+            />
+            <span className="pointer-events-none absolute top-1/2 right-3.5 -translate-y-1/2 text-[11px] text-r-text-2/45">
+              {nameLength}/{FANART_TEXT_LIMITS.displayName}
+            </span>
+          </div>
+        </div>
+        <div>
+          <div className="lg:min-h-[2.625rem]">
+            <label htmlFor={`${ids}-handle`} className={LABEL}>
+              บัญชี X<span className="text-r-pri"> *</span>
+            </label>
+            <p id={`${ids}-handle-hint`} className={cn(HINT, "mt-0.5")}>
+              ใช้เป็นเครดิตผลงาน
+            </p>
+          </div>
+          <div className="mt-1.5">{handleInput}</div>
+        </div>
       </div>
 
-      <label htmlFor={`${ids}-handle`} className={cn(LABEL, "mt-4")}>
-        บัญชี X<span className="text-[#e85a7a]"> *</span>
-      </label>
-      <p id={`${ids}-handle-hint`} className={cn(HINT, "mt-1")}>
-        ใช้ติดต่อเมื่อมีปัญหา และใช้เป็นเครดิตผลงาน
-      </p>
-      <div className="relative mt-2">
-        <span className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-sm text-[#f3b8c4]/60">@</span>
+      <div className="mt-4">
+        <label htmlFor={`${ids}-discord`} className={LABEL}>
+          Discord
+        </label>
+        <p id={`${ids}-discord-hint`} className={cn(HINT, "mt-0.5")}>
+          ช่องทางติดต่อสำรอง · ไม่บังคับ
+        </p>
         <input
-          id={`${ids}-handle`}
-          value={contactHandle}
-          maxLength={FANART_TEXT_LIMITS.handle + 1}
+          id={`${ids}-discord`}
+          value={contactDiscord}
+          maxLength={33}
           autoCapitalize="none"
           autoCorrect="off"
           spellCheck={false}
-          aria-describedby={`${ids}-handle-hint`}
-          onChange={(event) => setContactHandle(event.target.value.replace(/^@+/, ""))}
-          placeholder="honeyartist"
-          className={cn(INPUT, "pl-8")}
+          aria-describedby={`${ids}-discord-hint`}
+          aria-invalid={Boolean(discordCheck && "error" in discordCheck && formError)}
+          onChange={(event) => setContactDiscord(event.target.value.replace(/^@+/, ""))}
+          placeholder="ชื่อผู้ใช้ Discord"
+          className={cn(INPUT, "mt-1.5")}
         />
       </div>
 
@@ -681,17 +874,17 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
       <div className="mt-4 flex items-center gap-3">
         {avatarPreviewUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={avatarPreviewUrl} alt="รูปโปรไฟล์" className="size-11 flex-none rounded-full object-cover" />
+          <img src={avatarPreviewUrl} alt="รูปโปรไฟล์" className="size-12 flex-none rounded-full object-cover" />
         ) : (
           <span
             aria-hidden
-            className="flex size-11 flex-none items-center justify-center rounded-full border-[1.5px] border-dashed border-[#e85a7a]/50 bg-[#e85a7a]/[0.06] text-lg text-[#f3b8c4]"
+            className="flex size-12 flex-none items-center justify-center rounded-full border-[1.5px] border-dashed border-r-pri/50 text-lg text-r-text-2"
           >
             +
           </span>
         )}
         <div className="min-w-0 flex-1">
-          <p className="text-[13.5px] text-[#f7d7de]">รูปโปรไฟล์</p>
+          <p className="text-[0.90625rem] text-r-text">รูปโปรไฟล์</p>
           {avatarPreviewUrl ? (
             <div className="flex flex-wrap gap-x-3">
               {avatarCrop.canRecrop ? (
@@ -711,7 +904,7 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
         <button
           type="button"
           onClick={() => avatarInputRef.current?.click()}
-          className={cn(BTN_SMALL, "border border-[#e85a7a]/45 bg-[#e85a7a]/10 text-[#f3b8c4] hover:border-[#e85a7a]/70")}
+          className={cn(BTN_SMALL, "min-h-[38px] px-5 text-[15px] text-r-text ring-1 ring-r-text-2/35 ring-inset hover:ring-r-pri/60")}
         >
           {avatarPreviewUrl ? "เปลี่ยนรูป" : "เลือกรูป"}
         </button>
@@ -719,19 +912,20 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
     </section>
   );
 
-  const allDraft = draft?.target === "all" ? draft : null;
+  const full = items.length >= FANART_LIMITS.maxFiles;
   const artSection = (
-    <section className={CARD} aria-labelledby={`${ids}-art`}>
+    <section id={`${ids}-art-section`} className={cn(CARD, "scroll-mt-24")} aria-labelledby={`${ids}-art`}>
       <StepTitle
         n={2}
         id={`${ids}-art`}
+        done={artDone}
         aside={
-          <span className="text-xs text-[#f3b8c4]" aria-live="polite">
+          <span className={cn("text-[13px]", full ? "text-r-acc" : "text-r-text-2")} aria-live="polite">
             {items.length} / {FANART_LIMITS.maxFiles} รูป
           </span>
         }
       >
-        แฟนอาร์ต<span className="text-[#e85a7a]">*</span>
+        แฟนอาร์ต<span className="text-r-pri"> *</span>
       </StepTitle>
       <p className={cn(HINT, "mt-1.5 ml-9")}>JPEG, PNG หรือ WebP · รูปละไม่เกิน 40 MB</p>
       <input
@@ -745,53 +939,81 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
       />
 
       {items.length ? (
-        <ul className="mt-1.5">
+        <ul className="mt-4 space-y-2.5">
           {items.map((item, index) => {
             const rowDraft = draft?.target === item.key ? draft : null;
-            const credit = item.credit ?? baseCredit;
+            const { credit, source } = creditOf(item);
             return (
               <li
                 key={item.key}
                 className={cn(
-                  rowDraft
-                    ? "-mx-3 my-1 rounded-2xl bg-[#e85a7a]/[0.07] p-3 ring-1 ring-[#e85a7a]/30"
-                    : cn("py-2.5", index > 0 && "border-t border-white/[0.07]")
+                  "rounded-[18px] bg-white/[0.03] p-3 ring-1 ring-inset",
+                  rowDraft ? "ring-r-pri/30" : "ring-white/[0.06]"
                 )}
               >
-                <div className="flex items-center gap-3">
-                  <div className="relative size-16 flex-none overflow-hidden rounded-xl ring-1 ring-white/12">
+                <div className="flex gap-3.5">
+                  <div className="relative size-[72px] flex-none overflow-hidden rounded-[14px] bg-black/35">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={item.previewUrl} alt={`แฟนอาร์ตรูปที่ ${index + 1}`} className="size-full object-cover" />
+                    <img src={item.previewUrl} alt={`แฟนอาร์ตรูปที่ ${index + 1}`} className="size-full object-contain" />
                     {item.preparing ? (
-                      <span className="absolute inset-0 flex items-center justify-center bg-[#140a0d]/70">
-                        <Spinner className="size-[18px]" />
+                      <span className="absolute inset-0 flex items-center justify-center bg-r-bg/65">
+                        <Spinner className="size-[22px]" />
                       </span>
                     ) : null}
+                    <span className="pointer-events-none absolute inset-0 rounded-[14px] ring-1 ring-white/10 ring-inset" />
+                    <span
+                      aria-hidden
+                      className="absolute bottom-1.5 left-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-r-bg/85 px-1.5 text-[11px] font-semibold text-r-text"
+                    >
+                      {index + 1}
+                    </span>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[13.5px] text-[#fff5f7]">รูปที่ {index + 1}</p>
+                  <div className="flex min-w-0 flex-1 flex-col justify-center">
                     {item.preparing ? (
-                      <p className={cn(HINT, "mt-0.5")}>กำลังเตรียมรูป…</p>
-                    ) : rowDraft ? (
-                      <p className="mt-0.5 text-[12.5px] text-[#f3b8c4]">กำลังแก้เครดิต</p>
+                      <>
+                        <p className="text-[15px] text-r-text-3">รูปที่ {index + 1}</p>
+                        <p className={cn(HINT, "mt-0.5")}>กำลังเตรียมรูป…</p>
+                      </>
                     ) : (
                       <>
+                        <p className="min-w-0 text-[15px] text-r-text">
+                          {credit ? (
+                            <CreditLine credit={credit} />
+                          ) : (
+                            <span className="block truncate">{shownName || `รูปที่ ${index + 1}`}</span>
+                          )}
+                        </p>
                         <p
                           className={cn(
-                            "mt-0.5 flex min-w-0 items-center gap-1.5 text-[12.5px]",
-                            item.credit ? "text-[#f7d7de]" : "text-[#f3b8c4]/60"
+                            "mt-0.5 text-xs",
+                            rowDraft
+                              ? "text-r-text-2"
+                              : source === "artist"
+                                ? "text-r-acc"
+                                : source === "none"
+                                  ? ERROR_TEXT
+                                  : "text-r-text-3"
                           )}
                         >
-                          {credit ? <CreditLine credit={credit} /> : <span className="truncate">{shownName || "ยังไม่ได้กรอกบัญชี X"}</span>}
-                          {item.credit ? (
-                            <span className="flex-none rounded-full bg-[#e85a7a]/18 px-1.5 text-[10.5px] text-[#f3b8c4]">
-                              แยกรูปนี้
-                            </span>
-                          ) : null}
+                          {rowDraft
+                            ? "กำลังแก้เครดิต"
+                            : source === "artist"
+                              ? "เครดิตคนวาด"
+                              : source === "none"
+                                ? "ยังไม่ได้กรอกบัญชี X"
+                                : "บัญชี X ของคุณ"}
                         </p>
-                        <button type="button" onClick={() => openDraft(item.key)} className={LINK_BTN}>
-                          แก้เครดิต
-                        </button>
+                        {rowDraft ? null : (
+                          <button
+                            type="button"
+                            onClick={() => openDraft(item.key)}
+                            aria-label={`แก้เครดิตรูปที่ ${index + 1}`}
+                            className={cn(LINK_BTN, "mt-0.5 inline-flex items-center gap-1.5 self-start")}
+                          >
+                            <Pencil className="size-3.5" aria-hidden />
+                            แก้เครดิต
+                          </button>
+                        )}
                       </>
                     )}
                   </div>
@@ -800,53 +1022,55 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
                     aria-label={`ลบรูปที่ ${index + 1}`}
                     onClick={() => removeItem(item.key)}
                     className={cn(
-                      "flex size-10 flex-none items-center justify-center rounded-xl text-[#f3b8c4]/70 hover:bg-white/5 hover:text-[#fff5f7]",
+                      "-mt-1 -mr-1 flex size-9 flex-none items-center justify-center self-start rounded-full text-r-text-3 hover:bg-white/5 hover:text-r-text",
                       FOCUS
                     )}
                   >
                     <X className="size-4" aria-hidden />
                   </button>
                 </div>
-                {rowDraft ? (
-                  <div className="mt-3">
-                    {creditEditor(rowDraft, `เครดิตเฉพาะรูปที่ ${index + 1}`, "ใช้เครดิตเดียวกับรูปอื่น", () => {
-                      patchItem(item.key, { credit: undefined });
-                      setDraft(null);
-                    })}
-                  </div>
-                ) : null}
+                {rowDraft ? creditEditor(rowDraft, index, item) : null}
               </li>
             );
           })}
         </ul>
       ) : null}
 
-      {items.length < FANART_LIMITS.maxFiles ? (
+      {items.length === 0 ? (
         <button
           type="button"
           onClick={() => artInputRef.current?.click()}
           className={cn(
-            BTN_OUTLINE,
-            "mt-2 border-dashed border-[#e85a7a]/50 bg-[#e85a7a]/[0.06] text-[#f3b8c4] hover:border-[#e85a7a]/80",
-            items.length === 0 ? "mt-4 min-h-28 flex-col" : "min-h-[52px]"
+            "mt-4 flex min-h-44 w-full flex-col items-center justify-center gap-2.5 rounded-[18px] border-[1.5px] border-dashed border-r-pri/45 bg-r-pri/[0.04] text-[15px] text-r-text transition-colors hover:border-r-pri/75 sm:min-h-[200px]",
+            FOCUS
           )}
         >
-          {items.length === 0 ? (
-            <>
-              <Upload className="size-5" aria-hidden />
-              เลือกรูป (เลือกได้หลายรูป)
-            </>
-          ) : (
-            <>
-              + เพิ่มรูป
-              <span className="text-[#f3b8c4]/60">(เหลืออีก {FANART_LIMITS.maxFiles - items.length})</span>
-            </>
-          )}
+          <span className="flex size-12 items-center justify-center rounded-full bg-r-pri/14 text-r-pri">
+            <Upload className="size-[22px]" aria-hidden />
+          </span>
+          เลือกรูป (เลือกได้หลายรูป)
         </button>
-      ) : null}
+      ) : !full ? (
+        <button
+          type="button"
+          onClick={() => artInputRef.current?.click()}
+          className={cn(
+            "mt-2.5 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-[18px] border-[1.5px] border-dashed border-r-pri/45 text-sm text-r-text-2 transition-colors hover:border-r-pri/75 hover:text-r-text",
+            FOCUS
+          )}
+        >
+          <span className="text-lg leading-none text-r-pri" aria-hidden>
+            +
+          </span>
+          เพิ่มรูป
+          <span className="text-[12.5px] text-r-text-3">(เหลืออีก {FANART_LIMITS.maxFiles - items.length})</span>
+        </button>
+      ) : (
+        <p className={cn(HINT, "mt-3 text-center text-[12.5px]")}>ครบ {FANART_LIMITS.maxFiles} รูปแล้ว</p>
+      )}
 
       {prepErrors.length ? (
-        <ul role="alert" className="mt-3 space-y-1 text-[12.5px] text-[#ff8fa6]">
+        <ul role="alert" className={cn("mt-3 space-y-1 text-[12.5px]", ERROR_TEXT)}>
           {prepErrors.map((message, index) => (
             <li key={`${index}-${message}`} className="break-words">
               {message}
@@ -854,55 +1078,24 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
           ))}
         </ul>
       ) : null}
-
-      {allDraft ? (
-        <div className="mt-3 rounded-2xl bg-[#e85a7a]/[0.07] p-3.5 ring-1 ring-[#e85a7a]/30">
-          <p className="text-sm text-[#f7d7de]/90">เครดิตทุกรูป</p>
-          <div className="mt-1">
-            {creditEditor(allDraft, "ชื่อหรือลิงก์ที่จะแสดงคู่กับรูปบนเว็บและในคาเฟ่", "ใช้บัญชี X ของฉัน", () => {
-              setAllCredit(null);
-              setDraft(null);
-            })}
-          </div>
-        </div>
-      ) : (
-        <div className="mt-3 flex items-center gap-2.5 rounded-2xl bg-white/[0.04] px-3.5 py-3">
-          <div className="min-w-0 flex-1">
-            <p className={HINT}>เครดิตทุกรูป</p>
-            <p className="mt-0.5 flex min-w-0 items-center gap-1.5 text-sm text-[#fff5f7]">
-              {baseCredit ? <CreditLine credit={baseCredit} /> : <span className="truncate">{shownName || "—"}</span>}
-              <span className="flex-none text-xs text-[#f3b8c4]/60">
-                · {allCredit ? "ตั้งเอง" : ownCredit ? "จากบัญชี X" : "ใช้ชื่อไปก่อน จนกว่าจะกรอกบัญชี X"}
-              </span>
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => openDraft("all")}
-            className={cn(BTN_SMALL, "border border-white/15 text-[#f3b8c4] hover:border-white/30")}
-          >
-            เปลี่ยน
-          </button>
-        </div>
-      )}
     </section>
   );
 
+  const consentInvalid = consentError && !consent;
   const consentSection = (
-    <section
-      aria-labelledby={`${ids}-consent`}
-      className={cn(
-        "rounded-3xl bg-[#e85a7a]/[0.08] p-5 ring-[1.5px] sm:p-6",
-        consentError && !consent ? "ring-[#ff8fa6]" : "ring-[#e85a7a]/35"
-      )}
-    >
-      <StepTitle n={3} id={`${ids}-consent`}>
+    <section id={`${ids}-consent-section`} aria-labelledby={`${ids}-consent`} className={cn(CARD, "scroll-mt-24")}>
+      <StepTitle n={3} id={`${ids}-consent`} done={consent}>
         การนำผลงานไปใช้
       </StepTitle>
-      <p id={`${ids}-consent-text`} className="mt-3 text-[14.5px] leading-[1.7] text-[#fff5f7]">
+      <p id={`${ids}-consent-text`} className="mt-4 text-sm leading-relaxed text-r-text-2">
         {FANART_CONSENT.text}
       </p>
-      <label className="mt-4 flex cursor-pointer items-start gap-3 border-t border-white/10 pt-3.5">
+      <label
+        className={cn(
+          "mt-3.5 flex cursor-pointer items-start gap-3 rounded-[14px] bg-white/[0.03] p-3.5 ring-1 transition-colors ring-inset",
+          consentInvalid ? "ring-[#ff8fb0]" : consent ? "ring-r-pri/40" : "ring-white/[0.08] hover:ring-white/20"
+        )}
+      >
         <input
           type="checkbox"
           checked={consent}
@@ -914,45 +1107,113 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
             }
           }}
           aria-describedby={`${ids}-consent-text ${ids}-consent-hint`}
-          aria-invalid={consentError && !consent}
+          aria-invalid={consentInvalid}
           className="peer sr-only"
         />
         <span
           aria-hidden
           className={cn(
-            "mt-0.5 flex size-[22px] flex-none items-center justify-center rounded-[7px] transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-[#f3b8c4] peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#140a0d]",
+            "mt-0.5 flex size-[22px] flex-none items-center justify-center rounded-[7px] transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-r-acc peer-focus-visible:outline-solid",
             consent
-              ? "bg-[#e85a7a] text-[#140a0d]"
-              : cn("border-2", consentError ? "border-[#ff8fa6]" : "border-[#f3b8c4]/55")
+              ? "bg-r-pri text-r-on-pri"
+              : cn("ring-[1.5px] ring-inset", consentInvalid ? "ring-[#ff8fb0]" : "ring-r-text-2/50")
           )}
         >
           {consent ? <Check className="size-3.5" strokeWidth={3} /> : null}
         </span>
-        <span className="text-sm leading-relaxed text-[#f7d7de]">
-          {FANART_CONSENT.label} <span className="text-[#e85a7a]">*</span>
+        <span className="text-sm leading-relaxed text-r-text">
+          {FANART_CONSENT.label} <span className="text-r-pri">*</span>
         </span>
       </label>
-      <p id={`${ids}-consent-hint`} className="mt-2.5 ml-[34px] text-xs leading-relaxed text-[#f3b8c4]/60">
+      <p id={`${ids}-consent-hint`} className={cn(HINT, "mt-2.5 leading-relaxed")}>
         {FANART_CONSENT.hint}
       </p>
-      {consentError && !consent ? (
-        <p className="mt-2 ml-[34px] text-[12.5px] text-[#ff8fa6]">กรุณาติ๊กยินยอมก่อนส่ง</p>
-      ) : null}
+      {consentInvalid ? <p className={cn("mt-2 text-[12.5px]", ERROR_TEXT)}>กรุณาติ๊กยินยอมก่อนส่ง</p> : null}
     </section>
   );
 
   const submitBlock = (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       {errorBox}
       <button type="submit" disabled={!items.length || preparing} className={BTN}>
-        ดูตัวอย่าง{items.length ? ` (${items.length} รูป)` : ""}
+        ตรวจสอบก่อนส่ง{items.length ? ` (${items.length} รูป)` : ""}
       </button>
       {preparing ? (
-        <p className="text-center text-xs text-[#f3b8c4]/70" aria-live="polite">
+        <p className="text-center text-[12.5px] text-r-text-3" aria-live="polite">
           รอเตรียมรูปให้เสร็จก่อน จึงจะกดได้
         </p>
       ) : null}
     </div>
+  );
+
+  const usagePlaces = [
+    { icon: Coffee, title: "ตกแต่งคาเฟ่", sub: usage.cafeTitle },
+    { icon: Cake, title: "โปรเจกต์วันเกิดของ Mild-R", sub: usage.birthdayLabel },
+  ];
+  const aside = (
+    <aside className={cn("space-y-6 lg:sticky lg:space-y-4", standalone ? "lg:top-[88px]" : "lg:top-24")}>
+      {standalone ? null : (
+        <Link
+          href="/gallery"
+          className={cn(
+            "inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 text-[13px] text-r-text-2 ring-1 ring-r-text-2/20 transition-colors ring-inset hover:text-r-text hover:ring-r-pri/50",
+            FOCUS
+          )}
+        >
+          <ArrowLeft className="size-3.5" aria-hidden />
+          แกลเลอรี
+        </Link>
+      )}
+      {header("ส่งได้ครั้งละสูงสุด 5 รูป · ทีมงานจะตรวจก่อนนำไปใช้", "left")}
+      <nav aria-label="ขั้นตอนการกรอก" className="-ml-3 hidden space-y-1 lg:block">
+        {steps.map((step, index) => {
+          const current = activeSection === index;
+          return (
+            <button
+              key={step.title}
+              type="button"
+              onClick={() => goToSection(index)}
+              aria-current={current ? "step" : undefined}
+              className={cn(
+                "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors",
+                FOCUS,
+                current ? "bg-r-pri/[0.09] shadow-[inset_2px_0_0_var(--r-pri)]" : "hover:bg-white/[0.03]"
+              )}
+            >
+              <span
+                aria-hidden
+                className={cn(
+                  "flex size-[26px] flex-none items-center justify-center rounded-full text-[13px] font-bold transition-colors",
+                  step.done ? "bg-r-acc text-r-on-acc" : "text-r-text-2 ring-[1.5px] ring-r-text-2/40 ring-inset"
+                )}
+              >
+                {index + 1}
+              </span>
+              <span className="min-w-0">
+                <span className={cn("block text-[15px]", current ? "text-r-text" : "text-r-text/85")}>{step.title}</span>
+                <span className="block truncate text-xs text-r-text-3">{step.sub}</span>
+              </span>
+            </button>
+          );
+        })}
+      </nav>
+      <div className={cn(R_CARD_CLASS, "hidden p-5 lg:block")}>
+        <p className="text-sm text-r-text">รูปจะถูกนำไปใช้ที่</p>
+        <ul className="mt-2">
+          {usagePlaces.map(({ icon: Icon, title, sub }) => (
+            <li key={title} className="flex items-center gap-3 py-2">
+              <span className="flex size-9 flex-none items-center justify-center rounded-xl bg-r-pri/12 text-r-pri">
+                <Icon className="size-[18px]" aria-hidden />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-sm text-r-text">{title}</span>
+                <span className="block truncate text-xs text-r-text-3">{sub}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </aside>
   );
 
   const total = items.length;
@@ -963,25 +1224,34 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
     0
   );
   const retryableKeys = items.filter((item) => item.send === "failed" && item.retryable).map((item) => item.key);
+  const thumb = (item: Item, index: number, size: string) => (
+    <span className={cn("relative flex-none overflow-hidden rounded-xl bg-black/35", size)}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={item.previewUrl} alt={`แฟนอาร์ตรูปที่ ${index + 1}`} className="size-full object-contain" />
+      <span className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-white/10 ring-inset" />
+    </span>
+  );
 
   return (
     <div
       className={cn(
-        "mx-auto px-5",
-        phase === "form" ? "max-w-lg lg:max-w-5xl lg:px-10" : "max-w-lg",
-        // The site header is fixed on the regular page; the standalone page has none.
-        standalone ? "pt-12 pb-16 sm:pt-16 sm:pb-20" : "py-16 sm:py-20"
+        "mx-auto px-4 sm:px-5",
+        phase === "form" ? "max-w-lg lg:max-w-[1160px] lg:px-10" : "max-w-lg",
+        // The site header is fixed on the regular page; the standalone page has its own sticky bar.
+        standalone ? "pt-8 pb-16 sm:pt-12 sm:pb-20" : "py-16 sm:py-20"
       )}
     >
       {avatarCrop.dialog}
 
       {phase === "form" ? (
-        <form onSubmit={onSubmitForm} noValidate className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start lg:gap-7">
-          <div className="space-y-6 lg:sticky lg:top-6">
-            {header("ส่งได้ครั้งละสูงสุด 5 รูป · ทีมงานจะตรวจก่อนนำไปใช้")}
-            {aboutSection}
-          </div>
-          <div className="space-y-6 lg:pt-2">
+        <form
+          onSubmit={onSubmitForm}
+          noValidate
+          className="grid grid-cols-1 gap-6 lg:grid-cols-[360px_minmax(0,1fr)] lg:items-start lg:gap-14"
+        >
+          {aside}
+          <div className="space-y-3.5 lg:space-y-4">
+            {aboutCollapsed && aboutDone ? aboutCompact : aboutSection}
             {artSection}
             {consentSection}
             {submitBlock}
@@ -993,48 +1263,54 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
         <div className="space-y-6">
           {header("ตรวจข้อมูลอีกครั้งก่อนส่ง")}
           <section className={CARD}>
-            <h2 className="text-sm font-normal text-[#f7d7de]/90">ตรวจก่อนส่ง · {total} รูป</h2>
-            <ul className="mt-3.5 grid grid-cols-3 gap-2.5">
-              {items.map((item, index) => {
-                const credit = item.credit ?? baseCredit;
-                return (
-                  <li key={item.key} className="min-w-0">
-                    <div className="aspect-square overflow-hidden rounded-[14px] ring-1 ring-white/10">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={item.previewUrl} alt={`แฟนอาร์ตรูปที่ ${index + 1}`} className="size-full object-cover" />
-                    </div>
-                    {credit ? <CreditLine credit={credit} className="mt-1.5 text-[11.5px] text-[#f3b8c4]" /> : null}
-                  </li>
-                );
-              })}
-            </ul>
-            <div className="mt-4 flex items-center gap-3 border-t border-white/[0.08] pt-4">
+            <div className="flex items-center gap-3">
               {avatarPreviewUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatarPreviewUrl} alt="" className="size-11 rounded-full object-cover" />
+                <img src={avatarPreviewUrl} alt="" className="size-11 flex-none rounded-full object-cover" />
               ) : (
                 <span
                   aria-hidden
-                  className="flex size-11 items-center justify-center rounded-full bg-gradient-to-br from-[#e85a7a] to-[#f3b8c4] text-lg text-[#140a0d]"
+                  className="flex size-11 flex-none items-center justify-center rounded-full bg-r-pri/15 text-lg text-r-text"
                 >
                   {[...shownName][0] ?? ""}
                 </span>
               )}
               <div className="min-w-0">
-                <p className="truncate text-[#fff5f7]">{shownName}</p>
-                <p className="truncate text-[13px] text-[#f3b8c4]/80">
+                <p className="truncate text-r-text">{shownName}</p>
+                <p className="truncate text-[13px] text-r-text-3">
                   ติดต่อ: X · @{"handle" in handleCheck ? handleCheck.handle : contactHandle}
+                  {discordHandle ? ` · Discord · ${discordHandle}` : ""}
                 </p>
               </div>
             </div>
-            <p className="mt-4 flex items-start gap-2 rounded-[14px] bg-[#e85a7a]/10 px-3 py-2.5 text-[12.5px] leading-relaxed text-[#f3b8c4]">
-              <Check className="mt-0.5 size-3.5 flex-none text-[#e85a7a]" strokeWidth={3} aria-hidden />
+            <ul className="mt-4 divide-y divide-white/[0.06] border-t border-white/[0.08]">
+              {items.map((item, index) => {
+                const { credit, source } = creditOf(item);
+                return (
+                  <li key={item.key} className="flex items-center gap-3 py-2.5">
+                    {thumb(item, index, "size-14")}
+                    <div className="min-w-0">
+                      <p className="text-sm text-r-text">รูปที่ {index + 1}</p>
+                      {credit ? (
+                        <p className="mt-0.5 flex min-w-0 items-center gap-1 text-xs text-r-text-3">
+                          <span className="flex-none">เครดิต:</span>
+                          <CreditLine credit={credit} />
+                          {source === "artist" ? <span className="flex-none">(คนวาด)</span> : null}
+                        </p>
+                      ) : null}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+            <p className="mt-3 flex items-start gap-2 rounded-[14px] bg-white/[0.03] px-3 py-2.5 text-[12.5px] leading-relaxed text-r-text-2 ring-1 ring-white/[0.06] ring-inset">
+              <Shield className="mt-0.5 size-3.5 flex-none text-r-acc" aria-hidden />
               ยินยอมให้นำไปใช้ตกแต่งคาเฟ่ และในโปรเจกต์วันเกิดของ Mild-R เท่านั้น
             </p>
             <div className="mt-5 space-y-2">
               {errorBox}
               <button type="button" onClick={onConfirm} disabled={running} className={BTN}>
-                {running ? <Spinner className="size-4" /> : <Check className="size-4" aria-hidden />}
+                {running ? <Spinner className="size-4" /> : null}
                 {running ? "กำลังเริ่มส่ง…" : `ยืนยันส่ง ${total} รูป`}
               </button>
               <button
@@ -1058,10 +1334,10 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
           {header("กำลังส่งแฟนอาร์ต")}
           <section className={CARD}>
             <div className="flex items-baseline justify-between gap-3">
-              <p className="text-sm text-[#f7d7de]/90" aria-live="polite">
+              <p className="text-sm text-r-text" aria-live="polite">
                 ส่งแล้ว {done} / {total} รูป
               </p>
-              {failed ? <span className="text-xs text-[#ff8fa6]">พลาด {failed} รูป</span> : null}
+              {failed ? <span className={cn("text-xs", ERROR_TEXT)}>พลาด {failed} รูป</span> : null}
             </div>
             <div
               className="mt-3.5 flex h-2 overflow-hidden rounded-full bg-white/[0.08]"
@@ -1072,31 +1348,27 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
               aria-valuenow={done}
             >
               <div
-                className="h-full bg-[#e85a7a] transition-[width] duration-300"
+                className="h-full bg-r-pri transition-[width] duration-300"
                 style={{ width: `${((done + inFlight) / Math.max(1, total)) * 100}%` }}
               />
               {!running && failed ? (
-                <div className="ml-auto h-full bg-[#ff8fa6]" style={{ width: `${(failed / total) * 100}%` }} />
+                <div className="ml-auto h-full bg-[#ff8fb0]" style={{ width: `${(failed / total) * 100}%` }} />
               ) : null}
             </div>
-            <ul className="mt-3.5">
+            <ul className="mt-3.5 divide-y divide-white/[0.06]">
               {items.map((item, index) => (
-                <li
-                  key={item.key}
-                  className={cn("flex items-center gap-3 py-2.5", index > 0 && "border-t border-white/[0.07]")}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={item.previewUrl} alt="" className="size-12 flex-none rounded-[10px] object-cover" />
+                <li key={item.key} className="flex items-center gap-3 py-2.5">
+                  {thumb(item, index, "size-12")}
                   <div className="min-w-0 flex-1">
-                    <p className="text-[13.5px] text-[#fff5f7]">รูปที่ {index + 1}</p>
+                    <p className="text-sm text-r-text">รูปที่ {index + 1}</p>
                     <p
                       className={cn(
                         "mt-0.5 flex items-center gap-1.5 text-[12.5px]",
-                        item.send === "failed" ? "text-[#ff8fa6]" : "text-[#f3b8c4]/80"
+                        item.send === "failed" ? ERROR_TEXT : "text-r-text-3"
                       )}
                     >
                       {item.send === "done" ? (
-                        <Check className="size-4 flex-none text-[#7ad6a0]" strokeWidth={3} aria-hidden />
+                        <Check className="size-4 flex-none text-r-acc" strokeWidth={3} aria-hidden />
                       ) : item.send === "failed" ? (
                         <X className="size-4 flex-none" strokeWidth={2.5} aria-hidden />
                       ) : item.send === "waiting" ? null : (
@@ -1120,10 +1392,7 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
                       type="button"
                       onClick={() => retry([item.key])}
                       disabled={running}
-                      className={cn(
-                        "min-h-9 flex-none rounded-xl border border-[#e85a7a]/60 px-3 text-[13px] text-[#f3b8c4] hover:border-[#e85a7a] disabled:opacity-45",
-                        FOCUS
-                      )}
+                      className={cn(BTN_SMALL, "text-r-text-2 ring-1 ring-r-pri/60 ring-inset hover:ring-r-pri disabled:opacity-45")}
                     >
                       ลองใหม่
                     </button>
@@ -1131,7 +1400,7 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-xs leading-relaxed text-[#f3b8c4]/65">
+            <p className="mt-3 text-xs leading-relaxed text-r-text-3">
               รูปที่ส่งแล้วไม่ต้องส่งซ้ำ กด &quot;ลองใหม่&quot; เฉพาะรูปที่พลาด · อย่าปิดหน้านี้จนกว่าจะส่งครบ
             </p>
             {!running && failed ? (
@@ -1154,22 +1423,29 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
         <div className="space-y-6">
           {header("")}
           <section className={cn(CARD, "px-5 py-8 text-center")}>
-            <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-[#7ad6a0]/15 text-[#7ad6a0]">
+            <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-r-acc/15 text-r-acc">
               <Check className="size-6" strokeWidth={3} aria-hidden />
             </span>
-            <p role="status" className={cn(DISPLAY, "mt-4 text-xl text-[#fff5f7]")}>
-              ส่งแล้ว {sentCount} รูป
+            <p role="status" className={cn(DISPLAY, "mt-4 text-xl text-r-text")}>
+              ส่งแฟนอาร์ตแล้ว · {sentCount} รูป
             </p>
-            <p className="mt-2 text-sm leading-[1.7] text-[#f3b8c4]/85">
+            <p className="mt-2 text-sm leading-[1.7] text-r-text-2">
               ทีมงานจะตรวจก่อนนำไปใช้ตกแต่งคาเฟ่
               <br />
               และในโปรเจกต์วันเกิดของ Mild-R
             </p>
-            <button type="button" onClick={sendMore} className={cn(BTN, "mt-6")}>
-              <Upload className="size-4" aria-hidden />
-              ส่งรูปเพิ่ม
-            </button>
-            <p className="mt-2.5 text-xs text-[#f3b8c4]/60">ชื่อ บัญชี X และเครดิตจะยังอยู่ ไม่ต้องกรอกใหม่</p>
+            <div className="mt-6 space-y-2">
+              <button type="button" onClick={sendMore} className={BTN}>
+                <Upload className="size-4" aria-hidden />
+                ส่งรูปเพิ่ม
+              </button>
+              {standalone ? null : (
+                <Link href="/" className={BTN_OUTLINE}>
+                  กลับหน้าแรก
+                </Link>
+              )}
+            </div>
+            <p className="mt-2.5 text-xs text-r-text-3">ชื่อ บัญชี X และเครดิตจะยังอยู่ ไม่ต้องกรอกใหม่</p>
           </section>
         </div>
       ) : null}
@@ -1177,12 +1453,12 @@ export function FanartUploadClient({ standalone = false }: FanartUploadClientPro
       <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-6 z-40 flex justify-center px-4">
         {undo && phase === "form" ? (
           <div className="pointer-events-auto flex items-center gap-3.5 rounded-full bg-[#2a1820] py-2 pr-2 pl-4 shadow-[0_10px_30px_rgba(0,0,0,0.5)] ring-1 ring-white/12">
-            <span className="text-[13.5px] whitespace-nowrap text-[#f7d7de]">ลบรูปที่ {undo.index + 1} แล้ว</span>
+            <span className="text-[13.5px] whitespace-nowrap text-r-text">ลบรูปที่ {undo.index + 1} แล้ว</span>
             <button
               type="button"
               onClick={undoRemove}
               className={cn(
-                "min-h-[34px] rounded-full bg-[#e85a7a] px-3.5 text-[13px] font-semibold text-[#140a0d] hover:bg-[#f3b8c4]",
+                "min-h-[34px] rounded-full bg-r-pri px-3.5 text-[13px] font-semibold text-r-on-pri hover:bg-r-pri-hover",
                 FOCUS
               )}
             >

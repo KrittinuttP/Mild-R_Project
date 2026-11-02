@@ -124,6 +124,15 @@ export async function POST(request: Request) {
   const handle = checkContactHandle(channel, String(form.get("contactHandle") ?? ""));
   if ("error" in handle) return fail(handle.error);
 
+  // Optional backup contact.
+  const discordRaw = String(form.get("contactDiscord") ?? "").trim();
+  let discord: string | null = null;
+  if (discordRaw) {
+    const checked = checkContactHandle("discord", discordRaw);
+    if ("error" in checked) return fail(checked.error);
+    discord = checked.handle;
+  }
+
   const claims = readFileClaims(form.get("files"));
   if (typeof claims === "string") return fail(claims);
 
@@ -194,6 +203,7 @@ export async function POST(request: Request) {
     displayName: name.name,
     channel,
     handle: handle.handle,
+    discord,
     avatarPath,
     avatarUrl,
     paths: uploads.map((upload) => upload.path),

@@ -26,6 +26,8 @@ export type FanartSubmissionRow = {
   display_name: string;
   contact_channel: FanartContactChannel;
   contact_handle: string;
+  /** Optional backup contact; null when not given (or sent before the field existed). */
+  contact_discord: string | null;
   art_path: string;
   art_url: string;
   avatar_path: string | null;
@@ -56,6 +58,7 @@ export type CreateFanartSubmissionInput = {
   displayName: string;
   contactChannel: FanartContactChannel;
   contactHandle: string;
+  contactDiscord: string | null;
   artPath: string;
   artUrl: string;
   thumbPath: string;
@@ -88,6 +91,7 @@ function mapRow(row: Record<string, unknown>): FanartSubmissionRow {
     display_name: String(row.display_name),
     contact_channel: row.contact_channel as FanartContactChannel,
     contact_handle: String(row.contact_handle),
+    contact_discord: nullableString(row.contact_discord),
     art_path: String(row.art_path),
     art_url: String(row.art_url),
     avatar_path: nullableString(row.avatar_path),
@@ -172,6 +176,7 @@ export async function createFanartSubmission(
       display_name: input.displayName,
       contact_channel: input.contactChannel,
       contact_handle: input.contactHandle,
+      ...(input.contactDiscord ? { contact_discord: input.contactDiscord } : {}),
       art_path: input.artPath,
       art_url: input.artUrl,
       thumb_path: input.thumbPath,

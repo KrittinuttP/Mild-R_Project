@@ -120,6 +120,7 @@ export async function POST(request: Request) {
       displayName: ticket.displayName,
       contactChannel: ticket.channel,
       contactHandle: ticket.handle,
+      contactDiscord: ticket.discord ?? null,
       artPath,
       artUrl,
       thumbPath,

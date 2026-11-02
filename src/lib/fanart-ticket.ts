@@ -12,6 +12,8 @@ export type FanartTicket = {
   displayName: string;
   channel: FanartContactChannel;
   handle: string;
+  /** Optional backup contact (Discord username); missing on older tickets. */
+  discord?: string | null;
   avatarPath: string | null;
   avatarUrl: string | null;
   /** Object paths in the fanart-originals bucket, in the fan's order. */
