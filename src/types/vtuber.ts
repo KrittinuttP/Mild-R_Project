@@ -750,7 +750,7 @@ export interface CafePage {
   title: string;
   titleLocal?: string;
   tagline: string;
-  /** One line under the wordmark on the overview board. */
+  /** One line under the wordmark on the overview board. `|` = where a line may wrap (see `ThaiPhrases`). */
   lede?: string;
   status: ProjectStatus;
   statusLabel?: string;

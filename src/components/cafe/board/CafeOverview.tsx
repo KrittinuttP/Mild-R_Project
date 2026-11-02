@@ -27,6 +27,7 @@ import {
   TILT,
   tiltStyle,
 } from "@/components/cafe/board/pieces";
+import { ThaiPhrases } from "@/components/common/ThaiPhrases";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { useNow } from "@/hooks/useNow";
 import { preorderIsListed } from "@/lib/cafe-visibility";
@@ -615,7 +616,7 @@ export function CafeOverview({
                       "mt-3 max-w-[30ch] text-center text-[13px] leading-relaxed text-balance text-cafe-text italic min-[640px]:max-w-none min-[640px]:text-[15px]"
                     )}
                   >
-                    {cafe.lede}
+                    <ThaiPhrases text={cafe.lede} />
                   </p>
                 ) : null}
               </div>
