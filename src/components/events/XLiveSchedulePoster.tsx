@@ -1,35 +1,41 @@
 "use client";
 
 import { useState } from "react";
-import { ExternalLink, ZoomIn } from "lucide-react";
+import { ExternalLink, ImageIcon, ZoomIn } from "lucide-react";
 
 import { ImageLightbox } from "@/components/media/ImageLightbox";
 import type {
   XLiveScheduleHistoryRow,
   XLiveScheduleStatus,
 } from "@/lib/x-live-schedules";
-import { BADGE_SOFT_CLASS, META_CLASS } from "@/lib/site-ui";
+import { R_CARD_CLASS, R_EYEBROW_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { XLiveSchedulePoster as Poster } from "@/types/x-post";
+
+type Layout = "aside" | "row";
 
 type Props = {
   poster: Poster | XLiveScheduleHistoryRow;
   /** When set, show Agent status badge (week-synced history). */
   status?: XLiveScheduleStatus;
   errorMessage?: string | null;
-  /** Embed under weekly table instead of standalone section. */
-  embedded?: boolean;
-  emptyHint?: string | null;
+  /**
+   * `aside` = card beside the weekly list (desktop).
+   * `row` = small thumbnail row above the weekly list (phone / tablet).
+   */
+  layout?: Layout;
 };
 
+/** Posted date in English, Bangkok time (site rule). */
 function formatPostedAt(iso: string | null): string | null {
   if (!iso) return null;
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleDateString("th-TH", {
-    year: "numeric",
-    month: "long",
+  return d.toLocaleDateString("en-GB", {
     day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "Asia/Bangkok",
   });
 }
 
@@ -51,24 +57,36 @@ function statusLabel(status: XLiveScheduleStatus): string {
 function statusClass(status: XLiveScheduleStatus): string {
   switch (status) {
     case "imported":
-      return "border-[#6ec9b0]/35 text-[#a8e6d4]";
+      return "bg-r-acc/12 text-r-acc ring-r-acc/40";
     case "pending":
-      return "border-[#d4a574]/40 text-[#e8c9a0]";
+      return "bg-[#d4a574]/12 text-[#e8c49a] ring-[#d4a574]/40";
     case "failed":
-      return "border-[#e85a7a]/45 text-[#f3b8c4]";
+      return "bg-r-pri/12 text-r-text-2 ring-r-pri/45";
     case "skipped":
     default:
-      return "border-[#f3b8c4]/25 text-[#f3b8c4]/75";
+      return "bg-white/[0.04] text-r-text-3 ring-r-line";
   }
 }
 
-/** X "Live Schedule" poster — standalone or week-synced embed on /live. */
+function StatusChip({ status }: { status: XLiveScheduleStatus }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex h-6 shrink-0 items-center rounded-full px-2.5 text-xs ring-1 ring-inset",
+        statusClass(status)
+      )}
+    >
+      {statusLabel(status)}
+    </span>
+  );
+}
+
+/** X "Live Schedule" poster for the selected week on /live. */
 export function XLiveSchedulePoster({
   poster,
   status,
   errorMessage,
-  embedded = false,
-  emptyHint,
+  layout = "aside",
 }: Props) {
   const [open, setOpen] = useState(false);
   const postedLabel = formatPostedAt(poster.posted_at);
@@ -82,62 +100,89 @@ export function XLiveSchedulePoster({
     ("error_message" in poster ? poster.error_message : null);
 
   if (!poster.image_url) {
-    if (!emptyHint) return null;
     return (
-      <div
-        className={cn(
-          embedded
-            ? "border-t border-[#f3b8c4]/10 px-4 py-5 sm:px-5"
-            : "mt-10"
-        )}
-      >
-        <p className="text-sm text-[#f3b8c4]/45">{emptyHint}</p>
+      <XLiveSchedulePosterEmpty
+        layout={layout}
+        hint="ยังไม่มี Live Schedule จาก X สำหรับสัปดาห์นี้"
+      />
+    );
+  }
+
+  const lightbox = (
+    <ImageLightbox
+      tone="mild-r"
+      items={[
+        {
+          id: poster.tweet_id,
+          src: poster.image_url,
+          alt: "Live Schedule จาก X",
+          caption: "Live Schedule",
+        },
+      ]}
+      activeIndex={open ? 0 : null}
+      onActiveIndexChange={(index) => setOpen(index !== null)}
+    />
+  );
+
+  const xLink = poster.original_url ? (
+    <a
+      href={poster.original_url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 text-sm text-r-text-2 ring-1 ring-r-text-2/25 ring-inset transition-colors hover:text-r-text hover:ring-r-pri/55 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc"
+    >
+      ดูบน X
+      <ExternalLink className="size-3.5" aria-hidden />
+    </a>
+  ) : null;
+
+  if (layout === "row") {
+    return (
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="ขยายรูป Live Schedule"
+          className="group flex min-w-0 flex-1 items-center gap-3 rounded-2xl p-1.5 text-left transition-colors hover:bg-white/[0.04] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc"
+        >
+          <span className="relative h-16 w-12 shrink-0 overflow-hidden rounded-xl bg-r-bg ring-1 ring-r-line">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={poster.image_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className={cn(R_EYEBROW_CLASS, "block text-[0.65rem]")}>Live Schedule</span>
+            <span className="mt-0.5 block truncate text-sm text-r-text">
+              ภาพตารางจาก X{postedLabel ? ` · อัปเดต ${postedLabel}` : ""}
+            </span>
+            <span className="mt-0.5 inline-flex items-center gap-1 text-xs text-r-acc">
+              <ZoomIn className="size-3" aria-hidden />
+              ดูภาพเต็ม
+            </span>
+          </span>
+        </button>
+        {resolvedStatus ? <StatusChip status={resolvedStatus} /> : null}
+        {lightbox}
       </div>
     );
   }
 
-  const body = (
-    <>
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          {!embedded ? <p className={META_CLASS}>From X</p> : null}
-          <h2
-            id={embedded ? undefined : "x-live-schedule-heading"}
-            className={cn(
-              embedded
-                ? "font-[family-name:var(--font-display)] text-base font-normal text-[#fff5f7] sm:text-lg"
-                : "mt-3 font-[family-name:var(--font-display)] text-2xl font-normal tracking-normal text-[#fff5f7] sm:text-3xl"
-            )}
-          >
-            Live Schedule
-          </h2>
+  return (
+    <div className={cn(R_CARD_CLASS, "p-4")}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className={R_EYEBROW_CLASS}>Live Schedule</p>
+          <p className="mt-1.5 text-sm text-r-text">ภาพตารางจาก X</p>
           {postedLabel ? (
-            <p className="mt-1 text-xs text-[#f3b8c4]/65 sm:text-sm">
-              อัปเดต {postedLabel}
-            </p>
+            <p className="mt-0.5 text-xs text-r-text-3">อัปเดต {postedLabel}</p>
           ) : null}
         </div>
-        {resolvedStatus ? (
-          <span
-            className={cn(
-              BADGE_SOFT_CLASS,
-              "uppercase",
-              statusClass(resolvedStatus)
-            )}
-          >
-            {statusLabel(resolvedStatus)}
-          </span>
-        ) : null}
+        {resolvedStatus ? <StatusChip status={resolvedStatus} /> : null}
       </div>
 
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={cn(
-          "group relative mt-4 block w-full overflow-hidden rounded-2xl border border-[#f3b8c4]/18 bg-[#1a0c12]/50 text-left",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e85a7a]/50",
-          !embedded && "mt-6"
-        )}
+        className="group relative mt-4 block w-full overflow-hidden rounded-2xl bg-r-bg text-left ring-1 ring-r-line transition hover:ring-r-pri/45 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc"
         aria-label="ขยายรูป Live Schedule"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -148,77 +193,56 @@ export function XLiveSchedulePoster({
         />
         <span
           aria-hidden
-          className={cn(
-            "pointer-events-none absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full",
-            "border border-[#f3b8c4]/25 bg-[#1a0c12]/75 px-2.5 py-1 text-xs text-[#fff5f7] backdrop-blur-sm",
-            "opacity-70 transition duration-200 sm:translate-y-1 sm:opacity-0",
-            "sm:group-hover:translate-y-0 sm:group-hover:opacity-100",
-            "sm:group-focus-visible:translate-y-0 sm:group-focus-visible:opacity-100"
-          )}
+          className="pointer-events-none absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-r-bg/80 px-2.5 py-1 text-xs text-r-text ring-1 ring-r-line backdrop-blur-sm transition duration-200 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-visible:opacity-100"
         >
           <ZoomIn className="size-3.5" />
           ดูภาพเต็ม
         </span>
       </button>
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1">
-        {poster.original_url ? (
-          <a
-            href={poster.original_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-sm text-[#f3b8c4]/75 transition hover:text-[#f3b8c4]"
-          >
-            ดูบน X
-            <ExternalLink className="size-3.5 opacity-80" aria-hidden />
-          </a>
-        ) : null}
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        {xLink}
         {resolvedError && resolvedStatus !== "imported" ? (
-          <p className="max-w-full truncate text-xs text-[#f3b8c4]/45">
-            {resolvedError}
-          </p>
+          <p className="max-w-full truncate text-xs text-r-text-3">{resolvedError}</p>
         ) : null}
       </div>
-
-      <ImageLightbox
-        tone="mild-r"
-        items={[
-          {
-            id: poster.tweet_id,
-            src: poster.image_url,
-            alt: "Live Schedule จาก X",
-            caption: "Live Schedule",
-          },
-        ]}
-        activeIndex={open ? 0 : null}
-        onActiveIndexChange={(index) => setOpen(index !== null)}
-      />
-    </>
+      {lightbox}
+    </div>
   );
+}
 
-  if (embedded) {
+export function XLiveSchedulePosterEmpty({
+  hint,
+  layout = "aside",
+  loading = false,
+}: {
+  hint: string;
+  layout?: Layout;
+  loading?: boolean;
+}) {
+  const text = loading ? "กำลังโหลด Live Schedule…" : hint;
+
+  if (layout === "row") {
     return (
-      <div className="border-t border-[#f3b8c4]/10 px-4 py-5 sm:px-5">
-        {body}
+      <div className="flex items-center gap-3 p-1.5">
+        <span className="flex h-16 w-12 shrink-0 items-center justify-center rounded-xl border border-dashed border-r-text-2/25 text-r-text-3">
+          <ImageIcon className="size-4" aria-hidden />
+        </span>
+        <span className="min-w-0">
+          <span className={cn(R_EYEBROW_CLASS, "block text-[0.65rem]")}>Live Schedule</span>
+          <span className="mt-0.5 block text-sm text-r-text-3">{text}</span>
+        </span>
       </div>
     );
   }
 
   return (
-    <section
-      className="mt-16 sm:mt-20"
-      aria-labelledby="x-live-schedule-heading"
-    >
-      {body}
-    </section>
-  );
-}
-
-export function XLiveSchedulePosterEmpty({ hint }: { hint: string }) {
-  return (
-    <div className="border-t border-[#f3b8c4]/10 px-4 py-5 sm:px-5">
-      <p className={META_CLASS}>From X</p>
-      <p className="mt-2 text-sm text-[#f3b8c4]/45">{hint}</p>
+    <div className={cn(R_CARD_CLASS, "p-4")}>
+      <p className={R_EYEBROW_CLASS}>Live Schedule</p>
+      <div className="mt-4 flex aspect-[4/5] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-r-text-2/25 px-6 text-center text-sm text-r-text-3">
+        <ImageIcon className="size-6" aria-hidden />
+        {text}
+      </div>
     </div>
   );
 }

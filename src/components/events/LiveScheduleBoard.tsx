@@ -2,7 +2,7 @@
 import { englishWeekday, englishMonth, formatLiveShortDate, formatLiveDateRange } from "@/lib/live-date-format";
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, ExternalLink, Loader2 } from "lucide-react";
+import { ArrowDown, ChevronLeft, ChevronRight, Clock3, ExternalLink, Loader2 } from "lucide-react";
 
 import { LiveCoverPlaceholder } from "@/components/events/LiveCoverPlaceholder";
 import { LiveDetailHost, useLiveDetail } from "@/components/events/LiveDetailHost";
@@ -16,7 +16,6 @@ import {
 import { LiveWeekTable } from "@/components/events/LiveWeekTable";
 import { OfflineBadge } from "@/components/events/OfflineBadge";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
-import { buttonVariants } from "@/components/ui/button";
 import {
   LiveScheduleError,
   LiveScheduleSkeleton,
@@ -26,16 +25,13 @@ import { useLiveSchedule } from "@/hooks/useLiveSchedule";
 import { useXLiveSchedules } from "@/hooks/useXLiveSchedules";
 import { matchScheduleForWeek } from "@/lib/x-live-schedules";
 import {
-  BADGE_SOFT_CLASS,
-  CTA_OUTLINE_CLASS,
-  DISPLAY_H2_CLASS,
-  GLASS_CARD_CLASS,
   LIVE_BADGE_CANCELLED,
   LIVE_BADGE_COLLAB,
   LIVE_BADGE_MEMBER,
   LIVE_BADGE_PILL_COMPACT,
-  LIVE_BADGE_PILL_SM,
-  LIVE_BADGE_SOFT,
+  R_CARD_CLASS,
+  R_CHIP_SOFT_CLASS,
+  R_H2_CLASS,
 } from "@/lib/site-ui";
 import {
   addDays,
@@ -57,6 +53,7 @@ import {
   thisWeekRangeYmd,
   surroundingWeeksRangeYmd,
   weekDayDates,
+  weekOverlapsYmdRange,
 } from "@/lib/events";
 import { sortLiveSlotsForCalendar } from "@/lib/live-stream-utils";
 import { getSlotCoverUrl } from "@/lib/live-cover";
@@ -65,6 +62,26 @@ import { cn } from "@/lib/utils";
 import type { LiveSlot } from "@/types/vtuber";
 
 const LIVE_SECTION_HASHES = new Set(["#this-week", "#calendar", "#weekly"]);
+
+/** Round icon button — same look as the home live table (CI A+). */
+const NAV_BTN =
+  "r-card flex size-10 shrink-0 items-center justify-center rounded-full text-r-text-2 shadow-none ring-2 ring-r-text-2/15 transition-colors hover:text-r-text hover:ring-r-pri/45 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc disabled:pointer-events-none disabled:opacity-35";
+
+/** Small outline pill button. */
+const PILL_BTN =
+  "inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-full px-4 text-sm text-r-text ring-1 ring-r-text-2/30 ring-inset transition-colors hover:bg-r-pri/10 hover:ring-r-pri/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc";
+
+const SELECT_CLASS =
+  "rounded-full bg-r-bg px-3 py-2 font-[family-name:var(--font-display)] text-sm tracking-normal text-r-text ring-1 ring-r-text-2/30 ring-inset outline-none focus-visible:ring-2 focus-visible:ring-r-acc sm:px-3.5 sm:text-base";
+
+function TimeZoneChip() {
+  return (
+    <span className={cn(R_CHIP_SOFT_CLASS, "gap-1.5")}>
+      <Clock3 className="size-3" aria-hidden />
+      เวลาไทย
+    </span>
+  );
+}
 
 function WeekSlotCard({
   slot,
@@ -89,15 +106,15 @@ function WeekSlotCard({
         onClick={onOpen}
         title={`${slot.timePrevious ? `${slot.timePrevious}→` : ""}${slot.timeUpdated ?? slot.time} · ${title}`}
         className={cn(
-          "group flex min-h-[5.5rem] w-full cursor-pointer gap-3 overflow-hidden rounded-3xl border bg-[#1a0c12]/60 p-3 text-left transition sm:min-h-[6rem] sm:gap-4 sm:p-3.5",
+          "group flex min-h-[5.5rem] w-full cursor-pointer gap-3 overflow-hidden rounded-2xl border bg-white/[0.025] p-3 text-left transition sm:min-h-[6rem] sm:gap-4 sm:p-3.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc",
           cancelled
             ? "border-[#8a7f88]/30 opacity-85 hover:border-[#8a7f88]/50"
             : guestTone
               ? "border-[#d4a574]/30 hover:border-[#d4a574]/50 hover:bg-[#d4a574]/10"
-              : "border-[#f3b8c4]/12 hover:border-[#e85a7a]/40 hover:bg-[#1a0c12]"
+              : "border-r-line hover:border-r-pri/45 hover:bg-r-pri/[0.06]"
         )}
       >
-        <div className="relative aspect-video w-[6.5rem] shrink-0 overflow-hidden rounded-2xl bg-[#10070b] sm:w-36">
+        <div className="relative aspect-video w-[6.5rem] shrink-0 overflow-hidden rounded-2xl bg-r-bg sm:w-36">
           {cover ? (
             <>
               <ProtectedImage
@@ -109,7 +126,7 @@ function WeekSlotCard({
                   cancelled && "opacity-70 grayscale-[0.35]"
                 )}
               />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140a0d]/80 via-transparent to-transparent" />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-r-bg/80 via-transparent to-transparent" />
             </>
           ) : (
             <LiveCoverPlaceholder
@@ -126,7 +143,7 @@ function WeekSlotCard({
                   className={cn(
                     LIVE_BADGE_PILL_COMPACT,
                     LIVE_BADGE_CANCELLED,
-                    "h-4 bg-[#140a0d]/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
+                    "h-4 bg-r-bg/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
                   )}
                 >
                   ยกเลิก
@@ -138,7 +155,7 @@ function WeekSlotCard({
                       className={cn(
                         LIVE_BADGE_PILL_COMPACT,
                         LIVE_BADGE_MEMBER,
-                        "h-4 bg-[#140a0d]/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
+                        "h-4 bg-r-bg/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
                       )}
                     >
                       Member
@@ -149,7 +166,7 @@ function WeekSlotCard({
                       className={cn(
                         LIVE_BADGE_PILL_COMPACT,
                         LIVE_BADGE_COLLAB,
-                        "h-4 bg-[#140a0d]/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
+                        "h-4 bg-r-bg/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
                       )}
                     >
                       Collab
@@ -175,15 +192,15 @@ function WeekSlotCard({
                     ? "text-[#cfc6ff]"
                     : guestTone
                       ? "text-[#e8c49a]"
-                      : "text-[#e85a7a]"
+                      : "text-r-pri"
               }
             />
           </div>
-          <p className="mt-1 line-clamp-2 min-w-0 text-sm leading-snug font-medium text-[#fff5f7]">
+          <p className="mt-1 line-clamp-2 min-w-0 text-sm leading-snug font-medium text-r-text">
             {title}
           </p>
           {slot.titleLocal ? (
-            <p className="mt-0.5 line-clamp-1 min-w-0 text-xs text-[#f3b8c4]/55">
+            <p className="mt-0.5 line-clamp-1 min-w-0 text-xs text-r-text-3">
               {slot.title}
             </p>
           ) : null}
@@ -232,7 +249,7 @@ function MobileCalendarTimeSlot({
             ? "border-[#9b8cff]/80"
             : guestTone
               ? "border-[#d4a574]"
-              : "border-[#e85a7a]/70"
+              : "border-r-pri/70"
       )}
       title={`${time} · ${label}${cancelled ? " (ยกเลิก)" : ""}`}
     >
@@ -245,7 +262,7 @@ function MobileCalendarTimeSlot({
               ? "text-[#cfc6ff]"
               : guestTone
                 ? "text-[#e8c49a]"
-                : "text-[#e85a7a]"
+                : "text-r-pri"
         )}
       >
         {time}
@@ -289,10 +306,10 @@ function CalendarMonthSlot({
         cancelled
           ? "border-dashed border-[#8a7f88]/70 opacity-75 hover:bg-[#8a7f88]/08"
           : isMember
-            ? "border-[#9b8cff]/80 text-[#fff5f7] hover:bg-[#9b8cff]/08"
+            ? "border-[#9b8cff]/80 text-r-text hover:bg-[#9b8cff]/08"
             : guestTone
-              ? "border-[#d4a574] text-[#fff5f7] hover:bg-white/5"
-              : "border-[#e85a7a]/55 text-[#f7d7de]/90 hover:bg-white/5"
+              ? "border-[#d4a574] text-r-text hover:bg-white/5"
+              : "border-r-pri/60 text-r-text/90 hover:bg-white/5"
       )}
       title={`${slot.timePrevious ? `${slot.timePrevious}→` : ""}${time} · ${label}${cancelled ? " (ยกเลิก)" : ""}`}
     >
@@ -312,7 +329,7 @@ function CalendarMonthSlot({
                 ? "text-[#cfc6ff]"
                 : guestTone
                   ? "text-[#e8c49a]"
-                  : "text-[#e85a7a]"
+                  : "text-r-pri"
             }
           />
         )}
@@ -322,6 +339,7 @@ function CalendarMonthSlot({
             isMember={isMember}
             showChannel={false}
             compactChannel
+            tone="aplus"
           />
         ) : null}
         {cancelled ? <LiveCancelledBadge compact /> : null}
@@ -351,6 +369,8 @@ export function LiveScheduleBoard() {
     year: requestedYear, month: requestedMonth, selectedDate: requestedDate,
   });
   const { detailRef, openDetail } = useLiveDetail();
+  /** Day row that glows briefly after a calendar tap. */
+  const [flashIso, setFlashIso] = useState<string | null>(null);
   const weekDetailRef = useRef<HTMLDivElement>(null);
   const weekScrollAnchor = useRef<{ top: number; date: string } | null>(null);
 
@@ -418,6 +438,21 @@ export function LiveScheduleBoard() {
       },
     ];
   }, [spotlightQuery.weeks, thisWeekRange.from]);
+
+  /** Top section is pinned to the current week (no week paging there). */
+  const thisWeekOnly = useMemo(() => {
+    const match = spotlightWeeks.filter((week) =>
+      weekOverlapsYmdRange(week.weekStart, thisWeekRange.from, thisWeekRange.to)
+    );
+    if (match.length > 0) return match;
+    return [{ id: `empty-${thisWeekRange.from}`, weekStart: thisWeekRange.from, slots: [] }];
+  }, [spotlightWeeks, thisWeekRange.from, thisWeekRange.to]);
+
+  useEffect(() => {
+    if (!flashIso) return;
+    const timer = window.setTimeout(() => setFlashIso(null), 1400);
+    return () => window.clearTimeout(timer);
+  }, [flashIso]);
 
   const initialLoading =
     !monthQuery.hasLoaded &&
@@ -555,20 +590,15 @@ export function LiveScheduleBoard() {
     setSelectedDate(iso);
   };
 
-  /** Calendar cell tap: select day only; slot detail opens from time/title click. */
-  const selectCalendarDay = (iso: string, daySlots: LiveSlot[]) => {
+  /** Calendar cell tap: pick that week, scroll to the weekly list and glow the day. */
+  const selectCalendarDay = (iso: string) => {
     selectDay(iso);
-    if (daySlots.length > 1 && typeof window !== "undefined") {
-      const narrow = window.matchMedia("(max-width: 639px)").matches;
-      if (narrow) {
-        requestAnimationFrame(() => {
-          weekDetailRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-        });
-      }
-    }
+    setFlashIso(iso);
+    if (typeof window === "undefined") return;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    requestAnimationFrame(() => {
+      scrollToHashTarget("#weekly", reduceMotion ? "auto" : "smooth");
+    });
   };
 
   const jumpToThisWeek = () => {
@@ -583,6 +613,24 @@ export function LiveScheduleBoard() {
       return englishWeekday(d);
     });
   }, [today]);
+
+  const viewingThisWeek = selectedDate ? isInCurrentWeek(selectedDate, today) : true;
+
+  const renderPoster = (layout: "aside" | "row") =>
+    selectedWeekPoster ? (
+      <XLiveSchedulePoster
+        poster={selectedWeekPoster}
+        status={selectedWeekPoster.status}
+        errorMessage={selectedWeekPoster.error_message}
+        layout={layout}
+      />
+    ) : (
+      <XLiveSchedulePosterEmpty
+        layout={layout}
+        loading={xSchedulesQuery.status === "loading"}
+        hint="ยังไม่มี Live Schedule จาก X สำหรับสัปดาห์นี้"
+      />
+    );
 
   const retryAll = () => {
     spotlightQuery.retry();
@@ -605,74 +653,84 @@ export function LiveScheduleBoard() {
 
   return (
     <div className="space-y-16 sm:space-y-20">
-      {/* ── This week ── */}
-      <section id="this-week" className="relative scroll-mt-24 sm:scroll-mt-28">
-        <div className="pointer-events-none absolute -top-10 right-0 size-44 bg-[radial-gradient(circle,rgba(232,90,122,0.14),transparent_65%)]" />
-
-        <div className="relative">
-          <h2 className={DISPLAY_H2_CLASS}>
+      {/* ── This week (pinned to the current week) ── */}
+      <section
+        id="this-week"
+        aria-labelledby="this-week-title"
+        className="relative scroll-mt-24 sm:scroll-mt-28"
+      >
+        <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+          <h2 id="this-week-title" className={R_H2_CLASS}>
             ไลฟ์สัปดาห์นี้
           </h2>
+          <a
+            href="#calendar"
+            onClick={(event) => {
+              event.preventDefault();
+              const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+              scrollToHashTarget("#calendar", reduceMotion ? "auto" : "smooth");
+            }}
+            className="inline-flex items-center gap-1.5 pb-1 text-sm text-r-acc transition-colors hover:text-r-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc"
+          >
+            ดูเดือนอื่น / ย้อนหลัง
+            <ArrowDown className="size-3.5" aria-hidden />
+          </a>
         </div>
 
-        <div className="relative mt-8 sm:mt-10">
+        <div className="mt-8 sm:mt-10">
           {spotlightQuery.status === "loading" &&
           spotlightQuery.weeks.length === 0 ? (
             <LiveScheduleSkeleton variant="compact" />
           ) : (
             <LiveWeekTable
-              weeks={spotlightWeeks}
+              weeks={thisWeekOnly}
               blankEmptyDays
               slotLookup={allSlots}
-              weekRange={spotlightRange}
+              weekRange={thisWeekRange}
+              tone="aplus"
             />
           )}
         </div>
       </section>
 
       {/* ── Month calendar ── */}
-      <section id="calendar" className="relative scroll-mt-24 sm:scroll-mt-28">
+      <section
+        id="calendar"
+        aria-labelledby="calendar-title"
+        className="relative scroll-mt-24 sm:scroll-mt-28"
+      >
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className={DISPLAY_H2_CLASS}>
+            <h2 id="calendar-title" className={R_H2_CLASS}>
               ปฏิทินรายเดือน
             </h2>
             {calendarLoading ? (
-              <span className="inline-flex items-center gap-1.5 text-xs text-[#e85a7a]/90">
+              <span className="inline-flex items-center gap-1.5 text-xs text-r-text-3">
                 <Loader2 className="size-3.5 animate-spin" aria-hidden />
                 กำลังโหลด…
               </span>
             ) : null}
           </div>
-          <button
-            type="button"
-            onClick={jumpToThisWeek}
-            className={cn(
-              buttonVariants({ variant: "outline", size: "sm" }),
-              CTA_OUTLINE_CLASS
-            )}
-          >
+          <button type="button" onClick={jumpToThisWeek} className={PILL_BTN}>
             ไปสัปดาห์นี้
           </button>
         </div>
 
-        <div
-          className={cn(
-            GLASS_CARD_CLASS,
-            "mt-8 overflow-hidden"
-          )}
-        >
-          <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[#f3b8c4]/12 px-4 py-4 sm:px-5">
-            <p className="font-[family-name:var(--font-display)] text-lg font-normal text-[#fff5f7]">
-              {englishMonth(month)} {year}
-            </p>
+        <div className={cn(R_CARD_CLASS, "mt-8 overflow-hidden")}>
+          <div className="flex flex-wrap items-end justify-between gap-3 border-b border-r-line px-4 py-4 sm:px-5">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <p className="font-[family-name:var(--font-display)] text-lg font-normal text-r-text sm:text-xl">
+                {englishMonth(month)} {year}
+              </p>
+              <TimeZoneChip />
+            </div>
             <div className="ml-auto flex w-full min-w-0 items-center gap-1.5 sm:w-auto">
               <label className="min-w-0 flex-1 sm:flex-none">
                 <span className="sr-only">เดือน</span>
                 <select
                   value={month}
                   onChange={(event) => setMonth(Number(event.target.value))}
-                  className="w-full min-w-0 rounded-2xl border border-[#f3b8c4]/25 bg-[#140a0d] px-2 py-2 font-[family-name:var(--font-display)] text-sm tracking-normal text-[#fff5f7] outline-none focus:border-[#e85a7a]/50 sm:min-w-[8.5rem] sm:px-3 sm:text-base"
+                  className={cn(SELECT_CLASS, "w-full min-w-0 sm:min-w-[8.5rem]")}
                 >
                   {Array.from({ length: 12 }, (_, index) => (
                     <option key={index} value={index}>
@@ -687,7 +745,7 @@ export function LiveScheduleBoard() {
                 <select
                   value={year}
                   onChange={(event) => setYear(Number(event.target.value))}
-                  className="w-[4.75rem] rounded-2xl border border-[#f3b8c4]/25 bg-[#140a0d] px-2 py-2 font-[family-name:var(--font-display)] text-sm tracking-normal text-[#fff5f7] outline-none focus:border-[#e85a7a]/50 sm:w-auto sm:min-w-[6.5rem] sm:px-3 sm:text-base"
+                  className={cn(SELECT_CLASS, "w-[6.25rem] sm:w-auto sm:min-w-[6.5rem]")}
                 >
                   {years.map((value) => (
                     <option key={value} value={value}>
@@ -697,96 +755,42 @@ export function LiveScheduleBoard() {
                 </select>
               </label>
 
-              <button
-                type="button"
-                aria-label="เดือนก่อน"
-                onClick={goPrevMonth}
-                className={cn(
-                  buttonVariants({ variant: "outline", size: "icon" }),
-                  CTA_OUTLINE_CLASS, "size-10 shrink-0"
-                )}
-              >
+              <button type="button" aria-label="เดือนก่อน" onClick={goPrevMonth} className={NAV_BTN}>
                 <ChevronLeft className="size-4" />
               </button>
-              <button
-                type="button"
-                aria-label="เดือนถัดไป"
-                onClick={goNextMonth}
-                className={cn(
-                  buttonVariants({ variant: "outline", size: "icon" }),
-                  CTA_OUTLINE_CLASS, "size-10 shrink-0"
-                )}
-              >
+              <button type="button" aria-label="เดือนถัดไป" onClick={goNextMonth} className={NAV_BTN}>
                 <ChevronRight className="size-4" />
               </button>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1.5 border-b border-[#f3b8c4]/10 px-3 py-2 sm:gap-3 sm:px-4 sm:py-2.5">
-            <p className="mr-auto text-xs tracking-[0.14em] text-[#f3b8c4]/55 uppercase sm:text-sm">
+          <div className="flex flex-wrap items-center justify-end gap-x-2 gap-y-1.5 border-b border-r-line px-3 py-2 sm:px-4 sm:py-2.5">
+            <p className="mr-auto text-xs tracking-[0.14em] text-r-text-3 uppercase sm:text-sm">
               เดือนนี้
-              <span className="ml-1.5 tabular-nums text-[#f3b8c4]/75">
+              <span className="ml-1.5 tabular-nums text-r-text">
                 {monthKindStats.total}
               </span>
             </p>
-            {/* Mobile: compact counts — full pills from sm+ */}
-            <div className="flex items-center gap-2.5 text-[0.65rem] tabular-nums tracking-wide sm:hidden">
-              <span className="inline-flex items-center gap-1 text-[#cfc6ff]">
-                <span className="size-1.5 rounded-full bg-[#9b8cff]" aria-hidden />
-                {monthKindStats.member}
+            {(
+              [
+                ["Member", monthKindStats.member, "bg-[#9b8cff]"],
+                ["Solo", monthKindStats.solo, "bg-r-pri"],
+                ["Collab", monthKindStats.collab, "bg-[#d4a574]"],
+              ] as const
+            ).map(([label, count, dot]) => (
+              <span key={label} className={cn(R_CHIP_SOFT_CLASS, "gap-1.5 tabular-nums")}>
+                <span className={cn("size-1.5 rounded-full", dot)} aria-hidden />
+                <span className="sr-only sm:not-sr-only">{label}</span>
+                {count}
               </span>
-              <span className="inline-flex items-center gap-1 text-[#f3b8c4]/80">
-                <span className="size-1.5 rounded-full bg-[#e85a7a]" aria-hidden />
-                {monthKindStats.solo}
-              </span>
-              <span className="inline-flex items-center gap-1 text-[#e8c49a]">
-                <span className="size-1.5 rounded-full bg-[#d4a574]" aria-hidden />
-                {monthKindStats.collab}
-              </span>
-            </div>
-            <span
-              className={cn(
-                LIVE_BADGE_PILL_SM,
-                LIVE_BADGE_MEMBER,
-                "hidden gap-1.5 sm:inline-flex"
-              )}
-            >
-              Member
-              <span className="tabular-nums">
-                {monthKindStats.member}
-              </span>
-            </span>
-            <span
-              className={cn(
-                LIVE_BADGE_PILL_SM,
-                LIVE_BADGE_SOFT,
-                "hidden gap-1.5 sm:inline-flex"
-              )}
-            >
-              Solo
-              <span className="tabular-nums">
-                {monthKindStats.solo}
-              </span>
-            </span>
-            <span
-              className={cn(
-                LIVE_BADGE_PILL_SM,
-                LIVE_BADGE_COLLAB,
-                "hidden gap-1.5 sm:inline-flex"
-              )}
-            >
-              Collab
-              <span className="tabular-nums">
-                {monthKindStats.collab}
-              </span>
-            </span>
+            ))}
           </div>
 
-          <div className="grid grid-cols-7 gap-px bg-[#f3b8c4]/08 p-px">
+          <div className="grid grid-cols-7 gap-px bg-r-line p-px">
             {weekdayHeaders.map((label) => (
               <div
                 key={label}
-                className="bg-[#1a0c12]/80 px-1 py-2 text-center text-xs tracking-[0.14em] text-[#f3b8c4]/55 uppercase sm:text-sm"
+                className="bg-r-bg px-1 py-2 text-center text-xs tracking-[0.14em] text-r-text-3 uppercase sm:text-sm"
               >
                 {label}
               </div>
@@ -798,9 +802,9 @@ export function LiveScheduleBoard() {
               sortLiveSlotsForCalendar(byDate.get(iso) ?? [])
             );
             const isToday = iso === todayIso;
-            const inWeek = isInCurrentWeek(iso, today);
             const weekRowStart = iso === thisWeekSundayIso;
             const selected = selectedDate === iso;
+            const inSelectedWeek = selectedWeekDays.includes(iso);
             const dayNum = parseISODate(iso).getDate();
             const visibleSlots = daySlots.slice(0, 2);
             const extraCount = Math.max(0, daySlots.length - visibleSlots.length);
@@ -811,30 +815,27 @@ export function LiveScheduleBoard() {
                 key={iso}
                 role="button"
                 tabIndex={0}
-                onClick={() => selectCalendarDay(iso, daySlots)}
+                onClick={() => selectCalendarDay(iso)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();
-                    selectCalendarDay(iso, daySlots);
+                    selectCalendarDay(iso);
                   }
                 }}
                 className={cn(
-                  "relative flex cursor-pointer flex-col items-stretch bg-[#140a0d]/55 text-left transition",
+                  "relative flex cursor-pointer flex-col items-stretch bg-r-bg text-left transition",
                   "aspect-square gap-0.5 overflow-hidden p-1",
                   "sm:aspect-auto sm:gap-1.5 sm:p-1.5 md:p-2",
                   crowded
                     ? "sm:h-[7.5rem] sm:overflow-hidden md:h-[8.5rem]"
                     : "sm:min-h-[7.5rem] md:min-h-[8.5rem]",
-                  !inMonth && "opacity-40",
-                  inWeek && !isToday && !selected && "bg-[#f3b8c4]/04",
+                  !inMonth && "*:opacity-40",
+                  inSelectedWeek && "bg-[color-mix(in_srgb,var(--r-acc)_8%,var(--r-bg))]",
                   weekRowStart &&
-                    "before:absolute before:inset-y-1 before:left-0 before:z-10 before:w-[2px] before:rounded-full before:bg-[#f3b8c4]/55 before:content-['']",
-                  selected && "z-[1] bg-[#e85a7a]/12 ring-1 ring-inset ring-[#e85a7a]/50",
-                  isToday &&
-                    !selected &&
-                    "z-[1] bg-[#f3b8c4]/08 ring-1 ring-inset ring-[#f3b8c4]/35",
-                  isToday && selected && "bg-[#e85a7a]/14",
-                  "hover:bg-[#f3b8c4]/06"
+                    "before:absolute before:inset-y-1.5 before:left-0 before:z-10 before:w-[3px] before:rounded-full before:bg-r-pri before:content-['']",
+                  selected && "z-[1] ring-2 ring-inset ring-r-acc",
+                  isToday && !selected && "z-[1] ring-2 ring-inset ring-r-pri/70",
+                  "hover:bg-white/[0.04] focus-visible:z-[2] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-r-acc"
                 )}
               >
                 {/* —— Mobile: day number + times (no badges) —— */}
@@ -843,8 +844,8 @@ export function LiveScheduleBoard() {
                     className={cn(
                       "inline-flex size-5 shrink-0 items-center justify-center self-start text-[0.7rem] tabular-nums",
                       isToday
-                        ? "rounded-full border border-[#f3b8c4]/55 bg-[#f3b8c4]/18 font-semibold text-[#fff5f7]"
-                        : "text-[#f7d7de]/85"
+                        ? "rounded-full bg-r-pri font-semibold text-r-on-pri"
+                        : "text-r-text/85"
                     )}
                   >
                     {dayNum}
@@ -863,14 +864,14 @@ export function LiveScheduleBoard() {
                         />
                       ))}
                       {extraCount > 0 ? (
-                        <span className="pl-1 text-[0.5rem] leading-none text-[#f3b8c4]/50">
+                        <span className="pl-1 text-[0.5rem] leading-none text-r-text-3">
                           +{extraCount}
                         </span>
                       ) : null}
                     </div>
                   ) : showOfflineForDay(iso) ? (
-                    <div className="mt-auto border-l-2 border-[#6ec9b0]/70 py-px pl-1">
-                      <span className="text-[0.5rem] tracking-[0.1em] text-[#6ec9b0]/85 uppercase">
+                    <div className="mt-auto border-l-2 border-r-acc/70 py-px pl-1">
+                      <span className="text-[0.5rem] tracking-[0.1em] text-r-acc uppercase">
                         Off
                       </span>
                     </div>
@@ -884,8 +885,8 @@ export function LiveScheduleBoard() {
                       className={cn(
                         "inline-flex size-5 shrink-0 items-center justify-center text-[0.7rem] tabular-nums sm:size-6 sm:text-xs",
                         isToday
-                          ? "rounded-full border border-[#f3b8c4]/55 bg-[#f3b8c4]/18 font-semibold text-[#fff5f7]"
-                          : "text-[#f7d7de]/85"
+                          ? "rounded-full bg-r-pri font-semibold text-r-on-pri"
+                          : "text-r-text/85"
                       )}
                     >
                       {dayNum}
@@ -894,6 +895,7 @@ export function LiveScheduleBoard() {
                       <LiveDayChannelBadges
                         slots={daySlots}
                         size="sm"
+                        tone="aplus"
                         compact
                         className="justify-start"
                       />
@@ -914,14 +916,14 @@ export function LiveScheduleBoard() {
                         />
                       ))}
                       {extraCount > 0 ? (
-                        <span className="shrink-0 pl-1 text-[0.55rem] text-[#f3b8c4]/55 sm:text-[0.62rem]">
+                        <span className="shrink-0 pl-1 text-[0.55rem] text-r-text-3 sm:text-[0.62rem]">
                           +{extraCount} อีก
                         </span>
                       ) : null}
                     </div>
                   ) : showOfflineForDay(iso) ? (
                     <div className="flex w-full flex-col items-center pt-0.5">
-                      <OfflineBadge size="sm" />
+                      <OfflineBadge size="sm" tone="aplus" />
                     </div>
                   ) : null}
                 </div>
@@ -931,174 +933,212 @@ export function LiveScheduleBoard() {
           </div>
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs tracking-wide text-[#f3b8c4]/55 sm:text-sm">
-          <span className="inline-flex items-center gap-1.5">
-            <span className="h-3 w-0.5 shrink-0 rounded-full bg-[#e85a7a]" aria-hidden />
+        <ul
+          aria-label="สัญลักษณ์ในปฏิทิน"
+          className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-r-text-3 sm:text-sm"
+        >
+          <li className="inline-flex items-center gap-1.5">
+            <span className="h-3 w-0.5 shrink-0 rounded-full bg-r-pri" aria-hidden />
             Solo
-          </span>
-          <span className="inline-flex items-center gap-1.5">
+          </li>
+          <li className="inline-flex items-center gap-1.5">
             <span className="h-3 w-0.5 shrink-0 rounded-full bg-[#d4a574]" aria-hidden />
             Collab
-          </span>
-          <span className="inline-flex items-center gap-1.5">
+          </li>
+          <li className="inline-flex items-center gap-1.5">
+            <span className="h-3 w-0.5 shrink-0 rounded-full bg-[#9b8cff]" aria-hidden />
+            Member
+          </li>
+          <li className="inline-flex items-center gap-1.5">
             <span
               className="h-3 w-0.5 shrink-0 rounded-full border-l border-dashed border-[#8a7f88]"
               aria-hidden
             />
             ยกเลิก
-          </span>
-        </div>
+          </li>
+          <li className="inline-flex items-center gap-1.5">
+            <span className="h-3.5 w-[3px] shrink-0 rounded-full bg-r-pri" aria-hidden />
+            สัปดาห์นี้
+          </li>
+          <li className="inline-flex items-center gap-1.5">
+            <span
+              className="h-3 w-4 shrink-0 rounded-[4px] bg-r-acc/20 ring-1 ring-r-acc/60 ring-inset"
+              aria-hidden
+            />
+            สัปดาห์ที่เลือก
+          </li>
+        </ul>
+      </section>
 
-        <h2
-          id="weekly"
-          className={cn(DISPLAY_H2_CLASS, "mt-10 scroll-mt-24 sm:mt-12 sm:scroll-mt-28")}
-        >
+      {/* ── Selected week + Live Schedule poster from X ── */}
+      <section
+        id="weekly"
+        aria-labelledby="weekly-title"
+        className="scroll-mt-24 sm:scroll-mt-28"
+      >
+        <h2 id="weekly-title" className={R_H2_CLASS}>
           ตารางไลฟ์รายสัปดาห์
         </h2>
-        <p className="mt-3 text-sm leading-relaxed text-[#f3b8c4]/65 sm:text-base">
+        <p className="mt-3 text-sm leading-relaxed text-r-text-3 sm:text-base">
           เลือกวันจากปฏิทิน หรือเลื่อนชมตารางไลฟ์ในแต่ละสัปดาห์
         </p>
-        <div ref={weekDetailRef} className={cn(GLASS_CARD_CLASS, "mt-6 overflow-hidden")}>
-          {selectedDate ? (
-            <>
-              <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[#f3b8c4]/12 px-4 py-4 sm:px-5">
-                <div>
-                  <p className="font-[family-name:var(--font-display)] text-lg font-normal text-[#fff5f7]">
-                    {selectedWeekRangeLabel}
-                  </p>
-                  {selectedWeekSlotCount > 0 ? (
-                    <p className="mt-1 text-xs text-[#f3b8c4]/60 sm:text-sm">
-                      {selectedWeekSlotCount} ไลฟ์
-                    </p>
-                  ) : null}
-                </div>
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {selectedDate === todayIso ? (
-                    <span className={cn(BADGE_SOFT_CLASS, "uppercase")}>
-                      วันนี้
-                    </span>
-                  ) : null}
-                  {isInCurrentWeek(selectedDate, today) ? (
-                    <span className={cn(BADGE_SOFT_CLASS, "uppercase")}>
-                      สัปดาห์นี้
-                    </span>
-                  ) : null}
-                  <button
-                    type="button"
-                    aria-label="สัปดาห์ก่อนหน้า"
-                    disabled={!canMoveWeek(-1)}
-                    onClick={() => moveWeek(-1)}
-                    className={cn(buttonVariants({ variant: "outline", size: "icon" }), CTA_OUTLINE_CLASS, "size-10 disabled:opacity-35")}
-                  >
-                    <ChevronLeft className="size-4" aria-hidden />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="สัปดาห์ถัดไป"
-                    disabled={!canMoveWeek(1)}
-                    onClick={() => moveWeek(1)}
-                    className={cn(buttonVariants({ variant: "outline", size: "icon" }), CTA_OUTLINE_CLASS, "size-10 disabled:opacity-35")}
-                  >
-                    <ChevronRight className="size-4" aria-hidden />
-                  </button>
-                </div>
-              </div>
 
-              <div className="divide-y divide-[#f3b8c4]/10">
-                {selectedWeekDays.map((iso) => {
-                  const daySlots = preferOwnChannelSlots(
-                    sortLiveSlotsForCalendar(byDate.get(iso) ?? [])
-                  );
-                  const date = parseISODate(iso);
-                  const isFocus = iso === selectedDate;
-                  const isToday = iso === todayIso;
-
-                  return (
-                    <section
-                      key={iso}
+        <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] xl:grid-cols-[minmax(0,1fr)_22rem]">
+          <div ref={weekDetailRef} className={cn(R_CARD_CLASS, "min-w-0 overflow-hidden")}>
+            {selectedDate ? (
+              <>
+                <div className="flex flex-wrap items-end justify-between gap-3 border-b border-r-line px-4 py-4 sm:px-5">
+                  <div>
+                    <p
                       className={cn(
-                        "px-4 py-4 sm:px-5",
-                        isFocus && "bg-[#e85a7a]/06"
+                        "text-xs sm:text-sm",
+                        viewingThisWeek ? "text-r-text-3" : "text-r-acc"
                       )}
                     >
-                      <button
-                        type="button"
-                        onClick={() => selectDay(iso)}
-                        className="flex w-full cursor-pointer flex-wrap items-center gap-2 text-left"
-                      >
-                        <span
-                          className={cn(
-                            "inline-flex min-w-[2.5rem] items-center justify-center rounded-md px-2 py-1 text-sm tabular-nums",
-                            isToday
-                              ? "border border-[#f3b8c4]/45 bg-[#f3b8c4]/15 font-semibold text-[#fff5f7]"
-                              : isFocus
-                                ? "bg-[#e85a7a]/20 text-[#fff5f7]"
-                                : "text-[#f7d7de]/90"
-                          )}
-                        >
-                          {date.getDate()}
-                        </span>
-                        <span className="text-xs tracking-[0.14em] text-[#f3b8c4]/65 uppercase sm:text-sm">
-                          {englishWeekday(date)}
-                        </span>
-                        <span className="text-xs text-[#f3b8c4]/50 sm:text-sm">
-                          {formatLiveShortDate(iso)}
-                        </span>
-                        <LiveDayChannelBadges
-                          slots={daySlots}
-                          size="sm"
-                          className="justify-start"
-                        />
+                      {viewingThisWeek ? "สัปดาห์นี้" : "สัปดาห์ที่เลือก"}
+                    </p>
+                    <p className="mt-0.5 font-[family-name:var(--font-display)] text-lg font-normal text-r-text sm:text-xl">
+                      {selectedWeekRangeLabel}
+                    </p>
+                    {selectedWeekSlotCount > 0 ? (
+                      <p className="mt-1 text-xs text-r-text-3 sm:text-sm">
+                        {selectedWeekSlotCount} ไลฟ์
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <TimeZoneChip />
+                    {!viewingThisWeek ? (
+                      <button type="button" onClick={jumpToThisWeek} className={PILL_BTN}>
+                        กลับไปสัปดาห์นี้
                       </button>
-
-                      {daySlots.length > 0 ? (
-                        <ul className="mt-3 space-y-2">
-                          {daySlots.map((slot) => (
-                            <WeekSlotCard
-                              key={slot.id}
-                              slot={slot}
-                              onOpen={() => {
-                                selectDay(iso);
-                                openDetail(slot);
-                              }}
-                            />
-                          ))}
-                        </ul>
-                      ) : showOfflineForDay(iso) ? (
-                        <div className="mt-3 flex items-center gap-2 border-l-2 border-dashed border-[#6ec9b0]/40 px-3 py-2.5">
-                          <OfflineBadge size="sm" />
-                          <span className="text-xs text-[#a8e6d4]/75 sm:text-sm">
-                            ไม่มีไลฟ์
-                          </span>
-                        </div>
-                      ) : (
-                        <p className="mt-2 text-xs text-[#f3b8c4]/35">—</p>
-                      )}
-                    </section>
-                  );
-                })}
-              </div>
-
-              {selectedWeekPoster ? (
-                <XLiveSchedulePoster
-                  poster={selectedWeekPoster}
-                  status={selectedWeekPoster.status}
-                  errorMessage={selectedWeekPoster.error_message}
-                  embedded
-                />
-              ) : xSchedulesQuery.status === "loading" ? (
-                <div className="border-t border-[#f3b8c4]/10 px-4 py-5 sm:px-5">
-                  <p className="text-sm text-[#f3b8c4]/45">กำลังโหลด Live Schedule…</p>
+                    ) : null}
+                    <button
+                      type="button"
+                      aria-label="สัปดาห์ก่อนหน้า"
+                      disabled={!canMoveWeek(-1)}
+                      onClick={() => moveWeek(-1)}
+                      className={NAV_BTN}
+                    >
+                      <ChevronLeft className="size-4" aria-hidden />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="สัปดาห์ถัดไป"
+                      disabled={!canMoveWeek(1)}
+                      onClick={() => moveWeek(1)}
+                      className={NAV_BTN}
+                    >
+                      <ChevronRight className="size-4" aria-hidden />
+                    </button>
+                  </div>
                 </div>
-              ) : (
-                <XLiveSchedulePosterEmpty hint="ยังไม่มี Live Schedule จาก X สำหรับสัปดาห์นี้" />
-              )}
-            </>
-          ) : (
-            <p className="px-4 py-8 text-sm text-[#f3b8c4]/55 sm:px-5">
-              ยังไม่ได้เลือกวัน
-            </p>
-          )}
+
+                {/* Phone / tablet: the poster is a small row above the list. */}
+                <div className="border-b border-r-line px-4 py-3 sm:px-5 lg:hidden">
+                  {renderPoster("row")}
+                </div>
+
+                <div className="divide-y divide-r-line">
+                  {selectedWeekDays.map((iso) => {
+                    const daySlots = preferOwnChannelSlots(
+                      sortLiveSlotsForCalendar(byDate.get(iso) ?? [])
+                    );
+                    const date = parseISODate(iso);
+                    const isFocus = iso === selectedDate;
+                    const isToday = iso === todayIso;
+                    const isFlash = iso === flashIso;
+
+                    return (
+                      <section
+                        key={iso}
+                        aria-label={formatLiveShortDate(iso)}
+                        className={cn(
+                          "px-4 py-4 transition-[background-color,box-shadow] duration-700 sm:px-5",
+                          isFocus && "bg-r-acc/[0.05]",
+                          isFlash && "bg-r-acc/[0.1] shadow-[inset_0_0_0_2px_var(--r-acc)]"
+                        )}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => selectDay(iso)}
+                          className="flex w-full cursor-pointer flex-wrap items-center gap-2 text-left"
+                        >
+                          <span
+                            className={cn(
+                              "inline-flex min-w-[2.5rem] items-center justify-center rounded-full px-2 py-1 text-sm tabular-nums",
+                              isToday
+                                ? "bg-r-pri font-semibold text-r-on-pri"
+                                : isFocus
+                                  ? "bg-r-acc/15 text-r-text ring-1 ring-r-acc/50 ring-inset"
+                                  : "text-r-text/85 ring-1 ring-r-text-2/15 ring-inset"
+                            )}
+                          >
+                            {date.getDate()}
+                          </span>
+                          <span
+                            className={cn(
+                              "text-xs tracking-[0.14em] uppercase sm:text-sm",
+                              isToday ? "text-r-pri" : "text-r-text-3"
+                            )}
+                          >
+                            {englishWeekday(date)}
+                          </span>
+                          <span className="text-xs text-r-text-3 sm:text-sm">
+                            {formatLiveShortDate(iso)}
+                          </span>
+                          {isToday ? (
+                            <span className="inline-flex h-5 items-center rounded-full bg-r-pri px-2 text-[0.65rem] font-medium text-r-on-pri">
+                              วันนี้
+                            </span>
+                          ) : null}
+                          <LiveDayChannelBadges
+                            slots={daySlots}
+                            size="sm"
+                            tone="aplus"
+                            className="justify-start"
+                          />
+                        </button>
+
+                        {daySlots.length > 0 ? (
+                          <ul className="mt-3 space-y-2">
+                            {daySlots.map((slot) => (
+                              <WeekSlotCard
+                                key={slot.id}
+                                slot={slot}
+                                onOpen={() => {
+                                  selectDay(iso);
+                                  openDetail(slot);
+                                }}
+                              />
+                            ))}
+                          </ul>
+                        ) : showOfflineForDay(iso) ? (
+                          <div className="mt-3 flex items-center gap-2 rounded-2xl border border-dashed border-r-acc/30 px-3 py-2.5">
+                            <OfflineBadge size="sm" tone="aplus" />
+                            <span className="text-xs text-r-text-3 sm:text-sm">
+                              ไม่มีไลฟ์
+                            </span>
+                          </div>
+                        ) : (
+                          <p className="mt-2 text-xs text-r-text-3/60">—</p>
+                        )}
+                      </section>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <p className="px-4 py-8 text-sm text-r-text-3 sm:px-5">
+                ยังไม่ได้เลือกวัน
+              </p>
+            )}
+          </div>
+
+          {/* Desktop: poster stays beside the list while scrolling. */}
+          <aside aria-label="Live Schedule จาก X" className="hidden lg:sticky lg:top-24 lg:block">
+            {renderPoster("aside")}
+          </aside>
         </div>
       </section>
 

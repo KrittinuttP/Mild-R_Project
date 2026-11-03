@@ -1,8 +1,8 @@
-import { buttonVariants } from "@/components/ui/button";
 import {
-  CTA_OUTLINE_CLASS,
-  GLASS_CARD_CLASS,
-  META_CLASS,
+  R_CARD_CLASS,
+  R_CTA_OUTLINE_CLASS,
+  R_EYEBROW_CLASS,
+  R_META_CLASS,
 } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +14,7 @@ type LiveScheduleSkeletonProps = {
 function Pulse({ className }: { className?: string }) {
   return (
     <div
-      className={cn("animate-pulse rounded-2xl bg-[#f3b8c4]/10", className)}
+      className={cn("animate-pulse rounded-2xl bg-white/[0.05]", className)}
       aria-hidden
     />
   );
@@ -38,7 +38,7 @@ function CompactSkeleton() {
         {Array.from({ length: 7 }).map((_, i) => (
           <div key={i} className="space-y-2">
             <Pulse className="mx-auto h-3 w-8 rounded-full" />
-            <Pulse className="min-h-[5.75rem] w-full rounded-2xl border border-[#f3b8c4]/10 bg-[#1a0c12]/40 sm:min-h-[7.25rem]" />
+            <Pulse className="min-h-[5.75rem] w-full rounded-2xl bg-white/[0.035] sm:min-h-[7.25rem]" />
           </div>
         ))}
       </div>
@@ -50,29 +50,29 @@ function CompactSkeleton() {
 function CalendarMonthSkeleton() {
   return (
     <div aria-busy="true" aria-label="กำลังโหลดปฏิทินรายเดือน">
-      <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1.5 border-b border-[#f3b8c4]/10 px-3 py-2 sm:gap-3 sm:px-4 sm:py-2.5">
+      <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1.5 border-b border-r-line px-3 py-2 sm:gap-3 sm:px-4 sm:py-2.5">
         <Pulse className="mr-auto h-4 w-24 rounded-full" />
         <Pulse className="h-6 w-16 rounded-full sm:w-20" />
         <Pulse className="hidden h-6 w-16 rounded-full sm:block sm:w-20" />
         <Pulse className="hidden h-6 w-14 rounded-full sm:block sm:w-16" />
       </div>
 
-      <div className="grid grid-cols-7 gap-px bg-[#f3b8c4]/08 p-px">
+      <div className="grid grid-cols-7 gap-px bg-r-line p-px">
         {Array.from({ length: 7 }).map((_, i) => (
           <Pulse
             key={`wd-${i}`}
-            className="h-8 rounded-none bg-[#1a0c12]/80 sm:h-9"
+            className="h-8 rounded-none bg-r-bg sm:h-9"
           />
         ))}
         {Array.from({ length: 42 }).map((_, i) => (
           <Pulse
             key={`day-${i}`}
-            className="aspect-square rounded-none bg-[#140a0d]/55 sm:aspect-auto sm:min-h-[7.5rem] md:min-h-[8.5rem]"
+            className="aspect-square rounded-none bg-r-bg sm:aspect-auto sm:min-h-[7.5rem] md:min-h-[8.5rem]"
           />
         ))}
       </div>
 
-      <p className={cn(META_CLASS, "py-4 text-center text-[#f3b8c4]/45")}>
+      <p className={cn(R_META_CLASS, "py-4 text-center")}>
         กำลังโหลดปฏิทิน…
       </p>
     </div>
@@ -94,7 +94,7 @@ function FullSkeleton() {
           {Array.from({ length: 7 }).map((_, i) => (
             <Pulse
               key={i}
-              className="min-h-[7rem] w-full rounded-2xl bg-[#f3b8c4]/8 sm:min-h-[8rem]"
+              className="min-h-[7rem] w-full rounded-2xl bg-white/[0.04] sm:min-h-[8rem]"
             />
           ))}
         </div>
@@ -105,20 +105,20 @@ function FullSkeleton() {
           <Pulse className="h-3.5 w-32 rounded-full" />
           <Pulse className="mt-4 h-8 w-48" />
         </div>
-        <div className={cn(GLASS_CARD_CLASS, "overflow-hidden")}>
-          <Pulse className="h-14 w-full rounded-none bg-[#f3b8c4]/8" />
-          <div className="grid grid-cols-7 gap-px border-t border-[#f3b8c4]/10 bg-[#f3b8c4]/08 p-px">
+        <div className={cn(R_CARD_CLASS, "overflow-hidden")}>
+          <Pulse className="h-14 w-full rounded-none bg-white/[0.04]" />
+          <div className="grid grid-cols-7 gap-px border-t border-r-line bg-r-line p-px">
             {Array.from({ length: 35 }).map((_, i) => (
               <Pulse
                 key={i}
-                className="aspect-square rounded-none bg-[#140a0d]/55 sm:aspect-auto sm:min-h-[6.5rem]"
+                className="aspect-square rounded-none bg-r-bg sm:aspect-auto sm:min-h-[6.5rem]"
               />
             ))}
           </div>
         </div>
       </section>
 
-      <p className={cn(META_CLASS, "text-center text-[#f3b8c4]/45")}>
+      <p className={cn(R_META_CLASS, "text-center")}>
         กำลังโหลดตารางไลฟ์…
       </p>
     </div>
@@ -154,27 +154,23 @@ export function LiveScheduleError({
   return (
     <div
       className={cn(
-        GLASS_CARD_CLASS,
+        R_CARD_CLASS,
         "px-5 py-10 text-center sm:px-8",
         className
       )}
       role="alert"
     >
-      <p className={META_CLASS}>Live</p>
-      <p className="mt-3 font-[family-name:var(--font-display)] text-lg font-normal text-[#fff5f7] sm:text-xl">
+      <p className={R_EYEBROW_CLASS}>Live</p>
+      <p className="mt-3 font-[family-name:var(--font-display)] text-lg font-normal text-r-text sm:text-xl">
         โหลดตารางไลฟ์ไม่สำเร็จ
       </p>
       {message ? (
-        <p className="mt-2 text-sm text-[#f3b8c4]/55">{message}</p>
+        <p className="mt-2 text-sm text-r-text-3">{message}</p>
       ) : null}
       <button
         type="button"
         onClick={onRetry}
-        className={cn(
-          buttonVariants({ variant: "outline", size: "lg" }),
-          CTA_OUTLINE_CLASS,
-          "mt-6"
-        )}
+        className={cn(R_CTA_OUTLINE_CLASS, "mt-6")}
       >
         ลองใหม่
       </button>

@@ -17,7 +17,6 @@ import {
 import { LiveSlotTime } from "@/components/events/LiveSlotMeta";
 import { LiveCoverPlaceholder } from "@/components/events/LiveCoverPlaceholder";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
-import { buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -28,8 +27,8 @@ import {
 import { formatLiveDate } from "@/lib/live-date-format";
 import { getSlotCoverUrl } from "@/lib/live-cover";
 import {
-  CTA_PRIMARY_CLASS,
   MODAL_CLOSE_BUTTON_CLASS,
+  R_CTA_PRIMARY_CLASS,
 } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { LivePlatform, LiveSlot } from "@/types/vtuber";
@@ -91,16 +90,16 @@ function TimeCell({
     <div
       className={cn(
         "min-w-0 px-2.5 py-2 sm:px-3.5 sm:py-2.5",
-        accent && "bg-[#e85a7a]/06"
+        accent && "bg-r-pri/06"
       )}
     >
-      <p className="flex items-center gap-1 text-[0.65rem] tracking-[0.12em] text-[#f3b8c4]/60 uppercase sm:gap-1.5 sm:text-xs sm:tracking-[0.14em]">
+      <p className="flex items-center gap-1 text-[0.65rem] tracking-[0.12em] text-r-text-2/60 uppercase sm:gap-1.5 sm:text-xs sm:tracking-[0.14em]">
         <span className="opacity-80" aria-hidden>
           {icon}
         </span>
         {label}
       </p>
-      <div className="mt-0.5 font-[family-name:var(--font-display)] text-[0.82rem] tabular-nums text-[#fff5f7] sm:mt-1 sm:text-sm md:text-[0.95rem]">
+      <div className="mt-0.5 font-[family-name:var(--font-display)] text-[0.82rem] tabular-nums text-r-text sm:mt-1 sm:text-sm md:text-[0.95rem]">
         {children}
       </div>
     </div>
@@ -124,8 +123,7 @@ function WatchLink({
       target={external ? "_blank" : undefined}
       rel={external ? "noopener noreferrer" : undefined}
       className={cn(
-        buttonVariants({ size: "lg" }),
-        CTA_PRIMARY_CLASS,
+        R_CTA_PRIMARY_CLASS,
         "group flex h-10 w-full items-center justify-center gap-2 font-semibold md:h-11",
         className
       )}
@@ -160,34 +158,34 @@ function NewLiveRoundCta({
       onClick={() => onSelectSlot(link.slotId)}
       aria-label={`มีการไลฟ์ใหม่ ${dateLine} — เปิดไลฟ์รอบใหม่`}
       className={cn(
-        "group w-full overflow-hidden rounded-xl border border-[#f3b8c4]/18 bg-gradient-to-br from-[#e85a7a]/12 via-[#1c0c14]/90 to-[#14080e]/95 p-2.5 text-left shadow-[0_8px_24px_rgba(0,0,0,0.22)] transition duration-200 sm:rounded-2xl sm:p-3.5",
-        "hover:border-[#e85a7a]/45 hover:from-[#e85a7a]/18 hover:shadow-[0_12px_28px_rgba(232,90,122,0.16)]",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e85a7a]/55 focus-visible:ring-offset-2 focus-visible:ring-offset-[#14080e]",
+        "group w-full overflow-hidden rounded-xl border border-r-text-2/18 bg-gradient-to-br from-r-pri/12 via-r-bg/90 to-r-bg/95 p-2.5 text-left shadow-[0_8px_24px_rgba(0,0,0,0.22)] transition duration-200 sm:rounded-2xl sm:p-3.5",
+        "hover:border-r-pri/45 hover:from-r-pri/18 hover:shadow-[0_12px_28px_rgba(242,67,125,0.16)]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-r-pri/55 focus-visible:ring-offset-2 focus-visible:ring-offset-r-bg",
         className
       )}
     >
       <div className="flex items-center gap-2 sm:gap-3">
         <span
-          className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-[#e85a7a]/25 bg-[#e85a7a]/12 text-[#f3b8c4] transition group-hover:border-[#e85a7a]/40 group-hover:bg-[#e85a7a]/20 sm:size-10 sm:rounded-xl"
+          className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-r-pri/25 bg-r-pri/12 text-r-text-2 transition group-hover:border-r-pri/40 group-hover:bg-r-pri/20 sm:size-10 sm:rounded-xl"
           aria-hidden
         >
           <Radio className="size-3.5 sm:size-4" />
         </span>
 
         <div className="min-w-0 flex-1">
-          <p className="text-[0.62rem] font-semibold tracking-[0.1em] text-[#e85a7a] uppercase sm:text-[0.68rem] sm:tracking-[0.12em]">
+          <p className="text-[0.62rem] font-semibold tracking-[0.1em] text-r-pri uppercase sm:text-[0.68rem] sm:tracking-[0.12em]">
             มีการไลฟ์ใหม่
           </p>
-          <p className="mt-px flex items-center gap-1 font-[family-name:var(--font-display)] text-xs leading-snug tabular-nums text-[#fff5f7] sm:mt-0.5 sm:gap-1.5 sm:text-sm">
+          <p className="mt-px flex items-center gap-1 font-[family-name:var(--font-display)] text-xs leading-snug tabular-nums text-r-text sm:mt-0.5 sm:gap-1.5 sm:text-sm">
             <CalendarDays
-              className="size-3 shrink-0 text-[#f3b8c4]/55 sm:size-3.5"
+              className="size-3 shrink-0 text-r-text-2/55 sm:size-3.5"
               aria-hidden
             />
             <span className="truncate">{dateLine}</span>
           </p>
         </div>
 
-        <span className="flex shrink-0 items-center gap-0.5 whitespace-nowrap text-[0.68rem] font-semibold text-[#f3b8c4] transition group-hover:text-[#fff5f7] sm:gap-1 sm:text-xs">
+        <span className="flex shrink-0 items-center gap-0.5 whitespace-nowrap text-[0.68rem] font-semibold text-r-text-2 transition group-hover:text-r-text sm:gap-1 sm:text-xs">
           <span>ไลฟ์รอบใหม่</span>
           <ArrowRight
             className="size-3.5 shrink-0 transition group-hover:translate-x-0.5 sm:size-4"
@@ -257,31 +255,31 @@ export function LiveDetailModal({
   );
 
   const startValue = slot?.actualStartLabel ?? (
-    <span className="text-[#f3b8c4]/45">
+    <span className="text-r-text-2/45">
       {cancelled ? "ไม่ได้เริ่ม" : "ยังไม่เริ่ม"}
     </span>
   );
   const endValue = slot?.actualEndLabel ?? (
-    <span className="text-[#f3b8c4]/45">—</span>
+    <span className="text-r-text-2/45">—</span>
   );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-h-[92dvh] w-[min(100%,calc(100vw-1rem))] max-w-lg overflow-hidden rounded-3xl border border-[#f3b8c4]/20 bg-gradient-to-b from-[#220e18]/95 via-[#1a0c12]/95 to-[#12070c] p-0 text-[#fff5f7] shadow-[0_24px_60px_rgba(0,0,0,0.7)] md:max-w-3xl data-open:zoom-in-100 data-closed:zoom-out-100 [animation-duration:100ms] motion-reduce:animate-none"
+        className="max-h-[92dvh] w-[min(100%,calc(100vw-1rem))] max-w-lg overflow-hidden rounded-3xl border border-r-text-2/20 bg-r-bg bg-[linear-gradient(160deg,rgba(242,67,125,0.08),transparent_45%),linear-gradient(340deg,rgba(34,214,191,0.08),transparent_45%)] p-0 text-r-text shadow-[0_24px_60px_rgba(0,0,0,0.7)] md:max-w-3xl data-open:zoom-in-100 data-closed:zoom-out-100 [animation-duration:100ms] motion-reduce:animate-none"
         overlayClassName="bg-black/45 supports-backdrop-filter:backdrop-blur-none [animation-duration:100ms] motion-reduce:animate-none"
         showCloseButton
         closeButtonClassName={MODAL_CLOSE_BUTTON_CLASS}
       >
         {slot ? (
           <div className="relative md:grid md:grid-cols-12 md:overflow-visible">
-            <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-px bg-gradient-to-r from-transparent via-[#e85a7a]/80 to-transparent" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-px bg-[linear-gradient(90deg,transparent,var(--r-pri)_18%,var(--r-nurse)_50%,var(--r-acc)_82%,transparent)]" />
 
             {/* 🖼️ Left Column: Media & Primary Action (md:col-span-5) */}
-            <div className="flex flex-col justify-between gap-2 border-b border-[#f3b8c4]/12 bg-[#10070b]/70 p-3 sm:gap-4 sm:p-5 md:col-span-5 md:border-b-0 md:border-r">
+            <div className="flex flex-col justify-between gap-2 border-b border-r-text-2/12 bg-r-bg/70 p-3 sm:gap-4 sm:p-5 md:col-span-5 md:border-b-0 md:border-r">
               <div className="space-y-2 sm:space-y-3.5">
                 {/* Main Thumbnail Container */}
-                <div className="relative aspect-video max-h-[9.75rem] w-full overflow-hidden rounded-xl border border-[#f3b8c4]/15 bg-[#12070c] shadow-md sm:max-h-none sm:rounded-2xl">
+                <div className="relative aspect-video max-h-[9.75rem] w-full overflow-hidden rounded-xl border border-r-text-2/15 bg-r-bg shadow-md sm:max-h-none sm:rounded-2xl">
                   {activeCover ? (
                     <ProtectedImage
                       src={activeCover}
@@ -300,7 +298,7 @@ export function LiveDetailModal({
                     />
                   )}
 
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140a0d]/80 via-transparent to-transparent" />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-r-bg/80 via-transparent to-transparent" />
 
                   {/* Status Badge */}
                   <div className="absolute top-2.5 left-2.5 z-10">
@@ -308,10 +306,10 @@ export function LiveDetailModal({
                       className={cn(
                         "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[0.62rem] font-bold tracking-wider uppercase shadow-md backdrop-blur-md",
                         cancelled
-                          ? "border-[#8a7f88]/50 bg-[#140a0d]/85 text-[#d8d0d4]"
+                          ? "border-[#8a7f88]/50 bg-r-bg/85 text-[#d8d0d4]"
                           : slot.status === "live"
-                            ? "border-[#e85a7a]/70 bg-[#e85a7a]/25 text-[#fff5f7] shadow-[0_0_12px_rgba(232,90,122,0.5)]"
-                            : "border-[#f3b8c4]/30 bg-[#140a0d]/85 text-[#f3b8c4]"
+                            ? "border-r-pri/70 bg-r-pri/25 text-r-text shadow-[0_0_12px_rgba(242,67,125,0.5)]"
+                            : "border-r-text-2/30 bg-r-bg/85 text-r-text-2"
                       )}
                     >
                       <span
@@ -320,8 +318,8 @@ export function LiveDetailModal({
                           cancelled
                             ? "bg-[#8a7f88]"
                             : slot.status === "live"
-                              ? "animate-pulse bg-[#e85a7a]"
-                              : "bg-[#f3b8c4]/80"
+                              ? "animate-pulse bg-r-pri"
+                              : "bg-r-text-2/80"
                         )}
                       />
                       {statusText ?? "Live"}
@@ -332,8 +330,8 @@ export function LiveDetailModal({
                 {/* 🎞️ Cover History (if more than 1) */}
                 {history.length > 1 ? (
                   <div className="space-y-1">
-                    <p className="inline-flex items-center gap-1 text-[0.58rem] font-medium tracking-wider text-[#f3b8c4]/65 uppercase sm:gap-1.5 sm:text-[0.62rem]">
-                      <Images className="size-3 text-[#e85a7a]" aria-hidden />
+                    <p className="inline-flex items-center gap-1 text-[0.58rem] font-medium tracking-wider text-r-text-2/65 uppercase sm:gap-1.5 sm:text-[0.62rem]">
+                      <Images className="size-3 text-r-pri" aria-hidden />
                       ประวัติปก ({history.length})
                     </p>
                     <div className="flex gap-2 overflow-x-auto pb-1">
@@ -347,8 +345,8 @@ export function LiveDetailModal({
                             className={cn(
                               "relative h-9 w-14 shrink-0 overflow-hidden rounded-lg border transition sm:h-11 sm:w-16 sm:rounded-xl",
                               selected
-                                ? "border-[#e85a7a] ring-2 ring-[#e85a7a]/50"
-                                : "border-[#f3b8c4]/20 hover:border-[#e85a7a]/40"
+                                ? "border-r-pri ring-2 ring-r-pri/50"
+                                : "border-r-text-2/20 hover:border-r-pri/40"
                             )}
                             title={`ปก #${history.length - index}`}
                           >
@@ -385,13 +383,13 @@ export function LiveDetailModal({
                 {/* Header & Titles (No line-clamp, full width & wrap) */}
                 <DialogHeader className="gap-0.5 pr-7 text-left sm:gap-1.5 sm:pr-8">
                   <DialogTitle
-                    className="font-[family-name:var(--font-display)] text-base font-normal leading-snug break-words text-[#fff5f7] sm:text-lg md:text-xl"
+                    className="font-[family-name:var(--font-display)] text-base font-normal leading-snug break-words text-r-text sm:text-lg md:text-xl"
                   >
                     {displayTitle}
                   </DialogTitle>
                   {slot.titleLocal ? (
                     <DialogDescription
-                      className="text-[0.7rem] leading-snug break-words text-[#f3b8c4]/75 sm:text-xs sm:leading-relaxed md:text-sm"
+                      className="text-[0.7rem] leading-snug break-words text-r-text-2/75 sm:text-xs sm:leading-relaxed md:text-sm"
                     >
                       {slot.title}
                     </DialogDescription>
@@ -404,9 +402,9 @@ export function LiveDetailModal({
 
                 {/* 🏷️ Meta Badges */}
                 <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
-                  <MetaPill className="border-[#f3b8c4]/30 bg-[#f3b8c4]/10 text-xs font-medium text-[#f7d7de]">
+                  <MetaPill className="border-r-text-2/30 bg-r-text-2/10 text-xs font-medium text-r-text">
                     <CalendarDays
-                      className="size-3.5 shrink-0 text-[#e85a7a]"
+                      className="size-3.5 shrink-0 text-r-pri"
                       aria-hidden
                     />
                     {formatLiveDate(slot.date)}
@@ -422,7 +420,7 @@ export function LiveDetailModal({
                     </MetaPill>
                   ) : null}
                   {own ? (
-                    <MetaPill className="border-[#e85a7a]/50 bg-[#e85a7a]/15 text-xs font-semibold text-[#f3b8c4] uppercase">
+                    <MetaPill className="border-r-pri/50 bg-r-pri/15 text-xs font-semibold text-r-text-2 uppercase">
                       Mild-R
                     </MetaPill>
                   ) : null}
@@ -445,9 +443,9 @@ export function LiveDetailModal({
 
                 {/* ⏰ Schedule Timing Grid */}
                 {hasScheduleBlock ? (
-                  <div className="overflow-hidden rounded-xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1c0c14]/80 to-[#14080e]/90 shadow-md sm:rounded-2xl">
-                    <div className="border-b border-[#f3b8c4]/12 px-2.5 py-1 sm:px-3.5 sm:py-2">
-                      <p className="text-[0.58rem] font-semibold tracking-wider text-[#e85a7a] uppercase sm:text-[0.62rem]">
+                  <div className="overflow-hidden rounded-xl border border-r-text-2/15 bg-white/[0.025] shadow-md sm:rounded-2xl">
+                    <div className="border-b border-r-text-2/12 px-2.5 py-1 sm:px-3.5 sm:py-2">
+                      <p className="text-[0.58rem] font-semibold tracking-wider text-r-pri uppercase sm:text-[0.62rem]">
                         ตารางเวลาสตรีม
                       </p>
                     </div>
@@ -461,15 +459,15 @@ export function LiveDetailModal({
                           time={scheduledDisplay ?? slot.time}
                           timePrevious={slot.scheduledPrevious}
                           timeUpdated={slot.scheduledUpdated}
-                          accentClassName="text-[#fff5f7]"
+                          accentClassName="text-r-text"
                         />
                       ) : (
-                        <span className="text-[#f3b8c4]/45">—</span>
+                        <span className="text-r-text-2/45">—</span>
                       )}
                     </TimeCell>
 
-                    <div className="grid grid-cols-2 border-t border-[#f3b8c4]/10">
-                      <div className="border-r border-[#f3b8c4]/10">
+                    <div className="grid grid-cols-2 border-t border-r-text-2/10">
+                      <div className="border-r border-r-text-2/10">
                         <TimeCell
                           label="Start Live"
                           icon={<Radio className="size-3.5" />}
@@ -486,13 +484,13 @@ export function LiveDetailModal({
                       </TimeCell>
                     </div>
 
-                    <div className="border-t border-[#f3b8c4]/10">
+                    <div className="border-t border-r-text-2/10">
                       <TimeCell
                         label="เวลาไลฟ์"
                         icon={<Timer className="size-3.5" />}
                       >
                         {slot.durationLabel ?? (
-                          <span className="text-[#f3b8c4]/45">—</span>
+                          <span className="text-r-text-2/45">—</span>
                         )}
                       </TimeCell>
                     </div>
