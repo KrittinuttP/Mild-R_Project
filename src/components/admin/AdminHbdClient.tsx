@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -71,6 +71,10 @@ export function AdminHbdClient() {
   const [actingId, setActingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<HbdSubmissionRow | null>(null);
+  /** `?focus=<id>` from the Discord alert: scroll to that card in "รออนุมัติ" and highlight it. */
+  const [focusId, setFocusId] = useState<string | null>(null);
+  const [focusGone, setFocusGone] = useState(false);
+  const focusHandled = useRef(false);
 
   const load = useCallback(async (status: Tab) => {
     setLoading(true);
@@ -121,6 +125,25 @@ export function AdminHbdClient() {
       cancelled = true;
     };
   }, [load]);
+
+  useEffect(() => {
+    // Read after mount: the URL is not known while rendering on the server.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one read of the address bar
+    setFocusId(new URLSearchParams(window.location.search).get("focus"));
+  }, []);
+
+  useEffect(() => {
+    if (!focusId || focusHandled.current || checking || !unlocked || loading || tab !== "pending") return;
+    focusHandled.current = true;
+    const el = document.getElementById(`hbd-item-${focusId}`);
+    if (el) {
+      // Jump straight there (a smooth scroll can be cut short while the page settles).
+      el.scrollIntoView({ block: "center" });
+    } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- the list is only known after it loads
+      setFocusGone(true);
+    }
+  }, [focusId, checking, unlocked, loading, tab, items]);
 
   async function switchTab(next: Tab) {
     setTab(next);
@@ -275,6 +298,12 @@ export function AdminHbdClient() {
         </div>
       ) : null}
 
+      {focusGone ? (
+        <p className="mt-4 rounded-2xl border border-[#f3b8c4]/20 bg-[#1a0c12]/60 p-3.5 text-xs text-[#f3b8c4]/80">
+          การ์ดจากลิงก์ใน Discord ไม่ได้อยู่ในรายการรออนุมัติแล้ว (อาจถูกอนุมัติ ซ่อน หรือลบไปแล้ว)
+        </p>
+      ) : null}
+
       {/* 📋 Submissions List */}
       {loading ? (
         <div className="flex min-h-[30vh] flex-col items-center justify-center gap-3">
@@ -298,7 +327,9 @@ export function AdminHbdClient() {
           {items.map((item) => (
             <li
               key={item.id}
-              className="group overflow-hidden rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1f0d16]/85 via-[#1a0c12]/80 to-[#14080e]/90 p-5 shadow-lg transition hover:border-[#e85a7a]/40"
+              id={`hbd-item-${item.id}`}
+              data-focus={item.id === focusId && tab === "pending" ? "" : undefined}
+              className="group scroll-mt-24 data-[focus]:border-[#22d6bf]/70 data-[focus]:shadow-[0_0_0_2px_rgba(34,214,191,0.35)] overflow-hidden rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1f0d16]/85 via-[#1a0c12]/80 to-[#14080e]/90 p-5 shadow-lg transition hover:border-[#e85a7a]/40"
             >
               <div className="flex flex-col gap-5 sm:flex-row">
                 {/* 🖼️ Card Preview */}

@@ -44,6 +44,17 @@ export function siteForHost(host: string | null): HostSite | null {
   return null;
 }
 
+/**
+ * Base URL for links to the team tools (Discord alerts): the first `ADMIN_HOST`,
+ * else NEXT_PUBLIC_SITE_URL (the main domain serves /admin too). Null when neither is set.
+ */
+export function adminSiteOrigin(): string | null {
+  const host = siteHosts().admin[0];
+  if (host) return `https://${host}`;
+  const site = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/+$/, "");
+  return site || null;
+}
+
 /** Public cafe domain(s), from `CAFE_HOST`. */
 export function cafePromotionHosts() {
   return siteHosts().cafe;

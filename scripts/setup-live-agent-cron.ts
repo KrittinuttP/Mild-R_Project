@@ -3,7 +3,7 @@
  * hourly x-feed-sync (:00). Each run takes 1 pending poster, else 1 failed
  * poster whose next_retry_at has passed; silent when there is nothing to do.
  *
- *   npx tsx --env-file=.env.local scripts/setup-live-agent-cron.ts
+ *   npm run cron:live-agent
  *
  * Requires a public site URL (not localhost):
  *   LIVE_AGENT_API_BASE or NEXT_PUBLIC_SITE_URL

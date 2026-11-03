@@ -333,18 +333,27 @@ export async function notifyLiveScheduleRowDiscord(
   await postDiscordWebhook(buildLiveScheduleRowPayload(input));
 }
 
-async function postDiscordWebhook(payload: unknown): Promise<void> {
+/** Discord should answer quickly; a stuck webhook must not hold up a request or cron run. */
+const DISCORD_TIMEOUT_MS = 8000;
+
+/**
+ * POST a message to DISCORD_WEBHOOK_URL (the ops / alert channel).
+ * Never pings anyone (`allowed_mentions` is always empty) and never throws.
+ * Returns false when the webhook is not set or Discord did not accept it.
+ */
+export async function postDiscordWebhook(payload: Record<string, unknown>): Promise<boolean> {
   const webhookUrl =
     typeof process !== "undefined"
       ? process.env.DISCORD_WEBHOOK_URL?.trim()
       : undefined;
-  if (!webhookUrl) return;
+  if (!webhookUrl) return false;
 
   try {
     const res = await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ ...payload, allowed_mentions: { parse: [] } }),
+      signal: AbortSignal.timeout(DISCORD_TIMEOUT_MS),
     });
     if (!res.ok) {
       const body = await res.text().catch(() => "");
@@ -353,11 +362,14 @@ async function postDiscordWebhook(payload: unknown): Promise<void> {
         res.status,
         body.slice(0, 200)
       );
+      return false;
     }
+    return true;
   } catch (err) {
     console.error(
       "[discord] webhook:",
       err instanceof Error ? err.message : err
     );
+    return false;
   }
 }

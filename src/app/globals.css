@@ -169,6 +169,11 @@
     /* iOS long-press "Save to Photos"; right-click and drag are blocked in MediaProtection. */
     -webkit-touch-callout: none;
   }
+  /* Tailwind v4 dropped the pointer cursor on buttons; bring it back for anything clickable. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
 }
 
 /* Heart atmosphere — pulse + ECG share --heart-beat / --heart-ecg */

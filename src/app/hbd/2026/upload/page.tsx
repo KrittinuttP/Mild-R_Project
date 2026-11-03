@@ -10,7 +10,7 @@ import { mildRData } from "@/data/vtuber-data";
 export const metadata: Metadata = {
   title: "ส่งการ์ดอวยพร | Mild-R HBD 2026",
   description:
-    "อัปโหลดการ์ดอวยพรวันเกิด Mild-R · 12.12.2026 — จากฮันนี่ถึง mutant สาวของเรา",
+    "อัปโหลดการ์ดอวยพรวันเกิด Mild-R · 12 Dec 2026 — จากฮันนี่ถึง mutant สาวของเรา",
 };
 
 export default function Hbd2026UploadPage() {
