@@ -10,7 +10,20 @@ import {
   type ReactNode,
 } from "react";
 import Link from "next/link";
-import { ArrowLeft, Cake, Check, Coffee, Crop, Link2, Pencil, Shield, Upload, X } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
+  Cake,
+  Check,
+  Coffee,
+  Crop,
+  Link2,
+  Pencil,
+  Shield,
+  Upload,
+  X,
+} from "lucide-react";
 
 import { useAvatarCrop } from "@/components/upload/useAvatarCrop";
 import {
@@ -62,7 +75,63 @@ const ERROR_TEXT = "text-[#ff8fb0]";
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ?? "";
 const UNDO_MS = 6000;
 
-type Phase = "form" | "preview" | "sending" | "done";
+/** Pink text link that opens the "ก่อนเริ่ม" screen from the form (narrow screens). */
+const INTRO_LINK = cn(
+  "inline-flex min-h-8 items-center gap-1.5 rounded-md text-[13.5px] text-r-pri transition-colors hover:text-r-pri-hover",
+  FOCUS
+);
+
+/** Set once the "ก่อนเริ่ม" screen was read → next visit opens the form directly. */
+const FANART_INTRO_SEEN_KEY = "mild-r-fanart-upload-intro-seen";
+
+/** "ก่อนเริ่ม" screen · the three form steps in short. */
+const HOW_STEPS: ReadonlyArray<{ title: string; detail: string }> = [
+  { title: "กรอกชื่อและบัญชี X", detail: "ใช้เป็นเครดิตผลงาน · Discord ไม่บังคับ" },
+  {
+    title: "เลือกแฟนอาร์ต",
+    detail: `ครั้งละสูงสุด ${FANART_LIMITS.maxFiles} รูป · JPEG · PNG · WebP · รูปละไม่เกิน ${Math.round(
+      FANART_LIMITS.maxPickBytes / (1024 * 1024)
+    )} MB`,
+  },
+  { title: "ติ๊กยินยอม แล้วส่ง", detail: "ทีมงานจะตรวจก่อนนำไปใช้" },
+];
+
+const HOW_FAQ = [
+  {
+    q: "ส่งงานที่จ้างคนอื่นวาดได้ไหม?",
+    a: "ได้ค่ะ ขออนุญาตคนวาดก่อน แล้วใส่เครดิตของคนวาดที่ “แก้เครดิต” ของรูปนั้น",
+  },
+  {
+    q: "เครดิตจะขึ้นเป็นชื่ออะไร?",
+    a: "ใช้บัญชี X ของคุณเป็นเครดิต ถ้ารูปไหนเป็นผลงานของคนอื่น แก้เครดิตเฉพาะรูปนั้นได้ (บัญชี X หรือลิงก์เว็บ)",
+  },
+  {
+    q: `อยากส่งเกิน ${FANART_LIMITS.maxFiles} รูปทำยังไง?`,
+    a: `ส่งได้ครั้งละ ${FANART_LIMITS.maxFiles} รูป ส่งเสร็จแล้วกด “ส่งรูปเพิ่ม” เพื่อส่งชุดถัดไป`,
+  },
+  {
+    q: "ต้องกรอก Discord ไหม?",
+    a: "ไม่บังคับค่ะ เป็นช่องทางติดต่อสำรอง",
+  },
+] as const;
+
+function readIntroSeen() {
+  try {
+    return localStorage.getItem(FANART_INTRO_SEEN_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function writeIntroSeen() {
+  try {
+    localStorage.setItem(FANART_INTRO_SEEN_KEY, "1");
+  } catch {
+    /* ignore quota / private mode */
+  }
+}
+
+type Phase = "intro" | "form" | "preview" | "sending" | "done";
 type SendState = "waiting" | "uploading" | "saving" | "done" | "failed";
 
 type Item = {
@@ -205,7 +274,11 @@ function FanartUploadForm({
   const removedKeys = useRef(new Set<string>());
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [phase, setPhase] = useState<Phase>("form");
+  const [phase, setPhase] = useState<Phase>("intro");
+  /** localStorage was read: "ก่อนเริ่ม" or the form can show without a flash. */
+  const [introReady, setIntroReady] = useState(false);
+  /** FAQ on the "ก่อนเริ่ม" screen: one answer open at a time. */
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [items, setItems] = useState<Item[]>([]);
   const [prepErrors, setPrepErrors] = useState<string[]>([]);
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
@@ -233,6 +306,12 @@ function FanartUploadForm({
   useEffect(() => {
     itemsRef.current = items;
   }, [items]);
+
+  // Seen "ก่อนเริ่ม" before (or "ส่งรูปเพิ่ม" remounted this form) → straight to the form.
+  useEffect(() => {
+    if (readIntroSeen()) setPhase("form");
+    setIntroReady(true);
+  }, []);
 
   // Free the preview images when the page goes away.
   useEffect(
@@ -273,10 +352,33 @@ function FanartUploadForm({
     };
   }, [phase, ids]);
 
-  function goToSection(index: number) {
+  function scrollToSection(index: number) {
     document
       .getElementById(`${ids}-${SECTION_KEYS[index]}-section`)
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  /** Step list: from "ก่อนเริ่ม" it opens the form first, then scrolls to the step. */
+  function goToSection(index: number) {
+    if (phase === "intro") {
+      writeIntroSeen();
+      setPhase("form");
+      requestAnimationFrame(() => requestAnimationFrame(() => scrollToSection(index)));
+      return;
+    }
+    scrollToSection(index);
+  }
+
+  function showIntro() {
+    finishUndo();
+    setPhase("intro");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function startForm() {
+    writeIntroSeen();
+    setPhase("form");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function patchItem(key: string, patch: Partial<Item>) {
@@ -1144,8 +1246,34 @@ function FanartUploadForm({
       )}
       {header("ส่งได้ครั้งละสูงสุด 5 รูป · ทีมงานจะตรวจก่อนนำไปใช้", "left")}
       <nav aria-label="ขั้นตอนการกรอก" className="-ml-3 hidden space-y-1 lg:block">
+        <button
+          type="button"
+          onClick={showIntro}
+          aria-current={phase === "intro" ? "step" : undefined}
+          className={cn(
+            "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors",
+            FOCUS,
+            phase === "intro" ? "bg-r-pri/[0.09] shadow-[inset_2px_0_0_var(--r-pri)]" : "hover:bg-white/[0.03]"
+          )}
+        >
+          <span
+            aria-hidden
+            className={cn(
+              "flex size-[26px] flex-none items-center justify-center rounded-full transition-colors",
+              phase === "intro" ? "bg-r-pri text-r-on-pri" : "text-r-text-2 ring-[1.5px] ring-r-text-2/40 ring-inset"
+            )}
+          >
+            <BookOpen className="size-3.5" />
+          </span>
+          <span className="min-w-0">
+            <span className={cn("block text-[15px]", phase === "intro" ? "text-r-text" : "text-r-text/85")}>
+              ก่อนเริ่ม
+            </span>
+            <span className="block truncate text-xs text-r-text-3">วิธีส่ง · ใช้ที่ไหน</span>
+          </span>
+        </button>
         {steps.map((step, index) => {
-          const current = activeSection === index;
+          const current = phase === "form" && activeSection === index;
           return (
             <button
               key={step.title}
@@ -1175,7 +1303,7 @@ function FanartUploadForm({
           );
         })}
       </nav>
-      <div className={cn(R_CARD_CLASS, "hidden p-5 lg:block")}>
+      <div className={cn(R_CARD_CLASS, "hidden p-5", phase === "form" && "lg:block")}>
         <p className="text-sm text-r-text">รูปจะถูกนำไปใช้ที่</p>
         <ul className="mt-2">
           {usagePlaces.map(({ icon: Icon, title, sub }) => (
@@ -1192,6 +1320,94 @@ function FanartUploadForm({
         </ul>
       </div>
     </aside>
+  );
+
+  const intro = (
+    <div className="space-y-3.5 lg:space-y-4">
+      <section className={cn(CARD, "space-y-6")} aria-labelledby={`${ids}-how`}>
+        <div>
+          <h2 id={`${ids}-how`} className={cn(DISPLAY, "text-xl font-normal text-r-text sm:text-[1.375rem]")}>
+            ส่งแฟนอาร์ตได้ใน 3 ขั้น
+          </h2>
+          <ol className="mt-5">
+            {HOW_STEPS.map((step, index) => {
+              const last = index === HOW_STEPS.length - 1;
+              return (
+                <li key={step.title} className="relative flex gap-4 pb-6 last:pb-0">
+                  {/* line linking the step numbers */}
+                  {last ? null : (
+                    <span aria-hidden className="absolute top-8 bottom-1 left-[14px] w-px bg-r-pri/30" />
+                  )}
+                  <span
+                    aria-hidden
+                    className="relative flex size-[30px] flex-none items-center justify-center rounded-full bg-r-pri text-sm font-bold text-r-on-pri"
+                  >
+                    {index + 1}
+                  </span>
+                  <div className="min-w-0 pt-[3px]">
+                    <p className="text-[15px] leading-snug text-r-text">{step.title}</p>
+                    <p className="mt-1 text-[13px] leading-relaxed text-r-text-3">{step.detail}</p>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+
+        <div className="rounded-2xl bg-black/20 p-4 ring-1 ring-white/[0.06] ring-inset sm:px-[18px]">
+          <p className="text-sm text-r-text">รูปจะถูกนำไปใช้ที่</p>
+          <ul className="mt-2 grid gap-x-4 lg:grid-cols-2">
+            {usagePlaces.map(({ icon: Icon, title, sub }) => (
+              <li key={title} className="flex items-center gap-3 py-2">
+                <span className="flex size-9 flex-none items-center justify-center rounded-xl bg-r-pri/12 text-r-pri">
+                  <Icon className="size-[18px]" aria-hidden />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm text-r-text">{title}</span>
+                  <span className="block truncate text-xs text-r-text-3">{sub}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className={CARD} aria-labelledby={`${ids}-faq`}>
+        <h2 id={`${ids}-faq`} className={cn(DISPLAY, "text-lg font-normal text-r-text")}>
+          คำถามที่พบบ่อย
+        </h2>
+        <div className="mt-3 divide-y divide-white/[0.08]">
+          {HOW_FAQ.map((item, index) => (
+            <details key={item.q} open={openFaq === index} className="group py-3">
+              <summary
+                onClick={(event) => {
+                  // Opening one answer closes the others.
+                  event.preventDefault();
+                  setOpenFaq((current) => (current === index ? null : index));
+                }}
+                className={cn(
+                  "flex cursor-pointer list-none items-center justify-between gap-3 rounded-md text-[15px] text-r-text [&::-webkit-details-marker]:hidden",
+                  FOCUS
+                )}
+              >
+                {item.q}
+                <span aria-hidden className="text-r-text-3 transition-transform group-open:rotate-45">
+                  +
+                </span>
+              </summary>
+              <p className="mt-2 text-sm leading-[1.7] text-r-text-2">{item.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <div className="pt-1.5">
+        <button type="button" onClick={startForm} className={cn(R_CTA_PRIMARY_CLASS, "w-full sm:w-auto sm:px-8")}>
+          เริ่มกรอก
+          <ArrowRight className="size-4" aria-hidden />
+        </button>
+      </div>
+    </div>
   );
 
   const total = items.length;
@@ -1214,27 +1430,32 @@ function FanartUploadForm({
     <div
       className={cn(
         "mx-auto px-4 sm:px-5",
-        phase === "form" ? "max-w-lg lg:max-w-[1160px] lg:px-10" : "max-w-lg",
+        phase === "form" || phase === "intro" ? "max-w-lg lg:max-w-[1160px] lg:px-10" : "max-w-lg",
         // The site header is fixed on the regular page; the standalone page has its own sticky bar.
         standalone ? "pt-8 pb-16 sm:pt-12 sm:pb-20" : "py-16 sm:py-20"
       )}
     >
       {avatarCrop.dialog}
 
-      {phase === "form" ? (
-        <form
-          onSubmit={onSubmitForm}
-          noValidate
-          className="grid grid-cols-1 gap-6 lg:grid-cols-[360px_minmax(0,1fr)] lg:items-start lg:gap-14"
-        >
+      {phase === "form" || phase === "intro" ? (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[360px_minmax(0,1fr)] lg:items-start lg:gap-14">
           {aside}
-          <div className="space-y-3.5 lg:space-y-4">
-            {aboutSection}
-            {artSection}
-            {consentSection}
-            {submitBlock}
+          <div>
+            {phase === "form" ? (
+              <form onSubmit={onSubmitForm} noValidate className="space-y-3.5 lg:space-y-4">
+                <button type="button" onClick={showIntro} className={cn(INTRO_LINK, "lg:hidden")}>
+                  <BookOpen className="size-4" aria-hidden />
+                  ดูวิธีส่งแฟนอาร์ต
+                </button>
+                {aboutSection}
+                {artSection}
+                {consentSection}
+                {submitBlock}
+              </form>
+            ) : null}
+            {phase === "intro" && introReady ? intro : null}
           </div>
-        </form>
+        </div>
       ) : null}
 
       {phase === "preview" ? (
