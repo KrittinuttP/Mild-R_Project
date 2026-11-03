@@ -13,6 +13,8 @@ import Link from "next/link";
 import {
   AlertCircle,
   ArrowLeft,
+  ArrowRight,
+  BookOpen,
   Check,
   Crop,
   Download,
@@ -69,10 +71,54 @@ const MISSING_SUMMARY = "ยังส่งไม่ได้ — กรุณ�
 const CONTACT_HINT = "จะใช้ช่องทางนี้ติดต่อกลับ ในกรณีที่มีปัญหา";
 
 const HBD_FORM_CACHE_KEY = "mild-r-hbd-upload-draft";
+/** Set once the "ก่อนเริ่ม" screen was read → next visit opens the form directly. */
+const HBD_INTRO_SEEN_KEY = "mild-r-hbd-upload-intro-seen";
+
+/** "ก่อนเริ่ม" screen · short steps; step 1 carries the template download. */
+const HOW_STEPS: ReadonlyArray<{ title: string; detail?: string }> = [
+  { title: "โหลดเทมเพลต แล้วตกแต่งการ์ด" },
+  { title: "อัปโหลดการ์ด + ชื่อ + คำอวยพร", detail: "JPEG · PNG · WebP ไม่เกิน 20 MB" },
+  { title: "ใส่ช่องทางติดต่อ แล้วส่ง", detail: "X หรือ Discord · ไม่แสดงบนเว็บ" },
+];
+
+const HOW_FAQ = [
+  {
+    q: "ต้องใช้เทมเพลตของโปรเจกต์ไหม?",
+    a: "ต้องใช้ค่ะ โหลดเทมเพลตในขั้นที่ 1 ตกแต่งให้เสร็จ แล้วอัปโหลดเป็นรูปการ์ด",
+  },
+  {
+    q: "ต้องใส่รูปโปรไฟล์กับคำอวยพรไหม?",
+    a: "ไม่บังคับค่ะ ถ้าไม่ใส่รูปโปรไฟล์ จะใช้รูปเริ่มต้นแทน",
+  },
+  {
+    q: "ส่งแล้วการ์ดขึ้นเว็บเลยไหม?",
+    a: "ยังค่ะ ทีมงานจะตรวจการ์ดก่อน ผ่านแล้วการ์ดจะขึ้นในหน้าคำอวยพร",
+  },
+  {
+    q: "ช่องทางติดต่อเอาไปใช้ทำอะไร?",
+    a: "ใช้ติดต่อกลับเฉพาะตอนที่การ์ดมีปัญหาค่ะ และไม่แสดงบนเว็บ",
+  },
+] as const;
+
+function readIntroSeen() {
+  try {
+    return localStorage.getItem(HBD_INTRO_SEEN_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function writeIntroSeen() {
+  try {
+    localStorage.setItem(HBD_INTRO_SEEN_KEY, "1");
+  } catch {
+    /* ignore quota / private mode */
+  }
+}
 
 const SECTION_KEYS = ["card", "about", "contact"] as const;
 
-type Phase = "form" | "preview" | "done";
+type Phase = "intro" | "form" | "preview" | "done";
 
 type CachedFormFields = {
   displayName: string;
@@ -214,7 +260,7 @@ type HbdUploadClientProps = {
 
 export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
   const ids = useId();
-  const [phase, setPhase] = useState<Phase>("form");
+  const [phase, setPhase] = useState<Phase>("intro");
   const [loading, setLoading] = useState(false);
   /** Set after "ตรวจสอบก่อนส่ง" with missing fields; each field error clears once it is filled. */
   const [showMissing, setShowMissing] = useState(false);
@@ -233,6 +279,8 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | undefined>();
   const [cacheReady, setCacheReady] = useState(false);
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
+  /** FAQ on the "ก่อนเริ่ม" screen: one answer open at a time. */
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const cardInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -255,6 +303,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
       setContactChannel(cached.contactChannel);
       setContactHandle(cached.contactHandle);
     }
+    if (readIntroSeen()) setPhase("form");
     setCacheReady(true);
   }, []);
 
@@ -336,9 +385,22 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
     if (focusId) document.getElementById(focusId)?.focus({ preventScroll: true });
   }
 
-  /** Step list: from the review page it goes back to the form first. */
+  function showIntro() {
+    if (loading) return;
+    setSendError(null);
+    setPhase("intro");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function startForm() {
+    writeIntroSeen();
+    setPhase("form");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  /** Step list: from the review page or "ก่อนเริ่ม" it goes back to the form first. */
   function goToSection(index: number) {
-    if (phase === "preview") {
+    if (phase === "preview" || phase === "intro") {
       if (loading) return;
       setSendError(null);
       setPhase("form");
@@ -554,6 +616,32 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
       )}
       {header()}
       <nav aria-label="ขั้นตอนการกรอก" className="-ml-3 hidden space-y-1 lg:block">
+        <button
+          type="button"
+          onClick={showIntro}
+          aria-current={phase === "intro" ? "step" : undefined}
+          className={cn(
+            "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors",
+            FOCUS,
+            phase === "intro" ? "bg-r-pri/[0.09] shadow-[inset_2px_0_0_var(--r-pri)]" : "hover:bg-white/[0.03]"
+          )}
+        >
+          <span
+            aria-hidden
+            className={cn(
+              "flex size-[26px] flex-none items-center justify-center rounded-full transition-colors",
+              phase === "intro" ? "bg-r-pri text-r-on-pri" : "text-r-text-2 ring-[1.5px] ring-r-text-2/40 ring-inset"
+            )}
+          >
+            <BookOpen className="size-3.5" />
+          </span>
+          <span className="min-w-0">
+            <span className={cn("block text-[15px]", phase === "intro" ? "text-r-text" : "text-r-text/85")}>
+              ก่อนเริ่ม
+            </span>
+            <span className="block truncate text-xs text-r-text-3">วิธีส่ง · เทมเพลต</span>
+          </span>
+        </button>
         {steps.map((step, index) => {
           const current = phase === "form" && activeSection === index;
           return (
@@ -604,6 +692,104 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
         </div>
       ) : null}
     </aside>
+  );
+
+  const intro = (
+    <div className="space-y-3.5 lg:space-y-4">
+      <section
+        className={cn(CARD, "grid gap-6 lg:grid-cols-[minmax(0,15rem)_1fr] lg:items-center lg:gap-8")}
+        aria-labelledby={`${ids}-how`}
+      >
+        <figure className="order-2 lg:order-1">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={HBD_CARD_TEMPLATE.path}
+            alt="ตัวอย่างเทมเพลตการ์ดอวยพร"
+            className="h-auto w-full rounded-xl shadow-[0_14px_34px_rgba(0,0,0,0.45)] ring-1 ring-white/10"
+          />
+          <figcaption className="mt-2.5 text-[12.5px] leading-relaxed text-r-text-3">
+            ทุกการ์ดใช้เทมเพลตเดียวกัน ให้การ์ดทุกใบเข้าชุดกันตอนมายด์อาร์อ่าน
+          </figcaption>
+        </figure>
+
+        <div className="order-1 lg:order-2">
+          <h2 id={`${ids}-how`} className={cn(DISPLAY, "text-xl font-normal text-r-text sm:text-[1.375rem]")}>
+            ส่งการ์ดได้ใน 3 ขั้น
+          </h2>
+          <ol className="mt-5">
+            {HOW_STEPS.map((step, index) => {
+              const last = index === HOW_STEPS.length - 1;
+              return (
+                <li key={step.title} className="relative flex gap-4 pb-6 last:pb-0">
+                  {/* line linking the step numbers */}
+                  {last ? null : (
+                    <span aria-hidden className="absolute top-8 bottom-1 left-[14px] w-px bg-r-pri/30" />
+                  )}
+                  <span
+                    aria-hidden
+                    className="relative flex size-[30px] flex-none items-center justify-center rounded-full bg-r-pri text-sm font-bold text-r-on-pri"
+                  >
+                    {index + 1}
+                  </span>
+                  <div className="min-w-0 pt-[3px]">
+                    <p className="text-[15px] leading-snug text-r-text">{step.title}</p>
+                    {step.detail ? (
+                      <p className="mt-1 text-[13px] leading-relaxed text-r-text-3">{step.detail}</p>
+                    ) : null}
+                    {index === 0 ? (
+                      <a
+                        href={HBD_CARD_TEMPLATE.path}
+                        download={HBD_CARD_TEMPLATE.filename}
+                        className={cn(R_CTA_OUTLINE_CLASS, "mt-3 h-10 px-4 text-sm whitespace-nowrap")}
+                      >
+                        <Download className="size-4" aria-hidden />
+                        โหลดเทมเพลต
+                      </a>
+                    ) : null}
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      </section>
+
+      <section className={CARD} aria-labelledby={`${ids}-faq`}>
+        <h2 id={`${ids}-faq`} className={cn(DISPLAY, "text-lg font-normal text-r-text")}>
+          คำถามที่พบบ่อย
+        </h2>
+        <div className="mt-3 divide-y divide-white/[0.08]">
+          {HOW_FAQ.map((item, index) => (
+            <details key={item.q} open={openFaq === index} className="group py-3">
+              <summary
+                onClick={(event) => {
+                  // Opening one answer closes the others.
+                  event.preventDefault();
+                  setOpenFaq((current) => (current === index ? null : index));
+                }}
+                className={cn(
+                  "flex cursor-pointer list-none items-center justify-between gap-3 rounded-md text-[15px] text-r-text [&::-webkit-details-marker]:hidden",
+                  FOCUS
+                )}
+              >
+                {item.q}
+                <span aria-hidden className="text-r-text-3 transition-transform group-open:rotate-45">
+                  +
+                </span>
+              </summary>
+              <p className="mt-2 text-sm leading-[1.7] text-r-text-2">{item.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <div className="pt-1.5">
+        <button type="button" onClick={startForm} className={cn(R_CTA_PRIMARY_CLASS, "w-full sm:w-auto sm:px-8")}>
+          เริ่มกรอก
+          <ArrowRight className="size-4" aria-hidden />
+        </button>
+      </div>
+    </div>
   );
 
   const cardSection = (
@@ -1011,12 +1197,17 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
               aria-hidden={phase !== "form"}
               inert={phase !== "form" ? true : undefined}
             >
+              <button type="button" onClick={showIntro} className={cn(LINK_BTN, "lg:hidden")}>
+                <BookOpen className="size-4" aria-hidden />
+                ดูวิธีส่งการ์ด
+              </button>
               {cardSection}
               {aboutSection}
               {contactSection}
               {submitBlock}
             </form>
             {phase === "preview" ? review : null}
+            {phase === "intro" && cacheReady ? intro : null}
           </div>
         </div>
       )}
