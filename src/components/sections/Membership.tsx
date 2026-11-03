@@ -135,23 +135,30 @@ function TierAccordion({ tiers, index }: { tiers: MembershipTier[]; index: numbe
   const tier = tiers[index];
   const lead = index === 0;
   const inherit = inheritLine(tiers, index);
-  const summary = [inherit, ...tier.perks.map((p) => p.label)].filter(Boolean).join(" · ");
+  // Closed: one short line — "รวมระดับ… · first perk …" (cut with … so every closed card is the same height).
+  const shortInherit = inherit?.replace("รวมสิทธิ์", "รวม") ?? null;
+  const summary = [shortInherit, ...tier.perks.map((p) => p.label)].filter(Boolean).join(" · ");
   return (
+    // Same `name` on every tier → the browser keeps one open: opening a tier closes the other.
     <details
+      name="member-tiers"
       open={lead}
+      // Pink frame follows the open tier; closed tiers keep the thin line.
       className={cn(
-        "group r-card rounded-[20px] px-4 py-3.5 shadow-none",
-        lead ? "relative ring-[1.5px] ring-r-pri" : "ring-1 ring-r-text-2/15"
+        "group r-card rounded-[20px] px-4 py-3.5 shadow-none ring-1 ring-r-text-2/15 transition-shadow open:ring-[1.5px] open:ring-r-pri",
+        lead && "relative"
       )}
     >
       <summary className="flex cursor-pointer list-none items-start gap-3 [&::-webkit-details-marker]:hidden">
         <span className="min-w-0 flex-1">
-          <span className="flex items-center gap-2">
-            <span className="min-w-0 font-[family-name:var(--font-display)] text-[0.9375rem] text-r-text">{tier.name}</span>
-            <Hearts count={index + 1} className="shrink-0 text-r-pri" />
+          <span className="block truncate font-[family-name:var(--font-display)] text-[0.9375rem] text-r-text">
+            {tier.name}
           </span>
-          {/* closed: one-line summary (only the <summary> shows while closed) */}
-          <span className="mt-2 block text-xs leading-relaxed text-r-text-3 group-open:hidden">{summary}</span>
+          <span className="mt-1.5 flex items-center gap-2">
+            <Hearts count={index + 1} className="shrink-0 text-r-pri" />
+            {/* closed: one-line summary (only the <summary> shows while closed) */}
+            <span className="min-w-0 truncate text-xs text-r-text-3 group-open:hidden">{summary}</span>
+          </span>
         </span>
         <span className="text-right">
           <span className="block font-[family-name:var(--font-display)] text-[1.375rem] leading-tight font-semibold text-r-text-2">
