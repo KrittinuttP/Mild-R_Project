@@ -170,7 +170,29 @@ type FanartUploadClientProps = {
 
 const SECTION_KEYS = ["about", "art", "consent"] as const;
 
-export function FanartUploadClient({ standalone = false, usage }: FanartUploadClientProps) {
+/**
+ * "ส่งรูปเพิ่ม" starts a brand-new form: changing `key` remounts it, so every
+ * field, credit, crop and timer goes back to its default.
+ */
+export function FanartUploadClient(props: FanartUploadClientProps) {
+  const [round, setRound] = useState(0);
+  return (
+    <FanartUploadForm
+      key={round}
+      {...props}
+      onSendMore={() => {
+        setRound((value) => value + 1);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }}
+    />
+  );
+}
+
+function FanartUploadForm({
+  standalone = false,
+  usage,
+  onSendMore,
+}: FanartUploadClientProps & { onSendMore: () => void }) {
   const ids = useId();
   const artInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -190,8 +212,6 @@ export function FanartUploadClient({ standalone = false, usage }: FanartUploadCl
   const [displayName, setDisplayName] = useState("");
   const [contactHandle, setContactHandle] = useState("");
   const [contactDiscord, setContactDiscord] = useState("");
-  /** After "ส่งรูปเพิ่ม": section ① shows one line until the fan taps "แก้ไข". */
-  const [aboutCollapsed, setAboutCollapsed] = useState(false);
   /** Form section in view, for the step list beside the form (wide screens). */
   const [activeSection, setActiveSection] = useState(0);
   /** Credit for every picture; null = the fan's own X account. */
@@ -596,18 +616,11 @@ export function FanartUploadClient({ standalone = false, usage }: FanartUploadCl
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  /** After a successful send: same name, account and credit; fresh pictures and consent. */
+  /** After a successful send: a fresh, empty form (the parent remounts this one). */
   function sendMore() {
-    itemsRef.current.forEach((item) => URL.revokeObjectURL(item.previewUrl));
-    setItems([]);
-    setPrepErrors([]);
-    setConsent(false);
-    setConsentError(false);
-    setFormError(null);
-    setAboutCollapsed(true);
-    sessionRef.current = null;
-    setPhase("form");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    // Unmount frees the art previews; the avatar preview is freed here.
+    clearAvatar();
+    onSendMore();
   }
 
   const preparing = items.some((item) => item.preparing);
@@ -765,41 +778,6 @@ export function FanartUploadClient({ standalone = false, usage }: FanartUploadCl
         className={cn(INPUT, "pl-8")}
       />
     </div>
-  );
-  const aboutCompact = (
-    <section
-      id={`${ids}-about-section`}
-      className={cn(CARD, "flex scroll-mt-24 items-center gap-3 py-4 sm:py-4")}
-      aria-labelledby={`${ids}-about`}
-    >
-      <span
-        aria-hidden
-        className="flex size-[26px] flex-none items-center justify-center rounded-full bg-r-acc text-[13px] font-bold text-r-on-acc"
-      >
-        1
-      </span>
-      {avatarPreviewUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={avatarPreviewUrl} alt="" className="size-9 flex-none rounded-full object-cover" />
-      ) : null}
-      <div className="min-w-0 flex-1">
-        <h2 id={`${ids}-about`} className="truncate text-[15px] text-r-text">
-          <span className="sr-only">เกี่ยวกับคุณ: </span>
-          {shownName}
-        </h2>
-        <p className="truncate text-[12.5px] text-r-text-3">
-          @{"handle" in handleCheck ? handleCheck.handle : contactHandle}
-          {discordHandle ? ` · Discord · ${discordHandle}` : ""}
-        </p>
-      </div>
-      <button
-        type="button"
-        onClick={() => setAboutCollapsed(false)}
-        className={cn("min-h-9 flex-none rounded-full px-2 text-sm text-r-pri hover:text-r-pri-hover", FOCUS)}
-      >
-        แก้ไข
-      </button>
-    </section>
   );
   const aboutSection = (
     <section id={`${ids}-about-section`} className={cn(CARD, "scroll-mt-24")} aria-labelledby={`${ids}-about`}>
@@ -1251,7 +1229,7 @@ export function FanartUploadClient({ standalone = false, usage }: FanartUploadCl
         >
           {aside}
           <div className="space-y-3.5 lg:space-y-4">
-            {aboutCollapsed && aboutDone ? aboutCompact : aboutSection}
+            {aboutSection}
             {artSection}
             {consentSection}
             {submitBlock}
@@ -1445,7 +1423,6 @@ export function FanartUploadClient({ standalone = false, usage }: FanartUploadCl
                 </Link>
               )}
             </div>
-            <p className="mt-2.5 text-xs text-r-text-3">ชื่อ บัญชี X และเครดิตจะยังอยู่ ไม่ต้องกรอกใหม่</p>
           </section>
         </div>
       ) : null}
