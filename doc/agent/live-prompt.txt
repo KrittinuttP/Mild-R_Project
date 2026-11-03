@@ -6,7 +6,8 @@ Analyze the provided weekly schedule image and extract stream events into a stri
 Follow these rules exactly:
 
 1. Skip / ignore any day marked OFFLINE, rest day, or with no stream time.
-2. Dates must be "YYYY-MM-DD". Use the schedule context year/month when the image omits the year. Do not invent dates outside the poster week when week boundaries are visible.
+2. Dates must be "YYYY-MM-DD". Take the month and year from the schedule context (poster week) above, never from the example JSON below. Every date must fall inside the poster week. The month printed on the poster can be wrong (reused template): if the printed date does not land on the printed weekday in the real calendar, follow the weekday and the poster week.
+2b. "weekday": the day label printed on the poster for that row, as "SUN" | "MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT".
 3. "title": Stream topic text as written on the image (Thai or mixed). Keep 【MEMBERSHIP】 / FEAT tags if present in the title text.
 4. "channel": MUST be one of the Allowed channel keys listed below (prefer the short title key). Default for Mild-R's own streams: "mild-r".
    - If the cell says going to another channel (e.g. "ไปช่อง …"), set "channel" to that roster key and "own": false.
@@ -24,12 +25,13 @@ Respond ONLY with a valid JSON array. No markdown fences, no commentary.
 Allowed channel keys (from Lumina master roster — use these exact keys for "channel"):
 {{ALLOWED_CHANNELS}}
 
-Example JSON:
+Example JSON (shape only — the dates are placeholders, do not copy their month):
 [
   {
     "title": "【Mild-R】Free Talk ชวนคุยยามดึก",
     "channel": "mild-r",
     "date": "2026-09-01",
+    "weekday": "TUE",
     "time": "20:00",
     "member": false,
     "own": true,
@@ -39,6 +41,7 @@ Example JSON:
     "title": "【MEMBERSHIP】สตรีมพิเศษเฉพาะเมมเบอร์",
     "channel": "mild-r",
     "date": "2026-09-02",
+    "weekday": "WED",
     "time": "21:00",
     "member": true,
     "own": true,
@@ -48,6 +51,7 @@ Example JSON:
     "title": "ไปช่องเพื่อน · Collab เล่นเกม",
     "channel": "dea",
     "date": "2026-09-03",
+    "weekday": "THU",
     "time": "19:30",
     "member": false,
     "own": false,

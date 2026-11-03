@@ -12,7 +12,10 @@ import {
   previewLocalDate,
   type PreviewLikeRow,
 } from "@/lib/live-preview-match";
-import type { XLiveScheduleStatus } from "@/lib/x-live-schedules";
+import {
+  scheduleWeekStartFromPostedAt,
+  type XLiveScheduleStatus,
+} from "@/lib/x-live-schedules";
 
 export type XLiveScheduleRow = {
   id: string;
@@ -20,9 +23,14 @@ export type XLiveScheduleRow = {
   image_url: string | null;
   image_source_url: string | null;
   posted_at: string | null;
+  /** Sunday (Asia/Bangkok) of the week this poster covers. */
+  schedule_week_start?: string | null;
   status: XLiveScheduleStatus;
   attempt_count?: number | null;
 };
+
+/** A date the model returned outside the poster week: moved (`to`) or dropped (`to: null`). */
+export type PosterWeekFix = { from: string; to: string | null; title: string };
 
 export type LiveAgentManualItem = {
   title: string;
@@ -32,7 +40,21 @@ export type LiveAgentManualItem = {
   member: boolean;
   own: boolean;
   collab: boolean;
+  /**
+   * Weekday printed on the poster (SUN…SAT). Only used to check the date against
+   * the real calendar; removed before posting to /api/live/manual.
+   */
+  weekday?: Weekday;
 };
+
+const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
+type Weekday = (typeof WEEKDAYS)[number];
+
+function parseWeekday(value: unknown): Weekday | undefined {
+  if (typeof value !== "string") return undefined;
+  const key = value.trim().slice(0, 3).toUpperCase();
+  return (WEEKDAYS as readonly string[]).includes(key) ? (key as Weekday) : undefined;
+}
 
 export type ProcessScheduleResult = {
   tweet_id: string;
@@ -49,6 +71,8 @@ export type ProcessScheduleResult = {
   nextRetryAt?: string | null;
   /** Previously failed, now imported/skipped. */
   recovered?: boolean;
+  /** Dates moved into / dropped from the poster week. */
+  weekFixes?: PosterWeekFix[];
 };
 
 const DEFAULT_GEMINI_MODEL = "gemini-flash-lite-latest";
@@ -97,6 +121,65 @@ function addDaysYmd(ymd: string, days: number): string {
   const mm = String(dt.getUTCMonth() + 1).padStart(2, "0");
   const dd = String(dt.getUTCDate()).padStart(2, "0");
   return `${yy}-${mm}-${dd}`;
+}
+
+const YMD_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Prompt line that pins the model to the poster's Sun–Sat week. */
+export function posterWeekHint(weekStart: string | null | undefined): string | null {
+  if (!weekStart || !YMD_RE.test(weekStart)) return null;
+  const weekEnd = addDaysYmd(weekStart, 6);
+  return (
+    `This poster covers ${weekStart} (Sunday) to ${weekEnd} (Saturday), Asia/Bangkok. ` +
+    `Every "date" MUST be inside this range. Take the month and year from this range, never from the example JSON.`
+  );
+}
+
+/**
+ * Check each item against the real calendar and keep it inside the poster's Sun–Sat week.
+ * Posters sometimes carry a wrong month label (e.g. "01 SEP ▷ 07 SEP" on the 1–7 Nov poster),
+ * so when the printed date and the calendar disagree, the calendar wins:
+ *  1. weekday printed on the poster (SUN…SAT) → that day of the poster week
+ *  2. otherwise the day number → the poster-week date with the same day number
+ *  3. otherwise the item is dropped.
+ * Every change is reported back. The `weekday` helper field is stripped from the result.
+ */
+export function fitItemsToPosterWeek(
+  items: LiveAgentManualItem[],
+  weekStart: string | null | undefined
+): { items: LiveAgentManualItem[]; fixes: PosterWeekFix[] } {
+  const strip = (item: LiveAgentManualItem): LiveAgentManualItem => {
+    const copy = { ...item };
+    delete copy.weekday;
+    return copy;
+  };
+  if (!weekStart || !YMD_RE.test(weekStart)) return { items: items.map(strip), fixes: [] };
+
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDaysYmd(weekStart, i));
+  const kept: LiveAgentManualItem[] = [];
+  const fixes: PosterWeekFix[] = [];
+  for (const raw of items) {
+    const item = strip(raw);
+    const byWeekday = raw.weekday ? weekDays[WEEKDAYS.indexOf(raw.weekday)] : undefined;
+    // 7 consecutive days never repeat a day-of-month, so this is at most one match.
+    const byDayNumber = weekDays.find((ymd) => ymd.slice(8) === item.date.slice(8));
+    const target = byWeekday ?? (weekDays.includes(item.date) ? item.date : byDayNumber);
+    if (!target) {
+      fixes.push({ from: item.date, to: null, title: item.title });
+      continue;
+    }
+    if (target !== item.date) fixes.push({ from: item.date, to: target, title: item.title });
+    kept.push({ ...item, date: target });
+  }
+  return { items: kept, fixes };
+}
+
+function formatWeekFixes(fixes: PosterWeekFix[]): string {
+  if (fixes.length === 0) return "";
+  return (
+    "Out-of-week dates: " +
+    fixes.map((f) => (f.to ? `${f.from}→${f.to}` : `${f.from} dropped`)).join(", ")
+  );
 }
 
 /**
@@ -255,6 +338,7 @@ export function normalizeManualItems(raw: unknown[]): LiveAgentManualItem[] {
       collabFlag = !ownFlag;
     }
 
+    const weekday = parseWeekday(o.weekday ?? o.day);
     out.push({
       title,
       channel: channel.isMain ? "mild-r" : channel.title,
@@ -263,6 +347,7 @@ export function normalizeManualItems(raw: unknown[]): LiveAgentManualItem[] {
       member,
       own: Boolean(ownFlag),
       collab: Boolean(collabFlag),
+      ...(weekday ? { weekday } : {}),
     });
   }
   return out;
@@ -349,8 +434,17 @@ async function generateWithGeminiApiKey(options: {
 export async function extractScheduleItemsFromImage(options: {
   imageUrl: string;
   postedAt?: string | null;
-}): Promise<{ rawText: string; items: LiveAgentManualItem[] }> {
-  const prompt = buildLiveAgentPrompt({ postedAt: options.postedAt });
+  /** Sunday of the poster week — pins the model to that week and repairs stray months. */
+  weekStart?: string | null;
+}): Promise<{
+  rawText: string;
+  items: LiveAgentManualItem[];
+  weekFixes: PosterWeekFix[];
+}> {
+  const prompt = buildLiveAgentPrompt({
+    postedAt: options.postedAt,
+    weekHint: posterWeekHint(options.weekStart),
+  });
   const image = await fetchImageAsBase64(options.imageUrl);
 
   const rawText = await generateWithGeminiApiKey({
@@ -359,8 +453,11 @@ export async function extractScheduleItemsFromImage(options: {
     imageBase64: image.data,
   });
 
-  const items = normalizeManualItems(parseAgentJsonArray(rawText));
-  return { rawText, items };
+  const fitted = fitItemsToPosterWeek(
+    normalizeManualItems(parseAgentJsonArray(rawText)),
+    options.weekStart
+  );
+  return { rawText, items: fitted.items, weekFixes: fitted.fixes };
 }
 
 export async function postManualLiveItems(
@@ -524,17 +621,23 @@ async function attemptLiveScheduleRow(
   }
 
   try {
-    const { items } = await extractScheduleItemsFromImage({
+    const weekStart =
+      row.schedule_week_start ?? scheduleWeekStartFromPostedAt(row.posted_at);
+    const { items, weekFixes } = await extractScheduleItemsFromImage({
       imageUrl: row.image_url,
       postedAt: row.posted_at,
+      weekStart,
     });
+    const fixNote = formatWeekFixes(weekFixes);
+    const withFixNote = (message: string | null) =>
+      [message, fixNote].filter(Boolean).join(" · ") || null;
 
     if (items.length === 0) {
       if (!dryRun) {
         await markSchedule(supabase, row.tweet_id, {
           status: "skipped",
-          parsed_json: [],
-          error_message: "No extractable lives",
+          parsed_json: weekFixes.length ? { week_fixes: weekFixes } : [],
+          error_message: withFixNote("No extractable lives"),
           attempt,
         });
       }
@@ -545,6 +648,7 @@ async function attemptLiveScheduleRow(
         toInsert: [],
         skippedDates: [],
         dryRun,
+        weekFixes,
       };
     }
 
@@ -557,8 +661,10 @@ async function attemptLiveScheduleRow(
       if (!dryRun) {
         await markSchedule(supabase, row.tweet_id, {
           status: "skipped",
-          parsed_json: items,
-          error_message: `All dates already on calendar: ${skippedDates.join(", ")}`,
+          parsed_json: weekFixes.length ? { extracted: items, week_fixes: weekFixes } : items,
+          error_message: withFixNote(
+            `All dates already on calendar: ${skippedDates.join(", ")}`
+          ),
           attempt,
         });
       }
@@ -570,6 +676,7 @@ async function attemptLiveScheduleRow(
         skippedDates,
         dryRun,
         error: `All dates already on calendar (${skippedDates.length})`,
+        weekFixes,
       };
     }
 
@@ -581,6 +688,7 @@ async function attemptLiveScheduleRow(
         toInsert,
         skippedDates,
         dryRun: true,
+        weekFixes,
       };
     }
 
@@ -591,11 +699,13 @@ async function attemptLiveScheduleRow(
         extracted: items,
         imported: toInsert,
         skipped_dates: skippedDates,
+        ...(weekFixes.length ? { week_fixes: weekFixes } : {}),
       },
-      error_message:
+      error_message: withFixNote(
         skippedDates.length > 0
           ? `Skipped existing dates: ${skippedDates.join(", ")}`
-          : null,
+          : null
+      ),
       attempt,
     });
     return {
@@ -605,6 +715,7 @@ async function attemptLiveScheduleRow(
       toInsert,
       skippedDates,
       imported: inserted,
+      weekFixes,
     };
   } catch (err) {
     return fail(err instanceof Error ? err.message : String(err));
@@ -612,7 +723,7 @@ async function attemptLiveScheduleRow(
 }
 
 const SCHEDULE_ROW_COLUMNS =
-  "id, tweet_id, image_url, image_source_url, posted_at, status, attempt_count";
+  "id, tweet_id, image_url, image_source_url, posted_at, schedule_week_start, status, attempt_count";
 
 /**
  * Rows to process: pending first (newest poster first), then failed rows

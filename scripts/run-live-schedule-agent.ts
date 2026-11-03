@@ -91,6 +91,15 @@ async function main() {
           ? ` · skippedDates=${result.skippedDates.join(",")}`
           : "")
     );
+    const dates = (result.toInsert ?? result.items).map((item) => `${item.date} ${item.time}`);
+    if (dates.length) console.log(`    dates: ${dates.join(", ")}`);
+    if (result.weekFixes?.length) {
+      console.log(
+        `    week fixes: ${result.weekFixes
+          .map((f) => (f.to ? `${f.from}→${f.to}` : `${f.from} dropped`))
+          .join(", ")}`
+      );
+    }
   }
 
   const summaryResults = results.map((r) => ({
