@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { downloadZip } from "client-zip";
 import { Check, Download, FolderDown, X } from "lucide-react";
 
+import { AdminConfirmDialog } from "@/components/admin/AdminConfirmDialog";
 import {
   ImageLightbox,
   type ImageLightboxItem,
@@ -93,7 +94,7 @@ const OUTLINE = cn(
   buttonVariants({ variant: "outline", size: "sm" }),
   "h-9 border-[#f3b8c4]/25 bg-transparent px-3 text-[#f7d7de] hover:bg-[#f3b8c4]/10 hover:text-[#fff5f7]"
 );
-/** Second click of a reject: deletes the original, so it looks different. */
+/** Second click of a delete: removes the picture for good, so it looks different. */
 const DANGER = "border-[#ff8fa6] text-[#ff8fa6] hover:text-[#ff8fa6]";
 
 function Spinner({ className }: { className?: string }) {
@@ -107,6 +108,9 @@ function Spinner({ className }: { className?: string }) {
     />
   );
 }
+
+/** Approve / reject waiting for "ยืนยัน" in the dialog. `key` is the busy key used by act(). */
+type ConfirmState = { action: "approve" | "reject"; rows: FanartSubmissionRow[]; key: string; scope: "one" | "batch" | "all" };
 
 /** Approve / reject in progress: which pictures, and how many are done. */
 type Working = { key: string; ids: string[]; action: Action; done: number };
@@ -213,13 +217,13 @@ export function AdminFanartClient() {
   const [pendingCount, setPendingCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
-  /** Id (or batch key) waiting for a second click to reject. */
-  const [confirmReject, setConfirmReject] = useState<string | null>(null);
   /** Id waiting for a second click to delete for good. */
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   /** "กำลังรวมไฟล์ 3 / 12" while a ZIP is being built. */
   const [zipProgress, setZipProgress] = useState<string | null>(null);
   const [working, setWorking] = useState<Working | null>(null);
+  const [confirm, setConfirm] = useState<ConfirmState | null>(null);
+  const [confirmRunning, setConfirmRunning] = useState(false);
   /** Short "approved 2 pictures" message after an action. */
   const [notice, setNotice] = useState<string | null>(null);
   const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -289,7 +293,6 @@ export function AdminFanartClient() {
 
   async function act(ids: string[], action: Action, busyKey: string) {
     setBusy(busyKey);
-    setConfirmReject(null);
     setConfirmDelete(null);
     setError(null);
     setWorking({ key: busyKey, ids, action, done: 0 });
@@ -320,6 +323,18 @@ export function AdminFanartClient() {
     } finally {
       setWorking(null);
       setBusy(null);
+    }
+  }
+
+  /** Runs the action the dialog asked about, then closes it (errors show at the top of the page). */
+  async function runConfirm() {
+    if (!confirm) return;
+    setConfirmRunning(true);
+    try {
+      await act(confirm.rows.map((row) => row.id), confirm.action, confirm.key);
+    } finally {
+      setConfirmRunning(false);
+      setConfirm(null);
     }
   }
 
@@ -377,7 +392,6 @@ export function AdminFanartClient() {
   async function switchTab(next: Tab) {
     if (next === tab && !listLoading) return;
     setTab(next);
-    setConfirmReject(null);
     setConfirmDelete(null);
     setViewing(null);
     setListLoading(true);
@@ -550,6 +564,32 @@ export function AdminFanartClient() {
         </div>
       ) : null}
 
+      {tab === "pending" && !listLoading && items.length > 0 ? (
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white/[0.04] px-4 py-3 ring-1 ring-white/10">
+          <p className="text-sm text-[#f7d7de]">รออนุมัติ {items.length} รูป</p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={busy !== null}
+              onClick={() => setConfirm({ action: "approve", rows: items, key: "all", scope: "all" })}
+              className={PRIMARY}
+            >
+              {busy === "all" && working?.action === "approve" ? <Spinner /> : <Check className="size-3.5" aria-hidden />}
+              {workingLabel("all", "approve") ?? `Approve ทั้งหมด (${items.length})`}
+            </button>
+            <button
+              type="button"
+              disabled={busy !== null}
+              onClick={() => setConfirm({ action: "reject", rows: items, key: "all", scope: "all" })}
+              className={OUTLINE}
+            >
+              {busy === "all" && working?.action === "reject" ? <Spinner /> : <X className="size-3.5" aria-hidden />}
+              {workingLabel("all", "reject") ?? `Reject ทั้งหมด (${items.length})`}
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       {zipProgress && busy !== "zip-all" ? (
         <p className="sr-only" aria-live="polite">
           {zipProgress}
@@ -622,7 +662,6 @@ export function AdminFanartClient() {
                     const fit = printFit(item.width, item.height);
                     const credit = creditOf(item);
                     const flag = creditFlag(item);
-                    const rejecting = confirmReject === item.id;
                     const saving = working?.ids.includes(item.id) ?? false;
                     const position = ordered.findIndex((entry) => entry.item.id === item.id);
                     return (
@@ -713,7 +752,7 @@ export function AdminFanartClient() {
                                 <button
                                   type="button"
                                   disabled={busy !== null}
-                                  onClick={() => act([item.id], "approve", item.id)}
+                                  onClick={() => setConfirm({ action: "approve", rows: [item], key: item.id, scope: "one" })}
                                   className={PRIMARY}
                                 >
                                   {workingLabel(item.id, "approve") ? <Spinner /> : null}
@@ -722,14 +761,11 @@ export function AdminFanartClient() {
                                 <button
                                   type="button"
                                   disabled={busy !== null}
-                                  onClick={() =>
-                                    rejecting ? act([item.id], "reject", item.id) : setConfirmReject(item.id)
-                                  }
-                                  className={cn(OUTLINE, rejecting && DANGER)}
+                                  onClick={() => setConfirm({ action: "reject", rows: [item], key: item.id, scope: "one" })}
+                                  className={OUTLINE}
                                 >
                                   {workingLabel(item.id, "reject") ? <Spinner /> : null}
-                                  {workingLabel(item.id, "reject") ??
-                                    (rejecting ? "ยืนยันปฏิเสธ (ลบต้นฉบับ)" : "ปฏิเสธ")}
+                                  {workingLabel(item.id, "reject") ?? "ปฏิเสธ"}
                                 </button>
                               </>
                             ) : (
@@ -790,7 +826,7 @@ export function AdminFanartClient() {
                     <button
                       type="button"
                       disabled={busy !== null}
-                      onClick={() => act(ids, "approve", batch.key)}
+                      onClick={() => setConfirm({ action: "approve", rows: batch.items, key: batch.key, scope: "batch" })}
                       className={PRIMARY}
                     >
                       {batchBusy && working?.action === "approve" ? <Spinner /> : <Check className="size-3.5" aria-hidden />}
@@ -799,14 +835,11 @@ export function AdminFanartClient() {
                     <button
                       type="button"
                       disabled={busy !== null}
-                      onClick={() =>
-                        confirmReject === batch.key ? act(ids, "reject", batch.key) : setConfirmReject(batch.key)
-                      }
-                      className={cn(OUTLINE, confirmReject === batch.key && DANGER)}
+                      onClick={() => setConfirm({ action: "reject", rows: batch.items, key: batch.key, scope: "batch" })}
+                      className={OUTLINE}
                     >
                       {batchBusy && working?.action === "reject" ? <Spinner /> : <X className="size-3.5" aria-hidden />}
-                      {workingLabel(batch.key, "reject") ??
-                        (confirmReject === batch.key ? "ยืนยันปฏิเสธทั้งชุด (ลบต้นฉบับ)" : "ปฏิเสธทั้งชุด")}
+                      {workingLabel(batch.key, "reject") ?? "ปฏิเสธทั้งชุด"}
                     </button>
                       </>
                     ) : null}
@@ -860,6 +893,33 @@ export function AdminFanartClient() {
             </button>
           ) : null
         }
+      />
+
+      <AdminConfirmDialog
+        open={confirm !== null}
+        tone={confirm?.action ?? "approve"}
+        title={
+          confirm
+            ? `${confirm.action === "approve" ? "Approve" : "Reject"} ${
+                confirm.rows.length > 1 ? `${confirm.scope === "all" ? "ทั้งหมด " : "ทั้งชุด "}${confirm.rows.length} รูป` : "รูปนี้"
+              }?`
+            : ""
+        }
+        description={
+          confirm?.action === "reject"
+            ? "ไม่ขึ้นหน้าแฟนอาร์ต และไฟล์ต้นฉบับจะถูกลบ กู้คืนไม่ได้"
+            : "จะขึ้นหน้าแฟนอาร์ตบนเว็บ (ซ่อนทีหลังได้ในแท็บ อนุมัติแล้ว)"
+        }
+        items={(confirm?.rows ?? []).map((row) => ({ id: row.id, name: row.display_name, imageUrl: row.art_url }))}
+        confirmLabel={
+          confirm
+            ? `ยืนยัน ${confirm.action === "approve" ? "Approve" : "Reject"}${confirm.rows.length > 1 ? ` ${confirm.rows.length} รูป` : ""}`
+            : ""
+        }
+        busy={confirmRunning}
+        progress={confirm && confirmRunning ? workingLabel(confirm.key, confirm.action) : null}
+        onConfirm={() => void runConfirm()}
+        onCancel={() => setConfirm(null)}
       />
 
       <div

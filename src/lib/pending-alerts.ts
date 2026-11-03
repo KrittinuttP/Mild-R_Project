@@ -24,6 +24,31 @@ function adminLink(path: string): string | null {
   return origin ? `${origin}${path}` : null;
 }
 
+function bangkokParts(date: Date) {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Bangkok",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+  const get = (type: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === type)?.value ?? "";
+  return { day: get("day"), month: get("month"), hour: get("hour"), minute: get("minute") };
+}
+
+/** "26 Oct" in Bangkok time. */
+export function formatBangkokDay(iso: string): string {
+  const { day, month } = bangkokParts(new Date(iso));
+  return `${day} ${month}`;
+}
+
+/** "21:00" in Bangkok time (the cron runs at 09:00 and 21:00). */
+function bangkokClock(date: Date): string {
+  const { hour, minute } = bangkokParts(date);
+  return `${hour}:${minute}`;
+}
+
 /** "2 Nov 21:14" in Bangkok time (English month, 24-hour). */
 export function formatBangkokShort(iso: string): string {
   const parts = new Intl.DateTimeFormat("en-GB", {
@@ -47,12 +72,11 @@ export function buildHbdNewCardPayload(input: { id: string; displayName: string 
   return {
     embeds: [
       {
-        title: "🎂 การ์ดอวยพรใหม่",
-        description: [`จาก **${name}**`, link ? `👉 [ตรวจ / approve](${link})` : null]
+        title: "🎂 New HBD card · รอ Approve",
+        description: [`จาก **${name}**`, link ? `→ [Review & Approve](${link})` : null]
           .filter(Boolean)
           .join("\n"),
         color: PINK,
-        footer: { text: "source: hbd-submit" },
       },
     ],
   };
@@ -91,28 +115,26 @@ export async function loadPendingCounts(): Promise<PendingCounts> {
   return { fanart, hbd };
 }
 
-/** Null when nothing is waiting (no message is sent). */
-export function buildPendingDigestPayload(counts: PendingCounts) {
+/** Null when nothing is waiting (no message is sent). `now` sets the "รอบ HH:MM" label. */
+export function buildPendingDigestPayload(counts: PendingCounts, now: Date = new Date()) {
   const lines: string[] = [];
-  const line = (emoji: string, label: string, queue: PendingQueue, path: string) => {
+  const add = (emoji: string, label: string, unit: string, queue: PendingQueue, path: string) => {
     if (queue.count <= 0) return;
     const link = adminLink(path);
-    const oldest = queue.oldestAt ? ` · เก่าสุด ${formatBangkokShort(queue.oldestAt)}` : "";
-    lines.push(
-      `${emoji} ${label.replace("{n}", `**${queue.count}**`)}${oldest}${link ? ` · [เปิด](${link})` : ""}`
-    );
+    const since = queue.oldestAt ? ` · ค้างนานสุดตั้งแต่ ${formatBangkokDay(queue.oldestAt)}` : "";
+    lines.push(`${emoji} **${label} ${queue.count} ${unit}**${since}`);
+    if (link) lines.push(`→ [Review ${label}](${link})`);
   };
-  line("🎨", "แฟนอาร์ต {n} รูป", counts.fanart, "/admin/fanart");
-  line("🎂", "การ์ด HBD {n} ใบ", counts.hbd, "/admin/hbd");
+  add("🎨", "Fan art", "รูป", counts.fanart, "/admin/fanart");
+  add("🎂", "HBD card", "ใบ", counts.hbd, "/admin/hbd");
   if (!lines.length) return null;
 
   return {
     embeds: [
       {
-        title: "📋 รอตรวจตอนนี้",
+        title: `📋 Pending approval · รอบ ${bangkokClock(now)}`,
         description: lines.join("\n"),
         color: PINK,
-        footer: { text: "source: pending-digest · 09:00 / 21:00" },
       },
     ],
   };

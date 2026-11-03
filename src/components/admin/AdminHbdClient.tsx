@@ -19,6 +19,7 @@ import {
   XCircle,
 } from "lucide-react";
 
+import { AdminConfirmDialog } from "@/components/admin/AdminConfirmDialog";
 import { BackLink } from "@/components/layout/BackLink";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -45,6 +46,8 @@ const DISPLAY = "font-[family-name:var(--font-display)]";
 
 type Tab = "pending" | "approved" | "hidden";
 type ItemAction = "approve" | "reject" | "hide" | "unhide";
+/** Approve / reject waiting for "ยืนยัน" in the dialog: the cards shown when it opened. */
+type ConfirmState = { action: "approve" | "reject"; rows: HbdSubmissionRow[]; scope: "one" | "all" };
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "pending", label: "รออนุมัติ" },
@@ -71,6 +74,12 @@ export function AdminHbdClient() {
   const [actingId, setActingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<HbdSubmissionRow | null>(null);
+  const [confirm, setConfirm] = useState<ConfirmState | null>(null);
+  const [confirmBusy, setConfirmBusy] = useState(false);
+  const [confirmProgress, setConfirmProgress] = useState<string | null>(null);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
+  /** "Approve แล้ว 3 ใบ" after a confirmed action. */
+  const [notice, setNotice] = useState<string | null>(null);
   /** `?focus=<id>` from the Discord alert: scroll to that card in "รออนุมัติ" and highlight it. */
   const [focusId, setFocusId] = useState<string | null>(null);
   const [focusGone, setFocusGone] = useState(false);
@@ -169,6 +178,60 @@ export function AdminHbdClient() {
     } finally {
       setActingId(null);
     }
+  }
+
+  function openConfirm(action: ConfirmState["action"], rows: HbdSubmissionRow[], scope: ConfirmState["scope"]) {
+    setConfirmError(null);
+    setConfirmProgress(null);
+    setNotice(null);
+    setConfirm({ action, rows, scope });
+  }
+
+  /**
+   * One card at a time through the existing per-card API. Keeps going after a
+   * failure; the failed cards stay in the dialog so "ยืนยัน" retries only them.
+   */
+  async function runConfirm() {
+    if (!confirm) return;
+    const { action, rows } = confirm;
+    const verb = action === "approve" ? "Approve" : "Reject";
+    const failed: HbdSubmissionRow[] = [];
+    setConfirmBusy(true);
+    setConfirmError(null);
+    for (let index = 0; index < rows.length; index += 1) {
+      const row = rows[index];
+      setConfirmProgress(rows.length > 1 ? `กำลัง ${verb} ${index + 1} / ${rows.length}…` : `กำลัง ${verb}…`);
+      try {
+        const res = await fetch(`/api/hbd/admin/submissions/${row.id}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action }),
+        });
+        if (res.status === 401) {
+          setConfirmBusy(false);
+          setConfirm(null);
+          setUnlocked(false);
+          return;
+        }
+        if (!res.ok) failed.push(row);
+      } catch {
+        failed.push(row);
+      }
+    }
+    setConfirmBusy(false);
+    setConfirmProgress(null);
+    await load(tab);
+    const done = rows.length - failed.length;
+    if (failed.length) {
+      const names = failed.slice(0, 5).map((row) => row.display_name).join(", ");
+      setConfirmError(
+        `${verb} สำเร็จ ${done} · ไม่สำเร็จ ${failed.length} (${names}${failed.length > 5 ? " …" : ""}) — กดยืนยันอีกครั้งเพื่อลองใหม่เฉพาะใบที่ไม่สำเร็จ`
+      );
+      setConfirm({ ...confirm, rows: failed });
+      return;
+    }
+    setConfirm(null);
+    setNotice(`${verb} แล้ว ${done} ใบ`);
   }
 
   async function act(id: string, action: ItemAction) {
@@ -298,6 +361,47 @@ export function AdminHbdClient() {
         </div>
       ) : null}
 
+      {notice ? (
+        <p role="status" className="mt-4 flex items-center gap-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs text-emerald-100">
+          <CheckCircle2 className="size-3.5" />
+          {notice}
+        </p>
+      ) : null}
+
+      {tab === "pending" && !loading && items.length > 0 ? (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#f3b8c4]/15 bg-[#14080e]/70 p-3.5">
+          <p className="text-xs text-[#f3b8c4]/80">รออนุมัติ {items.length} ใบ</p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={confirmBusy || actingId !== null}
+              onClick={() => openConfirm("approve", items, "all")}
+              className={cn(
+                buttonVariants({ size: "sm" }),
+                ACTION_BUTTON_CLASS,
+                "border border-emerald-500/50 bg-emerald-500/20 font-semibold text-emerald-200 shadow-sm hover:bg-emerald-500/30 hover:text-white"
+              )}
+            >
+              <CheckCircle2 className="size-3.5" />
+              Approve ทั้งหมด ({items.length})
+            </button>
+            <button
+              type="button"
+              disabled={confirmBusy || actingId !== null}
+              onClick={() => openConfirm("reject", items, "all")}
+              className={cn(
+                buttonVariants({ variant: "outline", size: "sm" }),
+                ACTION_BUTTON_CLASS,
+                "border-red-500/40 bg-red-500/10 text-red-200 hover:bg-red-500/20 hover:text-white"
+              )}
+            >
+              <XCircle className="size-3.5" />
+              Reject ทั้งหมด ({items.length})
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       {focusGone ? (
         <p className="mt-4 rounded-2xl border border-[#f3b8c4]/20 bg-[#1a0c12]/60 p-3.5 text-xs text-[#f3b8c4]/80">
           การ์ดจากลิงก์ใน Discord ไม่ได้อยู่ในรายการรออนุมัติแล้ว (อาจถูกอนุมัติ ซ่อน หรือลบไปแล้ว)
@@ -402,7 +506,7 @@ export function AdminHbdClient() {
                         <button
                           type="button"
                           disabled={actingId === item.id}
-                          onClick={() => act(item.id, "approve")}
+                          onClick={() => openConfirm("approve", [item], "one")}
                           className={cn(
                             buttonVariants({ size: "sm" }),
                             ACTION_BUTTON_CLASS,
@@ -415,7 +519,7 @@ export function AdminHbdClient() {
                         <button
                           type="button"
                           disabled={actingId === item.id}
-                          onClick={() => act(item.id, "reject")}
+                          onClick={() => openConfirm("reject", [item], "one")}
                           className={cn(
                             buttonVariants({ variant: "outline", size: "sm" }),
                             ACTION_BUTTON_CLASS,
@@ -475,6 +579,37 @@ export function AdminHbdClient() {
           ))}
         </ul>
       )}
+
+      <AdminConfirmDialog
+        open={confirm !== null}
+        tone={confirm?.action ?? "approve"}
+        title={
+          confirm
+            ? `${confirm.action === "approve" ? "Approve" : "Reject"} ${
+                confirm.rows.length > 1 ? `การ์ด${confirm.scope === "all" ? "ทั้งหมด " : " "}${confirm.rows.length} ใบ` : "การ์ดใบนี้"
+              }?`
+            : ""
+        }
+        description={
+          confirm?.action === "reject"
+            ? "การ์ดจะไม่แสดงบนเว็บ (ดูได้ในแท็บ ซ่อน / ปฏิเสธ และกดแสดงอีกครั้งได้)"
+            : "การ์ดจะขึ้นหน้ารวมคำอวยพร /hbd/2026"
+        }
+        items={(confirm?.rows ?? []).map((row) => ({ id: row.id, name: row.display_name, imageUrl: row.card_url }))}
+        confirmLabel={
+          confirm
+            ? `ยืนยัน ${confirm.action === "approve" ? "Approve" : "Reject"}${confirm.rows.length > 1 ? ` ${confirm.rows.length} ใบ` : ""}`
+            : ""
+        }
+        busy={confirmBusy}
+        progress={confirmProgress}
+        error={confirmError}
+        onConfirm={() => void runConfirm()}
+        onCancel={() => {
+          setConfirm(null);
+          setConfirmError(null);
+        }}
+      />
 
       {/* 🗑️ Delete confirmation */}
       <Dialog
