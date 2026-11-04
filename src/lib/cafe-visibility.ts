@@ -55,6 +55,35 @@ export function kvModeSwitches(mode: KvMode): Pick<CafeSectionVisibilityMap, "he
 
 export type CafeSectionVisibilityMap = Record<CafeSectionKey, boolean>;
 
+/**
+ * Content sections that, while off, go into the "Sealed Files" stack on /cafe
+ * (one stack instead of a sealed box in each place). Header links follow.
+ */
+export const CAFE_SEALABLE_KEYS = [
+  "signatureMenu",
+  "venueMenu",
+  "daySchedule",
+  "operations",
+  "goods",
+  "caseFile",
+] as const satisfies readonly CafeSectionKey[];
+
+export function cafeHasSealedFiles(visibility: CafeSectionVisibilityMap) {
+  return CAFE_SEALABLE_KEYS.some((key) => !visibility[key]);
+}
+
+/** Menu links of /cafe hidden while their section is sealed. */
+export function cafeSealedNav(visibility: CafeSectionVisibilityMap) {
+  return {
+    menu: !visibility.signatureMenu,
+    venue: !visibility.venueMenu,
+    activities: !visibility.daySchedule && !visibility.operations,
+    goods: !visibility.goods,
+    story: !visibility.caseFile,
+    any: cafeHasSealedFiles(visibility),
+  };
+}
+
 export const CAFE_SECTION_META: Record<
   CafeSectionKey,
   { label: string; labelLocal: string }
@@ -112,8 +141,8 @@ export const CAFE_SECTION_META: Record<
     labelLocal: "คลิปจากช่อง YouTube ของคาเฟ่ · ไม่มีคลิปที่แสดง = ซ่อนทั้งหมวดเอง",
   },
   closing: {
-    label: "Closing Note",
-    labelLocal: "สรุปฉบับนี้",
+    label: "See You at the Scene",
+    labelLocal: "ข้อความชวนมาคาเฟ่ท้ายหน้า (เดิม Closing Note)",
   },
 };
 

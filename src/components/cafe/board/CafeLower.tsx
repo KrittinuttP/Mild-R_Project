@@ -15,9 +15,10 @@ import {
   SERIF,
   THAI,
 } from "@/components/cafe/board/pieces";
-import { GOLD_BUTTON } from "@/components/cafe/board/brass";
+import { GOLD_BUTTON, KeyholePlate } from "@/components/cafe/board/brass";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { isStandInCafeImage, setLetter, visiblePrice } from "@/lib/cafe-board";
+import { feedDate } from "@/lib/cafe-feeds";
 import { cn } from "@/lib/utils";
 import type { CafeGoodsItem, CafePage } from "@/types/vtuber";
 import type { ImageLightboxItem } from "@/components/media/ImageLightbox";
@@ -348,42 +349,44 @@ export function CafeStoryBlock({
   );
 }
 
-export function CafeClosingBlock({
-  cafe,
-  show,
-}: {
-  cafe: CafePage;
-  show: boolean;
-}) {
+/** "See You at the Scene": the invitation at the end of the page, on one cream paper. */
+export function CafeClosingBlock({ cafe }: { cafe: CafePage }) {
   const closing = cafe.closing;
-  const follow = closing.ctas;
   const paragraph = closing.body[0];
+  const schedule = cafe.dispatch.schedule;
+  const location = cafe.dispatch.location;
+  const day = schedule.startsAt ? feedDate(schedule.startsAt) : schedule.label;
+  const place = [location.imageAlt ?? location.label, location.detail ? `(${location.detail})` : ""]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <BoardSection className="mt-24 mb-24" width="820">
-        <div data-motion="rise" className="text-center">
-          {show ? (
-            <SectionHead
-              align="center"
-              eyebrow={closing.eyebrow}
-              title={closing.title}
-              titleLocal={closing.titleLocal}
-            />
-          ) : (
-            <SealedZone />
-          )}
-          {show && paragraph ? (
-            <p className="mt-6 text-base leading-relaxed text-cafe-text">{paragraph}</p>
-          ) : null}
-          {show && follow?.length ? (
-            <div className="mt-6 flex flex-col items-stretch justify-center gap-3 min-[560px]:flex-row min-[560px]:items-center">
-              <CafeFollowLinks ctas={follow} />
-            </div>
-          ) : null}
-          {show && closing.disclaimer ? (
-            <p className="mt-6 text-xs leading-relaxed text-cafe-muted">{closing.disclaimer}</p>
-          ) : null}
-        </div>
+      <div
+        data-motion="rise"
+        className="relative bg-cafe-cream px-5 pt-[34px] pb-[26px] text-center text-cafe-ink shadow-[0_14px_26px_rgba(0,0,0,0.45)] sm:px-12 sm:pt-11 sm:pb-[34px]"
+      >
+        <KeyholePlate className="top-0 left-1/2 -translate-x-1/2 -translate-y-[60%]" />
+        <h2 className={cn(SERIF, "text-[1.75rem] leading-tight font-bold sm:text-4xl")}>{closing.title}</h2>
+        {closing.titleLocal ? (
+          <p className={cn(THAI, "mt-1.5 text-[17px] text-cafe-gold-deep sm:text-[19px]")}>{closing.titleLocal}</p>
+        ) : null}
+        {paragraph ? (
+          <p className={cn(THAI, "mx-auto mt-[18px] max-w-[560px] text-[15.5px] leading-[1.85] sm:text-[17px]")}>{paragraph}</p>
+        ) : null}
+        <p className={cn(SERIF, "mt-4 text-[15px] font-bold sm:text-base")}>
+          {[day, schedule.detail].filter(Boolean).join(" · ")}
+        </p>
+        <p className={cn(THAI, "mt-1 text-sm text-cafe-ink-soft sm:text-[15px]")}>{place}</p>
+        {closing.ctas?.length ? (
+          <div className="mt-6 flex flex-col items-stretch justify-center gap-3 min-[560px]:flex-row min-[560px]:items-center">
+            <CafeFollowLinks ctas={closing.ctas} tone="paper" />
+          </div>
+        ) : null}
+        {closing.disclaimer ? (
+          <p className={cn(THAI, "mt-[18px] text-[12.5px] leading-relaxed text-cafe-ink-muted")}>{closing.disclaimer}</p>
+        ) : null}
+      </div>
     </BoardSection>
   );
 }

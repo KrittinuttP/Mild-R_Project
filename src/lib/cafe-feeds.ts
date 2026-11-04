@@ -93,6 +93,11 @@ export function feedDateTime(iso: string) {
   return `${parts.weekday}, ${parts.day} ${parts.month} ${parts.year} ${parts.hour}:${parts.minute}`;
 }
 
+/** "30 Oct" in Bangkok time, for small cards. */
+export function feedDayMonth(iso: string) {
+  return feedDate(iso).slice(5, 11);
+}
+
 /** "1:12" / "58:20" / "1:02:03". */
 export function tapeDuration(seconds: number | null) {
   if (seconds === null || !Number.isFinite(seconds)) return "";

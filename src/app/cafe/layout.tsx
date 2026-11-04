@@ -12,7 +12,7 @@ import { mildRData } from "@/data/vtuber-data";
 import { CAFE_CHROME_HEADER } from "@/lib/cafe-countdown";
 import { isCafePromotionHost } from "@/lib/cafe-host";
 import { loadCafeFeeds } from "@/lib/cafe-feeds-store";
-import { cafeForVisibility } from "@/lib/cafe-visibility";
+import { cafeForVisibility, cafeSealedNav } from "@/lib/cafe-visibility";
 import { loadCafeVisibility } from "@/lib/cafe-visibility-store";
 
 import "@/fonts/cafe-fonts.css";
@@ -69,6 +69,7 @@ export default async function CafeLayout({ children }: { children: ReactNode }) 
             notices: visibility.notices && feeds.notices.length > 0,
             tapes: visibility.tapes && feeds.tapes.length > 0,
           }}
+          sealed={cafeSealedNav(visibility)}
         />
       </CafeChromeGate>
       <main className="flex-1">{children}</main>

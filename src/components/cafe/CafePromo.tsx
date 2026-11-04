@@ -11,6 +11,7 @@ import {
   CafeVenueBlock,
 } from "@/components/cafe/board/CafeLower";
 import { CafeMenuSection } from "@/components/cafe/board/CafeMenuSection";
+import { CafeSealedFiles } from "@/components/cafe/board/CafeSealedFiles";
 import { CafeOverview } from "@/components/cafe/board/CafeOverview";
 import { SERIF } from "@/components/cafe/board/pieces";
 import { useBoardMotion } from "@/components/cafe/board/useBoardMotion";
@@ -22,6 +23,7 @@ import { useNow } from "@/hooks/useNow";
 import type { CafeCaseFileCover } from "@/lib/cafe-case-file";
 import type { CafeFeeds } from "@/lib/cafe-feeds";
 import {
+  cafeHasSealedFiles,
   defaultCafeVisibility,
   preorderDaysLeft,
   preorderIsListed,
@@ -139,33 +141,27 @@ export function CafePromo({ cafe, visibility, caseCover, feeds }: CafePromoProps
       />
       <PreorderTape cafe={cafe} />
       {show.notices ? (
-        <CafeNoticeBoard notices={feeds?.notices ?? []} onOpen={open} />
+        <CafeNoticeBoard notices={feeds?.notices ?? []} />
       ) : null}
-      <CafeMenuSection
-        cafe={cafe}
-        show={show.signatureMenu}
-        showDispatch={show.dispatch}
-        showGifts={show.goods}
-      />
-      <CafeVenueBlock
-        cafe={cafe}
-        show={show.venueMenu}
-        onOpen={open}
-      />
-      <CafeActivities
-        cafe={cafe}
-        showSchedule={show.daySchedule}
-        showMissions={show.operations}
-        onOpen={open}
-      />
-      <CafeGoodsBlock
-        cafe={cafe}
-        show={show.goods}
-        onOpen={open}
-      />
-      <CafeStoryBlock cover={caseCover ?? null} showCaseFile={show.caseFile} />
+      {/* A section switched off in /cafe/settings is left out here and only
+          counted in the Sealed Files stack above the closing note. */}
+      {show.signatureMenu ? (
+        <CafeMenuSection cafe={cafe} show showDispatch={show.dispatch} showGifts={show.goods} />
+      ) : null}
+      {show.venueMenu ? <CafeVenueBlock cafe={cafe} show onOpen={open} /> : null}
+      {show.daySchedule || show.operations ? (
+        <CafeActivities
+          cafe={cafe}
+          showSchedule={show.daySchedule}
+          showMissions={show.operations}
+          onOpen={open}
+        />
+      ) : null}
+      {show.goods ? <CafeGoodsBlock cafe={cafe} show onOpen={open} /> : null}
+      {show.caseFile ? <CafeStoryBlock cover={caseCover ?? null} showCaseFile /> : null}
       {show.tapes ? <CafeCaseTapes tapes={feeds?.tapes ?? []} /> : null}
-      <CafeClosingBlock cafe={cafe} show={show.closing} />
+      {cafeHasSealedFiles(show) ? <CafeSealedFiles /> : null}
+      {show.closing ? <CafeClosingBlock cafe={cafe} /> : null}
       <ImageLightbox
         tone="cafe"
         useProtectedImage

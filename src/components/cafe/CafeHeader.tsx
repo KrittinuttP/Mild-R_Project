@@ -3,7 +3,7 @@
 import { useEffect, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Lock, Menu, X } from "lucide-react";
 
 import { SherlockSweetieLogo } from "@/components/cafe/SherlockSweetieLogo";
 import { buttonVariants } from "@/components/ui/button";
@@ -33,12 +33,37 @@ const FEED_NAV: Record<"notices" | "tapes", CafeNavLink> = {
   tapes: { kind: "section", hash: "#tapes", label: "Videos" },
 };
 
+/** Sealed sections leave the menu; one "Sealed Files" link (with a lock) points at the stack. */
+const SEALED_NAV: CafeNavLink = { kind: "section", hash: "#sealed", label: "Sealed Files" };
+const SEALED_HASH: Record<string, "menu" | "venue" | "activities" | "goods" | "story"> = {
+  "#menu": "menu",
+  "#venue-menu": "venue",
+  "#activities": "activities",
+  "#goods": "goods",
+  "#story": "story",
+};
+
+export type CafeSealedNav = {
+  menu: boolean;
+  venue: boolean;
+  activities: boolean;
+  goods: boolean;
+  story: boolean;
+  any: boolean;
+};
+
+function isSealedLink(link: CafeNavLink) {
+  return link.kind === "section" && link.hash === "#sealed";
+}
+
 type CafeHeaderProps = {
   cafe: CafePage;
   mildRHomeHref?: string;
   showMainSiteLink?: boolean;
   /** Notice Board / Case Tapes are on the page (section on and not empty). */
   feedLinks?: { notices: boolean; tapes: boolean };
+  /** Sections switched off in /cafe/settings (see `cafeSealedNav`). */
+  sealed?: CafeSealedNav;
 };
 
 export function CafeHeader({
@@ -46,6 +71,7 @@ export function CafeHeader({
   mildRHomeHref = "/",
   showMainSiteLink = true,
   feedLinks,
+  sealed,
 }: CafeHeaderProps) {
   const pathname = usePathname();
   // `/` too: on the cafe domain the home is served at `/` (see proxy.ts).
@@ -64,9 +90,12 @@ export function CafeHeader({
   const bookingOpen =
     Boolean(cafe.preorder) && (now === null || preorderIsListed(cafe.preorder, now));
   const nav = [
-    ...CAFE_NAV,
+    ...CAFE_NAV.filter(
+      (link) => !(link.kind === "section" && SEALED_HASH[link.hash] && sealed?.[SEALED_HASH[link.hash]])
+    ),
     ...(feedLinks?.notices ? [FEED_NAV.notices] : []),
     ...(feedLinks?.tapes ? [FEED_NAV.tapes] : []),
+    ...(sealed?.any ? [SEALED_NAV] : []),
   ].map((link) =>
     link.kind === "section" && link.hash === "#menu" && !bookingOpen
       ? { ...link, label: "Menu" }
@@ -195,6 +224,7 @@ export function CafeHeader({
                   )}
                   aria-current={active ? "page" : undefined}
                 >
+                  {isSealedLink(link) ? <Lock className="mr-1.5 inline size-3 -translate-y-px" aria-hidden /> : null}
                   {link.label}
                 </Link>
               </span>
@@ -257,6 +287,7 @@ export function CafeHeader({
                 aria-current={active ? "page" : undefined}
                 onClick={(event) => handleNavClick(event, href)}
               >
+                {isSealedLink(link) ? <Lock className="mr-2 inline size-4 -translate-y-px" aria-hidden /> : null}
                 {link.label}
               </Link>
             );

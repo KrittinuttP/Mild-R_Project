@@ -7,7 +7,6 @@ import {
   EmptyFrame,
   LABEL,
   Paper,
-  SealedZone,
   SectionHead,
   SERIF,
   Stamp,
@@ -123,7 +122,6 @@ export function CafeActivities({
         />
       ) : null}
 
-      {schedule && !showSchedule ? <SealedZone /> : null}
 
       {schedule && showSchedule ? (
         <ol className="relative mt-12">
@@ -246,7 +244,6 @@ export function CafeActivities({
         </ol>
       ) : null}
 
-      {missions.length > 0 && !showMissions ? <SealedZone /> : null}
 
       {missions.length > 0 && showMissions ? (
         <CorkBoard className="mt-14 px-4 pt-6 pb-9 sm:px-7 sm:pt-7 sm:pb-11">
