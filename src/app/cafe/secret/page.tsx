@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { CafeSecretClient } from "@/components/cafe/CafeSecretClient";
 import { mildRData } from "@/data/vtuber-data";
 import { caseFileCover } from "@/lib/cafe-case-file";
+import { loadCafeFeeds } from "@/lib/cafe-feeds-store";
 import { isCafeSettingsUnlocked } from "@/lib/cafe-settings-auth";
 import type { CafePage } from "@/types/vtuber";
 
@@ -37,6 +38,7 @@ export default async function CafeSecretPage() {
     <CafeSecretClient
       cafe={unlocked ? fullPreview(mildRData.cafe) : null}
       caseCover={unlocked ? caseFileCover() : null}
+      feeds={unlocked ? await loadCafeFeeds() : null}
     />
   );
 }

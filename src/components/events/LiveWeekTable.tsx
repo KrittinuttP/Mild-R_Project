@@ -256,7 +256,7 @@ const LEGACY_SKIN: LiveTableSkin = {
   nextCard:
     "group flex w-full items-center gap-3 rounded-2xl border border-[#f3b8c4]/20 bg-[#14080e]/90 p-2.5 text-left transition hover:border-[#e85a7a]/40 hover:bg-[#1a0c12] sm:w-auto sm:min-w-[18rem]",
   nextThumb: "relative aspect-video w-20 shrink-0 overflow-hidden rounded-xl border border-[#f3b8c4]/15 bg-[#12080c] sm:w-24",
-  nextKicker: "block text-[0.65rem] font-semibold tracking-[0.12em] text-[#e85a7a] uppercase",
+  nextKicker: "block text-xs font-semibold text-[#e85a7a]",
   nextMeta: "flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-[#f7d7de]/90",
   nextTitle: "line-clamp-1 text-sm font-medium text-[#fff5f7] group-hover:text-white",
   offlineShellOn: "border-[#6ec9b0]/25 bg-[#6ec9b0]/05",
@@ -390,7 +390,7 @@ const APLUS_SKIN: LiveTableSkin = {
   nextCard:
     "group r-card flex w-full items-center gap-3 rounded-2xl p-2.5 text-left ring-1 ring-r-text-2/15 transition hover:ring-r-pri/45 sm:w-auto sm:min-w-[18rem]",
   nextThumb: "relative aspect-video w-20 shrink-0 overflow-hidden rounded-xl bg-r-bg ring-1 ring-r-line sm:w-24",
-  nextKicker: "block text-[0.65rem] font-medium tracking-[0.12em] text-r-pri uppercase",
+  nextKicker: "block text-xs font-medium text-r-pri",
   nextMeta: "flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-r-text-2",
   nextTitle: "line-clamp-1 text-sm font-medium text-r-text",
   offlineShellOn: "border-r-acc/30 bg-r-acc/[0.05]",
@@ -1321,7 +1321,7 @@ function AplusOfflineCard({
             {cover("w-44 lg:w-56", "transition duration-700 group-hover:scale-[1.04]")}
             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
               <div className="flex min-w-0 items-center gap-2 text-xs">
-                <span className="shrink-0 font-medium tracking-[0.14em] text-r-pri">ไลฟ์ถัดไป</span>
+                <span className="shrink-0 font-medium text-r-pri">ไลฟ์ถัดไป</span>
                 <span className="truncate tabular-nums text-r-text-2">{when}</span>
               </div>
               <p className="line-clamp-1 font-[family-name:var(--font-display)] text-lg text-r-text lg:text-xl" title={label}>
@@ -1350,7 +1350,7 @@ function AplusOfflineCard({
           <div className="flex flex-1 flex-col gap-2 rounded-[18px] border border-r-pri/25 bg-gradient-to-b from-r-pri/[0.08] to-r-bg/40 p-3">
             {cover("w-full", "scale-[1.12]")}
             <div className="flex items-center justify-between gap-2 pt-1">
-              <span className="text-[0.7rem] font-medium tracking-[0.14em] text-r-pri">ไลฟ์ถัดไป</span>
+              <span className="text-xs font-medium text-r-pri">ไลฟ์ถัดไป</span>
               {statusChip}
             </div>
             {/* one line: guest + collab badges must not push the card taller */}

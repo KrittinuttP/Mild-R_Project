@@ -73,6 +73,14 @@ export const MODAL_CLOSE_BUTTON_CLASS =
 /* ── Project R · CI A+ (doc/project-r-implementation.md §1) ─────────
    New home sections use these; the classes above stay for pages not yet moved. */
 
+/**
+ * Heading of a card inside a section (4 Nov, UI round 2): plain white, bold, a hint of tracking.
+ * Replaces the tiny pink tracked labels. Lore keeps its bilingual wording ("PROFILE · ข้อมูล").
+ */
+export const R_CARD_TITLE_CLASS = "text-[0.9375rem] font-semibold tracking-[0.03em] text-r-text";
+/** Group label inside a card (Art / Credits / Mama …): small soft pink, no tracking, no uppercase. */
+export const R_LABEL_CLASS = "text-[0.8125rem] font-medium text-r-text-2";
+
 /** Small uppercase label above a section title — mint (decisions 3 Nov: คงมิ้นต์ทั้งเว็บ) */
 export const R_EYEBROW_CLASS = "text-xs uppercase tracking-[0.24em] text-r-acc";
 

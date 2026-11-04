@@ -27,6 +27,7 @@ import {
   R_CTA_OUTLINE_CLASS,
   R_CTA_PRIMARY_CLASS,
   R_PILL_ACTIVE_CLASS,
+  R_LABEL_CLASS,
 } from "@/lib/site-ui";
 import {
   formatVideoDate,
@@ -496,7 +497,7 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
           </SheetHeader>
           <SheetBody className="space-y-6 px-5 pb-4">
             <fieldset>
-              <legend className="text-xs tracking-[0.12em] text-r-text-3 uppercase">ช่อง</legend>
+              <legend className={R_LABEL_CLASS}>ช่อง</legend>
               <div className="mt-3 flex flex-wrap gap-2">
                 {CHANNEL_FILTERS.map(({ key, label }) => (
                   <button
@@ -513,7 +514,7 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
             </fieldset>
             {years.length > 1 ? (
               <fieldset>
-                <legend className="text-xs tracking-[0.12em] text-r-text-3 uppercase">ปี</legend>
+                <legend className={R_LABEL_CLASS}>ปี</legend>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {["all", ...years].map((key) => (
                     <button

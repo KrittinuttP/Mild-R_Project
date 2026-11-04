@@ -7,6 +7,7 @@ import { Eye, EyeOff, FileLock2, Lock, Unlock } from "lucide-react";
 import { CafePromo } from "@/components/cafe/CafePromo";
 import { buttonVariants } from "@/components/ui/button";
 import type { CafeCaseFileCover } from "@/lib/cafe-case-file";
+import type { CafeFeeds } from "@/lib/cafe-feeds";
 import { defaultCafeVisibility } from "@/lib/cafe-visibility";
 import { cn } from "@/lib/utils";
 import type { CafePage } from "@/types/vtuber";
@@ -18,9 +19,11 @@ type CafeSecretClientProps = {
   /** Null until the server has seen the team cookie (see the page). */
   cafe: CafePage | null;
   caseCover: CafeCaseFileCover | null;
+  /** X posts and YouTube clips (hidden ones left out), so Notice Board / Case Tapes show too. */
+  feeds: CafeFeeds | null;
 };
 
-export function CafeSecretClient({ cafe, caseCover }: CafeSecretClientProps) {
+export function CafeSecretClient({ cafe, caseCover, feeds }: CafeSecretClientProps) {
   const [checking, setChecking] = useState(true);
   const [unlocked, setUnlocked] = useState(false);
   const [password, setPassword] = useState("");
@@ -177,6 +180,7 @@ export function CafeSecretClient({ cafe, caseCover }: CafeSecretClientProps) {
         cafe={cafe}
         visibility={defaultCafeVisibility()}
         caseCover={caseCover}
+        feeds={feeds ?? undefined}
       />
     </div>
   );

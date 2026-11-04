@@ -494,7 +494,7 @@ function ShortsBoard({
 function ArchiveLink({ className }: { className?: string }) {
   return (
     <Link href="/media" className={cn(R_CTA_OUTLINE_CLASS, className)}>
-      คลิปทั้งหมด
+      ดูคลิปทั้งหมด
       <ArrowRight aria-hidden className="size-3.5" />
     </Link>
   );

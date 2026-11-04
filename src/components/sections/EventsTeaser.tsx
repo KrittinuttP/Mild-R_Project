@@ -122,7 +122,7 @@ function SmallTile({ event, onOpen }: { event: CalendarEvent; onOpen: () => void
 function AllEventsLink({ className }: { className?: string }) {
   return (
     <Link href="/events" className={cn(R_CTA_OUTLINE_CLASS, className)}>
-      อีเวนต์ทั้งหมด
+      ดูอีเวนต์ทั้งหมด
       <ArrowRight aria-hidden className="size-3.5" />
     </Link>
   );

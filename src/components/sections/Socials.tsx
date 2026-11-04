@@ -9,6 +9,7 @@ import { XFeed } from "@/components/sections/XFeed";
 import { cn } from "@/lib/utils";
 import type { SocialLink, VtuberProfile } from "@/types/vtuber";
 import type { XPost } from "@/types/x-post";
+import { R_CARD_TITLE_CLASS } from "@/lib/site-ui";
 
 type SocialsProps = {
   data: VtuberProfile;
@@ -18,7 +19,6 @@ type SocialsProps = {
 
 const PRIMARY_SOCIAL_IDS = new Set(["youtube", "x"]);
 const BOX = "r-card rounded-[20px] shadow-none ring-1 ring-r-text-2/15";
-const BOX_LABEL = "text-xs tracking-[0.2em] text-r-text-3";
 
 /** "19 May 2024" (dates stay in English). */
 function enDate(ymd: string | undefined) {
@@ -56,7 +56,7 @@ function PrimaryCard({ social }: { social: SocialLink }) {
 function OtherChannels({ socials }: { socials: SocialLink[] }) {
   return (
     <div className={cn(BOX, "px-[18px] pt-[18px] pb-2")}>
-      <p className={cn(BOX_LABEL, "mb-2")}>ช่องทางอื่น</p>
+      <p className={cn(R_CARD_TITLE_CLASS, "mb-2")}>ช่องทางอื่น</p>
       <ul className="-mx-1.5">
         {socials.map((social) => (
           <li key={social.id} className="[&+&]:border-t [&+&]:border-r-text-2/15">
@@ -90,7 +90,7 @@ function SongCard({ song, fallbackUrl }: { song: NonNullable<VtuberProfile["basi
         <Music2 aria-hidden className="size-5" />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-[0.6875rem] tracking-[0.2em] text-r-text-2">เพลงออริจินัล</p>
+        <p className="text-[0.78125rem] text-r-text-2">เพลงออริจินัล</p>
         <p className="mt-[3px] truncate text-base text-r-text">
           {song.title}
           {song.titleEn ? ` · ${song.titleEn}` : ""}
@@ -138,7 +138,7 @@ export function Socials({ data, xPosts = [], xRetweets = [] }: SocialsProps) {
           {hasHashtags ? (
             <div className={cn(BOX, "px-5 py-[18px]")}>
               <p className="mb-3 flex items-baseline justify-between">
-                <span className={BOX_LABEL}>แฮชแท็ก</span>
+                <span className={R_CARD_TITLE_CLASS}>แฮชแท็ก</span>
                 <span className="text-xs text-r-text-3">แตะเพื่อคัดลอก</span>
               </p>
               <ConnectHashtagPills groups={data.hashtags} />

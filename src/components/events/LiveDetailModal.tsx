@@ -29,6 +29,7 @@ import { getSlotCoverUrl } from "@/lib/live-cover";
 import {
   MODAL_CLOSE_BUTTON_CLASS,
   R_CTA_PRIMARY_CLASS,
+  R_LABEL_CLASS,
 } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { LivePlatform, LiveSlot } from "@/types/vtuber";
@@ -93,7 +94,7 @@ function TimeCell({
         accent && "bg-r-pri/06"
       )}
     >
-      <p className="flex items-center gap-1 text-[0.65rem] tracking-[0.12em] text-r-text-2/60 uppercase sm:gap-1.5 sm:text-xs sm:tracking-[0.14em]">
+      <p className={cn("flex items-center gap-1 sm:gap-1.5", R_LABEL_CLASS)}>
         <span className="opacity-80" aria-hidden>
           {icon}
         </span>
@@ -173,7 +174,7 @@ function NewLiveRoundCta({
         </span>
 
         <div className="min-w-0 flex-1">
-          <p className="text-[0.62rem] font-semibold tracking-[0.1em] text-r-pri uppercase sm:text-[0.68rem] sm:tracking-[0.12em]">
+          <p className="text-xs font-semibold text-r-pri sm:text-[0.8125rem]">
             มีการไลฟ์ใหม่
           </p>
           <p className="mt-px flex items-center gap-1 font-[family-name:var(--font-display)] text-xs leading-snug tabular-nums text-r-text sm:mt-0.5 sm:gap-1.5 sm:text-sm">
@@ -330,7 +331,7 @@ export function LiveDetailModal({
                 {/* 🎞️ Cover History (if more than 1) */}
                 {history.length > 1 ? (
                   <div className="space-y-1">
-                    <p className="inline-flex items-center gap-1 text-[0.58rem] font-medium tracking-wider text-r-text-2/65 uppercase sm:gap-1.5 sm:text-[0.62rem]">
+                    <p className={cn("inline-flex items-center gap-1.5", R_LABEL_CLASS)}>
                       <Images className="size-3 text-r-pri" aria-hidden />
                       ประวัติปก ({history.length})
                     </p>
@@ -445,7 +446,7 @@ export function LiveDetailModal({
                 {hasScheduleBlock ? (
                   <div className="overflow-hidden rounded-xl border border-r-text-2/15 bg-white/[0.025] shadow-md sm:rounded-2xl">
                     <div className="border-b border-r-text-2/12 px-2.5 py-1 sm:px-3.5 sm:py-2">
-                      <p className="text-[0.58rem] font-semibold tracking-wider text-r-pri uppercase sm:text-[0.62rem]">
+                      <p className="text-xs font-semibold text-r-pri sm:text-[0.8125rem]">
                         ตารางเวลาสตรีม
                       </p>
                     </div>

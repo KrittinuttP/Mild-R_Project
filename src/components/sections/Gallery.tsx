@@ -266,7 +266,7 @@ function PictureBoard<T extends GalleryItem>({
 function AllGalleryLink({ className }: { className?: string }) {
   return (
     <Link href="/gallery" className={cn(R_CTA_OUTLINE_CLASS, className)}>
-      แกลเลอรีทั้งหมด
+      ดูแกลเลอรีทั้งหมด
       <ArrowRight aria-hidden className="size-3.5" />
     </Link>
   );

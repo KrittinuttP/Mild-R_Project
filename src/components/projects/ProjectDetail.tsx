@@ -13,6 +13,7 @@ import {
   R_EYEBROW_CLASS,
   R_H1_CLASS,
   R_H2_CLASS,
+  R_CARD_TITLE_CLASS,
 } from "@/lib/site-ui";
 import { getYoutubeEmbedUrl, getYoutubeVideoId } from "@/lib/youtube";
 import { cn } from "@/lib/utils";
@@ -132,7 +133,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
               key={item}
               className="rounded-2xl bg-white/[0.03] px-4 py-4 text-sm leading-relaxed text-r-text-2 ring-1 ring-r-line sm:px-5 sm:text-base"
             >
-              <span className="mb-2 block text-xs tracking-[0.18em] text-r-pri uppercase">
+              <span className={cn("mb-2 block", R_CARD_TITLE_CLASS, "text-r-pri")}>
                 Highlight
               </span>
               {item}

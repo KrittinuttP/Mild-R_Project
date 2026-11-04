@@ -10,6 +10,7 @@ import { useDebutDay } from "@/hooks/useDebutDay";
 import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 import type { VtuberProfile } from "@/types/vtuber";
+import { R_CARD_TITLE_CLASS } from "@/lib/site-ui";
 
 registerGsapPlugins();
 
@@ -17,7 +18,6 @@ const PROFILE_IMAGE = "/assets/mild/image/Mild_R.jpg";
 const LOVE_IMAGE = "/assets/mild/image/Mild-R LoVe.png";
 
 /** Small spaced label at the top of each box */
-const BOX_LABEL = "text-[0.6875rem] tracking-[0.2em]";
 const BOX_PAD = "rounded-[22px] p-5 sm:p-[22px]";
 const HEART_PATH =
   "M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.5 1.2 4.3 2.4.8-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z";
@@ -169,7 +169,7 @@ export function Lore({ data }: LoreProps) {
         <div className="flex min-w-0 flex-col gap-[18px]">
           <section data-lore-box aria-label="ข้อมูล" className="r-card rounded-[22px] px-5 pt-[18px] pb-2 sm:px-6">
             <div className="mb-1 flex items-baseline justify-between gap-3">
-              <p className={cn(BOX_LABEL, "text-r-pri")}>PROFILE · ข้อมูล</p>
+              <p className={R_CARD_TITLE_CLASS}>PROFILE · ข้อมูล</p>
               <span className="hidden text-[0.71875rem] text-r-text-3 sm:inline">{basic.agency}</span>
             </div>
             <dl className="grid xl:grid-flow-col xl:grid-cols-2 xl:grid-rows-3 xl:gap-x-9">
@@ -184,7 +184,7 @@ export function Lore({ data }: LoreProps) {
             aria-label="Story"
             className="flex-1 rounded-3xl bg-white/[0.02] bg-[radial-gradient(circle_at_90%_0%,color-mix(in_srgb,var(--r-pri)_22%,transparent),transparent_55%)] px-5 py-6 ring-1 ring-r-pri/30 ring-inset sm:px-[26px]"
           >
-            <p className={cn(BOX_LABEL, "text-r-pri")}>STORY · เรื่องราว</p>
+            <p className={R_CARD_TITLE_CLASS}>STORY · เรื่องราว</p>
             {quote ? (
               <blockquote className="mt-3 font-[family-name:var(--font-display)] text-xl leading-normal font-light text-balance text-r-text sm:text-[1.4375rem]">
                 “{quote}”
@@ -213,7 +213,7 @@ export function Lore({ data }: LoreProps) {
             )}
           >
             <div className="flex items-baseline justify-between gap-3">
-              <p className={cn(BOX_LABEL, "text-r-acc")}>
+              <p className={R_CARD_TITLE_CLASS}>
                 {design.companionGroupName}
                 {design.companionGroupNameLocal ? ` · ${design.companionGroupNameLocal}` : ""}
               </p>
@@ -253,7 +253,7 @@ export function Lore({ data }: LoreProps) {
         {/* ── Likes / dislikes ── */}
         {likes.length + dislikes.length > 0 ? (
           <section data-lore-box aria-label="ชอบ / ไม่ชอบ" className={cn(BOX_PAD, "r-card flex flex-col")}>
-            <p className={cn(BOX_LABEL, "text-r-pri")}>LIKES · ชอบ / ไม่ชอบ</p>
+            <p className={R_CARD_TITLE_CLASS}>LIKES · ชอบ / ไม่ชอบ</p>
             <div className="mt-3.5 grid flex-1 gap-3.5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
               {likes.length > 0 ? (
                 <div className="rounded-[18px] bg-r-pri/6 px-5 py-[18px] ring-1 ring-r-pri/22 ring-inset">
@@ -293,7 +293,7 @@ export function Lore({ data }: LoreProps) {
           aria-label="ทีมผู้สร้าง"
           className="r-card rounded-[22px] px-5 py-6 sm:px-7 md:col-span-2"
         >
-          <p className={cn(BOX_LABEL, "mb-[18px] text-r-pri")}>ทีมผู้สร้าง</p>
+          <p className={cn(R_CARD_TITLE_CLASS, "mb-[18px]")}>TEAM · ทีมผู้สร้าง</p>
           <DesignCredits design={design} variant="aplus" />
         </section>
       </div>

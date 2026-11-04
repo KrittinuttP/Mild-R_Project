@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 
 import { AvatarPicker } from "@/components/upload/AvatarPicker";
+import { UploadFormSkeleton } from "@/components/upload/UploadFormSkeleton";
 import { useAvatarCrop } from "@/components/upload/useAvatarCrop";
 import { shrinkImageFile } from "@/lib/hbd-client-resize";
 import {
@@ -141,7 +142,9 @@ function readFormCache(): CachedFormFields | null {
       message: typeof parsed.message === "string" ? parsed.message : "",
       contactChannel: channel,
       contactHandle:
-        typeof parsed.contactHandle === "string" ? parsed.contactHandle : "",
+        typeof parsed.contactHandle === "string" && parsed.contactHandle.trim() !== "@"
+          ? parsed.contactHandle
+          : "",
     };
   } catch {
     return null;
@@ -620,7 +623,13 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
   );
 
   const aside = (
-    <aside className={cn("space-y-6 lg:sticky lg:space-y-4", standalone ? "lg:top-[88px]" : "lg:top-24")}>
+    <aside
+      className={cn(
+        // Below lg only the back link + header show; the hidden nav/template card would still add space-y margin.
+        "space-y-6 max-lg:[&>header]:mb-0 lg:sticky lg:space-y-4",
+        standalone ? "lg:top-[88px]" : "lg:top-24"
+      )}
+    >
       {standalone ? null : (
         <Link
           href="/hbd/2026"
@@ -862,8 +871,8 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
           onClick={() => cardInputRef.current?.click()}
           aria-describedby={cardMessage ? `${ids}-card-error` : undefined}
           className={cn(
-            "mt-4 flex w-full flex-col items-center gap-2.5 rounded-[18px] border-[1.5px] border-dashed bg-white/[0.02] px-4 py-9 text-r-text transition-colors hover:border-r-pri/70 hover:bg-r-pri/[0.04] sm:py-11",
-            cardMessage ? "border-[#ffa062]" : "border-r-text-2/35",
+            "mt-4 flex w-full flex-col items-center gap-2.5 rounded-[18px] border-[1.5px] border-dashed bg-r-pri/[0.04] px-4 py-9 text-r-text transition-colors hover:border-r-pri/75 sm:py-11",
+            cardMessage ? "border-[#ffa062]" : "border-r-pri/45",
             FOCUS
           )}
         >
@@ -965,7 +974,10 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
               aria-pressed={contactChannel === channel}
               onClick={() => {
                 setContactChannel(channel);
-                setContactHandle((handle) => handleForChannel(handle, channel));
+                // Switching channel keeps what was typed; an empty field stays empty so the example shows.
+                setContactHandle((handle) =>
+                  handle.trim() === "" || handle.trim() === "@" ? "" : handleForChannel(handle, channel)
+                );
               }}
               className={cn(
                 "h-10 flex-1 rounded-full px-4 text-sm transition-colors",
@@ -989,6 +1001,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
             contactMessage ? `${ids}-contact-hint ${ids}-contact-error` : `${ids}-contact-hint`
           }
           onFocus={() => setContactHandle((handle) => handleForChannel(handle, contactChannel))}
+          onBlur={() => setContactHandle((handle) => (handle.trim() === "@" ? "" : handle))}
           onChange={(event) => setContactHandle(formatHandleInput(event.target.value, contactChannel))}
           placeholder={contactChannel === "x" ? "เช่น @honey_01" : "เช่น honey_01"}
           className={cn(INPUT, "min-w-0 sm:flex-1")}
@@ -1201,7 +1214,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
               {submitBlock}
             </form>
             {phase === "preview" ? review : null}
-            {phase === "intro" && cacheReady ? intro : null}
+            {phase === "intro" ? (cacheReady ? intro : <UploadFormSkeleton cards={["md", "lg", "sm"]} />) : null}
           </div>
         </div>
       )}

@@ -32,6 +32,7 @@ import {
   R_CARD_CLASS,
   R_CHIP_SOFT_CLASS,
   R_H2_CLASS,
+  R_LABEL_CLASS,
 } from "@/lib/site-ui";
 import {
   addDays,
@@ -620,15 +621,13 @@ export function LiveScheduleBoard() {
     selectedWeekPoster ? (
       <XLiveSchedulePoster
         poster={selectedWeekPoster}
-        status={selectedWeekPoster.status}
-        errorMessage={selectedWeekPoster.error_message}
         layout={layout}
       />
     ) : (
       <XLiveSchedulePosterEmpty
         layout={layout}
         loading={xSchedulesQuery.status === "loading"}
-        hint="ยังไม่มี Live Schedule จาก X สำหรับสัปดาห์นี้"
+        hint="ยังไม่มีภาพตารางไลฟ์จาก X สำหรับสัปดาห์นี้"
       />
     );
 
@@ -765,7 +764,7 @@ export function LiveScheduleBoard() {
           </div>
 
           <div className="flex flex-wrap items-center justify-end gap-x-2 gap-y-1.5 border-b border-r-line px-3 py-2 sm:px-4 sm:py-2.5">
-            <p className="mr-auto text-xs tracking-[0.14em] text-r-text-3 uppercase sm:text-sm">
+            <p className={cn("mr-auto", R_LABEL_CLASS)}>
               เดือนนี้
               <span className="ml-1.5 tabular-nums text-r-text">
                 {monthKindStats.total}
@@ -871,7 +870,7 @@ export function LiveScheduleBoard() {
                     </div>
                   ) : showOfflineForDay(iso) ? (
                     <div className="mt-auto border-l-2 border-r-acc/70 py-px pl-1">
-                      <span className="text-[0.5rem] tracking-[0.1em] text-r-acc uppercase">
+                      <span className="text-[0.625rem] tracking-[0.06em] text-r-acc uppercase">
                         Off
                       </span>
                     </div>
@@ -1136,7 +1135,7 @@ export function LiveScheduleBoard() {
           </div>
 
           {/* Desktop: poster stays beside the list while scrolling. */}
-          <aside aria-label="Live Schedule จาก X" className="hidden lg:sticky lg:top-24 lg:block">
+          <aside aria-label="ภาพตารางไลฟ์จาก X" className="hidden lg:sticky lg:top-24 lg:block">
             {renderPoster("aside")}
           </aside>
         </div>

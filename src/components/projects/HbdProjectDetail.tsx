@@ -4,7 +4,7 @@ import { ArrowUpRight, Sparkles, Upload } from "lucide-react";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { BackLink } from "@/components/layout/BackLink";
 import { HBD_CARD_TEMPLATE } from "@/lib/hbd-upload";
-import { R_CTA_OUTLINE_CLASS, R_CTA_PRIMARY_CLASS } from "@/lib/site-ui";
+import { R_CTA_OUTLINE_CLASS, R_CTA_PRIMARY_CLASS, R_CARD_TITLE_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { ProjectItem } from "@/types/vtuber";
 
@@ -94,7 +94,7 @@ export function HbdProjectDetail({ project }: HbdProjectDetailProps) {
               key={feature.title}
               className="r-card rounded-2xl px-4 py-5 text-center sm:px-5"
             >
-              <p className="text-xs tracking-[0.18em] text-r-pri-hover uppercase sm:text-sm">
+              <p className={R_CARD_TITLE_CLASS}>
                 {feature.title}
               </p>
               <p className="mt-3 text-sm leading-relaxed text-r-text-2">

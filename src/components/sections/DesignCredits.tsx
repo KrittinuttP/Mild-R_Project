@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { cn } from "@/lib/utils";
 import type { CharacterDesign, CreditPerson } from "@/types/vtuber";
+import { R_LABEL_CLASS } from "@/lib/site-ui";
 
 export type CreditZone = "art" | "audio" | "loading";
 
@@ -341,7 +342,7 @@ export function DesignCredits({
 
 /* ── CI A+ · Project R home (About · ทีมผู้สร้าง) ─────────────────── */
 
-const APLUS_ZONE_LABEL = "text-xs tracking-[0.24em] text-r-pri uppercase";
+const APLUS_ZONE_LABEL = R_LABEL_CLASS; // Art / Credits / Loading (4 Nov: no uppercase tracked pink)
 
 function AplusPersonLink({ entry, className, children }: { entry: CreditEntry; className?: string; children: ReactNode }) {
   const title = `${entry.role} · ${entry.person.handle ?? entry.person.name}`;
@@ -428,7 +429,7 @@ function AplusCredits({
                   >
                     <AplusAvatar entry={entry} big />
                     <span className="min-w-0">
-                      <span className="block text-[0.6875rem] tracking-[0.22em] text-r-pri uppercase">{entry.role}</span>
+                      <span className={cn("block", R_LABEL_CLASS)}>{entry.role}</span>
                       <span className="mt-0.5 block text-[0.9375rem] break-words text-r-text sm:text-base">
                         {entry.person.name}
                       </span>

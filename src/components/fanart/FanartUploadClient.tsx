@@ -26,7 +26,9 @@ import {
   X,
 } from "lucide-react";
 
+import { ThaiPhrases } from "@/components/common/ThaiPhrases";
 import { AvatarPicker } from "@/components/upload/AvatarPicker";
+import { UploadFormSkeleton } from "@/components/upload/UploadFormSkeleton";
 import { useAvatarCrop } from "@/components/upload/useAvatarCrop";
 import {
   FanartUploadError,
@@ -98,6 +100,9 @@ const INTRO_LINK = cn(
   "inline-flex min-h-8 items-center gap-1.5 rounded-md text-[13.5px] text-r-pri transition-colors hover:text-r-pri-hover",
   FOCUS
 );
+
+const DRAFT_INVALID = "เครดิตที่กำลังแก้ยังไม่ถูกต้อง";
+const ART_MISSING = "กรุณาเลือกรูปแฟนอาร์ตอย่างน้อย 1 รูป";
 
 /** Set once the "ก่อนเริ่ม" screen was read → next visit opens the form directly. */
 const FANART_INTRO_SEEN_KEY = "mild-r-fanart-upload-intro-seen";
@@ -313,7 +318,7 @@ function LinkTypeToggle({
           className={cn(
             "flex min-h-10 items-center justify-center gap-1.5 rounded-full text-[13px] whitespace-nowrap ring-1 transition-colors ring-inset",
             FOCUS,
-            value === type ? "bg-r-pri/15 text-r-text ring-r-pri" : "text-r-text-2 ring-white/15 hover:ring-white/30"
+            value === type ? "bg-r-pri font-medium text-r-on-pri ring-r-pri" : "text-r-text-2 ring-white/15 hover:ring-white/30"
           )}
         >
           {type === "x" ? (
@@ -708,6 +713,8 @@ function FanartUploadForm({
   const contactCheck = checkContactHandle(contactChannel, contactHandle);
   /** Field errors show once the fan tried to go on ("ตรวจสอบก่อนส่ง"). */
   const showFieldErrors = Boolean(formError);
+  /** Step ② error once "ตรวจสอบก่อนส่ง" was pressed with no picture (button is no longer disabled). */
+  const artMissing = showFieldErrors && items.length === 0;
 
   /** Credit shown for a picture and where it comes from. */
   function creditOf(item: Item): { credit: FanartPictureCredit | null; source: "mine" | "artist" | "none" } {
@@ -764,11 +771,11 @@ function FanartUploadForm({
   }
 
   function validate(): string | null {
-    if (!commitDraft()) return "เครดิตที่กำลังแก้ยังไม่ถูกต้อง";
+    if (!commitDraft()) return DRAFT_INVALID;
     if ("error" in nameCheck) return nameCheck.error;
     if ("error" in ownLinkCheck) return ownLinkCheck.error;
     if ("error" in contactCheck) return contactCheck.error;
-    if (!items.length) return "กรุณาเลือกรูปแฟนอาร์ตอย่างน้อย 1 รูป";
+    if (!items.length) return ART_MISSING;
     if (items.some((item) => item.preparing)) return "รอเตรียมรูปให้เสร็จก่อน";
     if (!consent) {
       setConsentError(true);
@@ -781,7 +788,13 @@ function FanartUploadForm({
     event.preventDefault();
     const problem = validate();
     setFormError(problem);
-    if (problem) return;
+    if (problem) {
+      // Same as the HBD form: take the fan to the first step that still needs something.
+      const aboutProblem = "error" in nameCheck || "error" in ownLinkCheck || "error" in contactCheck;
+      const artProblem = !items.length || preparing || problem === DRAFT_INVALID;
+      scrollToSection(problem === DRAFT_INVALID ? 1 : aboutProblem ? 0 : artProblem ? 1 : 2);
+      return;
+    }
     finishUndo();
     setPhase("preview");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1340,19 +1353,29 @@ function FanartUploadForm({
       ) : null}
 
       {items.length === 0 ? (
-        <button
-          type="button"
-          onClick={() => artInputRef.current?.click()}
-          className={cn(
-            "mt-4 flex min-h-44 w-full flex-col items-center justify-center gap-2.5 rounded-[18px] border-[1.5px] border-dashed border-r-pri/45 bg-r-pri/[0.04] text-[15px] text-r-text transition-colors hover:border-r-pri/75 sm:min-h-[200px]",
-            FOCUS
-          )}
-        >
-          <span className="flex size-12 items-center justify-center rounded-full bg-r-pri/14 text-r-pri">
-            <Upload className="size-[22px]" aria-hidden />
-          </span>
-          เลือกรูป (เลือกได้หลายรูป)
-        </button>
+        <>
+          <button
+            id={`${ids}-art-pick`}
+            type="button"
+            onClick={() => artInputRef.current?.click()}
+            aria-describedby={artMissing ? `${ids}-art-error` : undefined}
+            className={cn(
+              "mt-4 flex min-h-44 w-full flex-col items-center justify-center gap-2.5 rounded-[18px] border-[1.5px] border-dashed bg-r-pri/[0.04] text-[15px] text-r-text transition-colors hover:border-r-pri/75 sm:min-h-[200px]",
+              artMissing ? "border-[#ffa062]" : "border-r-pri/45",
+              FOCUS
+            )}
+          >
+            <span className="flex size-12 items-center justify-center rounded-full bg-r-pri/14 text-r-pri">
+              <Upload className="size-[22px]" aria-hidden />
+            </span>
+            เลือกรูป (เลือกได้หลายรูป)
+          </button>
+          {artMissing ? (
+            <p id={`${ids}-art-error`} className={cn("mt-2 text-[13px]", ERROR_TEXT)}>
+              <ErrorLine>{ART_MISSING}</ErrorLine>
+            </p>
+          ) : null}
+        </>
       ) : !full ? (
         <button
           type="button"
@@ -1391,7 +1414,7 @@ function FanartUploadForm({
         การนำผลงานไปใช้
       </StepTitle>
       <p id={`${ids}-consent-text`} className="mt-4 text-sm leading-relaxed text-r-text-2">
-        {FANART_CONSENT.text}
+        <ThaiPhrases text={FANART_CONSENT.text} />
       </p>
       <label
         className={cn(
@@ -1425,11 +1448,11 @@ function FanartUploadForm({
           {consent ? <Check className="size-3.5" strokeWidth={3} /> : null}
         </span>
         <span className="text-sm leading-relaxed text-r-text">
-          {FANART_CONSENT.label} <span className="text-r-pri">*</span>
+          <ThaiPhrases text={FANART_CONSENT.label} /> <span className="text-r-pri">*</span>
         </span>
       </label>
       <p id={`${ids}-consent-hint`} className={cn(HINT, "mt-2.5 leading-relaxed")}>
-        {FANART_CONSENT.hint}
+        <ThaiPhrases text={FANART_CONSENT.hint} />
       </p>
       {consentInvalid ? (
         <p className={cn("mt-2 text-[13px]", ERROR_TEXT)}>
@@ -1442,12 +1465,12 @@ function FanartUploadForm({
   const submitBlock = (
     <div className="space-y-2.5">
       {errorBox}
-      <button type="submit" disabled={!items.length || preparing} className={BTN}>
+      <button type="submit" disabled={preparing} className={BTN}>
         ตรวจสอบก่อนส่ง{items.length ? ` (${items.length} รูป)` : ""}
       </button>
-      {preparing || !items.length ? (
+      {preparing ? (
         <p className="text-center text-[13px] text-r-text-3" aria-live="polite">
-          {preparing ? "รอเตรียมรูปให้เสร็จก่อน จึงจะกดได้" : "เลือกรูปอย่างน้อย 1 รูปก่อน จึงจะกดได้"}
+          รอเตรียมรูปให้เสร็จก่อน จึงจะกดได้
         </p>
       ) : null}
     </div>
@@ -1458,7 +1481,13 @@ function FanartUploadForm({
     { icon: Cake, title: "โปรเจกต์วันเกิดของ Mild-R", sub: usage.birthdayLabel },
   ];
   const aside = (
-    <aside className={cn("space-y-6 lg:sticky lg:space-y-4", standalone ? "lg:top-[88px]" : "lg:top-24")}>
+    <aside
+      className={cn(
+        // Below lg only the back link + header show; the hidden nav/card would still add space-y margin.
+        "space-y-6 max-lg:[&>header]:mb-0 lg:sticky lg:space-y-4",
+        standalone ? "lg:top-[88px]" : "lg:top-24"
+      )}
+    >
       {standalone ? null : (
         <Link
           href="/gallery"
@@ -1680,7 +1709,7 @@ function FanartUploadForm({
                 {submitBlock}
               </form>
             ) : null}
-            {phase === "intro" && introReady ? intro : null}
+            {phase === "intro" ? (introReady ? intro : <UploadFormSkeleton cards={["lg", "md", "sm"]} />) : null}
           </div>
         </div>
       ) : null}
@@ -1739,7 +1768,9 @@ function FanartUploadForm({
             </ul>
             <p className="mt-3 flex items-start gap-2 rounded-[14px] bg-white/[0.03] px-3 py-2.5 text-[12.5px] leading-relaxed text-r-text-2 ring-1 ring-white/[0.06] ring-inset">
               <Shield className="mt-0.5 size-3.5 flex-none text-r-acc" aria-hidden />
-              ยินยอมให้นำไปใช้ตกแต่งคาเฟ่ และในโปรเจกต์วันเกิดของ Mild-R เท่านั้น
+              <span>
+                <ThaiPhrases text="ยินยอม|ให้นำไปใช้|ตกแต่งคาเฟ่ และ|ในโปรเจกต์|วันเกิด|ของ Mild-R เท่านั้น" />
+              </span>
             </p>
             <div className="mt-5 space-y-2">
               {errorBox}

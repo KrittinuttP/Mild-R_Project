@@ -70,7 +70,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
       { label: "ปฏิทินรายเดือน", href: "/live#calendar", icon: CalendarDays },
       { label: "ตารางรายสัปดาห์", href: "/live#weekly", icon: Rows3 },
     ],
-    footer: { label: "ดู Live ทั้งหมด", href: "/live" },
+    footer: { label: "ดูไลฟ์ทั้งหมด", href: "/live" },
   },
   { key: "media", label: "Media", href: "/media", homeHash: "#media", sections: ["media"] },
   {
@@ -88,7 +88,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
         icon: GALLERY_ICONS[category.key],
       })),
     ],
-    footer: { label: "ดู Gallery ทั้งหมด", href: "/gallery" },
+    footer: { label: "ดูแกลเลอรีทั้งหมด", href: "/gallery" },
   },
   { key: "events", label: "Events", href: "/events", homeHash: "#events", sections: ["events"] },
   {

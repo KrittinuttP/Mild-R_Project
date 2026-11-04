@@ -20,6 +20,11 @@ type Props = {
   status?: XLiveScheduleStatus;
   errorMessage?: string | null;
   /**
+   * Agent status + error line are for the team only (4 Nov): /live leaves this off,
+   * so a poster row's own `status` / `error_message` is not shown to the public.
+   */
+  showStatus?: boolean;
+  /**
    * `aside` = card beside the weekly list (desktop).
    * `row` = small thumbnail row above the weekly list (phone / tablet).
    */
@@ -87,23 +92,26 @@ export function XLiveSchedulePoster({
   status,
   errorMessage,
   layout = "aside",
+  showStatus = false,
 }: Props) {
   const [open, setOpen] = useState(false);
   const postedLabel = formatPostedAt(poster.posted_at);
-  const resolvedStatus =
-    status ??
+  const resolvedStatus = !showStatus
+    ? undefined
+    : status ??
     ("status" in poster
       ? (poster.status as XLiveScheduleStatus | undefined)
       : undefined);
-  const resolvedError =
-    errorMessage ??
+  const resolvedError = !showStatus
+    ? null
+    : errorMessage ??
     ("error_message" in poster ? poster.error_message : null);
 
   if (!poster.image_url) {
     return (
       <XLiveSchedulePosterEmpty
         layout={layout}
-        hint="ยังไม่มี Live Schedule จาก X สำหรับสัปดาห์นี้"
+        hint="ยังไม่มีภาพตารางไลฟ์จาก X สำหรับสัปดาห์นี้"
       />
     );
   }
@@ -115,8 +123,8 @@ export function XLiveSchedulePoster({
         {
           id: poster.tweet_id,
           src: poster.image_url,
-          alt: "Live Schedule จาก X",
-          caption: "Live Schedule",
+          alt: "ภาพตารางไลฟ์จาก X",
+          caption: "ภาพตารางไลฟ์",
         },
       ]}
       activeIndex={open ? 0 : null}
@@ -142,7 +150,7 @@ export function XLiveSchedulePoster({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          aria-label="ขยายรูป Live Schedule"
+          aria-label="ขยายภาพตารางไลฟ์"
           className="group flex min-w-0 flex-1 items-center gap-3 rounded-2xl p-1.5 text-left transition-colors hover:bg-white/[0.04] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc"
         >
           <span className="relative h-16 w-12 shrink-0 overflow-hidden rounded-xl bg-r-bg ring-1 ring-r-line">
@@ -150,9 +158,9 @@ export function XLiveSchedulePoster({
             <img src={poster.image_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
           </span>
           <span className="min-w-0 flex-1">
-            <span className={cn(R_EYEBROW_CLASS, "block text-[0.65rem]")}>Live Schedule</span>
+            <span className={cn(R_EYEBROW_CLASS, "block tracking-normal")}>ภาพตารางไลฟ์</span>
             <span className="mt-0.5 block truncate text-sm text-r-text">
-              ภาพตารางจาก X{postedLabel ? ` · อัปเดต ${postedLabel}` : ""}
+              จาก X{postedLabel ? ` · อัปเดต ${postedLabel}` : ""}
             </span>
             <span className="mt-0.5 inline-flex items-center gap-1 text-xs text-r-acc">
               <ZoomIn className="size-3" aria-hidden />
@@ -170,8 +178,8 @@ export function XLiveSchedulePoster({
     <div className={cn(R_CARD_CLASS, "p-4")}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className={R_EYEBROW_CLASS}>Live Schedule</p>
-          <p className="mt-1.5 text-sm text-r-text">ภาพตารางจาก X</p>
+          <p className={cn(R_EYEBROW_CLASS, "tracking-normal")}>ภาพตารางไลฟ์</p>
+          <p className="mt-1.5 text-sm text-r-text">จาก X</p>
           {postedLabel ? (
             <p className="mt-0.5 text-xs text-r-text-3">อัปเดต {postedLabel}</p>
           ) : null}
@@ -183,12 +191,12 @@ export function XLiveSchedulePoster({
         type="button"
         onClick={() => setOpen(true)}
         className="group relative mt-4 block w-full overflow-hidden rounded-2xl bg-r-bg text-left ring-1 ring-r-line transition hover:ring-r-pri/45 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc"
-        aria-label="ขยายรูป Live Schedule"
+        aria-label="ขยายภาพตารางไลฟ์"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={poster.image_url}
-          alt="Live Schedule จาก X"
+          alt="ภาพตารางไลฟ์จาก X"
           className="h-auto w-full object-contain"
         />
         <span
@@ -220,7 +228,7 @@ export function XLiveSchedulePosterEmpty({
   layout?: Layout;
   loading?: boolean;
 }) {
-  const text = loading ? "กำลังโหลด Live Schedule…" : hint;
+  const text = loading ? "กำลังโหลดภาพตารางไลฟ์…" : hint;
 
   if (layout === "row") {
     return (
@@ -229,7 +237,7 @@ export function XLiveSchedulePosterEmpty({
           <ImageIcon className="size-4" aria-hidden />
         </span>
         <span className="min-w-0">
-          <span className={cn(R_EYEBROW_CLASS, "block text-[0.65rem]")}>Live Schedule</span>
+          <span className={cn(R_EYEBROW_CLASS, "block tracking-normal")}>ภาพตารางไลฟ์</span>
           <span className="mt-0.5 block text-sm text-r-text-3">{text}</span>
         </span>
       </div>
@@ -238,7 +246,7 @@ export function XLiveSchedulePosterEmpty({
 
   return (
     <div className={cn(R_CARD_CLASS, "p-4")}>
-      <p className={R_EYEBROW_CLASS}>Live Schedule</p>
+      <p className={cn(R_EYEBROW_CLASS, "tracking-normal")}>ภาพตารางไลฟ์</p>
       <div className="mt-4 flex aspect-[4/5] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-r-text-2/25 px-6 text-center text-sm text-r-text-3">
         <ImageIcon className="size-6" aria-hidden />
         {text}

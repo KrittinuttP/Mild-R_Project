@@ -182,7 +182,7 @@ export function sortProjects(projects: ProjectItem[]): ProjectItem[] {
 function AllProjectsLink({ className }: { className?: string }) {
   return (
     <Link href="/projects" className={cn(R_CTA_OUTLINE_CLASS, className)}>
-      โปรเจกต์ทั้งหมด
+      ดูโปรเจกต์ทั้งหมด
       <ArrowRight aria-hidden className="size-3.5" />
     </Link>
   );

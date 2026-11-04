@@ -9,6 +9,7 @@ import {
   getLiveStreamStatus,
   liveStreamToSlot,
 } from "@/lib/live-stream-utils";
+import { R_CARD_TITLE_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { LiveStreamRow } from "@/types/live-stream";
 import type { LiveSlot } from "@/types/vtuber";
@@ -128,7 +129,7 @@ function Section({
 
   return (
     <div>
-      <h3 className="text-[0.7rem] tracking-[0.22em] text-r-text-2/70 uppercase">
+      <h3 className={R_CARD_TITLE_CLASS}>
         {title}
       </h3>
       <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
