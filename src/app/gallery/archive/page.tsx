@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Images } from "lucide-react";
 
 import { GallerySection } from "@/components/gallery/GallerySection";
 import { mildRData } from "@/data/vtuber-data";
@@ -14,7 +13,6 @@ export default function GalleryArchivePage() {
     <GallerySection
       id="visual-archive"
       eyebrow="Moments"
-      icon={Images}
       title="ช่วงเวลาของ Mild-R"
       description="คลังภาพของ Mild-R"
       headingSize="h2"

@@ -23,9 +23,9 @@ type EventsTeaserProps = {
 /** Bento: 1 big tile + 4 small (project R · Events). */
 const BENTO_COUNT = 5;
 
-/** Corner dot / label per format: online = mint · offline = pink · campaign = nurse white. */
+/** Corner dot / label per format (dot colour carries the type): online = mint dot + soft pink text (4 Nov) · offline = pink · campaign = nurse white. */
 const FORMAT: Record<CalendarEventFormat, { label: string; dot: string; text: string }> = {
-  online: { label: "ออนไลน์", dot: "bg-r-acc", text: "text-r-acc" },
+  online: { label: "ออนไลน์", dot: "bg-r-acc", text: "text-r-text-2" },
   offline: { label: "ออฟไลน์", dot: "bg-r-pri", text: "text-r-pri" },
   campaign: { label: "แคมเปญ", dot: "bg-r-nurse", text: "text-r-nurse" },
 };
@@ -118,10 +118,11 @@ function SmallTile({ event, onOpen }: { event: CalendarEvent; onOpen: () => void
   );
 }
 
-function AllEventsLink({ total, className }: { total: number; className?: string }) {
+/** Same "…ทั้งหมด →" as the other home sections (no count, 4 Nov). */
+function AllEventsLink({ className }: { className?: string }) {
   return (
     <Link href="/events" className={cn(R_CTA_OUTLINE_CLASS, className)}>
-      อีเวนต์ทั้งหมด ({total})
+      อีเวนต์ทั้งหมด
       <ArrowRight aria-hidden className="size-3.5" />
     </Link>
   );
@@ -160,7 +161,7 @@ export function EventsTeaser({ board }: EventsTeaserProps) {
                 {statusLine}
               </span>
             }
-            action={<AllEventsLink total={total} className="hidden md:inline-flex" />}
+            action={<AllEventsLink className="hidden md:inline-flex" />}
           />
         </ScrollReveal>
 
@@ -190,7 +191,7 @@ export function EventsTeaser({ board }: EventsTeaserProps) {
           </p>
         </ScrollReveal>
 
-        <AllEventsLink total={total} className="mt-6 md:hidden" />
+        <AllEventsLink className="mt-6 md:hidden" />
       </Section>
 
       <EventDetailModal

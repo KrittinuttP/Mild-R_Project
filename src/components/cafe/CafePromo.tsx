@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 
 import { CafeActivities } from "@/components/cafe/board/CafeActivities";
+import { CafeCaseTapes, CafeNoticeBoard } from "@/components/cafe/board/CafeFeeds";
 import {
   CafeClosingBlock,
   CafeGoodsBlock,
@@ -19,6 +20,7 @@ import {
 } from "@/components/media/ImageLightbox";
 import { useNow } from "@/hooks/useNow";
 import type { CafeCaseFileCover } from "@/lib/cafe-case-file";
+import type { CafeFeeds } from "@/lib/cafe-feeds";
 import {
   defaultCafeVisibility,
   preorderDaysLeft,
@@ -33,6 +35,8 @@ type CafePromoProps = {
   visibility?: CafeSectionVisibilityMap;
   /** Only passed while the case file is visible. */
   caseCover?: CafeCaseFileCover | null;
+  /** X posts and YouTube clips (not hidden). A section with none hides itself. */
+  feeds?: CafeFeeds;
 };
 
 type LightboxState = {
@@ -77,7 +81,7 @@ function PreorderTape({ cafe }: { cafe: CafePage }) {
   );
 }
 
-export function CafePromo({ cafe, visibility, caseCover }: CafePromoProps) {
+export function CafePromo({ cafe, visibility, caseCover, feeds }: CafePromoProps) {
   const show = visibility ?? defaultCafeVisibility();
   const rootRef = useRef<HTMLDivElement>(null);
   useBoardMotion(rootRef);
@@ -134,6 +138,9 @@ export function CafePromo({ cafe, visibility, caseCover }: CafePromoProps) {
         onOpenVenue={() => open(venuePlate, 0, "Venue")}
       />
       <PreorderTape cafe={cafe} />
+      {show.notices ? (
+        <CafeNoticeBoard notices={feeds?.notices ?? []} onOpen={open} />
+      ) : null}
       <CafeMenuSection
         cafe={cafe}
         show={show.signatureMenu}
@@ -157,6 +164,7 @@ export function CafePromo({ cafe, visibility, caseCover }: CafePromoProps) {
         onOpen={open}
       />
       <CafeStoryBlock cover={caseCover ?? null} showCaseFile={show.caseFile} />
+      {show.tapes ? <CafeCaseTapes tapes={feeds?.tapes ?? []} /> : null}
       <CafeClosingBlock cafe={cafe} show={show.closing} />
       <ImageLightbox
         tone="cafe"

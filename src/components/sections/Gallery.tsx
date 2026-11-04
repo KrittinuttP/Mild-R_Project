@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { ChevronRight, Images, Palette, Radio, Upload, type LucideIcon } from "lucide-react";
+import { ArrowRight, ChevronRight, Images, Palette, Radio, type LucideIcon } from "lucide-react";
 
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { RChip } from "@/components/common/RChip";
@@ -13,7 +13,6 @@ import { LiveCoverLightbox } from "@/components/gallery/LiveCoverLightbox";
 import { ImageLightbox, type ImageLightboxItem } from "@/components/media/ImageLightbox";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { useLiveCovers } from "@/hooks/useLiveCovers";
-import { FANART_LIMITS } from "@/lib/fanart-upload";
 import type { LiveCoverItem } from "@/lib/live-streams";
 import { R_CTA_OUTLINE_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
@@ -262,27 +261,14 @@ function PictureBoard<T extends GalleryItem>({
   );
 }
 
-/* ── fan-art upload banner ───────────────────────────────────────── */
+/* ── link to /gallery (same as the other home sections' "…ทั้งหมด →") ── */
 
-function FanArtSubmit() {
+function AllGalleryLink({ className }: { className?: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-[18px] bg-[linear-gradient(120deg,color-mix(in_srgb,var(--r-pri)_16%,transparent),color-mix(in_srgb,var(--r-text-2)_5%,transparent))] p-4 ring-[1.5px] ring-r-pri/32 ring-inset sm:gap-4 sm:px-[18px]">
-      <span className="flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-r-pri/18 text-r-pri">
-        <Upload aria-hidden className="size-5" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-[0.96875rem] text-r-text">ส่งแฟนอาร์ตถึงมายด์</p>
-        <p className="mt-[3px] text-[0.78125rem] text-r-text-3">
-          ครั้งละไม่เกิน {FANART_LIMITS.maxFiles} รูป · ใส่เครดิตได้ · อนุมัติแล้วขึ้นที่นี่
-        </p>
-      </div>
-      <Link
-        href="/fanart/upload"
-        className="inline-flex h-10 shrink-0 items-center rounded-full bg-r-pri px-[18px] text-sm text-r-on-pri transition-colors hover:bg-r-pri-hover active:bg-r-pri-active focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-r-acc"
-      >
-        ส่งเลย
-      </Link>
-    </div>
+    <Link href="/gallery" className={cn(R_CTA_OUTLINE_CLASS, className)}>
+      แกลเลอรีทั้งหมด
+      <ArrowRight aria-hidden className="size-3.5" />
+    </Link>
   );
 }
 
@@ -415,6 +401,7 @@ export function Gallery({ data, fanArt }: GalleryProps) {
           eyebrow="Gallery"
           title="แกลเลอรี"
           description={<span className="text-r-text-3">ช่วงเวลาของมายด์ · แฟนอาร์ตจากฮันนี่ · ปกไลฟ์</span>}
+          action={<AllGalleryLink className="hidden md:inline-flex" />}
         />
       </ScrollReveal>
 
@@ -436,9 +423,8 @@ export function Gallery({ data, fanArt }: GalleryProps) {
           <span id="fan-art" aria-hidden className="block scroll-mt-28" />
           <BlockHeading icon={Palette} title="แฟนอาร์ต" count="จากฮันนี่" />
           <div className="mt-4">
-            <FanArtSubmit />
             {fanArt.length > 0 ? (
-              <div className="mt-3.5">
+              <div>
                 <PictureBoard
                   items={fanArt}
                   viewAllHref="/gallery/fanart"
@@ -449,7 +435,7 @@ export function Gallery({ data, fanArt }: GalleryProps) {
                 />
               </div>
             ) : (
-              <p className="mt-3.5 text-sm text-r-text-3">ยังไม่มีแฟนอาร์ต</p>
+              <p className="text-sm text-r-text-3">ยังไม่มีแฟนอาร์ต</p>
             )}
           </div>
         </ScrollReveal>
@@ -461,6 +447,8 @@ export function Gallery({ data, fanArt }: GalleryProps) {
           </div>
         </ScrollReveal>
       </div>
+
+      <AllGalleryLink className="mt-6 md:hidden" />
     </Section>
   );
 }

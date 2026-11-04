@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Cropper, { type Area, type Point } from "react-easy-crop";
-import { Loader2, ZoomIn, ZoomOut } from "lucide-react";
+import { AlertCircle, Loader2, ZoomIn, ZoomOut } from "lucide-react";
 
 import {
   Dialog,
@@ -46,7 +46,7 @@ export function AvatarCropDialog({
         overlayClassName="bg-r-bg/75"
       >
         <DialogTitle className="font-[family-name:var(--font-display)] text-lg font-normal text-r-text">
-          ครอบรูปโปรไฟล์
+          ครอปรูปโปรไฟล์
         </DialogTitle>
         <DialogDescription className="mt-1.5 text-xs leading-relaxed text-r-text-3">
           ลากรูปเพื่อเลื่อน ถ่างนิ้ว เลื่อนลูกกลิ้งเมาส์ หรือใช้แถบด้านล่างเพื่อซูม
@@ -93,7 +93,7 @@ function CropArea({
           onCropChange={setCrop}
           onZoomChange={setZoom}
           onCropComplete={(_, pixels) => setArea(pixels)}
-          cropperProps={{ "aria-label": "พื้นที่ครอบรูป ใช้ปุ่มลูกศรเพื่อเลื่อนได้" }}
+          cropperProps={{ "aria-label": "พื้นที่ครอปรูป ใช้ปุ่มลูกศรเพื่อเลื่อนได้" }}
         />
       </div>
 
@@ -113,8 +113,9 @@ function CropArea({
       </div>
 
       {error ? (
-        <p role="alert" className="mt-3 text-sm text-[#ff8fb0]">
-          {error}
+        <p role="alert" className="mt-3 flex items-start gap-1.5 text-sm text-[#ffa062]">
+          <AlertCircle className="mt-[3px] size-3.5 flex-none" aria-hidden />
+          <span>{error}</span>
         </p>
       ) : null}
 

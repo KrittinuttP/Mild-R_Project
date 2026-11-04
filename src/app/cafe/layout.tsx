@@ -11,6 +11,7 @@ import { MediaProtection } from "@/components/media/MediaProtection";
 import { mildRData } from "@/data/vtuber-data";
 import { CAFE_CHROME_HEADER } from "@/lib/cafe-countdown";
 import { isCafePromotionHost } from "@/lib/cafe-host";
+import { loadCafeFeeds } from "@/lib/cafe-feeds-store";
 import { cafeForVisibility } from "@/lib/cafe-visibility";
 import { loadCafeVisibility } from "@/lib/cafe-visibility-store";
 
@@ -50,7 +51,7 @@ export default async function CafeLayout({ children }: { children: ReactNode }) 
     );
   }
 
-  const visibility = await loadCafeVisibility();
+  const [visibility, feeds] = await Promise.all([loadCafeVisibility(), loadCafeFeeds()]);
   const cafe = cafeForVisibility(mildRData.cafe, visibility);
   const onCafeDomain = isCafePromotionHost(
     requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host")
@@ -64,6 +65,10 @@ export default async function CafeLayout({ children }: { children: ReactNode }) 
         <CafeHeader
           cafe={cafe}
           showMainSiteLink={visibility.mainSiteLink && !onCafeDomain}
+          feedLinks={{
+            notices: visibility.notices && feeds.notices.length > 0,
+            tapes: visibility.tapes && feeds.tapes.length > 0,
+          }}
         />
       </CafeChromeGate>
       <main className="flex-1">{children}</main>

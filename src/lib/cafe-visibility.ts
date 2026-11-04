@@ -6,6 +6,7 @@ export const CAFE_SECTION_KEYS = [
   "heroCutout",
   "kvSpoil",
   "dispatch",
+  "notices",
   "daySchedule",
   "operations",
   "signatureMenu",
@@ -13,6 +14,7 @@ export const CAFE_SECTION_KEYS = [
   "venueMenu",
   "goods",
   "caseFile",
+  "tapes",
   "closing",
 ] as const;
 
@@ -73,6 +75,10 @@ export const CAFE_SECTION_META: Record<
     label: "Crime Scene Details",
     labelLocal: "ข้อมูลสถานที่และเวลาเกิดเหตุ",
   },
+  notices: {
+    label: "Notice Board",
+    labelLocal: "ประกาศจาก X @Mild_Honeycomb · ไม่มีโพสต์ที่แสดง = ซ่อนทั้งหมวดเอง",
+  },
   daySchedule: {
     label: "Case Incident Log",
     labelLocal: "บันทึกลำดับเหตุการณ์",
@@ -101,6 +107,10 @@ export const CAFE_SECTION_META: Record<
     label: "Case File",
     labelLocal: "แฟ้มคดี · เว็บตูน /cafe/event (ปิด = เข้าไม่ได้)",
   },
+  tapes: {
+    label: "Case Tapes",
+    labelLocal: "คลิปจากช่อง YouTube ของคาเฟ่ · ไม่มีคลิปที่แสดง = ซ่อนทั้งหมวดเอง",
+  },
   closing: {
     label: "Closing Note",
     labelLocal: "สรุปฉบับนี้",
@@ -121,6 +131,8 @@ export function defaultCafeVisibility(): CafeSectionVisibilityMap {
     venueMenu: true,
     goods: true,
     caseFile: true,
+    notices: true,
+    tapes: true,
     closing: true,
   };
 }

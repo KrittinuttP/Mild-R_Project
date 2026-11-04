@@ -10,7 +10,7 @@ import { SectionHeader } from "@/components/common/SectionHeader";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { useVideos } from "@/hooks/useVideos";
 import { groupMediaClips, MEDIA_CATEGORY_LABEL, type MediaGroupId } from "@/lib/media";
-import { R_CTA_OUTLINE_CLASS, R_CTA_PRIMARY_CLASS } from "@/lib/site-ui";
+import { R_CTA_OUTLINE_CLASS, R_CTA_PRIMARY_CLASS, R_PILL_ACTIVE_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import { getYoutubeEmbedUrl, getYoutubePosterUrl, getYoutubeThumbnailUrl, getYoutubeVideoId } from "@/lib/youtube";
 import type { MediaClip, VtuberProfile } from "@/types/vtuber";
@@ -56,11 +56,11 @@ function TabChip({
       className={cn(
         "inline-flex shrink-0 items-center gap-[7px] rounded-full py-[7px] pr-3.5 pl-[11px] text-[0.8125rem] whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc",
         selected
-          ? "bg-r-pri text-r-on-pri"
+          ? R_PILL_ACTIVE_CLASS
           : "text-r-text/85 ring-1 ring-r-text-2/15 ring-inset hover:bg-white/[0.04] hover:text-r-text"
       )}
     >
-      <Icon aria-hidden className={cn("size-3.5", selected ? "text-r-on-pri" : mint ? "text-r-acc" : "text-r-text-2")} />
+      <Icon aria-hidden className={cn("size-3.5", selected ? "text-current" : mint ? "text-r-acc" : "text-r-text-2")} />
       {label}
       {count !== undefined ? <span className="opacity-60">{count}</span> : null}
     </button>
@@ -494,7 +494,7 @@ function ShortsBoard({
 function ArchiveLink({ className }: { className?: string }) {
   return (
     <Link href="/media" className={cn(R_CTA_OUTLINE_CLASS, className)}>
-      คลังคลิปทั้งหมด
+      คลิปทั้งหมด
       <ArrowRight aria-hidden className="size-3.5" />
     </Link>
   );

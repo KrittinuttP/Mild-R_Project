@@ -4,6 +4,7 @@ import { ArrowUpRight, Sparkles, Upload } from "lucide-react";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { BackLink } from "@/components/layout/BackLink";
 import { HBD_CARD_TEMPLATE } from "@/lib/hbd-upload";
+import { R_CTA_OUTLINE_CLASS, R_CTA_PRIMARY_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { ProjectItem } from "@/types/vtuber";
 
@@ -20,7 +21,7 @@ const FEATURES = [
   },
   {
     title: "วันเกิด 2026",
-    body: "โปรเจกต์ฉลองวันเกิด Mild-R · 12.12.2026",
+    body: "โปรเจกต์ฉลองวันเกิด Mild-R · 12 Dec 2026",
   },
 ] as const;
 
@@ -31,9 +32,9 @@ type HbdProjectDetailProps = {
 /** Birthday project landing — intro + CTAs only; gallery lives on /hbd/2026. */
 export function HbdProjectDetail({ project }: HbdProjectDetailProps) {
   return (
-    <article className="relative overflow-hidden text-[#fff5f7]">
+    <article className="relative overflow-hidden text-r-text">
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_45%_at_50%_-5%,rgba(232,90,122,0.28),transparent_55%),radial-gradient(ellipse_50%_40%_at_90%_30%,rgba(243,184,196,0.08),transparent_50%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_45%_at_50%_-5%,rgba(242,67,125,0.22),transparent_55%),radial-gradient(ellipse_50%_40%_at_90%_30%,rgba(34,214,191,0.08),transparent_50%)]"
         aria-hidden
       />
 
@@ -43,8 +44,8 @@ export function HbdProjectDetail({ project }: HbdProjectDetailProps) {
         </BackLink>
 
         <header className="mx-auto mt-10 max-w-3xl text-center sm:mt-12">
-          <p className="inline-flex rounded-full bg-[#e85a7a]/15 px-3 py-1 text-xs tracking-[0.18em] text-[#f3b8c4] uppercase sm:text-sm">
-            Birthday · 12.12.2026
+          <p className="inline-flex rounded-full bg-r-pri/15 px-3 py-1 text-xs tracking-[0.18em] text-r-text-2 uppercase sm:text-sm">
+            Birthday · 12 Dec 2026
           </p>
 
           <h1
@@ -57,12 +58,12 @@ export function HbdProjectDetail({ project }: HbdProjectDetailProps) {
           </h1>
 
           {project.titleLocal ? (
-            <p className="mt-3 text-xl text-[#f3b8c4]/85 sm:text-2xl">
+            <p className="mt-3 text-xl text-r-text-2 sm:text-2xl">
               {project.titleLocal}
             </p>
           ) : null}
 
-          <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-[#f7d7de]/85 sm:text-lg">
+          <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-r-text-2 sm:text-lg">
             {project.summary}
           </p>
 
@@ -70,7 +71,7 @@ export function HbdProjectDetail({ project }: HbdProjectDetailProps) {
             <Link
               href="/hbd/2026"
               prefetch={false}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#e85a7a] px-6 py-3.5 text-sm font-normal text-[#140a0d] shadow-[0_10px_30px_rgba(232,90,122,0.35)] transition hover:bg-[#f3b8c4] sm:w-auto"
+              className={cn(R_CTA_PRIMARY_CLASS, "w-full sm:w-auto")}
             >
               <Sparkles className="size-4" />
               เปิดดูคำอวยพร
@@ -79,7 +80,7 @@ export function HbdProjectDetail({ project }: HbdProjectDetailProps) {
             <Link
               href="/hbd/2026/upload"
               prefetch={false}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[#f3b8c4]/30 bg-white/[0.04] px-6 py-3.5 text-sm font-normal text-[#fff5f7] transition hover:border-[#e85a7a]/45 hover:bg-[#e85a7a]/15 sm:w-auto"
+              className={cn(R_CTA_OUTLINE_CLASS, "w-full sm:w-auto")}
             >
               <Upload className="size-4" />
               ส่งการ์ดอวยพร
@@ -91,12 +92,12 @@ export function HbdProjectDetail({ project }: HbdProjectDetailProps) {
           {FEATURES.map((feature) => (
             <li
               key={feature.title}
-              className="rounded-2xl bg-white/[0.03] px-4 py-5 text-center ring-1 ring-white/10 sm:px-5"
+              className="r-card rounded-2xl px-4 py-5 text-center sm:px-5"
             >
-              <p className="text-xs tracking-[0.18em] text-[#e85a7a] uppercase sm:text-sm">
+              <p className="text-xs tracking-[0.18em] text-r-pri-hover uppercase sm:text-sm">
                 {feature.title}
               </p>
-              <p className="mt-3 text-sm leading-relaxed text-[#f7d7de]/85">
+              <p className="mt-3 text-sm leading-relaxed text-r-text-2">
                 {feature.body}
               </p>
             </li>
@@ -104,17 +105,16 @@ export function HbdProjectDetail({ project }: HbdProjectDetailProps) {
         </ul>
 
         <section className="mt-16 text-center">
-          <p className="text-xs tracking-[0.18em] text-[#f3b8c4]/75 uppercase sm:text-sm">
-            Wish card
-          </p>
+          {/* HBD pages keep text off mint (decisions 3 Nov) */}
+          <p className="text-xs tracking-[0.24em] text-r-text-2 uppercase">Wish card</p>
           <h2 className={cn(DISPLAY, "mt-3 text-2xl font-normal sm:text-3xl")}>
             ตัวอย่างการ์ดอวยพร
           </h2>
-          <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-[#f3b8c4]/80">
+          <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-r-text-2">
             การ์ดที่เป็นหัวใจของโปรเจกต์นี้
           </p>
 
-          <div className="mx-auto mt-8 w-fit max-w-full overflow-hidden rounded-3xl bg-black/25 p-3 ring-1 ring-[#e85a7a]/25 shadow-[0_24px_60px_rgba(0,0,0,0.35)] sm:p-4">
+          <div className="mx-auto mt-8 w-fit max-w-full overflow-hidden rounded-3xl bg-black/25 p-3 ring-1 ring-r-pri/25 shadow-[0_24px_60px_rgba(0,0,0,0.35)] sm:p-4">
             <ProtectedImage
               src={project.cover || HBD_CARD_TEMPLATE.path}
               alt="เทมเพลตการ์ดอวยพร Mild-R"
@@ -128,7 +128,7 @@ export function HbdProjectDetail({ project }: HbdProjectDetailProps) {
             {project.body.map((paragraph) => (
               <p
                 key={paragraph.slice(0, 32)}
-                className="text-base leading-relaxed text-[#f7d7de]/85 sm:text-lg"
+                className="text-base leading-relaxed text-r-text-2 sm:text-lg"
               >
                 {paragraph}
               </p>
@@ -138,16 +138,16 @@ export function HbdProjectDetail({ project }: HbdProjectDetailProps) {
 
         <footer className="mt-20 text-center">
           <div
-            className="mx-auto h-px w-28 bg-[#e85a7a]/55 sm:w-40"
+            className="mx-auto h-px w-28 bg-r-pri/55 sm:w-40"
             aria-hidden
           />
           <p
             className={cn(
               DISPLAY,
-              "mt-6 text-lg font-normal text-[#f3b8c4]/90 sm:text-xl"
+              "mt-6 text-lg font-normal text-r-text-2 sm:text-xl"
             )}
           >
-            เชิญชวนฮันนี่มาอวยพร mutant สาวของเรา · 12.12.2026
+            เชิญชวนฮันนี่มาอวยพร mutant สาวของเรา · 12 Dec 2026
           </p>
         </footer>
       </div>

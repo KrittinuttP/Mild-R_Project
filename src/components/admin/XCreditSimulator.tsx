@@ -3,7 +3,11 @@
 import { useMemo, useState } from "react";
 import { Calculator } from "lucide-react";
 
-import { GLASS_CARD_CLASS, META_CLASS } from "@/lib/site-ui";
+import {
+  R_CARD_CLASS,
+  R_EYEBROW_CLASS,
+  R_PILL_ACTIVE_CLASS,
+} from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import {
   CREDITS_PER_TWEET,
@@ -64,18 +68,18 @@ export function XCreditSimulator({ balance, postsPerDay }: Props) {
   }, [intervalHours, posts, credits, nowMs]);
 
   return (
-    <section className={cn(GLASS_CARD_CLASS, "p-5 sm:p-6")}>
+    <section className={cn(R_CARD_CLASS, "p-5 sm:p-6")}>
       <div className="flex items-center gap-2">
-        <Calculator className="size-4 text-[#e85a7a]" />
-        <p className={META_CLASS}>Simulator</p>
+        <Calculator className="size-4 text-r-pri" />
+        <p className={R_EYEBROW_CLASS}>Simulator</p>
       </div>
-      <h2 className={cn(DISPLAY, "mt-1 text-xl font-normal text-[#fff5f7]")}>
+      <h2 className={cn(DISPLAY, "mt-1 text-xl font-normal text-r-text")}>
         จำลองการใช้เครดิต
       </h2>
 
       <div className="mt-5 grid gap-5 sm:grid-cols-3">
         <div>
-          <p className="text-xs font-semibold text-[#f3b8c4]/80">รอบซิงค์</p>
+          <p className="text-xs font-semibold text-r-text-2/80">รอบซิงค์</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {INTERVALS.map((h) => (
               <button
@@ -86,8 +90,8 @@ export function XCreditSimulator({ balance, postsPerDay }: Props) {
                 className={cn(
                   "rounded-full border px-3 py-1 text-xs transition",
                   intervalHours === h
-                    ? "border-[#e85a7a] bg-[#e85a7a] font-semibold text-[#140a0d]"
-                    : "border-[#f3b8c4]/20 text-[#f3b8c4]/80 hover:border-[#e85a7a]/50"
+                    ? cn("border-transparent", R_PILL_ACTIVE_CLASS)
+                    : "border-r-text-2/20 text-r-text-2/80 hover:border-r-pri/50"
                 )}
               >
                 ทุก {h} ชม.
@@ -97,7 +101,7 @@ export function XCreditSimulator({ balance, postsPerDay }: Props) {
         </div>
 
         <label className="block">
-          <span className="text-xs font-semibold text-[#f3b8c4]/80">
+          <span className="text-xs font-semibold text-r-text-2/80">
             โพสต์ใหม่ต่อวัน: {posts}
           </span>
           <input
@@ -107,65 +111,65 @@ export function XCreditSimulator({ balance, postsPerDay }: Props) {
             step={0.5}
             value={posts}
             onChange={(e) => setPosts(Number(e.target.value))}
-            className="mt-3 w-full accent-[#e85a7a]"
+            className="mt-3 w-full accent-r-pri"
           />
           {postsPerDay != null ? (
-            <span className="mt-1 block text-[0.7rem] text-[#f3b8c4]/55">
+            <span className="mt-1 block text-[0.7rem] text-r-text-2/55">
               เฉลี่ยจริง 30 วัน ≈ {postsPerDay.toFixed(1)} โพสต์/วัน
             </span>
           ) : null}
         </label>
 
         <label className="block">
-          <span className="text-xs font-semibold text-[#f3b8c4]/80">เครดิตตั้งต้น</span>
+          <span className="text-xs font-semibold text-r-text-2/80">เครดิตตั้งต้น</span>
           <input
             type="number"
             min={0}
             step={10_000}
             value={credits}
             onChange={(e) => setCredits(Math.max(0, Number(e.target.value) || 0))}
-            className="mt-2 w-full rounded-xl border border-[#f3b8c4]/20 bg-[#12070c]/90 px-3 py-2 text-sm text-[#fff5f7] outline-none focus:border-[#e85a7a]/70"
+            className="mt-2 w-full rounded-xl bg-white/[0.03] ring-1 ring-r-line ring-inset px-3 py-2 text-sm text-r-text outline-none focus:border-r-pri/70"
           />
-          <span className="mt-1 block text-[0.7rem] text-[#f3b8c4]/55">
+          <span className="mt-1 block text-[0.7rem] text-r-text-2/55">
             ≈ {usd.format(credits / CREDITS_PER_USD)}
           </span>
         </label>
       </div>
 
       <dl className="mt-6 grid gap-3 sm:grid-cols-4">
-        <div className="rounded-2xl border border-[#f3b8c4]/10 bg-[#14080e]/70 p-4">
-          <dt className="text-[0.7rem] text-[#f3b8c4]/60">รอบต่อเดือน</dt>
-          <dd className="mt-1 text-lg font-semibold text-[#fff5f7]">
+        <div className="rounded-2xl bg-white/[0.03] ring-1 ring-r-line ring-inset p-4">
+          <dt className="text-[0.7rem] text-r-text-2/60">รอบต่อเดือน</dt>
+          <dd className="mt-1 text-lg font-semibold text-r-text">
             {fmt.format(result.runsPerMonth)}
           </dd>
         </div>
-        <div className="rounded-2xl border border-[#e85a7a]/30 bg-[#e85a7a]/10 p-4">
-          <dt className="text-[0.7rem] text-[#f3b8c4]/70">เครดิต/เดือน (ค้นหา)</dt>
-          <dd className="mt-1 text-lg font-semibold text-[#fff5f7]">
+        <div className="rounded-2xl border border-r-pri/30 bg-r-pri/10 p-4">
+          <dt className="text-[0.7rem] text-r-text-2/70">เครดิต/เดือน (ค้นหา)</dt>
+          <dd className="mt-1 text-lg font-semibold text-r-text">
             {fmt.format(result.searchMonthly)}
           </dd>
-          <dd className="text-[0.7rem] text-[#f3b8c4]/60">
+          <dd className="text-[0.7rem] text-r-text-2/60">
             ≈ {usd.format(result.searchMonthly / CREDITS_PER_USD)}
           </dd>
         </div>
-        <div className="rounded-2xl border border-[#f3b8c4]/10 bg-[#14080e]/70 p-4">
-          <dt className="text-[0.7rem] text-[#f3b8c4]/60">สำรองสูงสุด (ถ้าค้นหาพัง)</dt>
-          <dd className="mt-1 text-lg font-semibold text-[#fff5f7]/80">
+        <div className="rounded-2xl bg-white/[0.03] ring-1 ring-r-line ring-inset p-4">
+          <dt className="text-[0.7rem] text-r-text-2/60">สำรองสูงสุด (ถ้าค้นหาพัง)</dt>
+          <dd className="mt-1 text-lg font-semibold text-r-text/80">
             +{fmt.format(result.fallbackMaxMonthly)}
           </dd>
-          <dd className="text-[0.7rem] text-[#f3b8c4]/60">
+          <dd className="text-[0.7rem] text-r-text-2/60">
             แบบเดิมวันละครั้ง ตอนเที่ยงคืน · 300/ครั้ง
           </dd>
         </div>
-        <div className="rounded-2xl border border-[#f3b8c4]/10 bg-[#14080e]/70 p-4">
-          <dt className="text-[0.7rem] text-[#f3b8c4]/60">ใช้ได้อีก</dt>
-          <dd className="mt-1 text-lg font-semibold text-[#fff5f7]">
+        <div className="rounded-2xl bg-white/[0.03] ring-1 ring-r-line ring-inset p-4">
+          <dt className="text-[0.7rem] text-r-text-2/60">ใช้ได้อีก</dt>
+          <dd className="mt-1 text-lg font-semibold text-r-text">
             {lifetimeLabel(result.months)}
           </dd>
           {result.runOut ? (
-            <dd className="text-[0.7rem] text-[#f3b8c4]/60">
+            <dd className="text-[0.7rem] text-r-text-2/60">
               หมดราว{" "}
-              {result.runOut.toLocaleDateString("th-TH", {
+              {result.runOut.toLocaleDateString("en-GB", {
                 dateStyle: "medium",
                 timeZone: "Asia/Bangkok",
               })}
@@ -174,7 +178,7 @@ export function XCreditSimulator({ balance, postsPerDay }: Props) {
         </div>
       </dl>
 
-      <p className="mt-4 text-[0.7rem] leading-relaxed text-[#f3b8c4]/55">
+      <p className="mt-4 text-[0.7rem] leading-relaxed text-r-text-2/55">
         คิด 15 เครดิตต่อโพสต์ที่ได้ ขั้นต่ำ 15 เครดิตต่อรอบแม้ไม่มีโพสต์ใหม่ ·
         รวมรอบเที่ยงคืนที่ค้นย้อน 24 ชม. เพื่อเก็บโพสต์ตกหล่นแล้ว
       </p>

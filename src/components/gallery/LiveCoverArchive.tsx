@@ -12,7 +12,6 @@ import {
   ArrowUpRight,
   CalendarDays,
   LayoutGrid,
-  MonitorPlay,
   Search,
   X,
 } from "lucide-react";
@@ -25,7 +24,6 @@ import {
   LiveCoverLightbox,
 } from "@/components/gallery/LiveCoverLightbox";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
-import { buttonVariants } from "@/components/ui/button";
 import { useLiveCovers } from "@/hooks/useLiveCovers";
 import { useLoadMoreOnScroll } from "@/hooks/useLoadMoreOnScroll";
 import {
@@ -36,12 +34,15 @@ import {
 } from "@/lib/gsap";
 import type { LiveCoverItem } from "@/lib/live-streams";
 import {
-  BODY_CLASS,
-  CTA_OUTLINE_CLASS,
-  DISPLAY_H1_CLASS,
-  DISPLAY_H2_CLASS,
-  DISPLAY_H3_CLASS,
-  META_CLASS,
+  R_BODY_CLASS,
+  R_CTA_OUTLINE_CLASS,
+  R_EYEBROW_CLASS,
+  R_H1_CLASS,
+  R_H2_CLASS,
+  R_H3_CLASS,
+  R_PILL_ACTIVE_CLASS,
+  R_PILL_ACTIVE_FILL_CLASS,
+  R_PILL_ACTIVE_TEXT_CLASS,
 } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 
@@ -184,16 +185,16 @@ function CoverTile({
       >
         <span
           className={cn(
-            "relative block aspect-video overflow-hidden rounded-xl border border-[#f3b8c4]/12 bg-[#1a0c12]",
-            "transition duration-300 group-hover:-translate-y-0.5 group-hover:border-[#f3b8c4]/30",
-            "group-focus-visible:ring-2 group-focus-visible:ring-[#e85a7a]/60"
+            "relative block aspect-video overflow-hidden rounded-xl bg-white/[0.03] ring-1 ring-r-line ring-inset",
+            "transition duration-300 group-hover:-translate-y-0.5 group-hover:ring-r-text-2/30",
+            "group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-solid group-focus-visible:outline-r-acc"
           )}
         >
           {!loaded && !failed ? (
-            <span className="absolute inset-0 animate-pulse bg-[#241019]" />
+            <span className="absolute inset-0 animate-pulse bg-white/[0.05]" />
           ) : null}
           {failed ? (
-            <span className="absolute inset-0 flex items-center justify-center p-3 text-center text-xs text-[#f3b8c4]/50">
+            <span className="absolute inset-0 flex items-center justify-center p-3 text-center text-xs text-r-text-3">
               {item.title}
             </span>
           ) : (
@@ -202,6 +203,10 @@ function CoverTile({
               alt={item.title}
               loading="lazy"
               decoding="async"
+              ref={(img) => {
+                // Cached images can finish before hydration, so onLoad never fires.
+                if (img?.complete && img.naturalWidth > 0) setLoaded(true);
+              }}
               onLoad={() => setLoaded(true)}
               onError={() => setFailed(true)}
               className={cn(
@@ -212,13 +217,13 @@ function CoverTile({
           )}
         </span>
         <span className="mt-2 block px-0.5">
-          <span className="line-clamp-2 min-h-[2.75em] text-sm leading-snug text-[#fff5f7]/90">
+          <span className="line-clamp-2 min-h-[2.75em] text-sm leading-snug text-r-text/90">
             {item.title}
           </span>
           <span className="mt-1.5 flex min-h-[2.875rem] min-w-0 flex-wrap content-start items-center gap-1.5 md:min-h-5">
             <ChannelBadge item={item} />
             {item.date ? (
-              <span className="shrink-0 text-[0.7rem] text-[#f3b8c4]/55">
+              <span className="shrink-0 text-[0.7rem] text-r-text-3">
                 {formatCoverDate(item.date)}
               </span>
             ) : null}
@@ -232,10 +237,10 @@ function CoverTile({
 function SkeletonTile() {
   return (
     <li className="min-w-0">
-      <span className="block aspect-video animate-pulse rounded-xl bg-[#1d0d14]" />
-      <span className="mt-2 block h-[2.75em] w-4/5 animate-pulse rounded bg-[#1d0d14] text-sm" />
+      <span className="block aspect-video animate-pulse rounded-xl bg-white/[0.05]" />
+      <span className="mt-2 block h-[2.75em] w-4/5 animate-pulse rounded bg-white/[0.05] text-sm" />
       <span className="mt-1.5 block min-h-[2.875rem] md:min-h-5">
-        <span className="block h-5 w-2/5 animate-pulse rounded bg-[#1d0d14]" />
+        <span className="block h-5 w-2/5 animate-pulse rounded bg-white/[0.05]" />
       </span>
     </li>
   );
@@ -244,9 +249,9 @@ function SkeletonTile() {
 type HeadingSize = "h1" | "h2" | "h3";
 
 const HEADING_CLASS: Record<HeadingSize, string> = {
-  h1: DISPLAY_H1_CLASS,
-  h2: DISPLAY_H2_CLASS,
-  h3: DISPLAY_H3_CLASS,
+  h1: R_H1_CLASS,
+  h2: R_H2_CLASS,
+  h3: R_H3_CLASS,
 };
 
 type LiveCoverArchiveProps = {
@@ -460,22 +465,19 @@ export function LiveCoverArchive({
       id={id}
       aria-labelledby={`${id}-heading`}
       className={cn(
-        "relative scroll-mt-20 bg-[#12080c] px-5 pb-20 text-[#fff5f7] sm:scroll-mt-24 sm:px-10 sm:pb-28 lg:px-16",
+        "relative scroll-mt-20 bg-r-bg px-5 pb-20 text-r-text sm:scroll-mt-24 sm:px-10 sm:pb-28 lg:px-16",
         className
       )}
     >
       <div
         className={cn(
           "relative mx-auto max-w-6xl",
-          showDivider && "border-t border-[#f3b8c4]/10 pt-16 sm:pt-20"
+          showDivider && "border-t border-r-line pt-16 sm:pt-20"
         )}
       >
         <ScrollReveal>
           {eyebrow ? (
-            <div className="flex items-center gap-2">
-              <MonitorPlay className="size-4 text-[#e85a7a]" aria-hidden />
-              <p className={META_CLASS}>{eyebrow}</p>
-            </div>
+            <p className={R_EYEBROW_CLASS}>{eyebrow}</p>
           ) : null}
           <h2
             id={`${id}-heading`}
@@ -483,21 +485,21 @@ export function LiveCoverArchive({
           >
             {title}
           </h2>
-          <p className={cn("mt-4 max-w-xl", BODY_CLASS)}>รวมปกไลฟ์ Mild-R</p>
+          <p className={cn("mt-4 max-w-xl", R_BODY_CLASS)}>รวมปกไลฟ์ Mild-R</p>
         </ScrollReveal>
 
         {!preview && years.length > 0 ? (
           <div className="mt-6 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-3 sm:gap-x-3 lg:gap-x-4">
             <div
-              className="relative col-start-2 row-start-1 grid h-10 grid-cols-2 rounded-full border border-[#f3b8c4]/15 bg-[#1a0c12]/70 p-0.5 lg:h-9"
+              className="relative col-start-2 row-start-1 grid h-10 grid-cols-2 rounded-full bg-white/[0.04] p-0.5 ring-1 ring-r-line ring-inset lg:h-9"
               role="group"
               aria-label="มุมมอง"
             >
               <span
                 aria-hidden
                 className={cn(
-                  "pointer-events-none absolute inset-y-0.5 left-0.5 w-[calc(50%-2px)] rounded-full border border-[#e85a7a]/55",
-                  "bg-gradient-to-b from-[#e85a7a]/30 to-[#e85a7a]/12 shadow-[0_0_18px_-6px_rgba(232,90,122,0.75)]",
+                  "pointer-events-none absolute inset-y-0.5 left-0.5 w-[calc(50%-2px)] rounded-full",
+                  R_PILL_ACTIVE_FILL_CLASS,
                   "transition-transform duration-300 ease-out motion-reduce:transition-none",
                   view === "all" && "translate-x-full"
                 )}
@@ -514,10 +516,10 @@ export function LiveCoverArchive({
                     onClick={() => selectView(key)}
                     className={cn(
                       "relative flex items-center justify-center gap-1.5 rounded-full px-3 text-xs transition-colors duration-300 sm:px-4 sm:text-sm",
-                      "focus-visible:ring-2 focus-visible:ring-[#e85a7a]/60 focus-visible:outline-none",
+                      "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-r-acc",
                       selected
-                        ? "text-[#fff5f7]"
-                        : "text-[#f3b8c4]/55 hover:text-[#fff5f7]"
+                        ? R_PILL_ACTIVE_TEXT_CLASS
+                        : "text-r-text-2 hover:text-r-text"
                     )}
                   >
                     <Icon className="size-4 shrink-0" aria-hidden />
@@ -530,7 +532,7 @@ export function LiveCoverArchive({
             <label className="relative col-start-1 row-start-1 block w-full lg:col-start-2 lg:row-start-2 lg:w-64 lg:justify-self-end">
               <span className="sr-only">ค้นหาปกไลฟ์</span>
               <Search
-                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#f3b8c4]/45"
+                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-r-text-3/70"
                 aria-hidden
               />
               <input
@@ -540,8 +542,8 @@ export function LiveCoverArchive({
                 placeholder="ค้นหาชื่อไลฟ์ หรือช่อง…"
                 enterKeyHint="search"
                 className={cn(
-                  "h-10 w-full rounded-full border border-[#f3b8c4]/15 bg-[#1a0c12]/70 pr-9 pl-9 text-sm text-[#fff5f7] transition outline-none",
-                  "placeholder:text-[#f3b8c4]/40 focus:border-[#e85a7a]/55 focus:bg-[#1a0c12]",
+                  "h-10 w-full rounded-full bg-white/[0.04] ring-1 ring-r-line ring-inset pr-9 pl-9 text-sm text-r-text transition outline-none",
+                  "placeholder:text-r-text-3/70 focus:bg-white/[0.06] focus:ring-r-pri/55",
                   "[&::-webkit-search-cancel-button]:appearance-none"
                 )}
               />
@@ -550,7 +552,7 @@ export function LiveCoverArchive({
                   type="button"
                   onClick={() => changeQuery("")}
                   aria-label="ล้างคำค้น"
-                  className="absolute top-1/2 right-2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-[#f3b8c4]/60 transition hover:bg-[#f3b8c4]/10 hover:text-[#fff5f7]"
+                  className="absolute top-1/2 right-2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-r-text-3 transition hover:bg-r-text-2/10 hover:text-r-text"
                 >
                   <X className="size-3.5" />
                 </button>
@@ -570,14 +572,15 @@ export function LiveCoverArchive({
                   aria-selected={filter === key}
                   onClick={() => selectFilter(key)}
                   className={cn(
-                    "shrink-0 rounded-full border px-3 py-1.5 text-xs whitespace-nowrap transition sm:px-3.5 sm:text-sm",
+                    "inline-flex h-9 shrink-0 items-center rounded-full px-3.5 text-xs whitespace-nowrap transition-colors sm:px-4 sm:text-sm",
+                    "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-r-acc",
                     filter === key
-                      ? "border-[#e85a7a]/60 bg-[#e85a7a]/20 text-[#fff5f7]"
-                      : "border-[#f3b8c4]/20 text-[#f3b8c4]/70 hover:border-[#f3b8c4]/40 hover:text-[#fff5f7]"
+                      ? R_PILL_ACTIVE_CLASS
+                      : "bg-white/[0.04] text-r-text-2 ring-1 ring-r-line ring-inset hover:text-r-text hover:ring-r-pri/50"
                   )}
                 >
                   {FILTER_LABEL[key]}
-                  <span className="ml-1.5 text-[#f3b8c4]/55">{counts[key]}</span>
+                  <span className="ml-1.5 tabular-nums opacity-60">{counts[key]}</span>
                 </button>
               ))}
             </div>
@@ -597,10 +600,11 @@ export function LiveCoverArchive({
                       aria-pressed={selected}
                       onClick={() => selectYear(key)}
                       className={cn(
-                        "rounded-full border px-3 py-1 text-[0.7rem] transition sm:text-xs",
+                        "inline-flex h-8 items-center rounded-full px-3 text-[0.7rem] tabular-nums transition-colors sm:text-xs",
+                        "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-r-acc",
                         selected
-                          ? "border-[#f3b8c4]/45 bg-[#f3b8c4]/12 text-[#fff5f7]"
-                          : "border-[#f3b8c4]/12 text-[#f3b8c4]/60 hover:border-[#f3b8c4]/35 hover:text-[#fff5f7]"
+                          ? R_PILL_ACTIVE_CLASS
+                          : "text-r-text-3 ring-1 ring-r-line ring-inset hover:text-r-text hover:ring-r-pri/50"
                       )}
                     >
                       {key === "all" ? "ทุกปี" : key}
@@ -614,14 +618,11 @@ export function LiveCoverArchive({
 
         {status === "error" ? (
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <p className="text-sm text-[#f3b8c4]/60">โหลดปกไลฟ์ไม่สำเร็จ</p>
+            <p className="text-sm text-r-text-3">โหลดปกไลฟ์ไม่สำเร็จ</p>
             <button
               type="button"
               onClick={retry}
-              className={cn(
-                buttonVariants({ variant: "outline", size: "sm" }),
-                CTA_OUTLINE_CLASS
-              )}
+              className={cn(R_CTA_OUTLINE_CLASS, "h-9 px-4 text-sm")}
             >
               ลองใหม่
             </button>
@@ -629,7 +630,7 @@ export function LiveCoverArchive({
         ) : status === "ready" && filtered.length === 0 ? (
           normalizedQuery ? (
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <p className="text-sm text-[#f3b8c4]/60">
+              <p className="text-sm text-r-text-3">
                 ไม่พบไลฟ์ที่ตรงกับ “{query.trim()}”
               </p>
               <button
@@ -637,16 +638,13 @@ export function LiveCoverArchive({
                 onClick={() =>
                   matchesInOtherYears ? selectYear("all") : changeQuery("")
                 }
-                className={cn(
-                  buttonVariants({ variant: "outline", size: "sm" }),
-                  CTA_OUTLINE_CLASS
-                )}
+                className={cn(R_CTA_OUTLINE_CLASS, "h-9 px-4 text-sm")}
               >
                 {matchesInOtherYears ? "ค้นหาในทุกปี" : "ล้างคำค้น"}
               </button>
             </div>
           ) : (
-            <p className="mt-8 text-sm text-[#f3b8c4]/60">ยังไม่มีปกไลฟ์ในหมวดนี้</p>
+            <p className="mt-8 text-sm text-r-text-3">ยังไม่มีปกไลฟ์ในหมวดนี้</p>
           )
         ) : (
           <div ref={gridRef} className="mt-6 sm:mt-8">
@@ -676,12 +674,12 @@ export function LiveCoverArchive({
                   >
                     <h3
                       id={`${id}-month-${group.key}`}
-                      className="sticky top-14 z-10 -mx-2 mb-4 flex items-baseline gap-2 bg-[#12080c]/90 px-2 py-2.5 backdrop-blur-sm sm:top-16"
+                      className="sticky top-14 z-10 -mx-2 mb-4 flex items-baseline gap-2 bg-r-bg/90 px-2 py-2.5 backdrop-blur-sm sm:top-16"
                     >
-                      <span className="font-[family-name:var(--font-display)] text-lg text-[#fff5f7] sm:text-xl">
+                      <span className="font-[family-name:var(--font-display)] text-lg text-r-text sm:text-xl">
                         {formatMonthHeading(group.key)}
                       </span>
-                      <span className="text-xs text-[#f3b8c4]/55">
+                      <span className="text-xs text-r-text-3">
                         {group.items.length} ไลฟ์
                       </span>
                     </h3>
@@ -705,11 +703,7 @@ export function LiveCoverArchive({
           <div className="mt-10 flex justify-center sm:mt-12">
             <Link
               href={viewAllHref}
-              className={cn(
-                buttonVariants({ variant: "outline", size: "lg" }),
-                CTA_OUTLINE_CLASS,
-                "px-6"
-              )}
+              className={R_CTA_OUTLINE_CLASS}
             >
               View all
               <ArrowUpRight className="size-4 opacity-80" />
@@ -724,14 +718,10 @@ export function LiveCoverArchive({
             <button
               type="button"
               onClick={showMore}
-              className={cn(
-                buttonVariants({ variant: "outline", size: "lg" }),
-                CTA_OUTLINE_CLASS,
-                "px-6"
-              )}
+              className={R_CTA_OUTLINE_CLASS}
             >
               โหลดเพิ่ม
-              <span className="ml-2 text-[#f3b8c4]/70">
+              <span className="ml-2 text-r-text-3">
                 ({filtered.length - visible.length})
               </span>
             </button>

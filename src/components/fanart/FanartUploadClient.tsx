@@ -208,6 +208,13 @@ function uploadErrorText(error: unknown): { message: string; retryable: boolean 
   if (error instanceof FanartUploadError) {
     if (error.status === 0) return { message: "เชื่อมต่อไม่ได้ กด “ลองใหม่” อีกครั้ง", retryable: true };
     if (error.status === 413) return { message: "ไฟล์ใหญ่เกินไป (รูปละไม่เกิน 40 MB)", retryable: false };
+    if (error.status === 415 || error.code === "invalid_mime_type") {
+      return { message: "ไฟล์ประเภทนี้ใช้ไม่ได้ ใช้ได้เฉพาะ JPEG · PNG · WebP", retryable: false };
+    }
+    // Signed upload link expired or rejected: a retry reuses the same link, so send again from the form.
+    if (error.status === 401 || error.status === 403) {
+      return { message: "ลิงก์อัปโหลดหมดอายุ กด “กลับไปแก้ไขรูปที่พลาด” แล้วส่งใหม่", retryable: false };
+    }
   }
   return { message: "อัปโหลดไม่สำเร็จ กด “ลองใหม่” อีกครั้ง", retryable: true };
 }
@@ -935,7 +942,7 @@ function FanartUploadForm({
 
   const header = (sub: string, align: "left" | "center" = "center") => (
     <header className={align === "center" ? "text-center" : undefined}>
-      <p className={R_EYEBROW_CLASS}>Fan art</p>
+      <p className={cn(R_EYEBROW_CLASS, align === "center" && "mx-auto")}>Fan art</p>
       <h1 className={cn(DISPLAY, "mt-2.5 text-[1.875rem] leading-tight font-normal text-r-text sm:text-[2.125rem]")}>
         ส่งแฟนอาร์ต
       </h1>

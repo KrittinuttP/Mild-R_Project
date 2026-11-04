@@ -12,7 +12,7 @@ import { loadApprovedHbdWishes } from "@/lib/hbd-submissions-store";
 export const metadata: Metadata = {
   title: "คำอวยพรวันเกิด | Mild-R Fanclub",
   description:
-    "คำอวยพรวันเกิด Mild-R จากฮันนี่ — สุขสันต์วันเกิดในโอกาส 12.12.2026",
+    "คำอวยพรวันเกิด Mild-R จากฮันนี่ — สุขสันต์วันเกิดในโอกาส 12 Dec 2026",
 };
 
 /** Always fetch approved wishes fresh — avoid stale ISR after admin approve */

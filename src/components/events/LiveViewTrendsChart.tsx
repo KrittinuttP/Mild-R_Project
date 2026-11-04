@@ -14,6 +14,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import type { LiveViewTrendRow, TrendGrain } from "@/types/live-view-trends";
+import { R_PILL_ACTIVE_CLASS } from "@/lib/site-ui";
 
 type ChartPoint = LiveViewTrendRow & { label: string };
 type ChartMode = "totals" | "peak";
@@ -78,8 +79,8 @@ function TrendsTooltip({
   const showExtraPeak = grain !== "day" && !peakOnly && point;
 
   return (
-    <div className="rounded-2xl border border-[#f3b8c4]/20 bg-[#16080f]/95 px-3.5 py-2.5 text-xs text-[#fff5f7] shadow-[0_12px_32px_rgba(0,0,0,0.7)] backdrop-blur-md">
-      <p className="mb-2 font-medium text-[#f3b8c4]/80">
+    <div className="rounded-2xl bg-r-bg/95 ring-1 ring-r-line ring-inset px-3.5 py-2.5 text-xs text-r-text shadow-[0_12px_32px_rgba(0,0,0,0.7)] backdrop-blur-md">
+      <p className="mb-2 font-medium text-r-text-2/80">
         {label} · คลิกดูรายละเอียด
       </p>
       <div className="space-y-1.5">
@@ -95,7 +96,7 @@ function TrendsTooltip({
           </p>
         ))}
         {showExtraPeak ? (
-          <p className="flex items-center justify-between gap-4 border-t border-[#f3b8c4]/15 pt-1.5">
+          <p className="flex items-center justify-between gap-4 border-t border-r-text-2/15 pt-1.5">
             <span className="flex items-center gap-1.5 text-[#f7c98a]">
               <span className="size-1.5 rounded-full bg-[#f7c98a]" />
               สูงสุดไลฟ์
@@ -187,7 +188,7 @@ export function LiveViewTrendsChart({
 
   if (rows.length === 0) {
     return (
-      <div className="flex h-72 items-center justify-center rounded-3xl border border-dashed border-[#f3b8c4]/20 bg-[#1a0c12]/40 text-sm text-[#f3b8c4]/70">
+      <div className="flex h-72 items-center justify-center rounded-3xl border border-dashed border-r-text-2/20 bg-white/[0.03] text-sm text-r-text-2/70">
         ไม่มีข้อมูลในช่วงนี้
       </div>
     );
@@ -201,24 +202,24 @@ export function LiveViewTrendsChart({
   const showDots = data.length <= 60;
 
   return (
-    <div className="w-full overflow-hidden rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1f0d16]/75 via-[#1a0c12]/85 to-[#14080e]/95 p-4 shadow-xl sm:p-6">
+    <div className="w-full overflow-hidden rounded-3xl r-card p-4 shadow-xl sm:p-6">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs text-[#f3b8c4]/65">
+        <p className="text-xs text-r-text-2/65">
           คลิกที่จุดหรือบริเวณกราฟเพื่อดูรายละเอียดด้านล่าง
           {peakOnly
             ? " · กำลังดูยอดไลฟ์สูงสุดต่อช่วง"
             : ""}
         </p>
         {canTogglePeak ? (
-          <div className="flex items-center gap-1.5 rounded-full border border-[#f3b8c4]/15 bg-[#12070c]/80 p-1">
+          <div className="flex items-center gap-1.5 rounded-full bg-white/[0.03] ring-1 ring-r-line ring-inset p-1">
             <button
               type="button"
               onClick={() => setChartMode("totals")}
               className={cn(
                 "rounded-full px-3 py-1 text-[0.65rem] font-bold tracking-wider uppercase transition",
                 chartMode === "totals"
-                  ? "border border-[#e85a7a]/60 bg-[#e85a7a]/25 text-[#fff5f7] shadow-[0_0_12px_rgba(232,90,122,0.3)]"
-                  : "text-[#f3b8c4]/60 hover:text-[#fff5f7]"
+                  ? R_PILL_ACTIVE_CLASS
+                  : "text-r-text-2 hover:text-r-text"
               )}
             >
               ยอดรวมช่วง
@@ -230,7 +231,7 @@ export function LiveViewTrendsChart({
                 "rounded-full px-3 py-1 text-[0.65rem] font-bold tracking-wider uppercase transition",
                 chartMode === "peak"
                   ? "border border-[#f7c98a]/60 bg-[#f7c98a]/20 text-[#f7c98a] shadow-[0_0_12px_rgba(247,201,138,0.25)]"
-                  : "text-[#f3b8c4]/60 hover:text-[#fff5f7]"
+                  : "text-r-text-2 hover:text-r-text"
               )}
             >
               สูงสุดต่อ{grain === "month" ? "เดือน" : "ปี"}
@@ -334,7 +335,7 @@ export function LiveViewTrendsChart({
                   type="monotone"
                   dataKey="latest_views"
                   name="ยอดรวม"
-                  stroke="#e85a7a"
+                  stroke="#f2437d"
                   strokeWidth={2}
                   dot={
                     showDots
@@ -351,8 +352,8 @@ export function LiveViewTrendsChart({
                               cx={cx}
                               cy={cy}
                               r={selected ? 5 : 3}
-                              fill={selected ? "#e85a7a" : "#1a0d12"}
-                              stroke="#e85a7a"
+                              fill={selected ? "#f2437d" : "#1a0d12"}
+                              stroke="#f2437d"
                               strokeWidth={selected ? 2 : 1}
                               style={{ cursor: "pointer" }}
                               onClick={(e) => {

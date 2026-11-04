@@ -50,9 +50,9 @@ function StreamCard({
       <button
         type="button"
         onClick={() => onOpen(slot)}
-        className="group flex w-full flex-col overflow-hidden border border-[#f3b8c4]/14 bg-[#1a0d12]/55 text-left transition hover:border-[#e85a7a]/40 hover:bg-[#e85a7a]/10"
+        className="group r-card flex w-full flex-col overflow-hidden rounded-2xl text-left transition hover:bg-r-pri/10 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-r-acc"
       >
-        <div className="relative aspect-video overflow-hidden bg-[#10070b]">
+        <div className="relative aspect-video overflow-hidden bg-r-bg">
           <ProtectedImage
             src={thumb}
             alt={row.title ?? "Live stream"}
@@ -62,18 +62,18 @@ function StreamCard({
               status === "cancelled" && "opacity-70 grayscale-[0.35]"
             )}
           />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140a0d] via-transparent to-transparent" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-r-bg via-transparent to-transparent" />
           <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5">
             <span
               className={cn(
-                "inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[0.58rem] tracking-[0.16em] uppercase backdrop-blur-sm",
+                "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[0.58rem] tracking-[0.16em] uppercase backdrop-blur-sm",
                 status === "live"
                   ? "border-red-400/40 bg-red-500/20 text-red-100"
                   : status === "upcoming"
-                    ? "border-[#e85a7a]/35 bg-[#140a0d]/70 text-[#f3b8c4]"
+                    ? "border-r-pri/35 bg-r-bg/70 text-r-text-2"
                     : status === "cancelled"
-                      ? "border-[#8a7f88]/40 bg-[#140a0d]/70 text-[#d8d0d4]"
-                      : "border-white/15 bg-[#140a0d]/70 text-[#f7d7de]/75"
+                      ? "border-[#8a7f88]/40 bg-r-bg/70 text-[#d8d0d4]"
+                      : "border-white/15 bg-r-bg/70 text-r-text-2/75"
               )}
             >
               {status === "live" ? (
@@ -83,16 +83,16 @@ function StreamCard({
             </span>
             <span
               className={cn(
-                "inline-flex items-center rounded-md border px-2 py-0.5 text-[0.58rem] tracking-[0.14em] uppercase backdrop-blur-sm",
+                "inline-flex items-center rounded-full border px-2 py-0.5 text-[0.58rem] tracking-[0.14em] uppercase backdrop-blur-sm",
                 row.is_own_channel
-                  ? "border-[#f3b8c4]/30 bg-[#140a0d]/70 text-[#fff5f7]"
-                  : "border-r-acc/40 bg-[#140a0d]/70 text-r-acc"
+                  ? "border-r-text-2/30 bg-r-bg/70 text-r-text"
+                  : "border-r-acc/40 bg-r-bg/70 text-r-acc"
               )}
             >
               {row.is_own_channel ? "Own" : "Other"}
             </span>
             {row.is_collab ? (
-              <span className="inline-flex items-center rounded-md border border-r-acc/45 bg-r-acc/15 px-2 py-0.5 text-[0.58rem] tracking-[0.14em] text-r-acc uppercase backdrop-blur-sm">
+              <span className="inline-flex items-center rounded-full border border-r-acc/45 bg-r-acc/15 px-2 py-0.5 text-[0.58rem] tracking-[0.14em] text-r-acc uppercase backdrop-blur-sm">
                 Collab
               </span>
             ) : null}
@@ -100,15 +100,15 @@ function StreamCard({
         </div>
         <div className="flex items-start gap-2 p-3.5">
           <div className="min-w-0 flex-1">
-            <p className="line-clamp-2 text-sm font-medium text-[#fff5f7]">
+            <p className="line-clamp-2 text-sm font-medium text-r-text">
               {row.title}
             </p>
-            <p className="mt-1 text-xs text-[#f3b8c4]/65">
+            <p className="mt-1 text-xs text-r-text-2/65">
               {row.channel_name}
               {slot.time ? ` · ${slot.date} ${slot.time}` : null}
             </p>
           </div>
-          <ExternalLink className="mt-0.5 size-3.5 shrink-0 text-[#f3b8c4]/40" />
+          <ExternalLink className="mt-0.5 size-3.5 shrink-0 text-r-text-2/40" />
         </div>
       </button>
     </li>
@@ -128,7 +128,7 @@ function Section({
 
   return (
     <div>
-      <h3 className="text-[0.7rem] tracking-[0.22em] text-[#f3b8c4]/70 uppercase">
+      <h3 className="text-[0.7rem] tracking-[0.22em] text-r-text-2/70 uppercase">
         {title}
       </h3>
       <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -171,7 +171,7 @@ export function YoutubeLiveArchive({
 
   if (empty) {
     return (
-      <div className="border border-dashed border-[#f3b8c4]/20 bg-[#1a0d12]/35 px-5 py-8 text-sm text-[#f3b8c4]/70">
+      <div className="rounded-2xl border border-dashed border-r-text-2/20 bg-white/[0.03] px-5 py-8 text-sm text-r-text-2/70">
         ยังไม่มีไลฟ์ในช่วงวันที่เลือก
       </div>
     );

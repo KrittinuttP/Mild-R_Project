@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { YoutubeLiveArchive } from "@/components/events/YoutubeLiveArchive";
+import { R_EYEBROW_CLASS, R_PILL_ACTIVE_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { SyncLogSourceTab } from "@/lib/sync-logs";
 import type { LiveStreamRow } from "@/types/live-stream";
@@ -84,11 +85,11 @@ function rangeFromPreset(preset: RangePreset): { from: string; to: string } {
 }
 
 function formatWhen(iso: string) {
-  return new Intl.DateTimeFormat("th-TH", {
+  return (new Intl.DateTimeFormat("en-GB", {
     timeZone: "Asia/Bangkok",
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(new Date(iso));
+  }).format(new Date(iso))).replace("Sept", "Sep");
 }
 
 function statusClass(status: string) {
@@ -96,14 +97,14 @@ function statusClass(status: string) {
     return "border-emerald-400/35 bg-emerald-500/10 text-emerald-100";
   }
   if (status === "skipped") {
-    return "border-[#f3b8c4]/30 bg-[#fff5f7]/05 text-[#f3b8c4]";
+    return "border-r-text-2/30 bg-r-text/05 text-r-text-2";
   }
   return "border-red-400/35 bg-red-500/10 text-red-100";
 }
 
 function sourceBadgeClass(source: string) {
   if (source === "edge-main") {
-    return "border-[#e85a7a]/40 bg-[#e85a7a]/12 text-[#f3b8c4]";
+    return "border-r-pri/40 bg-r-pri/12 text-r-text-2";
   }
   if (source === "edge-search") {
     return "border-[#7eb6d4]/45 bg-[#7eb6d4]/12 text-[#b8d9ec]";
@@ -117,7 +118,7 @@ function sourceBadgeClass(source: string) {
   if (source.startsWith("edge-x-")) {
     return "border-[#6ec9b0]/40 bg-[#6ec9b0]/10 text-[#a8e6d4]";
   }
-  return "border-[#d4a574]/40 bg-[#d4a574]/12 text-[#e8c49a]";
+  return "border-r-acc/40 bg-r-acc/12 text-r-acc";
 }
 
 export function LiveOpsSyncPanel({
@@ -223,14 +224,14 @@ export function LiveOpsSyncPanel({
       <div className="space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="text-[0.7rem] tracking-[0.22em] text-[#e85a7a] uppercase">
+            <h2 className={R_EYEBROW_CLASS}>
               Sync logs
             </h2>
-            <p className="mt-1 text-xs text-[#f3b8c4]/55">
+            <p className="mt-1 text-xs text-r-text-2/55">
               แยกตามโหมดดึง · กรองช่วงเวลา (Asia/Bangkok) — streams ใช้ช่วงเดียวกัน
             </p>
           </div>
-          <p className="text-[0.65rem] tabular-nums text-[#f3b8c4]/50">
+          <p className="text-[0.65rem] tabular-nums text-r-text-2/50">
             {busy
               ? "กำลังโหลด…"
               : `${counts.total} logs · ${counts.streamTotal} streams · saved ${counts.saved}`}
@@ -245,10 +246,10 @@ export function LiveOpsSyncPanel({
               title={tab.hint}
               onClick={() => setSourceTab(tab.id)}
               className={cn(
-                "border px-3 py-1.5 text-[0.65rem] tracking-[0.14em] uppercase transition",
+                "inline-flex h-8 items-center rounded-full px-3.5 text-[0.7rem] tracking-[0.12em] uppercase transition-colors outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-r-acc",
                 sourceTab === tab.id
-                  ? "border-[#e85a7a]/55 bg-[#e85a7a]/15 text-[#fff5f7]"
-                  : "border-[#f3b8c4]/18 bg-[#1a0d12]/40 text-[#f3b8c4]/70 hover:border-[#f3b8c4]/35"
+                  ? R_PILL_ACTIVE_CLASS
+                  : "bg-white/[0.04] text-r-text-2 ring-1 ring-r-line ring-inset hover:text-r-text hover:ring-r-pri/50"
               )}
             >
               {tab.label}
@@ -263,10 +264,10 @@ export function LiveOpsSyncPanel({
               type="button"
               onClick={() => applyPreset(p.id)}
               className={cn(
-                "border px-2.5 py-1 text-[0.62rem] tracking-[0.12em] uppercase transition",
+                "inline-flex h-7 items-center rounded-full px-3 text-[0.68rem] tabular-nums transition-colors outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-r-acc",
                 preset === p.id
-                  ? "border-[#7eb6d4]/50 bg-[#7eb6d4]/12 text-[#b8d9ec]"
-                  : "border-[#f3b8c4]/15 text-[#f3b8c4]/60 hover:border-[#f3b8c4]/30"
+                  ? R_PILL_ACTIVE_CLASS
+                  : "text-r-text-3 ring-1 ring-r-line ring-inset hover:text-r-text hover:ring-r-pri/50"
               )}
             >
               {p.label}
@@ -275,7 +276,7 @@ export function LiveOpsSyncPanel({
         </div>
 
         <div className="flex flex-wrap items-end gap-3">
-          <label className="space-y-1 text-[0.65rem] tracking-[0.12em] text-[#f3b8c4]/65 uppercase">
+          <label className="space-y-1 text-[0.65rem] tracking-[0.12em] text-r-text-2/65 uppercase">
             เริ่ม
             <input
               type="date"
@@ -284,11 +285,11 @@ export function LiveOpsSyncPanel({
                 setPreset("custom");
                 setFromYmd(e.target.value);
               }}
-              className="block border border-[#f3b8c4]/20 bg-[#10070b] px-2.5 py-1.5 text-sm normal-case tracking-normal text-[#fff5f7] outline-none focus:border-[#e85a7a]/45"
+              className="block h-9 rounded-full bg-white/[0.04] px-3.5 text-sm normal-case tracking-normal text-r-text ring-1 ring-r-line outline-none ring-inset [color-scheme:dark] focus:ring-r-pri/55"
             />
           </label>
-          <span className="pb-2 text-[#f3b8c4]/40">→</span>
-          <label className="space-y-1 text-[0.65rem] tracking-[0.12em] text-[#f3b8c4]/65 uppercase">
+          <span className="pb-2 text-r-text-2/40">→</span>
+          <label className="space-y-1 text-[0.65rem] tracking-[0.12em] text-r-text-2/65 uppercase">
             สิ้นสุด
             <input
               type="date"
@@ -297,10 +298,10 @@ export function LiveOpsSyncPanel({
                 setPreset("custom");
                 setToYmd(e.target.value);
               }}
-              className="block border border-[#f3b8c4]/20 bg-[#10070b] px-2.5 py-1.5 text-sm normal-case tracking-normal text-[#fff5f7] outline-none focus:border-[#e85a7a]/45"
+              className="block h-9 rounded-full bg-white/[0.04] px-3.5 text-sm normal-case tracking-normal text-r-text ring-1 ring-r-line outline-none ring-inset [color-scheme:dark] focus:ring-r-pri/55"
             />
           </label>
-          <div className="flex flex-wrap gap-2 pb-1 text-[0.6rem] text-[#f3b8c4]/45">
+          <div className="flex flex-wrap gap-2 pb-1 text-[0.6rem] text-r-text-2/45">
             <span>สำเร็จ {counts.success}</span>
             <span>·</span>
             <span>error {counts.errorCount}</span>
@@ -312,13 +313,13 @@ export function LiveOpsSyncPanel({
         ) : null}
 
         {logs.length === 0 && !busy ? (
-          <div className="border border-dashed border-[#f3b8c4]/20 bg-[#1a0d12]/35 px-5 py-8 text-sm text-[#f3b8c4]/70">
+          <div className="rounded-2xl border border-dashed border-r-text-2/20 bg-white/[0.03] px-5 py-8 text-sm text-r-text-2/70">
             ไม่มี sync log ในช่วงที่เลือก
           </div>
         ) : (
-          <div className="max-h-[min(70dvh,calc(100dvh-16rem))] overflow-auto border border-[#f3b8c4]/14 bg-[#1a0d12]/45">
+          <div className="max-h-[min(70dvh,calc(100dvh-16rem))] overflow-auto rounded-2xl bg-white/[0.03] ring-1 ring-r-line ring-inset">
             <table className="min-w-full text-left text-sm">
-              <thead className="sticky top-0 z-10 border-b border-[#f3b8c4]/12 bg-[#160b10] text-[0.65rem] tracking-[0.18em] text-[#f3b8c4]/65 uppercase shadow-[0_1px_0_0_rgba(243,184,196,0.12)]">
+              <thead className="sticky top-0 z-10 border-b border-r-text-2/12 bg-r-bg text-[0.65rem] tracking-[0.18em] text-r-text-2/65 uppercase shadow-[0_1px_0_0_rgba(243,184,196,0.12)]">
                 <tr>
                   <th className="px-4 py-3 font-medium">When</th>
                   <th className="px-4 py-3 font-medium">Source</th>
@@ -331,9 +332,9 @@ export function LiveOpsSyncPanel({
                 {logs.map((log) => (
                   <tr
                     key={log.id}
-                    className="border-b border-[#f3b8c4]/08 last:border-0"
+                    className="border-b border-r-text-2/08 last:border-0"
                   >
-                    <td className="whitespace-nowrap px-4 py-3 text-[#f7d7de]/85 tabular-nums">
+                    <td className="whitespace-nowrap px-4 py-3 text-r-text-2/85 tabular-nums">
                       {formatWhen(log.created_at)}
                     </td>
                     <td className="px-4 py-3">
@@ -356,10 +357,10 @@ export function LiveOpsSyncPanel({
                         {log.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 tabular-nums text-[#f3b8c4]/85">
+                    <td className="px-4 py-3 tabular-nums text-r-text-2/85">
                       {log.saved_count}
                     </td>
-                    <td className="max-w-md px-4 py-3 text-[#f7d7de]/80">
+                    <td className="max-w-md px-4 py-3 text-r-text-2/80">
                       {log.message ?? "—"}
                     </td>
                   </tr>
@@ -370,12 +371,12 @@ export function LiveOpsSyncPanel({
         )}
       </div>
 
-      <section className={cn("space-y-4 border-t border-[#f3b8c4]/12 pt-10", busy && "opacity-70")}>
+      <section className={cn("space-y-4 border-t border-r-text-2/12 pt-10", busy && "opacity-70")}>
         <div>
-          <h2 className="text-[0.7rem] tracking-[0.22em] text-[#e85a7a] uppercase">
+          <h2 className={R_EYEBROW_CLASS}>
             YouTube streams
           </h2>
-          <p className="mt-1 text-xs text-[#f3b8c4]/55">
+          <p className="mt-1 text-xs text-r-text-2/55">
             คลิปในช่วง {fromYmd} → {toYmd} (Bangkok) · {counts.streamTotal} รายการ
           </p>
         </div>

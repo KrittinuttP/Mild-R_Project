@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { postDiscordWebhook } from "@/lib/discord-job-alert";
+import { sendDiscordWebhook } from "@/lib/discord-job-alert";
 import { hasLiveAgentSecret } from "@/lib/live-agent-auth";
 import { buildPendingDigestPayload, loadPendingCounts } from "@/lib/pending-alerts";
 
@@ -38,6 +38,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, sent: false, reason: "dry run", counts, payload });
   }
 
-  const sent = await postDiscordWebhook(payload);
-  return NextResponse.json({ ok: sent, sent, counts }, { status: sent ? 200 : 502 });
+  const result = await sendDiscordWebhook(payload);
+  if (!result.ok) {
+    // e.g. "webhook not set" / "discord HTTP 404" — so the cron check and logs say why.
+    return NextResponse.json({ ok: false, sent: false, reason: result.reason, counts }, { status: 502 });
+  }
+  return NextResponse.json({ ok: true, sent: true, counts });
 }

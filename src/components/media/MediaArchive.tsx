@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { ExternalLink, Heart, Lock, Play, Search, SlidersHorizontal, X } from "lucide-react";
 
 import { ProtectedImage } from "@/components/media/ProtectedImage";
-import { buttonVariants } from "@/components/ui/button";
 import { useLoadMoreOnScroll } from "@/hooks/useLoadMoreOnScroll";
 import {
   Dialog,
@@ -22,13 +21,12 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import {
-  CTA_OUTLINE_CLASS,
-  CTA_PRIMARY_CLASS,
   LIVE_BADGE_COLLAB,
   LIVE_BADGE_MEMBER,
-  LIVE_BADGE_MILD,
   LIVE_BADGE_PILL_SM,
-  LIVE_BADGE_SOFT,
+  R_CTA_OUTLINE_CLASS,
+  R_CTA_PRIMARY_CLASS,
+  R_PILL_ACTIVE_CLASS,
 } from "@/lib/site-ui";
 import {
   formatVideoDate,
@@ -71,15 +69,22 @@ const WIDE_GRID_CLASS =
 const SHORTS_GRID_CLASS =
   "grid grid-cols-3 gap-x-3 gap-y-6 sm:grid-cols-4 sm:gap-x-4 lg:grid-cols-6";
 
-const PILL_CLASS =
-  "shrink-0 rounded-full border px-3 py-1.5 text-xs whitespace-nowrap transition sm:px-3.5 sm:text-sm";
-const PILL_ACTIVE_CLASS = "border-[#e85a7a]/60 bg-[#e85a7a]/20 text-[#fff5f7]";
+const PILL_FOCUS =
+  "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-r-acc";
+const PILL_CLASS = cn(
+  "inline-flex h-9 shrink-0 items-center rounded-full px-3.5 text-xs whitespace-nowrap transition-colors sm:px-4 sm:text-sm",
+  PILL_FOCUS
+);
+const PILL_ACTIVE_CLASS = R_PILL_ACTIVE_CLASS;
 const PILL_IDLE_CLASS =
-  "border-[#f3b8c4]/20 text-[#f3b8c4]/70 hover:border-[#f3b8c4]/40 hover:text-[#fff5f7]";
-const SUB_PILL_CLASS = "rounded-full border px-3 py-1 text-[0.7rem] transition sm:text-xs";
-const SUB_PILL_ACTIVE_CLASS = "border-[#f3b8c4]/45 bg-[#f3b8c4]/12 text-[#fff5f7]";
+  "bg-white/[0.04] text-r-text-2 ring-1 ring-r-line ring-inset hover:text-r-text hover:ring-r-pri/50";
+const SUB_PILL_CLASS = cn(
+  "inline-flex h-8 items-center rounded-full px-3 text-[0.7rem] tabular-nums transition-colors sm:text-xs",
+  PILL_FOCUS
+);
+const SUB_PILL_ACTIVE_CLASS = R_PILL_ACTIVE_CLASS;
 const SUB_PILL_IDLE_CLASS =
-  "border-[#f3b8c4]/12 text-[#f3b8c4]/60 hover:border-[#f3b8c4]/35 hover:text-[#fff5f7]";
+  "text-r-text-3 ring-1 ring-r-line ring-inset hover:text-r-text hover:ring-r-pri/50";
 
 function normalizeSearch(value: string): string {
   return value.normalize("NFC").trim().toLocaleLowerCase();
@@ -100,18 +105,19 @@ function yearsOf(items: VideoItem[]): string[] {
   return [...years].sort((a, b) => b.localeCompare(a));
 }
 
+/**
+ * Only what a viewer needs (4 Nov): the other channel on a collab, and Member.
+ * No MILD-R badge (almost every clip is hers) and no Short / Premiere badge
+ * (Shorts already sit in the vertical row, and the filter splits the kinds).
+ */
 function VideoBadges({ item }: { item: VideoItem }) {
   return (
     <>
-      <span
-        className={cn(
-          LIVE_BADGE_PILL_SM,
-          "min-w-0 truncate text-[0.6rem]",
-          item.isOwnChannel ? LIVE_BADGE_MILD : LIVE_BADGE_COLLAB
-        )}
-      >
-        {item.channelLabel}
-      </span>
+      {!item.isOwnChannel ? (
+        <span className={cn(LIVE_BADGE_PILL_SM, "min-w-0 truncate text-[0.6rem]", LIVE_BADGE_COLLAB)}>
+          {item.channelLabel}
+        </span>
+      ) : null}
       {item.membersOnly ? (
         <span
           className={cn(
@@ -122,11 +128,6 @@ function VideoBadges({ item }: { item: VideoItem }) {
         >
           <Lock className="size-2.5" aria-hidden />
           Member
-        </span>
-      ) : null}
-      {item.kind !== "video" ? (
-        <span className={cn(LIVE_BADGE_PILL_SM, "text-[0.6rem]", LIVE_BADGE_SOFT)}>
-          {VIDEO_KIND_LABEL[item.kind]}
         </span>
       ) : null}
     </>
@@ -155,17 +156,17 @@ function VideoTile({
       >
         <span
           className={cn(
-            "relative block overflow-hidden rounded-xl border border-[#f3b8c4]/12 bg-[#1a0c12]",
-            "transition duration-300 group-hover:-translate-y-0.5 group-hover:border-[#f3b8c4]/30",
-            "group-focus-visible:ring-2 group-focus-visible:ring-[#e85a7a]/60",
+            "relative block overflow-hidden rounded-xl bg-white/[0.03] ring-1 ring-r-line ring-inset",
+            "transition duration-300 group-hover:-translate-y-0.5 group-hover:ring-r-text-2/30",
+            "group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-solid group-focus-visible:outline-r-acc",
             vertical ? "aspect-[9/16]" : "aspect-video"
           )}
         >
           {!loaded && !failed ? (
-            <span className="absolute inset-0 animate-pulse bg-[#241019]" />
+            <span className="absolute inset-0 animate-pulse bg-white/[0.05]" />
           ) : null}
           {failed ? (
-            <span className="absolute inset-0 flex items-center justify-center p-3 text-center text-xs text-[#f3b8c4]/50">
+            <span className="absolute inset-0 flex items-center justify-center p-3 text-center text-xs text-r-text-3">
               {item.title}
             </span>
           ) : (
@@ -174,6 +175,10 @@ function VideoTile({
               alt={item.title}
               loading="lazy"
               decoding="async"
+              ref={(img) => {
+                // Cached images can finish before hydration, so onLoad never fires.
+                if (img?.complete && img.naturalWidth > 0) setLoaded(true);
+              }}
               onLoad={() => setLoaded(true)}
               onError={() => setFailed(true)}
               className={cn(
@@ -188,19 +193,19 @@ function VideoTile({
             </span>
           ) : null}
           <span className="absolute inset-0 flex items-center justify-center opacity-0 transition group-hover:opacity-100">
-            <span className="flex size-11 items-center justify-center rounded-full bg-[#e85a7a]/90 text-white shadow-lg">
+            <span className="flex size-11 items-center justify-center rounded-full bg-r-pri/90 text-r-on-pri shadow-lg">
               <Play className="size-5 fill-current" />
             </span>
           </span>
         </span>
         <span className="mt-2 block px-0.5">
-          <span className="line-clamp-2 text-sm leading-snug text-[#fff5f7]/90">
+          <span className="line-clamp-2 text-sm leading-snug text-r-text/90">
             {item.title}
           </span>
           <span className="mt-1.5 flex min-w-0 flex-wrap items-center gap-1.5">
             <VideoBadges item={item} />
             {item.date ? (
-              <span className="shrink-0 text-[0.7rem] text-[#f3b8c4]/55">
+              <span className="shrink-0 text-[0.7rem] text-r-text-3">
                 {formatVideoDate(item.date)}
               </span>
             ) : null}
@@ -218,7 +223,7 @@ function MembershipIntro({ item }: { item: VideoItem }) {
   return (
     <section
       aria-label="คลิปแนะนำการสมัครสมาชิก"
-      className="mt-6 grid gap-4 overflow-hidden rounded-2xl border border-[#f3b8c4]/15 bg-[#1a0c12]/70 p-3 sm:mt-8 sm:p-4 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] md:items-center md:gap-6"
+      className="mt-6 grid gap-4 overflow-hidden r-card rounded-3xl p-3 sm:mt-8 sm:p-4 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] md:items-center md:gap-6"
     >
       <div className="relative aspect-video overflow-hidden rounded-xl bg-black">
         {playing ? (
@@ -245,7 +250,7 @@ function MembershipIntro({ item }: { item: VideoItem }) {
               className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
             />
             <span className="absolute inset-0 flex items-center justify-center bg-black/20 transition group-hover:bg-black/10">
-              <span className="flex size-14 items-center justify-center rounded-full bg-[#e85a7a]/90 text-white shadow-lg transition group-hover:scale-105 group-focus-visible:ring-2 group-focus-visible:ring-[#fff5f7]/70">
+              <span className="flex size-14 items-center justify-center rounded-full bg-r-pri/90 text-r-on-pri shadow-lg transition group-hover:scale-105 group-focus-visible:ring-2 group-focus-visible:ring-r-text/70">
                 <Play className="size-6 fill-current" />
               </span>
             </span>
@@ -260,16 +265,16 @@ function MembershipIntro({ item }: { item: VideoItem }) {
             Membership
           </span>
           {item.durationLabel ? (
-            <span className="text-xs text-[#f3b8c4]/55">
+            <span className="text-xs text-r-text-3">
               {item.durationLabel}
               {views ? ` · ${views}` : null}
             </span>
           ) : null}
         </div>
-        <h2 className="mt-3 font-[family-name:var(--font-display)] text-lg leading-snug text-[#fff5f7] sm:text-xl">
+        <h2 className="mt-3 font-[family-name:var(--font-display)] text-lg leading-snug text-r-text sm:text-xl">
           มาเป็นสมาชิกช่อง Mild-R กัน
         </h2>
-        <p className="mt-2 text-sm leading-relaxed text-[#f3b8c4]/70">
+        <p className="mt-2 text-sm leading-relaxed text-r-text-3">
           สมาชิกช่องดูคลิปเมมเบอร์ทั้งหมดในหน้านี้ได้บน YouTube ดูรายละเอียดสิทธิพิเศษได้จากคลิปแนะนำ
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
@@ -277,7 +282,7 @@ function MembershipIntro({ item }: { item: VideoItem }) {
             href={MEMBERSHIP_JOIN_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className={cn(buttonVariants({ size: "lg" }), CTA_PRIMARY_CLASS, "px-5")}
+            className={cn(R_CTA_PRIMARY_CLASS, "px-5")}
           >
             <Heart className="size-4" aria-hidden />
             สมัครสมาชิก
@@ -286,7 +291,7 @@ function MembershipIntro({ item }: { item: VideoItem }) {
             href={item.youtubeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className={cn(buttonVariants({ variant: "outline", size: "lg" }), CTA_OUTLINE_CLASS, "px-5")}
+            className={cn(R_CTA_OUTLINE_CLASS, "px-5")}
           >
             ดูบน YouTube
             <ExternalLink className="size-4" aria-hidden />
@@ -377,7 +382,7 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
   };
 
   if (videos.length === 0) {
-    return <p className="mt-8 text-sm text-[#f3b8c4]/60">ยังไม่มีคลิป</p>;
+    return <p className="mt-8 text-sm text-r-text-3">ยังไม่มีคลิป</p>;
   }
 
   return (
@@ -394,7 +399,7 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
               className={cn(PILL_CLASS, kind === key ? PILL_ACTIVE_CLASS : PILL_IDLE_CLASS)}
             >
               {label}
-              <span className="ml-1.5 text-[#f3b8c4]/55">{counts[key]}</span>
+              <span className="ml-1.5 tabular-nums opacity-60">{counts[key]}</span>
             </button>
           ))}
         </div>
@@ -403,7 +408,7 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
           <label className="relative block min-w-0 flex-1">
             <span className="sr-only">ค้นหาคลิป</span>
             <Search
-              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#f3b8c4]/45"
+              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-r-text-3/70"
               aria-hidden
             />
             <input
@@ -413,8 +418,8 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
               placeholder="ค้นหาชื่อคลิป หรือช่อง…"
               enterKeyHint="search"
               className={cn(
-                "h-10 w-full rounded-full border border-[#f3b8c4]/15 bg-[#1a0c12]/70 pr-9 pl-9 text-sm text-[#fff5f7] transition outline-none",
-                "placeholder:text-[#f3b8c4]/40 focus:border-[#e85a7a]/55 focus:bg-[#1a0c12]",
+                "h-10 w-full rounded-full bg-white/[0.04] ring-1 ring-r-line ring-inset pr-9 pl-9 text-sm text-r-text transition outline-none",
+                "placeholder:text-r-text-3/70 focus:bg-white/[0.06] focus:ring-r-pri/55",
                 "[&::-webkit-search-cancel-button]:appearance-none"
               )}
             />
@@ -423,7 +428,7 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
                 type="button"
                 onClick={() => changeQuery("")}
                 aria-label="ล้างคำค้น"
-                className="absolute top-1/2 right-2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-[#f3b8c4]/60 transition hover:bg-[#f3b8c4]/10 hover:text-[#fff5f7]"
+                className="absolute top-1/2 right-2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-r-text-3 transition hover:bg-r-text-2/10 hover:text-r-text"
               >
                 <X className="size-3.5" />
               </button>
@@ -437,14 +442,14 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
             className={cn(
               "relative flex h-10 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-sm transition sm:hidden",
               activeFilterCount
-                ? "border-[#e85a7a]/55 bg-[#e85a7a]/15 text-[#fff5f7]"
-                : "border-[#f3b8c4]/15 bg-[#1a0c12]/70 text-[#f3b8c4]/80"
+                ? "border-r-pri/55 bg-r-pri/15 text-r-text"
+                : "border-r-line bg-white/[0.04] text-r-text-2"
             )}
           >
             <SlidersHorizontal className="size-4" aria-hidden />
             ตัวกรอง
             {activeFilterCount ? (
-              <span className="flex size-5 items-center justify-center rounded-full bg-[#e85a7a] text-[0.65rem] font-medium text-[#140a0d]">
+              <span className="flex size-5 items-center justify-center rounded-full bg-r-pri text-[0.65rem] font-medium text-r-on-pri">
                 {activeFilterCount}
               </span>
             ) : null}
@@ -466,7 +471,7 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
         ))}
         {years.length > 1 ? (
           <>
-            <span aria-hidden className="mx-1 self-center text-[#f3b8c4]/25">
+            <span aria-hidden className="mx-1 self-center text-r-text-3/70">
               |
             </span>
             {["all", ...years].map((key) => (
@@ -491,7 +496,7 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
           </SheetHeader>
           <SheetBody className="space-y-6 px-5 pb-4">
             <fieldset>
-              <legend className="text-xs tracking-[0.12em] text-[#f3b8c4]/60 uppercase">ช่อง</legend>
+              <legend className="text-xs tracking-[0.12em] text-r-text-3 uppercase">ช่อง</legend>
               <div className="mt-3 flex flex-wrap gap-2">
                 {CHANNEL_FILTERS.map(({ key, label }) => (
                   <button
@@ -508,7 +513,7 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
             </fieldset>
             {years.length > 1 ? (
               <fieldset>
-                <legend className="text-xs tracking-[0.12em] text-[#f3b8c4]/60 uppercase">ปี</legend>
+                <legend className="text-xs tracking-[0.12em] text-r-text-3 uppercase">ปี</legend>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {["all", ...years].map((key) => (
                     <button
@@ -525,7 +530,7 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
               </fieldset>
             ) : null}
           </SheetBody>
-          <div className="flex shrink-0 gap-2 border-t border-[#f3b8c4]/10 px-5 pt-3">
+          <div className="flex shrink-0 gap-2 border-t border-r-line px-5 pt-3">
             <button
               type="button"
               disabled={!activeFilterCount}
@@ -533,11 +538,11 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
                 selectChannel("all");
                 selectYear("all");
               }}
-              className={cn(buttonVariants({ variant: "outline", size: "lg" }), CTA_OUTLINE_CLASS, "flex-1 disabled:opacity-40")}
+              className={cn(R_CTA_OUTLINE_CLASS, "flex-1 disabled:opacity-40")}
             >
               ล้างตัวกรอง
             </button>
-            <SheetClose className={cn(buttonVariants({ size: "lg" }), CTA_PRIMARY_CLASS, "flex-1")}>
+            <SheetClose className={cn(R_CTA_PRIMARY_CLASS, "flex-1")}>
               ดู {filtered.length} คลิป
             </SheetClose>
           </div>
@@ -547,7 +552,7 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
       {kind === "member" && membershipIntro ? <MembershipIntro item={membershipIntro} /> : null}
 
       {filtered.length === 0 ? (
-        <p className="mt-8 text-sm text-[#f3b8c4]/60">
+        <p className="mt-8 text-sm text-r-text-3">
           {normalizedQuery ? `ไม่พบคลิปที่ตรงกับ “${query.trim()}”` : "ยังไม่มีคลิปในหมวดนี้"}
         </p>
       ) : (
@@ -570,10 +575,10 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
           <button
             type="button"
             onClick={() => setVisibleCount(visible.length + PAGE_STEP)}
-            className={cn(buttonVariants({ variant: "outline", size: "lg" }), CTA_OUTLINE_CLASS, "px-6")}
+            className={cn(R_CTA_OUTLINE_CLASS, "px-6")}
           >
             โหลดเพิ่ม
-            <span className="ml-2 text-[#f3b8c4]/70">({filtered.length - visible.length})</span>
+            <span className="ml-2 text-r-text-3">({filtered.length - visible.length})</span>
           </button>
         </div>
       ) : null}
@@ -586,7 +591,7 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
       >
         <DialogContent
           className={cn(
-            "max-h-[94dvh] w-[min(100%,calc(100vw-1rem))] overflow-y-auto border-[#f3b8c4]/20 bg-[#140a0d] p-3 text-[#fff5f7] sm:p-4",
+            "max-h-[94dvh] w-[min(100%,calc(100vw-1rem))] overflow-y-auto border-r-text-2/20 bg-r-bg p-3 text-r-text sm:p-4",
             active?.kind === "short" ? "max-w-sm sm:max-w-sm" : "max-w-4xl sm:max-w-4xl"
           )}
           showCloseButton
@@ -594,10 +599,10 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
           {active ? (
             <>
               <DialogHeader className="px-1 pt-1 pr-10 sm:px-2">
-                <DialogTitle className="font-[family-name:var(--font-display)] text-base leading-snug text-[#fff5f7] sm:text-lg">
+                <DialogTitle className="font-[family-name:var(--font-display)] text-base leading-snug text-r-text sm:text-lg">
                   {active.title}
                 </DialogTitle>
-                <DialogDescription className="flex flex-wrap items-center gap-2 text-[#f3b8c4]/70">
+                <DialogDescription className="flex flex-wrap items-center gap-2 text-r-text-3">
                   <VideoBadges item={active} />
                   {active.date ? <span>{formatVideoDate(active.date)}</span> : null}
                   {formatVideoViews(active.views) ? (
@@ -609,7 +614,7 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
               <div
                 className={cn(
                   "relative mt-1 overflow-hidden rounded-xl bg-black",
-                  active.kind === "short" ? "mx-auto aspect-[9/16] max-h-[72dvh]" : "aspect-video"
+                  active.kind === "short" ? "mx-auto aspect-[9/16] w-full max-w-[calc(72dvh*9/16)]" : "aspect-video"
                 )}
               >
                 {active.membersOnly ? (
@@ -620,14 +625,14 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
                       decoding="async"
                       className="absolute inset-0 h-full w-full object-cover opacity-35 blur-[2px]"
                     />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-t from-[#140a0d]/90 via-[#140a0d]/40 to-transparent p-4 text-center">
-                      <span className="flex size-14 items-center justify-center rounded-full border border-[#f3b8c4]/30 bg-[#140a0d]/70 text-[#f3b8c4] shadow-lg">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-t from-r-bg/90 via-r-bg/40 to-transparent p-4 text-center">
+                      <span className="flex size-14 items-center justify-center rounded-full border border-r-text-2/30 bg-r-bg/70 text-r-text-2 shadow-lg">
                         <Lock className="size-6" aria-hidden />
                       </span>
-                      <p className="font-[family-name:var(--font-display)] text-base text-[#fff5f7] sm:text-lg">
+                      <p className="font-[family-name:var(--font-display)] text-base text-r-text sm:text-lg">
                         คลิปนี้สำหรับสมาชิกช่อง (Member) เท่านั้น
                       </p>
-                      <p className="max-w-sm text-xs text-[#f3b8c4]/70 sm:text-sm">
+                      <p className="max-w-sm text-xs text-r-text-3 sm:text-sm">
                         ดูได้บน YouTube เมื่อเป็นสมาชิกช่อง Mild-R
                       </p>
                     </div>
@@ -651,7 +656,7 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
                     href={MEMBERSHIP_JOIN_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={cn(buttonVariants({ variant: "outline", size: "lg" }), CTA_OUTLINE_CLASS, "px-5")}
+                    className={cn(R_CTA_OUTLINE_CLASS, "px-5")}
                   >
                     <Heart className="size-4" aria-hidden />
                     สมัครสมาชิก
@@ -660,7 +665,7 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
                     href={active.youtubeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={cn(buttonVariants({ size: "lg" }), CTA_PRIMARY_CLASS, "px-5")}
+                    className={cn(R_CTA_PRIMARY_CLASS, "px-5")}
                   >
                     ดูบน YouTube
                     <ExternalLink className="size-4" aria-hidden />
@@ -672,7 +677,7 @@ export function MediaArchive({ videos }: { videos: VideoItem[] }) {
                     href={active.youtubeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sm text-[#f3b8c4]/75 transition hover:text-[#f3b8c4]"
+                    className="inline-flex items-center gap-1.5 text-sm text-r-text-2 transition hover:text-r-text-2"
                   >
                     ดูบน YouTube
                     <ExternalLink className="size-3.5 opacity-80" aria-hidden />

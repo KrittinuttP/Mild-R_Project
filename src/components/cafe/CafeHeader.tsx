@@ -27,16 +27,25 @@ const CAFE_NAV: CafeNavLink[] = [
   { kind: "section", hash: "#story", label: "Story" },
 ];
 
+/** Only listed while the section is on and has something to show. */
+const FEED_NAV: Record<"notices" | "tapes", CafeNavLink> = {
+  notices: { kind: "section", hash: "#notices", label: "News" },
+  tapes: { kind: "section", hash: "#tapes", label: "Videos" },
+};
+
 type CafeHeaderProps = {
   cafe: CafePage;
   mildRHomeHref?: string;
   showMainSiteLink?: boolean;
+  /** Notice Board / Case Tapes are on the page (section on and not empty). */
+  feedLinks?: { notices: boolean; tapes: boolean };
 };
 
 export function CafeHeader({
   cafe,
   mildRHomeHref = "/",
   showMainSiteLink = true,
+  feedLinks,
 }: CafeHeaderProps) {
   const pathname = usePathname();
   // `/` too: on the cafe domain the home is served at `/` (see proxy.ts).
@@ -54,7 +63,11 @@ export function CafeHeader({
   const now = useNow(60_000, Boolean(cafe.preorder));
   const bookingOpen =
     Boolean(cafe.preorder) && (now === null || preorderIsListed(cafe.preorder, now));
-  const nav = CAFE_NAV.map((link) =>
+  const nav = [
+    ...CAFE_NAV,
+    ...(feedLinks?.notices ? [FEED_NAV.notices] : []),
+    ...(feedLinks?.tapes ? [FEED_NAV.tapes] : []),
+  ].map((link) =>
     link.kind === "section" && link.hash === "#menu" && !bookingOpen
       ? { ...link, label: "Menu" }
       : link

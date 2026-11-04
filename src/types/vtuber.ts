@@ -223,7 +223,8 @@ export interface ProjectItem {
   title: string;
   titleLocal?: string;
   summary: string;
-  cover: string;
+  /** Optional: without one, cards and the detail page show a "เร็ว ๆ นี้" placeholder. */
+  cover?: string;
   status: ProjectStatus;
   /** Campaign / release year shown on project cards */
   year?: number;

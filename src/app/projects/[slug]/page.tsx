@@ -5,6 +5,7 @@ import { BackToTop } from "@/components/layout/BackToTop";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { MediaProtection } from "@/components/media/MediaProtection";
+import { stripThaiBreaks } from "@/components/common/ThaiPhrases";
 import { HbdProjectDetail } from "@/components/projects/HbdProjectDetail";
 import { ProjectDetail } from "@/components/projects/ProjectDetail";
 import {
@@ -42,7 +43,7 @@ export async function generateMetadata({
 
   return {
     title: `${project.title} | Mild-R Projects`,
-    description: project.summary,
+    description: stripThaiBreaks(project.summary),
   };
 }
 
@@ -56,19 +57,18 @@ export default async function ProjectSlugPage({ params }: ProjectPageProps) {
 
   const isHbd =
     project.slug === "hbd" || project.category.toLowerCase() === "hbd";
-
   return (
     <>
       <MediaProtection />
       <Header data={mildRData} />
-      <main className="relative flex-1 bg-[#140a0d] text-[#fff5f7]">
+      <main className="relative flex-1 bg-r-bg text-r-text">
         {PROJECTS_COMING_SOON ? (
           <ProjectsComingSoonPage />
         ) : isHbd ? (
           <HbdProjectDetail project={project} />
         ) : (
           <>
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-[22rem] bg-[radial-gradient(ellipse_at_70%_0%,rgba(232,90,122,0.14),transparent_50%)]" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-[22rem] bg-[radial-gradient(ellipse_at_70%_0%,rgba(242,67,125,0.14),transparent_50%)]" />
             <ProjectDetail project={project} />
           </>
         )}

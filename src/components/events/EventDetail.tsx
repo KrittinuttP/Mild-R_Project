@@ -29,9 +29,9 @@ import {
   formatEnglishDateShort,
 } from "@/lib/events";
 import {
-  BODY_CLASS,
-  DISPLAY_H1_CLASS,
-  DISPLAY_H2_CLASS,
+  R_BODY_CLASS,
+  R_H1_CLASS,
+  R_H2_CLASS,
 } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type {
@@ -73,7 +73,7 @@ function toTiles(event: CalendarEvent, gallery: EventGalleryImage[]): GalleryTil
 }
 
 function SectionTitle({ children }: { children: string }) {
-  return <h2 className={cn("text-2xl sm:text-3xl", DISPLAY_H2_CLASS)}>{children}</h2>;
+  return <h2 className={cn("text-2xl sm:text-3xl", R_H2_CLASS)}>{children}</h2>;
 }
 
 function EventLiveRow({ live }: { live: EventLive }) {
@@ -90,9 +90,9 @@ function EventLiveRow({ live }: { live: EventLive }) {
       href={live.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex gap-3 rounded-2xl border border-[#f3b8c4]/12 bg-[#1a0c12]/60 p-2.5 transition hover:border-[#e85a7a]/40 hover:bg-[#1a0c12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e85a7a]/60 sm:gap-4 sm:p-3"
+      className="group flex gap-3 rounded-2xl r-card p-2.5 transition hover:bg-r-pri/[0.06] hover:ring-r-pri/40 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-r-acc sm:gap-4 sm:p-3"
     >
-      <div className="relative aspect-video w-32 shrink-0 overflow-hidden rounded-xl bg-[#12080c] sm:w-44">
+      <div className="relative aspect-video w-32 shrink-0 overflow-hidden rounded-xl bg-white/[0.03] sm:w-44">
         <ProtectedImage
           src={live.cover}
           alt=""
@@ -104,20 +104,20 @@ function EventLiveRow({ live }: { live: EventLive }) {
         </span>
       </div>
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
-        <p className="line-clamp-2 text-sm leading-snug text-[#fff5f7] sm:text-base">
+        <p className="line-clamp-2 text-sm leading-snug text-r-text sm:text-base">
           {live.title}
         </p>
         {live.channelName ? (
-          <p className="truncate text-xs text-[#f3b8c4]/65">{live.channelName}</p>
+          <p className="truncate text-xs text-r-text-3">{live.channelName}</p>
         ) : null}
         {when || stats.length ? (
-          <p className="text-xs tabular-nums text-[#f3b8c4]/55">
+          <p className="text-xs tabular-nums text-r-text-3">
             {[when, ...stats].filter(Boolean).join(" · ")}
           </p>
         ) : null}
       </div>
       <ExternalLink
-        className="mt-1 size-4 shrink-0 self-start text-[#f3b8c4]/50 transition group-hover:text-[#e85a7a]"
+        className="mt-1 size-4 shrink-0 self-start text-r-text-3 transition group-hover:text-r-pri"
         aria-hidden
       />
     </a>
@@ -148,7 +148,7 @@ export function EventDetail({
             src={event.cover}
             alt={event.coverAlt ?? event.title}
             media="square-contain"
-            className="rounded-3xl border border-[#f3b8c4]/12"
+            className="rounded-3xl ring-1 ring-r-line ring-inset"
           />
         </div>
 
@@ -158,17 +158,17 @@ export function EventDetail({
               <EventStatusBadge event={event} />
               <EventTags event={event} />
             </div>
-            <h1 className={cn("mt-4", DISPLAY_H1_CLASS)}>
+            <h1 className={cn("mt-4", R_H1_CLASS)}>
               {event.titleLocal ?? event.title}
             </h1>
             {event.titleLocal ? (
-              <p className="mt-2 text-base text-[#f3b8c4]/70">{event.title}</p>
+              <p className="mt-2 text-base text-r-text-3">{event.title}</p>
             ) : null}
 
-            <dl className="mt-6 space-y-2 text-sm text-[#f7d7de]/85 sm:text-base">
+            <dl className="mt-6 space-y-2 text-sm text-r-text-2 sm:text-base">
               <div className="flex items-start gap-2.5">
                 <dt className="sr-only">วันที่</dt>
-                <CalendarDays className="mt-0.5 size-4 shrink-0 text-[#e85a7a]" aria-hidden />
+                <CalendarDays className="mt-0.5 size-4 shrink-0 text-r-pri" aria-hidden />
                 <dd className="tabular-nums">
                   {formatEventDateRange(event)}
                   {event.timeLabel ? ` · ${event.timeLabel}` : null}
@@ -177,17 +177,17 @@ export function EventDetail({
               {place ? (
                 <div className="flex items-start gap-2.5">
                   <dt className="sr-only">สถานที่</dt>
-                  <MapPin className="mt-0.5 size-4 shrink-0 text-[#e85a7a]" aria-hidden />
+                  <MapPin className="mt-0.5 size-4 shrink-0 text-r-pri" aria-hidden />
                   <dd>{place}</dd>
                 </div>
               ) : null}
             </dl>
 
             {event.summary ? (
-              <p className={cn("mt-6", BODY_CLASS)}>{event.summary}</p>
+              <p className={cn("mt-6", R_BODY_CLASS)}>{event.summary}</p>
             ) : null}
             {event.details?.map((paragraph) => (
-              <p key={paragraph} className={cn("mt-4", BODY_CLASS)}>
+              <p key={paragraph} className={cn("mt-4", R_BODY_CLASS)}>
                 {paragraph}
               </p>
             ))}
@@ -198,25 +198,25 @@ export function EventDetail({
               <div id="event-schedule">
                 <SectionTitle>ตารางเวลา</SectionTitle>
               </div>
-              <ol className="mt-5 divide-y divide-[#f3b8c4]/10 overflow-hidden rounded-2xl border border-[#f3b8c4]/12 bg-[#1a0c12]/60">
+              <ol className="mt-5 divide-y divide-r-line overflow-hidden rounded-2xl r-card">
                 {event.schedule.map((item, index) => (
                   <li
                     key={`${item.date}-${index}`}
                     className="grid gap-1 px-4 py-3.5 sm:grid-cols-[11rem_minmax(0,1fr)] sm:gap-4 sm:px-5"
                   >
-                    <div className="text-sm tabular-nums text-[#f3b8c4]/80">
+                    <div className="text-sm tabular-nums text-r-text-2">
                       {formatEnglishDateRange(item.date, item.endDate)}
                       {item.time ? (
-                        <span className="mt-0.5 flex items-center gap-1 text-xs text-[#f3b8c4]/60">
+                        <span className="mt-0.5 flex items-center gap-1 text-xs text-r-text-3">
                           <Clock className="size-3" aria-hidden />
                           {item.time}
                         </span>
                       ) : null}
                     </div>
                     <div>
-                      <p className="text-sm text-[#fff5f7] sm:text-base">{item.label}</p>
+                      <p className="text-sm text-r-text sm:text-base">{item.label}</p>
                       {item.note ? (
-                        <p className="mt-0.5 text-xs text-[#f3b8c4]/60 sm:text-sm">
+                        <p className="mt-0.5 text-xs text-r-text-3 sm:text-sm">
                           {item.note}
                         </p>
                       ) : null}
@@ -231,7 +231,7 @@ export function EventDetail({
             <section aria-labelledby="event-lives">
               <div id="event-lives" className="flex items-baseline justify-between gap-4">
                 <SectionTitle>{`${videosLabel}ที่เกี่ยวข้อง`}</SectionTitle>
-                <span className="text-sm tabular-nums text-[#f3b8c4]/60">
+                <span className="text-sm tabular-nums text-r-text-3">
                   {lives.length} {videosLabel === "ไลฟ์และวิดีโอ" ? "รายการ" : videosLabel}
                 </span>
               </div>
@@ -246,12 +246,12 @@ export function EventDetail({
           ) : null}
 
           {event.notes?.length ? (
-            <section className="rounded-2xl border border-[#f3b8c4]/12 bg-white/[0.03] px-4 py-4 sm:px-5">
-              <h2 className="flex items-center gap-2 text-sm font-medium text-[#fff5f7]">
-                <Info className="size-4 text-[#e85a7a]" aria-hidden />
+            <section className="rounded-2xl bg-white/[0.03] ring-1 ring-r-line ring-inset px-4 py-4 sm:px-5">
+              <h2 className="flex items-center gap-2 text-sm font-medium text-r-text">
+                <Info className="size-4 text-r-pri" aria-hidden />
                 หมายเหตุ
               </h2>
-              <ul className="mt-2 list-disc space-y-1.5 pl-6 text-sm leading-relaxed text-[#f7d7de]/75">
+              <ul className="mt-2 list-disc space-y-1.5 pl-6 text-sm leading-relaxed text-r-text-2">
                 {event.notes.map((note) => (
                   <li key={note}>{note}</li>
                 ))}
@@ -263,7 +263,7 @@ export function EventDetail({
             <section aria-labelledby="event-gallery">
               <div id="event-gallery" className="flex items-baseline justify-between gap-4">
                 <SectionTitle>ภาพจากอีเวนต์</SectionTitle>
-                <span className="text-sm tabular-nums text-[#f3b8c4]/60">
+                <span className="text-sm tabular-nums text-r-text-3">
                   {tiles.length} ภาพ
                 </span>
               </div>
@@ -274,7 +274,7 @@ export function EventDetail({
                       type="button"
                       onClick={() => setActiveIndex(index)}
                       aria-label={`ดูภาพ: ${tile.alt}`}
-                      className="group relative block aspect-square w-full overflow-hidden rounded-xl border border-[#f3b8c4]/12 bg-[#12080c] transition hover:border-[#e85a7a]/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e85a7a]/60"
+                      className="group relative block aspect-square w-full overflow-hidden rounded-xl ring-1 ring-r-line ring-inset bg-white/[0.03] transition hover:ring-r-pri/50 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-r-acc"
                     >
                       <ProtectedImage
                         src={tile.thumb}
@@ -302,7 +302,7 @@ export function EventDetail({
                       href={source.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-sm text-[#e85a7a] underline-offset-4 hover:underline sm:text-base"
+                      className="inline-flex items-center gap-1.5 text-sm text-r-pri underline-offset-4 transition-colors hover:text-r-pri-hover hover:underline sm:text-base"
                     >
                       {source.label}
                       <ExternalLink className="size-3.5 shrink-0" />
@@ -318,18 +318,18 @@ export function EventDetail({
       {older || newer ? (
         <nav
           aria-label="อีเวนต์อื่น"
-          className="mt-16 grid gap-3 border-t border-[#f3b8c4]/10 pt-8 sm:grid-cols-2"
+          className="mt-16 grid gap-3 border-t border-r-line pt-8 sm:grid-cols-2"
         >
           {older ? (
             <Link
               href={`/events/${older.id}`}
-              className="group rounded-2xl border border-[#f3b8c4]/12 px-4 py-4 transition hover:border-[#e85a7a]/40 hover:bg-[#1a0c12]"
+              className="group rounded-2xl ring-1 ring-r-line ring-inset px-4 py-4 transition hover:bg-r-pri/[0.06] hover:ring-r-pri/40"
             >
-              <span className="inline-flex items-center gap-1.5 text-xs text-[#f3b8c4]/60">
+              <span className="inline-flex items-center gap-1.5 text-xs text-r-text-3">
                 <ArrowLeft className="size-3.5" aria-hidden />
                 ก่อนหน้า
               </span>
-              <span className="mt-1 block text-[#fff5f7] group-hover:text-white">
+              <span className="mt-1 block text-r-text group-hover:text-r-text">
                 {older.titleLocal ?? older.title}
               </span>
             </Link>
@@ -339,13 +339,13 @@ export function EventDetail({
           {newer ? (
             <Link
               href={`/events/${newer.id}`}
-              className="group rounded-2xl border border-[#f3b8c4]/12 px-4 py-4 text-right transition hover:border-[#e85a7a]/40 hover:bg-[#1a0c12]"
+              className="group rounded-2xl ring-1 ring-r-line ring-inset px-4 py-4 text-right transition hover:bg-r-pri/[0.06] hover:ring-r-pri/40"
             >
-              <span className="inline-flex items-center gap-1.5 text-xs text-[#f3b8c4]/60">
+              <span className="inline-flex items-center gap-1.5 text-xs text-r-text-3">
                 ถัดไป
                 <ArrowRight className="size-3.5" aria-hidden />
               </span>
-              <span className="mt-1 block text-[#fff5f7] group-hover:text-white">
+              <span className="mt-1 block text-r-text group-hover:text-r-text">
                 {newer.titleLocal ?? newer.title}
               </span>
             </Link>

@@ -3,8 +3,9 @@
 import type { MouseEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Cake, Coffee } from "lucide-react";
+import { Music2 } from "lucide-react";
 
+import { CafeLensMark } from "@/components/projects/CafeLensMark";
 import { cn } from "@/lib/utils";
 import type { ProjectItem, VtuberProfile } from "@/types/vtuber";
 
@@ -16,7 +17,6 @@ type NavProject = {
   meta: string;
   /** Pink = open now (with glow) · soft pink = coming soon · none = released / ended. */
   dot: "open" | "soon" | null;
-  action: { label: string; href: string } | null;
 };
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -39,23 +39,25 @@ export function shortDate(iso: string | undefined) {
   return new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Bangkok", day: "numeric", month: "short" }).format(date);
 }
 
-/** A same-site "upload" CTA on an active project, e.g. HBD → send a birthday card. */
-function openAction(project: ProjectItem) {
-  if (project.status !== "active") return null;
-  const cta = project.ctas?.find((c) => c.url.startsWith("/") && c.url.includes("upload"));
-  return cta ? { label: "ส่ง Card", href: cta.url } : null;
+/**
+ * Active project taking submissions (a same-site "upload" CTA), e.g. HBD cards.
+ * The menu only says so in the status line — no send button (4 Nov).
+ */
+function isOpenForSubmissions(project: ProjectItem) {
+  if (project.status !== "active") return false;
+  return Boolean(project.ctas?.some((c) => c.url.startsWith("/") && c.url.includes("upload")));
 }
 
 function navProject(project: ProjectItem, data: VtuberProfile): NavProject {
   const category = project.category.toLowerCase();
-  const action = openAction(project);
+  const open = isOpenForSubmissions(project);
   // Projects go by their own name (e.g. "Mild-R: Sherlock Sweetie"), never the Thai one on its own.
   const title = category === "hbd" && project.year ? `HBD ${project.year}` : project.title;
   const kind = [CATEGORY_LABEL[category] ?? project.category, project.year].filter(Boolean).join(" · ");
 
   let meta = kind;
   let dot: NavProject["dot"] = null;
-  if (action) {
+  if (open) {
     meta = category === "hbd" ? "เปิดรับการ์ดอวยพร" : "เปิดรับอยู่";
     dot = "open";
   } else if (project.status === "upcoming") {
@@ -64,12 +66,12 @@ function navProject(project: ProjectItem, data: VtuberProfile): NavProject {
     dot = "soon";
   }
 
-  return { project, title, href: `/projects/${project.slug}`, meta, dot, action };
+  return { project, title, href: `/projects/${project.slug}`, meta, dot };
 }
 
 /** Open now → coming soon → released → ended. */
 function rank(row: NavProject) {
-  if (row.action) return 0;
+  if (row.dot === "open") return 0;
   if (row.project.status === "upcoming") return 1;
   if (row.project.status === "active") return 2;
   return 3;
@@ -86,7 +88,7 @@ export function navProjects(data: VtuberProfile): NavProject[] {
 function Thumb({ project, size }: { project: ProjectItem; size: number }) {
   const category = project.category.toLowerCase();
   const focus = THUMB_FOCUS[category];
-  // The cafe card never shows its KV before opening, so the menu keeps the placeholder + cup.
+  // Cafe: the gold heart lens on the cafe's green (the full wordmark is too small to read here).
   const isCafe = category === "cafe";
   return (
     <span
@@ -94,7 +96,9 @@ function Thumb({ project, size }: { project: ProjectItem; size: number }) {
       style={{ width: size, height: size }}
       aria-hidden
     >
-      {project.cover ? (
+      {isCafe ? (
+        <CafeLensMark />
+      ) : project.cover ? (
         <Image
           src={project.cover}
           alt=""
@@ -105,12 +109,11 @@ function Thumb({ project, size }: { project: ProjectItem; size: number }) {
           className="object-cover"
           style={focus ? { objectPosition: focus.position, transform: `scale(${focus.zoom})`, transformOrigin: focus.position } : undefined}
         />
-      ) : null}
-      {isCafe ? (
-        <span className="absolute inset-0 flex items-center justify-center text-r-nurse/90">
-          <Coffee className="size-[42%]" />
+      ) : (
+        <span className="absolute inset-0 flex items-center justify-center text-r-text-2/60">
+          <Music2 className="size-[42%]" />
         </span>
-      ) : null}
+      )}
     </span>
   );
 }
@@ -125,8 +128,8 @@ type NavProjectListProps = {
 
 /**
  * Projects in the header menu (desktop dropdown + mobile menu): cover · name · one line of
- * real status. No row arrows — the whole row opens the project; the only button is the
- * project's open action (e.g. HBD "ส่ง Card"), kept on the right.
+ * real status. No row arrows and no buttons — the whole row opens the project
+ * (no "ส่ง Card" in the menu, 4 Nov).
  */
 export function NavProjectList({ data, size, onNavigate, className }: NavProjectListProps) {
   const rows = navProjects(data);
@@ -168,19 +171,6 @@ export function NavProjectList({ data, size, onNavigate, className }: NavProject
               <span className="truncate">{row.meta}</span>
             </span>
           </div>
-          {row.action ? (
-            <Link
-              href={row.action.href}
-              onClick={(event) => onNavigate(event, row.action!.href)}
-              className={cn(
-                "relative z-10 inline-flex shrink-0 items-center gap-1.5 rounded-full bg-r-pri font-semibold text-r-on-pri transition hover:bg-r-pri-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-r-acc",
-                md ? "h-[34px] px-[13px] text-[12.5px]" : "h-[30px] px-[11px] text-xs"
-              )}
-            >
-              <Cake className="size-3.5" aria-hidden />
-              {row.action.label}
-            </Link>
-          ) : null}
         </li>
       ))}
     </ul>

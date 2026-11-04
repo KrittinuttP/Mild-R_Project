@@ -106,10 +106,13 @@ function formatDuration(ms: number): string {
   return `${hours} ชม. ${minutes} นาที`;
 }
 
+const EN_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
+
+/** "1 Nov 15:00" in Bangkok time (dates stay in English). */
 function bangkokDateTimeLabel(iso: string): string {
   const { date, time } = bangkokParts(iso);
-  const [y, m, d] = date.split("-");
-  return `${Number(d)}/${Number(m)} ${time}`;
+  const [, m, d] = date.split("-");
+  return `${Number(d)} ${EN_MONTHS[Number(m) - 1] ?? m} ${time}`;
 }
 
 /** Public watch URL only when a real video exists (not channel-page placeholders). */

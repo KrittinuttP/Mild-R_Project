@@ -22,9 +22,8 @@ import {
   type ImageLightboxItem,
 } from "@/components/media/ImageLightbox";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
-import { buttonVariants } from "@/components/ui/button";
 import { gsap, registerGsapPlugins, ScrollTrigger, useGSAP } from "@/lib/gsap";
-import { CTA_OUTLINE_CLASS } from "@/lib/site-ui";
+import { R_CTA_OUTLINE_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { GalleryItem } from "@/types/vtuber";
 
@@ -164,7 +163,7 @@ export function GalleryBoard({
 
   if (items.length === 0) {
     return (
-      <p className="mt-10 text-sm text-[#f3b8c4]/70">
+      <p className="mt-10 text-sm text-r-text-3">
         ยังไม่มีผลงานในหมวดนี้
       </p>
     );
@@ -211,11 +210,11 @@ export function GalleryBoard({
                 type="button"
                 onClick={() => setActiveIndex(index)}
                 className={cn(
-                  "group relative h-full w-full overflow-hidden bg-[#1a0c12] text-left outline-none transition duration-500 ease-out focus-visible:ring-2 focus-visible:ring-[#e85a7a]/60",
+                  "group relative h-full w-full overflow-hidden bg-white/[0.03] text-left transition duration-500 ease-out outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-r-acc",
                   variant === "archive" &&
-                    "hover:-translate-y-0.5 hover:shadow-[0_12px_40px_-12px_rgba(232,90,122,0.35)]",
+                    "hover:-translate-y-0.5 hover:shadow-[0_12px_40px_-12px_rgba(242,67,125,0.35)]",
                   variant === "fan-art" &&
-                    "hover:-translate-y-1 hover:shadow-[0_16px_44px_-12px_rgba(232,90,122,0.45)] hover:ring-1 hover:ring-[#e85a7a]/25"
+                    "hover:-translate-y-1 hover:shadow-[0_16px_44px_-12px_rgba(242,67,125,0.45)] hover:ring-1 hover:ring-r-pri/25"
                 )}
               >
                 <span
@@ -245,7 +244,7 @@ export function GalleryBoard({
 
                 <div
                   className={cn(
-                    "pointer-events-none absolute inset-0 bg-gradient-to-t from-[#10080c]/90 via-[#10080c]/15 to-transparent transition duration-500",
+                    "pointer-events-none absolute inset-0 bg-gradient-to-t from-r-bg/90 via-r-bg/15 to-transparent transition duration-500",
                     item.caption ? "opacity-90 group-hover:opacity-100" : "opacity-0 group-hover:opacity-50"
                   )}
                 />
@@ -256,15 +255,15 @@ export function GalleryBoard({
                     className="absolute inset-x-0 bottom-0 flex translate-y-1 flex-col gap-0.5 p-3 transition duration-500 ease-out group-hover:translate-y-0 sm:p-4"
                   >
                     <span className="flex items-end justify-between gap-2">
-                      <span className="font-[family-name:var(--font-display)] text-sm leading-tight text-[#fff5f7] sm:text-base">
+                      <span className="font-[family-name:var(--font-display)] text-sm leading-tight text-r-text sm:text-base">
                         {item.caption}
                       </span>
-                      <span className="shrink-0 text-[0.6rem] tracking-[0.18em] text-[#f3b8c4]/70 uppercase transition group-hover:text-[#e85a7a] sm:text-[0.65rem]">
+                      <span className="shrink-0 text-[0.6rem] tracking-[0.18em] text-r-text-3 uppercase transition group-hover:text-r-pri sm:text-[0.65rem]">
                         View
                       </span>
                     </span>
                     {showArtist && isFanArtItem(item) ? (
-                      <span className="text-[0.65rem] tracking-wide text-[#f3b8c4]/65 sm:text-xs">
+                      <span className="text-[0.65rem] tracking-wide text-r-text-3 sm:text-xs">
                         by {item.artist.name}
                       </span>
                     ) : null}
@@ -281,13 +280,11 @@ export function GalleryBoard({
           <Link
             href={viewAllHref}
             className={cn(
-              buttonVariants({ variant: "outline", size: "lg" }),
-              CTA_OUTLINE_CLASS,
-              "px-6"
+              R_CTA_OUTLINE_CLASS
             )}
           >
             View all
-            <span className="ml-2 text-[#f3b8c4]/70">({items.length})</span>
+            <span className="ml-2 text-r-text-3">({items.length})</span>
             <ArrowUpRight className="size-4 opacity-80" />
           </Link>
         </div>

@@ -27,7 +27,7 @@ export function EventCard({ event, onOpen, headingAs = "h3" }: EventCardProps) {
       eyebrow={
         <div>
           <EventTags event={event} className="mb-3" />
-          <p className="text-xs tabular-nums text-[#f3b8c4]/70 sm:text-sm">
+          <p className="text-xs tabular-nums text-r-text-3 sm:text-sm">
             {formatEventDateRange(event)}
             {event.timeLabel ? ` · ${event.timeLabel}` : null}
           </p>

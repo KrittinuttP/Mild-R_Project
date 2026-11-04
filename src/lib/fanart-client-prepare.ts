@@ -113,7 +113,10 @@ export type UploadProgress = (loaded: number, total: number) => void;
 export class FanartUploadError extends Error {
   constructor(
     message: string,
-    readonly status: number
+    /** HTTP status — or Storage's own `statusCode` from the JSON body when it has one. */
+    readonly status: number,
+    /** Storage's `error` field, e.g. "invalid_mime_type" (when the body has one). */
+    readonly code?: string
   ) {
     super(message);
   }
@@ -150,13 +153,31 @@ export function uploadToSignedUrl(
         onProgress(file.size, file.size);
         resolve();
       } else {
-        reject(new FanartUploadError("upload failed", xhr.status));
+        const { status, code } = storageFailure(xhr);
+        reject(new FanartUploadError("upload failed", status, code));
       }
     };
     xhr.onerror = () => reject(new FanartUploadError("network", 0));
     xhr.ontimeout = () => reject(new FanartUploadError("timeout", 0));
     xhr.send(body);
   });
+}
+
+/**
+ * Storage often answers HTTP 400 with the real cause in the body:
+ * `{ "statusCode": "413", "error": "Payload too large", ... }`. Use that status when present.
+ */
+function storageFailure(xhr: XMLHttpRequest): { status: number; code?: string } {
+  try {
+    const data = JSON.parse(xhr.responseText) as { statusCode?: string | number; error?: string };
+    const status = Number(data.statusCode);
+    return {
+      status: Number.isFinite(status) && status > 0 ? status : xhr.status,
+      code: typeof data.error === "string" ? data.error : undefined,
+    };
+  } catch {
+    return { status: xhr.status };
+  }
 }
 
 function isAlreadyStored(xhr: XMLHttpRequest) {

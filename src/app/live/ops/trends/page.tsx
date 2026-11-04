@@ -5,11 +5,10 @@ import { Activity, Radio } from "lucide-react";
 import { AddManualLiveButton } from "@/components/events/AddManualLiveModal";
 import { LiveViewTrendsPanel } from "@/components/events/LiveViewTrendsPanel";
 import { BackLink } from "@/components/layout/BackLink";
-import { buttonVariants } from "@/components/ui/button";
 import {
-  CTA_OUTLINE_CLASS,
-  DISPLAY_H1_CLASS,
-  META_CLASS,
+  R_CTA_OUTLINE_CLASS,
+  R_EYEBROW_CLASS,
+  R_H1_CLASS,
 } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import {
@@ -89,21 +88,21 @@ export default async function LiveOpsTrendsPage({ searchParams }: PageProps) {
   const isAdmin = await isSiteAdminUnlocked();
 
   return (
-    <main className="relative min-h-dvh bg-[#0c0709] px-4 py-10 text-[#fff5f7] sm:px-8 sm:py-14">
+    <main className="relative min-h-dvh overflow-x-clip bg-r-bg px-4 py-10 text-r-text sm:px-8 sm:py-14">
       {/* 🌟 Background Ambient Glow */}
-      <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 size-96 bg-[radial-gradient(circle,rgba(232,90,122,0.14),transparent_70%)]" />
+      <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 size-96 bg-[radial-gradient(circle,rgba(242,67,125,0.14),transparent_70%)]" />
 
       <div className="relative mx-auto max-w-6xl space-y-10">
-        <header className="border-b border-[#f3b8c4]/12 pb-6">
+        <header className="border-b border-r-text-2/12 pb-6">
           <BackLink href="/live" className="mb-4">
             กลับหน้าตารางไลฟ์
           </BackLink>
           <div className="mt-4 flex items-center gap-2">
-            <Activity className="size-4 text-[#e85a7a]" />
-            <p className={META_CLASS}>Live View Analytics · Internal</p>
+            <Activity className="size-4 text-r-pri" />
+            <p className={R_EYEBROW_CLASS}>Live View Analytics · Internal</p>
           </div>
           <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
-            <h1 className={DISPLAY_H1_CLASS}>View Trends</h1>
+            <h1 className={R_H1_CLASS}>View Trends</h1>
             <div className="flex flex-wrap items-center gap-2.5">
               {isAdmin ? (
                 <>
@@ -111,19 +110,19 @@ export default async function LiveOpsTrendsPage({ searchParams }: PageProps) {
                   <Link
                     href="/live/ops"
                     className={cn(
-                      buttonVariants({ variant: "outline", size: "sm" }),
-                      CTA_OUTLINE_CLASS,
+                      R_CTA_OUTLINE_CLASS,
+                      "h-9 px-4 text-sm",
                       "inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider"
                     )}
                   >
-                    <Radio className="size-3.5 text-[#e85a7a]" />
+                    <Radio className="size-3.5 text-r-pri" />
                     <span>Sync Monitor</span>
                   </Link>
                 </>
               ) : null}
             </div>
           </div>
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-[#f7d7de]/80">
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-r-text-2/80">
             วิเคราะห์แนวโน้มยอดคนดูหลังจบไลฟ์, ยอดวิวสะสมล่าสุด และสัดส่วน Solo /
             Collab / Member
           </p>

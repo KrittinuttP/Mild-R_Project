@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, CheckCircle2, Eye, EyeOff, FileLock2, Home, Lock, Settings2, Unlock } from "lucide-react";
 
 import { GOLD_BUTTON, KeyholePlate } from "@/components/cafe/board/brass";
+import { CafeFeedsPanel } from "@/components/cafe/CafeFeedsPanel";
 import { CafeGatePanel } from "@/components/cafe/CafeGatePanel";
 import { LABEL, SERIF, THAI } from "@/components/cafe/board/pieces";
 import {
@@ -467,6 +468,10 @@ export function CafeSettingsClient() {
           {status}
         </p>
       ) : null}
+
+      {/* Notice Board (X) and Case Tapes (YouTube): nightly pull, pin / hide per item */}
+      <p className={cn(LABEL, "mt-12")}>Feeds · ประกาศ + คลิป</p>
+      <CafeFeedsPanel />
 
       <div className="mt-10 flex flex-wrap gap-3">
         <Link

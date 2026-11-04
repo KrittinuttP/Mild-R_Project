@@ -67,7 +67,8 @@ const ERROR_TEXT = "text-[#ffa062]";
 
 const EYEBROW = "Birthday · 12 Dec 2026";
 const MISSING_SUMMARY = "ยังส่งไม่ได้ — กรุณากรอกช่องที่มี * ให้ครบ";
-const CONTACT_HINT = "ใช้ติดต่อกลับเฉพาะตอนการ์ดมีปัญหา · ไม่แสดงบนเว็บ";
+/** นายท่านกำหนดประโยคนี้เอง — ห้ามเปลี่ยน (decisions.md) */
+const CONTACT_HINT = "จะใช้ช่องทางนี้ติดต่อกลับ ในกรณีที่มีปัญหา";
 
 const HBD_FORM_CACHE_KEY = "mild-r-hbd-upload-draft";
 /** Set once the "ก่อนเริ่ม" screen was read → next visit opens the form directly. */
@@ -77,7 +78,7 @@ const HBD_INTRO_SEEN_KEY = "mild-r-hbd-upload-intro-seen";
 const HOW_STEPS: ReadonlyArray<{ title: string; detail?: string }> = [
   { title: "โหลดเทมเพลต แล้วตกแต่งการ์ด" },
   { title: "อัปโหลดการ์ด + ชื่อ + คำอวยพร", detail: "JPEG · PNG · WebP ไม่เกิน 20 MB" },
-  { title: "ใส่ช่องทางติดต่อ แล้วส่ง", detail: "X หรือ Discord · ไม่แสดงบนเว็บ" },
+  { title: "ใส่ช่องทางติดต่อ แล้วส่ง", detail: "X หรือ Discord" },
 ];
 
 const HOW_FAQ = [
@@ -95,7 +96,7 @@ const HOW_FAQ = [
   },
   {
     q: "ช่องทางติดต่อเอาไปใช้ทำอะไร?",
-    a: "ใช้ติดต่อกลับเฉพาะตอนที่การ์ดมีปัญหาค่ะ และไม่แสดงบนเว็บ",
+    a: "จะใช้ช่องทางนี้ติดต่อกลับ ในกรณีที่มีปัญหาค่ะ",
   },
 ] as const;
 
@@ -594,7 +595,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
 
   const header = (align: "left" | "center" = "left") => (
     <header className={align === "center" ? "text-center" : undefined}>
-      <p className={R_EYEBROW_CLASS}>{EYEBROW}</p>
+      <p className={cn(R_EYEBROW_CLASS, align === "center" && "mx-auto")}>{EYEBROW}</p>
       <h1 className={cn(DISPLAY, "mt-2.5 text-[1.875rem] leading-tight font-normal text-r-text sm:text-[2.125rem]")}>
         ส่งการ์ดอวยพร
       </h1>

@@ -71,11 +71,11 @@ export function AdminConfirmDialog({
     >
       <DialogContent
         showCloseButton={!busy}
-        className="border-[#f3b8c4]/15 bg-[#1a0c12] text-[#fff5f7]"
+        className="border-r-text-2/15 bg-r-bg text-r-text"
       >
         <DialogHeader>
           <DialogTitle className={cn(DISPLAY, "text-lg font-normal")}>{title}</DialogTitle>
-          <DialogDescription className="text-[#f7d7de]/75">{description}</DialogDescription>
+          <DialogDescription className="text-r-text-2/75">{description}</DialogDescription>
         </DialogHeader>
 
         {thumbs.length ? (
@@ -90,21 +90,21 @@ export function AdminConfirmDialog({
               />
             ))}
             {moreThumbs > 0 ? (
-              <span className="flex size-12 items-center justify-center rounded-xl bg-white/5 text-sm text-[#f3b8c4] ring-1 ring-white/10">
+              <span className="flex size-12 items-center justify-center rounded-xl bg-white/5 text-sm text-r-text-2 ring-1 ring-white/10">
                 +{moreThumbs}
               </span>
             ) : null}
           </div>
         ) : null}
         {shownNames ? (
-          <p className="text-sm text-[#f7d7de]/90">
+          <p className="text-sm text-r-text-2/90">
             จาก {shownNames}
             {moreNames > 0 ? ` … อีก ${moreNames} คน` : ""}
           </p>
         ) : null}
 
         {progress ? (
-          <p role="status" className="text-sm text-[#f3b8c4]">
+          <p role="status" className="text-sm text-r-text-2">
             {progress}
           </p>
         ) : null}
@@ -114,7 +114,7 @@ export function AdminConfirmDialog({
           </p>
         ) : null}
 
-        <DialogFooter className="border-[#f3b8c4]/10 bg-[#14080e]/60">
+        <DialogFooter className="border-r-text-2/10 bg-white/[0.03]">
           <button
             type="button"
             disabled={busy}
@@ -122,7 +122,7 @@ export function AdminConfirmDialog({
             className={cn(
               buttonVariants({ variant: "outline", size: "sm" }),
               BUTTON,
-              "border-[#f3b8c4]/25 bg-transparent text-[#f7d7de] hover:bg-[#f3b8c4]/10"
+              "border-r-text-2/25 bg-transparent text-r-text-2 hover:bg-r-text-2/10"
             )}
           >
             ยกเลิก

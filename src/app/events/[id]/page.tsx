@@ -56,9 +56,9 @@ export default async function EventPage({ params }: EventPageProps) {
     <>
       <MediaProtection />
       <Header data={mildRData} />
-      <main className="flex-1 bg-[#140a0d]">
-        <section className="relative px-5 pb-24 pt-28 text-[#fff5f7] sm:px-10 sm:pt-32 lg:px-16">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(ellipse_at_20%_0%,rgba(232,90,122,0.18),transparent_55%)]" />
+      <main className="flex-1 bg-r-bg">
+        <section className="relative px-5 pb-24 pt-28 text-r-text sm:px-10 sm:pt-32 lg:px-16">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(ellipse_at_80%_0%,rgba(242,67,125,0.14),transparent_55%),radial-gradient(ellipse_at_0%_10%,rgba(34,214,191,0.08),transparent_50%)]" />
           <EventDetail
             event={found.event}
             gallery={getEventGallery(id)}

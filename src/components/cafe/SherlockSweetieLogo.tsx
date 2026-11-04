@@ -14,7 +14,7 @@ const BRAND_FONT =
   "font-[family-name:var(--font-cafe-serif),var(--font-cafe-thai),serif]";
 
 /** Lens + handle, tilted −8.75° like the Canva master. Viewbox 124 × 148. */
-function LensGlyph({
+export function LensGlyph({
   className,
   style,
   mark,

@@ -176,7 +176,7 @@ const LEGACY_SKIN: LiveTableSkin = {
   slotDesktopBase:
     "group flex w-full flex-col overflow-hidden rounded-2xl border bg-[#1a0c12]/60 text-left transition",
   slotCancelled: "border-[#8a7f88]/30 opacity-80 hover:border-[#8a7f88]/50 hover:bg-[#8a7f88]/10",
-  slotGuest: "border-[#d4a574]/35 hover:border-[#d4a574]/55 hover:bg-[#d4a574]/10",
+  slotGuest: "border-r-acc/35 hover:border-r-acc/55 hover:bg-r-acc/10",
   slotLive:
     "border-[#e85a7a]/60 shadow-[0_0_16px_rgba(232,90,122,0.18)] hover:border-[#e85a7a] hover:bg-[#1f0d16]",
   slotIdle: "border-[#f3b8c4]/12 hover:border-[#e85a7a]/40 hover:bg-[#1a0c12]",
@@ -319,7 +319,7 @@ const APLUS_SKIN: LiveTableSkin = {
   slotDesktopBase:
     "group flex w-full flex-col overflow-hidden rounded-2xl border r-card text-left transition",
   slotCancelled: "border-[#8a7f88]/40 opacity-80",
-  slotGuest: "border-[#d4a574]/50 hover:border-[#d4a574]/75",
+  slotGuest: "border-r-acc/50 hover:border-r-acc/75",
   slotLive: "border-r-pri hover:bg-r-pri/10",
   slotIdle: "border-transparent hover:border-r-pri/45",
   coverBg: "bg-r-bg",
@@ -459,7 +459,7 @@ function clockClass(
 ) {
   if (state.cancelled) return "text-[#8a7f88]";
   if (state.member) return "text-[#9b8cff]";
-  if (state.guest) return "text-[#d4a574]";
+  if (state.guest) return "text-r-acc"; // Collab = mint (decisions 3 Nov)
   return skin.clock;
 }
 

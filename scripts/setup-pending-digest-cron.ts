@@ -92,11 +92,23 @@ async function main() {
     );
 
     if (checkOnly) {
+      // Read-only, but a broken setup must say FAIL (exit 1), not PASS.
+      const problems: string[] = [];
+      const job = current.rows[0];
+      if (!job) problems.push(`no "${JOB_NAME}" job scheduled`);
+      else {
+        if (!job.active) problems.push("job is not active");
+        if (job.schedule !== SCHEDULE) problems.push(`schedule is ${job.schedule}, expected ${SCHEDULE}`);
+      }
       if (base && secret) {
         const test = await dryRun(runUrl, secret);
         console.log(`route ${ROUTE}: ${test.ok ? "OK" : "not reachable"} — ${test.detail}`);
+        if (!test.ok) problems.push(`route ${ROUTE} not ready (${test.detail})`);
+      } else {
+        problems.push("CRON_API_BASE or LIVE_AGENT_CRON_SECRET not set — cannot test the route");
       }
-      console.log("PASS (check only, nothing changed)");
+      if (problems.length) fail(`${problems.join(" · ")} (check only, nothing changed)`);
+      console.log("PASS (check only, nothing changed) — note: the dry run does not post to Discord");
       return;
     }
 

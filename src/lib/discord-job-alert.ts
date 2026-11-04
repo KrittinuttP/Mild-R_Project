@@ -341,12 +341,15 @@ const DISCORD_TIMEOUT_MS = 8000;
  * Never pings anyone (`allowed_mentions` is always empty) and never throws.
  * Returns false when the webhook is not set or Discord did not accept it.
  */
-export async function postDiscordWebhook(payload: Record<string, unknown>): Promise<boolean> {
+/** Why a Discord post did not go out — safe to return from an API (never the webhook URL). */
+export type DiscordSendResult = { ok: true } | { ok: false; reason: string };
+
+export async function sendDiscordWebhook(payload: Record<string, unknown>): Promise<DiscordSendResult> {
   const webhookUrl =
     typeof process !== "undefined"
       ? process.env.DISCORD_WEBHOOK_URL?.trim()
       : undefined;
-  if (!webhookUrl) return false;
+  if (!webhookUrl) return { ok: false, reason: "webhook not set" };
 
   try {
     const res = await fetch(webhookUrl, {
@@ -362,14 +365,19 @@ export async function postDiscordWebhook(payload: Record<string, unknown>): Prom
         res.status,
         body.slice(0, 200)
       );
-      return false;
+      return { ok: false, reason: `discord HTTP ${res.status}` };
     }
-    return true;
+    return { ok: true };
   } catch (err) {
     console.error(
       "[discord] webhook:",
       err instanceof Error ? err.message : err
     );
-    return false;
+    const timedOut = err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError");
+    return { ok: false, reason: timedOut ? "discord timeout" : "discord network error" };
   }
+}
+
+export async function postDiscordWebhook(payload: Record<string, unknown>): Promise<boolean> {
+  return (await sendDiscordWebhook(payload)).ok;
 }

@@ -40,7 +40,7 @@ export const LIVE_BADGE_PILL_COMPACT =
   "inline-flex h-[1.125rem] max-w-[5.5rem] shrink-0 items-center justify-center truncate rounded-full border px-2 text-[0.68rem] leading-none tracking-normal";
 
 export const LIVE_BADGE_MILD =
-  "border-[#f3b8c4]/40 bg-[#e85a7a]/12 text-[#f3b8c4] uppercase";
+  "border-r-text-2/40 bg-r-pri/12 text-r-text-2 uppercase";
 
 export const LIVE_BADGE_CHANNEL =
   "border-[#7eb6d4]/50 bg-[#7eb6d4]/14 text-[#b8d9ec]";
@@ -52,7 +52,7 @@ export const LIVE_BADGE_COLLAB =
   "border-r-acc/55 bg-r-acc/14 text-r-acc uppercase";
 
 export const LIVE_BADGE_SOFT =
-  "border-[#f3b8c4]/20 bg-white/[0.03] text-[#f3b8c4]/80";
+  "border-r-text-2/20 bg-white/[0.03] text-r-text-2/80";
 
 export const LIVE_BADGE_CANCELLED =
   "border-[#8a7f88]/45 bg-white/[0.03] text-[#d8d0d4]";
@@ -73,8 +73,12 @@ export const MODAL_CLOSE_BUTTON_CLASS =
 /* ── Project R · CI A+ (doc/project-r-implementation.md §1) ─────────
    New home sections use these; the classes above stay for pages not yet moved. */
 
-/** Small uppercase label above a section title — mint */
+/** Small uppercase label above a section title — mint (decisions 3 Nov: คงมิ้นต์ทั้งเว็บ) */
 export const R_EYEBROW_CLASS = "text-xs uppercase tracking-[0.24em] text-r-acc";
+
+/** Page title (same as /live) */
+export const R_H1_CLASS =
+  "font-[family-name:var(--font-display)] text-[2.25rem] leading-tight font-normal tracking-normal text-r-text sm:text-5xl";
 
 export const R_H2_CLASS =
   "font-[family-name:var(--font-display)] text-3xl font-normal leading-tight tracking-normal text-r-text md:text-4xl";
@@ -102,6 +106,16 @@ export const R_CTA_PRIMARY_CLASS = [
 ].join(" ");
 
 /** Outline button */
+/**
+ * Selected state of a pill / tab / segment (filters, view toggles, admin tabs) —
+ * decided 4 Nov (option C): soft pink fill + pink ring + pink text, not white.
+ * Not for the upload forms, where solid pink = the chosen option.
+ */
+export const R_PILL_ACTIVE_TEXT_CLASS = "font-semibold text-[#ff6b9a]";
+/** Fill + ring only — for a sliding thumb behind segmented buttons. */
+export const R_PILL_ACTIVE_FILL_CLASS = "bg-r-pri/16 ring-[1.5px] ring-r-pri/75 ring-inset";
+export const R_PILL_ACTIVE_CLASS = `${R_PILL_ACTIVE_FILL_CLASS} ${R_PILL_ACTIVE_TEXT_CLASS}`;
+
 export const R_CTA_OUTLINE_CLASS = [
   "inline-flex h-12 items-center justify-center gap-2 rounded-full px-6 text-[0.9375rem] transition-colors",
   "border border-r-text-2/35 text-r-text hover:border-r-pri/60 hover:bg-r-pri/10 active:bg-r-pri/20",

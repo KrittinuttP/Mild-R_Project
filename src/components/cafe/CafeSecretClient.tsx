@@ -161,7 +161,7 @@ export function CafeSecretClient({ cafe, caseCover }: CafeSecretClientProps) {
     <div>
       <div className="sticky top-0 z-50 border-b border-cafe-gold/40 bg-cafe-deep/95 px-4 py-2.5 text-center backdrop-blur-sm sm:px-6">
         <p className="text-[0.62rem] tracking-[0.22em] text-cafe-gold-soft uppercase">
-          Secret · Full reveal · ไม่ใช้ visibility จาก DB
+          Secret · Full reveal · เห็นครบทุกส่วน ไม่ตามการตั้งค่าซ่อน/แสดงใน Settings
         </p>
         <div className="mt-1.5 flex flex-wrap items-center justify-center gap-3 text-xs text-cafe-muted">
           <Link href="/cafe" className="hover:text-cafe-cream">

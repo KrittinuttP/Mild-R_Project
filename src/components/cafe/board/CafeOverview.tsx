@@ -6,10 +6,10 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
-import Link from "next/link";
 import { Heart } from "lucide-react";
 
 import { CafeCountdown } from "@/components/cafe/CafeCountdown";
+import { CafeFollowLinks } from "@/components/cafe/board/CafeFollowLinks";
 import {
   CaseGhostMotifs,
   SherlockSweetieLogo,
@@ -360,7 +360,7 @@ export function CafeOverview({
   const schedule = cafe.dispatch.schedule;
   const location = cafe.dispatch.location;
   const hidden = !showDispatch;
-  const follow = cafe.closing.ctas?.[0];
+  const follow = cafe.closing.ctas;
   const cutout = cafe.heroCutout || "/assets/cafe/kv/KV_cafe.webp";
   const when = hidden ? null : caseDate(schedule.startsAt);
   const statusLabel = hidden
@@ -686,16 +686,7 @@ export function CafeOverview({
                     <SetsButtonLabel preorder={cafe.preorder} />
                   </a>
                 ) : null}
-                {follow?.url ? (
-                  <Link
-                    href={follow.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex min-h-12 items-center justify-center border border-cafe-gold/60 px-6 text-[15px] font-semibold text-cafe-cream transition hover:-translate-y-0.5 hover:border-cafe-gold hover:bg-cafe-gold/10 motion-reduce:transition-none"
-                  >
-                    {follow.label}
-                  </Link>
-                ) : null}
+                <CafeFollowLinks ctas={follow} />
               </div>
             </div>
           </div>

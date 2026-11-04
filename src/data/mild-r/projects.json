@@ -5,7 +5,6 @@
     "title": "Mild-R: Sherlock Sweetie",
     "titleLocal": "คาเฟ่วันเกิดของนักสืบ Mild-R",
     "summary": "คาเฟ่ธีมสถานที่เกิดเหตุลึกลับที่แฟนคลับ Honeycomb จัดทำเอง — ไขปริศนาจากเมนู เก็บกู้เบาะแส และโซนถ่ายรูป",
-    "cover": "/assets/images/gallery-02.svg",
     "status": "upcoming",
     "year": 2026,
     "category": "cafe",
@@ -30,36 +29,24 @@
     ]
   },
   {
-    "id": "heart-cure",
-    "slug": "heart-cure",
-    "title": "Heart Cure",
-    "titleLocal": "รักษาหัวใจ",
-    "summary": "Fansong ต้นฉบับของ Mild-R — รวมลิงก์รับชมและไฮไลต์ของมิวสิควิดีโอ",
-    "cover": "/assets/Gallery/moments/01-heart-cure-thumb.webp",
-    "status": "active",
-    "year": 2024,
+    "id": "fansong",
+    "slug": "fansong",
+    "title": "Fansong",
+    "titleLocal": "เพลงจากแฟนคลับ",
+    "summary": "เพลงที่แฟนคลับ|ตั้งใจทำให้มายด์อาร์ — รายละเอียด|จะประกาศเร็ว ๆ นี้",
+    "status": "upcoming",
+    "year": 2026,
     "category": "fansong",
-    "highlights": [
-      "เพลงต้นฉบับ「รักษาหัวใจ」",
-      "รับชมบน YouTube",
-      "ธีมหัวใจ / mutant motif"
-    ],
     "body": [
-      "Fansong รวมจุดโปรโมทมิวสิควิดีโอของ Mild-R ไว้ที่เดียว ให้ฮันนี่ส่งต่อและกลับมารับชมซ้ำได้ง่าย",
-      "สามารถฝังคลิปด้านล่าง และเพิ่มคอนเทนต์เบื้องหลังได้เมื่อมีวัสดุพร้อม"
-    ],
-    "youtubeUrl": "https://www.youtube.com/watch?v=-fxIAm8dozk",
-    "cta": {
-      "label": "ดูบน YouTube",
-      "url": "https://www.youtube.com/watch?v=-fxIAm8dozk"
-    }
+      "พื้นที่สำหรับเพลง|จากแฟนคลับ ลิงก์รับชม|และเบื้องหลัง|จะตามมาเร็ว ๆ นี้"
+    ]
   },
   {
     "id": "hbd",
     "slug": "hbd",
     "title": "คำอวยพรวันเกิด",
     "titleLocal": "สุขสันต์วันเกิด Mild-R",
-    "summary": "รวมคำอวยพรวันเกิดจากฮันนี่ถึง Mild-R ในโอกาส 12.12.2026",
+    "summary": "รวมคำอวยพรวันเกิดจากฮันนี่ถึง Mild-R ในโอกาส 12\u00a0Dec\u00a02026",
     "cover": "/assets/hbd/template/hbd-card-template.png",
     "status": "active",
     "year": 2026,

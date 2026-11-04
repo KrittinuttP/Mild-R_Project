@@ -1,3 +1,5 @@
+import { R_PILL_ACTIVE_CLASS } from "@/lib/site-ui";
+
 export type GalleryCategoryKey = "archive" | "live" | "fanart";
 
 export type GalleryCategory = {
@@ -24,6 +26,7 @@ export function parseGalleryCategory(value: unknown): GalleryCategoryKey {
 export const GALLERY_PILL_GROUP_CLASS =
   "inline-flex max-w-full flex-wrap gap-1 rounded-full bg-white/[0.04] p-1 ring-1 ring-r-line ring-inset";
 export const GALLERY_PILL_CLASS =
-  "inline-flex h-9 items-center rounded-full px-4 text-sm transition-colors outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-r-acc";
-export const GALLERY_PILL_ACTIVE_CLASS = "bg-r-text font-semibold text-r-bg";
+  // Narrower below 360px so the 3 pills stay on one line on 320px phones.
+  "inline-flex h-9 items-center rounded-full px-3 text-[13px] min-[360px]:px-4 min-[360px]:text-sm transition-colors outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-r-acc";
+export const GALLERY_PILL_ACTIVE_CLASS = R_PILL_ACTIVE_CLASS;
 export const GALLERY_PILL_IDLE_CLASS = "text-r-text-2 hover:text-r-text";

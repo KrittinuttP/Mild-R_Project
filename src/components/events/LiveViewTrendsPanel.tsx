@@ -9,7 +9,6 @@ import {
   ChevronDown,
   ChevronUp,
   ExternalLink,
-  Eye,
   Filter,
   Flame,
   Layers,
@@ -17,8 +16,6 @@ import {
   RotateCcw,
   Sparkles,
   TrendingUp,
-  Tv,
-  Users,
   Video,
 } from "lucide-react";
 
@@ -37,16 +34,14 @@ import {
 } from "@/lib/live-view-trends";
 import { cn } from "@/lib/utils";
 import {
-  CTA_OUTLINE_CLASS,
-  CTA_PRIMARY_CLASS,
-  DISPLAY_H2_CLASS,
-  GLASS_CARD_CLASS,
   LIVE_BADGE_COLLAB,
   LIVE_BADGE_MEMBER,
   LIVE_BADGE_MILD,
   LIVE_BADGE_PILL_SM,
-  META_CLASS,
-  META_MUTED_CLASS,
+  R_CTA_OUTLINE_CLASS,
+  R_CTA_PRIMARY_CLASS,
+  R_META_CLASS,
+  R_PILL_ACTIVE_CLASS,
 } from "@/lib/site-ui";
 import { getYoutubeThumbnailUrl } from "@/lib/youtube";
 import type {
@@ -147,7 +142,7 @@ const KIND_OPTIONS: { id: LiveKind; label: string }[] = [
 ];
 
 const dateInputClass =
-  "rounded-2xl border border-[#f3b8c4]/20 bg-[#12070c]/90 px-3.5 py-2 text-sm text-[#fff5f7] outline-none transition focus:border-[#e85a7a] focus:ring-1 focus:ring-[#e85a7a]/40 [color-scheme:dark]";
+  "rounded-2xl bg-white/[0.03] ring-1 ring-r-line ring-inset px-3.5 py-2 text-sm text-r-text outline-none transition focus:border-r-pri focus:ring-1 focus:ring-r-pri/40 [color-scheme:dark]";
 
 export function LiveViewTrendsPanel({
   rows,
@@ -293,7 +288,7 @@ export function LiveViewTrendsPanel({
       {/* 🎛️ Navigation Filter Bars */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {/* Grain Selector */}
-        <div className="flex items-center gap-1.5 rounded-full border border-[#f3b8c4]/15 bg-[#14080e]/90 p-1 shadow-inner">
+        <div className="flex items-center gap-1.5 rounded-full bg-white/[0.03] ring-1 ring-r-line ring-inset p-1 shadow-inner">
           {GRAINS.map((g) => (
             <Link
               key={g.id}
@@ -306,8 +301,8 @@ export function LiveViewTrendsPanel({
               className={cn(
                 "rounded-full px-4 py-1.5 text-xs font-semibold tracking-wider uppercase transition",
                 grain === g.id
-                  ? "border border-[#e85a7a]/60 bg-[#e85a7a]/25 text-[#fff5f7] shadow-[0_0_12px_rgba(232,90,122,0.35)]"
-                  : "text-[#f3b8c4]/65 hover:text-[#fff5f7]"
+                  ? R_PILL_ACTIVE_CLASS
+                  : "text-r-text-2 hover:text-r-text"
               )}
             >
               {g.label}
@@ -316,14 +311,14 @@ export function LiveViewTrendsPanel({
         </div>
 
         {/* Channel Selector */}
-        <div className="flex items-center gap-1.5 rounded-full border border-[#f3b8c4]/15 bg-[#14080e]/90 p-1 shadow-inner">
+        <div className="flex items-center gap-1.5 rounded-full bg-white/[0.03] ring-1 ring-r-line ring-inset p-1 shadow-inner">
           <Link
             href={trendsHref({ grain, ownOnly: true, kinds, ranges })}
             className={cn(
               "rounded-full px-4 py-1.5 text-xs font-semibold tracking-wider uppercase transition",
               ownOnly
-                ? "border border-[#e85a7a]/60 bg-[#e85a7a]/25 text-[#fff5f7] shadow-[0_0_12px_rgba(232,90,122,0.35)]"
-                : "text-[#f3b8c4]/65 hover:text-[#fff5f7]"
+                ? R_PILL_ACTIVE_CLASS
+                : "text-r-text-2 hover:text-r-text"
             )}
           >
             ช่อง Mild-R
@@ -333,8 +328,8 @@ export function LiveViewTrendsPanel({
             className={cn(
               "rounded-full px-4 py-1.5 text-xs font-semibold tracking-wider uppercase transition",
               !ownOnly
-                ? "border border-[#e85a7a]/60 bg-[#e85a7a]/25 text-[#fff5f7] shadow-[0_0_12px_rgba(232,90,122,0.35)]"
-                : "text-[#f3b8c4]/65 hover:text-[#fff5f7]"
+                ? R_PILL_ACTIVE_CLASS
+                : "text-r-text-2 hover:text-r-text"
             )}
           >
             รวมทั้งหมด
@@ -343,25 +338,25 @@ export function LiveViewTrendsPanel({
       </div>
 
       {/* Combined filter: kinds + date range */}
-      <div className="relative overflow-hidden rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1f0d16]/80 to-[#14080e]/90 p-5 shadow-lg sm:p-6">
-        <div className="flex items-center justify-between gap-2 border-b border-[#f3b8c4]/10 pb-3">
+      <div className="relative overflow-hidden rounded-3xl r-card p-5 shadow-lg sm:p-6">
+        <div className="flex items-center justify-between gap-2 border-b border-r-text-2/10 pb-3">
           <div className="flex items-center gap-2">
-            <Filter className="size-4 text-[#e85a7a]" />
-            <p className={META_CLASS}>
+            <Filter className="size-4 text-r-pri" />
+            <p className="text-xs font-medium text-r-text-2">
               ตัวกรอง · {GRAIN_LABEL[grain]} (Asia/Bangkok)
             </p>
           </div>
-          <span className="text-[0.68rem] text-[#f3b8c4]/50">
+          <span className="text-[0.68rem] text-r-text-2/50">
             {fromYmd} → {toYmd}
           </span>
         </div>
 
         <div className="mt-4 space-y-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-            <span className="text-xs font-medium text-[#f3b8c4]/70">
+            <span className="text-xs font-medium text-r-text-2/70">
               ประเภทไลฟ์
             </span>
-            <div className="flex items-center gap-1.5 rounded-full border border-[#f3b8c4]/15 bg-[#12070c]/90 p-1 shadow-inner">
+            <div className="flex items-center gap-1.5 rounded-full bg-white/[0.03] ring-1 ring-r-line ring-inset p-1 shadow-inner">
               {KIND_OPTIONS.map((opt) => {
                 const active = draftKinds.includes(opt.id);
                 return (
@@ -372,8 +367,8 @@ export function LiveViewTrendsPanel({
                     className={cn(
                       "rounded-full px-4 py-1.5 text-xs font-semibold tracking-wider uppercase transition",
                       active
-                        ? "border border-[#e85a7a]/60 bg-[#e85a7a]/25 text-[#fff5f7] shadow-[0_0_12px_rgba(232,90,122,0.35)]"
-                        : "text-[#f3b8c4]/65 hover:text-[#fff5f7]"
+                        ? R_PILL_ACTIVE_CLASS
+                        : "text-r-text-2 hover:text-r-text"
                     )}
                   >
                     {opt.label}
@@ -385,7 +380,7 @@ export function LiveViewTrendsPanel({
 
           <div className="flex flex-col gap-3.5 sm:flex-row sm:flex-wrap sm:items-end">
             <label className="flex min-w-[10rem] flex-1 flex-col gap-1.5 text-sm">
-              <span className="text-xs font-medium text-[#f3b8c4]/70">
+              <span className="text-xs font-medium text-r-text-2/70">
                 วันที่เริ่มต้น (Start)
               </span>
               <input
@@ -397,7 +392,7 @@ export function LiveViewTrendsPanel({
               />
             </label>
             <label className="flex min-w-[10rem] flex-1 flex-col gap-1.5 text-sm">
-              <span className="text-xs font-medium text-[#f3b8c4]/70">
+              <span className="text-xs font-medium text-r-text-2/70">
                 วันที่สิ้นสุด (End)
               </span>
               <input
@@ -413,7 +408,7 @@ export function LiveViewTrendsPanel({
                 type="button"
                 onClick={applyFilters}
                 className={cn(
-                  CTA_PRIMARY_CLASS,
+                  R_CTA_PRIMARY_CLASS,
                   "flex items-center gap-1.5 px-4 py-2 text-xs font-semibold"
                 )}
               >
@@ -424,7 +419,7 @@ export function LiveViewTrendsPanel({
                 type="button"
                 onClick={resetFilters}
                 className={cn(
-                  CTA_OUTLINE_CLASS,
+                  R_CTA_OUTLINE_CLASS,
                   "flex items-center gap-1.5 px-4 py-2 text-xs font-semibold"
                 )}
               >
@@ -462,10 +457,10 @@ export function LiveViewTrendsPanel({
       {/* 🏆 Peak Cards */}
       <div>
         <div className="mb-3 flex items-center justify-between">
-          <p className={META_CLASS}>
+          <p className="text-xs font-medium text-r-text-2">
             ยอดวิวสูงสุด · {peakScopeLabel}
           </p>
-          <p className="text-xs text-[#f3b8c4]/60">
+          <p className="text-xs text-r-text-2/60">
             {totals.stream_count.toLocaleString("th-TH")} ไลฟ์ในช่วงที่เลือก
           </p>
         </div>
@@ -492,12 +487,12 @@ export function LiveViewTrendsPanel({
       />
 
       {/* 🏷️ Stream Kind Breakdown Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#f3b8c4]/15 bg-[#14080e]/90 px-4 py-3 shadow-md sm:px-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white/[0.03] ring-1 ring-r-line ring-inset px-4 py-3 shadow-md sm:px-5">
         <div className="flex items-center gap-2">
-          <Layers className="size-4 text-[#e85a7a]" />
-          <p className="text-xs font-medium text-[#f3b8c4]/80">
+          <Layers className="size-4 text-r-pri" />
+          <p className="text-xs font-medium text-r-text-2/80">
             {kindStatsLabel}
-            <span className="ml-1.5 font-bold tabular-nums text-[#fff5f7]">
+            <span className="ml-1.5 font-bold tabular-nums text-r-text">
               ({pending && selectedBucket ? "…" : displayKindStats.total} ไลฟ์)
             </span>
           </p>
@@ -527,21 +522,21 @@ export function LiveViewTrendsPanel({
       {/* 🔍 Selected Bucket Detail Section */}
       <section
         ref={detailRef}
-        className="overflow-hidden rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1f0d16]/85 via-[#1a0c12]/80 to-[#14080e]/95 shadow-xl"
+        className="overflow-hidden rounded-3xl r-card shadow-xl"
       >
         {!selectedBucket ? (
           <div className="px-6 py-10 text-center">
-            <Activity className="mx-auto size-8 text-[#e85a7a]/60 animate-pulse" />
-            <p className="mt-3 text-sm font-medium text-[#f7d7de]/80">
+            <Activity className="mx-auto size-8 text-r-pri/60 animate-pulse" />
+            <p className="mt-3 text-sm font-medium text-r-text-2/80">
               คลิกจุดหรือแท่งบนกราฟ เพื่อดูรายละเอียดคลิปของวัน / เดือน นั้น
             </p>
           </div>
         ) : (
           <div className="space-y-0">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#f3b8c4]/15 bg-[#14080e]/90 px-5 py-3.5">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-r-text-2/15 bg-white/[0.03] px-5 py-3.5">
               <div className="flex items-center gap-2">
-                <Sparkles className="size-4 text-[#e85a7a]" />
-                <h2 className="text-xs font-bold tracking-wider text-[#e85a7a] uppercase sm:text-sm">
+                <Sparkles className="size-4 text-r-pri" />
+                <h2 className="text-xs font-bold tracking-wider text-r-pri uppercase sm:text-sm">
                   รายละเอียดสตรีม · {formatBucket(selectedBucket, grain)}
                 </h2>
               </div>
@@ -552,7 +547,7 @@ export function LiveViewTrendsPanel({
                   setStreams([]);
                   setBucketDetailPeaks(null);
                 }}
-                className="rounded-full border border-[#f3b8c4]/20 bg-[#1f0d16] px-3 py-1 text-xs text-[#f3b8c4]/80 transition hover:border-[#e85a7a]/50 hover:text-[#fff5f7]"
+                className="rounded-full border border-r-text-2/20 bg-r-bg px-3 py-1 text-xs text-r-text-2/80 transition hover:border-r-pri/50 hover:text-r-text"
               >
                 ล้างการเลือก
               </button>
@@ -560,13 +555,13 @@ export function LiveViewTrendsPanel({
 
             {pending ? (
               <div className="flex min-h-[20vh] flex-col items-center justify-center gap-2 py-10">
-                <span className="size-2.5 rounded-full bg-[#e85a7a] animate-ping" />
-                <p className="text-xs text-[#f3b8c4]/60">กำลังโหลดข้อมูลไลฟ์…</p>
+                <span className="size-2.5 rounded-full bg-r-pri animate-ping" />
+                <p className="text-xs text-r-text-2/60">กำลังโหลดข้อมูลไลฟ์…</p>
               </div>
             ) : error ? (
               <p className="px-5 py-6 text-sm text-red-300">{error}</p>
             ) : streams.length === 0 ? (
-              <p className="px-5 py-8 text-center text-sm text-[#f3b8c4]/70">
+              <p className="px-5 py-8 text-center text-sm text-r-text-2/70">
                 ไม่มีไลฟ์ในช่วงนี้
               </p>
             ) : (
@@ -582,19 +577,19 @@ export function LiveViewTrendsPanel({
       </section>
 
       {/* 📑 Summary Table Dropdown */}
-      <div className="overflow-hidden rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1a0c12]/80 to-[#14080e]/90 shadow-lg">
+      <div className="overflow-hidden rounded-3xl r-card shadow-lg">
         <button
           type="button"
           onClick={() => setTableOpen((v) => !v)}
-          className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition hover:bg-[#e85a7a]/08"
+          className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition hover:bg-r-pri/08"
         >
           <div className="flex items-center gap-2">
-            <Video className="size-4 text-[#e85a7a]" />
-            <span className="text-xs font-bold tracking-wider text-[#fff5f7] uppercase sm:text-sm">
+            <Video className="size-4 text-r-pri" />
+            <span className="text-xs font-bold tracking-wider text-r-text uppercase sm:text-sm">
               ตารางสรุปข้อมูล
             </span>
           </div>
-          <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#e85a7a]">
+          <span className="inline-flex items-center gap-1 text-xs font-semibold text-r-pri">
             {tableOpen ? (
               <>
                 <span>ซ่อนตาราง</span>
@@ -609,9 +604,9 @@ export function LiveViewTrendsPanel({
           </span>
         </button>
         {tableOpen ? (
-          <div className="overflow-x-auto border-t border-[#f3b8c4]/12">
+          <div className="overflow-x-auto border-t border-r-text-2/12">
             <table className="min-w-full text-left text-sm">
-              <thead className="border-b border-[#f3b8c4]/15 bg-[#14080e]/80 text-[0.68rem] tracking-wider text-[#f3b8c4]/70 uppercase">
+              <thead className="border-b border-r-text-2/15 bg-white/[0.03] text-[0.68rem] tracking-wider text-r-text-2/70 uppercase">
                 <tr>
                   <th className="px-5 py-3 font-semibold">ช่วงเวลา</th>
                   <th className="px-5 py-3 font-semibold">ปก</th>
@@ -629,17 +624,17 @@ export function LiveViewTrendsPanel({
                       key={row.bucket}
                       onClick={() => selectBucket(row.bucket)}
                       className={cn(
-                        "cursor-pointer border-b border-[#f3b8c4]/08 last:border-0 transition-colors hover:bg-[#e85a7a]/12",
+                        "cursor-pointer border-b border-r-text-2/08 last:border-0 transition-colors hover:bg-r-pri/12",
                         selectedBucket === row.bucket &&
-                          "bg-[#e85a7a]/20 font-semibold"
+                          "bg-r-pri/20 font-semibold"
                       )}
                     >
-                      <td className="px-5 py-3 text-[#fff5f7]">
+                      <td className="px-5 py-3 text-r-text">
                         {formatBucket(row.bucket, grain)}
                       </td>
                       <td className="px-5 py-3">
                         {peak ? (
-                          <div className="relative h-12 w-20 overflow-hidden rounded-lg border border-[#f3b8c4]/15 bg-[#10070b]">
+                          <div className="relative h-12 w-20 overflow-hidden rounded-lg border border-r-text-2/15 bg-r-bg">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={streamThumb(
@@ -653,18 +648,18 @@ export function LiveViewTrendsPanel({
                             />
                           </div>
                         ) : (
-                          <span className="text-[#f3b8c4]/45">—</span>
+                          <span className="text-r-text-2/45">—</span>
                         )}
                       </td>
-                      <td className="max-w-[16rem] px-5 py-3 text-[#fff5f7]">
+                      <td className="max-w-[16rem] px-5 py-3 text-r-text">
                         <span className="line-clamp-2">
                           {peak?.title || "—"}
                         </span>
                       </td>
-                      <td className="px-5 py-3 tabular-nums text-[#f7d7de]/85">
+                      <td className="px-5 py-3 tabular-nums text-r-text-2/85">
                         {formatViews(row.views_on_end)}
                       </td>
-                      <td className="px-5 py-3 tabular-nums text-[#fff5f7]">
+                      <td className="px-5 py-3 tabular-nums text-r-text">
                         {formatViews(row.latest_views)}
                       </td>
                       <td className="px-5 py-3 font-semibold tabular-nums text-[#7dd3c0]">
@@ -811,7 +806,7 @@ function TrendThumb({
   return (
     <div
       className={cn(
-        "relative w-full overflow-hidden bg-[#10070b]",
+        "relative w-full overflow-hidden bg-r-bg",
         className ?? "aspect-video min-h-[200px]"
       )}
     >
@@ -828,7 +823,7 @@ function TrendThumb({
           if (src !== fallback) setSrc(fallback);
         }}
       />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140a0d] via-transparent to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-r-bg via-transparent to-transparent" />
       {children}
     </div>
   );
@@ -871,7 +866,7 @@ function BucketPeriodDetail({
   return (
     <div>
       {trendRow ? (
-        <div className="grid grid-cols-2 border-b border-[#f3b8c4]/12 sm:grid-cols-4">
+        <div className="grid grid-cols-2 border-b border-r-text-2/12 sm:grid-cols-4">
           <PeriodChip
             label="หลังไลฟ์ (รวมช่วง)"
             value={formatViews(trendRow.views_on_end)}
@@ -904,62 +899,62 @@ function BucketPeriodDetail({
             alt={hero.title ?? "Peak live"}
             className="aspect-[16/10] min-h-[240px] lg:min-h-full lg:aspect-auto lg:h-full"
           >
-            <div className="absolute inset-x-0 bottom-0 space-y-2 bg-gradient-to-t from-[#0c0709] via-[#0c0709]/80 to-transparent p-4 pt-16">
+            <div className="absolute inset-x-0 bottom-0 space-y-2 bg-gradient-to-t from-r-bg via-r-bg/80 to-transparent p-4 pt-16">
               <div className="flex flex-wrap gap-1.5">
-                <span className="border border-[#e85a7a]/50 bg-[#e85a7a]/20 px-2 py-0.5 text-[0.58rem] tracking-[0.16em] text-[#fff5f7] uppercase">
+                <span className="border border-r-pri/50 bg-r-pri/20 px-2 py-0.5 text-[0.58rem] tracking-[0.16em] text-r-text uppercase">
                   ยอดสูงสุดช่วงนี้
                 </span>
                 <span
                   className={cn(
                     "border px-2 py-0.5 text-[0.58rem] tracking-[0.14em] uppercase",
                     hero.is_own_channel
-                      ? "border-[#f3b8c4]/30 bg-[#140a0d]/70 text-[#fff5f7]"
-                      : "border-[#d4a574]/40 bg-[#140a0d]/70 text-[#e8c49a]"
+                      ? "border-r-text-2/30 bg-r-bg/70 text-r-text"
+                      : "border-r-acc/40 bg-r-bg/70 text-r-acc"
                   )}
                 >
                   {hero.is_own_channel ? "Own" : "Other"}
                 </span>
                 {hero.is_collab ? (
-                  <span className="border border-[#d4a574]/45 bg-[#d4a574]/15 px-2 py-0.5 text-[0.58rem] tracking-[0.14em] text-[#e8c49a] uppercase">
+                  <span className="border border-r-acc/45 bg-r-acc/15 px-2 py-0.5 text-[0.58rem] tracking-[0.14em] text-r-acc uppercase">
                     Collab
                   </span>
                 ) : null}
               </div>
-              <p className="font-[family-name:var(--font-display)] text-xl leading-snug tracking-normal text-[#fff5f7] sm:text-2xl">
+              <p className="font-[family-name:var(--font-display)] text-xl leading-snug tracking-normal text-r-text sm:text-2xl">
                 {hero.title || hero.video_id}
               </p>
-              <p className="text-xs text-[#f3b8c4]/75">
+              <p className="text-xs text-r-text-2/75">
                 {hero.channel_name || "—"}
               </p>
             </div>
           </TrendThumb>
         </button>
 
-        <div className="flex flex-col justify-between gap-5 border-t border-[#f3b8c4]/12 p-4 sm:p-5 lg:border-t-0 lg:border-l">
+        <div className="flex flex-col justify-between gap-5 border-t border-r-text-2/12 p-4 sm:p-5 lg:border-t-0 lg:border-l">
           <div className="space-y-4">
             <div>
-              <p className="text-[0.65rem] tracking-[0.2em] text-[#f3b8c4]/55 uppercase">
+              <p className="text-[0.65rem] tracking-[0.2em] text-r-text-2/55 uppercase">
                 ยอดวิวคลิปนี้
               </p>
               <div className="mt-2 grid grid-cols-3 gap-3">
                 <div>
-                  <p className="text-[0.58rem] tracking-[0.14em] text-[#f3b8c4]/50 uppercase">
+                  <p className="text-[0.58rem] tracking-[0.14em] text-r-text-2/50 uppercase">
                     หลังไลฟ์
                   </p>
-                  <p className="mt-1 font-[family-name:var(--font-display)] text-2xl tabular-nums text-[#fff5f7]">
+                  <p className="mt-1 font-[family-name:var(--font-display)] text-2xl tabular-nums text-r-text">
                     {formatViews(onEnd)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[0.58rem] tracking-[0.14em] text-[#f3b8c4]/50 uppercase">
+                  <p className="text-[0.58rem] tracking-[0.14em] text-r-text-2/50 uppercase">
                     ยอดรวม
                   </p>
-                  <p className="mt-1 font-[family-name:var(--font-display)] text-2xl tabular-nums text-[#fff5f7]">
+                  <p className="mt-1 font-[family-name:var(--font-display)] text-2xl tabular-nums text-r-text">
                     {formatViews(latest)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[0.58rem] tracking-[0.14em] text-[#f3b8c4]/50 uppercase">
+                  <p className="text-[0.58rem] tracking-[0.14em] text-r-text-2/50 uppercase">
                     Diff
                   </p>
                   <p className="mt-1 font-[family-name:var(--font-display)] text-2xl tabular-nums text-[#7dd3c0]">
@@ -1007,11 +1002,11 @@ function BucketPeriodDetail({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 border-t border-[#f3b8c4]/10 pt-3">
+          <div className="flex flex-wrap items-center gap-3 border-t border-r-text-2/10 pt-3">
             <button
               type="button"
               onClick={() => onOpen(hero)}
-              className="border border-[#e85a7a]/45 bg-[#e85a7a]/12 px-3 py-1.5 text-xs tracking-wide text-[#fff5f7] transition-colors hover:bg-[#e85a7a]/22"
+              className="border border-r-pri/45 bg-r-pri/12 px-3 py-1.5 text-xs tracking-wide text-r-text transition-colors hover:bg-r-pri/22"
             >
               เปิดรายละเอียด
             </button>
@@ -1019,7 +1014,7 @@ function BucketPeriodDetail({
               href={url}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs text-[#f3b8c4]/75 underline-offset-4 hover:text-[#fff5f7] hover:underline"
+              className="inline-flex items-center gap-1.5 text-xs text-r-text-2/75 underline-offset-4 hover:text-r-text hover:underline"
             >
               เปิด YouTube
               <ExternalLink className="size-3.5 opacity-70" />
@@ -1029,8 +1024,8 @@ function BucketPeriodDetail({
       </div>
 
       {others.length > 0 ? (
-        <div className="border-t border-[#f3b8c4]/12 px-4 py-4">
-          <p className="mb-3 text-[0.65rem] tracking-[0.18em] text-[#f3b8c4]/55 uppercase">
+        <div className="border-t border-r-text-2/12 px-4 py-4">
+          <p className="mb-3 text-[0.65rem] tracking-[0.18em] text-r-text-2/55 uppercase">
             ไลฟ์อื่นในช่วงนี้ · {others.length}
           </p>
           <ul className="grid gap-3 sm:grid-cols-2">
@@ -1058,14 +1053,14 @@ function PeriodChip({
   accent?: boolean;
 }) {
   return (
-    <div className="border-b border-[#f3b8c4]/08 px-4 py-3 sm:border-b-0 sm:border-r sm:last:border-r-0">
-      <p className="text-[0.58rem] tracking-[0.14em] text-[#f3b8c4]/50 uppercase">
+    <div className="border-b border-r-text-2/08 px-4 py-3 sm:border-b-0 sm:border-r sm:last:border-r-0">
+      <p className="text-[0.58rem] tracking-[0.14em] text-r-text-2/50 uppercase">
         {label}
       </p>
       <p
         className={cn(
           "mt-1 font-[family-name:var(--font-display)] text-lg tabular-nums",
-          accent ? "text-[#7dd3c0]" : "text-[#fff5f7]"
+          accent ? "text-[#7dd3c0]" : "text-r-text"
         )}
       >
         {value}
@@ -1090,11 +1085,11 @@ function TrendStreamCard({
 
   return (
     <li>
-      <div className="overflow-hidden border border-[#f3b8c4]/14 bg-[#0c0709]/45">
+      <div className="overflow-hidden bg-white/[0.03] ring-1 ring-r-line ring-inset">
         <button
           type="button"
           onClick={onOpen}
-          className="group block w-full text-left transition-colors hover:bg-[#e85a7a]/08"
+          className="group block w-full text-left transition-colors hover:bg-r-pri/08"
         >
           <TrendThumb
             videoId={stream.video_id}
@@ -1107,14 +1102,14 @@ function TrendStreamCard({
                 className={cn(
                   "rounded-md border px-2 py-0.5 text-[0.58rem] tracking-[0.14em] uppercase backdrop-blur-sm",
                   stream.is_own_channel
-                    ? "border-[#f3b8c4]/30 bg-[#140a0d]/75 text-[#fff5f7]"
-                    : "border-[#d4a574]/40 bg-[#140a0d]/75 text-[#e8c49a]"
+                    ? "border-r-text-2/30 bg-r-bg/75 text-r-text"
+                    : "border-r-acc/40 bg-r-bg/75 text-r-acc"
                 )}
               >
                 {stream.is_own_channel ? "Own" : "Other"}
               </span>
               {stream.is_collab ? (
-                <span className="rounded-md border border-[#d4a574]/45 bg-[#d4a574]/15 px-2 py-0.5 text-[0.58rem] tracking-[0.14em] text-[#e8c49a] uppercase backdrop-blur-sm">
+                <span className="rounded-md border border-r-acc/45 bg-r-acc/15 px-2 py-0.5 text-[0.58rem] tracking-[0.14em] text-r-acc uppercase backdrop-blur-sm">
                   Collab
                 </span>
               ) : null}
@@ -1122,10 +1117,10 @@ function TrendStreamCard({
           </TrendThumb>
           <div className="space-y-3 p-4">
             <div>
-              <p className="line-clamp-2 text-base font-medium text-[#fff5f7]">
+              <p className="line-clamp-2 text-base font-medium text-r-text">
                 {stream.title || stream.video_id}
               </p>
-              <p className="mt-1 text-xs text-[#f3b8c4]/65">
+              <p className="mt-1 text-xs text-r-text-2/65">
                 {stream.channel_name || "—"}
               </p>
             </div>
@@ -1174,11 +1169,11 @@ function TrendStreamCard({
             </div>
           </div>
         </button>
-        <div className="flex flex-wrap items-center gap-3 border-t border-[#f3b8c4]/10 px-4 py-2.5">
+        <div className="flex flex-wrap items-center gap-3 border-t border-r-text-2/10 px-4 py-2.5">
           <button
             type="button"
             onClick={() => setShowEmbed((v) => !v)}
-            className="text-xs text-[#e85a7a] underline-offset-4 hover:underline"
+            className="text-xs text-r-pri underline-offset-4 hover:underline"
           >
             {showEmbed ? "ซ่อนฝังวิดีโอ" : "ฝังวิดีโอ"}
           </button>
@@ -1186,14 +1181,14 @@ function TrendStreamCard({
             href={url}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs text-[#f3b8c4]/75 underline-offset-4 hover:text-[#fff5f7] hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs text-r-text-2/75 underline-offset-4 hover:text-r-text hover:underline"
           >
             เปิด YouTube
             <ExternalLink className="size-3.5 opacity-70" />
           </a>
         </div>
         {showEmbed ? (
-          <div className="border-t border-[#f3b8c4]/10 bg-black">
+          <div className="border-t border-r-text-2/10 bg-black">
             <div className="relative aspect-video min-h-[220px] w-full">
               <iframe
                 title={stream.title || stream.video_id}
@@ -1221,11 +1216,11 @@ function MetaCell({
 }) {
   return (
     <div>
-      <p className="text-[#f3b8c4]/50">{label}</p>
+      <p className="text-r-text-2/50">{label}</p>
       <p
         className={cn(
           "mt-0.5 tabular-nums",
-          accent ? "text-[#7dd3c0]" : "text-[#f7d7de]/90"
+          accent ? "text-[#7dd3c0]" : "text-r-text-2/90"
         )}
       >
         {value}
@@ -1272,11 +1267,11 @@ function PeakCard({
 }) {
   if (!peak) {
     return (
-      <div className="rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1f0d16]/75 to-[#14080e]/90 p-5">
-        <p className={META_MUTED_CLASS}>
+      <div className="rounded-3xl r-card p-5">
+        <p className={R_META_CLASS}>
           {label}
         </p>
-        <p className="mt-2 text-xs text-[#f3b8c4]/50">ไม่มีข้อมูลในช่วงนี้</p>
+        <p className="mt-2 text-xs text-r-text-2/50">ไม่มีข้อมูลในช่วงนี้</p>
       </div>
     );
   }
@@ -1287,11 +1282,11 @@ function PeakCard({
     <button
       type="button"
       onClick={() => onOpen(peak)}
-      className="group relative flex w-full flex-col justify-between overflow-hidden rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1f0d16]/85 to-[#14080e]/95 p-5 text-left transition duration-300 hover:border-[#e85a7a]/50 hover:shadow-[0_12px_32px_rgba(232,90,122,0.18)]"
+      className="group relative flex w-full flex-col justify-between overflow-hidden rounded-3xl r-card p-5 text-left transition duration-300 hover:border-r-pri/50 hover:shadow-[0_12px_32px_rgba(242,67,125,0.18)]"
     >
       <div className="flex w-full items-start gap-4">
         {/* 16:9 Thumbnail Mini Preview */}
-        <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-2xl border border-[#f3b8c4]/15 bg-[#12070c] sm:w-32">
+        <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-2xl border border-r-text-2/15 bg-r-bg sm:w-32">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={thumb}
@@ -1301,28 +1296,28 @@ function PeakCard({
         </div>
 
         <div className="min-w-0 flex-1">
-          <span className="inline-block rounded-full bg-[#e85a7a]/20 px-2.5 py-0.5 text-[0.65rem] font-bold tracking-wider text-[#e85a7a] uppercase">
+          <span className="inline-block rounded-full bg-r-pri/20 px-2.5 py-0.5 text-[0.65rem] font-bold tracking-wider text-r-pri uppercase">
             {label}
           </span>
-          <p className="mt-1.5 line-clamp-2 text-xs font-medium leading-relaxed text-[#fff5f7] group-hover:text-white sm:text-sm">
+          <p className="mt-1.5 line-clamp-2 text-xs font-medium leading-relaxed text-r-text group-hover:text-white sm:text-sm">
             {peak.title || peak.video_id}
           </p>
-          <p className="mt-1 text-[0.7rem] text-[#f3b8c4]/65">
+          <p className="mt-1 text-[0.7rem] text-r-text-2/65">
             {peak.channel_name || "Mild-R Channel"}
           </p>
         </div>
       </div>
 
-      <div className="mt-4 flex w-full items-end justify-between border-t border-[#f3b8c4]/10 pt-3">
-        <span className="inline-flex items-center gap-1 text-[0.72rem] font-medium text-[#e85a7a] opacity-80 group-hover:opacity-100">
+      <div className="mt-4 flex w-full items-end justify-between border-t border-r-text-2/10 pt-3">
+        <span className="inline-flex items-center gap-1 text-[0.72rem] font-medium text-r-pri opacity-80 group-hover:opacity-100">
           <span>คลิกดูรายละเอียด</span>
           <ArrowUpRight className="size-3.5" />
         </span>
         <div className="text-right">
-          <p className="font-[family-name:var(--font-display)] text-2xl font-normal tracking-tight tabular-nums text-[#fff5f7] sm:text-3xl">
+          <p className="font-[family-name:var(--font-display)] text-2xl font-normal tracking-tight tabular-nums text-r-text sm:text-3xl">
             {formatViews(peak.views)}
           </p>
-          <p className="text-[0.62rem] text-[#f3b8c4]/50 uppercase">Views</p>
+          <p className="text-[0.62rem] text-r-text-2/50 uppercase">Views</p>
         </div>
       </div>
     </button>
@@ -1343,9 +1338,9 @@ function StatCard({
   icon?: typeof Flame;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1f0d16]/85 via-[#1a0c12]/80 to-[#14080e]/95 p-5 shadow-lg transition hover:border-[#e85a7a]/35">
+    <div className="relative overflow-hidden rounded-3xl r-card p-5 shadow-lg transition hover:border-r-pri/35">
       <div className="flex items-center justify-between">
-        <p className={META_CLASS}>
+        <p className="text-xs font-medium text-r-text-2">
           {label}
         </p>
         {Icon ? (
@@ -1354,7 +1349,7 @@ function StatCard({
               "flex size-9 items-center justify-center rounded-xl border",
               accent
                 ? "border-emerald-500/30 bg-emerald-500/15 text-emerald-300"
-                : "border-[#e85a7a]/30 bg-[#e85a7a]/15 text-[#e85a7a]"
+                : "border-r-pri/30 bg-r-pri/15 text-r-pri"
             )}
           >
             <Icon className="size-4" />
@@ -1365,14 +1360,14 @@ function StatCard({
       <p
         className={cn(
           "mt-3 font-[family-name:var(--font-display)] text-3xl font-normal tracking-tight tabular-nums sm:text-4xl",
-          accent ? "text-[#7dd3c0]" : "text-[#fff5f7]"
+          accent ? "text-[#7dd3c0]" : "text-r-text"
         )}
       >
         {accent && value > 0 ? `+${formatViews(value)}` : formatViews(value)}
       </p>
 
       {sublabel ? (
-        <p className="mt-1 text-[0.68rem] text-[#f3b8c4]/50">
+        <p className="mt-1 text-[0.68rem] text-r-text-2/50">
           {sublabel}
         </p>
       ) : null}

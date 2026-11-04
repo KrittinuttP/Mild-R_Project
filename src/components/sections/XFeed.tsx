@@ -6,6 +6,7 @@ import { ChevronRight, ChevronUp, ExternalLink, Heart, Repeat2 } from "lucide-re
 import { ImageLightbox } from "@/components/media/ImageLightbox";
 import { cn } from "@/lib/utils";
 import type { XPost, XQuotedTweet } from "@/types/x-post";
+import { R_PILL_ACTIVE_CLASS } from "@/lib/site-ui";
 
 type XFeedProps = {
   posts: XPost[];
@@ -199,7 +200,7 @@ function FeedHeader({ tab, setTab, posts, retweets }: { tab: TabId; setTab: (t: 
       onClick={() => setTab(id)}
       className={cn(
         "rounded-full px-4 py-1.5 text-[0.8125rem] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc",
-        tab === id ? "bg-r-pri text-r-on-pri" : "text-r-text/85 hover:text-r-text"
+        tab === id ? R_PILL_ACTIVE_CLASS : "text-r-text/85 hover:text-r-text"
       )}
     >
       {label} <span className="opacity-60">{count}</span>

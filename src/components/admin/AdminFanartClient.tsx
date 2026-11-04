@@ -7,6 +7,7 @@ import { downloadZip } from "client-zip";
 import { Check, Download, FolderDown, X } from "lucide-react";
 
 import { AdminConfirmDialog } from "@/components/admin/AdminConfirmDialog";
+import { BackLink } from "@/components/layout/BackLink";
 import {
   ImageLightbox,
   type ImageLightboxItem,
@@ -23,6 +24,7 @@ import {
   formatMegabytes,
   type FanartPictureCredit,
 } from "@/lib/fanart-upload";
+import { R_EYEBROW_CLASS, R_PILL_ACTIVE_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 
 type Tab = "pending" | "approved" | "hidden";
@@ -56,8 +58,8 @@ const DONE_TEXT: Record<Action, (count: number) => string> = {
   delete: (count) => `ลบถาวรแล้ว ${count} รูป`,
 };
 
-/** Thai month names with the same year (2026) as the rest of the site. */
-const DATE_TIME = new Intl.DateTimeFormat("th-TH-u-ca-gregory", {
+/** English dates, Bangkok time (site rule). */
+const DATE_TIME_FMT = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
   month: "short",
   year: "numeric",
@@ -65,6 +67,7 @@ const DATE_TIME = new Intl.DateTimeFormat("th-TH-u-ca-gregory", {
   minute: "2-digit",
   timeZone: "Asia/Bangkok",
 });
+const DATE_TIME = { format: (d: Date) => DATE_TIME_FMT.format(d).replace("Sept", "Sep") };
 
 /** Paper sizes at 250 dpi: long edge × short edge in pixels. */
 const PRINT_SIZES: [string, number, number][] = [
@@ -90,11 +93,11 @@ const TYPE_LABEL: Record<string, string> = {
 
 const PRIMARY = cn(
   buttonVariants({ size: "sm" }),
-  "h-9 bg-[#e85a7a] px-3 text-[#140a0d] hover:bg-[#f3b8c4]"
+  "h-9 bg-r-pri px-3 text-r-on-pri hover:bg-r-pri-hover"
 );
 const OUTLINE = cn(
   buttonVariants({ variant: "outline", size: "sm" }),
-  "h-9 border-[#f3b8c4]/25 bg-transparent px-3 text-[#f7d7de] hover:bg-[#f3b8c4]/10 hover:text-[#fff5f7]"
+  "h-9 border-r-text-2/25 bg-transparent px-3 text-r-text-2 hover:bg-r-text-2/10 hover:text-r-text"
 );
 /** Second click of a delete: removes the picture for good, so it looks different. */
 const DANGER = "border-[#ff8fa6] text-[#ff8fa6] hover:text-[#ff8fa6]";
@@ -486,11 +489,11 @@ export function AdminFanartClient() {
   }
 
   if (checking) {
-    return <p className="text-sm text-[#f3b8c4]">กำลังตรวจสิทธิ์…</p>;
+    return <p className="text-sm text-r-text-2">กำลังตรวจสิทธิ์…</p>;
   }
 
   if (!unlocked) {
-    return <p className="text-sm text-[#f3b8c4]">กำลังพาไปหน้าเข้าสู่ระบบ…</p>;
+    return <p className="text-sm text-r-text-2">กำลังพาไปหน้าเข้าสู่ระบบ…</p>;
   }
 
   const batches = groupByBatch(items);
@@ -511,22 +514,25 @@ export function AdminFanartClient() {
     <div className="relative mx-auto max-w-5xl">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs tracking-[0.2em] text-[#f3b8c4] uppercase">Admin</p>
-          <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl text-[#fff5f7]">
+          <BackLink href="/admin" className="mb-6">
+            Control desk
+          </BackLink>
+          <p className={R_EYEBROW_CLASS}>Fan art</p>
+          <h1 className="mt-1.5 font-[family-name:var(--font-display)] text-3xl text-r-text sm:text-4xl">
             อนุมัติแฟนอาร์ต
           </h1>
-          <p className="mt-2 text-sm text-[#f7d7de]/75">
+          <p className="mt-2 text-sm text-r-text-2/75">
             รายการจาก{" "}
-            <Link href="/upload/fanart" className="text-[#f3b8c4] underline">
+            <Link href="/upload/fanart" className="text-r-text-2 underline">
               /upload/fanart
             </Link>
           </p>
-          <p className="mt-1 text-xs text-[#f3b8c4]/65">ปฏิเสธแล้วไฟล์ต้นฉบับจะถูกลบ</p>
+          <p className="mt-1 text-xs text-r-text-2/65">ปฏิเสธแล้วไฟล์ต้นฉบับจะถูกลบ</p>
         </div>
       </header>
 
       {error ? (
-        <p className="mt-4 rounded-2xl bg-[#e85a7a]/15 px-4 py-3 text-sm" role="alert">
+        <p className="mt-4 rounded-2xl bg-r-pri/15 px-4 py-3 text-sm" role="alert">
           {error}
         </p>
       ) : null}
@@ -541,7 +547,7 @@ export function AdminFanartClient() {
             onClick={() => void switchTab(item.key)}
             className={cn(
               "min-h-11 rounded-full px-4 text-sm disabled:opacity-60",
-              tab === item.key ? "bg-[#e85a7a] text-[#140a0d]" : "bg-white/5 text-[#f7d7de]"
+              tab === item.key ? R_PILL_ACTIVE_CLASS : "bg-white/5 text-r-text-2"
             )}
           >
             {item.label}
@@ -563,7 +569,7 @@ export function AdminFanartClient() {
             <FolderDown className="size-4" aria-hidden />
             ดาวน์โหลดทั้งหมด (ZIP) · {originalsCount} รูป
           </button>
-          <p className="text-xs text-[#f3b8c4]/75">
+          <p className="text-xs text-r-text-2/75">
             {busy === "zip-all" && zipProgress ? zipProgress : "ไฟล์ต้นฉบับ แยกโฟลเดอร์ตามคนส่ง"}
           </p>
         </div>
@@ -571,7 +577,7 @@ export function AdminFanartClient() {
 
       {tab === "pending" && !listLoading && items.length > 0 ? (
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white/[0.04] px-4 py-3 ring-1 ring-white/10">
-          <p className="text-sm text-[#f7d7de]">รออนุมัติ {items.length} รูป</p>
+          <p className="text-sm text-r-text-2">รออนุมัติ {items.length} รูป</p>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -602,12 +608,12 @@ export function AdminFanartClient() {
       ) : null}
 
       {listLoading ? (
-        <p className="mt-8 flex items-center gap-2 text-sm text-[#f3b8c4]/80" role="status">
-          <Spinner className="size-4 text-[#e85a7a]" />
+        <p className="mt-8 flex items-center gap-2 text-sm text-r-text-2/80" role="status">
+          <Spinner className="size-4 text-r-pri" />
           กำลังโหลดรายการ…
         </p>
       ) : batches.length === 0 ? (
-        <p className="mt-8 text-sm text-[#f3b8c4]/80">
+        <p className="mt-8 text-sm text-r-text-2/80">
           {EMPTY_TEXT[tab]}
         </p>
       ) : (
@@ -619,26 +625,26 @@ export function AdminFanartClient() {
             const batchOriginals = batch.items.filter((item) => item.original_path).map((item) => item.id);
             const zipKey = `zip-${batch.key}`;
             return (
-              <section key={batch.key} className="rounded-3xl bg-[#1a0c12] p-4 ring-1 ring-white/10 sm:p-5">
+              <section key={batch.key} className="rounded-3xl bg-r-bg p-4 ring-1 ring-white/10 sm:p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="flex min-w-0 items-center gap-3">
                     {first.avatar_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={first.avatar_url} alt="" className="size-10 rounded-full object-cover" />
                     ) : (
-                      <span className="flex size-10 items-center justify-center rounded-full bg-[#e85a7a]/25 text-[#fff5f7]">
+                      <span className="flex size-10 items-center justify-center rounded-full bg-r-pri/25 text-r-text">
                         {[...first.display_name][0]}
                       </span>
                     )}
                     <div className="min-w-0">
-                      <p className="truncate font-medium text-[#fff5f7]">{first.display_name}</p>
-                      <p className="truncate text-sm text-[#f3b8c4]/80">
+                      <p className="truncate font-medium text-r-text">{first.display_name}</p>
+                      <p className="truncate text-sm text-r-text-2/80">
                         {contactLabel(first.contact_channel, first.contact_handle)}
                         {first.contact_discord ? ` · Discord · ${first.contact_discord}` : ""}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right text-xs text-[#f3b8c4]/75">
+                  <div className="text-right text-xs text-r-text-2/75">
                     <p>{DATE_TIME.format(new Date(first.created_at))}</p>
                     <p className="mt-0.5">{batch.items.length} รูปในชุดนี้</p>
                   </div>
@@ -647,7 +653,7 @@ export function AdminFanartClient() {
                 <p
                   className={cn(
                     "mt-3 flex items-start gap-1.5 rounded-xl px-3 py-2 text-xs leading-relaxed",
-                    first.consent_at ? "bg-[#7ad6a0]/10 text-[#bfeccf]" : "bg-white/5 text-[#f3b8c4]/70"
+                    first.consent_at ? "bg-[#7ad6a0]/10 text-[#bfeccf]" : "bg-white/5 text-r-text-2/70"
                   )}
                 >
                   {first.consent_at ? (
@@ -683,7 +689,7 @@ export function AdminFanartClient() {
                           onClick={() => setViewing(position)}
                           disabled={saving}
                           aria-label={`ขยายดูรูปที่ ${index + 1} ของ ${item.display_name}`}
-                          className="relative block w-full cursor-zoom-in outline-none focus-visible:ring-2 focus-visible:ring-[#f3b8c4] disabled:cursor-wait"
+                          className="relative block w-full cursor-zoom-in outline-none focus-visible:ring-2 focus-visible:ring-r-text-2 disabled:cursor-wait"
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
@@ -692,14 +698,14 @@ export function AdminFanartClient() {
                             className="h-64 w-full bg-black/40 object-contain sm:aspect-[4/5] sm:h-auto"
                           />
                           {saving ? (
-                            <span className="absolute inset-0 flex items-center justify-center bg-[#0c0709]/55">
-                              <Spinner className="size-7 border-[3px] text-[#f3b8c4]" />
+                            <span className="absolute inset-0 flex items-center justify-center bg-black/55">
+                              <Spinner className="size-7 border-[3px] text-r-text-2" />
                             </span>
                           ) : null}
                         </button>
                         <div className="space-y-2 p-3">
                           <div className="space-y-1">
-                            <p className="flex min-w-0 items-baseline gap-1 text-[12.5px] text-[#fff5f7]">
+                            <p className="flex min-w-0 items-baseline gap-1 text-[12.5px] text-r-text">
                               <span className="flex-none">เครดิต:</span>
                               <span className="truncate">{credit.name}</span>
                             </p>
@@ -708,7 +714,7 @@ export function AdminFanartClient() {
                                 href={creditHref(credit.link)}
                                 target="_blank"
                                 rel="noreferrer noopener"
-                                className="block truncate text-[11.5px] text-[#f3b8c4] underline underline-offset-2 hover:text-[#fff5f7]"
+                                className="block truncate text-[11.5px] text-r-text-2 underline underline-offset-2 hover:text-r-text"
                               >
                                 {creditLabel(credit.link)}
                                 {credit.link.type === "url" ? " ↗" : ""}
@@ -718,7 +724,7 @@ export function AdminFanartClient() {
                               <span
                                 className={cn(
                                   "inline-flex rounded-full px-2 py-0.5 text-[10.5px]",
-                                  flag.warn ? "bg-[#ffd27a]/15 text-[#ffd27a]" : "bg-white/[0.06] text-[#f3b8c4]/70"
+                                  flag.warn ? "bg-[#ffd27a]/15 text-[#ffd27a]" : "bg-white/[0.06] text-r-text-2/70"
                                 )}
                               >
                                 {flag.text}
@@ -726,18 +732,18 @@ export function AdminFanartClient() {
                             ) : null}
                           </div>
                           {item.original_path ? (
-                            <p className="text-xs text-[#f7d7de]/80">
+                            <p className="text-xs text-r-text-2/80">
                               {item.width && item.height ? `${item.width} × ${item.height} px · ` : ""}
                               {item.original_bytes ? `${formatMegabytes(item.original_bytes)} · ` : ""}
                               {TYPE_LABEL[item.original_type ?? ""] ?? "รูป"}
                               {fit ? (
-                                <span className="ml-1.5 rounded-full bg-[#e85a7a]/15 px-2 py-0.5 text-[11px] text-[#f3b8c4]">
+                                <span className="ml-1.5 rounded-full bg-r-pri/15 px-2 py-0.5 text-[11px] text-r-text-2">
                                   {fit}
                                 </span>
                               ) : null}
                             </p>
                           ) : (
-                            <p className="text-xs text-[#f3b8c4]/60">ไม่มีไฟล์ต้นฉบับ (เก็บแค่ขนาด 2048 px)</p>
+                            <p className="text-xs text-r-text-2/60">ไม่มีไฟล์ต้นฉบับ (เก็บแค่ขนาด 2048 px)</p>
                           )}
                           <div className="flex flex-wrap gap-2">
                             {item.original_path ? (

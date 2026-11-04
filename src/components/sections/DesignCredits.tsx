@@ -123,14 +123,14 @@ function CreditAvatar({
       alt={entry.person.name}
       className={cn(
         dim,
-        "mx-auto rounded-full object-cover ring-1 ring-[#f3b8c4]/30",
+        "mx-auto rounded-full object-cover ring-1 ring-r-text-2/30",
         size !== "sm" && "shadow-[0_8px_24px_rgba(8,2,4,0.35)]"
       )}
     />
   ) : (
     <span
       className={cn(
-        "mx-auto inline-flex items-center justify-center rounded-full bg-[#1a0d12] text-xs text-[#f3b8c4]/70 ring-1 ring-[#f3b8c4]/25",
+        "mx-auto inline-flex items-center justify-center rounded-full bg-white/[0.04] text-xs text-r-text-3 ring-1 ring-r-text-2/25",
         dim
       )}
     >
@@ -143,7 +143,7 @@ function CreditAvatar({
       {img}
       <span
         className={cn(
-          "mx-auto mt-1.5 block text-center leading-snug tracking-[0.08em] break-words text-[#f3b8c4]/85 uppercase",
+          "mx-auto mt-1.5 block text-center leading-snug tracking-[0.08em] break-words text-r-text-2 uppercase",
           size === "sm" ? "mt-1" : "mt-2.5",
           ROLE_TEXT[size],
           LABEL_MAX[size]
@@ -153,7 +153,7 @@ function CreditAvatar({
       </span>
       <span
         className={cn(
-          "mx-auto mt-1 block text-center leading-snug font-medium break-words text-[#fff5f7]",
+          "mx-auto mt-1 block text-center leading-snug font-medium break-words text-r-text",
           NAME_TEXT[size],
           LABEL_MAX[size]
         )}
@@ -163,7 +163,7 @@ function CreditAvatar({
       {showHandle && entry.person.handle ? (
         <span
           className={cn(
-            "mx-auto mt-0.5 block text-center leading-snug break-all text-[#f3b8c4]/55",
+            "mx-auto mt-0.5 block text-center leading-snug break-all text-r-text-3",
             size === "lg" ? "text-xs sm:text-sm" : "text-[0.6rem]",
             LABEL_MAX[size]
           )}
@@ -242,7 +242,7 @@ export function DesignCredits({
             {!hideHeading ? (
               <p
                 className={cn(
-                  "tracking-[0.18em] text-[#e85a7a] uppercase",
+                  "tracking-[0.18em] text-r-pri uppercase",
                   compact ? "text-xs" : "text-xs sm:text-sm"
                 )}
               >
@@ -280,7 +280,7 @@ export function DesignCredits({
       {activeZones.map((zone) => (
         <div key={zone}>
           {!hideHeading ? (
-            <p className="text-[0.7rem] tracking-[0.28em] text-[#e85a7a] uppercase sm:text-xs">
+            <p className="text-[0.7rem] tracking-[0.28em] text-r-pri uppercase sm:text-xs">
               {ZONE_LABEL[zone]}
             </p>
           ) : null}
@@ -292,22 +292,22 @@ export function DesignCredits({
                     <ProtectedImage
                       src={entry.person.image}
                       alt={entry.person.name}
-                      className="size-12 shrink-0 rounded-full object-cover ring-1 ring-[#f3b8c4]/25 sm:size-14"
+                      className="size-12 shrink-0 rounded-full object-cover ring-1 ring-r-text-2/25 sm:size-14"
                     />
                   ) : (
-                    <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-[#1a0d12] text-sm text-[#f3b8c4]/70 ring-1 ring-[#f3b8c4]/20 sm:size-14">
+                    <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-white/[0.04] text-sm text-r-text-3 ring-1 ring-r-text-2/20 sm:size-14">
                       {entry.person.name.slice(0, 1).toUpperCase()}
                     </span>
                   )}
                   <span className="min-w-0">
-                    <span className="block text-[0.7rem] tracking-[0.16em] text-[#f3b8c4]/65 uppercase">
+                    <span className="block text-[0.7rem] tracking-[0.16em] text-r-text-3 uppercase">
                       {entry.role}
                     </span>
-                    <span className="mt-0.5 block truncate text-base text-[#fff5f7] sm:text-lg">
+                    <span className="mt-0.5 block truncate text-base text-r-text sm:text-lg">
                       {entry.person.name}
                     </span>
                     {showHandle && entry.person.handle ? (
-                      <span className="mt-0.5 block truncate text-sm text-[#f3b8c4]/50">
+                      <span className="mt-0.5 block truncate text-sm text-r-text-3">
                         {entry.person.handle}
                       </span>
                     ) : null}
@@ -322,7 +322,7 @@ export function DesignCredits({
                       href={entry.person.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-4 transition hover:text-[#e85a7a]"
+                      className="flex items-center gap-4 transition hover:text-r-pri"
                     >
                       {row}
                     </Link>

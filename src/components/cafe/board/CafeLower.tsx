@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { CafeFollowLinks } from "@/components/cafe/board/CafeFollowLinks";
 import { CafeVenueBook } from "@/components/cafe/board/CafeVenueBook";
 import {
   BoardSection,
@@ -355,7 +356,7 @@ export function CafeClosingBlock({
   show: boolean;
 }) {
   const closing = cafe.closing;
-  const follow = closing.ctas?.[0];
+  const follow = closing.ctas;
   const paragraph = closing.body[0];
 
   return (
@@ -374,15 +375,10 @@ export function CafeClosingBlock({
           {show && paragraph ? (
             <p className="mt-6 text-base leading-relaxed text-cafe-text">{paragraph}</p>
           ) : null}
-          {show && follow?.url ? (
-            <Link
-              href={follow.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-6 inline-flex min-h-12 items-center justify-center border border-cafe-gold/60 px-6 text-[15px] font-semibold text-cafe-cream transition hover:-translate-y-0.5 hover:border-cafe-gold hover:bg-cafe-gold/10 motion-reduce:transition-none"
-            >
-              {follow.label}
-            </Link>
+          {show && follow?.length ? (
+            <div className="mt-6 flex flex-col items-stretch justify-center gap-3 min-[560px]:flex-row min-[560px]:items-center">
+              <CafeFollowLinks ctas={follow} />
+            </div>
           ) : null}
           {show && closing.disclaimer ? (
             <p className="mt-6 text-xs leading-relaxed text-cafe-muted">{closing.disclaimer}</p>

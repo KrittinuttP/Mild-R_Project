@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Activity,
-  ArrowLeft,
   ArrowUpRight,
   Cake,
   Coins,
@@ -17,20 +16,16 @@ import {
   Radio,
   Settings2,
   ShieldCheck,
-  Sparkles,
   Unlock,
 } from "lucide-react";
 
 import { BackLink } from "@/components/layout/BackLink";
-import { buttonVariants } from "@/components/ui/button";
 import { safeAdminNext } from "@/lib/admin-next";
 import {
-  CTA_OUTLINE_CLASS,
-  CTA_PRIMARY_CLASS,
-  DISPLAY_H1_CLASS,
-  GLASS_CARD_CLASS,
-  META_CLASS,
-  META_MUTED_CLASS,
+  R_CTA_OUTLINE_CLASS,
+  R_CTA_PRIMARY_CLASS,
+  R_EYEBROW_CLASS,
+  R_META_CLASS,
 } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 
@@ -207,8 +202,8 @@ export function AdminHubClient() {
   if (checking) {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 text-center">
-        <span className="size-3 rounded-full bg-[#e85a7a] animate-ping" />
-        <p className="text-sm font-medium tracking-[0.2em] text-[#f3b8c4]/70 uppercase">
+        <span className="size-3 rounded-full bg-r-pri animate-ping" />
+        <p className="text-sm font-medium tracking-[0.2em] text-r-text-2/70 uppercase">
           Checking clearance…
         </p>
       </div>
@@ -220,27 +215,27 @@ export function AdminHubClient() {
       <div className="mx-auto max-w-md pt-8">
         <form
           onSubmit={unlock}
-          className="relative overflow-hidden rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#220e18]/95 via-[#1a0c12]/90 to-[#140a0d] p-7 shadow-[0_20px_50px_rgba(0,0,0,0.6)] sm:p-9"
+          className="relative overflow-hidden rounded-3xl border border-r-text-2/15 r-card p-7 shadow-[0_20px_50px_rgba(0,0,0,0.6)] sm:p-9"
         >
           {/* Header */}
           <div className="flex items-center gap-3.5">
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-[#e85a7a]/40 bg-[#e85a7a]/15 text-[#e85a7a] shadow-[0_0_16px_rgba(232,90,122,0.3)]">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-r-pri/40 bg-r-pri/15 text-r-pri shadow-[0_0_16px_rgba(242,67,125,0.3)]">
               <Lock className="size-6" />
             </div>
             <div>
-              <p className={META_MUTED_CLASS}>Site Admin</p>
-              <h1 className={cn(DISPLAY, "text-2xl font-normal text-[#fff5f7]")}>
+              <p className={R_META_CLASS}>Site Admin</p>
+              <h1 className={cn(DISPLAY, "text-2xl font-normal text-r-text")}>
                 Control Desk
               </h1>
             </div>
           </div>
 
-          <p className="mt-4 text-sm leading-relaxed text-[#f7d7de]/80">
+          <p className="mt-4 text-sm leading-relaxed text-r-text-2/80">
             ใส่รหัสทีมเพื่อเข้าถึงเครื่องมือจัดการคาเฟ่, คำอวยพรวันเกิด และระบบหลังบ้าน
           </p>
 
           <label className="mt-6 block">
-            <span className={META_CLASS}>Clearance code</span>
+            <span className={R_EYEBROW_CLASS}>Clearance code</span>
             <div className="relative mt-2 flex items-center">
               <input
                 type={showPassword ? "text" : "password"}
@@ -248,12 +243,12 @@ export function AdminHubClient() {
                 onChange={(event) => setPassword(event.target.value)}
                 autoComplete="current-password"
                 placeholder="ป้อนรหัสผ่านทีม…"
-                className="w-full rounded-2xl border border-[#f3b8c4]/20 bg-[#12070c]/90 px-4 py-3 text-sm text-[#fff5f7] placeholder-[#f3b8c4]/30 outline-none transition focus:border-[#e85a7a]/70 focus:ring-2 focus:ring-[#e85a7a]/20"
+                className="w-full rounded-2xl bg-white/[0.03] ring-1 ring-r-line ring-inset px-4 py-3 text-sm text-r-text placeholder-r-text-2/30 outline-none transition focus:border-r-pri/70 focus:ring-2 focus:ring-r-pri/20"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 p-1.5 text-[#f3b8c4]/60 transition hover:text-[#fff5f7]"
+                className="absolute right-3 p-1.5 text-r-text-2/60 transition hover:text-r-text"
                 aria-label={showPassword ? "ซ่อนรหัส" : "แสดงรหัส"}
               >
                 {showPassword ? (
@@ -275,8 +270,7 @@ export function AdminHubClient() {
           <button
             type="submit"
             className={cn(
-              buttonVariants({ size: "lg" }),
-              CTA_PRIMARY_CLASS,
+              R_CTA_PRIMARY_CLASS,
               "mt-6 flex w-full items-center justify-center gap-2 font-semibold"
             )}
           >
@@ -284,7 +278,7 @@ export function AdminHubClient() {
             ปลดล็อกเข้าสู่ระบบ
           </button>
 
-          <div className="mt-5 border-t border-[#f3b8c4]/10 pt-4 text-center">
+          <div className="mt-5 border-t border-r-text-2/10 pt-4 text-center">
             <BackLink href="/">กลับหน้าหลัก</BackLink>
           </div>
         </form>
@@ -295,16 +289,16 @@ export function AdminHubClient() {
   return (
     <div className="mx-auto max-w-3xl">
       {/* 🌟 Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#f3b8c4]/12 pb-6">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-r-text-2/12 pb-6">
         <div>
           <div className="flex items-center gap-2">
-            <ShieldCheck className="size-4 text-[#e85a7a]" />
-            <p className={META_CLASS}>Site Admin Clearance</p>
+            <ShieldCheck className="size-4 text-r-pri" />
+            <p className={R_EYEBROW_CLASS}>Site Admin Clearance</p>
           </div>
-          <h1 className={cn(DISPLAY, "mt-1.5 text-3xl font-normal text-[#fff5f7] sm:text-4xl")}>
+          <h1 className={cn(DISPLAY, "mt-1.5 text-3xl font-normal text-r-text sm:text-4xl")}>
             Control Desk
           </h1>
-          <p className="mt-2 text-sm leading-relaxed text-[#f7d7de]/80">
+          <p className="mt-2 text-sm leading-relaxed text-r-text-2/80">
             ศูนย์รวมเครื่องมือผู้ดูแลระบบ · เซสชันใช้งานร่วมกับคาเฟ่และ HBD
           </p>
         </div>
@@ -312,8 +306,8 @@ export function AdminHubClient() {
           type="button"
           onClick={lock}
           className={cn(
-            buttonVariants({ variant: "outline", size: "sm" }),
-            CTA_OUTLINE_CLASS,
+            R_CTA_OUTLINE_CLASS,
+            "h-9 px-4 text-sm",
             "inline-flex items-center gap-1.5"
           )}
         >
@@ -337,36 +331,36 @@ export function AdminHubClient() {
               <Link
                 href={tool.href}
                 className={cn(
-                  "group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1f0d16]/80 to-[#14080e]/90 p-5 text-left transition duration-300 hover:-translate-y-0.5 hover:border-[#e85a7a]/50 hover:shadow-[0_12px_32px_rgba(232,90,122,0.18)]"
+                  "group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl r-card p-5 text-left transition duration-300 hover:-translate-y-0.5 hover:border-r-pri/50 hover:shadow-[0_12px_32px_rgba(242,67,125,0.18)]"
                 )}
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="flex size-11 items-center justify-center rounded-2xl border border-[#e85a7a]/30 bg-[#e85a7a]/15 text-[#e85a7a] transition group-hover:scale-105 group-hover:bg-[#e85a7a]/25 group-hover:shadow-[0_0_16px_rgba(232,90,122,0.4)]">
+                    <span className="flex size-11 items-center justify-center rounded-2xl border border-r-pri/30 bg-r-pri/15 text-r-pri transition group-hover:scale-105 group-hover:bg-r-pri/25 group-hover:shadow-[0_0_16px_rgba(242,67,125,0.4)]">
                       <Icon className="size-5" />
                     </span>
                     {badge > 0 ? (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-[#e85a7a] bg-[#e85a7a] px-2.5 py-0.5 text-[0.68rem] font-bold text-white shadow-[0_0_12px_rgba(232,90,122,0.6)]">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-r-pri bg-r-pri px-2.5 py-0.5 text-[0.68rem] font-bold text-white shadow-[0_0_12px_rgba(242,67,125,0.6)]">
                         <span className="size-1.5 rounded-full bg-white animate-ping" />
                         {badge} รออนุมัติ
                       </span>
                     ) : (
-                      <ArrowUpRight className="size-4 text-[#f3b8c4]/40 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-[#e85a7a]" />
+                      <ArrowUpRight className="size-4 text-r-text-2/40 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-r-pri" />
                     )}
                   </div>
 
-                  <h3 className={cn(DISPLAY, "mt-4 text-lg font-normal text-[#fff5f7] group-hover:text-[#fff5f7]")}>
+                  <h3 className={cn(DISPLAY, "mt-4 text-lg font-normal text-r-text group-hover:text-r-text")}>
                     {tool.title}
                   </h3>
-                  <p className="mt-0.5 text-xs font-semibold text-[#e85a7a]">
+                  <p className="mt-0.5 text-xs font-semibold text-r-pri">
                     {tool.titleLocal}
                   </p>
-                  <p className="mt-2 text-xs leading-relaxed text-[#f3b8c4]/65">
+                  <p className="mt-2 text-xs leading-relaxed text-r-text-2/65">
                     {tool.description}
                   </p>
                 </div>
 
-                <div className="mt-4 flex items-center gap-1 pt-2 text-[0.75rem] font-medium text-[#e85a7a] opacity-80 transition group-hover:opacity-100">
+                <div className="mt-4 flex items-center gap-1 pt-2 text-[0.75rem] font-medium text-r-pri opacity-80 transition group-hover:opacity-100">
                   <span>เปิดเครื่องมือ</span>
                   <ArrowUpRight className="size-3.5" />
                 </div>
@@ -377,32 +371,32 @@ export function AdminHubClient() {
       </ul>
 
       {/* 🔗 Footer Navigation */}
-      <div className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#f3b8c4]/10 bg-[#14080e]/60 p-4 text-xs sm:text-sm">
+      <div className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white/[0.03] ring-1 ring-r-line ring-inset p-4 text-xs sm:text-sm">
         <BackLink href="/">หน้าหลัก</BackLink>
         <Link
           href="/hbd/2026/upload"
           prefetch={false}
-          className="inline-flex items-center gap-1.5 text-[#f3b8c4]/70 transition hover:text-[#fff5f7]"
+          className="inline-flex items-center gap-1.5 text-r-text-2/70 transition hover:text-r-text"
         >
-          <Cake className="size-3.5 text-[#e85a7a]" />
+          <Cake className="size-3.5 text-r-pri" />
           <span>หน้าอัปโหลดคำอวยพร HBD (สาธารณะ)</span>
           <ArrowUpRight className="size-3.5" />
         </Link>
         <Link
           href="/upload/hbd"
           prefetch={false}
-          className="inline-flex items-center gap-1.5 text-[#f3b8c4]/70 transition hover:text-[#fff5f7]"
+          className="inline-flex items-center gap-1.5 text-r-text-2/70 transition hover:text-r-text"
         >
-          <Cake className="size-3.5 text-[#e85a7a]" />
+          <Cake className="size-3.5 text-r-pri" />
           <span>ลิงก์อัปโหลด HBD แยก (ไม่มีเมนู)</span>
           <ArrowUpRight className="size-3.5" />
         </Link>
         <Link
           href="/upload/fanart"
           prefetch={false}
-          className="inline-flex items-center gap-1.5 text-[#f3b8c4]/70 transition hover:text-[#fff5f7]"
+          className="inline-flex items-center gap-1.5 text-r-text-2/70 transition hover:text-r-text"
         >
-          <ImageIcon className="size-3.5 text-[#e85a7a]" />
+          <ImageIcon className="size-3.5 text-r-pri" />
           <span>ลิงก์อัปโหลดแฟนอาร์ตแยก (ไม่มีเมนู)</span>
           <ArrowUpRight className="size-3.5" />
         </Link>

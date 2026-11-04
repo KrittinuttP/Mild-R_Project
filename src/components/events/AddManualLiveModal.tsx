@@ -14,7 +14,6 @@ import {
   Sparkles,
   Trash2,
   Users,
-  Video,
 } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
@@ -30,11 +29,10 @@ import {
   resolveLuminaChannel,
 } from "@/data/lumina-channels";
 import {
-  CTA_OUTLINE_CLASS,
-  CTA_PRIMARY_CLASS,
-  GLASS_CARD_CLASS,
-  META_CLASS,
-  META_MUTED_CLASS,
+  R_CTA_OUTLINE_CLASS,
+  R_CTA_PRIMARY_CLASS,
+  R_EYEBROW_CLASS,
+  R_PILL_ACTIVE_CLASS,
 } from "@/lib/site-ui";
 import { getYoutubeVideoId } from "@/lib/youtube";
 import { cn } from "@/lib/utils";
@@ -491,8 +489,8 @@ export function AddManualLiveButton() {
           setError(null);
         }}
         className={cn(
-          buttonVariants({ size: "sm" }),
-          CTA_PRIMARY_CLASS,
+          R_CTA_PRIMARY_CLASS,
+          "h-9 px-4 text-sm",
           "inline-flex items-center gap-1.5 font-semibold"
         )}
       >
@@ -501,30 +499,30 @@ export function AddManualLiveButton() {
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[90dvh] w-[min(100%,calc(100vw-1rem))] max-w-2xl sm:w-[calc(100vw-3rem)] sm:max-w-3xl lg:max-w-4xl overflow-x-hidden overflow-y-auto rounded-3xl border border-[#f3b8c4]/20 bg-gradient-to-b from-[#220e18]/95 via-[#1a0c12]/95 to-[#12070c] p-4 text-[#fff5f7] shadow-[0_24px_60px_rgba(0,0,0,0.7)] backdrop-blur-xl sm:p-7 [scrollbar-color:rgba(232,90,122,0.3)_transparent] [scrollbar-width:thin]">
+        <DialogContent className="max-h-[90dvh] w-[min(100%,calc(100vw-1rem))] max-w-2xl sm:w-[calc(100vw-3rem)] sm:max-w-3xl lg:max-w-4xl overflow-x-hidden overflow-y-auto rounded-3xl border border-r-text-2/20 bg-r-bg bg-[linear-gradient(160deg,rgba(242,67,125,0.08),transparent_45%),linear-gradient(340deg,rgba(34,214,191,0.08),transparent_45%)] p-4 text-r-text shadow-[0_24px_60px_rgba(0,0,0,0.7)] backdrop-blur-xl sm:p-7 [scrollbar-color:rgba(242,67,125,0.3)_transparent] [scrollbar-width:thin]">
           <DialogHeader className="pr-6 text-left">
             <div className="flex items-center gap-2">
-              <Sparkles className="size-4 text-[#e85a7a]" />
-              <p className={META_CLASS}>Live Stream Operations</p>
+              <Sparkles className="size-4 text-r-pri" />
+              <p className={R_EYEBROW_CLASS}>Live Stream Operations</p>
             </div>
-            <DialogTitle className="font-[family-name:var(--font-display)] text-xl font-normal break-words text-[#fff5f7] sm:text-2xl">
+            <DialogTitle className="font-[family-name:var(--font-display)] text-xl font-normal break-words text-r-text sm:text-2xl">
               เพิ่มตัวอย่างไลฟ์ล่วงหน้า
             </DialogTitle>
-            <DialogDescription className="text-xs leading-relaxed break-words text-[#f7d7de]/75">
+            <DialogDescription className="text-xs leading-relaxed break-words text-r-text-2/75">
               Mock ข้อมูลเอง · Member (ดึงเฉพาะช่อง Mild-R) · Collab (ดึงจากลิงก์ช่องอื่น)
             </DialogDescription>
           </DialogHeader>
 
           {/* 🏷️ Segmented Mode Navigation Pills */}
-          <div className="mt-4 flex items-center gap-1 rounded-full border border-[#f3b8c4]/15 bg-[#12070c]/90 p-1 shadow-inner">
+          <div className="mt-4 flex items-center gap-1 rounded-full bg-white/[0.03] ring-1 ring-r-line ring-inset p-1 shadow-inner">
             <button
               type="button"
               onClick={() => setTab("form")}
               className={cn(
                 "min-w-0 flex-1 rounded-full px-2 py-1.5 text-center text-[0.7rem] font-semibold tracking-wider uppercase transition sm:px-3 sm:text-xs",
                 tab === "form"
-                  ? "border border-[#e85a7a]/60 bg-[#e85a7a]/25 text-[#fff5f7] shadow-[0_0_12px_rgba(232,90,122,0.3)]"
-                  : "text-[#f3b8c4]/65 hover:text-[#fff5f7]"
+                  ? R_PILL_ACTIVE_CLASS
+                  : "text-r-text-2 hover:text-r-text"
               )}
             >
               ฟอร์ม
@@ -536,7 +534,7 @@ export function AddManualLiveButton() {
                 "inline-flex min-w-0 flex-1 items-center justify-center gap-1 rounded-full px-2 py-1.5 text-center text-[0.7rem] font-semibold tracking-wider uppercase transition sm:gap-1.5 sm:px-3 sm:text-xs",
                 tab === "member"
                   ? "border border-[#9b8cff]/60 bg-[#9b8cff]/25 text-[#f0ecff] shadow-[0_0_12px_rgba(155,140,255,0.3)]"
-                  : "text-[#f3b8c4]/65 hover:text-[#cfc6ff]"
+                  : "text-r-text-2/65 hover:text-[#cfc6ff]"
               )}
             >
               <Link2 className="size-3 shrink-0 sm:size-3.5" />
@@ -548,8 +546,8 @@ export function AddManualLiveButton() {
               className={cn(
                 "inline-flex min-w-0 flex-1 items-center justify-center gap-1 rounded-full px-2 py-1.5 text-center text-[0.7rem] font-semibold tracking-wider uppercase transition sm:gap-1.5 sm:px-3 sm:text-xs",
                 tab === "collab"
-                  ? "border border-[#d4a574]/60 bg-[#d4a574]/25 text-[#ffeedb] shadow-[0_0_12px_rgba(212,165,116,0.3)]"
-                  : "text-[#f3b8c4]/65 hover:text-[#e8c49a]"
+                  ? "border border-r-acc/60 bg-r-acc/25 text-[#ffeedb] shadow-[0_0_12px_rgba(34,214,191,0.3)]"
+                  : "text-r-text-2/65 hover:text-r-acc"
               )}
             >
               <Users className="size-3 shrink-0 sm:size-3.5" />
@@ -561,8 +559,8 @@ export function AddManualLiveButton() {
               className={cn(
                 "inline-flex min-w-0 flex-1 items-center justify-center gap-1 rounded-full px-2 py-1.5 text-center text-[0.7rem] font-semibold tracking-wider uppercase transition sm:gap-1.5 sm:px-3 sm:text-xs",
                 tab === "json"
-                  ? "border border-[#e85a7a]/60 bg-[#e85a7a]/25 text-[#fff5f7] shadow-[0_0_12px_rgba(232,90,122,0.3)]"
-                  : "text-[#f3b8c4]/65 hover:text-[#fff5f7]"
+                  ? R_PILL_ACTIVE_CLASS
+                  : "text-r-text-2 hover:text-r-text"
               )}
             >
               <FileJson className="size-3 shrink-0 sm:size-3.5" />
@@ -575,10 +573,10 @@ export function AddManualLiveButton() {
               {rows.map((row, index) => (
                 <div
                   key={row.key}
-                  className="space-y-3.5 rounded-2xl border border-[#f3b8c4]/15 bg-gradient-to-b from-[#1c0c14]/85 to-[#14080e]/95 p-3.5 shadow-md transition hover:border-[#e85a7a]/35 sm:p-4"
+                  className="space-y-3.5 rounded-2xl r-card p-3.5 shadow-md transition hover:border-r-pri/35 sm:p-4"
                 >
-                  <div className="flex items-center justify-between gap-2 border-b border-[#f3b8c4]/10 pb-2.5">
-                    <p className="text-xs font-semibold text-[#f3b8c4]">
+                  <div className="flex items-center justify-between gap-2 border-b border-r-text-2/10 pb-2.5">
+                    <p className="text-xs font-semibold text-r-text-2">
                       รายการที่ {index + 1}
                       {row.member ? " · (Member Slot)" : ""}
                     </p>
@@ -591,7 +589,7 @@ export function AddManualLiveButton() {
                             prev.filter((r) => r.key !== row.key)
                           )
                         }
-                        className="rounded-lg p-1 text-[#f3b8c4]/50 transition hover:bg-rose-500/10 hover:text-rose-400"
+                        className="rounded-lg p-1 text-r-text-2/50 transition hover:bg-rose-500/10 hover:text-rose-400"
                       >
                         <Trash2 className="size-4" />
                       </button>
@@ -618,7 +616,7 @@ export function AddManualLiveButton() {
                     </label>
                     {!(row.member && resolveIdFromLink(row.youtubeUrl)) ? (
                       <>
-                        <label className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-medium text-[#f3b8c4]">
+                        <label className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-medium text-r-text-2">
                           <input
                             type="checkbox"
                             checked={row.own}
@@ -641,11 +639,11 @@ export function AddManualLiveButton() {
                                 )
                               );
                             }}
-                            className="size-4 rounded accent-[#e85a7a]"
+                            className="size-4 rounded accent-r-pri"
                           />
                           ช่องตัวเอง (Mild-R)
                         </label>
-                        <label className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-medium text-[#e8c49a]">
+                        <label className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-medium text-r-acc">
                           <input
                             type="checkbox"
                             checked={row.collab}
@@ -658,7 +656,7 @@ export function AddManualLiveButton() {
                                 )
                               )
                             }
-                            className="size-4 rounded accent-[#d4a574]"
+                            className="size-4 rounded accent-r-acc"
                           />
                           Collab
                         </label>
@@ -699,7 +697,7 @@ export function AddManualLiveButton() {
                           )
                         }
                         placeholder="เช่น https://www.youtube.com/live/XZcXaFlzJzc (เว้นว่างเพื่อทำ Mock)"
-                        className="w-full min-w-0 rounded-xl border border-[#9b8cff]/30 bg-[#12070c]/90 px-3.5 py-2 text-sm text-[#fff5f7] placeholder-[#9b8cff]/40 outline-none transition focus:border-[#9b8cff] focus:ring-1 focus:ring-[#9b8cff]/40"
+                        className="w-full min-w-0 rounded-xl border border-[#9b8cff]/30 bg-white/[0.03] px-3.5 py-2 text-sm text-r-text placeholder-[#9b8cff]/40 outline-none transition focus:border-[#9b8cff] focus:ring-1 focus:ring-[#9b8cff]/40"
                       />
                       <span className="block text-[0.68rem] text-[#cfc6ff]/60">
                         มีลิงก์ = ดึงจาก YouTube (รับเฉพาะช่อง Mild-R) · ไม่มี = จองตารางด้วยชื่อ/วัน/เวลา
@@ -709,7 +707,7 @@ export function AddManualLiveButton() {
 
                   {row.member && resolveIdFromLink(row.youtubeUrl) ? null : (
                     <>
-                      <label className="block space-y-1.5 text-xs text-[#f3b8c4]/80">
+                      <label className="block space-y-1.5 text-xs text-r-text-2/80">
                         <span>ชื่อไลฟ์</span>
                         <input
                           value={row.title}
@@ -722,12 +720,12 @@ export function AddManualLiveButton() {
                               )
                             )
                           }
-                          className="w-full min-w-0 rounded-xl border border-[#f3b8c4]/20 bg-[#12070c]/90 px-3.5 py-2 text-sm text-[#fff5f7] placeholder-[#f3b8c4]/30 outline-none transition focus:border-[#e85a7a] focus:ring-1 focus:ring-[#e85a7a]/30"
+                          className="w-full min-w-0 rounded-xl bg-white/[0.03] ring-1 ring-r-line ring-inset px-3.5 py-2 text-sm text-r-text placeholder-r-text-2/30 outline-none transition focus:border-r-pri focus:ring-1 focus:ring-r-pri/30"
                           placeholder="เช่น 【Mild-R】Free Talk ชวนคุยยามดึก เล่นเกมชิลล์ๆ..."
                         />
                       </label>
 
-                      <label className="block space-y-1.5 text-xs text-[#f3b8c4]/80">
+                      <label className="block space-y-1.5 text-xs text-r-text-2/80">
                         <span>ช่องสตรีม{row.own ? "" : " *"}</span>
                         <select
                           value={row.channelId}
@@ -750,7 +748,7 @@ export function AddManualLiveButton() {
                               )
                             );
                           }}
-                          className="w-full min-w-0 rounded-xl border border-[#f3b8c4]/20 bg-[#12070c]/90 px-3.5 py-2 text-sm text-[#fff5f7] outline-none transition focus:border-[#e85a7a] disabled:opacity-50"
+                          className="w-full min-w-0 rounded-xl bg-white/[0.03] ring-1 ring-r-line ring-inset px-3.5 py-2 text-sm text-r-text outline-none transition focus:border-r-pri disabled:opacity-50"
                         >
                           {!row.own ? (
                             <option value="" disabled>
@@ -758,7 +756,7 @@ export function AddManualLiveButton() {
                             </option>
                           ) : null}
                           {channelOptions.map((ch) => (
-                            <option key={ch.channelId} value={ch.channelId} className="bg-[#1a0c12]">
+                            <option key={ch.channelId} value={ch.channelId} className="bg-r-bg">
                               {ch.title} — {ch.channelTitle}
                             </option>
                           ))}
@@ -766,7 +764,7 @@ export function AddManualLiveButton() {
                       </label>
 
                       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        <label className="block min-w-0 space-y-1.5 text-xs text-[#f3b8c4]/80">
+                        <label className="block min-w-0 space-y-1.5 text-xs text-r-text-2/80">
                           <span>วันที่ (Bangkok)</span>
                           <input
                             type="date"
@@ -780,10 +778,10 @@ export function AddManualLiveButton() {
                                 )
                               )
                             }
-                            className="w-full min-w-0 rounded-xl border border-[#f3b8c4]/20 bg-[#12070c]/90 px-3 py-2 text-sm text-[#fff5f7] outline-none transition focus:border-[#e85a7a] [color-scheme:dark]"
+                            className="w-full min-w-0 rounded-xl bg-white/[0.03] ring-1 ring-r-line ring-inset px-3 py-2 text-sm text-r-text outline-none transition focus:border-r-pri [color-scheme:dark]"
                           />
                         </label>
-                        <label className="block min-w-0 space-y-1.5 text-xs text-[#f3b8c4]/80">
+                        <label className="block min-w-0 space-y-1.5 text-xs text-r-text-2/80">
                           <span>เวลา</span>
                           <input
                             type="time"
@@ -797,7 +795,7 @@ export function AddManualLiveButton() {
                                 )
                               )
                             }
-                            className="w-full min-w-0 rounded-xl border border-[#f3b8c4]/20 bg-[#12070c]/90 px-3 py-2 text-sm text-[#fff5f7] outline-none transition focus:border-[#e85a7a] [color-scheme:dark]"
+                            className="w-full min-w-0 rounded-xl bg-white/[0.03] ring-1 ring-r-line ring-inset px-3 py-2 text-sm text-r-text outline-none transition focus:border-r-pri [color-scheme:dark]"
                           />
                         </label>
                       </div>
@@ -815,7 +813,7 @@ export function AddManualLiveButton() {
               <button
                 type="button"
                 onClick={() => setRows((prev) => [...prev, emptyRow()])}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#e85a7a] transition hover:underline"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-r-pri transition hover:underline"
               >
                 <Plus className="size-3.5" />
                 <span>เพิ่มอีกรายการ</span>
@@ -833,8 +831,7 @@ export function AddManualLiveButton() {
                   void submit(rows);
                 }}
                 className={cn(
-                  buttonVariants({ size: "lg" }),
-                  CTA_PRIMARY_CLASS,
+                  R_CTA_PRIMARY_CLASS,
                   "mt-2 w-full font-semibold"
                 )}
               >
@@ -856,7 +853,7 @@ export function AddManualLiveButton() {
                   placeholder={
                     "https://www.youtube.com/live/XZcXaFlzJzc\nhttps://www.youtube.com/watch?v=...\n(วางลิงก์ 1 บรรทัดต่อ 1 สตรีม)"
                   }
-                  className="w-full min-w-0 resize-y break-all rounded-2xl border border-[#9b8cff]/30 bg-[#12070c]/90 p-3.5 font-mono text-xs text-[#f7d7de] placeholder-[#9b8cff]/30 outline-none transition focus:border-[#9b8cff] focus:ring-1 focus:ring-[#9b8cff]/30"
+                  className="w-full min-w-0 resize-y break-all rounded-2xl border border-[#9b8cff]/30 bg-white/[0.03] p-3.5 font-mono text-xs text-r-text-2 placeholder-[#9b8cff]/30 outline-none transition focus:border-[#9b8cff] focus:ring-1 focus:ring-[#9b8cff]/30"
                   spellCheck={false}
                 />
               </div>
@@ -901,7 +898,7 @@ export function AddManualLiveButton() {
                 }}
                 className={cn(
                   buttonVariants({ size: "lg" }),
-                  "w-full rounded-2xl border border-[#9b8cff]/60 bg-[#9b8cff] font-semibold text-[#140a0d] shadow-[0_10px_30px_rgba(155,140,255,0.35)] hover:bg-[#b5abff] disabled:opacity-50"
+                  "w-full rounded-2xl border border-[#9b8cff]/60 bg-[#9b8cff] font-semibold text-r-bg shadow-[0_10px_30px_rgba(155,140,255,0.35)] hover:bg-[#b5abff] disabled:opacity-50"
                 )}
               >
                 {busy ? "กำลังดึงข้อมูล YouTube…" : "บันทึก Member จากลิงก์"}
@@ -909,7 +906,7 @@ export function AddManualLiveButton() {
             </div>
           ) : tab === "collab" ? (
             <div className="mt-5 space-y-3.5">
-              <p className="text-xs leading-relaxed break-words text-[#e8c49a]/85">
+              <p className="text-xs leading-relaxed break-words text-r-acc/85">
                 วางลิงก์ YouTube Collab ทีละบรรทัด · รับช่องอื่น (หรือช่อง Mild-R ที่มี ft.) · ระบบจะดึงชื่อ ปก เวลา สถิติจาก API
               </p>
               <textarea
@@ -919,11 +916,11 @@ export function AddManualLiveButton() {
                 placeholder={
                   "https://www.youtube.com/live/...\nhttps://www.youtube.com/watch?v=...\n(วางลิงก์ 1 บรรทัดต่อ 1 สตรีม)"
                 }
-                className="w-full min-w-0 resize-y break-all rounded-2xl border border-[#d4a574]/35 bg-[#12070c]/90 p-3.5 font-mono text-xs text-[#f7d7de] placeholder-[#d4a574]/30 outline-none transition focus:border-[#d4a574] focus:ring-1 focus:ring-[#d4a574]/30"
+                className="w-full min-w-0 resize-y break-all rounded-2xl border border-r-acc/35 bg-white/[0.03] p-3.5 font-mono text-xs text-r-text-2 placeholder-r-acc/30 outline-none transition focus:border-r-acc focus:ring-1 focus:ring-r-acc/30"
                 spellCheck={false}
               />
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs text-[#e8c49a]/60">
+                <p className="text-xs text-r-acc/60">
                   {
                     collabLinksText
                       .split(/\r?\n/)
@@ -939,7 +936,7 @@ export function AddManualLiveButton() {
                     setError(null);
                     setMessage(null);
                   }}
-                  className="inline-flex items-center gap-1.5 text-xs text-[#e8c49a]/65 transition hover:text-[#e8c49a]"
+                  className="inline-flex items-center gap-1.5 text-xs text-r-acc/65 transition hover:text-r-acc"
                 >
                   <Eraser className="size-3.5" />
                   ล้างข้อความ
@@ -963,7 +960,7 @@ export function AddManualLiveButton() {
                 }}
                 className={cn(
                   buttonVariants({ size: "lg" }),
-                  "w-full rounded-2xl border border-[#d4a574]/60 bg-[#d4a574] font-semibold text-[#140a0d] shadow-[0_10px_30px_rgba(212,165,116,0.35)] hover:bg-[#e4be95] disabled:opacity-50"
+                  "w-full rounded-2xl border border-r-acc/60 bg-r-acc font-semibold text-r-bg shadow-[0_10px_30px_rgba(34,214,191,0.35)] hover:bg-r-acc disabled:opacity-50"
                 )}
               >
                 {busy ? "กำลังดึงข้อมูล YouTube…" : "บันทึก Collab จากลิงก์"}
@@ -972,10 +969,10 @@ export function AddManualLiveButton() {
           ) : (
             <div className="mt-5 space-y-3.5">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs leading-relaxed break-words text-[#f3b8c4]/70">
+                <p className="text-xs leading-relaxed break-words text-r-text-2/70">
                   Mock: title / channel / date / time / own / collab · Member:{" "}
                   <code className="text-[#cfc6ff]">member: true</code> · Collab:{" "}
-                  <code className="text-[#e8c49a]">collab: true</code>
+                  <code className="text-r-acc">collab: true</code>
                 </p>
                 <div className="flex flex-wrap items-center gap-1.5">
                   <button
@@ -985,7 +982,7 @@ export function AddManualLiveButton() {
                       "inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1 text-xs font-semibold transition",
                       copiedJson
                         ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-300"
-                        : "border-[#e85a7a]/40 bg-[#e85a7a]/15 text-[#f7d7de] hover:border-[#e85a7a] hover:bg-[#e85a7a]/25"
+                        : "border-r-pri/40 bg-r-pri/15 text-r-text-2 hover:border-r-pri hover:bg-r-pri/25"
                     )}
                     title="คัดลอก JSON ตัวอย่างลง Clipboard"
                   >
@@ -996,7 +993,7 @@ export function AddManualLiveButton() {
                       </>
                     ) : (
                       <>
-                        <Copy className="size-3.5 text-[#e85a7a]" />
+                        <Copy className="size-3.5 text-r-pri" />
                         <span>คัดลอก JSON ตัวอย่าง</span>
                       </>
                     )}
@@ -1008,10 +1005,10 @@ export function AddManualLiveButton() {
                       setError(null);
                       setMessage("ใส่ JSON ตัวอย่างเรียบร้อยแล้ว");
                     }}
-                    className="inline-flex items-center gap-1 rounded-xl border border-[#f3b8c4]/20 bg-[#12070c] px-2.5 py-1 text-xs text-[#f3b8c4]/70 transition hover:border-[#f3b8c4]/40 hover:text-[#fff5f7]"
+                    className="inline-flex items-center gap-1 rounded-xl border border-r-text-2/20 bg-r-bg px-2.5 py-1 text-xs text-r-text-2/70 transition hover:border-r-text-2/40 hover:text-r-text"
                     title="ใส่ JSON ตัวอย่างลงในช่อง"
                   >
-                    <FileText className="size-3 text-[#f3b8c4]/60" />
+                    <FileText className="size-3 text-r-text-2/60" />
                     <span>ใส่ตัวอย่าง</span>
                   </button>
                 </div>
@@ -1022,7 +1019,7 @@ export function AddManualLiveButton() {
                 onChange={(e) => setJsonText(e.target.value)}
                 placeholder={SAMPLE_JSON}
                 rows={10}
-                className="w-full min-w-0 resize-y break-all rounded-2xl border border-[#f3b8c4]/20 bg-[#12070c]/90 p-3.5 font-mono text-xs text-[#f7d7de] placeholder-[#f3b8c4]/25 outline-none transition focus:border-[#e85a7a] focus:ring-1 focus:ring-[#e85a7a]/30"
+                className="w-full min-w-0 resize-y break-all rounded-2xl bg-white/[0.03] ring-1 ring-r-line ring-inset p-3.5 font-mono text-xs text-r-text-2 placeholder-r-text-2/25 outline-none transition focus:border-r-pri focus:ring-1 focus:ring-r-pri/30"
                 spellCheck={false}
               />
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1033,7 +1030,7 @@ export function AddManualLiveButton() {
                     setError(null);
                     setMessage(null);
                   }}
-                  className="inline-flex items-center gap-1.5 text-xs text-[#f3b8c4]/60 transition hover:text-[#fff5f7]"
+                  className="inline-flex items-center gap-1.5 text-xs text-r-text-2/60 transition hover:text-r-text"
                 >
                   <Eraser className="size-3.5" />
                   ล้างข้อความ
@@ -1054,8 +1051,8 @@ export function AddManualLiveButton() {
                       setMessage(`โหลดเข้าฟอร์มแล้ว ${parsed.rows.length} รายการ`);
                     }}
                     className={cn(
-                      buttonVariants({ variant: "outline", size: "sm" }),
-                      CTA_OUTLINE_CLASS,
+                      R_CTA_OUTLINE_CLASS,
+                      "h-9 px-4 text-sm",
                       "text-xs"
                     )}
                   >
@@ -1082,8 +1079,8 @@ export function AddManualLiveButton() {
                       void submit(parsed.rows);
                     }}
                     className={cn(
-                      buttonVariants({ size: "sm" }),
-                      CTA_PRIMARY_CLASS,
+                      R_CTA_PRIMARY_CLASS,
+                      "h-9 px-4 text-sm",
                       "text-xs font-semibold"
                     )}
                   >

@@ -181,10 +181,10 @@ export function LiveCoverLightbox({ covers, activeIndex, onActiveIndexChange }: 
                         aria-label={`ปกเวอร์ชัน ${versionLabel(v)}`}
                         aria-pressed={versionIndex === i}
                         className={cn(
-                          "block w-24 overflow-hidden rounded-lg border transition sm:w-28",
+                          "block w-24 overflow-hidden rounded-lg ring-1 transition ring-inset sm:w-28",
                           versionIndex === i
-                            ? "border-[#e85a7a]/70"
-                            : "border-[#f3b8c4]/15 opacity-70 hover:opacity-100"
+                            ? "ring-r-pri/70"
+                            : "opacity-70 ring-r-line hover:opacity-100"
                         )}
                       >
                         <ProtectedImage
@@ -194,7 +194,7 @@ export function LiveCoverLightbox({ covers, activeIndex, onActiveIndexChange }: 
                           decoding="async"
                           className="aspect-video w-full object-cover"
                         />
-                        <span className="block px-1.5 py-1 text-left text-[0.65rem] text-[#f3b8c4]/65">
+                        <span className="block px-1.5 py-1 text-left text-[0.65rem] text-r-text-3">
                           {versionLabel(v)}
                         </span>
                       </button>
@@ -211,7 +211,7 @@ export function LiveCoverLightbox({ covers, activeIndex, onActiveIndexChange }: 
             href={active.youtubeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-sm text-[#f3b8c4]/75 transition hover:text-[#f3b8c4]"
+            className="inline-flex items-center gap-1.5 text-sm text-r-text-2 transition hover:text-r-text-2"
           >
             ดูบน YouTube
             <ExternalLink className="size-3.5 opacity-80" aria-hidden />

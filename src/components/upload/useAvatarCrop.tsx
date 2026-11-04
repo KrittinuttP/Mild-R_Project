@@ -71,7 +71,7 @@ export function useAvatarCrop({ maxEdge, maxBytes, onCropped }: UseAvatarCropOpt
       setPending(null);
       onCropped(cropped);
     } catch {
-      setError("ครอบรูปไม่สำเร็จ ลองใช้รูปอื่น");
+      setError("ครอปรูปไม่สำเร็จ ลองใช้รูปอื่น");
     } finally {
       setBusy(false);
     }
