@@ -14,12 +14,12 @@ import {
 } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 
-/** "29 ต.ค. 2026" (Bangkok). */
+/** "29 Oct 2026" (Bangkok). */
 export function formatCoverDate(ymd: string | null): string {
   if (!ymd) return "";
   const d = new Date(`${ymd}T12:00:00+07:00`);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("th-TH-u-ca-gregory", {
+  return d.toLocaleDateString("en-GB", {
     timeZone: "Asia/Bangkok",
     day: "numeric",
     month: "short",
@@ -35,7 +35,7 @@ function versionLabel(version: LiveCoverVersion): string {
 function formatCaptured(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("th-TH", {
+  return d.toLocaleDateString("en-GB", {
     timeZone: "Asia/Bangkok",
     day: "numeric",
     month: "short",

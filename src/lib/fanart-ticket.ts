@@ -1,13 +1,19 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 
-import type { FanartContactChannel, FanartCredit } from "@/lib/fanart-upload";
+import {
+  creditLabel,
+  type FanartContactChannel,
+  type FanartCredit,
+  type FanartPictureCredit,
+} from "@/lib/fanart-upload";
 
 /**
  * Server-only. What /api/fanart/upload-url checked, signed so each
  * /api/fanart/submit call can trust it without a pending-batch table.
  */
 export type FanartTicket = {
-  v: 1;
+  /** 1 = credits were an X handle / link only (before 2026-11-04); 2 = name + optional link. */
+  v: 1 | 2;
   batchId: string;
   displayName: string;
   channel: FanartContactChannel;
@@ -18,8 +24,8 @@ export type FanartTicket = {
   avatarUrl: string | null;
   /** Object paths in the fanart-originals bucket, in the fan's order. */
   paths: string[];
-  /** Credit per picture, same order as `paths`. */
-  credits: FanartCredit[];
+  /** Credit per picture, same order as `paths` (`FanartCredit` on v1 tickets). */
+  credits: FanartPictureCredit[] | FanartCredit[];
   consentAt: string;
   consentVersion: string;
   /** Unix ms. */
@@ -65,9 +71,20 @@ export function verifyFanartTicket(raw: unknown): TicketCheck {
   } catch {
     return { ok: false, reason: "invalid" };
   }
-  if (ticket.v !== 1 || !Array.isArray(ticket.paths) || !Array.isArray(ticket.credits)) {
+  if ((ticket.v !== 1 && ticket.v !== 2) || !Array.isArray(ticket.paths) || !Array.isArray(ticket.credits)) {
     return { ok: false, reason: "invalid" };
   }
   if (Date.now() > ticket.exp) return { ok: false, reason: "expired" };
   return { ok: true, ticket };
+}
+
+/** Credit of picture `index`; v1 tickets (signed before the update) are read the old way. */
+export function ticketCredit(ticket: FanartTicket, index: number): FanartPictureCredit {
+  if (ticket.v === 2) {
+    const credit = (ticket.credits as FanartPictureCredit[])[index];
+    return credit ?? { name: ticket.displayName, link: null };
+  }
+  const old = (ticket.credits as FanartCredit[])[index] ?? { type: "x" as const, value: ticket.handle };
+  const own = old.type === "x" && old.value.toLowerCase() === ticket.handle.toLowerCase();
+  return { name: own ? ticket.displayName : creditLabel(old), link: old };
 }

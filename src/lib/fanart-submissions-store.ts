@@ -2,8 +2,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import {
   creditHref,
   creditLabel,
+  creditOfRow,
   type FanartContactChannel,
-  type FanartCredit,
   type FanartCreditType,
 } from "@/lib/fanart-upload";
 import type { FanArtItem, GalleryTileSize } from "@/types/vtuber";
@@ -45,7 +45,9 @@ export type FanartSubmissionRow = {
   batch_id: string | null;
   consent_at: string | null;
   consent_version: string | null;
-  /** Null for submissions made before credits: the contact handle is the credit. */
+  /** Name shown in the credit; null for submissions made before 2026-11-04 (see `creditOfRow`). */
+  credit_name: string | null;
+  /** Optional @X / link under the name. Before 2026-11-04 null meant "the contact handle". */
   credit_type: FanartCreditType | null;
   credit_value: string | null;
   /** 720 px WebP for gallery tiles; null for pictures sent before thumbnails. */
@@ -58,6 +60,7 @@ export type CreateFanartSubmissionInput = {
   displayName: string;
   contactChannel: FanartContactChannel;
   contactHandle: string;
+  /** Only on rows sent before 2026-11-04; new rows give one contact channel. */
   contactDiscord: string | null;
   artPath: string;
   artUrl: string;
@@ -73,8 +76,9 @@ export type CreateFanartSubmissionInput = {
   batchId: string;
   consentAt: string;
   consentVersion: string;
-  creditType: FanartCreditType;
-  creditValue: string;
+  creditName: string;
+  creditType: FanartCreditType | null;
+  creditValue: string | null;
 };
 
 function nullableNumber(value: unknown): number | null {
@@ -108,6 +112,7 @@ function mapRow(row: Record<string, unknown>): FanartSubmissionRow {
     batch_id: nullableString(row.batch_id),
     consent_at: nullableString(row.consent_at),
     consent_version: nullableString(row.consent_version),
+    credit_name: nullableString(row.credit_name),
     credit_type: (nullableString(row.credit_type) as FanartCreditType | null) ?? null,
     credit_value: nullableString(row.credit_value),
     thumb_path: nullableString(row.thumb_path),
@@ -192,6 +197,7 @@ export async function createFanartSubmission(
       batch_id: input.batchId,
       consent_at: input.consentAt,
       consent_version: input.consentVersion,
+      credit_name: input.creditName,
       credit_type: input.creditType,
       credit_value: input.creditValue,
     })
@@ -326,22 +332,19 @@ export async function listGalleryFanArt(limit = 200): Promise<FanArtItem[]> {
     if (error) throw new Error(error.message);
     return (data ?? []).map((raw) => {
       const row = mapRow(raw as Record<string, unknown>);
-      const credit: FanartCredit =
-        row.credit_type && row.credit_value
-          ? { type: row.credit_type, value: row.credit_value }
-          : { type: "x", value: row.contact_handle };
+      const credit = creditOfRow(row);
       return {
         id: `fanart-${row.id}`,
         src: row.art_url,
         thumb: row.thumb_url ?? undefined,
-        alt: `แฟนอาร์ต Mild-R โดย ${row.display_name}`,
+        alt: `แฟนอาร์ต Mild-R โดย ${credit.name}`,
         size: tileSize(row.width, row.height),
         width: row.width ?? undefined,
         height: row.height ?? undefined,
         artist: {
-          name: row.display_name,
-          handle: creditLabel(credit),
-          url: creditHref(credit),
+          name: credit.name,
+          handle: credit.link ? creditLabel(credit.link) : undefined,
+          url: credit.link ? creditHref(credit.link) : undefined,
         },
       };
     });

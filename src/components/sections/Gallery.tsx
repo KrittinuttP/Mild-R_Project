@@ -149,7 +149,7 @@ function ArtistTag({ item }: { item: FanArtItem }) {
       <span aria-hidden className="flex size-4 shrink-0 items-center justify-center rounded-full bg-r-pri/30 text-[0.5625rem] text-r-text">
         {item.artist.name.slice(0, 1).toUpperCase()}
       </span>
-      <span className="min-w-0 truncate text-[0.6875rem] text-r-text/90">{item.artist.handle ?? item.artist.name}</span>
+      <span className="min-w-0 truncate text-[0.6875rem] text-r-text/90">{item.artist.name}</span>
     </span>
   );
 }

@@ -7,6 +7,7 @@ import {
   GALLERY_CATEGORIES,
   GALLERY_PILL_ACTIVE_CLASS,
   GALLERY_PILL_CLASS,
+  GALLERY_PILL_GROUP_CLASS,
   GALLERY_PILL_IDLE_CLASS,
 } from "@/components/gallery/gallery-categories";
 import { cn } from "@/lib/utils";
@@ -16,7 +17,7 @@ export function GalleryCategoryTabs() {
   const segment = useSelectedLayoutSegment();
 
   return (
-    <nav aria-label="หมวด Gallery" className="mt-8 flex flex-wrap gap-2">
+    <nav aria-label="หมวด Gallery" className={cn("mt-8", GALLERY_PILL_GROUP_CLASS)}>
       {GALLERY_CATEGORIES.map((category) => {
         const active = category.key === segment;
         return (

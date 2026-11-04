@@ -11,13 +11,14 @@ import {
 } from "react";
 import Link from "next/link";
 import {
+  AlertCircle,
   ArrowLeft,
   ArrowRight,
   BookOpen,
   Cake,
   Check,
+  ChevronDown,
   Coffee,
-  Crop,
   Link2,
   Pencil,
   Shield,
@@ -25,6 +26,7 @@ import {
   X,
 } from "lucide-react";
 
+import { AvatarPicker } from "@/components/upload/AvatarPicker";
 import { useAvatarCrop } from "@/components/upload/useAvatarCrop";
 import {
   FanartUploadError,
@@ -37,13 +39,19 @@ import {
   FANART_CONSENT,
   FANART_IMAGE_SIZES,
   FANART_LIMITS,
+  FANART_CONTACT_CHANNELS,
   FANART_TEXT_LIMITS,
   checkContactHandle,
-  checkCredit,
+  checkCreditLink,
+  checkCreditName,
   checkDisplayName,
+  contactLabel,
   creditLabel,
-  type FanartCredit,
+  isContactChannel,
+  sameCredit,
+  type FanartContactChannel,
   type FanartCreditType,
+  type FanartPictureCredit,
 } from "@/lib/fanart-upload";
 import {
   R_CARD_CLASS,
@@ -58,7 +66,7 @@ const FOCUS =
   "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-r-acc";
 const CARD = cn(R_CARD_CLASS, "p-5 sm:p-[22px]");
 const INPUT =
-  "h-12 w-full rounded-[14px] bg-white/[0.04] px-4 text-[15px] text-r-text ring-1 ring-white/10 outline-none ring-inset placeholder:text-r-text-2/45 focus:ring-r-pri/60 aria-[invalid=true]:ring-[#ff8fb0]";
+  "h-12 w-full rounded-[14px] bg-white/[0.04] px-4 text-[15px] text-r-text ring-1 ring-white/[0.16] outline-none ring-inset placeholder:text-r-text-2/45 focus:ring-r-pri/60 aria-[invalid=true]:ring-[#ffa062]";
 const BTN = cn(R_CTA_PRIMARY_CLASS, "w-full");
 const BTN_OUTLINE = cn(R_CTA_OUTLINE_CLASS, "w-full");
 const BTN_SMALL = cn(
@@ -69,9 +77,19 @@ const LINK_BTN = cn(
   "min-h-8 rounded-md text-[13px] text-r-text-2 underline decoration-r-pri/70 underline-offset-4 hover:text-r-text",
   FOCUS
 );
-const HINT = "text-xs text-r-text-3";
+const HINT = "text-[13px] text-r-text-3";
 const LABEL = "block text-[0.90625rem] text-r-text";
-const ERROR_TEXT = "text-[#ff8fb0]";
+const ERROR_TEXT = "text-[#ffa062]";
+
+/** Error text with the ⚠ icon, so it never reads as a pink hint. */
+function ErrorLine({ children }: { children: ReactNode }) {
+  return (
+    <span className="flex items-start gap-1.5">
+      <AlertCircle className="mt-[3px] size-3.5 flex-none" aria-hidden />
+      <span>{children}</span>
+    </span>
+  );
+}
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ?? "";
 const UNDO_MS = 6000;
 
@@ -86,7 +104,10 @@ const FANART_INTRO_SEEN_KEY = "mild-r-fanart-upload-intro-seen";
 
 /** "ก่อนเริ่ม" screen · the three form steps in short. */
 const HOW_STEPS: ReadonlyArray<{ title: string; detail: string }> = [
-  { title: "กรอกชื่อและบัญชี X", detail: "ใช้เป็นเครดิตผลงาน · Discord ไม่บังคับ" },
+  {
+    title: "กรอกชื่อ เครดิต และช่องทางติดต่อ",
+    detail: "ใส่ชื่อสำหรับเครดิต และช่องทางติดต่อ (X, Discord หรือ Facebook)",
+  },
   {
     title: "เลือกแฟนอาร์ต",
     detail: `ครั้งละสูงสุด ${FANART_LIMITS.maxFiles} รูป · JPEG · PNG · WebP · รูปละไม่เกิน ${Math.round(
@@ -99,19 +120,19 @@ const HOW_STEPS: ReadonlyArray<{ title: string; detail: string }> = [
 const HOW_FAQ = [
   {
     q: "ส่งงานที่จ้างคนอื่นวาดได้ไหม?",
-    a: "ได้ค่ะ ขออนุญาตคนวาดก่อน แล้วใส่เครดิตของคนวาดที่ “แก้เครดิต” ของรูปนั้น",
+    a: "ได้ค่ะ ขออนุญาตคนวาดก่อน แล้วใส่ชื่อคนวาดที่ “แก้เครดิต” ของรูปนั้น จะใส่บัญชี X หรือลิงก์ด้วยก็ได้",
   },
   {
     q: "เครดิตจะขึ้นเป็นชื่ออะไร?",
-    a: "ใช้บัญชี X ของคุณเป็นเครดิต ถ้ารูปไหนเป็นผลงานของคนอื่น แก้เครดิตเฉพาะรูปนั้นได้ (บัญชี X หรือลิงก์เว็บ)",
+    a: "ขึ้นเป็นชื่อที่กรอกในขั้นที่ 1 ถ้าใส่บัญชี X หรือลิงก์ไว้ จะขึ้นเป็นบรรทัดเล็กใต้ชื่อ",
   },
   {
     q: `อยากส่งเกิน ${FANART_LIMITS.maxFiles} รูปทำยังไง?`,
     a: `ส่งได้ครั้งละ ${FANART_LIMITS.maxFiles} รูป ส่งเสร็จแล้วกด “ส่งรูปเพิ่ม” เพื่อส่งชุดถัดไป`,
   },
   {
-    q: "ต้องกรอก Discord ไหม?",
-    a: "ไม่บังคับค่ะ เป็นช่องทางติดต่อสำรอง",
+    q: "ช่องทางติดต่อเอาไปใช้ทำอะไร?",
+    a: "ใช้ติดต่อกลับเฉพาะตอนมีปัญหาค่ะ เห็นเฉพาะทีมงาน",
   },
 ] as const;
 
@@ -141,7 +162,7 @@ type Item = {
   previewUrl: string;
   preparing: boolean;
   /** Set when this picture's credit differs from the one for all pictures. */
-  credit?: FanartCredit;
+  credit?: FanartPictureCredit;
   send: SendState;
   /** Upload progress, 0–1. */
   progress: number;
@@ -158,7 +179,21 @@ type Session = {
 };
 
 /** Credit being typed for one picture (its key); `all` = use it for every picture. */
-type Draft = { target: string; type: FanartCreditType; value: string; all?: boolean; error?: string };
+type Draft = {
+  target: string;
+  name: string;
+  type: FanartCreditType;
+  value: string;
+  all?: boolean;
+  error?: string;
+};
+
+/** Small hint under the contact field, per channel. */
+const CONTACT_FIELD: Record<FanartContactChannel, { placeholder: string; hint: string }> = {
+  x: { placeholder: "ชื่อบัญชี", hint: "" },
+  discord: { placeholder: "ชื่อผู้ใช้ Discord", hint: "ใช้ username ไม่ใช่ display name" },
+  facebook: { placeholder: "https://facebook.com/…", hint: "วางลิงก์หน้าโปรไฟล์" },
+};
 
 /** Where the picture is used, shown beside the form on wide screens. */
 export type FanartUsage = { cafeTitle: string; birthdayLabel: string };
@@ -171,10 +206,10 @@ function nextKey() {
 
 function uploadErrorText(error: unknown): { message: string; retryable: boolean } {
   if (error instanceof FanartUploadError) {
-    if (error.status === 0) return { message: "เชื่อมต่อไม่ได้ กรุณากด ลองใหม่", retryable: true };
+    if (error.status === 0) return { message: "เชื่อมต่อไม่ได้ กด “ลองใหม่” อีกครั้ง", retryable: true };
     if (error.status === 413) return { message: "ไฟล์ใหญ่เกินไป (รูปละไม่เกิน 40 MB)", retryable: false };
   }
-  return { message: "อัปโหลดไม่สำเร็จ กรุณากด ลองใหม่", retryable: true };
+  return { message: "อัปโหลดไม่สำเร็จ กด “ลองใหม่” อีกครั้ง", retryable: true };
 }
 
 function Spinner({ className }: { className?: string }) {
@@ -210,7 +245,7 @@ function StepTitle({
           aria-hidden
           className={cn(
             "flex size-[26px] flex-none items-center justify-center rounded-full font-sans text-[13px] font-bold transition-colors",
-            done ? "bg-r-acc text-r-on-acc" : "bg-r-pri text-r-on-pri"
+            done ? "bg-r-acc text-r-on-acc" : "text-r-text-2 ring-[1.5px] ring-r-text-2/40 ring-inset"
           )}
         >
           {n}
@@ -222,12 +257,125 @@ function StepTitle({
   );
 }
 
-function CreditLine({ credit, className }: { credit: FanartCredit; className?: string }) {
+/** X logo for the small credit line (lucide has no brand icons). */
+function XLogo({ className }: { className?: string }) {
   return (
-    <span className={cn("flex min-w-0 items-center gap-1", className)}>
-      {credit.type === "url" ? <Link2 className="size-3 flex-none" aria-hidden /> : null}
-      <span className="truncate">{creditLabel(credit)}</span>
+    <svg viewBox="0 0 24 24" aria-hidden fill="currentColor" className={className}>
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
+/** Credit as shown everywhere: the name first, the @X / link as a small line under it. */
+function CreditBlock({ credit, small = false }: { credit: FanartPictureCredit; small?: boolean }) {
+  return (
+    <span className="block min-w-0">
+      <span className={cn("block truncate text-r-text", small ? "text-sm" : "text-[15px]")}>{credit.name}</span>
+      {credit.link ? (
+        <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-r-text-3">
+          {credit.link.type === "x" ? (
+            <XLogo className="size-3 flex-none" />
+          ) : (
+            <Link2 className="size-3 flex-none" aria-hidden />
+          )}
+          <span className="truncate">{creditLabel(credit.link)}</span>
+        </span>
+      ) : null}
     </span>
+  );
+}
+
+/** Two pills: @ บัญชี X | ลิงก์เว็บ. */
+function LinkTypeToggle({
+  value,
+  onChange,
+  className,
+}: {
+  value: FanartCreditType;
+  onChange: (type: FanartCreditType) => void;
+  className?: string;
+}) {
+  return (
+    <div className={cn("grid grid-cols-2 gap-2", className)} role="group" aria-label="ชนิดบัญชีหรือลิงก์">
+      {(["x", "url"] as const).map((type) => (
+        <button
+          key={type}
+          type="button"
+          aria-pressed={value === type}
+          onClick={() => onChange(type)}
+          className={cn(
+            "flex min-h-10 items-center justify-center gap-1.5 rounded-full text-[13px] whitespace-nowrap ring-1 transition-colors ring-inset",
+            FOCUS,
+            value === type ? "bg-r-pri/15 text-r-text ring-r-pri" : "text-r-text-2 ring-white/15 hover:ring-white/30"
+          )}
+        >
+          {type === "x" ? (
+            "@ บัญชี X"
+          ) : (
+            <>
+              <Link2 className="size-3.5" aria-hidden />
+              ลิงก์เว็บ
+            </>
+          )}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Field for an X account (with @) or a web link, depending on `type`. */
+function LinkField({
+  id,
+  type,
+  value,
+  onChange,
+  onEnter,
+  invalid,
+  describedBy,
+  label,
+  className,
+}: {
+  id?: string;
+  type: FanartCreditType;
+  value: string;
+  onChange: (value: string) => void;
+  onEnter?: () => void;
+  invalid?: boolean;
+  describedBy?: string;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <div className={cn("relative", className)}>
+      {type === "x" ? (
+        <span className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-sm text-r-text-3">@</span>
+      ) : null}
+      <input
+        id={id}
+        value={value}
+        aria-label={label}
+        aria-invalid={invalid}
+        aria-describedby={describedBy}
+        inputMode={type === "url" ? "url" : undefined}
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
+        maxLength={type === "x" ? FANART_TEXT_LIMITS.handle + 1 : FANART_TEXT_LIMITS.creditUrl}
+        placeholder={type === "x" ? "honeyartist" : "https://www.pixiv.net/users/…"}
+        onChange={(event) => onChange(type === "x" ? event.target.value.replace(/^@+/, "") : event.target.value)}
+        onKeyDown={
+          onEnter
+            ? (event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  onEnter();
+                }
+              }
+            : undefined
+        }
+        className={cn(INPUT, type === "x" && "pl-8")}
+      />
+    </div>
   );
 }
 
@@ -266,6 +414,8 @@ function FanartUploadForm({
   const artInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const avatarFileRef = useRef<File | null>(null);
+  /** Avatar taken away a moment ago, kept while "เลิกทำ" is on screen. */
+  const removedAvatarRef = useRef<{ file: File; url: string } | null>(null);
   const prepQueue = useRef<Promise<void>>(Promise.resolve());
   const sessionRef = useRef<Session | null>(null);
   const doneKeys = useRef(new Set<string>());
@@ -283,12 +433,15 @@ function FanartUploadForm({
   const [prepErrors, setPrepErrors] = useState<string[]>([]);
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState("");
+  /** Optional @X / link under the fan's name in the credit. */
+  const [ownLinkType, setOwnLinkType] = useState<FanartCreditType>("x");
+  const [ownLinkValue, setOwnLinkValue] = useState("");
+  const [contactChannel, setContactChannel] = useState<FanartContactChannel>("x");
   const [contactHandle, setContactHandle] = useState("");
-  const [contactDiscord, setContactDiscord] = useState("");
   /** Form section in view, for the step list beside the form (wide screens). */
   const [activeSection, setActiveSection] = useState(0);
   /** Credit for every picture; null = the fan's own X account. */
-  const [allCredit, setAllCredit] = useState<FanartCredit | null>(null);
+  const [allCredit, setAllCredit] = useState<FanartPictureCredit | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [undo, setUndo] = useState<{ item: Item; index: number } | null>(null);
   const [consent, setConsent] = useState(false);
@@ -317,6 +470,7 @@ function FanartUploadForm({
   useEffect(
     () => () => {
       itemsRef.current.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+      if (removedAvatarRef.current) URL.revokeObjectURL(removedAvatarRef.current.url);
       if (undoTimer.current) clearTimeout(undoTimer.current);
     },
     []
@@ -393,7 +547,32 @@ function FanartUploadForm({
 
   function clearAvatar() {
     setAvatar(null);
+    dropRemovedAvatar();
     avatarCrop.clear();
+  }
+
+  function dropRemovedAvatar() {
+    if (removedAvatarRef.current) URL.revokeObjectURL(removedAvatarRef.current.url);
+    removedAvatarRef.current = null;
+  }
+
+  /** "เอารูปออก": keep the photo for a few seconds so "เลิกทำ" can bring it back. */
+  function removeAvatar() {
+    dropRemovedAvatar();
+    if (avatarFileRef.current && avatarPreviewUrl) {
+      removedAvatarRef.current = { file: avatarFileRef.current, url: avatarPreviewUrl };
+    }
+    // Not setAvatar(null): that would revoke the preview kept for "เลิกทำ".
+    avatarFileRef.current = null;
+    setAvatarPreviewUrl(null);
+    avatarCrop.clear();
+  }
+
+  function undoRemoveAvatar() {
+    const removed = removedAvatarRef.current;
+    if (!removed) return;
+    removedAvatarRef.current = null;
+    setAvatar(removed.file, removed.url);
   }
 
   /** One at a time: re-encoding big files needs a lot of memory on phones. */
@@ -511,30 +690,33 @@ function FanartUploadForm({
     avatarCrop.start(file);
   }
 
-  const handleCheck = checkContactHandle("x", contactHandle);
-  const ownCredit: FanartCredit | null = "handle" in handleCheck ? { type: "x", value: handleCheck.handle } : null;
   const nameCheck = checkDisplayName(displayName);
   const shownName = "name" in nameCheck ? nameCheck.name : "";
+  const ownLinkCheck = checkCreditLink(ownLinkType, ownLinkValue);
+  const ownLink = "link" in ownLinkCheck ? ownLinkCheck.link : null;
+  /** The fan's own credit: display name + optional @X / link. */
+  const ownCredit: FanartPictureCredit | null = shownName ? { name: shownName, link: ownLink } : null;
   /** Credit used by pictures without their own. */
   const baseCredit = allCredit ?? ownCredit;
-  const discordText = contactDiscord.trim();
-  const discordCheck = discordText ? checkContactHandle("discord", discordText) : null;
-  const discordHandle = discordCheck && "handle" in discordCheck ? discordCheck.handle : "";
+  const contactCheck = checkContactHandle(contactChannel, contactHandle);
+  /** Field errors show once the fan tried to go on ("ตรวจสอบก่อนส่ง"). */
+  const showFieldErrors = Boolean(formError);
 
   /** Credit shown for a picture and where it comes from. */
-  function creditOf(item: Item): { credit: FanartCredit | null; source: "mine" | "artist" | "none" } {
+  function creditOf(item: Item): { credit: FanartPictureCredit | null; source: "mine" | "artist" | "none" } {
     const credit = item.credit ?? baseCredit;
     if (!credit) return { credit: null, source: "none" };
-    const own =
-      ownCredit !== null &&
-      credit.type === "x" &&
-      credit.value.toLowerCase() === ownCredit.value.toLowerCase();
-    return { credit, source: own ? "mine" : "artist" };
+    return { credit, source: sameCredit(credit, ownCredit) ? "mine" : "artist" };
   }
 
   function openDraft(target: string) {
-    const current = target === "all" ? baseCredit : (itemsRef.current.find((item) => item.key === target)?.credit ?? baseCredit);
-    setDraft({ target, type: current?.type ?? "x", value: current?.value ?? "" });
+    const current = itemsRef.current.find((item) => item.key === target)?.credit ?? baseCredit;
+    setDraft({
+      target,
+      name: current?.name ?? "",
+      type: current?.link?.type ?? "x",
+      value: current?.link?.value ?? "",
+    });
   }
 
   /** Saves the open credit editor. False when what was typed is not valid. */
@@ -542,8 +724,8 @@ function FanartUploadForm({
     if (!draft) return true;
     const clearOwnCredits = () =>
       setItems((list) => list.map((item) => (item.credit ? { ...item, credit: undefined } : item)));
-    if (!draft.value.trim()) {
-      // Empty = go back to the default.
+    if (!draft.name.trim() && !draft.value.trim()) {
+      // Both empty = go back to the default.
       if (draft.all) {
         setAllCredit(null);
         clearOwnCredits();
@@ -553,17 +735,22 @@ function FanartUploadForm({
       setDraft(null);
       return true;
     }
-    const checked = checkCredit(draft.type, draft.value);
-    if ("error" in checked) {
-      setDraft({ ...draft, error: checked.error.replace(/^เครดิต: /, "") });
+    const name = checkCreditName(draft.name);
+    if ("error" in name) {
+      setDraft({ ...draft, error: name.error });
       return false;
     }
+    const link = checkCreditLink(draft.type, draft.value);
+    if ("error" in link) {
+      setDraft({ ...draft, error: link.error.replace(/^เครดิต: /, "") });
+      return false;
+    }
+    const credit: FanartPictureCredit = { name: name.name, link: link.link };
     if (draft.all) {
-      const same = ownCredit && checked.credit.type === "x" && checked.credit.value.toLowerCase() === ownCredit.value.toLowerCase();
-      setAllCredit(same ? null : checked.credit);
+      setAllCredit(sameCredit(credit, ownCredit) ? null : credit);
       clearOwnCredits();
     } else {
-      patchItem(draft.target, { credit: checked.credit });
+      patchItem(draft.target, { credit: sameCredit(credit, allCredit ?? ownCredit) ? undefined : credit });
     }
     setDraft(null);
     return true;
@@ -572,8 +759,8 @@ function FanartUploadForm({
   function validate(): string | null {
     if (!commitDraft()) return "เครดิตที่กำลังแก้ยังไม่ถูกต้อง";
     if ("error" in nameCheck) return nameCheck.error;
-    if ("error" in handleCheck) return handleCheck.error;
-    if (discordCheck && "error" in discordCheck) return discordCheck.error;
+    if ("error" in ownLinkCheck) return ownLinkCheck.error;
+    if ("error" in contactCheck) return contactCheck.error;
     if (!items.length) return "กรุณาเลือกรูปแฟนอาร์ตอย่างน้อย 1 รูป";
     if (items.some((item) => item.preparing)) return "รอเตรียมรูปให้เสร็จก่อน";
     if (!consent) {
@@ -623,13 +810,13 @@ function FanartUploadForm({
       if (!response.ok) {
         patchItem(key, {
           send: "failed",
-          sendError: data?.error ?? "บันทึกรูปไม่สำเร็จ กรุณากด ลองใหม่",
+          sendError: data?.error ?? "บันทึกรูปไม่สำเร็จ กด “ลองใหม่” อีกครั้ง",
           retryable: data?.code !== "unreadable" && data?.code !== "expired" && data?.code !== "invalid",
         });
         return false;
       }
     } catch {
-      patchItem(key, { send: "failed", sendError: "เชื่อมต่อไม่ได้ กรุณากด ลองใหม่", retryable: true });
+      patchItem(key, { send: "failed", sendError: "เชื่อมต่อไม่ได้ กด “ลองใหม่” อีกครั้ง", retryable: true });
       return false;
     }
 
@@ -654,12 +841,22 @@ function FanartUploadForm({
 
     const body = new FormData();
     body.set("displayName", displayName);
+    body.set("creditType", ownLink?.type ?? "");
+    body.set("creditValue", ownLink?.value ?? "");
+    body.set("contactChannel", contactChannel);
     body.set("contactHandle", contactHandle);
-    body.set("contactDiscord", discordHandle);
     body.set("consent", consent ? "yes" : "no");
     body.set("files", JSON.stringify(list.map((item) => ({ size: item.file.size, type: item.file.type }))));
-    // null = the fan's own X account (decided on the server).
-    body.set("credits", JSON.stringify(list.map((item) => item.credit ?? allCredit ?? null)));
+    // null = the fan's own credit (display name + optional @X / link).
+    body.set(
+      "credits",
+      JSON.stringify(
+        list.map((item) => {
+          const credit = item.credit ?? allCredit;
+          return credit ? { name: credit.name, type: credit.link?.type ?? "", value: credit.link?.value ?? "" } : null;
+        })
+      )
+    );
     if (avatarFileRef.current) body.set("avatar", avatarFileRef.current);
 
     let session: Session;
@@ -727,8 +924,12 @@ function FanartUploadForm({
 
   const preparing = items.some((item) => item.preparing);
   const errorBox = formError ? (
-    <p role="alert" className="rounded-2xl bg-r-pri/12 px-4 py-3 text-sm text-r-text ring-1 ring-r-pri/35 ring-inset">
-      {formError}
+    <p
+      role="alert"
+      className="flex items-start gap-2 rounded-2xl bg-[#ffa062]/10 px-4 py-3 text-sm text-r-text ring-1 ring-[#ffa062]/35 ring-inset"
+    >
+      <AlertCircle className={cn("mt-0.5 size-4 flex-none", ERROR_TEXT)} aria-hidden />
+      <span>{formError}</span>
     </p>
   ) : null;
 
@@ -746,84 +947,74 @@ function FanartUploadForm({
     </header>
   );
 
-  const aboutDone = "name" in nameCheck && "handle" in handleCheck && !(discordCheck && "error" in discordCheck);
+  const aboutDone = "name" in nameCheck && !("error" in ownLinkCheck) && "handle" in contactCheck;
+  const channelLabel = FANART_CONTACT_CHANNELS.find((option) => option.value === contactChannel)?.label ?? "X";
   const artDone = items.length > 0 && !preparing;
   const steps = [
     {
       title: "เกี่ยวกับคุณ",
-      sub: "name" in nameCheck && "handle" in handleCheck ? `${shownName} · @${handleCheck.handle}` : "ยังไม่ได้กรอก",
+      sub: "name" in nameCheck && "handle" in contactCheck ? `${shownName} · ติดต่อทาง ${channelLabel}` : "",
       done: aboutDone,
     },
-    { title: "แฟนอาร์ต", sub: `${items.length} / ${FANART_LIMITS.maxFiles} รูป`, done: artDone },
-    { title: "การนำผลงานไปใช้", sub: consent ? "ยินยอมแล้ว" : "ยังไม่ได้ติ๊ก", done: consent },
+    { title: "แฟนอาร์ต", sub: items.length ? `${items.length} / ${FANART_LIMITS.maxFiles} รูป` : "", done: artDone },
+    { title: "การนำผลงานไปใช้", sub: consent ? "ยินยอมแล้ว" : "", done: consent },
   ];
 
   /** Credit editor for one picture, opened from its "แก้เครดิต" link. */
   const creditEditor = (current: Draft, index: number, item: Item) => {
-    const resetLabel = item.credit ? "ใช้เครดิตเดียวกับรูปอื่น" : allCredit ? "ใช้บัญชี X ของฉัน" : null;
+    const resetLabel = item.credit ? "ใช้เครดิตเดียวกับรูปอื่น" : allCredit ? "ใช้เครดิตของฉัน" : null;
+    const nameId = `${ids}-draft-name`;
     return (
-      <div className="mt-3 space-y-2.5 rounded-2xl bg-r-pri/[0.06] p-3.5 ring-1 ring-r-pri/30 ring-inset">
+      <div className="mt-3 space-y-3 rounded-2xl bg-r-pri/[0.06] p-3.5 ring-1 ring-r-pri/30 ring-inset">
         <div>
           <p className="text-sm text-r-text">เครดิตเฉพาะรูปที่ {index + 1}</p>
-          <p className={cn(HINT, "mt-0.5")}>ชื่อหรือลิงก์ที่จะแสดงคู่กับรูป</p>
         </div>
-        <div className="grid grid-cols-2 gap-2" role="group" aria-label="ชนิดเครดิต">
-          {(["x", "url"] as const).map((type) => (
-            <button
-              key={type}
-              type="button"
-              aria-pressed={current.type === type}
-              onClick={() => setDraft({ ...current, type, value: type === current.type ? current.value : "", error: undefined })}
-              className={cn(
-                "flex min-h-9 items-center justify-center gap-1.5 rounded-full text-[13px] ring-1 transition-colors ring-inset",
-                FOCUS,
-                current.type === type
-                  ? "bg-r-pri/15 text-r-text ring-r-pri"
-                  : "text-r-text-2 ring-white/15 hover:ring-white/30"
-              )}
-            >
-              {type === "x" ? (
-                "@ บัญชี X"
-              ) : (
-                <>
-                  <Link2 className="size-3.5" aria-hidden />
-                  ลิงก์เว็บ
-                </>
-              )}
-            </button>
-          ))}
-        </div>
-        <div className="relative">
-          {current.type === "x" ? (
-            <span className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-sm text-r-text-3">@</span>
-          ) : null}
+        <div>
+          <label htmlFor={nameId} className="block text-[13.5px] text-r-text">
+            ชื่อคนวาด<span className="text-r-pri"> *</span>
+          </label>
           <input
-            value={current.value}
-            aria-label={current.type === "x" ? "บัญชี X ของคนวาด" : "ลิงก์ผลงาน"}
-            aria-invalid={Boolean(current.error)}
-            inputMode={current.type === "url" ? "url" : undefined}
-            autoCapitalize="none"
-            autoCorrect="off"
-            spellCheck={false}
-            maxLength={current.type === "x" ? FANART_TEXT_LIMITS.handle : FANART_TEXT_LIMITS.creditUrl}
-            placeholder={current.type === "x" ? "honeyartist" : "https://www.pixiv.net/artworks/…"}
-            onChange={(event) =>
-              setDraft({
-                ...current,
-                value: current.type === "x" ? event.target.value.replace(/^@+/, "") : event.target.value,
-                error: undefined,
-              })
-            }
+            id={nameId}
+            value={current.name}
+            maxLength={FANART_TEXT_LIMITS.displayName}
+            onChange={(event) => setDraft({ ...current, name: event.target.value, error: undefined })}
             onKeyDown={(event) => {
               if (event.key === "Enter") {
                 event.preventDefault();
                 commitDraft();
               }
             }}
-            className={cn(INPUT, current.type === "x" && "pl-8")}
+            placeholder="เช่น มิ้นท์ชา"
+            className={cn(INPUT, "mt-1.5")}
           />
         </div>
-        {current.error ? <p className={cn("text-xs", ERROR_TEXT)}>{current.error}</p> : null}
+        <div>
+          <p className="text-[13.5px] text-r-text">
+            บัญชีหรือลิงก์<span className="ml-2 text-xs text-r-text-3">ไม่บังคับ</span>
+          </p>
+          <div className="mt-1.5 flex flex-col gap-2 sm:flex-row sm:items-center">
+            <LinkTypeToggle
+              value={current.type}
+              onChange={(type) =>
+                setDraft({ ...current, type, value: type === current.type ? current.value : "", error: undefined })
+              }
+              className="sm:w-[196px] sm:flex-none"
+            />
+            <LinkField
+              type={current.type}
+              value={current.value}
+              label={current.type === "x" ? "บัญชี X ของคนวาด" : "ลิงก์ผลงานของคนวาด"}
+              onChange={(value) => setDraft({ ...current, value, error: undefined })}
+              onEnter={() => commitDraft()}
+              className="min-w-0 flex-1"
+            />
+          </div>
+        </div>
+        {current.error ? (
+          <p className={cn("text-[13px]", ERROR_TEXT)}>
+            <ErrorLine>{current.error}</ErrorLine>
+          </p>
+        ) : null}
         {items.length > 1 ? (
           <label className="flex min-h-8 cursor-pointer items-center gap-2.5 text-[13px] text-r-text-2">
             <input
@@ -864,41 +1055,33 @@ function FanartUploadForm({
   };
 
   const nameLength = [...displayName].length;
-  const handleInput = (
-    <div className="relative">
-      <span className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-sm text-r-text-3">@</span>
-      <input
-        id={`${ids}-handle`}
-        value={contactHandle}
-        maxLength={FANART_TEXT_LIMITS.handle + 1}
-        autoCapitalize="none"
-        autoCorrect="off"
-        spellCheck={false}
-        aria-describedby={`${ids}-handle-hint`}
-        onChange={(event) => setContactHandle(event.target.value.replace(/^@+/, ""))}
-        placeholder="honeyartist"
-        className={cn(INPUT, "pl-8")}
-      />
-    </div>
-  );
   const aboutSection = (
     <section id={`${ids}-about-section`} className={cn(CARD, "scroll-mt-24")} aria-labelledby={`${ids}-about`}>
       <StepTitle n={1} id={`${ids}-about`} done={aboutDone}>
         เกี่ยวกับคุณ
       </StepTitle>
-      <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-3">
-        <div>
-          <div className="lg:min-h-[2.625rem]">
-            <label htmlFor={`${ids}-name`} className={LABEL}>
-              ชื่อที่แสดง<span className="text-r-pri"> *</span>
-            </label>
-          </div>
+      <div className="mt-5 flex items-start gap-4">
+        <div className="pt-[23px]">
+          <AvatarPicker
+            src={avatarPreviewUrl}
+            onPick={() => avatarInputRef.current?.click()}
+            onRemove={removeAvatar}
+            onUndoRemove={undoRemoveAvatar}
+            onRemoveSettled={dropRemovedAvatar}
+          />
+        </div>
+        <div className="min-w-0 flex-1">
+          <label htmlFor={`${ids}-name`} className={LABEL}>
+            ชื่อที่แสดง<span className="text-r-pri"> *</span>
+            <span className="ml-2 text-[12.5px] text-r-text-3">ใช้เป็นชื่อในเครดิต</span>
+          </label>
           <div className="relative mt-1.5">
             <input
               id={`${ids}-name`}
               value={displayName}
               maxLength={FANART_TEXT_LIMITS.displayName}
               autoComplete="nickname"
+              aria-invalid={showFieldErrors && "error" in nameCheck}
               onChange={(event) => setDisplayName(event.target.value)}
               placeholder="เช่น ฮันนี่"
               className={cn(INPUT, "pr-14")}
@@ -908,39 +1091,110 @@ function FanartUploadForm({
             </span>
           </div>
         </div>
-        <div>
-          <div className="lg:min-h-[2.625rem]">
-            <label htmlFor={`${ids}-handle`} className={LABEL}>
-              บัญชี X<span className="text-r-pri"> *</span>
-            </label>
-            <p id={`${ids}-handle-hint`} className={cn(HINT, "mt-0.5")}>
-              ใช้เป็นเครดิตผลงาน
-            </p>
-          </div>
-          <div className="mt-1.5">{handleInput}</div>
+      </div>
+      {avatarPreviewUrl ? null : (
+        <p className={cn(HINT, "mt-2")}>รูปโปรไฟล์ · ไม่บังคับ</p>
+      )}
+
+      <div className="mt-5">
+        <p id={`${ids}-credit-label`} className={LABEL}>
+          บัญชีหรือลิงก์สำหรับเครดิต<span className="ml-2 text-[12.5px] text-r-text-3">ไม่บังคับ</span>
+        </p>
+        <div className="mt-1.5 flex flex-col gap-2 sm:flex-row sm:items-center">
+          <LinkTypeToggle
+            value={ownLinkType}
+            onChange={(type) => {
+              if (type !== ownLinkType) setOwnLinkValue("");
+              setOwnLinkType(type);
+            }}
+            className="sm:w-[196px] sm:flex-none"
+          />
+          <LinkField
+            id={`${ids}-credit`}
+            type={ownLinkType}
+            value={ownLinkValue}
+            label={ownLinkType === "x" ? "บัญชี X สำหรับเครดิต" : "ลิงก์สำหรับเครดิต"}
+            onChange={setOwnLinkValue}
+            invalid={showFieldErrors && "error" in ownLinkCheck}
+            describedBy={`${ids}-credit-hint`}
+            className="min-w-0 flex-1"
+          />
         </div>
+        <p
+          id={`${ids}-credit-hint`}
+          className={cn(HINT, "mt-1.5", showFieldErrors && "error" in ownLinkCheck && ERROR_TEXT)}
+        >
+          {showFieldErrors && "error" in ownLinkCheck ? (
+            <ErrorLine>{ownLinkCheck.error.replace(/^เครดิต: /, "")}</ErrorLine>
+          ) : (
+            "แสดงใต้ชื่อในเครดิต"
+          )}
+        </p>
       </div>
 
-      <div className="mt-4">
-        <label htmlFor={`${ids}-discord`} className={LABEL}>
-          Discord
+      <div className="mt-5 border-t border-white/[0.08] pt-5">
+        <label htmlFor={`${ids}-contact`} className={LABEL}>
+          ช่องทางติดต่อ<span className="text-r-pri"> *</span>
         </label>
-        <p id={`${ids}-discord-hint`} className={cn(HINT, "mt-0.5")}>
-          ช่องทางติดต่อสำรอง · ไม่บังคับ
-        </p>
-        <input
-          id={`${ids}-discord`}
-          value={contactDiscord}
-          maxLength={33}
-          autoCapitalize="none"
-          autoCorrect="off"
-          spellCheck={false}
-          aria-describedby={`${ids}-discord-hint`}
-          aria-invalid={Boolean(discordCheck && "error" in discordCheck && formError)}
-          onChange={(event) => setContactDiscord(event.target.value.replace(/^@+/, ""))}
-          placeholder="ชื่อผู้ใช้ Discord"
-          className={cn(INPUT, "mt-1.5")}
-        />
+        <p className={cn(HINT, "mt-0.5")}>ใช้ติดต่อกลับเฉพาะตอนมีปัญหา · เห็นเฉพาะทีมงาน</p>
+        <div className="mt-2 flex gap-2">
+          <div className="relative w-[124px] flex-none sm:w-[150px]">
+            <select
+              aria-label="เลือกช่องทางติดต่อ"
+              value={contactChannel}
+              onChange={(event) => {
+                if (isContactChannel(event.target.value)) {
+                  setContactChannel(event.target.value);
+                  setContactHandle("");
+                }
+              }}
+              className={cn(INPUT, "cursor-pointer appearance-none bg-white/[0.06] pr-9")}
+            >
+              {FANART_CONTACT_CHANNELS.map((option) => (
+                <option key={option.value} value={option.value} className="bg-[#1d0f14] text-r-text">
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-r-text-2"
+              aria-hidden
+            />
+          </div>
+          <div className="relative min-w-0 flex-1">
+            {contactChannel === "x" ? (
+              <span className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-sm text-r-text-3">@</span>
+            ) : null}
+            <input
+              id={`${ids}-contact`}
+              value={contactHandle}
+              maxLength={contactChannel === "facebook" ? FANART_TEXT_LIMITS.contactUrl : 33}
+              inputMode={contactChannel === "facebook" ? "url" : undefined}
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              aria-invalid={showFieldErrors && "error" in contactCheck}
+              aria-describedby={`${ids}-contact-hint`}
+              onChange={(event) =>
+                setContactHandle(contactChannel === "facebook" ? event.target.value : event.target.value.replace(/^@+/, ""))
+              }
+              placeholder={CONTACT_FIELD[contactChannel].placeholder}
+              className={cn(INPUT, contactChannel === "x" && "pl-8")}
+            />
+          </div>
+        </div>
+        {(showFieldErrors && "error" in contactCheck) || CONTACT_FIELD[contactChannel].hint ? (
+          <p
+            id={`${ids}-contact-hint`}
+            className={cn(HINT, "mt-1.5", showFieldErrors && "error" in contactCheck && ERROR_TEXT)}
+          >
+            {showFieldErrors && "error" in contactCheck ? (
+              <ErrorLine>{contactCheck.error}</ErrorLine>
+            ) : (
+              CONTACT_FIELD[contactChannel].hint
+            )}
+          </p>
+        ) : null}
       </div>
 
       <input
@@ -951,44 +1205,6 @@ function FanartUploadForm({
         className="sr-only"
         tabIndex={-1}
       />
-      <div className="mt-4 flex items-center gap-3">
-        {avatarPreviewUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={avatarPreviewUrl} alt="รูปโปรไฟล์" className="size-12 flex-none rounded-full object-cover" />
-        ) : (
-          <span
-            aria-hidden
-            className="flex size-12 flex-none items-center justify-center rounded-full border-[1.5px] border-dashed border-r-pri/50 text-lg text-r-text-2"
-          >
-            +
-          </span>
-        )}
-        <div className="min-w-0 flex-1">
-          <p className="text-[0.90625rem] text-r-text">รูปโปรไฟล์</p>
-          {avatarPreviewUrl ? (
-            <div className="flex flex-wrap gap-x-3">
-              {avatarCrop.canRecrop ? (
-                <button type="button" onClick={avatarCrop.recrop} className={cn(LINK_BTN, "inline-flex items-center gap-1")}>
-                  <Crop className="size-3" aria-hidden />
-                  ครอปใหม่
-                </button>
-              ) : null}
-              <button type="button" onClick={clearAvatar} className={LINK_BTN}>
-                เอาออก
-              </button>
-            </div>
-          ) : (
-            <p className={HINT}>ไม่บังคับ · ไม่เกิน 10 MB</p>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={() => avatarInputRef.current?.click()}
-          className={cn(BTN_SMALL, "min-h-[38px] px-5 text-[15px] text-r-text ring-1 ring-r-text-2/35 ring-inset hover:ring-r-pri/60")}
-        >
-          {avatarPreviewUrl ? "เปลี่ยนรูป" : "เลือกรูป"}
-        </button>
-      </div>
     </section>
   );
 
@@ -1056,16 +1272,16 @@ function FanartUploadForm({
                       </>
                     ) : (
                       <>
-                        <p className="min-w-0 text-[15px] text-r-text">
+                        <div className="min-w-0">
                           {credit ? (
-                            <CreditLine credit={credit} />
+                            <CreditBlock credit={credit} />
                           ) : (
-                            <span className="block truncate">{shownName || `รูปที่ ${index + 1}`}</span>
+                            <span className="block truncate text-[15px] text-r-text-3">รูปที่ {index + 1}</span>
                           )}
-                        </p>
+                        </div>
                         <p
                           className={cn(
-                            "mt-0.5 text-xs",
+                            "mt-1 text-xs",
                             rowDraft
                               ? "text-r-text-2"
                               : source === "artist"
@@ -1080,8 +1296,8 @@ function FanartUploadForm({
                             : source === "artist"
                               ? "เครดิตคนวาด"
                               : source === "none"
-                                ? "ยังไม่ได้กรอกบัญชี X"
-                                : "บัญชี X ของคุณ"}
+                                ? "ยังไม่ได้กรอกชื่อที่แสดง"
+                                : "เครดิตของคุณ"}
                         </p>
                         {rowDraft ? null : (
                           <button
@@ -1146,7 +1362,7 @@ function FanartUploadForm({
           <span className="text-[12.5px] text-r-text-3">(เหลืออีก {FANART_LIMITS.maxFiles - items.length})</span>
         </button>
       ) : (
-        <p className={cn(HINT, "mt-3 text-center text-[12.5px]")}>ครบ {FANART_LIMITS.maxFiles} รูปแล้ว</p>
+        <p className={cn(HINT, "mt-3 text-center")}>ครบ {FANART_LIMITS.maxFiles} รูปแล้ว</p>
       )}
 
       {prepErrors.length ? (
@@ -1173,7 +1389,7 @@ function FanartUploadForm({
       <label
         className={cn(
           "mt-3.5 flex cursor-pointer items-start gap-3 rounded-[14px] bg-white/[0.03] p-3.5 ring-1 transition-colors ring-inset",
-          consentInvalid ? "ring-[#ff8fb0]" : consent ? "ring-r-pri/40" : "ring-white/[0.08] hover:ring-white/20"
+          consentInvalid ? "ring-[#ffa062]" : consent ? "ring-r-pri/40" : "ring-white/[0.08] hover:ring-white/20"
         )}
       >
         <input
@@ -1196,7 +1412,7 @@ function FanartUploadForm({
             "mt-0.5 flex size-[22px] flex-none items-center justify-center rounded-[7px] transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-r-acc peer-focus-visible:outline-solid",
             consent
               ? "bg-r-pri text-r-on-pri"
-              : cn("ring-[1.5px] ring-inset", consentInvalid ? "ring-[#ff8fb0]" : "ring-r-text-2/50")
+              : cn("ring-[1.5px] ring-inset", consentInvalid ? "ring-[#ffa062]" : "ring-r-text-2/50")
           )}
         >
           {consent ? <Check className="size-3.5" strokeWidth={3} /> : null}
@@ -1208,7 +1424,11 @@ function FanartUploadForm({
       <p id={`${ids}-consent-hint`} className={cn(HINT, "mt-2.5 leading-relaxed")}>
         {FANART_CONSENT.hint}
       </p>
-      {consentInvalid ? <p className={cn("mt-2 text-[12.5px]", ERROR_TEXT)}>กรุณาติ๊กยินยอมก่อนส่ง</p> : null}
+      {consentInvalid ? (
+        <p className={cn("mt-2 text-[13px]", ERROR_TEXT)}>
+          <ErrorLine>กรุณาติ๊กยินยอมก่อนส่ง</ErrorLine>
+        </p>
+      ) : null}
     </section>
   );
 
@@ -1218,9 +1438,9 @@ function FanartUploadForm({
       <button type="submit" disabled={!items.length || preparing} className={BTN}>
         ตรวจสอบก่อนส่ง{items.length ? ` (${items.length} รูป)` : ""}
       </button>
-      {preparing ? (
-        <p className="text-center text-[12.5px] text-r-text-3" aria-live="polite">
-          รอเตรียมรูปให้เสร็จก่อน จึงจะกดได้
+      {preparing || !items.length ? (
+        <p className="text-center text-[13px] text-r-text-3" aria-live="polite">
+          {preparing ? "รอเตรียมรูปให้เสร็จก่อน จึงจะกดได้" : "เลือกรูปอย่างน้อย 1 รูปก่อน จึงจะกดได้"}
         </p>
       ) : null}
     </div>
@@ -1244,7 +1464,7 @@ function FanartUploadForm({
           แกลเลอรี
         </Link>
       )}
-      {header("ส่งได้ครั้งละสูงสุด 5 รูป · ทีมงานจะตรวจก่อนนำไปใช้", "left")}
+      {header(`ส่งได้ครั้งละสูงสุด ${FANART_LIMITS.maxFiles} รูป · ทีมงานจะตรวจก่อนนำไปใช้`, "left")}
       <nav aria-label="ขั้นตอนการกรอก" className="-ml-3 hidden space-y-1 lg:block">
         <button
           type="button"
@@ -1297,7 +1517,7 @@ function FanartUploadForm({
               </span>
               <span className="min-w-0">
                 <span className={cn("block text-[15px]", current ? "text-r-text" : "text-r-text/85")}>{step.title}</span>
-                <span className="block truncate text-xs text-r-text-3">{step.sub}</span>
+                {step.sub ? <span className="block truncate text-xs text-r-text-3">{step.sub}</span> : null}
               </span>
             </button>
           );
@@ -1475,13 +1695,16 @@ function FanartUploadForm({
                 </span>
               )}
               <div className="min-w-0">
-                <p className="truncate text-r-text">{shownName}</p>
-                <p className="truncate text-[13px] text-r-text-3">
-                  ติดต่อ: X · @{"handle" in handleCheck ? handleCheck.handle : contactHandle}
-                  {discordHandle ? ` · Discord · ${discordHandle}` : ""}
-                </p>
+                <p className="text-xs text-r-text-3">เครดิตของคุณ</p>
+                {ownCredit ? <CreditBlock credit={ownCredit} /> : null}
               </div>
             </div>
+            <p className="mt-3 flex min-w-0 items-center gap-2 border-t border-white/[0.08] pt-3 text-[13.5px] text-r-text">
+              <span className="flex-none text-xs text-r-text-3">ติดต่อ</span>
+              <span className="truncate">
+                {"handle" in contactCheck ? contactLabel(contactChannel, contactCheck.handle) : contactHandle}
+              </span>
+            </p>
             <ul className="mt-4 divide-y divide-white/[0.06] border-t border-white/[0.08]">
               {items.map((item, index) => {
                 const { credit, source } = creditOf(item);
@@ -1489,13 +1712,18 @@ function FanartUploadForm({
                   <li key={item.key} className="flex items-center gap-3 py-2.5">
                     {thumb(item, index, "size-14")}
                     <div className="min-w-0">
-                      <p className="text-sm text-r-text">รูปที่ {index + 1}</p>
+                      <p className="flex items-center gap-2 text-xs text-r-text-3">
+                        รูปที่ {index + 1}
+                        {source === "artist" ? (
+                          <span className="rounded-full px-2 py-px text-[11px] text-r-text-2 ring-1 ring-r-text-2/30 ring-inset">
+                            คนวาด
+                          </span>
+                        ) : null}
+                      </p>
                       {credit ? (
-                        <p className="mt-0.5 flex min-w-0 items-center gap-1 text-xs text-r-text-3">
-                          <span className="flex-none">เครดิต:</span>
-                          <CreditLine credit={credit} />
-                          {source === "artist" ? <span className="flex-none">(คนวาด)</span> : null}
-                        </p>
+                        <div className="mt-0.5">
+                          <CreditBlock credit={credit} small />
+                        </div>
                       ) : null}
                     </div>
                   </li>
@@ -1551,7 +1779,7 @@ function FanartUploadForm({
                 style={{ width: `${((done + inFlight) / Math.max(1, total)) * 100}%` }}
               />
               {!running && failed ? (
-                <div className="ml-auto h-full bg-[#ff8fb0]" style={{ width: `${(failed / total) * 100}%` }} />
+                <div className="ml-auto h-full bg-[#ffa062]" style={{ width: `${(failed / total) * 100}%` }} />
               ) : null}
             </div>
             <ul className="mt-3.5 divide-y divide-white/[0.06]">
@@ -1600,7 +1828,7 @@ function FanartUploadForm({
               ))}
             </ul>
             <p className="mt-3 text-xs leading-relaxed text-r-text-3">
-              รูปที่ส่งแล้วไม่ต้องส่งซ้ำ กด &quot;ลองใหม่&quot; เฉพาะรูปที่พลาด · อย่าปิดหน้านี้จนกว่าจะส่งครบ
+              กด “ลองใหม่” เฉพาะรูปที่พลาด · อย่าปิดหน้านี้จนกว่าจะส่งครบ
             </p>
             {!running && failed ? (
               <div className="mt-5 space-y-2">

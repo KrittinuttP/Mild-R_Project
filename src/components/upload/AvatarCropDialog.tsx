@@ -4,13 +4,13 @@ import { useState } from "react";
 import Cropper, { type Area, type Point } from "react-easy-crop";
 import { Loader2, ZoomIn, ZoomOut } from "lucide-react";
 
-import { buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { R_CTA_OUTLINE_CLASS, R_CTA_PRIMARY_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 
 const MIN_ZOOM = 1;
@@ -42,13 +42,13 @@ export function AvatarCropDialog({
     >
       <DialogContent
         showCloseButton={false}
-        className="gap-0 bg-[#1c0f13] p-5 text-[#f7d7de] ring-white/10 sm:max-w-md"
-        overlayClassName="bg-[#140a0d]/75"
+        className="gap-0 rounded-[22px] bg-[#1d0f14] p-5 text-r-text-2 ring-white/10 sm:max-w-md"
+        overlayClassName="bg-r-bg/75"
       >
-        <DialogTitle className="text-lg font-normal text-[#fff5f7]">
+        <DialogTitle className="font-[family-name:var(--font-display)] text-lg font-normal text-r-text">
           ครอบรูปโปรไฟล์
         </DialogTitle>
-        <DialogDescription className="mt-1.5 text-xs leading-relaxed text-[#f3b8c4]/70">
+        <DialogDescription className="mt-1.5 text-xs leading-relaxed text-r-text-3">
           ลากรูปเพื่อเลื่อน ถ่างนิ้ว เลื่อนลูกกลิ้งเมาส์ หรือใช้แถบด้านล่างเพื่อซูม
         </DialogDescription>
         {/* A new photo starts again from the centre at 1×. */}
@@ -98,7 +98,7 @@ function CropArea({
       </div>
 
       <div className="mt-4 flex items-center gap-3">
-        <ZoomOut className="size-4 shrink-0 text-[#f3b8c4]/70" aria-hidden />
+        <ZoomOut className="size-4 shrink-0 text-r-text-3" aria-hidden />
         <input
           type="range"
           min={MIN_ZOOM}
@@ -107,13 +107,13 @@ function CropArea({
           value={zoom}
           onChange={(event) => setZoom(Number(event.target.value))}
           aria-label="ซูมรูป"
-          className="h-2 w-full cursor-pointer accent-[#e85a7a]"
+          className="h-2 w-full cursor-pointer accent-r-pri"
         />
-        <ZoomIn className="size-4 shrink-0 text-[#f3b8c4]/70" aria-hidden />
+        <ZoomIn className="size-4 shrink-0 text-r-text-3" aria-hidden />
       </div>
 
       {error ? (
-        <p role="alert" className="mt-3 text-sm text-[#f3b8c4]">
+        <p role="alert" className="mt-3 text-sm text-[#ff8fb0]">
           {error}
         </p>
       ) : null}
@@ -123,10 +123,7 @@ function CropArea({
           type="button"
           onClick={onCancel}
           disabled={busy}
-          className={cn(
-            buttonVariants({ variant: "outline", size: "lg" }),
-            "rounded-2xl border-white/15 text-[#f7d7de] hover:bg-white/5"
-          )}
+          className={cn(R_CTA_OUTLINE_CLASS, "h-11 px-5")}
         >
           ยกเลิก
         </button>
@@ -134,10 +131,7 @@ function CropArea({
           type="button"
           onClick={() => area && onConfirm(area)}
           disabled={busy || !area}
-          className={cn(
-            buttonVariants({ size: "lg" }),
-            "rounded-2xl border-transparent bg-[#e85a7a] font-normal text-[#140a0d] hover:bg-[#f3b8c4]"
-          )}
+          className={cn(R_CTA_PRIMARY_CLASS, "h-11 px-5")}
         >
           {busy ? <Loader2 className="size-4 animate-spin" /> : null}
           ใช้รูปนี้

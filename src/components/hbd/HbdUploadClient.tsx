@@ -16,17 +16,16 @@ import {
   ArrowRight,
   BookOpen,
   Check,
-  Crop,
   Download,
   Heart,
   ImageIcon,
-  Lock,
   Pencil,
   Trash2,
   Upload,
   X,
 } from "lucide-react";
 
+import { AvatarPicker } from "@/components/upload/AvatarPicker";
 import { useAvatarCrop } from "@/components/upload/useAvatarCrop";
 import { shrinkImageFile } from "@/lib/hbd-client-resize";
 import {
@@ -55,20 +54,20 @@ const FOCUS =
   "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-r-acc";
 const CARD = cn(R_CARD_CLASS, "p-5 sm:p-[22px]");
 const INPUT =
-  "h-12 w-full rounded-[14px] bg-white/[0.04] px-4 text-[15px] text-r-text ring-1 ring-white/10 outline-none ring-inset placeholder:text-r-text-2/45 focus:ring-r-pri/60 aria-[invalid=true]:ring-[#ff8fb0]";
+  "h-12 w-full rounded-[14px] bg-white/[0.04] px-4 text-[15px] text-r-text ring-1 ring-white/[0.16] outline-none ring-inset placeholder:text-r-text-2/45 focus:ring-r-pri/60 aria-[invalid=true]:ring-[#ffa062]";
 const BTN = cn(R_CTA_PRIMARY_CLASS, "w-full");
 const BTN_OUTLINE = cn(R_CTA_OUTLINE_CLASS, "w-full");
 const LINK_BTN = cn(
   "inline-flex min-h-8 items-center gap-1.5 rounded-md text-[13.5px] text-r-pri transition-colors hover:text-r-pri-hover",
   FOCUS
 );
-const HINT = "text-xs text-r-text-3";
+const HINT = "text-[13px] text-r-text-3";
 const LABEL = "block text-[0.90625rem] text-r-text";
-const ERROR_TEXT = "text-[#ff8fb0]";
+const ERROR_TEXT = "text-[#ffa062]";
 
 const EYEBROW = "Birthday · 12 Dec 2026";
 const MISSING_SUMMARY = "ยังส่งไม่ได้ — กรุณากรอกช่องที่มี * ให้ครบ";
-const CONTACT_HINT = "จะใช้ช่องทางนี้ติดต่อกลับ ในกรณีที่มีปัญหา";
+const CONTACT_HINT = "ใช้ติดต่อกลับเฉพาะตอนการ์ดมีปัญหา · ไม่แสดงบนเว็บ";
 
 const HBD_FORM_CACHE_KEY = "mild-r-hbd-upload-draft";
 /** Set once the "ก่อนเริ่ม" screen was read → next visit opens the form directly. */
@@ -207,7 +206,7 @@ function StepTitle({
           aria-hidden
           className={cn(
             "flex size-[26px] flex-none items-center justify-center rounded-full font-sans text-[13px] font-bold transition-colors",
-            done ? "bg-r-acc text-r-on-acc" : "bg-r-pri text-r-on-pri"
+            done ? "bg-r-acc text-r-on-acc" : "text-r-text-2 ring-[1.5px] ring-r-text-2/40 ring-inset"
           )}
         >
           {n}
@@ -236,20 +235,11 @@ function ErrorBox({ children }: { children: ReactNode }) {
   return (
     <p
       role="alert"
-      className="flex items-start gap-2 rounded-2xl bg-r-pri/12 px-4 py-3 text-sm text-r-text ring-1 ring-r-pri/35 ring-inset"
+      className="flex items-start gap-2 rounded-2xl bg-[#ffa062]/10 px-4 py-3 text-sm text-r-text ring-1 ring-[#ffa062]/35 ring-inset"
     >
       <AlertCircle className={cn("mt-0.5 size-4 flex-none", ERROR_TEXT)} aria-hidden />
       <span>{children}</span>
     </p>
-  );
-}
-
-function PrivateTag() {
-  return (
-    <span className="inline-flex flex-none items-center gap-1.5 text-[12.5px] text-r-text-3">
-      <Lock className="size-3.5 text-r-acc" aria-hidden />
-      ไม่แสดงบนเว็บ
-    </span>
   );
 }
 
@@ -289,6 +279,8 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
   const avatarUrlRef = useRef<string | undefined>(undefined);
   const cardFileRef = useRef<File | null>(null);
   const avatarFileRef = useRef<File | null>(null);
+  /** Avatar taken away a moment ago, kept while "เลิกทำ" is on screen. */
+  const removedAvatarRef = useRef<{ file: File; url: string } | null>(null);
   const avatarCrop = useAvatarCrop({
     maxEdge: HBD_IMAGE_SIZES.avatarClientMaxEdge,
     maxBytes: HBD_AVATAR_LIMITS.maxBytes,
@@ -316,6 +308,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
     return () => {
       revokeUrl(cardUrlRef.current);
       revokeUrl(avatarUrlRef.current);
+      revokeUrl(removedAvatarRef.current?.url);
     };
   }, []);
 
@@ -373,6 +366,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
   function clearMedia() {
     setCardMedia(null, undefined);
     setAvatarMedia(null, undefined);
+    dropRemovedAvatar();
     avatarCrop.clear();
     if (cardInputRef.current) cardInputRef.current.value = "";
     if (avatarInputRef.current) avatarInputRef.current.value = "";
@@ -430,7 +424,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
     if (!file) return;
 
     if (file.size > HBD_AVATAR_LIMITS.maxSourceBytes) {
-      setAvatarError("ไฟล์ avatar ใหญ่เกินไป (สูงสุด 10 MB)");
+      setAvatarError("ไฟล์รูปโปรไฟล์ใหญ่เกินไป (สูงสุด 10 MB)");
       event.target.value = "";
       return;
     }
@@ -446,11 +440,31 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
     if (cardInputRef.current) cardInputRef.current.value = "";
   }
 
-  function clearAvatar() {
+  function dropRemovedAvatar() {
+    revokeUrl(removedAvatarRef.current?.url);
+    removedAvatarRef.current = null;
+  }
+
+  /** "เอารูปออก": keep the photo for a few seconds so "เลิกทำ" can bring it back. */
+  function removeAvatar() {
+    dropRemovedAvatar();
+    const file = avatarFileRef.current;
+    const url = avatarUrlRef.current;
+    if (file && url) {
+      removedAvatarRef.current = { file, url };
+      avatarUrlRef.current = undefined; // not revoked by setAvatarMedia below
+    }
     setAvatarError(null);
     setAvatarMedia(null, undefined);
     avatarCrop.clear();
     if (avatarInputRef.current) avatarInputRef.current.value = "";
+  }
+
+  function undoRemoveAvatar() {
+    const removed = removedAvatarRef.current;
+    if (!removed) return;
+    removedAvatarRef.current = null;
+    setAvatarMedia(removed.file, removed.url);
   }
 
   const cardMissing = !cardFile || !cardPreviewUrl;
@@ -502,7 +516,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
         return;
       }
       if (avatar && avatar.size > HBD_AVATAR_LIMITS.maxBytes) {
-        setSendError("ไฟล์ avatar ใหญ่เกินไปหลังย่อ — ลองใช้รูปอื่น");
+        setSendError("ไฟล์รูปโปรไฟล์ใหญ่เกินไปหลังย่อ — ลองใช้รูปอื่น");
         return;
       }
 
@@ -532,7 +546,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
       setPhase("done");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
-      setSendError("เครือข่ายมีปัญหา — ลองอีกครั้ง");
+      setSendError("เชื่อมต่อไม่ได้ ตรวจอินเทอร์เน็ตแล้วลองใหม่");
     } finally {
       setLoading(false);
     }
@@ -560,9 +574,13 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
 
   const avatarSrc = avatarPreviewUrl ?? HBD_AVATAR_DEFAULT;
   const handleShown = contactHandle.trim();
-  const cardMessage = cardError ?? (showMissing && cardMissing ? "กรุณาอัปโหลดรูปการ์ดจาก template" : null);
+  const cardMessage = cardError ?? (showMissing && cardMissing ? "กรุณาอัปโหลดรูปการ์ดจากเทมเพลต" : null);
   const nameMessage = showMissing && nameMissing ? "กรุณากรอกชื่อที่จะแสดงบนเว็บ" : null;
-  const contactMessage = showMissing && contactMissing ? "กรุณากรอกชื่อช่องทางติดต่อ" : null;
+  const contactMessage = showMissing && contactMissing
+      ? contactChannel === "x"
+        ? "กรุณากรอกชื่อบัญชี X"
+        : "กรุณากรอกชื่อผู้ใช้ Discord"
+      : null;
 
   const steps = [
     { title: "การ์ดอวยพร", sub: cardFile?.name ?? "", done: !cardMissing },
@@ -844,7 +862,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
           aria-describedby={cardMessage ? `${ids}-card-error` : undefined}
           className={cn(
             "mt-4 flex w-full flex-col items-center gap-2.5 rounded-[18px] border-[1.5px] border-dashed bg-white/[0.02] px-4 py-9 text-r-text transition-colors hover:border-r-pri/70 hover:bg-r-pri/[0.04] sm:py-11",
-            cardMessage ? "border-[#ff8fb0]" : "border-r-text-2/35",
+            cardMessage ? "border-[#ffa062]" : "border-r-text-2/35",
             FOCUS
           )}
         >
@@ -876,59 +894,35 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
         className="sr-only"
         tabIndex={-1}
       />
-      <div className="mt-5 flex items-center gap-3.5">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={avatarSrc}
-          alt="รูปโปรไฟล์"
-          className="size-16 flex-none rounded-full object-cover ring-2 ring-r-pri/35"
-        />
-        <div className="min-w-0">
-          <p className="text-[0.90625rem] text-r-text">
-            รูปโปรไฟล์<span className="ml-2 text-[12.5px] text-r-text-3">ไม่บังคับ</span>
-          </p>
-          <div className="flex flex-wrap gap-x-3">
-            {avatarFile ? (
-              <>
-                <button type="button" onClick={() => avatarInputRef.current?.click()} className={LINK_BTN}>
-                  เปลี่ยนรูป
-                </button>
-                {avatarCrop.canRecrop ? (
-                  <button type="button" onClick={avatarCrop.recrop} className={LINK_BTN}>
-                    <Crop className="size-3.5" aria-hidden />
-                    ครอปใหม่
-                  </button>
-                ) : null}
-                <button type="button" onClick={clearAvatar} className={cn(LINK_BTN, "text-r-text-2 hover:text-r-text")}>
-                  เอาออก
-                </button>
-              </>
-            ) : (
-              <button type="button" onClick={() => avatarInputRef.current?.click()} className={LINK_BTN}>
-                <Upload className="size-3.5" aria-hidden />
-                เลือกรูป
-              </button>
-            )}
-          </div>
+      <div className="mt-5 flex items-start gap-4">
+        <div className="pt-[22px]">
+          <AvatarPicker
+            src={avatarPreviewUrl ?? null}
+            onPick={() => avatarInputRef.current?.click()}
+            onRemove={removeAvatar}
+            onUndoRemove={undoRemoveAvatar}
+            onRemoveSettled={dropRemovedAvatar}
+          />
+        </div>
+        <div className="min-w-0 flex-1">
+          <label htmlFor={`${ids}-name`} className={LABEL}>
+            ชื่อที่แสดง<span className="text-r-pri"> *</span>
+          </label>
+          <input
+            id={`${ids}-name`}
+            value={displayName}
+            autoComplete="nickname"
+            onChange={(event) => setDisplayName(event.target.value)}
+            placeholder="เช่น ฮันนี่"
+            aria-invalid={Boolean(nameMessage)}
+            aria-describedby={nameMessage ? `${ids}-name-error` : undefined}
+            className={cn(INPUT, "mt-2")}
+          />
+          {nameMessage ? <FieldError id={`${ids}-name-error`}>{nameMessage}</FieldError> : null}
         </div>
       </div>
+      {avatarPreviewUrl ? null : <p className={cn(HINT, "mt-2")}>รูปโปรไฟล์ · ไม่บังคับ</p>}
       {avatarError ? <FieldError>{avatarError}</FieldError> : null}
-      <div className="mt-[18px]">
-        <label htmlFor={`${ids}-name`} className={LABEL}>
-          ชื่อที่แสดง<span className="text-r-pri"> *</span>
-        </label>
-        <input
-          id={`${ids}-name`}
-          value={displayName}
-          autoComplete="nickname"
-          onChange={(event) => setDisplayName(event.target.value)}
-          placeholder="เช่น ฮันนี่"
-          aria-invalid={Boolean(nameMessage)}
-          aria-describedby={nameMessage ? `${ids}-name-error` : undefined}
-          className={cn(INPUT, "mt-2")}
-        />
-        {nameMessage ? <FieldError id={`${ids}-name-error`}>{nameMessage}</FieldError> : null}
-      </div>
       <div className="mt-[18px]">
         <label htmlFor={`${ids}-message`} className={LABEL}>
           ข้อความอวยพร<span className="ml-2 text-[12.5px] text-r-text-3">ไม่บังคับ</span>
@@ -951,10 +945,10 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
       className={cn(CARD, "scroll-mt-24")}
       aria-labelledby={`${ids}-contact`}
     >
-      <StepTitle n={3} id={`${ids}-contact`} done={!contactMissing} required aside={<PrivateTag />}>
+      <StepTitle n={3} id={`${ids}-contact`} done={!contactMissing} required>
         ช่องทางติดต่อ
       </StepTitle>
-      <p id={`${ids}-contact-hint`} className={cn(HINT, "mt-1.5 text-[12.5px] leading-relaxed")}>
+      <p id={`${ids}-contact-hint`} className={cn(HINT, "mt-1.5 leading-relaxed")}>
         {CONTACT_HINT}
       </p>
       <div className="mt-4 flex flex-col gap-2.5 sm:flex-row sm:items-center">
@@ -1058,7 +1052,6 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
         <span className="min-w-0 flex-1 truncate text-r-text">
           {channelLabel(contactChannel)} · {handleShown}
         </span>
-        <PrivateTag />
       </div>
       {loading ? (
         <div className={CARD} role="status" aria-live="polite">
@@ -1066,7 +1059,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
             <Spinner />
             <div>
               <p className="text-base text-r-text">กำลังส่งการ์ดอวยพร…</p>
-              <p className={cn(HINT, "mt-0.5 text-[12.5px]")}>อย่าปิดหน้านี้จนกว่าจะส่งเสร็จ</p>
+              <p className={cn(HINT, "mt-0.5")}>อย่าปิดหน้านี้จนกว่าจะส่งเสร็จ</p>
             </div>
           </div>
           <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/[0.08]">
@@ -1109,8 +1102,8 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
           ขอบคุณนะฮันนี่
         </p>
         <p className="mt-2 text-sm leading-[1.7] text-r-text-2">
-          การ์ดของคุณจะถูกนำไปจัดแสดงในหน้ารวมคำอวยพร
-          <span className="whitespace-nowrap">เร็วๆ นี้</span>
+          ทีมงานจะตรวจการ์ดก่อน
+          <span className="whitespace-nowrap">ผ่านแล้วจะขึ้นในหน้าคำอวยพร</span>
         </p>
         <div className="mx-auto mt-6 max-w-[400px] space-y-2.5">
           {standalone ? (
@@ -1172,7 +1165,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
                 type="button"
                 onClick={clearFormData}
                 className={cn(
-                  "inline-flex h-11 flex-1 items-center justify-center rounded-full bg-[#ff8fb0] px-4 text-[0.9375rem] font-medium text-r-on-pri transition-colors hover:bg-[#ffa6c1]",
+                  "inline-flex h-11 flex-1 items-center justify-center rounded-full bg-[#ffa062] px-4 text-[0.9375rem] font-medium text-r-on-pri transition-colors hover:bg-[#ffb685]",
                   FOCUS
                 )}
               >

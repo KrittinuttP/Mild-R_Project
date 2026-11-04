@@ -106,25 +106,25 @@ const SIZE =
 
 const TONE = {
   "mild-r": {
-    content: "rounded-2xl border-[#f3b8c4]/20 bg-[#140a0d] text-[#fff5f7]",
+    content: "rounded-2xl border-white/10 bg-r-bg text-r-text",
     overlay: "bg-black/70 supports-backdrop-filter:backdrop-blur-sm",
-    close: "text-[#f3b8c4] hover:bg-[#e85a7a]/15 hover:text-[#fff5f7]",
+    close: "text-r-text-2 hover:bg-r-pri/15 hover:text-r-text",
     title:
-      "font-[family-name:var(--font-display)] text-lg leading-snug text-[#fff5f7] sm:text-xl",
-    description: "text-[#f3b8c4]/70",
+      "font-[family-name:var(--font-display)] text-lg leading-snug text-r-text sm:text-xl",
+    description: "text-r-text-3",
     stage: "rounded-md bg-[#0c0508]",
     ambient: "opacity-95 saturate-200",
     vignette:
       "bg-[#140a0d]/10 bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(20,10,13,0.6)_100%)]",
-    nav: "rounded-full border border-[#f3b8c4]/25 bg-[#140a0d]/75 text-[#fff5f7] hover:scale-105 hover:bg-[#e85a7a]/90 hover:text-white",
-    counter: "text-[#f3b8c4]/55",
-    separator: "text-[#f3b8c4]/30",
+    nav: "rounded-full border border-r-text-2/25 bg-r-bg/75 text-r-text hover:scale-105 hover:bg-r-pri hover:text-r-on-pri",
+    counter: "text-r-text-3",
+    separator: "text-r-text-2/30",
     drawerHeader:
-      "border-t border-[#f3b8c4]/20 bg-[#140a0d]/70 text-[#fff5f7] hover:bg-[#3a1220]/75",
-    drawerCount: "rounded-full bg-[#e85a7a] text-white",
+      "border-t border-r-text-2/20 bg-r-bg/70 text-r-text hover:bg-[#3a1220]/75",
+    drawerCount: "rounded-full bg-r-pri text-r-on-pri",
     drawerChevron:
-      "rounded-full border-[#f3b8c4]/30 text-[#f3b8c4] group-hover:border-[#e85a7a] group-hover:text-[#fff5f7]",
-    drawerPanel: "bg-[#140a0d]/70",
+      "rounded-full border-r-text-2/30 text-r-text-2 group-hover:border-r-pri group-hover:text-r-text",
+    drawerPanel: "bg-r-bg/70",
   },
   cafe: {
     content: "rounded-none border-cafe-gold/30 bg-cafe-ground text-cafe-cream",

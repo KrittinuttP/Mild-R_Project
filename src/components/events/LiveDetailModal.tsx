@@ -435,7 +435,7 @@ export function LiveDetailModal({
                     </MetaPill>
                   ) : null}
                   {collab ? (
-                    <MetaPill className="border-[#d4a574]/60 bg-[#d4a574]/20 text-xs font-semibold text-[#f0d3b6] uppercase">
+                    <MetaPill className="border-r-acc/60 bg-r-acc/20 text-xs font-semibold text-r-acc uppercase">
                       Collab
                     </MetaPill>
                   ) : null}

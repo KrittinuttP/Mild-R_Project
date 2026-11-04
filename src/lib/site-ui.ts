@@ -49,7 +49,7 @@ export const LIVE_BADGE_MEMBER =
   "border-[#9b8cff]/55 bg-[#9b8cff]/14 text-[#cfc6ff] uppercase";
 
 export const LIVE_BADGE_COLLAB =
-  "border-[#d4a574]/55 bg-[#d4a574]/14 text-[#e8c49a] uppercase";
+  "border-r-acc/55 bg-r-acc/14 text-r-acc uppercase";
 
 export const LIVE_BADGE_SOFT =
   "border-[#f3b8c4]/20 bg-white/[0.03] text-[#f3b8c4]/80";

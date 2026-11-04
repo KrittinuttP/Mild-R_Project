@@ -86,13 +86,13 @@ function StreamCard({
                 "inline-flex items-center rounded-md border px-2 py-0.5 text-[0.58rem] tracking-[0.14em] uppercase backdrop-blur-sm",
                 row.is_own_channel
                   ? "border-[#f3b8c4]/30 bg-[#140a0d]/70 text-[#fff5f7]"
-                  : "border-[#d4a574]/40 bg-[#140a0d]/70 text-[#e8c49a]"
+                  : "border-r-acc/40 bg-[#140a0d]/70 text-r-acc"
               )}
             >
               {row.is_own_channel ? "Own" : "Other"}
             </span>
             {row.is_collab ? (
-              <span className="inline-flex items-center rounded-md border border-[#d4a574]/45 bg-[#d4a574]/15 px-2 py-0.5 text-[0.58rem] tracking-[0.14em] text-[#e8c49a] uppercase backdrop-blur-sm">
+              <span className="inline-flex items-center rounded-md border border-r-acc/45 bg-r-acc/15 px-2 py-0.5 text-[0.58rem] tracking-[0.14em] text-r-acc uppercase backdrop-blur-sm">
                 Collab
               </span>
             ) : null}

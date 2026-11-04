@@ -10,17 +10,18 @@ type BackLinkProps = {
   className?: string;
 };
 
-/** Shared glass-pill back nav — left-aligned site-wide. */
+/** Shared back nav (CI A+ outline pill) — left-aligned site-wide. */
 export function BackLink({ href, children, className }: BackLinkProps) {
   return (
     <Link
       href={href}
       className={cn(
-        "inline-flex self-start items-center gap-2 rounded-full border border-[#f3b8c4]/20 bg-white/[0.06] px-3.5 py-2 text-sm text-[#f3b8c4]/90 shadow-[0_8px_24px_rgba(0,0,0,0.2)] backdrop-blur-sm transition hover:border-[#e85a7a]/40 hover:bg-[#e85a7a]/15 hover:text-[#fff5f7]",
+        "inline-flex h-9 self-start items-center gap-1.5 rounded-full px-3.5 text-[13px] text-r-text-2 ring-1 ring-r-text-2/25 transition-colors ring-inset hover:text-r-text hover:ring-r-pri/50",
+        "outline-none focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-solid focus-visible:outline-r-acc",
         className
       )}
     >
-      <ArrowLeft className="size-4 shrink-0" />
+      <ArrowLeft className="size-3.5 shrink-0" aria-hidden />
       {children}
     </Link>
   );

@@ -16,10 +16,12 @@ import { ADMIN_FANART_LOGIN } from "@/lib/admin-next";
 import type { FanartSubmissionRow } from "@/lib/fanart-submissions-store";
 import {
   FANART_CONSENT_SUMMARY,
+  contactLabel,
   creditHref,
   creditLabel,
+  creditOfRow,
   formatMegabytes,
-  type FanartCredit,
+  type FanartPictureCredit,
 } from "@/lib/fanart-upload";
 import { cn } from "@/lib/utils";
 
@@ -169,26 +171,29 @@ type ZipFile = {
   creditUrl: string;
 };
 
-/** Credit of a picture; older submissions without one credit the sender's account. */
-function creditOf(row: FanartSubmissionRow): FanartCredit {
-  if (row.credit_type && row.credit_value) return { type: row.credit_type, value: row.credit_value };
-  return { type: "x", value: row.contact_handle };
+/** Credit of a picture: a name + optional @X / link (older rows: see creditOfRow). */
+function creditOf(row: FanartSubmissionRow): FanartPictureCredit {
+  return creditOfRow(row);
+}
+
+/** "เครดิต name · @x" in one line. */
+function creditText(credit: FanartPictureCredit): string {
+  return `เครดิต ${credit.name}${credit.link ? ` · ${creditLabel(credit.link)}` : ""}`;
 }
 
 /** Badge that tells the team when a credit is worth a second look. */
 function creditFlag(row: FanartSubmissionRow): { text: string; warn: boolean } | null {
   const credit = creditOf(row);
-  if (credit.type === "url") return { text: "ลิงก์ · กดเปิดดูได้", warn: false };
-  if (credit.value.toLowerCase() !== row.contact_handle.toLowerCase()) {
-    return { text: "คนละบัญชีกับผู้ส่ง · ควรเช็ค", warn: true };
-  }
+  if (credit.name !== row.display_name) return { text: "เครดิตคนวาด · ควรเช็ค", warn: true };
+  if (credit.link?.type === "url") return { text: "ลิงก์ · กดเปิดดูได้", warn: false };
   return null;
 }
 
 /** credits.txt inside the ZIP: what to print next to each picture. */
 function creditsText(files: ZipFile[]): string {
   const lines = files.map(
-    (file) => `${file.name}\n  เครดิต: ${file.credit} (${file.creditUrl})\n  ส่งโดย: ${file.sender}`
+    (file) =>
+      `${file.name}\n  เครดิต: ${file.credit}${file.creditUrl ? ` (${file.creditUrl})` : ""}\n  ส่งโดย: ${file.sender}`
   );
   return `เครดิตแฟนอาร์ต Mild-R\n\n${lines.join("\n\n")}\n`;
 }
@@ -628,7 +633,7 @@ export function AdminFanartClient() {
                     <div className="min-w-0">
                       <p className="truncate font-medium text-[#fff5f7]">{first.display_name}</p>
                       <p className="truncate text-sm text-[#f3b8c4]/80">
-                        {first.contact_channel === "x" ? `X · @${first.contact_handle}` : `Discord · ${first.contact_handle}`}
+                        {contactLabel(first.contact_channel, first.contact_handle)}
                         {first.contact_discord ? ` · Discord · ${first.contact_discord}` : ""}
                       </p>
                     </div>
@@ -696,16 +701,19 @@ export function AdminFanartClient() {
                           <div className="space-y-1">
                             <p className="flex min-w-0 items-baseline gap-1 text-[12.5px] text-[#fff5f7]">
                               <span className="flex-none">เครดิต:</span>
+                              <span className="truncate">{credit.name}</span>
+                            </p>
+                            {credit.link ? (
                               <a
-                                href={creditHref(credit)}
+                                href={creditHref(credit.link)}
                                 target="_blank"
                                 rel="noreferrer noopener"
-                                className="truncate text-[#f3b8c4] underline underline-offset-2 hover:text-[#fff5f7]"
+                                className="block truncate text-[11.5px] text-[#f3b8c4] underline underline-offset-2 hover:text-[#fff5f7]"
                               >
-                                {creditLabel(credit)}
-                                {credit.type === "url" ? " ↗" : ""}
+                                {creditLabel(credit.link)}
+                                {credit.link.type === "url" ? " ↗" : ""}
                               </a>
-                            </p>
+                            ) : null}
                             {flag ? (
                               <span
                                 className={cn(
@@ -874,7 +882,7 @@ export function AdminFanartClient() {
             <>
               {viewed.width && viewed.height ? <span>{`${viewed.width} × ${viewed.height} px`}</span> : null}
               {printFit(viewed.width, viewed.height) ? <span>{printFit(viewed.width, viewed.height)}</span> : null}
-              <span>เครดิต {creditLabel(creditOf(viewed))}</span>
+              <span>{creditText(creditOf(viewed))}</span>
             </>
           ) : null
         }

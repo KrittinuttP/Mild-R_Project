@@ -119,7 +119,25 @@ export function formatThaiDateRange(start: string, end?: string): string {
 export function formatEventDateRange(
   event: Pick<CalendarEvent, "date" | "endDate">
 ): string {
-  return formatThaiDateRange(event.date, event.endDate);
+  return formatEnglishDateRange(event.date, event.endDate);
+}
+
+const EN_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
+
+/** "9 Aug 2026" from YYYY-MM-DD — built by hand so server and browser never disagree. */
+export function formatEnglishDateShort(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  return `${d} ${EN_MONTHS[(m ?? 1) - 1]} ${y}`;
+}
+
+/** "14–15 Feb 2026", "22 Sep – 10 Oct 2026", "28 Dec 2026 – 3 Jan 2027", or a single date. */
+export function formatEnglishDateRange(start: string, end?: string): string {
+  if (!end || end === start) return formatEnglishDateShort(start);
+  const [y1, m1, d1] = start.split("-").map(Number);
+  const [y2, m2, d2] = end.split("-").map(Number);
+  if (y1 !== y2) return `${formatEnglishDateShort(start)} – ${formatEnglishDateShort(end)}`;
+  if (m1 !== m2) return `${d1} ${EN_MONTHS[m1 - 1]} – ${d2} ${EN_MONTHS[m2 - 1]} ${y2}`;
+  return `${d1}–${d2} ${EN_MONTHS[m2 - 1]} ${y2}`;
 }
 
 /** English short date like birthday style + year, e.g. "23 May 2024" */

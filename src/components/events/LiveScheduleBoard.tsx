@@ -110,7 +110,7 @@ function WeekSlotCard({
           cancelled
             ? "border-[#8a7f88]/30 opacity-85 hover:border-[#8a7f88]/50"
             : guestTone
-              ? "border-[#d4a574]/30 hover:border-[#d4a574]/50 hover:bg-[#d4a574]/10"
+              ? "border-r-acc/30 hover:border-r-acc/50 hover:bg-r-acc/10"
               : "border-r-line hover:border-r-pri/45 hover:bg-r-pri/[0.06]"
         )}
       >
@@ -191,7 +191,7 @@ function WeekSlotCard({
                   : isMember
                     ? "text-[#cfc6ff]"
                     : guestTone
-                      ? "text-[#e8c49a]"
+                      ? "text-r-acc"
                       : "text-r-pri"
               }
             />
@@ -248,7 +248,7 @@ function MobileCalendarTimeSlot({
           : isMember
             ? "border-[#9b8cff]/80"
             : guestTone
-              ? "border-[#d4a574]"
+              ? "border-r-acc"
               : "border-r-pri/70"
       )}
       title={`${time} · ${label}${cancelled ? " (ยกเลิก)" : ""}`}
@@ -261,7 +261,7 @@ function MobileCalendarTimeSlot({
             : isMember
               ? "text-[#cfc6ff]"
               : guestTone
-                ? "text-[#e8c49a]"
+                ? "text-r-acc"
                 : "text-r-pri"
         )}
       >
@@ -308,7 +308,7 @@ function CalendarMonthSlot({
           : isMember
             ? "border-[#9b8cff]/80 text-r-text hover:bg-[#9b8cff]/08"
             : guestTone
-              ? "border-[#d4a574] text-r-text hover:bg-white/5"
+              ? "border-r-acc text-r-text hover:bg-white/5"
               : "border-r-pri/60 text-r-text/90 hover:bg-white/5"
       )}
       title={`${slot.timePrevious ? `${slot.timePrevious}→` : ""}${time} · ${label}${cancelled ? " (ยกเลิก)" : ""}`}
@@ -328,7 +328,7 @@ function CalendarMonthSlot({
               isMember
                 ? "text-[#cfc6ff]"
                 : guestTone
-                  ? "text-[#e8c49a]"
+                  ? "text-r-acc"
                   : "text-r-pri"
             }
           />
@@ -775,7 +775,7 @@ export function LiveScheduleBoard() {
               [
                 ["Member", monthKindStats.member, "bg-[#9b8cff]"],
                 ["Solo", monthKindStats.solo, "bg-r-pri"],
-                ["Collab", monthKindStats.collab, "bg-[#d4a574]"],
+                ["Collab", monthKindStats.collab, "bg-r-acc"],
               ] as const
             ).map(([label, count, dot]) => (
               <span key={label} className={cn(R_CHIP_SOFT_CLASS, "gap-1.5 tabular-nums")}>
@@ -942,7 +942,7 @@ export function LiveScheduleBoard() {
             Solo
           </li>
           <li className="inline-flex items-center gap-1.5">
-            <span className="h-3 w-0.5 shrink-0 rounded-full bg-[#d4a574]" aria-hidden />
+            <span className="h-3 w-0.5 shrink-0 rounded-full bg-r-acc" aria-hidden />
             Collab
           </li>
           <li className="inline-flex items-center gap-1.5">

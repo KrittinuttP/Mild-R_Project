@@ -45,6 +45,7 @@
     "db:migrate:lucky-draw": "npx tsx --env-file=.env scripts/apply-sql.ts supabase/migrations/20261011120000_lucky_draw_entries.sql",
     "db:migrate:cafe-gate": "npx tsx --env-file=.env scripts/apply-sql.ts supabase/migrations/20261018120000_cafe_gate.sql",
     "db:migrate:fanart-discord": "npx tsx --env-file=.env scripts/apply-sql.ts supabase/migrations/20261031120000_fanart_contact_discord.sql",
+    "db:migrate:fanart-credit-name": "npx tsx --env-file=.env scripts/migrate-fanart-credit-name.ts",
     "agent:live-schedule": "npx tsx --env-file=.env.local scripts/run-live-schedule-agent.ts",
     "reprocess:x-live-schedule": "npx tsx --env-file=.env scripts/reprocess-x-live-schedule.ts",
     "cron:x": "npx tsx --env-file=.env scripts/setup-x-feed-cron.ts",

@@ -5,7 +5,7 @@ import {
   listFanartSubmissions,
   type FanartSubmissionRow,
 } from "@/lib/fanart-submissions-store";
-import { creditHref, creditLabel } from "@/lib/fanart-upload";
+import { contactLabel, creditHref, creditLabel, creditOfRow } from "@/lib/fanart-upload";
 import { isSiteAdminUnlocked } from "@/lib/site-admin-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -23,7 +23,8 @@ const LINK_SECONDS = 30 * 60;
 
 /** Folder name that is safe on Windows and macOS. */
 function folderName(row: FanartSubmissionRow) {
-  const handle = row.contact_channel === "x" ? `@${row.contact_handle}` : row.contact_handle;
+  const handle =
+    row.contact_channel === "x" ? `@${row.contact_handle}` : row.contact_channel === "discord" ? row.contact_handle : "Facebook";
   return `${row.display_name} (${handle})`
     .replace(/[\\/:*?"<>|\u0000-\u001f]/g, "_")
     .replace(/[. ]+$/, "")
@@ -91,18 +92,16 @@ export async function POST(request: Request) {
       const number = (counters.get(folder) ?? 0) + 1;
       counters.set(folder, number);
       const ext = EXTENSION[row.original_type ?? ""] ?? "jpg";
-      const credit = row.credit_type && row.credit_value
-        ? { type: row.credit_type, value: row.credit_value }
-        : { type: "x" as const, value: row.contact_handle };
+      const credit = creditOfRow(row);
       return [
         {
           id: row.id,
           url,
           type: row.original_type,
           name: `${folder}/${String(number).padStart(2, "0")}.${ext}`,
-          sender: `${row.display_name} (@${row.contact_handle})`,
-          credit: creditLabel(credit),
-          creditUrl: creditHref(credit),
+          sender: `${row.display_name} (${contactLabel(row.contact_channel, row.contact_handle)})`,
+          credit: credit.link ? `${credit.name} · ${creditLabel(credit.link)}` : credit.name,
+          creditUrl: credit.link ? creditHref(credit.link) : "",
         },
       ];
     });

@@ -25,8 +25,8 @@ import { ProtectedImage } from "@/components/media/ProtectedImage";
 import {
   eventVideosLabel,
   formatEventDateRange,
-  formatThaiDate,
-  formatThaiDateRange,
+  formatEnglishDateRange,
+  formatEnglishDateShort,
 } from "@/lib/events";
 import {
   BODY_CLASS,
@@ -59,7 +59,7 @@ function toTiles(event: CalendarEvent, gallery: EventGalleryImage[]): GalleryTil
       alt: image.alt,
       caption: image.alt,
       description: image.publishedAt
-        ? `โพสต์ ${formatThaiDate(image.publishedAt.slice(0, 10))}`
+        ? `โพสต์ ${formatEnglishDateShort(image.publishedAt.slice(0, 10))}`
         : undefined,
     }));
   }
@@ -77,7 +77,7 @@ function SectionTitle({ children }: { children: string }) {
 }
 
 function EventLiveRow({ live }: { live: EventLive }) {
-  const when = [live.date ? formatThaiDate(live.date) : null, live.time]
+  const when = [live.date ? formatEnglishDateShort(live.date) : null, live.time]
     .filter(Boolean)
     .join(" · ");
   const stats = [
@@ -205,7 +205,7 @@ export function EventDetail({
                     className="grid gap-1 px-4 py-3.5 sm:grid-cols-[11rem_minmax(0,1fr)] sm:gap-4 sm:px-5"
                   >
                     <div className="text-sm tabular-nums text-[#f3b8c4]/80">
-                      {formatThaiDateRange(item.date, item.endDate)}
+                      {formatEnglishDateRange(item.date, item.endDate)}
                       {item.time ? (
                         <span className="mt-0.5 flex items-center gap-1 text-xs text-[#f3b8c4]/60">
                           <Clock className="size-3" aria-hidden />

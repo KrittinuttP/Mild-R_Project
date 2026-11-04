@@ -9,7 +9,7 @@ import {
   findFanartSubmissionByOriginal,
 } from "@/lib/fanart-submissions-store";
 import { processFanartOriginal } from "@/lib/fanart-image";
-import { verifyFanartTicket } from "@/lib/fanart-ticket";
+import { ticketCredit, verifyFanartTicket } from "@/lib/fanart-ticket";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
@@ -114,6 +114,7 @@ export async function POST(request: Request) {
   }
   const thumbUrl = supabase.storage.from(FANART_STORAGE_BUCKET).getPublicUrl(thumbPath).data.publicUrl;
 
+  const credit = ticketCredit(ticket, index);
   try {
     const row = await createFanartSubmission({
       id,
@@ -135,8 +136,9 @@ export async function POST(request: Request) {
       batchId: ticket.batchId,
       consentAt: ticket.consentAt,
       consentVersion: ticket.consentVersion,
-      creditType: ticket.credits[index]?.type ?? "x",
-      creditValue: ticket.credits[index]?.value ?? ticket.handle,
+      creditName: credit.name,
+      creditType: credit.link?.type ?? null,
+      creditValue: credit.link?.value ?? null,
     });
     return NextResponse.json({ ok: true, id: row.id });
   } catch (error) {

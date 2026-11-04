@@ -139,7 +139,7 @@ function formatMonthHeading(monthKey: string): string {
   if (monthKey === UNKNOWN_MONTH) return "ไม่ระบุวันที่";
   const d = new Date(`${monthKey}-15T12:00:00+07:00`);
   if (Number.isNaN(d.getTime())) return monthKey;
-  return d.toLocaleDateString("th-TH-u-ca-gregory", {
+  return d.toLocaleDateString("en-GB", {
     timeZone: "Asia/Bangkok",
     month: "long",
     year: "numeric",

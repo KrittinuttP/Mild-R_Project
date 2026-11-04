@@ -20,9 +20,10 @@ export function parseGalleryCategory(value: unknown): GalleryCategoryKey {
     : DEFAULT_GALLERY_CATEGORY;
 }
 
+/** Capsule holding the category pills (CI A+ segmented style). */
+export const GALLERY_PILL_GROUP_CLASS =
+  "inline-flex max-w-full flex-wrap gap-1 rounded-full bg-white/[0.04] p-1 ring-1 ring-r-line ring-inset";
 export const GALLERY_PILL_CLASS =
-  "rounded-full border px-4 py-2 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e85a7a]/60";
-export const GALLERY_PILL_ACTIVE_CLASS =
-  "border-[#e85a7a]/60 bg-[#e85a7a]/20 text-[#fff5f7]";
-export const GALLERY_PILL_IDLE_CLASS =
-  "border-[#f3b8c4]/20 text-[#f3b8c4]/70 hover:border-[#f3b8c4]/40 hover:text-[#fff5f7]";
+  "inline-flex h-9 items-center rounded-full px-4 text-sm transition-colors outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-r-acc";
+export const GALLERY_PILL_ACTIVE_CLASS = "bg-r-text font-semibold text-r-bg";
+export const GALLERY_PILL_IDLE_CLASS = "text-r-text-2 hover:text-r-text";

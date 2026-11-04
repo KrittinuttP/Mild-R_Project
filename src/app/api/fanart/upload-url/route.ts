@@ -5,11 +5,13 @@ import {
   FANART_CONSENT,
   FANART_LIMITS,
   checkContactHandle,
-  checkCredit,
+  checkCreditLink,
+  checkCreditName,
   checkDisplayName,
+  isContactChannel,
   isFanartMimeType,
-  type FanartCredit,
   type FanartMimeType,
+  type FanartPictureCredit,
 } from "@/lib/fanart-upload";
 import {
   FANART_ORIGINALS_BUCKET,
@@ -68,10 +70,14 @@ function readFileClaims(raw: FormDataEntryValue | null): FileClaim[] | string {
 }
 
 /**
- * One credit per picture. A missing or empty entry means the fan's own X
- * account, which is also the default on the form.
+ * One credit per picture: a name plus an optional @X / link. A missing entry
+ * means the fan's own credit, which is also the default on the form.
  */
-function readCredits(raw: FormDataEntryValue | null, count: number, handle: string): FanartCredit[] | string {
+function readCredits(
+  raw: FormDataEntryValue | null,
+  count: number,
+  own: FanartPictureCredit
+): FanartPictureCredit[] | string {
   let parsed: unknown = [];
   if (raw !== null) {
     try {
@@ -81,17 +87,18 @@ function readCredits(raw: FormDataEntryValue | null, count: number, handle: stri
     }
   }
   if (!Array.isArray(parsed) || parsed.length > count) return "เครดิตไม่ถูกต้อง";
-  const credits: FanartCredit[] = [];
+  const credits: FanartPictureCredit[] = [];
   for (let index = 0; index < count; index += 1) {
-    const item = parsed[index] as { type?: unknown; value?: unknown } | null | undefined;
-    const value = typeof item?.value === "string" ? item.value : "";
-    if (!item || !value.trim()) {
-      credits.push({ type: "x", value: handle });
+    const item = parsed[index] as { name?: unknown; type?: unknown; value?: unknown } | null | undefined;
+    if (!item) {
+      credits.push(own);
       continue;
     }
-    const checked = checkCredit(String(item.type ?? ""), value);
-    if ("error" in checked) return `รูปที่ ${index + 1} · ${checked.error}`;
-    credits.push(checked.credit);
+    const name = checkCreditName(typeof item.name === "string" ? item.name : "");
+    if ("error" in name) return `รูปที่ ${index + 1} · ${name.error}`;
+    const link = checkCreditLink(String(item.type ?? ""), typeof item.value === "string" ? item.value : "");
+    if ("error" in link) return `รูปที่ ${index + 1} · ${link.error}`;
+    credits.push({ name: name.name, link: link.link });
   }
   return credits;
 }
@@ -119,24 +126,22 @@ export async function POST(request: Request) {
   const name = checkDisplayName(String(form.get("displayName") ?? ""));
   if ("error" in name) return fail(name.error);
 
-  // Contact is an X account only (Discord was dropped on 2026-10-21).
-  const channel = "x" as const;
+  // The fan's own credit: the display name + an optional @X / link.
+  const ownLink = checkCreditLink(String(form.get("creditType") ?? ""), String(form.get("creditValue") ?? ""));
+  if ("error" in ownLink) return fail(ownLink.error);
+  const ownCredit: FanartPictureCredit = { name: name.name, link: ownLink.link };
+
+  // One contact for the team (X, Discord or Facebook); never shown publicly.
+  const channelRaw = String(form.get("contactChannel") ?? "x");
+  if (!isContactChannel(channelRaw)) return fail("ช่องทางติดต่อไม่ถูกต้อง");
+  const channel = channelRaw;
   const handle = checkContactHandle(channel, String(form.get("contactHandle") ?? ""));
   if ("error" in handle) return fail(handle.error);
-
-  // Optional backup contact.
-  const discordRaw = String(form.get("contactDiscord") ?? "").trim();
-  let discord: string | null = null;
-  if (discordRaw) {
-    const checked = checkContactHandle("discord", discordRaw);
-    if ("error" in checked) return fail(checked.error);
-    discord = checked.handle;
-  }
 
   const claims = readFileClaims(form.get("files"));
   if (typeof claims === "string") return fail(claims);
 
-  const credits = readCredits(form.get("credits"), claims.length, handle.handle);
+  const credits = readCredits(form.get("credits"), claims.length, ownCredit);
   if (typeof credits === "string") return fail(credits);
 
   const avatar = form.get("avatar");
@@ -198,12 +203,12 @@ export async function POST(request: Request) {
   }
 
   const ticket = signFanartTicket({
-    v: 1,
+    v: 2,
     batchId,
     displayName: name.name,
     channel,
     handle: handle.handle,
-    discord,
+    discord: null,
     avatarPath,
     avatarUrl,
     paths: uploads.map((upload) => upload.path),

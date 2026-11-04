@@ -14,12 +14,12 @@ export function formatVideoDuration(seconds: number | null | undefined): string 
   return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${ss}` : `${m}:${ss}`;
 }
 
-/** "3 ต.ค. 2026" from a Bangkok YYYY-MM-DD. */
+/** "3 Oct 2026" from a Bangkok YYYY-MM-DD. */
 export function formatVideoDate(ymd: string | null | undefined): string {
   if (!ymd) return "";
   const d = new Date(`${ymd}T12:00:00+07:00`);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("th-TH-u-ca-gregory", {
+  return d.toLocaleDateString("en-GB", {
     timeZone: "Asia/Bangkok",
     day: "numeric",
     month: "short",
@@ -32,7 +32,7 @@ export function formatVideoViews(views: number | null | undefined): string | nul
   return `${new Intl.NumberFormat("en", { notation: "compact" }).format(views)} views`;
 }
 
-/** "Mild-R · 3 ต.ค. 2026" */
+/** "Mild-R · 3 Oct 2026" */
 export function videoSubtitle(item: Pick<VideoItem, "channelLabel" | "date">): string {
   return [item.channelLabel, formatVideoDate(item.date)].filter(Boolean).join(" · ");
 }

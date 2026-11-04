@@ -3,11 +3,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
 import { ProtectedImage } from "@/components/media/ProtectedImage";
-import {
-  BADGE_ACCENT_CLASS,
-  BADGE_SOFT_CLASS,
-  DISPLAY_H3_CLASS,
-} from "@/lib/site-ui";
+import { R_CHIP_PRI_CLASS, R_CHIP_SOFT_CLASS, R_H3_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 
 export type CoverMedia = "square-contain" | "wide-cover";
@@ -21,11 +17,10 @@ const POSITION_CLASS: Record<CoverPosition, string> = {
 };
 
 const TONE_CLASS: Record<CoverCardTone, string> = {
-  default: "border-[#f3b8c4]/12 hover:border-[#e85a7a]/40 hover:bg-[#1a0c12]",
-  muted:
-    "border-[#f3b8c4]/10 opacity-90 hover:border-[#f3b8c4]/25 hover:bg-[#1a0c12] hover:opacity-100",
+  default: "hover:shadow-[inset_0_0_0_1px_rgba(242,67,125,0.45)]",
+  muted: "opacity-90 hover:opacity-100 hover:shadow-[inset_0_0_0_1px_rgba(243,184,196,0.3)]",
   featured:
-    "border-[#e85a7a]/30 shadow-[0_16px_40px_rgba(232,90,122,0.12)] hover:border-[#e85a7a]/55 hover:bg-[#1a0c12]",
+    "shadow-[inset_0_0_0_1px_rgba(242,67,125,0.35),0_16px_40px_rgba(242,67,125,0.12)] hover:shadow-[inset_0_0_0_1px_rgba(242,67,125,0.6),0_16px_40px_rgba(242,67,125,0.16)]",
 };
 
 type CoverImageProps = {
@@ -143,8 +138,8 @@ export function CoverCard({
   uniform = false,
 }: CoverCardProps) {
   const className = cn(
-    "group flex h-full w-full flex-col overflow-hidden rounded-3xl border bg-[#1a0c12]/60 text-left transition",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e85a7a]/60",
+    "r-card group flex h-full w-full flex-col overflow-hidden rounded-3xl text-left transition",
+    "outline-none focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-solid focus-visible:outline-r-acc",
     TONE_CLASS[tone]
   );
 
@@ -158,14 +153,16 @@ export function CoverCard({
         dimmed={tone === "muted"}
         hoverZoom
       >
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#1a0c12] via-[#1a0c12]/40 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-r-bg via-r-bg/40 to-transparent" />
         {badge ? (
           <div className="absolute top-3 left-3">{badge}</div>
         ) : status ? (
           <span
             className={cn(
-              status.tone === "accent" ? BADGE_ACCENT_CLASS : BADGE_SOFT_CLASS,
-              "absolute top-3 left-3 bg-[#140a0d]/80 uppercase backdrop-blur-sm"
+              status.tone === "accent"
+                ? R_CHIP_PRI_CLASS
+                : cn(R_CHIP_SOFT_CLASS, "bg-r-bg/80 backdrop-blur-sm"),
+              "absolute top-3 left-3 uppercase"
             )}
           >
             {status.label}
@@ -180,7 +177,7 @@ export function CoverCard({
           className={cn(
             eyebrow && "mt-2",
             "transition group-hover:text-white",
-            DISPLAY_H3_CLASS,
+            R_H3_CLASS,
             uniform && "line-clamp-2"
           )}
         >
@@ -189,7 +186,7 @@ export function CoverCard({
         {subtitle ? (
           <p
             className={cn(
-              "mt-1 text-sm text-[#f3b8c4]/65",
+              "mt-1 text-sm text-r-text-3",
               uniform && "line-clamp-1"
             )}
           >
@@ -200,7 +197,7 @@ export function CoverCard({
         {summary ? (
           <p
             className={cn(
-              "mt-3 text-sm leading-relaxed text-[#f7d7de]/80",
+              "mt-3 text-sm leading-relaxed text-r-text-2",
               uniform ? "line-clamp-2" : "line-clamp-3"
             )}
           >
@@ -211,7 +208,7 @@ export function CoverCard({
         {footnote ? (
           <p
             className={cn(
-              "text-xs text-[#f3b8c4]/55",
+              "text-xs text-r-text-3",
               uniform ? "mt-auto line-clamp-1 pt-4" : "mt-2"
             )}
           >
@@ -220,7 +217,7 @@ export function CoverCard({
         ) : null}
 
         {ctaLabel ? (
-          <span className="mt-auto inline-flex items-center gap-1.5 pt-5 text-sm tracking-wide text-[#e85a7a] transition group-hover:gap-2.5">
+          <span className="mt-auto inline-flex items-center gap-1.5 pt-5 text-sm tracking-wide text-r-pri transition-all group-hover:gap-2.5">
             {ctaLabel}
             <ArrowUpRight className="size-4" />
           </span>
