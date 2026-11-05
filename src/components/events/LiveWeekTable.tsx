@@ -36,6 +36,8 @@ import {
   LIVE_BADGE_COLLAB,
   LIVE_BADGE_MEMBER,
   LIVE_BADGE_PILL_COMPACT,
+  R_BADGE_S,
+  R_BADGE_TONE,
 } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type {
@@ -222,14 +224,11 @@ const APLUS_SKIN: LiveTableSkin = {
     "inline-flex items-center gap-1 rounded-full bg-r-pri px-2.5 py-0.5 text-[0.68rem] font-medium text-r-on-pri",
   statusIdleSm:
     "inline-flex items-center gap-1 rounded-full bg-r-bg/85 px-2.5 py-0.5 text-[0.68rem] font-medium text-r-text ring-1 ring-r-pri/40 ring-inset",
-  countdownSm:
-    "inline-flex items-center gap-1 rounded-full bg-r-bg/85 px-2.5 py-0.5 text-[0.68rem] text-r-text ring-1 ring-r-line ring-inset",
-  countdownSmBare:
-    "inline-flex items-center gap-1 rounded-full bg-white/[0.04] px-2.5 py-0.5 text-[0.68rem] text-r-text-2 ring-1 ring-r-line ring-inset",
-  statusLiveBare:
-    "inline-flex items-center gap-1 rounded-full bg-r-pri px-2.5 py-0.5 text-[0.68rem] font-medium text-r-on-pri",
-  statusIdleBare:
-    "inline-flex items-center gap-1 rounded-full bg-r-pri/14 px-2.5 py-0.5 text-[0.68rem] font-medium text-r-text ring-1 ring-r-pri/40 ring-inset",
+  // RBadge size S (5 Nov): countdown = meta · on air = now · idle = soft pink tint.
+  countdownSm: cn(R_BADGE_S, R_BADGE_TONE.meta, "bg-r-bg/85 text-r-text"),
+  countdownSmBare: `${R_BADGE_S} ${R_BADGE_TONE.meta}`,
+  statusLiveBare: `${R_BADGE_S} ${R_BADGE_TONE.now}`,
+  statusIdleBare: `${R_BADGE_S} bg-r-pri/14 font-medium text-r-text ring-1 ring-r-pri/45 ring-inset`,
   titleLg:
     "mt-3.5 line-clamp-2 font-[family-name:var(--font-display)] text-xl font-normal leading-snug tracking-normal text-r-text sm:text-2xl",
   titleMd:
