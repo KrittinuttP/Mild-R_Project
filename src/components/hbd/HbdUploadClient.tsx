@@ -72,13 +72,13 @@ const MISSING_SUMMARY = "ยังส่งไม่ได้ — กรุณ�
 const CONTACT_HINT = "จะใช้ช่องทางนี้ติดต่อกลับ ในกรณีที่มีปัญหา";
 
 const HBD_FORM_CACHE_KEY = "mild-r-hbd-upload-draft";
-/** Set once the "ก่อนเริ่ม" screen was read → next visit opens the form directly. */
+/** Set once the "วิธีส่ง" screen was read → next visit opens the form directly. */
 const HBD_INTRO_SEEN_KEY = "mild-r-hbd-upload-intro-seen";
 
-/** "ก่อนเริ่ม" screen · short steps; step 1 carries the template download. */
+/** "วิธีส่ง" screen · short steps; step 1 carries the template download. */
 const HOW_STEPS: ReadonlyArray<{ title: string; detail?: string }> = [
   { title: "โหลดเทมเพลต แล้วตกแต่งการ์ด" },
-  { title: "อัปโหลดการ์ด + ชื่อ + คำอวยพร", detail: "JPEG · PNG · WebP ไม่เกิน 20 MB" },
+  { title: "อัปโหลดการ์ด + ชื่อ + คำอวยพร", detail: "JPEG · PNG · WebP · ไม่เกิน 20 MB" },
   { title: "ใส่ช่องทางติดต่อ แล้วส่ง", detail: "X หรือ Discord" },
 ];
 
@@ -273,7 +273,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | undefined>();
   const [cacheReady, setCacheReady] = useState(false);
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
-  /** FAQ on the "ก่อนเริ่ม" screen: one answer open at a time. */
+  /** FAQ on the "วิธีส่ง" screen: one answer open at a time. */
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const cardInputRef = useRef<HTMLInputElement>(null);
@@ -396,7 +396,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  /** Step list: from the review page or "ก่อนเริ่ม" it goes back to the form first. */
+  /** Step list: from the review page or "วิธีส่ง" it goes back to the form first. */
   function goToSection(index: number) {
     if (phase === "preview" || phase === "intro") {
       if (loading) return;
@@ -414,7 +414,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
     if (!file) return;
 
     if (file.size > HBD_CARD_TEMPLATE.maxSourceBytes) {
-      setCardError("ไฟล์การ์ดใหญ่เกินไป (สูงสุด 20 MB)");
+      setCardError("ไฟล์การ์ดใหญ่เกินไป (ไม่เกิน 20 MB)");
       event.target.value = "";
       return;
     }
@@ -428,7 +428,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
     if (!file) return;
 
     if (file.size > HBD_AVATAR_LIMITS.maxSourceBytes) {
-      setAvatarError("ไฟล์รูปโปรไฟล์ใหญ่เกินไป (สูงสุด 10 MB)");
+      setAvatarError("ไฟล์รูปโปรไฟล์ใหญ่เกินไป (ไม่เกิน 10 MB)");
       event.target.value = "";
       return;
     }
@@ -536,7 +536,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
       const data = (await res.json().catch(() => null)) as { error?: string } | null;
 
       if (!res.ok) {
-        setSendError(data?.error ?? "ส่งไม่สำเร็จ");
+        setSendError(data?.error ?? "ส่งไม่สำเร็จ กรุณาลองใหม่");
         return;
       }
 
@@ -579,7 +579,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
   const avatarSrc = avatarPreviewUrl ?? HBD_AVATAR_DEFAULT;
   const handleShown = contactHandle.trim();
   const cardMessage = cardError ?? (showMissing && cardMissing ? "กรุณาอัปโหลดรูปการ์ดจากเทมเพลต" : null);
-  const nameMessage = showMissing && nameMissing ? "กรุณากรอกชื่อที่จะแสดงบนเว็บ" : null;
+  const nameMessage = showMissing && nameMissing ? "กรุณากรอกชื่อที่แสดง" : null;
   const contactMessage = showMissing && contactMissing
       ? contactChannel === "x"
         ? "กรุณากรอกชื่อบัญชี X"
@@ -665,9 +665,9 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
           </span>
           <span className="min-w-0">
             <span className={cn("block text-[15px]", phase === "intro" ? "text-r-text" : "text-r-text/85")}>
-              ก่อนเริ่ม
+              วิธีส่ง
             </span>
-            <span className="block truncate text-xs text-r-text-3">วิธีส่ง · เทมเพลต</span>
+            <span className="block truncate text-xs text-r-text-3">3 ขั้น · เทมเพลต</span>
           </span>
         </button>
         {steps.map((step, index) => {
@@ -880,7 +880,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
             <Upload className="size-5" aria-hidden />
           </span>
           <span className="text-[15px]">เลือกไฟล์การ์ด</span>
-          <span className="text-[12.5px] text-r-text-3">JPEG · PNG · WebP · สูงสุด 20 MB</span>
+          <span className="text-[12.5px] text-r-text-3">JPEG · PNG · WebP · ไม่เกิน 20 MB</span>
         </button>
       )}
       {cardMessage ? <FieldError id={`${ids}-card-error`}>{cardMessage}</FieldError> : null}
@@ -1116,7 +1116,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
           ขอบคุณนะฮันนี่
         </p>
         <p className="mt-2 text-sm leading-[1.7] text-r-text-2">
-          ทีมงานจะตรวจการ์ดก่อน
+          ทีมงานจะตรวจการ์ดก่อน{" "}
           <span className="whitespace-nowrap">ผ่านแล้วจะขึ้นในหน้าคำอวยพร</span>
         </p>
         <div className="mx-auto mt-6 max-w-[400px] space-y-2.5">

@@ -65,13 +65,13 @@ export async function POST(request: Request) {
   }
   if (!ALLOWED_IMAGE.has(card.type)) {
     return NextResponse.json(
-      { error: "รูปการ์ดต้องเป็น JPEG / PNG / WebP" },
+      { error: "รูปการ์ดต้องเป็น JPEG · PNG · WebP" },
       { status: 400 }
     );
   }
   if (card.size > HBD_CARD_TEMPLATE.maxBytes) {
     return NextResponse.json(
-      { error: `ไฟล์การ์ดใหญ่เกินไป (สูงสุด ${HBD_CARD_TEMPLATE.maxBytes / 1024 / 1024} MB)` },
+      { error: `ไฟล์การ์ดใหญ่เกินไป (ไม่เกิน ${HBD_CARD_TEMPLATE.maxBytes / 1024 / 1024} MB)` },
       { status: 400 }
     );
   }
@@ -79,13 +79,13 @@ export async function POST(request: Request) {
   if (avatar instanceof File && avatar.size > 0) {
     if (!ALLOWED_IMAGE.has(avatar.type)) {
       return NextResponse.json(
-        { error: "Avatar ต้องเป็น JPEG / PNG / WebP" },
+        { error: "รูปโปรไฟล์ต้องเป็น JPEG · PNG · WebP" },
         { status: 400 }
       );
     }
     if (avatar.size > HBD_AVATAR_LIMITS.maxBytes) {
       return NextResponse.json(
-        { error: `ไฟล์ avatar ใหญ่เกินไป (สูงสุด ${HBD_AVATAR_LIMITS.maxBytes / 1024 / 1024} MB)` },
+        { error: `ไฟล์รูปโปรไฟล์ใหญ่เกินไป (ไม่เกิน ${HBD_AVATAR_LIMITS.maxBytes / 1024 / 1024} MB)` },
         { status: 400 }
       );
     }
@@ -100,7 +100,7 @@ export async function POST(request: Request) {
     }
   } catch {
     return NextResponse.json(
-      { error: "อ่านไฟล์รูปไม่ได้ — ลองบันทึกเป็น JPEG / PNG แล้วอัปใหม่" },
+      { error: "อ่านไฟล์รูปไม่ได้ — ลองบันทึกเป็น JPEG หรือ PNG แล้วอัปใหม่" },
       { status: 400 }
     );
   }
@@ -144,7 +144,7 @@ export async function POST(request: Request) {
     if (avatarUploadError) {
       await supabase.storage.from(HBD_STORAGE_BUCKET).remove([cardPath]);
       return NextResponse.json(
-        { error: `อัปโหลด avatar ไม่สำเร็จ: ${avatarUploadError.message}` },
+        { error: `อัปโหลดรูปโปรไฟล์ไม่สำเร็จ: ${avatarUploadError.message}` },
         { status: 500 }
       );
     }

@@ -95,7 +95,7 @@ function ErrorLine({ children }: { children: ReactNode }) {
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ?? "";
 const UNDO_MS = 6000;
 
-/** Pink text link that opens the "ก่อนเริ่ม" screen from the form (narrow screens). */
+/** Pink text link that opens the "วิธีส่ง" screen from the form (narrow screens). */
 const INTRO_LINK = cn(
   "inline-flex min-h-8 items-center gap-1.5 rounded-md text-[13.5px] text-r-pri transition-colors hover:text-r-pri-hover",
   FOCUS
@@ -104,10 +104,10 @@ const INTRO_LINK = cn(
 const DRAFT_INVALID = "เครดิตที่กำลังแก้ยังไม่ถูกต้อง";
 const ART_MISSING = "กรุณาเลือกรูปแฟนอาร์ตอย่างน้อย 1 รูป";
 
-/** Set once the "ก่อนเริ่ม" screen was read → next visit opens the form directly. */
+/** Set once the "วิธีส่ง" screen was read → next visit opens the form directly. */
 const FANART_INTRO_SEEN_KEY = "mild-r-fanart-upload-intro-seen";
 
-/** "ก่อนเริ่ม" screen · the three form steps in short. */
+/** "วิธีส่ง" screen · the three form steps in short. */
 const HOW_STEPS: ReadonlyArray<{ title: string; detail: string }> = [
   {
     title: "กรอกชื่อ เครดิต และช่องทางติดต่อ",
@@ -115,7 +115,7 @@ const HOW_STEPS: ReadonlyArray<{ title: string; detail: string }> = [
   },
   {
     title: "เลือกแฟนอาร์ต",
-    detail: `ครั้งละสูงสุด ${FANART_LIMITS.maxFiles} รูป · JPEG · PNG · WebP · รูปละไม่เกิน ${Math.round(
+    detail: `ครั้งละไม่เกิน ${FANART_LIMITS.maxFiles} รูป · JPEG · PNG · WebP · รูปละไม่เกิน ${Math.round(
       FANART_LIMITS.maxPickBytes / (1024 * 1024)
     )} MB`,
   },
@@ -133,7 +133,7 @@ const HOW_FAQ = [
   },
   {
     q: `อยากส่งเกิน ${FANART_LIMITS.maxFiles} รูปทำยังไง?`,
-    a: `ส่งได้ครั้งละ ${FANART_LIMITS.maxFiles} รูป ส่งเสร็จแล้วกด “ส่งรูปเพิ่ม” เพื่อส่งชุดถัดไป`,
+    a: `ส่งได้ครั้งละไม่เกิน ${FANART_LIMITS.maxFiles} รูป ส่งเสร็จแล้วกด “ส่งรูปเพิ่ม” เพื่อส่งชุดถัดไป`,
   },
   {
     q: "ช่องทางติดต่อเอาไปใช้ทำอะไร?",
@@ -437,9 +437,9 @@ function FanartUploadForm({
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [phase, setPhase] = useState<Phase>("intro");
-  /** localStorage was read: "ก่อนเริ่ม" or the form can show without a flash. */
+  /** localStorage was read: "วิธีส่ง" or the form can show without a flash. */
   const [introReady, setIntroReady] = useState(false);
-  /** FAQ on the "ก่อนเริ่ม" screen: one answer open at a time. */
+  /** FAQ on the "วิธีส่ง" screen: one answer open at a time. */
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [items, setItems] = useState<Item[]>([]);
   const [prepErrors, setPrepErrors] = useState<string[]>([]);
@@ -472,7 +472,7 @@ function FanartUploadForm({
     itemsRef.current = items;
   }, [items]);
 
-  // Seen "ก่อนเริ่ม" before (or "ส่งรูปเพิ่ม" remounted this form) → straight to the form.
+  // Seen "วิธีส่ง" (intro) before (or "ส่งรูปเพิ่ม" remounted this form) → straight to the form.
   useEffect(() => {
     if (readIntroSeen()) setPhase("form");
     setIntroReady(true);
@@ -524,7 +524,7 @@ function FanartUploadForm({
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  /** Step list: from "ก่อนเริ่ม" it opens the form first, then scrolls to the step. */
+  /** Step list: from "วิธีส่ง" it opens the form first, then scrolls to the step. */
   function goToSection(index: number) {
     if (phase === "intro") {
       writeIntroSeen();
@@ -1136,20 +1136,15 @@ function FanartUploadForm({
             label={ownLinkType === "x" ? "บัญชี X สำหรับเครดิต" : "ลิงก์สำหรับเครดิต"}
             onChange={setOwnLinkValue}
             invalid={showFieldErrors && "error" in ownLinkCheck}
-            describedBy={`${ids}-credit-hint`}
+            describedBy={showFieldErrors && "error" in ownLinkCheck ? `${ids}-credit-hint` : undefined}
             className="min-w-0 flex-1"
           />
         </div>
-        <p
-          id={`${ids}-credit-hint`}
-          className={cn(HINT, "mt-1.5", showFieldErrors && "error" in ownLinkCheck && ERROR_TEXT)}
-        >
-          {showFieldErrors && "error" in ownLinkCheck ? (
+        {showFieldErrors && "error" in ownLinkCheck ? (
+          <p id={`${ids}-credit-hint`} className={cn(HINT, "mt-1.5", ERROR_TEXT)}>
             <ErrorLine>{ownLinkCheck.error.replace(/^เครดิต: /, "")}</ErrorLine>
-          ) : (
-            "แสดงใต้ชื่อในเครดิต"
-          )}
-        </p>
+          </p>
+        ) : null}
       </div>
 
       <div className="mt-5 border-t border-white/[0.08] pt-5">
@@ -1171,7 +1166,7 @@ function FanartUploadForm({
               className={cn(INPUT, "cursor-pointer appearance-none bg-white/[0.06] pr-9")}
             >
               {FANART_CONTACT_CHANNELS.map((option) => (
-                <option key={option.value} value={option.value} className="bg-[#1d0f14] text-r-text">
+                <option key={option.value} value={option.value} className="bg-[var(--r-panel)] text-r-text">
                   {option.label}
                 </option>
               ))}
@@ -1243,7 +1238,7 @@ function FanartUploadForm({
       >
         แฟนอาร์ต<span className="text-r-pri"> *</span>
       </StepTitle>
-      <p className={cn(HINT, "mt-1.5 ml-9")}>JPEG, PNG หรือ WebP · รูปละไม่เกิน 40 MB</p>
+      <p className={cn(HINT, "mt-1.5 ml-9")}>JPEG · PNG · WebP · รูปละไม่เกิน 40 MB</p>
       <input
         ref={artInputRef}
         type="file"
@@ -1500,7 +1495,7 @@ function FanartUploadForm({
           แกลเลอรี
         </Link>
       )}
-      {header(`ส่งได้ครั้งละสูงสุด ${FANART_LIMITS.maxFiles} รูป · ทีมงานจะตรวจก่อนนำไปใช้`, "left")}
+      {header("", "left")}
       <nav aria-label="ขั้นตอนการกรอก" className="-ml-3 hidden space-y-1 lg:block">
         <button
           type="button"
@@ -1523,9 +1518,9 @@ function FanartUploadForm({
           </span>
           <span className="min-w-0">
             <span className={cn("block text-[15px]", phase === "intro" ? "text-r-text" : "text-r-text/85")}>
-              ก่อนเริ่ม
+              วิธีส่ง
             </span>
-            <span className="block truncate text-xs text-r-text-3">วิธีส่ง · ใช้ที่ไหน</span>
+            <span className="block truncate text-xs text-r-text-3">3 ขั้น · ใช้ที่ไหน</span>
           </span>
         </button>
         {steps.map((step, index) => {
@@ -1559,22 +1554,6 @@ function FanartUploadForm({
           );
         })}
       </nav>
-      <div className={cn(R_CARD_CLASS, "hidden p-5", phase === "form" && "lg:block")}>
-        <p className="text-sm text-r-text">รูปจะถูกนำไปใช้ที่</p>
-        <ul className="mt-2">
-          {usagePlaces.map(({ icon: Icon, title, sub }) => (
-            <li key={title} className="flex items-center gap-3 py-2">
-              <span className="flex size-9 flex-none items-center justify-center rounded-xl bg-r-pri/12 text-r-pri">
-                <Icon className="size-[18px]" aria-hidden />
-              </span>
-              <span className="min-w-0">
-                <span className="block text-sm text-r-text">{title}</span>
-                <span className="block truncate text-xs text-r-text-3">{sub}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
     </aside>
   );
 
@@ -1916,7 +1895,7 @@ function FanartUploadForm({
 
       <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-6 z-40 flex justify-center px-4">
         {undo && phase === "form" ? (
-          <div className="pointer-events-auto flex items-center gap-3.5 rounded-full bg-[#2a1820] py-2 pr-2 pl-4 shadow-[0_10px_30px_rgba(0,0,0,0.5)] ring-1 ring-white/12">
+          <div className="pointer-events-auto flex items-center gap-3.5 rounded-full bg-[var(--r-raised)] py-2 pr-2 pl-4 shadow-[0_10px_30px_rgba(0,0,0,0.5)] ring-1 ring-white/12">
             <span className="text-[13.5px] whitespace-nowrap text-r-text">ลบรูปที่ {undo.index + 1} แล้ว</span>
             <button
               type="button"

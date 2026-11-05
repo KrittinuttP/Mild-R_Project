@@ -112,6 +112,10 @@
   --r-text-2: #f3b8c4;
   --r-text-3: rgb(243 184 196 / 0.72);
   --r-line: rgb(255 255 255 / 0.08);
+  /* Solid panels on the upload pages (menus, dialogs, toasts, footer) — tokens so a theme can swap them */
+  --r-panel: #1d0f14;
+  --r-raised: #2a1820;
+  --r-footer: #0e0609;
 }
 
 .dark {
@@ -312,6 +316,39 @@
 html:has([data-cafe-root]),
 body:has([data-cafe-root]) {
   background-color: var(--color-cafe-ground);
+}
+
+/* Standalone fan art upload (/upload/fanart · 5 Nov): Sherlock Sweetie colours on the
+   same form. Swaps the Project R tokens for the whole document (header, form, dialogs
+   in portals, footer) only while that page is mounted — /fanart/upload and /upload/hbd
+   keep the main theme. Error orange #ffa062 stays (reads well on green). */
+:root:has([data-theme="cafe-upload"]) {
+  --r-bg: var(--color-cafe-ground);
+  --r-surface: rgb(241 230 207 / 0.035);
+  --r-pri: var(--color-cafe-gold);
+  --r-pri-hover: var(--color-cafe-gold-soft);
+  --r-pri-active: #b08a38;
+  --r-on-pri: var(--color-cafe-ink);
+  --r-acc: var(--color-cafe-gold-pale);
+  --r-on-acc: var(--color-cafe-ink);
+  --r-nurse: var(--color-cafe-cream-light);
+  --r-text: var(--color-cafe-cream);
+  --r-text-2: var(--color-cafe-text);
+  --r-text-3: rgb(181 173 156 / 0.9);
+  --r-line: rgb(233 217 166 / 0.14);
+  --r-panel: var(--color-cafe-deep);
+  --r-raised: var(--color-cafe-felt);
+  --r-footer: var(--color-cafe-deep);
+  background-color: var(--color-cafe-ground);
+}
+:root:has([data-theme="cafe-upload"]) body {
+  background-color: var(--color-cafe-ground);
+}
+/* Headings (DISPLAY = --font-display) in the cafe serif; form text stays sans. */
+[data-theme="cafe-upload"] {
+  --font-display: var(--font-cafe-thai), var(--font-cafe-serif), serif;
+  color: var(--r-text-2);
+  background: radial-gradient(ellipse 120% 420px at 50% 0%, var(--color-cafe-glow), transparent 70%);
 }
 
 @keyframes cafe-tape-marquee {

@@ -99,7 +99,7 @@ export function AvatarPicker({
   const badge = (
     <span
       aria-hidden
-      className="absolute -right-1 -bottom-1 flex size-[26px] items-center justify-center rounded-full bg-[#2a1820] text-r-text shadow-[0_0_0_2px_var(--r-bg),0_4px_10px_rgba(0,0,0,0.4)] transition-colors group-hover:bg-r-pri group-hover:text-r-on-pri group-data-[popup-open]:bg-r-pri group-data-[popup-open]:text-r-on-pri"
+      className="absolute -right-1 -bottom-1 flex size-[26px] items-center justify-center rounded-full bg-[var(--r-raised)] text-r-text shadow-[0_0_0_2px_var(--r-bg),0_4px_10px_rgba(0,0,0,0.4)] transition-colors group-hover:bg-r-pri group-hover:text-r-on-pri group-data-[popup-open]:bg-r-pri group-data-[popup-open]:text-r-on-pri"
     >
       <Pencil className="size-3.5" />
     </span>
@@ -140,7 +140,7 @@ export function AvatarPicker({
         </Menu.Trigger>
         <Menu.Portal>
           <Menu.Positioner side="bottom" align="start" sideOffset={10} className="z-50">
-            <Menu.Popup className="w-44 rounded-[14px] bg-[#1d0f14] p-1.5 text-sm text-r-text shadow-[0_14px_34px_rgba(0,0,0,0.55)] ring-1 ring-white/10 outline-none ring-inset">
+            <Menu.Popup className="w-44 rounded-[14px] bg-[var(--r-panel)] p-1.5 text-sm text-r-text shadow-[0_14px_34px_rgba(0,0,0,0.55)] ring-1 ring-white/10 outline-none ring-inset">
               <Menu.Item onClick={pick} className={cn(itemClass, "h-10")}>
                 <ImageIcon className="size-[17px] text-r-text-2" aria-hidden />
                 เปลี่ยนรูป
@@ -203,7 +203,7 @@ export function AvatarPicker({
       {control}
       <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-6 z-40 flex justify-center px-4">
         {undoOpen ? (
-          <div className="pointer-events-auto flex items-center gap-3.5 rounded-full bg-[#2a1820] py-2 pr-2 pl-4 shadow-[0_10px_30px_rgba(0,0,0,0.5)] ring-1 ring-white/12">
+          <div className="pointer-events-auto flex items-center gap-3.5 rounded-full bg-[var(--r-raised)] py-2 pr-2 pl-4 shadow-[0_10px_30px_rgba(0,0,0,0.5)] ring-1 ring-white/12">
             <span className="text-[13.5px] whitespace-nowrap text-r-text">เอารูปออกแล้ว</span>
             <button
               type="button"

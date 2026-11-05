@@ -17,7 +17,7 @@ export default function UploadLayout({ children }: { children: ReactNode }) {
   return (
     <>
       <MediaProtection />
-      <main className="flex-1 bg-[#140a0d] text-[#f7d7de]">{children}</main>
+      <main className="flex-1 bg-r-bg text-[#f7d7de]">{children}</main>
       <ShortFooter />
     </>
   );

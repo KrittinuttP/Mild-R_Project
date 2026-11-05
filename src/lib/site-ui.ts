@@ -108,7 +108,7 @@ const R_FOCUS =
 /** Primary button · normal / hover / active / focus / disabled */
 export const R_CTA_PRIMARY_CLASS = [
   "inline-flex h-12 items-center justify-center gap-2 rounded-full px-6 text-[0.9375rem] font-medium transition-[background-color,box-shadow]",
-  "bg-r-pri text-r-on-pri hover:bg-r-pri-hover hover:shadow-[0_8px_24px_rgba(242,67,125,0.35)] active:bg-r-pri-active",
+  "bg-r-pri text-r-on-pri hover:bg-r-pri-hover hover:shadow-[0_8px_24px_color-mix(in_srgb,var(--r-pri)_35%,transparent)] active:bg-r-pri-active",
   "disabled:pointer-events-none disabled:bg-white/8 disabled:text-r-text/40 disabled:shadow-none",
   R_FOCUS,
 ].join(" ");

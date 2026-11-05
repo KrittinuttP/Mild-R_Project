@@ -83,7 +83,7 @@ const ATTEMPTS: { maxEdge: number; quality: number }[] = [
 
 /** Quick check before a picked file gets a tile: the reason it cannot be used, or null. */
 export function precheckFanartFile(file: File): string | null {
-  if (!fileType(file)) return "รองรับเฉพาะ JPEG, PNG หรือ WebP";
+  if (!fileType(file)) return "รองรับเฉพาะ JPEG · PNG · WebP";
   if (file.size === 0) return "ไฟล์ว่างเปล่า";
   if (file.size > FANART_LIMITS.maxPickBytes) return "ไฟล์ใหญ่เกิน 40 MB";
   return null;

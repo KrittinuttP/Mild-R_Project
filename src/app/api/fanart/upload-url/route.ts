@@ -61,7 +61,7 @@ function readFileClaims(raw: FormDataEntryValue | null): FileClaim[] | string {
   for (const item of parsed) {
     const size = Number((item as { size?: unknown })?.size);
     const type = String((item as { type?: unknown })?.type ?? "");
-    if (!isFanartMimeType(type)) return "รูปต้องเป็น JPEG, PNG หรือ WebP";
+    if (!isFanartMimeType(type)) return "รูปต้องเป็น JPEG · PNG · WebP";
     if (!Number.isInteger(size) || size <= 0) return "ไฟล์รูปไม่ถูกต้อง";
     if (size > FANART_LIMITS.maxOriginalBytes) return "ไฟล์รูปใหญ่เกินไป";
     claims.push({ size, type });
@@ -147,7 +147,7 @@ export async function POST(request: Request) {
   const avatar = form.get("avatar");
   const hasAvatar = avatar instanceof File && avatar.size > 0;
   if (hasAvatar) {
-    if (!isFanartMimeType(avatar.type)) return fail("รูปโปรไฟล์ต้องเป็น JPEG, PNG หรือ WebP");
+    if (!isFanartMimeType(avatar.type)) return fail("รูปโปรไฟล์ต้องเป็น JPEG · PNG · WebP");
     if (avatar.size > FANART_AVATAR_LIMITS.maxBytes) return fail("ไฟล์รูปโปรไฟล์ใหญ่เกินไป");
   }
 
