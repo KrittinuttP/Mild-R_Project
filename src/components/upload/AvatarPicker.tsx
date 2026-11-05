@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Menu } from "@base-ui/react/menu";
-import { ImageIcon, Pencil, Trash2 } from "lucide-react";
+import { ImageIcon, Pencil, Plus, Trash2 } from "lucide-react";
 
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,8 @@ type AvatarPickerProps = {
   onRemoveSettled?: () => void;
   /** Size of the circle, as Tailwind classes. */
   sizeClass?: string;
+  /** Sample picture shown (dimmed, with a + badge) while no picture is chosen. */
+  placeholderSrc?: string;
 };
 
 /** Narrow screens get a bottom sheet; wide screens a small menu under the picture. */
@@ -50,6 +52,7 @@ export function AvatarPicker({
   onUndoRemove,
   onRemoveSettled,
   sizeClass = "size-16",
+  placeholderSrc,
 }: AvatarPickerProps) {
   const wide = useWide();
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -113,7 +116,29 @@ export function AvatarPicker({
     "flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 text-left outline-none data-[highlighted]:bg-white/[0.07]";
 
   let control;
-  if (!src) {
+  if (!src && placeholderSrc) {
+    control = (
+      <button
+        type="button"
+        onClick={pick}
+        aria-label="เลือกรูปโปรไฟล์"
+        className={cn(circle, "group cursor-pointer", FOCUS)}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={placeholderSrc}
+          alt=""
+          className="size-full rounded-full object-cover opacity-60 ring-2 ring-r-pri/45 transition-opacity group-hover:opacity-100"
+        />
+        <span
+          aria-hidden
+          className="absolute -right-1 -bottom-1 flex size-[26px] items-center justify-center rounded-full bg-r-pri text-r-on-pri shadow-[0_0_0_2px_var(--r-bg),0_4px_10px_rgba(0,0,0,0.4)] transition-colors group-hover:bg-r-pri-hover"
+        >
+          <Plus className="size-4" strokeWidth={2.5} />
+        </span>
+      </button>
+    );
+  } else if (!src) {
     control = (
       <button
         type="button"

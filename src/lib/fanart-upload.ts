@@ -6,6 +6,9 @@
  * Vercel function body (4.5 MB cap). The server keeps a 2048 px WebP copy
  * in `fanart-uploads` for the admin screen.
  */
+/** Sample profile picture: shown while a fan has not picked one (same file as the HBD card). */
+export const FANART_AVATAR_DEFAULT = "/assets/hbd/default-avatar.png";
+
 export const FANART_LIMITS = {
   maxFiles: 5,
   /** Largest file a fan may pick. Bigger than `maxOriginalBytes` is re-encoded in the browser. */

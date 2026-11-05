@@ -908,6 +908,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
         <div className="pt-[22px]">
           <AvatarPicker
             src={avatarPreviewUrl ?? null}
+            placeholderSrc={HBD_AVATAR_DEFAULT}
             onPick={() => avatarInputRef.current?.click()}
             onRemove={removeAvatar}
             onUndoRemove={undoRemoveAvatar}

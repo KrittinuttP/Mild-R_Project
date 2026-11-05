@@ -22,6 +22,7 @@ import {
   creditLabel,
   creditOfRow,
   formatMegabytes,
+  FANART_AVATAR_DEFAULT,
   type FanartPictureCredit,
 } from "@/lib/fanart-upload";
 import { R_EYEBROW_CLASS, R_PILL_ACTIVE_CLASS } from "@/lib/site-ui";
@@ -628,14 +629,12 @@ export function AdminFanartClient() {
               <section key={batch.key} className="rounded-3xl bg-r-bg p-4 ring-1 ring-white/10 sm:p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="flex min-w-0 items-center gap-3">
-                    {first.avatar_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={first.avatar_url} alt="" className="size-10 rounded-full object-cover" />
-                    ) : (
-                      <span className="flex size-10 items-center justify-center rounded-full bg-r-pri/25 text-r-text">
-                        {[...first.display_name][0]}
-                      </span>
-                    )}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={first.avatar_url || FANART_AVATAR_DEFAULT}
+                      alt=""
+                      className="size-10 rounded-full object-cover"
+                    />
                     <div className="min-w-0">
                       <p className="truncate font-medium text-r-text">{first.display_name}</p>
                       <p className="truncate text-sm text-r-text-2/80">

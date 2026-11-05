@@ -38,6 +38,7 @@ import {
   uploadToSignedUrl,
 } from "@/lib/fanart-client-prepare";
 import {
+  FANART_AVATAR_DEFAULT,
   FANART_AVATAR_LIMITS,
   FANART_CONSENT,
   FANART_IMAGE_SIZES,
@@ -1110,6 +1111,7 @@ function FanartUploadForm({
         <div className="pt-[23px]">
           <AvatarPicker
             src={avatarPreviewUrl}
+            placeholderSrc={FANART_AVATAR_DEFAULT}
             onPick={() => avatarInputRef.current?.click()}
             onRemove={removeAvatar}
             onUndoRemove={undoRemoveAvatar}
@@ -1708,17 +1710,12 @@ function FanartUploadForm({
           {header("ตรวจข้อมูลอีกครั้งก่อนส่ง")}
           <section className={CARD}>
             <div className="flex items-center gap-3">
-              {avatarPreviewUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatarPreviewUrl} alt="" className="size-11 flex-none rounded-full object-cover" />
-              ) : (
-                <span
-                  aria-hidden
-                  className="flex size-11 flex-none items-center justify-center rounded-full bg-r-pri/15 text-lg text-r-text"
-                >
-                  {[...shownName][0] ?? ""}
-                </span>
-              )}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={avatarPreviewUrl ?? FANART_AVATAR_DEFAULT}
+                alt=""
+                className="size-11 flex-none rounded-full object-cover ring-2 ring-r-pri/35"
+              />
               <div className="min-w-0">
                 <p className="text-xs text-r-text-3">เครดิตของคุณ</p>
                 {ownCredit ? <CreditBlock credit={ownCredit} /> : null}
