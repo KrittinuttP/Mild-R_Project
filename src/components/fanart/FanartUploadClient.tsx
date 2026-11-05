@@ -137,7 +137,7 @@ const HOW_STEPS: ReadonlyArray<{ title: string; detail: string }> = [
       FANART_LIMITS.maxPickBytes / (1024 * 1024)
     )} MB`,
   },
-  { title: "ติ๊กยินยอม แล้วส่ง", detail: "ทีมงานจะตรวจก่อนนำไปใช้" },
+  { title: "ติ๊กยินยอม แล้วส่ง", detail: "การนำไปใช้ขึ้นอยู่กับการพิจารณาของทีมงาน" },
 ];
 
 const HOW_FAQ = [
@@ -152,6 +152,10 @@ const HOW_FAQ = [
   {
     q: `อยากส่งเกิน ${FANART_LIMITS.maxFiles} รูปทำยังไง?`,
     a: `ส่งได้ครั้งละไม่เกิน ${FANART_LIMITS.maxFiles} รูป ส่งเสร็จแล้วกด “ส่งรูปเพิ่ม” เพื่อส่งชุดถัดไป`,
+  },
+  {
+    q: "ส่งไปแล้วจะได้นำไปใช้ไหม?",
+    a: "การนำไปใช้ขึ้นอยู่กับการพิจารณาของทีมงาน ขอบคุณทุกรูปที่ส่งเข้ามา",
   },
   {
     q: "ช่องทางติดต่อเอาไปใช้ทำอะไร?",
@@ -1894,9 +1898,14 @@ function FanartUploadForm({
               ส่งแฟนอาร์ตแล้ว · {sentCount} รูป
             </p>
             <p className="mt-2 text-sm leading-[1.7] text-r-text-2">
-              ทีมงานจะตรวจก่อนนำไปใช้ตกแต่งคาเฟ่
+              ผลงานจะนำไปใช้ตกแต่งคาเฟ่
               <br />
               และในโปรเจกต์วันเกิดของ Mild-R
+            </p>
+            <p className="mt-2 text-[13px] leading-[1.7] text-r-text-3">
+              การนำไปใช้ขึ้นอยู่กับการพิจารณาของทีมงาน
+              <br />
+              ขอบคุณทุกรูปที่ส่งเข้ามา
             </p>
             <div className="mt-6 space-y-2">
               <button type="button" onClick={sendMore} className={BTN}>
