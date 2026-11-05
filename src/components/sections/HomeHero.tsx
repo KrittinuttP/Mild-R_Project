@@ -729,7 +729,7 @@ export function HomeHero({ data, initialSlots = [], premieres = [], posts = [] }
                 >
                   <span
                     className={cn(
-                      "r-bubble relative block rounded-xl bg-r-nurse px-3 py-[7px] text-sm font-medium text-r-on-pri shadow-[0_10px_24px_-10px_rgb(0_0_0/0.6)] md:rounded-[14px] md:px-4 md:py-[9px] md:text-base",
+                      "r-bubble relative block rounded-xl bg-r-nurse px-3 py-[7px] text-sm font-medium text-r-on-pri shadow-[0_10px_24px_-10px_rgb(0_0_0/0.6)] md:rounded-xl md:px-4 md:py-[9px] md:text-base",
                       spot ? "whitespace-nowrap" : TOP_SPOT_TEXT_CLS,
                       ORIGIN[side]
                     )}

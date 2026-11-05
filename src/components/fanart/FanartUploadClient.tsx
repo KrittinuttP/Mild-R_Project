@@ -69,7 +69,7 @@ const FOCUS =
   "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-r-acc";
 const CARD = cn(R_CARD_CLASS, "p-5 sm:p-[22px]");
 const INPUT =
-  "h-12 w-full rounded-[14px] bg-white/[0.04] px-4 text-[15px] text-r-text ring-1 ring-white/[0.16] outline-none ring-inset placeholder:text-r-text-2/45 focus:ring-r-pri/60 aria-[invalid=true]:ring-[#ffa062]";
+  "h-12 w-full rounded-xl bg-white/[0.04] px-4 text-[15px] text-r-text ring-1 ring-white/[0.16] outline-none ring-inset placeholder:text-r-text-2/45 focus:ring-r-pri/60 aria-[invalid=true]:ring-[#ffa062]";
 const BTN = cn(R_CTA_PRIMARY_CLASS, "w-full");
 const BTN_OUTLINE = cn(R_CTA_OUTLINE_CLASS, "w-full");
 const BTN_SMALL = cn(
@@ -1284,12 +1284,12 @@ function FanartUploadForm({
               <li
                 key={item.key}
                 className={cn(
-                  "rounded-[18px] bg-white/[0.03] p-3 ring-1 ring-inset",
+                  "rounded-2xl bg-white/[0.03] p-3 ring-1 ring-inset",
                   rowDraft ? "ring-r-pri/30" : "ring-white/[0.06]"
                 )}
               >
                 <div className="flex gap-3.5">
-                  <div className="relative size-[72px] flex-none overflow-hidden rounded-[14px] bg-black/35">
+                  <div className="relative size-[72px] flex-none overflow-hidden rounded-xl bg-black/35">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={item.previewUrl} alt={`แฟนอาร์ตรูปที่ ${index + 1}`} className="size-full object-contain" />
                     {item.preparing ? (
@@ -1297,7 +1297,7 @@ function FanartUploadForm({
                         <Spinner className="size-[22px]" />
                       </span>
                     ) : null}
-                    <span className="pointer-events-none absolute inset-0 rounded-[14px] ring-1 ring-white/10 ring-inset" />
+                    <span className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-white/10 ring-inset" />
                     <span
                       aria-hidden
                       className="absolute bottom-1.5 left-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-r-bg/85 px-1.5 text-[11px] font-semibold text-r-text"
@@ -1381,7 +1381,7 @@ function FanartUploadForm({
             onClick={() => artInputRef.current?.click()}
             aria-describedby={artMissing ? `${ids}-art-error` : undefined}
             className={cn(
-              "mt-4 flex min-h-44 w-full flex-col items-center justify-center gap-2.5 rounded-[18px] border-[1.5px] border-dashed bg-r-pri/[0.04] text-[15px] text-r-text transition-colors hover:border-r-pri/75 sm:min-h-[200px]",
+              "mt-4 flex min-h-44 w-full flex-col items-center justify-center gap-2.5 rounded-2xl border-[1.5px] border-dashed bg-r-pri/[0.04] text-[15px] text-r-text transition-colors hover:border-r-pri/75 sm:min-h-[200px]",
               artMissing ? "border-[#ffa062]" : "border-r-pri/45",
               FOCUS
             )}
@@ -1402,7 +1402,7 @@ function FanartUploadForm({
           type="button"
           onClick={() => artInputRef.current?.click()}
           className={cn(
-            "mt-2.5 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-[18px] border-[1.5px] border-dashed border-r-pri/45 text-sm text-r-text-2 transition-colors hover:border-r-pri/75 hover:text-r-text",
+            "mt-2.5 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-r-pri/45 text-sm text-r-text-2 transition-colors hover:border-r-pri/75 hover:text-r-text",
             FOCUS
           )}
         >
@@ -1439,7 +1439,7 @@ function FanartUploadForm({
       </p>
       <label
         className={cn(
-          "mt-3.5 flex cursor-pointer items-start gap-3 rounded-[14px] bg-white/[0.03] p-3.5 ring-1 transition-colors ring-inset",
+          "mt-3.5 flex cursor-pointer items-start gap-3 rounded-xl bg-white/[0.03] p-3.5 ring-1 transition-colors ring-inset",
           consentInvalid ? "ring-[#ffa062]" : consent ? "ring-r-pri/40" : "ring-white/[0.08] hover:ring-white/20"
         )}
       >
@@ -1755,7 +1755,7 @@ function FanartUploadForm({
                 );
               })}
             </ul>
-            <p className="mt-3 flex items-start gap-2 rounded-[14px] bg-white/[0.03] px-3 py-2.5 text-[12.5px] leading-relaxed text-r-text-2 ring-1 ring-white/[0.06] ring-inset">
+            <p className="mt-3 flex items-start gap-2 rounded-xl bg-white/[0.03] px-3 py-2.5 text-[12.5px] leading-relaxed text-r-text-2 ring-1 ring-white/[0.06] ring-inset">
               <Shield className="mt-0.5 size-3.5 flex-none text-r-acc" aria-hidden />
               <span>
                 <ThaiPhrases text="ยินยอม|ให้นำไปใช้|ตกแต่งคาเฟ่ และ|ในโปรเจกต์|วันเกิด|ของ Mild-R เท่านั้น" />

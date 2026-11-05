@@ -625,9 +625,9 @@ function WishCard({
         {!revealed ? (
           <div
             aria-hidden
-            className="absolute inset-0 z-10 rounded-[20px] bg-black/25 p-2 ring-1 ring-white/10 sm:rounded-[26px] sm:p-3"
+            className="absolute inset-0 z-10 rounded-2xl bg-black/25 p-2 ring-1 ring-white/10 sm:rounded-3xl sm:p-3"
           >
-            <div className="hbd-skel flex h-full w-full flex-col items-center justify-center gap-2 rounded-[12px] sm:rounded-[14px]">
+            <div className="hbd-skel flex h-full w-full flex-col items-center justify-center gap-2 rounded-xl sm:rounded-xl">
               <Heart className="hbd-beat size-7 fill-r-pri text-r-pri opacity-70" />
               <span className="text-[13px] text-r-text-3">กำลังเปิดการ์ด…</span>
             </div>
@@ -636,12 +636,12 @@ function WishCard({
 
         <div
           data-card-media
-          className="relative rounded-[20px] bg-black/25 p-2 opacity-0 shadow-[0_26px_60px_rgba(0,0,0,0.42)] ring-1 ring-white/10 sm:rounded-[26px] sm:p-3"
+          className="relative rounded-2xl bg-black/25 p-2 opacity-0 shadow-[0_26px_60px_rgba(0,0,0,0.42)] ring-1 ring-white/10 sm:rounded-3xl sm:p-3"
         >
           {wish.image ? (
             <div className={cn("relative", status !== "ready" && "aspect-[1748/1240]")}>
               {status === "error" ? (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-[12px] bg-white/[0.04] text-center sm:rounded-[14px]">
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-xl bg-white/[0.04] text-center sm:rounded-xl">
                   <span className="text-sm text-r-text-2">เปิดการ์ดใบนี้ไม่สำเร็จ</span>
                   <button
                     type="button"
@@ -673,7 +673,7 @@ function WishCard({
                     onLoad={onLoad}
                     onError={() => setStatus("error")}
                     className={cn(
-                      "w-full rounded-[12px] object-contain sm:rounded-[14px]",
+                      "w-full rounded-xl object-contain sm:rounded-xl",
                       status === "ready" ? "h-auto" : "h-full"
                     )}
                   />

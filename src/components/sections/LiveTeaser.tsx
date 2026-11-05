@@ -18,6 +18,8 @@ export type InitialLiveSchedule = {
   from: string;
   to: string;
   weeks: LiveWeek[];
+  /** Bangkok date the server rendered with — keeps hydration stable when the cached page is old. */
+  todayIso?: string;
 };
 
 type LiveTeaserProps = {
@@ -61,7 +63,13 @@ export function LiveTeaser({ initialLiveSchedule }: LiveTeaserProps) {
             </button>
           </div>
         ) : (
-          <LiveWeekTable weeks={displayWeeks} weekRange={teaserRange} blankEmptyDays tone="aplus" />
+          <LiveWeekTable
+            weeks={displayWeeks}
+            weekRange={teaserRange}
+            serverTodayIso={initialLiveSchedule?.todayIso}
+            blankEmptyDays
+            tone="aplus"
+          />
         )}
       </ScrollReveal>
 

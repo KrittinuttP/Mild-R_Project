@@ -10,7 +10,7 @@ import { Section } from "@/components/common/Section";
 import { SectionHeader } from "@/components/common/SectionHeader";
 import { EventDetailModal } from "@/components/events/EventDetailModal";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
-import { featuredEvents, formatEventDateRangeEn, ongoingEvents, upcomingEvents } from "@/lib/events";
+import { featuredEvents, formatEventDateRangeEn } from "@/lib/events";
 import { R_CTA_OUTLINE_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { CalendarEvent, CalendarEventFormat, EventsBoard } from "@/types/vtuber";
@@ -111,10 +111,6 @@ function SmallTile({ event, onOpen }: { event: CalendarEvent; onOpen: () => void
       className={cn(TILE, "h-[176px] md:h-full")}
     >
       <Cover event={event} />
-      <span
-        aria-hidden
-        className={cn("absolute top-3 right-3 size-2.5 rounded-full shadow-[0_0_0_3px_color-mix(in_srgb,var(--r-bg)_75%,transparent)]", FORMAT[event.format].dot)}
-      />
       <span className="absolute inset-x-4 bottom-3.5 [text-shadow:0_1px_8px_rgb(0_0_0/0.6)]">
         <span className="block text-xs text-r-text-2">{formatEventDateRangeEn(event)}</span>
         <span className="mt-[3px] line-clamp-2 font-[family-name:var(--font-display)] text-base leading-[1.35] text-r-text">
@@ -135,7 +131,7 @@ function AllEventsLink({ className }: { className?: string }) {
   );
 }
 
-/** Home · อีเวนต์ (project R): status line, Bento 1 + 4, counts since debut from events.json. */
+/** Home · อีเวนต์ (project R): online / offline counts, Bento 1 + 4. */
 export function EventsTeaser({ board }: EventsTeaserProps) {
   const events = featuredEvents(board, BENTO_COUNT);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -144,20 +140,13 @@ export function EventsTeaser({ board }: EventsTeaserProps) {
   if (events.length === 0) return null;
 
   const [lead, ...rest] = events;
-  const total = board.events.length;
-  const ongoing = ongoingEvents(board).length;
-  const upcoming = upcomingEvents(board).length;
   const byFormat = (format: CalendarEventFormat) => board.events.filter((e) => e.format === format).length;
-  const statusLine =
-    ongoing > 0
-      ? `กำลังจัด ${ongoing} งาน`
-      : upcoming > 0
-        ? `เร็วๆ นี้ ${upcoming} งาน`
-        : "ตอนนี้ยังไม่มีงานที่กำลังจัด";
+  // Header line (5 Nov): how many online / offline events since debut (replaces the "กำลังจัด / เร็วๆ นี้" line).
+  const statusLine = `ออนไลน์ ${byFormat("online")} งาน · ออฟไลน์ ${byFormat("offline")} งาน`;
 
   return (
     <>
-      <Section id="events">
+      <Section id="events" seam>
         <ScrollReveal>
           <SectionHeader
             eyebrow="Events"
@@ -183,19 +172,6 @@ export function EventsTeaser({ board }: EventsTeaserProps) {
               </li>
             ))}
           </ul>
-
-          <p className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-r-text-3">
-            <span className="text-r-text">ตั้งแต่เดบิวต์ {total} งาน</span>
-            {(Object.keys(FORMAT) as CalendarEventFormat[]).map((format) => {
-              const count = byFormat(format);
-              return count > 0 ? (
-                <span key={format} className="inline-flex items-center gap-1.5 whitespace-nowrap">
-                  <FormatLabel format={format} />
-                  <span className="text-r-text">{count}</span>
-                </span>
-              ) : null;
-            })}
-          </p>
         </ScrollReveal>
 
         <AllEventsLink className="mt-6 md:hidden" />

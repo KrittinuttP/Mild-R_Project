@@ -308,7 +308,7 @@ function LiveCard({ live, onNavigate }: { live: HeaderLive; onNavigate: Navigate
   );
   const body = (
     <>
-      <span className="relative aspect-video w-[104px] shrink-0 overflow-hidden rounded-[10px] bg-r-bg">
+      <span className="relative aspect-video w-[104px] shrink-0 overflow-hidden rounded-xl bg-r-bg">
         {live.coverUrl ? (
           <ProtectedImage
             src={live.coverUrl}
@@ -331,7 +331,7 @@ function LiveCard({ live, onNavigate }: { live: HeaderLive; onNavigate: Navigate
     </>
   );
   const className = cn(
-    "flex items-center gap-3 rounded-[18px] border p-2.5 transition active:scale-[0.99]",
+    "flex items-center gap-3 rounded-2xl border p-2.5 transition active:scale-[0.99]",
     isLive
       ? "border-r-pri/60 bg-[linear-gradient(135deg,color-mix(in_srgb,var(--r-pri)_24%,transparent),rgba(20,10,13,0.4))]"
       : "border-r-pri/35 bg-[linear-gradient(135deg,color-mix(in_srgb,var(--r-pri)_14%,transparent),rgba(20,10,13,0.4))]"

@@ -94,7 +94,7 @@ function TierCard({ tiers, index }: { tiers: MembershipTier[]; index: number }) 
   return (
     <article
       className={cn(
-        "r-card relative overflow-hidden rounded-[22px] shadow-none",
+        "r-card relative overflow-hidden rounded-2xl shadow-none",
         lead ? "ring-[2.5px] ring-r-pri" : "ring-2 ring-r-pri/32"
       )}
     >
@@ -140,7 +140,7 @@ function EmojiMarquee({ membership }: { membership: MembershipInfo }) {
         <span
           key={emoji.id}
           title={copy ? undefined : emoji.alt}
-          className="r-card flex size-[60px] shrink-0 items-center justify-center rounded-[18px] p-1.5 shadow-none ring-2 ring-r-pri/32"
+          className="r-card flex size-[60px] shrink-0 items-center justify-center rounded-2xl p-1.5 shadow-none ring-2 ring-r-pri/32"
         >
           <ProtectedImage
             src={emoji.src}
@@ -181,7 +181,7 @@ function TierAccordion({ tiers, index }: { tiers: MembershipTier[]; index: numbe
       open={lead}
       // Pink frame follows the open tier; closed tiers keep the thin line.
       className={cn(
-        "group r-card rounded-[20px] px-4 py-3.5 shadow-none ring-1 ring-r-text-2/15 transition-shadow open:ring-[1.5px] open:ring-r-pri",
+        "group r-card rounded-2xl px-4 py-3.5 shadow-none ring-1 ring-r-text-2/15 transition-shadow open:ring-[1.5px] open:ring-r-pri",
         lead && "relative"
       )}
     >
@@ -222,7 +222,7 @@ function TierAccordion({ tiers, index }: { tiers: MembershipTier[]; index: numbe
 
 function PerksBox({ membership }: { membership: MembershipInfo }) {
   return (
-    <div className="r-card rounded-[20px] p-4 shadow-none ring-1 ring-r-text-2/15">
+    <div className="r-card rounded-2xl p-4 shadow-none ring-1 ring-r-text-2/15">
       <div className="flex items-baseline justify-between gap-3">
         <h3 className="font-[family-name:var(--font-display)] text-base text-r-text">สิ่งที่สมาชิกจะได้</h3>
         <span className="text-xs text-r-text-3">ทุกระดับ</span>
@@ -232,7 +232,7 @@ function PerksBox({ membership }: { membership: MembershipInfo }) {
       </p>
       <ul className="mt-2.5 grid grid-cols-6 gap-1.5">
         {membership.emojis.map((emoji) => (
-          <li key={emoji.id} title={emoji.alt} className="aspect-square rounded-[10px] p-1 ring-1 ring-r-pri/32">
+          <li key={emoji.id} title={emoji.alt} className="aspect-square rounded-xl p-1 ring-1 ring-r-pri/32">
             <ProtectedImage src={emoji.src} alt={emoji.alt} loading="lazy" className="size-full object-contain" />
           </li>
         ))}
@@ -268,7 +268,7 @@ export function Membership({ data }: MembershipProps) {
   );
 
   return (
-    <Section id="member" strong className="overflow-hidden">
+    <Section id="member" strong seam className="overflow-hidden">
       <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-9">
         <ScrollReveal>
           <SectionHeader eyebrow="Member" title={membership.title} description={membership.description} />

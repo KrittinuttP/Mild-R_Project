@@ -92,7 +92,7 @@ function Thumb({ project, size }: { project: ProjectItem; size: number }) {
   const isCafe = category === "cafe";
   return (
     <span
-      className="relative shrink-0 overflow-hidden rounded-[10px] bg-[#2a1a20] ring-1 ring-r-text-2/15 ring-inset sm:rounded-xl"
+      className="relative shrink-0 overflow-hidden rounded-xl bg-[#2a1a20] ring-1 ring-r-text-2/15 ring-inset sm:rounded-xl"
       style={{ width: size, height: size }}
       aria-hidden
     >

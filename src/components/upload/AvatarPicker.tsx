@@ -110,7 +110,7 @@ export function AvatarPicker({
   ) : null;
 
   const itemClass =
-    "flex w-full cursor-pointer items-center gap-2.5 rounded-[10px] px-3 text-left outline-none data-[highlighted]:bg-white/[0.07]";
+    "flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 text-left outline-none data-[highlighted]:bg-white/[0.07]";
 
   let control;
   if (!src) {
@@ -140,7 +140,7 @@ export function AvatarPicker({
         </Menu.Trigger>
         <Menu.Portal>
           <Menu.Positioner side="bottom" align="start" sideOffset={10} className="z-50">
-            <Menu.Popup className="w-44 rounded-[14px] bg-[var(--r-panel)] p-1.5 text-sm text-r-text shadow-[0_14px_34px_rgba(0,0,0,0.55)] ring-1 ring-white/10 outline-none ring-inset">
+            <Menu.Popup className="w-44 rounded-xl bg-[var(--r-panel)] p-1.5 text-sm text-r-text shadow-[0_14px_34px_rgba(0,0,0,0.55)] ring-1 ring-white/10 outline-none ring-inset">
               <Menu.Item onClick={pick} className={cn(itemClass, "h-10")}>
                 <ImageIcon className="size-[17px] text-r-text-2" aria-hidden />
                 เปลี่ยนรูป

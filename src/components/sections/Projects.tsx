@@ -120,13 +120,13 @@ export function ProjectCardR({ project, data }: { project: ProjectItem; data: Vt
   const ctaExternal = cta?.url.startsWith("http");
 
   return (
-    <article className="relative r-card h-full rounded-[20px] p-3 md:rounded-3xl md:px-2.5 md:pt-2.5 md:pb-5">
+    <article className="relative r-card h-full rounded-2xl p-3 md:rounded-3xl md:px-2.5 md:pt-2.5 md:pb-5">
       {/* phones: thumb left · text right */}
       <div className="flex gap-3.5 md:hidden">
         <Cover src={cover} category={category} cafeLabel={cafeLabel} soon={soon} className="w-[118px] shrink-0 self-start rounded-xl" />
         <div className="min-w-0 flex-1">
           <h3 className="text-[0.96875rem] leading-[1.35] text-r-text">
-            <Link href={href} className="after:absolute after:inset-0 after:rounded-[20px] focus-visible:outline-none">
+            <Link href={href} className="after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-none">
               {project.title}
             </Link>
           </h3>
@@ -151,7 +151,7 @@ export function ProjectCardR({ project, data }: { project: ProjectItem; data: Vt
 
       {/* tablet + desktop: cover on top */}
       <div className="hidden md:block">
-        <Cover src={cover} category={category} cafeLabel={cafeLabel} soon={soon} className="rounded-[18px]" />
+        <Cover src={cover} category={category} cafeLabel={cafeLabel} soon={soon} className="rounded-2xl" />
         <div className="px-2 pt-4">
           <p className="flex items-center gap-[7px] text-[0.78125rem] text-r-text-2">
             <Icon aria-hidden className="size-3.5" />

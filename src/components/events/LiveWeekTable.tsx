@@ -55,6 +55,8 @@ type LiveWeekTableProps = {
   slotLookup?: LiveSlot[];
   /** Clamp week picker to the loaded schedule window (e.g. homepage 2-week range). */
   weekRange?: { from: string; to: string };
+  /** Bangkok date the server rendered with (hydration-safe "today"). */
+  serverTodayIso?: string;
   /** The table uses the homepage CI (`--r-*`, `r-card`, `r-ring`) palette. */
   tone?: "aplus";
 };
@@ -214,9 +216,9 @@ const APLUS_SKIN: LiveTableSkin = {
   ctaOutlineBlock: cn(R_CTA_OUTLINE_CLASS, "w-full"),
   // 370px wide = 208px tall: a 2-line title fits beside it, so every state is 256px on desktop.
   thumb:
-    "group relative aspect-[16/9] w-64 shrink-0 overflow-hidden rounded-[18px] bg-r-bg text-left ring-1 ring-r-line transition hover:ring-r-pri/50 lg:w-[370px]",
+    "group relative aspect-[16/9] w-64 shrink-0 overflow-hidden rounded-2xl bg-r-bg text-left ring-1 ring-r-line transition hover:ring-r-pri/50 lg:w-[370px]",
   thumbPlain:
-    "relative aspect-[16/9] w-64 shrink-0 overflow-hidden rounded-[18px] bg-r-bg text-left ring-1 ring-r-line transition hover:ring-r-pri/50 lg:w-[370px]",
+    "relative aspect-[16/9] w-64 shrink-0 overflow-hidden rounded-2xl bg-r-bg text-left ring-1 ring-r-line transition hover:ring-r-pri/50 lg:w-[370px]",
   thumbShade: "pointer-events-none absolute inset-0 bg-gradient-to-t from-r-bg/70 via-transparent to-transparent",
   mobileCoverBg: "relative aspect-[16/9] w-full overflow-hidden bg-r-bg text-left",
   mobileCoverShade: "pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-r-bg to-transparent",
@@ -1118,7 +1120,7 @@ function AplusOfflineCard({
     ) : null;
 
   const empty = (
-    <div className="flex flex-1 items-center justify-center rounded-[20px] border border-dashed border-r-text-2/20 px-4 text-center text-sm text-r-text-3">
+    <div className="flex flex-1 items-center justify-center rounded-2xl border border-dashed border-r-text-2/20 px-4 text-center text-sm text-r-text-3">
       ยังไม่มีไลฟ์ถัดไปในตาราง
     </div>
   );
@@ -1156,7 +1158,7 @@ function AplusOfflineCard({
         </div>
 
         {next ? (
-          <div className="flex flex-1 items-center gap-5 rounded-[20px] border border-r-pri/25 bg-gradient-to-r from-r-pri/[0.08] via-r-bg/40 to-r-bg/40 p-3.5 lg:gap-6">
+          <div className="flex flex-1 items-center gap-5 rounded-2xl border border-r-pri/25 bg-gradient-to-r from-r-pri/[0.08] via-r-bg/40 to-r-bg/40 p-3.5 lg:gap-6">
             {cover("w-44 lg:w-56", "transition duration-700 group-hover:scale-[1.04]")}
             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
               <div className="flex min-w-0 items-center gap-2 text-xs">
@@ -1186,7 +1188,7 @@ function AplusOfflineCard({
         </div>
 
         {next ? (
-          <div className="flex flex-1 flex-col gap-2 rounded-[18px] border border-r-pri/25 bg-gradient-to-b from-r-pri/[0.08] to-r-bg/40 p-3">
+          <div className="flex flex-1 flex-col gap-2 rounded-2xl border border-r-pri/25 bg-gradient-to-b from-r-pri/[0.08] to-r-bg/40 p-3">
             {cover("w-full", "scale-[1.12]")}
             <div className="flex items-center justify-between gap-2 pt-1">
               <span className="text-xs font-medium text-r-pri">ไลฟ์ถัดไป</span>
@@ -1489,6 +1491,7 @@ export function LiveWeekTable({
   blankEmptyDays = false,
   slotLookup,
   weekRange,
+  serverTodayIso,
   tone = "aplus",
 }: LiveWeekTableProps) {
   const skin = APLUS_SKIN;
@@ -1513,7 +1516,7 @@ export function LiveWeekTable({
     currentOfflineByDate,
     highlightSlot,
     nextHighlightSlot,
-  } = useLiveWeekView({ weeks, slotLookup, weekRange });
+  } = useLiveWeekView({ weeks, slotLookup, weekRange, serverTodayIso });
   const { detailRef, openDetail } = useLiveDetail();
 
   if (!week) {

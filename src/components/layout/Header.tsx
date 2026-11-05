@@ -337,7 +337,7 @@ export function Header({ data }: HeaderProps) {
                 >
                   <div
                     className={cn(
-                      "rounded-[18px] border border-r-text-2/14 bg-[rgb(26_13_18/0.97)] p-2 shadow-[0_24px_50px_-16px_rgba(0,0,0,0.7)] backdrop-blur-md",
+                      "rounded-2xl border border-r-text-2/14 bg-[rgb(26_13_18/0.97)] p-2 shadow-[0_24px_50px_-16px_rgba(0,0,0,0.7)] backdrop-blur-md",
                       item.key === "projects" ? "w-[340px]" : item.key === "about" ? "w-[230px]" : "w-[260px]"
                     )}
                   >

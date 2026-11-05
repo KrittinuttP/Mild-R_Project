@@ -18,7 +18,7 @@ type SocialsProps = {
 };
 
 const PRIMARY_SOCIAL_IDS = new Set(["youtube", "x"]);
-const BOX = "r-card rounded-[20px] shadow-none ring-1 ring-r-text-2/15";
+const BOX = "r-card rounded-2xl shadow-none ring-1 ring-r-text-2/15";
 
 /** "19 May 2024" (dates stay in English). */
 function enDate(ymd: string | undefined) {
@@ -32,7 +32,7 @@ function enDate(ymd: string | undefined) {
 function PrimaryCard({ social, lead = false }: { social: SocialLink; lead?: boolean }) {
   return (
     <div className={cn(BOX, "relative flex items-center gap-3.5 p-[18px]")}>
-      <span className="flex size-12 shrink-0 items-center justify-center rounded-[15px] bg-r-pri/12 text-r-text-2">
+      <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-r-pri/12 text-r-text-2">
         <SocialPlatformIcon platform={social.platform} className="size-5" />
       </span>
       <div className="min-w-0 flex-1">
@@ -46,7 +46,7 @@ function PrimaryCard({ social, lead = false }: { social: SocialLink; lead?: bool
         aria-label={`ติดตามบน ${social.label}`}
         // One solid pink button per section (5 Nov · UI round 2 P1): the first channel leads, the rest are outline.
         className={cn(
-          "inline-flex h-[38px] shrink-0 items-center gap-1.5 rounded-full px-4 text-sm transition-colors after:absolute after:inset-0 after:rounded-[20px] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-r-acc",
+          "inline-flex h-[38px] shrink-0 items-center gap-1.5 rounded-full px-4 text-sm transition-colors after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-r-acc",
           lead
             ? "bg-r-pri text-r-on-pri hover:bg-r-pri-hover"
             : "bg-white/[0.06] text-r-text ring-1 ring-r-text-2/25 ring-inset hover:bg-white/10"
@@ -91,8 +91,8 @@ function OtherChannels({ socials }: { socials: SocialLink[] }) {
 function SongCard({ song, fallbackUrl }: { song: NonNullable<VtuberProfile["basic"]["originalSong"]>; fallbackUrl: string }) {
   const released = enDate(song.releasedAt);
   return (
-    <div className="relative flex items-center gap-3.5 rounded-[20px] bg-[linear-gradient(120deg,color-mix(in_srgb,var(--r-pri)_16%,transparent),color-mix(in_srgb,var(--r-text-2)_5%,transparent))] px-4 py-3.5 ring-[1.5px] ring-r-pri/32 ring-inset">
-      <span className="flex size-[46px] shrink-0 items-center justify-center rounded-[14px] bg-r-pri text-r-on-pri">
+    <div className="relative flex items-center gap-3.5 rounded-2xl bg-[linear-gradient(120deg,color-mix(in_srgb,var(--r-pri)_16%,transparent),color-mix(in_srgb,var(--r-text-2)_5%,transparent))] px-4 py-3.5 ring-[1.5px] ring-r-pri/32 ring-inset">
+      <span className="flex size-[46px] shrink-0 items-center justify-center rounded-xl bg-r-pri text-r-on-pri">
         <Music2 aria-hidden className="size-5" />
       </span>
       <div className="min-w-0 flex-1">
@@ -108,7 +108,7 @@ function SongCard({ song, fallbackUrl }: { song: NonNullable<VtuberProfile["basi
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`ฟัง ${song.title} บน YouTube`}
-        className="inline-flex h-[38px] shrink-0 items-center gap-1.5 rounded-full bg-white/[0.06] px-4 text-sm text-r-text ring-1 ring-r-text-2/25 ring-inset transition-colors after:absolute after:inset-0 after:rounded-[20px] hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-r-acc"
+        className="inline-flex h-[38px] shrink-0 items-center gap-1.5 rounded-full bg-white/[0.06] px-4 text-sm text-r-text ring-1 ring-r-text-2/25 ring-inset transition-colors after:absolute after:inset-0 after:rounded-2xl hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-r-acc"
       >
         <Play aria-hidden className="size-3.5" />
         ฟัง

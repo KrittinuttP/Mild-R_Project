@@ -18,6 +18,7 @@ import { Socials } from "@/components/sections/Socials";
 import { getEventsBoard, mildRData } from "@/data/vtuber-data";
 import { listGalleryFanArt } from "@/lib/fanart-submissions-store";
 import { flattenLiveSlots, surroundingWeeksRangeYmdBangkok } from "@/lib/events";
+import { bangkokDateFromIso } from "@/lib/live-preview-match";
 import {
   loadLiveStreamsInRange,
   mergeLiveWeeksWithStreams,
@@ -33,7 +34,7 @@ async function loadInitialLiveSchedule(): Promise<InitialLiveSchedule | null> {
   try {
     const streams = await loadLiveStreamsInRange(from, to, 500);
     const weeks = mergeLiveWeeksWithStreams([], streams, { from, to });
-    return { from, to, weeks };
+    return { from, to, weeks, todayIso: bangkokDateFromIso(new Date().toISOString()) ?? undefined };
   } catch (err) {
     console.error("[home] live schedule", err);
     return null;

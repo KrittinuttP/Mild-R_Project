@@ -44,7 +44,7 @@ export function ConnectHashtagPills({ groups, className }: ConnectHashtagPillsPr
               type="button"
               onClick={() => copyTag(tag)}
               aria-label={copied ? `คัดลอก ${tag} แล้ว` : `คัดลอก ${tag}`}
-              className="flex h-11 w-full items-center gap-2.5 rounded-[14px] bg-r-pri/8 px-3.5 text-left ring-1 ring-r-pri/20 ring-inset transition-colors hover:bg-r-pri/14 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc"
+              className="flex h-11 w-full items-center gap-2.5 rounded-xl bg-r-pri/8 px-3.5 text-left ring-1 ring-r-pri/20 ring-inset transition-colors hover:bg-r-pri/14 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc"
             >
               <span className="flex-1 font-[family-name:var(--font-display)] text-[0.9375rem] text-r-text-2">{tag}</span>
               <span className="text-xs text-r-text-3">{copied ? "คัดลอกแล้ว" : hint}</span>

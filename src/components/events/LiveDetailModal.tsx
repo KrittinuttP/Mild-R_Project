@@ -411,7 +411,7 @@ export function LiveDetailModal({
                     {formatLiveDate(slot.date)}
                   </MetaPill>
                   {platform && !slot.isPreview ? (
-                    <MetaPill className="border-red-500/40 bg-red-500/15 text-xs font-semibold text-red-200 uppercase">
+                    <MetaPill className="border-r-text-2/30 bg-white/[0.05] text-xs font-medium text-r-text-2">
                       {platform}
                     </MetaPill>
                   ) : null}

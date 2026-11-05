@@ -59,7 +59,7 @@ function RichText({ text }: { text: string }) {
 
 function QuoteCard({ nested }: { nested: XQuotedTweet }) {
   return (
-    <div className="mt-3 rounded-[14px] bg-r-bg/50 px-3.5 py-2.5 ring-1 ring-r-text-2/15 ring-inset">
+    <div className="mt-3 rounded-xl bg-r-bg/50 px-3.5 py-2.5 ring-1 ring-r-text-2/15 ring-inset">
       <p className="text-[0.8125rem] text-r-text-3">
         <span className="text-r-text/90">{nested.author_name ?? "ผู้ใช้"}</span>
         {nested.author_username ? <span> @{nested.author_username}</span> : null}
@@ -81,7 +81,7 @@ function PostCard({ post, tab, onOpenImage, fallbackUrl }: { post: XPost; tab: T
   const bodyText = retweet ? post.quoted_tweet?.text || post.text : post.text;
 
   return (
-    <article className="rounded-[20px] bg-r-bg/55 px-4 py-4 ring-1 ring-r-text-2/18 ring-inset sm:px-5 sm:py-[18px]">
+    <article className="rounded-2xl bg-r-bg/55 px-4 py-4 ring-1 ring-r-text-2/18 ring-inset sm:px-5 sm:py-[18px]">
       {tab === "retweets" ? (
         <p className="mb-2 flex items-center gap-1 text-xs text-r-text-3">
           <Repeat2 aria-hidden className="size-3.5" />
@@ -122,7 +122,7 @@ function PostCard({ post, tab, onOpenImage, fallbackUrl }: { post: XPost; tab: T
           type="button"
           onClick={() => onOpenImage(media)}
           aria-label="ดูรูปขนาดใหญ่"
-          className="mt-3 block w-full overflow-hidden rounded-[14px] bg-r-bg ring-1 ring-r-text-2/15 ring-inset focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc"
+          className="mt-3 block w-full overflow-hidden rounded-xl bg-r-bg ring-1 ring-r-text-2/15 ring-inset focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={media} alt="" loading="lazy" referrerPolicy="no-referrer" className="mx-auto max-h-[420px] w-full object-contain" />
@@ -278,7 +278,7 @@ export function XFeed({ posts, retweets, profileUrl, className }: XFeedProps) {
     <div className={className}>
       {/* tablet + desktop */}
       <div className="hidden lg:block">
-        <div className="rounded-[26px] bg-white/[0.015] p-[22px] ring-1 ring-r-text-2/15 ring-inset">
+        <div className="rounded-3xl bg-white/[0.015] p-[22px] ring-1 ring-r-text-2/15 ring-inset">
           <FeedHeader tab={tab} setTab={switchTab} posts={posts.length} retweets={retweets.length} />
           {total === 0 ? (
             <EmptyFeed tab={tab} />
@@ -308,7 +308,7 @@ export function XFeed({ posts, retweets, profileUrl, className }: XFeedProps) {
               </div>
               <span
                 aria-hidden
-                className="pointer-events-none absolute inset-x-0 right-[18px] bottom-0 h-14 rounded-b-[20px] bg-gradient-to-t from-r-bg to-transparent"
+                className="pointer-events-none absolute inset-x-0 right-[18px] bottom-0 h-14 rounded-b-2xl bg-gradient-to-t from-r-bg to-transparent"
               />
             </div>
           )}

@@ -18,7 +18,7 @@ const PROFILE_IMAGE = "/assets/mild/image/Mild_R.jpg";
 const LOVE_IMAGE = "/assets/mild/image/Mild-R LoVe.png";
 
 /** Small spaced label at the top of each box */
-const BOX_PAD = "rounded-[22px] p-5 sm:p-[22px]";
+const BOX_PAD = "rounded-2xl p-5 sm:p-[22px]";
 const HEART_PATH =
   "M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.5 1.2 4.3 2.4.8-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z";
 const SIDE_LABEL = { left: "ตาฝั่งซ้าย", right: "ตาฝั่งขวา" } as const;
@@ -120,7 +120,7 @@ export function Lore({ data }: LoreProps) {
   );
 
   return (
-    <Section ref={rootRef} id="lore" aria-labelledby="lore-title">
+    <Section ref={rootRef} id="lore" seam aria-labelledby="lore-title">
       <SectionHeader eyebrow="About · Lore" title={`รู้จัก ${basic.name}`} titleId="lore-title" />
 
       <div
@@ -142,7 +142,7 @@ export function Lore({ data }: LoreProps) {
             {/* tablet–laptop: the card matches the record + story column, so the photo grows to fill it */}
             <div
               data-protect-media
-              className="relative aspect-[4/3] overflow-hidden rounded-[18px] bg-[radial-gradient(circle_at_50%_40%,var(--r-text),color-mix(in_srgb,var(--r-text-2)_45%,var(--r-text)))] md:aspect-auto md:min-h-72 md:flex-1 xl:aspect-square xl:flex-none"
+              className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-[radial-gradient(circle_at_50%_40%,var(--r-text),color-mix(in_srgb,var(--r-text-2)_45%,var(--r-text)))] md:aspect-auto md:min-h-72 md:flex-1 xl:aspect-square xl:flex-none"
             >
               <Image
                 src={PROFILE_IMAGE}
@@ -167,7 +167,7 @@ export function Lore({ data }: LoreProps) {
 
         {/* ── Patient record + story ── */}
         <div className="flex min-w-0 flex-col gap-[18px]">
-          <section data-lore-box aria-label="ข้อมูล" className="r-card rounded-[22px] px-5 pt-[18px] pb-2 sm:px-6">
+          <section data-lore-box aria-label="ข้อมูล" className="r-card rounded-2xl px-5 pt-[18px] pb-2 sm:px-6">
             <div className="mb-1 flex items-baseline justify-between gap-3">
               <p className={R_CARD_TITLE_CLASS}>PROFILE · ข้อมูล</p>
               <span className="hidden text-[0.71875rem] text-r-text-3 sm:inline">{basic.agency}</span>
@@ -222,7 +222,7 @@ export function Lore({ data }: LoreProps) {
               ) : null}
             </div>
             <div className="my-auto pt-3.5">
-              <div data-protect-media className="relative aspect-video overflow-hidden rounded-[18px]">
+              <div data-protect-media className="relative aspect-video overflow-hidden rounded-2xl">
                 <Image
                   src={LOVE_IMAGE}
                   alt={`${design.companionGroupNameLocal ?? ""} · ${companions.map((c) => c.name).join(" และ ")}`}
@@ -231,7 +231,7 @@ export function Lore({ data }: LoreProps) {
                   sizes="(min-width: 1280px) 376px, (min-width: 768px) 316px, 100vw"
                   className="object-cover object-[50%_35%] select-none"
                 />
-                <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[18px] ring-[1.5px] ring-r-acc/35 ring-inset" />
+                <span aria-hidden className="pointer-events-none absolute inset-0 rounded-2xl ring-[1.5px] ring-r-acc/35 ring-inset" />
               </div>
               <ul className="mt-3 grid grid-cols-2 gap-3">
                 {companions.map((c) => (
@@ -256,7 +256,7 @@ export function Lore({ data }: LoreProps) {
             <p className={R_CARD_TITLE_CLASS}>LIKES · ชอบ / ไม่ชอบ</p>
             <div className="mt-3.5 grid flex-1 gap-3.5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
               {likes.length > 0 ? (
-                <div className="rounded-[18px] bg-r-pri/6 px-5 py-[18px] ring-1 ring-r-pri/22 ring-inset">
+                <div className="rounded-2xl bg-r-pri/6 px-5 py-[18px] ring-1 ring-r-pri/22 ring-inset">
                   <p className="flex items-center gap-2 text-[0.9375rem] text-r-text">
                     <Heart className="size-3.5 text-r-pri" /> ของที่ชอบ
                   </p>
@@ -270,7 +270,7 @@ export function Lore({ data }: LoreProps) {
                 </div>
               ) : null}
               {dislikes.length > 0 ? (
-                <div className="rounded-[18px] bg-white/[0.02] px-5 py-[18px] ring-1 ring-r-text-2/15 ring-inset">
+                <div className="rounded-2xl bg-white/[0.02] px-5 py-[18px] ring-1 ring-r-text-2/15 ring-inset">
                   <p className="text-[0.9375rem] text-r-text/85">
                     <span aria-hidden>✕ </span>ของที่ไม่ชอบ
                   </p>
@@ -291,7 +291,7 @@ export function Lore({ data }: LoreProps) {
         <section
           data-lore-box
           aria-label="ทีมผู้สร้าง"
-          className="r-card rounded-[22px] px-5 py-6 sm:px-7 md:col-span-2"
+          className="r-card rounded-2xl px-5 py-6 sm:px-7 md:col-span-2"
         >
           <p className={cn(R_CARD_TITLE_CLASS, "mb-[18px]")}>TEAM · ทีมผู้สร้าง</p>
           <DesignCredits design={design} />

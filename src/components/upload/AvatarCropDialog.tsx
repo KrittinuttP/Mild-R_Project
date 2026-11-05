@@ -42,7 +42,7 @@ export function AvatarCropDialog({
     >
       <DialogContent
         showCloseButton={false}
-        className="gap-0 rounded-[22px] bg-[var(--r-panel)] p-5 text-r-text-2 ring-white/10 sm:max-w-md"
+        className="gap-0 rounded-2xl bg-[var(--r-panel)] p-5 text-r-text-2 ring-white/10 sm:max-w-md"
         overlayClassName="bg-r-bg/75"
       >
         <DialogTitle className="font-[family-name:var(--font-display)] text-lg font-normal text-r-text">

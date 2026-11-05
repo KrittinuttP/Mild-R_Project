@@ -22,7 +22,7 @@ export function MembershipIntroVideo({ videoId, title, label, className }: Membe
   return (
     <div
       className={cn(
-        "relative aspect-video overflow-hidden rounded-[22px] bg-r-bg shadow-[0_0_40px_color-mix(in_srgb,var(--r-pri)_18%,transparent)] ring-[1.5px] ring-r-pri/32",
+        "relative aspect-video overflow-hidden rounded-2xl bg-r-bg shadow-[0_0_40px_color-mix(in_srgb,var(--r-pri)_18%,transparent)] ring-[1.5px] ring-r-pri/32",
         className
       )}
     >

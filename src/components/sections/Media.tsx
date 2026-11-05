@@ -302,7 +302,7 @@ function PlaylistPanel({
           {Array.from({ length: 4 }, (_, i) => (
             <li key={i} className="flex items-center gap-3 p-2">
               <span className="w-[18px]" />
-              <span className="aspect-video w-[104px] shrink-0 animate-pulse rounded-[10px] bg-white/[0.05] md:w-[120px]" />
+              <span className="aspect-video w-[104px] shrink-0 animate-pulse rounded-xl bg-white/[0.05] md:w-[120px]" />
               <span className="flex-1 space-y-2">
                 <span className="block h-3.5 w-4/5 animate-pulse rounded bg-white/[0.05]" />
                 <span className="block h-3 w-2/5 animate-pulse rounded bg-white/[0.05]" />
@@ -331,7 +331,7 @@ function PlaylistPanel({
                     <span className={cn("w-[18px] shrink-0 text-center text-xs", selected ? "text-r-pri" : "text-r-text-3")}>
                       {selected ? "▶" : index + 1}
                     </span>
-                    <span className="relative aspect-video w-[104px] shrink-0 overflow-hidden rounded-[10px] bg-[linear-gradient(140deg,color-mix(in_srgb,var(--r-pri)_22%,var(--r-bg)),var(--r-bg))] ring-1 ring-r-text-2/15 md:w-[120px]">
+                    <span className="relative aspect-video w-[104px] shrink-0 overflow-hidden rounded-xl bg-[linear-gradient(140deg,color-mix(in_srgb,var(--r-pri)_22%,var(--r-bg)),var(--r-bg))] ring-1 ring-r-text-2/15 md:w-[120px]">
                       {clip.thumbUrl ? (
                         <ProtectedImage src={clip.thumbUrl} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
                       ) : null}
@@ -394,7 +394,7 @@ function ShortsBoard({
 
   return (
     <div className="grid grid-cols-1 items-center gap-[22px] lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
-      <div className="relative mx-auto aspect-[9/16] w-[min(222px,64vw)] overflow-hidden rounded-[22px] bg-[radial-gradient(circle_at_50%_30%,color-mix(in_srgb,var(--r-pri)_35%,var(--r-bg)),var(--r-bg)_70%)] ring-2 ring-r-pri lg:w-[252px]">
+      <div className="relative mx-auto aspect-[9/16] w-[min(222px,64vw)] overflow-hidden rounded-2xl bg-[radial-gradient(circle_at_50%_30%,color-mix(in_srgb,var(--r-pri)_35%,var(--r-bg)),var(--r-bg)_70%)] ring-2 ring-r-pri lg:w-[252px]">
         {active && playing && active.embed ? (
           <YoutubeFrame clip={active} />
         ) : (
@@ -602,7 +602,7 @@ export function Media({ data }: MediaProps) {
                   />
                   <div className="mt-3.5 flex flex-wrap items-center justify-between gap-3">
                     {active.funFact ? (
-                      <span className="inline-flex items-center gap-2 rounded-[14px] bg-r-pri/10 px-[13px] py-2 text-[0.8125rem] text-r-text-2">
+                      <span className="inline-flex items-center gap-2 rounded-xl bg-r-pri/10 px-[13px] py-2 text-[0.8125rem] text-r-text-2">
                         <Lightbulb aria-hidden className="size-3.5 text-r-pri" />
                         {active.funFact}
                       </span>

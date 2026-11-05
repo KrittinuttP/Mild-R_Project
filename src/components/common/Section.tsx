@@ -10,6 +10,8 @@ type SectionProps = {
   strong?: boolean;
   /** Gradient hairline along the top edge (pink → nurse white → mint). */
   hairline?: boolean;
+  /** Clearer seam with the previous section — brighter hairline + soft pink band (Lore · Events · Member). */
+  seam?: boolean;
   /** Extra classes on <section> (e.g. overflow-hidden, safe-area padding). */
   className?: string;
   /** Extra classes on the max-w-6xl content wrapper. */
@@ -28,6 +30,7 @@ export function Section({
   children,
   strong = false,
   hairline = true,
+  seam = false,
   className,
   innerClassName,
   ref,
@@ -44,7 +47,10 @@ export function Section({
       )}
     >
       <SectionGlow strong={strong} />
-      {hairline ? <div aria-hidden className="r-hairline absolute inset-x-0 top-0" /> : null}
+      {seam ? <div aria-hidden className="r-seam-band pointer-events-none absolute inset-x-0 top-0" /> : null}
+      {hairline ? (
+        <div aria-hidden className={cn("r-hairline absolute inset-x-0 top-0", seam && "r-hairline-seam")} />
+      ) : null}
       <div className={cn("relative mx-auto max-w-6xl", innerClassName)}>{children}</div>
     </section>
   );

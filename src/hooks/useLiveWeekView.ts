@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 
 import {
   findDefaultWeekIndex,
@@ -11,6 +11,22 @@ import {
 } from "@/lib/events";
 import { bangkokDateFromIso } from "@/lib/live-preview-match";
 import type { LiveOfflineDay, LiveSlot, LiveWeek } from "@/types/vtuber";
+
+function bangkokToday(): string {
+  return bangkokDateFromIso(new Date().toISOString()) ?? formatISODate(new Date());
+}
+
+/**
+ * Today's Bangkok date, hydration-safe. The home page is cached (ISR), so its HTML can be older than the
+ * visitor's clock: hydrate with the date the server rendered (`serverTodayIso`), then switch to the real one.
+ */
+function useBangkokToday(serverTodayIso?: string): string {
+  const subscribe = useCallback((onChange: () => void) => {
+    const id = window.setInterval(onChange, 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+  return useSyncExternalStore(subscribe, bangkokToday, () => serverTodayIso ?? bangkokToday());
+}
 
 /** Spotlight highlight: only slots on today's Bangkok date. */
 function findTodayHighlightSlot(week: LiveWeek, todayIso: string): LiveSlot | null {
@@ -54,12 +70,15 @@ export function useLiveWeekView({
   weeks,
   slotLookup,
   weekRange,
+  serverTodayIso,
 }: {
   weeks: LiveWeek[];
   /** All slots for reschedule / next-live lookups (defaults to slots in `weeks`). */
   slotLookup?: LiveSlot[];
   /** Clamp the week picker to the loaded schedule window (e.g. homepage 2-week range). */
   weekRange?: { from: string; to: string };
+  /** Bangkok date the server rendered with (see `useBangkokToday`). */
+  serverTodayIso?: string;
 }) {
   const sorted = useMemo(() => sortLiveWeeks(weeks), [weeks]);
   const visibleWeeks = useMemo(() => {
@@ -67,7 +86,7 @@ export function useLiveWeekView({
     return sorted.filter((week) => weekOverlapsYmdRange(week.weekStart, weekRange.from, weekRange.to));
   }, [sorted, weekRange]);
 
-  const todayIso = bangkokDateFromIso(new Date().toISOString()) ?? formatISODate(new Date());
+  const todayIso = useBangkokToday(serverTodayIso);
 
   /** Weeks user can flip through: current week always, others only if they have lives. */
   const navigableWeeks = useMemo(() => {

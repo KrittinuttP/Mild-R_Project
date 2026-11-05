@@ -26,7 +26,7 @@ export function UploadFormSkeleton({ cards }: { cards: readonly CardSize[] }) {
             <span className="size-7 rounded-full ring-[1.5px] ring-r-text-2/25 ring-inset" />
             <span className="h-3.5 w-32 rounded-full bg-white/[0.06]" />
           </div>
-          <div className="mt-6 h-11 rounded-[14px] bg-white/[0.035]" />
+          <div className="mt-6 h-11 rounded-xl bg-white/[0.035]" />
           <div className="mt-3 h-3 w-2/5 rounded-full bg-white/[0.04]" />
         </div>
       ))}
