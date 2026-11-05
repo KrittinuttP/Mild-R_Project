@@ -125,17 +125,46 @@ export class FanartUploadError extends Error {
 /**
  * PUT to a Supabase signed upload URL, like storage-js uploadToSignedUrl but
  * with upload progress. A 409 means an earlier try already stored the file.
+ *
+ * The file is copied into memory first: on Android a picked photo (gallery / Google Photos /
+ * cloud-backed) can lose its read access while the request streams, and the browser then reports
+ * a plain network error (status 0). A network error (status 0) is retried once.
  */
-export function uploadToSignedUrl(
+export async function uploadToSignedUrl(
   signedUrl: string,
   file: File,
+  onProgress: UploadProgress,
+  apiKey: string
+): Promise<void> {
+  let blob: Blob;
+  try {
+    blob = new Blob([await file.arrayBuffer()], { type: file.type });
+  } catch {
+    // The file can no longer be read (revoked / moved) → let the user pick it again.
+    throw new FanartUploadError("unreadable", 0);
+  }
+
+  try {
+    await putOnce(signedUrl, blob, file.name, onProgress, apiKey);
+  } catch (error) {
+    if (!(error instanceof FanartUploadError) || error.status !== 0) throw error;
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    onProgress(0, blob.size);
+    await putOnce(signedUrl, blob, file.name, onProgress, apiKey);
+  }
+}
+
+function putOnce(
+  signedUrl: string,
+  blob: Blob,
+  fileName: string,
   onProgress: UploadProgress,
   apiKey: string
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const body = new FormData();
     body.append("cacheControl", "31536000");
-    body.append("", file);
+    body.append("", blob, fileName);
 
     const xhr = new XMLHttpRequest();
     xhr.open("PUT", signedUrl);
@@ -150,7 +179,7 @@ export function uploadToSignedUrl(
     };
     xhr.onload = () => {
       if ((xhr.status >= 200 && xhr.status < 300) || isAlreadyStored(xhr)) {
-        onProgress(file.size, file.size);
+        onProgress(blob.size, blob.size);
         resolve();
       } else {
         const { status, code } = storageFailure(xhr);

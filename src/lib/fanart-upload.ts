@@ -51,9 +51,11 @@ export const FANART_TEXT_LIMITS = {
 
 /** Bump `version` whenever `text` changes; it is stored with every submission. */
 export const FANART_CONSENT = {
-  version: "2026-10-21",
+  version: "2026-11-05",
   // `|` = where Thai may wrap (render with <ThaiPhrases>, strip elsewhere).
   text: "แฟนอาร์ต|ที่ส่งมา|จะถูกนำไปใช้|เพื่อตกแต่งคาเฟ่ และ|ในโปรเจกต์|วันเกิด|ของ Mild-R เท่านั้น",
+  /** Own line under `text` (11/5): the label's "ข้างต้น" covers it, so it is not repeated in the label. */
+  rule: "ไม่รับ|ภาพที่สร้างด้วย AI",
   label:
     "ฉันเป็น|เจ้าของผลงาน หรือ|ได้รับอนุญาต|จากเจ้าของผลงาน|แล้ว และ|ยินยอม|ให้นำไปใช้|ตามที่ระบุ|ข้างต้น",
   hint: "ถ้าเป็นผลงาน|ของคนอื่น เช่น งาน|ที่จ้างวาด กรุณา|ขออนุญาต|คนวาดก่อน และ|ใส่เครดิต|ของคนวาด|ที่ “แก้เครดิต”",
@@ -63,6 +65,7 @@ export const FANART_CONSENT = {
 export const FANART_CONSENT_SUMMARY: Record<string, string> = {
   "2026-10-20": "เป็นเจ้าของผลงาน",
   "2026-10-21": "เป็นเจ้าของผลงาน หรือได้รับอนุญาตจากเจ้าของแล้ว",
+  "2026-11-05": "เป็นเจ้าของผลงาน หรือได้รับอนุญาตจากเจ้าของแล้ว · ยอมรับกติกาไม่รับภาพ AI",
 };
 
 export type FanartContactChannel = "x" | "discord" | "facebook";

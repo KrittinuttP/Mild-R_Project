@@ -14,6 +14,7 @@ import {
   AlertCircle,
   ArrowLeft,
   ArrowRight,
+  Ban,
   BookOpen,
   ChevronRight,
   Cake,
@@ -228,6 +229,9 @@ function nextKey() {
 
 function uploadErrorText(error: unknown): { message: string; retryable: boolean } {
   if (error instanceof FanartUploadError) {
+    if (error.message === "unreadable") {
+      return { message: "อ่านไฟล์รูปไม่ได้ กด “กลับไปแก้ไขรูปที่พลาด” แล้วเลือกรูปนี้ใหม่", retryable: false };
+    }
     if (error.status === 0) return { message: "เชื่อมต่อไม่ได้ กด “ลองใหม่” อีกครั้ง", retryable: true };
     if (error.status === 413) return { message: "ไฟล์ใหญ่เกินไป (รูปละไม่เกิน 40 MB)", retryable: false };
     if (error.status === 415 || error.code === "invalid_mime_type") {
@@ -1439,6 +1443,15 @@ function FanartUploadForm({
       <p id={`${ids}-consent-text`} className="mt-4 text-sm leading-relaxed text-r-text-2">
         <ThaiPhrases text={FANART_CONSENT.text} />
       </p>
+      <p
+        id={`${ids}-consent-rule`}
+        className="mt-3 flex items-center gap-2.5 rounded-xl bg-r-pri/[0.08] px-3.5 py-2.5 text-sm leading-relaxed font-semibold text-r-text ring-1 ring-r-pri/35 ring-inset"
+      >
+        <Ban aria-hidden className="size-4 flex-none text-r-pri" strokeWidth={2.25} />
+        <span>
+          <ThaiPhrases text={FANART_CONSENT.rule} />
+        </span>
+      </p>
       <label
         className={cn(
           "mt-3.5 flex cursor-pointer items-start gap-3 rounded-xl bg-white/[0.03] p-3.5 ring-1 transition-colors ring-inset",
@@ -1455,7 +1468,7 @@ function FanartUploadForm({
               setFormError(null);
             }
           }}
-          aria-describedby={`${ids}-consent-text ${ids}-consent-hint`}
+          aria-describedby={`${ids}-consent-text ${ids}-consent-rule ${ids}-consent-hint`}
           aria-invalid={consentInvalid}
           className="peer sr-only"
         />
