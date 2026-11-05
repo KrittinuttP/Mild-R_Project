@@ -555,7 +555,7 @@ export function LiveViewTrendsPanel({
 
             {pending ? (
               <div className="flex min-h-[20vh] flex-col items-center justify-center gap-2 py-10">
-                <span className="size-2.5 rounded-full bg-r-pri animate-ping" />
+                <span className="r-ping size-2.5 rounded-full bg-r-pri" />
                 <p className="text-xs text-r-text-2/60">กำลังโหลดข้อมูลไลฟ์…</p>
               </div>
             ) : error ? (

@@ -54,7 +54,7 @@ export function MembershipIntroVideo({ videoId, title, label, className }: Membe
             className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,color-mix(in_srgb,var(--r-pri)_30%,transparent),transparent_60%),linear-gradient(0deg,color-mix(in_srgb,var(--r-bg)_75%,transparent),color-mix(in_srgb,var(--r-bg)_25%,transparent))]"
           />
           <span className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-            <span className="r-ping flex size-16 items-center justify-center rounded-full bg-r-pri text-r-text transition-transform group-hover:scale-105 group-focus-visible:outline-2 group-focus-visible:outline-offset-3 group-focus-visible:outline-r-acc">
+            <span className="flex size-16 items-center justify-center rounded-full bg-r-pri text-r-text transition-transform group-hover:scale-105 group-focus-visible:outline-2 group-focus-visible:outline-offset-3 group-focus-visible:outline-r-acc">
               <Play aria-hidden className="size-6 fill-current" />
             </span>
             {label ? (

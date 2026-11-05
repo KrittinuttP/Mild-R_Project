@@ -32,7 +32,8 @@ const SHORT_MAX_SECONDS = 3 * 60;
 const SHORT_FALLBACK_SECONDS = 60;
 const PROBE_CONCURRENCY = 8;
 
-const MILD_MENTION_RE = /@?MildRWorldEnd|Mild-?R\b|MildR\b/i;
+/** Other channels' uploads count only when the title or description tags the official handle. */
+const MILD_HANDLE_RE = /@MildRWorldEnd\b/i;
 const SHORTS_TAG_RE = /#shorts?\b/i;
 
 export type YoutubeVideoItem = {
@@ -110,10 +111,12 @@ export function isRealLive(item: YoutubeVideoItem): boolean {
   return Boolean(item.liveStreamingDetails) && !isPremiere(item);
 }
 
+/** Own uploads always pass; other channels need @MildRWorldEnd in the title or description. */
 export function mentionsMildRVideo(item: YoutubeVideoItem): boolean {
+  if (item.snippet.channelId === MAIN_CHANNEL_ID) return true;
   return (
-    MILD_MENTION_RE.test(item.snippet.title) ||
-    MILD_MENTION_RE.test(item.snippet.description ?? "")
+    MILD_HANDLE_RE.test(item.snippet.title) ||
+    MILD_HANDLE_RE.test(item.snippet.description ?? "")
   );
 }
 

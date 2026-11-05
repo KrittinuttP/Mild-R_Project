@@ -3,7 +3,7 @@
  *
  *   Mild-R channel: every upload.
  *   Pixela Official + Lumina master + guest hosts seen in mild_r_live_streams:
- *     only uploads that mention Mild-R in title or description.
+ *     only uploads that tag @MildRWorldEnd in title or description.
  *
  *   npm run backfill:videos
  *   npx tsx --env-file=.env.local scripts/backfill-videos.ts --dry-run

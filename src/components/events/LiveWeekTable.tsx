@@ -16,7 +16,6 @@ import {
 import { LiveCoverPlaceholder } from "@/components/events/LiveCoverPlaceholder";
 import { LiveDetailHost, useLiveDetail } from "@/components/events/LiveDetailHost";
 import {
-  LiveCancelledBadge,
   LiveDayChannelBadges,
   LiveSlotTime,
   LiveSourceBadges,
@@ -25,27 +24,21 @@ import {
 import { OfflineBadge } from "@/components/events/OfflineBadge";
 import { FadeInImage } from "@/components/media/FadeInImage";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
-import { buttonVariants } from "@/components/ui/button";
 import { useLiveWeekView } from "@/hooks/useLiveWeekView";
 import { useNow } from "@/hooks/useNow";
 import { parseISODate } from "@/lib/events";
 import { getSlotCoverUrl } from "@/lib/live-cover";
 import { slotStartMs, startCountdownLabel } from "@/lib/live-today";
 import {
-  BADGE_ACCENT_CLASS,
-  CTA_OUTLINE_CLASS,
-  CTA_PRIMARY_CLASS,
   R_CTA_OUTLINE_CLASS,
   R_CTA_PRIMARY_CLASS,
   LIVE_BADGE_CANCELLED,
   LIVE_BADGE_COLLAB,
   LIVE_BADGE_MEMBER,
   LIVE_BADGE_PILL_COMPACT,
-  META_MUTED_CLASS,
 } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type {
-  LivePlatform,
   LiveSlot,
   LiveWeek,
   LiveWeekBanner,
@@ -60,15 +53,12 @@ type LiveWeekTableProps = {
   slotLookup?: LiveSlot[];
   /** Clamp week picker to the loaded schedule window (e.g. homepage 2-week range). */
   weekRange?: { from: string; to: string };
-  /**
-   * `legacy` is the /live palette.
-   * `aplus` recolors the same table with the homepage CI (`--r-*`, `r-card`, `r-ring`).
-   */
-  tone?: "legacy" | "aplus";
+  /** The table uses the homepage CI (`--r-*`, `r-card`, `r-ring`) palette. */
+  tone?: "aplus";
 };
 
 type LiveTableSkin = {
-  tone: "legacy" | "aplus";
+  tone: "aplus";
   emptyMessage: string;
   slotMobileBase: string;
   slotDesktopBase: string;
@@ -166,149 +156,6 @@ type LiveTableSkin = {
   mobileEmptyRule: string;
   mobileEmptyText: string;
   mobileEmptyNote: string;
-};
-
-const LEGACY_SKIN: LiveTableSkin = {
-  tone: "legacy",
-  emptyMessage: "text-sm text-[#f3b8c4]/70",
-  slotMobileBase:
-    "group flex h-[5.5rem] w-full items-stretch overflow-hidden rounded-2xl border bg-[#1a0c12]/70 text-left transition",
-  slotDesktopBase:
-    "group flex w-full flex-col overflow-hidden rounded-2xl border bg-[#1a0c12]/60 text-left transition",
-  slotCancelled: "border-[#8a7f88]/30 opacity-80 hover:border-[#8a7f88]/50 hover:bg-[#8a7f88]/10",
-  slotGuest: "border-r-acc/35 hover:border-r-acc/55 hover:bg-r-acc/10",
-  slotLive:
-    "border-[#e85a7a]/60 shadow-[0_0_16px_rgba(232,90,122,0.18)] hover:border-[#e85a7a] hover:bg-[#1f0d16]",
-  slotIdle: "border-[#f3b8c4]/12 hover:border-[#e85a7a]/40 hover:bg-[#1a0c12]",
-  coverBg: "bg-[#10070b]",
-  coverShade: "pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140a0d]/80 via-transparent to-transparent",
-  livePillSm:
-    "inline-flex items-center gap-1 rounded-md bg-[#e85a7a] px-1.5 py-0.5 text-[0.65rem] font-bold tracking-wider text-white uppercase shadow-[0_0_8px_rgba(232,90,122,0.6)]",
-  livePill:
-    "inline-flex items-center gap-1 rounded-md bg-[#e85a7a] px-2 py-0.5 text-[0.68rem] font-bold tracking-wider text-white uppercase shadow-[0_0_8px_rgba(232,90,122,0.6)]",
-  liveDot: "size-1.5 animate-ping rounded-full bg-white",
-  clock: "text-[#e85a7a]",
-  time: "text-[#fff5f7]",
-  title: "text-[#fff5f7]",
-  subtitle: "text-[#f3b8c4]/60",
-  subtitleSoft: "text-[#f3b8c4]/65",
-  timeBarCancelled: "border-[#8a7f88]/20 bg-[#160a0f]/90",
-  timeBarLive: "border-[#e85a7a]/40 bg-[#e85a7a]/20",
-  timeBarIdle: "border-[#f3b8c4]/10 bg-[#14080e]/95 group-hover:bg-[#180912]",
-  offlineDay: "border border-dashed border-[#6ec9b0]/25 bg-[#6ec9b0]/05",
-  emptyDay: "border-[#6ec9b0]/25 bg-[#6ec9b0]/05",
-  blankDay: "border-[#8a7f88]/30 bg-transparent",
-  blankText: "text-[#f3b8c4]/50",
-  spotlight:
-    "relative overflow-hidden rounded-3xl border border-[#e85a7a]/35 bg-gradient-to-r from-[#220e18]/95 via-[#1a0c12]/90 to-[#140a0d] shadow-[0_16px_40px_rgba(232,90,122,0.16)]",
-  statusLive:
-    "inline-flex items-center gap-1.5 rounded-full border border-[#e85a7a] bg-[#e85a7a] px-3 py-1 text-xs font-semibold tracking-wide text-white uppercase shadow-sm shadow-[0_0_16px_rgba(232,90,122,0.6)]",
-  statusUpcoming:
-    "inline-flex items-center gap-1.5 rounded-full border border-[#e85a7a]/60 bg-[#e85a7a]/20 px-3 py-1 text-xs font-semibold tracking-wide text-[#fff5f7] uppercase shadow-sm",
-  statusMuted:
-    "inline-flex items-center gap-1.5 rounded-full border border-[#f3b8c4]/30 bg-[#f3b8c4]/15 px-3 py-1 text-xs font-semibold tracking-wide text-[#f7d7de] uppercase shadow-sm",
-  statusDotLive: "size-2 animate-ping rounded-full bg-white",
-  statusDotUpcoming: "size-2 animate-pulse rounded-full bg-[#e85a7a]",
-  statusDotMuted: "size-2 rounded-full bg-[#f3b8c4]/80",
-  statusDotIdleSm: "size-1.5 rounded-full bg-[#e85a7a]",
-  countdown:
-    "inline-flex items-center gap-1.5 rounded-full border border-[#e85a7a]/60 bg-[#e85a7a]/25 px-3 py-1 text-xs font-bold text-[#fff5f7] shadow-[0_0_16px_rgba(232,90,122,0.35)]",
-  metaPill:
-    "inline-flex items-center gap-1.5 rounded-xl border border-[#f3b8c4]/15 bg-[#14080e]/90 px-3 py-1.5 text-[#fff5f7] shadow-inner",
-  metaPillSm:
-    "inline-flex items-center gap-1 rounded-lg border border-[#f3b8c4]/15 bg-[#14080e]/90 px-2.5 py-1 text-[#fff5f7]",
-  metaIcon: "text-[#e85a7a]",
-  ctaPrimary: cn(
-    buttonVariants({ size: "sm" }),
-    CTA_PRIMARY_CLASS,
-    "inline-flex items-center gap-1.5 shadow-md"
-  ),
-  ctaOutline: cn(buttonVariants({ variant: "outline", size: "sm" }), CTA_OUTLINE_CLASS),
-  ctaPrimaryBlock: cn(
-    buttonVariants({ size: "sm" }),
-    CTA_PRIMARY_CLASS,
-    "flex w-full items-center justify-center gap-1.5"
-  ),
-  ctaOutlineBlock: cn(buttonVariants({ variant: "outline", size: "sm" }), CTA_OUTLINE_CLASS, "w-full text-xs"),
-  thumb:
-    "group relative aspect-[16/9] w-64 shrink-0 overflow-hidden rounded-2xl border border-[#f3b8c4]/20 bg-[#12080c] text-left transition hover:border-[#e85a7a]/50 lg:w-80",
-  thumbPlain:
-    "relative aspect-[16/9] w-64 shrink-0 overflow-hidden rounded-2xl border border-[#f3b8c4]/20 bg-[#12080c] text-left transition hover:border-[#e85a7a]/50 lg:w-80",
-  thumbShade: "pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140a0d]/70 via-transparent to-transparent",
-  mobileCoverBg: "relative aspect-[16/9] w-full overflow-hidden bg-[#12080c] text-left",
-  mobileCoverShade: "pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#1a0c12] to-transparent",
-  statusLiveSm:
-    "inline-flex items-center gap-1 rounded-full border border-[#e85a7a] bg-[#e85a7a] px-2.5 py-0.5 text-[0.68rem] font-bold text-white uppercase shadow-sm shadow-[0_0_12px_rgba(232,90,122,0.6)] backdrop-blur-md",
-  statusIdleSm:
-    "inline-flex items-center gap-1 rounded-full border border-[#e85a7a]/60 bg-[#140a0d]/85 px-2.5 py-0.5 text-[0.68rem] font-bold text-[#fff5f7] uppercase shadow-sm backdrop-blur-md",
-  countdownSm:
-    "inline-flex items-center gap-1 rounded-full border border-[#e85a7a]/60 bg-[#140a0d]/85 px-2.5 py-0.5 text-[0.68rem] font-bold text-[#fff5f7] shadow-sm backdrop-blur-md",
-  countdownSmBare:
-    "inline-flex items-center gap-1 rounded-full border border-[#e85a7a]/60 bg-[#e85a7a]/25 px-2.5 py-0.5 text-[0.68rem] font-bold text-[#fff5f7] shadow-sm",
-  statusLiveBare:
-    "inline-flex items-center gap-1 rounded-full border border-[#e85a7a] bg-[#e85a7a] px-2.5 py-0.5 text-[0.68rem] font-bold text-white uppercase",
-  statusIdleBare:
-    "inline-flex items-center gap-1 rounded-full border border-[#e85a7a]/60 bg-[#e85a7a]/20 px-2.5 py-0.5 text-[0.68rem] font-bold text-[#fff5f7] uppercase",
-  titleLg:
-    "mt-3.5 line-clamp-2 font-[family-name:var(--font-display)] text-xl font-normal leading-snug tracking-normal text-[#fff5f7] sm:text-2xl",
-  titleMd:
-    "mt-2.5 line-clamp-2 font-[family-name:var(--font-display)] text-lg font-normal leading-snug tracking-normal text-[#fff5f7]",
-  nextCard:
-    "group flex w-full items-center gap-3 rounded-2xl border border-[#f3b8c4]/20 bg-[#14080e]/90 p-2.5 text-left transition hover:border-[#e85a7a]/40 hover:bg-[#1a0c12] sm:w-auto sm:min-w-[18rem]",
-  nextThumb: "relative aspect-video w-20 shrink-0 overflow-hidden rounded-xl border border-[#f3b8c4]/15 bg-[#12080c] sm:w-24",
-  nextKicker: "block text-xs font-semibold text-[#e85a7a]",
-  nextMeta: "flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-[#f7d7de]/90",
-  nextTitle: "line-clamp-1 text-sm font-medium text-[#fff5f7] group-hover:text-white",
-  offlineShellOn: "border-[#6ec9b0]/25 bg-[#6ec9b0]/05",
-  offlineShellOff: "border-[#8a7f88]/30 bg-transparent",
-  offlineDateOn: "border-[#6ec9b0]/25 bg-[#6ec9b0]/05 text-[#a8e6d4]",
-  offlineDateOff: "border-[#f3b8c4]/15 bg-[#14080e]/90 text-[#fff5f7]",
-  offlineDateIconOn: "text-[#6ec9b0]",
-  offlineDateIconOff: "text-[#e85a7a]",
-  offlineDateSmOn: "border-[#6ec9b0]/25 bg-[#6ec9b0]/05 text-[#a8e6d4]",
-  offlineDateSmOff: "border-[#f3b8c4]/15 bg-[#14080e]/90 text-[#fff5f7]",
-  offlineCoverOn: "border-[#6ec9b0]/25",
-  offlineCoverOff: "border-[#8a7f88]/30",
-  offlineNote: "text-sm text-[#f3b8c4]/50",
-  banner:
-    "overflow-hidden rounded-3xl border border-[#e85a7a]/30 bg-gradient-to-r from-[#220e18]/90 via-[#1a0c12]/80 to-[#140a0d] shadow-[0_12px_32px_rgba(232,90,122,0.12)]",
-  bannerBadge: cn(BADGE_ACCENT_CLASS, "uppercase tracking-wider"),
-  bannerTitle:
-    "font-[family-name:var(--font-display)] font-normal leading-snug tracking-normal text-[#fff5f7]",
-  bannerSub: "text-[#f7d7de]/80",
-  bannerThumb: "relative aspect-[16/9] w-56 shrink-0 overflow-hidden rounded-2xl border border-[#f3b8c4]/15 bg-[#12080c] lg:w-72",
-  bannerCoverBg: "relative aspect-[16/9] w-full overflow-hidden bg-[#12080c]",
-  bannerCoverShade: "pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#1a0c12] to-transparent",
-  bannerCta: cn(buttonVariants({ size: "sm" }), CTA_PRIMARY_CLASS, "inline-flex items-center gap-1.5"),
-  bannerCtaBlock: cn(
-    buttonVariants({ size: "sm" }),
-    CTA_PRIMARY_CLASS,
-    "mt-3.5 flex w-full items-center justify-center gap-1.5"
-  ),
-  weekKicker: META_MUTED_CLASS,
-  weekRange:
-    "mt-1 font-[family-name:var(--font-display)] text-lg font-normal text-[#fff5f7] sm:text-xl",
-  navButton: cn(buttonVariants({ variant: "outline", size: "icon" }), CTA_OUTLINE_CLASS, "size-9 disabled:opacity-35"),
-  navCount: "min-w-[4.5rem] text-center text-xs tabular-nums text-[#f3b8c4]/70 sm:text-sm",
-  todayGlow:
-    "pointer-events-none absolute -inset-1.5 rounded-2xl border-2 border-[#e85a7a]/60 bg-[#e85a7a]/08 shadow-[0_0_24px_rgba(232,90,122,0.22)]",
-  todayGlowMobile:
-    "pointer-events-none absolute -inset-x-2 -inset-y-1.5 rounded-2xl border-2 border-[#e85a7a]/60 bg-[#e85a7a]/08 shadow-[0_0_24px_rgba(232,90,122,0.18)]",
-  dayRuleToday: "border-[#e85a7a]/40",
-  dayRule: "border-[#f3b8c4]/15",
-  todayDot: "size-1.5 animate-ping rounded-full bg-[#e85a7a]",
-  dayNameToday: "font-bold text-[#fff5f7]",
-  dayName: "text-[#f3b8c4]/65",
-  dayDateToday:
-    "inline-flex items-center justify-center rounded-full border border-[#e85a7a]/50 bg-[#e85a7a]/25 px-2 py-0.5 text-xs font-semibold tabular-nums text-[#fff5f7] shadow-sm sm:text-sm",
-  dayDate:
-    "inline-flex items-center justify-center px-2 py-0.5 text-xs tabular-nums text-[#f7d7de]/80 sm:text-sm",
-  todayBadge: cn(BADGE_ACCENT_CLASS, "px-2 py-0.5 text-[0.65rem] font-bold uppercase shadow-sm"),
-  mobileDivide: "divide-[#f3b8c4]/10",
-  mobileEmptyRuleBlank: "border-[#8a7f88]/40",
-  mobileEmptyRule: "border-[#6ec9b0]/40",
-  mobileEmptyText: "text-xs text-[#f3b8c4]/50",
-  mobileEmptyNote: "text-xs text-[#a8e6d4]/75",
 };
 
 const APLUS_SKIN: LiveTableSkin = {
@@ -437,7 +284,7 @@ const APLUS_SKIN: LiveTableSkin = {
   mobileEmptyNote: "text-xs text-r-acc/80",
 };
 
-const LiveTableSkinContext = createContext<LiveTableSkin>(LEGACY_SKIN);
+const LiveTableSkinContext = createContext<LiveTableSkin>(APLUS_SKIN);
 
 function useLiveTableSkin() {
   return useContext(LiveTableSkinContext);
@@ -503,13 +350,6 @@ function nextLiveAfter(
       )
       .sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time))[0] ?? null
   );
-}
-
-function platformLabel(platform?: LivePlatform) {
-  if (platform === "youtube") return "YouTube";
-  if (platform === "x") return "X";
-  if (platform === "other") return "Other";
-  return null;
 }
 
 function MobileSlotCard({
@@ -1650,9 +1490,9 @@ export function LiveWeekTable({
   blankEmptyDays = false,
   slotLookup,
   weekRange,
-  tone = "legacy",
+  tone = "aplus",
 }: LiveWeekTableProps) {
-  const skin = tone === "aplus" ? APLUS_SKIN : LEGACY_SKIN;
+  const skin = APLUS_SKIN;
   const selectable = tone === "aplus";
   const nowMs = useNow(30000);
   const spotlightRef = useRef<HTMLDivElement>(null);
