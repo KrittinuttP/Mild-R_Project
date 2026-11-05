@@ -32,8 +32,11 @@ const SHORT_MAX_SECONDS = 3 * 60;
 const SHORT_FALLBACK_SECONDS = 60;
 const PROBE_CONCURRENCY = 8;
 
-/** Other channels' uploads count only when the title or description tags the official handle. */
+/** Official handle, anywhere in the title or description. */
 const MILD_HANDLE_RE = /@MildRWorldEnd\b/i;
+/** A collab marker followed by Mild-R's name in the title: "ft. Mild-R", "feat. A, Mild-R", "คอลแลปกับ MildR". */
+const MILD_COLLAB_TITLE_RE =
+  /(?:\bft\.?|\bfeat\.?|\bfeaturing\b|\bcollab|คอลแลป|คอลแลบ|คอลาบ|ร่วมกับ)[^\n]{0,60}?mild[\s\-_.]*r(?:worldend)?(?![a-z0-9])/i;
 const SHORTS_TAG_RE = /#shorts?\b/i;
 
 export type YoutubeVideoItem = {
@@ -111,13 +114,23 @@ export function isRealLive(item: YoutubeVideoItem): boolean {
   return Boolean(item.liveStreamingDetails) && !isPremiere(item);
 }
 
-/** Own uploads always pass; other channels need @MildRWorldEnd in the title or description. */
+/**
+ * Another channel's live or video belongs on the site when it tags @MildRWorldEnd
+ * (title or description) or its title names Mild-R after ft. / feat. / collab / คอลแลป / คอลาบ / ร่วมกับ.
+ * A bare "Mild-R" in someone else's title is only a mention.
+ */
+export function tagsMildRCollab(
+  title: string | null | undefined,
+  description?: string | null
+): boolean {
+  if (title && (MILD_HANDLE_RE.test(title) || MILD_COLLAB_TITLE_RE.test(title))) return true;
+  return Boolean(description && MILD_HANDLE_RE.test(description));
+}
+
+/** Own uploads always pass; other channels go through tagsMildRCollab. */
 export function mentionsMildRVideo(item: YoutubeVideoItem): boolean {
   if (item.snippet.channelId === MAIN_CHANNEL_ID) return true;
-  return (
-    MILD_HANDLE_RE.test(item.snippet.title) ||
-    MILD_HANDLE_RE.test(item.snippet.description ?? "")
-  );
+  return tagsMildRCollab(item.snippet.title, item.snippet.description);
 }
 
 /** true = Short, false = regular video, null = YouTube didn't answer clearly. */

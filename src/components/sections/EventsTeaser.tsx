@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight, CalendarDays } from "lucide-react";
 
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
-import { RChip } from "@/components/common/RChip";
+import { RBadge } from "@/components/common/RBadge";
 import { Section } from "@/components/common/Section";
 import { SectionHeader } from "@/components/common/SectionHeader";
 import { EventDetailModal } from "@/components/events/EventDetailModal";
@@ -41,10 +41,15 @@ function FormatLabel({ format }: { format: CalendarEventFormat }) {
 }
 
 function StatusChip({ event }: { event: CalendarEvent }) {
+  // Same colours as /events (5 Nov): ongoing pink · upcoming mint · ended grey.
   if (event.status === "ongoing")
-    return <RChip className="bg-r-acc/8 text-r-acc ring-r-acc/32">กำลังจัด</RChip>;
-  if (event.status === "upcoming") return <RChip tone="pri">เร็วๆ นี้</RChip>;
-  return <RChip>จบแล้ว</RChip>;
+    return (
+      <RBadge tone="now" dot>
+        กำลังจัด
+      </RBadge>
+    );
+  if (event.status === "upcoming") return <RBadge tone="soon">เร็วๆ นี้</RBadge>;
+  return <RBadge tone="done">จบแล้ว</RBadge>;
 }
 
 const TILE =
@@ -75,7 +80,9 @@ function BigTile({ event, onOpen }: { event: CalendarEvent; onOpen: () => void }
       <Cover event={event} />
       <span className="absolute top-4 left-4 flex gap-1.5">
         <StatusChip event={event} />
-        <RChip tone="pri">ล่าสุด</RChip>
+        <RBadge tone="meta" className="bg-r-bg/70 backdrop-blur-sm">
+          ล่าสุด
+        </RBadge>
       </span>
       <span className="absolute inset-x-5 bottom-5 [text-shadow:0_1px_8px_rgb(0_0_0/0.6)] md:inset-x-[26px] md:bottom-6">
         <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1">

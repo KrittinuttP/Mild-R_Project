@@ -72,7 +72,6 @@ export function LiveSourceBadges({
   showMember = true,
   /** Smaller calendar pill size (channel name only, same as other compact badges). */
   compactChannel = false,
-  tone = "legacy",
 }: {
   isOwnChannel?: boolean;
   sourceTitle?: string | null;
@@ -84,7 +83,7 @@ export function LiveSourceBadges({
   showCollab?: boolean;
   showMember?: boolean;
   compactChannel?: boolean;
-  /** Homepage table uses the CI pink for the own-channel chip. /live stays on the legacy chip. */
+  /** Kept for callers; both now render the RBadge solo chip (5 Nov). */
   tone?: "legacy" | "aplus";
 }) {
   const pill = compactChannel
@@ -96,12 +95,7 @@ export function LiveSourceBadges({
   const channel =
     showChannel && isOwnChannel ? (
       <span
-        className={cn(
-          pill,
-          tone === "aplus"
-            ? "border-r-pri/45 bg-r-pri/14 text-r-text uppercase"
-            : LIVE_BADGE_MILD
-        )}
+        className={cn(pill, LIVE_BADGE_MILD)}
       >
         Mild-R
       </span>

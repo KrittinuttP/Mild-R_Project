@@ -55,6 +55,8 @@
   --color-r-on-pri: var(--r-on-pri);
   --color-r-acc: var(--r-acc);
   --color-r-on-acc: var(--r-on-acc);
+  --color-r-collab: var(--r-collab);
+  --color-r-collab-text: var(--r-collab-text);
   --color-r-nurse: var(--r-nurse);
   --color-r-text: var(--r-text);
   --color-r-text-2: var(--r-text-2);
@@ -107,6 +109,9 @@
   --r-on-pri: #2a0414;
   --r-acc: #22d6bf;
   --r-on-acc: #062421;
+  /* Collab (other channels) = sky blue (5 Nov · was mint; mint stays for Offline / upcoming) */
+  --r-collab: #74b9ff;
+  --r-collab-text: #bfdcff;
   --r-nurse: #fff2f0;
   --r-text: #fff5f7;
   --r-text-2: #f3b8c4;

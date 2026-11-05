@@ -1,5 +1,6 @@
 import { RadioTower } from "lucide-react";
 
+import { R_BADGE_M, R_BADGE_S, R_BADGE_TONE } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 
 type OfflineBadgeProps = {
@@ -14,12 +15,11 @@ export function OfflineBadge({ className, size = "sm", tone = "legacy" }: Offlin
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border tracking-[0.12em] uppercase",
+        // RBadge (5 Nov): S / M sizes, mint tint (Offline stays mint; Collab moved to sky blue).
+        size === "md" ? R_BADGE_M : R_BADGE_S,
         tone === "aplus"
-          ? "border-r-acc/50 bg-r-acc/12 text-r-acc"
-          : "border-[#6ec9b0]/50 bg-[#6ec9b0]/12 text-[#a8e6d4]",
-        size === "sm" && "px-2.5 py-1 text-[0.55rem]",
-        size === "md" && "px-3 py-1.5 text-[0.6rem]",
+          ? R_BADGE_TONE.offline
+          : "bg-[#6ec9b0]/12 text-[#a8e6d4] uppercase tracking-[0.06em] ring-1 ring-[#6ec9b0]/50 ring-inset",
         className
       )}
     >

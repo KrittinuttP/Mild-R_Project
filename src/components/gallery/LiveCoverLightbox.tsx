@@ -7,6 +7,7 @@ import { ImageLightbox, type ImageLightboxItem } from "@/components/media/ImageL
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import type { LiveCoverItem, LiveCoverVersion } from "@/lib/live-streams";
 import {
+  LIVE_BADGE_CHANNEL,
   LIVE_BADGE_COLLAB,
   LIVE_BADGE_MEMBER,
   LIVE_BADGE_MILD,
@@ -75,19 +76,19 @@ export function ChannelBadge({ item }: { item: LiveCoverItem }) {
       <span
         className={cn(
           LIVE_BADGE_PILL_SM,
-          "min-w-0 truncate text-[0.6rem]",
-          item.isOwnChannel ? LIVE_BADGE_MILD : LIVE_BADGE_COLLAB
+          "min-w-0 truncate",
+          item.isOwnChannel ? LIVE_BADGE_MILD : LIVE_BADGE_CHANNEL
         )}
       >
         {item.channelLabel}
       </span>
       {item.isOwnChannel && item.isCollab ? (
-        <span className={cn(LIVE_BADGE_PILL_SM, "text-[0.6rem]", LIVE_BADGE_COLLAB)}>
+        <span className={cn(LIVE_BADGE_PILL_SM, LIVE_BADGE_COLLAB)}>
           Collab
         </span>
       ) : null}
       {item.isMember ? (
-        <span className={cn(LIVE_BADGE_PILL_SM, "text-[0.6rem]", LIVE_BADGE_MEMBER)}>
+        <span className={cn(LIVE_BADGE_PILL_SM, LIVE_BADGE_MEMBER)}>
           Member
         </span>
       ) : null}

@@ -1,22 +1,23 @@
 /**
- * Hide lives from other channels whose title and description do not tag @MildRWorldEnd
+ * Hide lives from other channels that don't pass tagsMildRCollab: no @MildRWorldEnd in the title or
+ * description, and no "ft. / feat. / collab / คอลแลป / คอลาบ / ร่วมกับ + Mild-R" in the title
  * (sets metadata.hidden = true, so they drop off the public schedule; ops still sees them).
  * Dry run unless --apply is passed.
  *
- *   npx tsx --env-file=.env.local scripts/hide-untagged-guest-lives.ts             # today (Bangkok), dry run
- *   npx tsx --env-file=.env.local scripts/hide-untagged-guest-lives.ts --days=7    # last 7 Bangkok days
- *   npx tsx --env-file=.env.local scripts/hide-untagged-guest-lives.ts --apply     # write the change
- *   npx tsx --env-file=.env.local scripts/hide-untagged-guest-lives.ts --unhide=<videoId> --apply
+ *   npm run hide:guest-lives                # today (Bangkok), dry run
+ *   npm run hide:guest-lives -- --days=7    # last 7 Bangkok days
+ *   npm run hide:guest-lives -- --apply     # write the change
+ *   npm run hide:guest-lives -- --unhide=<videoId> --apply
  *
  * Clips (mild_r_videos, Media page): add --videos. Scans every visible clip from other channels
- * (no date limit) and sets hidden = true on those without @MildRWorldEnd in title or description.
- *   npx tsx --env-file=.env.local scripts/hide-untagged-guest-lives.ts --videos
- *   npx tsx --env-file=.env.local scripts/hide-untagged-guest-lives.ts --videos --apply
- *   npx tsx --env-file=.env.local scripts/hide-untagged-guest-lives.ts --videos --unhide=<videoId> --apply
+ * (no date limit) and sets hidden = true on those that don't pass the same rule.
+ *   npm run hide:guest-lives -- --videos
+ *   npm run hide:guest-lives -- --videos --apply
+ *   npm run hide:guest-lives -- --videos --unhide=<videoId> --apply
  */
 import { createClient } from "@supabase/supabase-js";
 
-import { textTagsMildRHandle } from "./lib/mild-r-mention";
+import { tagsMildRCollab } from "../supabase/functions/youtube-tracker/video-classify.ts";
 
 const APPLY = process.argv.includes("--apply");
 const DAYS = Math.max(1, Number(argValue("--days") ?? 1) || 1);
@@ -56,10 +57,7 @@ function bangkokDate(ms: number): string {
 
 function rowTagsHandle(row: Row): boolean {
   const description = row.metadata?.description;
-  return (
-    textTagsMildRHandle(row.title) ||
-    (typeof description === "string" && textTagsMildRHandle(description))
-  );
+  return tagsMildRCollab(row.title, typeof description === "string" ? description : null);
 }
 
 function rowDate(row: Row): string | null {
@@ -149,17 +147,14 @@ async function runVideos() {
 
   const tagged = (row: VideoRow) => {
     const description = row.metadata?.description;
-    return (
-      textTagsMildRHandle(row.title) ||
-      (typeof description === "string" && textTagsMildRHandle(description))
-    );
+    return tagsMildRCollab(row.title, typeof description === "string" ? description : null);
   };
   const targets = rows.filter((row) => !tagged(row));
   const kept = rows.length - targets.length;
   const day = (iso: string | null) => (iso ? bangkokDate(Date.parse(iso)) : "-");
 
   console.log(`คลิปจากช่องอื่นที่ยังแสดงอยู่ ${rows.length} รายการ · เก็บไว้ (มี @) ${kept}`);
-  console.log(`\nจะซ่อน (ไม่มี @MildRWorldEnd ทั้งในหัวข้อและคำอธิบาย): ${targets.length}`);
+  console.log(`\nจะซ่อน (ไม่ใช่คอลแลป: ไม่มี @MildRWorldEnd และไม่มี ft./คอลแลป + Mild-R): ${targets.length}`);
   for (const row of targets) {
     console.log(`  - ${row.video_id} · ${day(row.published_at)} · ${row.channel_name ?? "-"} · ${row.title ?? "-"}`);
   }
@@ -222,11 +217,11 @@ async function main() {
   const kept = visible.filter((row) => rowTagsHandle(row));
 
   console.log(`ช่วงวันที่ ${startDate} → ${today} (Asia/Bangkok) · ไลฟจากช่องอื่นที่ยังแสดงอยู่ ${visible.length} รายการ`);
-  console.log(`\nจะซ่อน (ไม่มี @MildRWorldEnd ทั้งในหัวข้อและคำอธิบาย): ${targets.length}`);
+  console.log(`\nจะซ่อน (ไม่ใช่คอลแลป: ไม่มี @MildRWorldEnd และไม่มี ft./คอลแลป + Mild-R): ${targets.length}`);
   for (const row of targets) {
     console.log(`  - ${row.video_id} · ${rowDate(row)} · ${row.channel_name ?? "-"} · ${row.title ?? "-"}`);
   }
-  console.log(`\nเก็บไว้ (มี @MildRWorldEnd ในหัวข้อหรือคำอธิบาย): ${kept.length}`);
+  console.log(`\nเก็บไว้ (เข้ากฎคอลแลป): ${kept.length}`);
   for (const row of kept) {
     console.log(`  - ${row.video_id} · ${rowDate(row)} · ${row.channel_name ?? "-"} · ${row.title ?? "-"}`);
   }

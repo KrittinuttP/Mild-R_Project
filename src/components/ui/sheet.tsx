@@ -34,18 +34,19 @@ function SheetContent({
       <SheetPrimitive.Popup
         data-slot="sheet-content"
         className={cn(
-          "fixed inset-x-0 bottom-0 z-50 flex max-h-[85dvh] flex-col rounded-t-3xl border-t border-[#f3b8c4]/15 bg-[#140a0d] text-[#fff5f7] shadow-[0_-20px_60px_rgba(0,0,0,0.5)] outline-none",
+          // Theme tokens (same values as before on the default A+ theme; the cafe upload page swaps them).
+          "fixed inset-x-0 bottom-0 z-50 flex max-h-[85dvh] flex-col rounded-t-3xl border-t border-r-text-2/15 bg-r-bg text-r-text shadow-[0_-20px_60px_rgba(0,0,0,0.5)] outline-none",
           "pb-[max(1rem,env(safe-area-inset-bottom))] transition-transform duration-300 ease-out data-[ending-style]:translate-y-full data-[starting-style]:translate-y-full",
           className
         )}
         {...props}
       >
-        <span aria-hidden className="mx-auto mt-2.5 h-1 w-10 shrink-0 rounded-full bg-[#f3b8c4]/25" />
+        <span aria-hidden className="mx-auto mt-2.5 h-1 w-10 shrink-0 rounded-full bg-r-text-2/25" />
         {children}
         {showCloseButton ? (
           <SheetPrimitive.Close
             data-slot="sheet-close"
-            className="absolute top-3 right-3 flex size-9 items-center justify-center rounded-full text-[#f3b8c4]/70 transition hover:bg-[#f3b8c4]/10 hover:text-[#fff5f7]"
+            className="absolute top-3 right-3 flex size-9 items-center justify-center rounded-full text-r-text-2/70 transition hover:bg-r-text-2/10 hover:text-r-text"
           >
             <XIcon className="size-4" />
             <span className="sr-only">ปิด</span>
@@ -71,7 +72,7 @@ function SheetTitle({ className, ...props }: SheetPrimitive.Title.Props) {
     <SheetPrimitive.Title
       data-slot="sheet-title"
       className={cn(
-        "font-[family-name:var(--font-display)] text-lg leading-snug text-[#fff5f7]",
+        "font-[family-name:var(--font-display)] text-lg leading-snug text-r-text",
         className
       )}
       {...props}

@@ -166,7 +166,7 @@ const APLUS_SKIN: LiveTableSkin = {
   slotDesktopBase:
     "group flex w-full flex-col overflow-hidden rounded-2xl border r-card text-left transition",
   slotCancelled: "border-[#8a7f88]/40 opacity-80",
-  slotGuest: "border-r-acc/50 hover:border-r-acc/75",
+  slotGuest: "border-r-collab/50 hover:border-r-collab/75",
   slotLive: "border-r-pri hover:bg-r-pri/10",
   slotIdle: "border-transparent hover:border-r-pri/45",
   coverBg: "bg-r-bg",
@@ -306,7 +306,7 @@ function clockClass(
 ) {
   if (state.cancelled) return "text-[#8a7f88]";
   if (state.member) return "text-[#9b8cff]";
-  if (state.guest) return "text-r-acc"; // Collab = mint (decisions 3 Nov)
+  if (state.guest) return "text-r-collab"; // Collab = sky blue (decisions 5 Nov · was mint)
   return skin.clock;
 }
 
@@ -316,7 +316,7 @@ function timeClass(
 ) {
   if (state.cancelled) return "text-[#d8d0d4]";
   if (state.member) return "text-[#cfc6ff]";
-  if (state.guest) return "text-[#f3d9be]";
+  if (state.guest) return "text-r-collab-text";
   return skin.time;
 }
 
@@ -432,7 +432,7 @@ function MobileSlotCard({
                 className={cn(
                   LIVE_BADGE_PILL_COMPACT,
                   LIVE_BADGE_CANCELLED,
-                  "h-4 bg-[#140a0d]/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
+                  "bg-r-bg/85 shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
                 )}
               >
                 ยกเลิก
@@ -444,7 +444,7 @@ function MobileSlotCard({
                     className={cn(
                       LIVE_BADGE_PILL_COMPACT,
                       LIVE_BADGE_MEMBER,
-                      "h-4 bg-[#140a0d]/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
+                      "bg-r-bg/85 shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
                     )}
                   >
                     Member
@@ -455,7 +455,7 @@ function MobileSlotCard({
                     className={cn(
                       LIVE_BADGE_PILL_COMPACT,
                       LIVE_BADGE_COLLAB,
-                      "h-4 bg-[#140a0d]/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
+                      "bg-r-bg/85 shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
                     )}
                   >
                     Collab
@@ -492,7 +492,7 @@ function SlotCard({
   const collab = slot.kind === "collab";
   const cancelled = slot.status === "cancelled";
   const isMember = Boolean(slot.isMember);
-  // Own channel always rose; guests keep copper accent when collab/other
+  // Own channel always rose; collab guests use the sky-blue collab accent
   const guestTone = !own && collab && !cancelled;
   const label = slot.titleLocal ?? slot.title;
   const coverUrl = getSlotCoverUrl(slot);

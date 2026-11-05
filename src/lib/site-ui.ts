@@ -29,33 +29,47 @@ export const BADGE_ACCENT_CLASS =
 export const BADGE_SOFT_CLASS =
   "rounded-full border border-[#f3b8c4]/20 bg-white/[0.03] px-3 py-1 text-xs tracking-wide text-[#f3b8c4]/80 sm:text-sm";
 
-/** Shared live-tag pill sizes — Mild-R / Collab / Member / channel / stats */
-export const LIVE_BADGE_PILL_SM =
-  "inline-flex h-5 shrink-0 items-center justify-center rounded-full border px-2.5 text-xs leading-none tracking-[0.08em]";
+/**
+ * RBadge (5 Nov · UI round 2 P1): one status / tag badge for the whole site.
+ * Two sizes — S (20px · 11px) in cards and rows, M (24px · 12px) for card headers / hero.
+ * 1px inset ring for every tinted tone · English tags uppercase + .06em · Thai never tracked.
+ */
+export const R_BADGE_S =
+  "inline-flex h-5 shrink-0 items-center justify-center gap-1 rounded-full px-2 text-[11px] leading-none whitespace-nowrap";
+export const R_BADGE_M =
+  "inline-flex h-6 shrink-0 items-center justify-center gap-1.5 rounded-full px-2.5 text-xs leading-none whitespace-nowrap";
 
-export const LIVE_BADGE_PILL_MD =
-  "inline-flex h-6 shrink-0 items-center justify-center gap-1 rounded-full border px-3 text-xs leading-none tracking-[0.08em] sm:text-sm";
+export const R_BADGE_TONE = {
+  /** Happening now — LIVE · กำลังไลฟ์ · กำลังจัด (solid pink + dot) */
+  now: "bg-r-pri font-semibold text-r-on-pri",
+  /** Coming up — เร็วๆ นี้ (solid mint) */
+  soon: "bg-r-acc font-semibold text-r-on-acc",
+  /** Over — จบแล้ว · ไลฟ์จบแล้ว */
+  done: "bg-white/[0.05] text-r-text-2/85 ring-1 ring-white/12 ring-inset",
+  /** Live kinds (tint): Solo / own channel pink · Collab sky · Member purple · other channel = collab sky */
+  solo: "bg-r-pri/14 text-r-text-2 uppercase tracking-[0.06em] ring-1 ring-r-pri/45 ring-inset",
+  collab: "bg-r-collab/13 text-r-collab-text uppercase tracking-[0.06em] ring-1 ring-r-collab/48 ring-inset",
+  member: "bg-[#9b8cff]/14 text-[#cfc6ff] uppercase tracking-[0.06em] ring-1 ring-[#9b8cff]/50 ring-inset",
+  channel: "bg-r-collab/13 text-r-collab-text ring-1 ring-r-collab/48 ring-inset",
+  /** No live today — mint tint */
+  offline: "bg-r-acc/12 text-r-acc uppercase tracking-[0.06em] ring-1 ring-r-acc/45 ring-inset",
+  cancelled: "bg-white/[0.03] text-[#d8d0d4] ring-1 ring-[#8a7f88]/45 ring-inset",
+  /** Extra info — countdown · เวลาไทย */
+  meta: "bg-white/[0.04] text-r-text-2 ring-1 ring-r-text-2/18 ring-inset",
+} as const;
+export type RBadgeTone = keyof typeof R_BADGE_TONE;
 
-export const LIVE_BADGE_PILL_COMPACT =
-  "inline-flex h-[1.125rem] max-w-[5.5rem] shrink-0 items-center justify-center truncate rounded-full border px-2 text-[0.68rem] leading-none tracking-normal";
-
-export const LIVE_BADGE_MILD =
-  "border-r-text-2/40 bg-r-pri/12 text-r-text-2 uppercase";
-
-export const LIVE_BADGE_CHANNEL =
-  "border-[#7eb6d4]/50 bg-[#7eb6d4]/14 text-[#b8d9ec]";
-
-export const LIVE_BADGE_MEMBER =
-  "border-[#9b8cff]/55 bg-[#9b8cff]/14 text-[#cfc6ff] uppercase";
-
-export const LIVE_BADGE_COLLAB =
-  "border-r-acc/55 bg-r-acc/14 text-r-acc uppercase";
-
-export const LIVE_BADGE_SOFT =
-  "border-r-text-2/20 bg-white/[0.03] text-r-text-2/80";
-
-export const LIVE_BADGE_CANCELLED =
-  "border-[#8a7f88]/45 bg-white/[0.03] text-[#d8d0d4]";
+/** Live-tag aliases (older names) — now the RBadge sizes / tones. */
+export const LIVE_BADGE_PILL_SM = R_BADGE_S;
+export const LIVE_BADGE_PILL_MD = R_BADGE_M;
+/** Calendar / table cells: size S, long channel names truncate. */
+export const LIVE_BADGE_PILL_COMPACT = `${R_BADGE_S} max-w-[5.5rem] truncate`;
+export const LIVE_BADGE_MILD = R_BADGE_TONE.solo;
+export const LIVE_BADGE_CHANNEL = R_BADGE_TONE.channel;
+export const LIVE_BADGE_MEMBER = R_BADGE_TONE.member;
+export const LIVE_BADGE_COLLAB = R_BADGE_TONE.collab;
+export const LIVE_BADGE_SOFT = R_BADGE_TONE.meta;
+export const LIVE_BADGE_CANCELLED = R_BADGE_TONE.cancelled;
 
 export const GLASS_CARD_CLASS =
   "rounded-3xl border border-[#f3b8c4]/12 bg-[#1a0c12]/60";

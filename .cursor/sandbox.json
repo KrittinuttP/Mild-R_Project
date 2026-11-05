@@ -1,0 +1,12 @@
+{
+  "networkPolicy": {
+    "default": "deny",
+    "allow": [
+      "*.supabase.co",
+      "api.supabase.com",
+      "www.googleapis.com",
+      "github.com",
+      "*.githubusercontent.com"
+    ]
+  }
+}

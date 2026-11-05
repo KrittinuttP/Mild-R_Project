@@ -21,7 +21,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import {
-  LIVE_BADGE_COLLAB,
+  LIVE_BADGE_CHANNEL,
   LIVE_BADGE_MEMBER,
   LIVE_BADGE_PILL_SM,
   R_CTA_OUTLINE_CLASS,
@@ -115,7 +115,7 @@ function VideoBadges({ item }: { item: VideoItem }) {
   return (
     <>
       {!item.isOwnChannel ? (
-        <span className={cn(LIVE_BADGE_PILL_SM, "min-w-0 truncate text-[0.6rem]", LIVE_BADGE_COLLAB)}>
+        <span className={cn(LIVE_BADGE_PILL_SM, "min-w-0 truncate", LIVE_BADGE_CHANNEL)}>
           {item.channelLabel}
         </span>
       ) : null}
@@ -123,7 +123,7 @@ function VideoBadges({ item }: { item: VideoItem }) {
         <span
           className={cn(
             LIVE_BADGE_PILL_SM,
-            "inline-flex items-center gap-1 text-[0.6rem]",
+            "inline-flex items-center gap-1",
             LIVE_BADGE_MEMBER
           )}
         >
@@ -261,7 +261,7 @@ function MembershipIntro({ item }: { item: VideoItem }) {
 
       <div className="px-1 pb-1 md:px-0 md:pb-0">
         <div className="flex flex-wrap items-center gap-2">
-          <span className={cn(LIVE_BADGE_PILL_SM, "inline-flex items-center gap-1 text-[0.6rem]", LIVE_BADGE_MEMBER)}>
+          <span className={cn(LIVE_BADGE_PILL_SM, "inline-flex items-center gap-1", LIVE_BADGE_MEMBER)}>
             <Lock className="size-2.5" aria-hidden />
             Membership
           </span>

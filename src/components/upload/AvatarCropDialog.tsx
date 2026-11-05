@@ -49,7 +49,7 @@ export function AvatarCropDialog({
           ครอปรูปโปรไฟล์
         </DialogTitle>
         <DialogDescription className="mt-1.5 text-xs leading-relaxed text-r-text-3">
-          ลากรูปเพื่อเลื่อน ถ่างนิ้ว เลื่อนลูกกลิ้งเมาส์ หรือใช้แถบด้านล่างเพื่อซูม
+          ลากรูปเพื่อเลื่อน ถ่างนิ้ว เลื่อนลูกกลิ้งเมาส์ หรือใช้แถบ<span className="whitespace-nowrap">ด้านล่างเพื่อซูม</span>
         </DialogDescription>
         {/* A new photo starts again from the centre at 1×. */}
         {src ? (
@@ -107,7 +107,13 @@ function CropArea({
           value={zoom}
           onChange={(event) => setZoom(Number(event.target.value))}
           aria-label="ซูมรูป"
-          className="h-2 w-full cursor-pointer accent-r-pri"
+          className={cn(
+            // Own track + thumb so the slider looks the same on every page (the native track rendered white on HBD).
+            "h-1.5 w-full cursor-pointer appearance-none rounded-full bg-r-text-2/20 outline-none",
+            "[&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-r-pri [&::-webkit-slider-thumb]:shadow-[0_0_0_3px_var(--r-panel)]",
+            "[&::-moz-range-thumb]:size-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-r-pri",
+            "focus-visible:ring-2 focus-visible:ring-r-acc focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--r-panel)]"
+          )}
         />
         <ZoomIn className="size-4 shrink-0 text-r-text-3" aria-hidden />
       </div>

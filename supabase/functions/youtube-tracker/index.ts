@@ -15,6 +15,7 @@ import {
   mentionsMildRVideo,
   PIXELA_OFFICIAL_CHANNEL_ID,
   saveVideoItems,
+  tagsMildRCollab,
   VIDEO_PARTS,
   type YoutubeVideoItem,
 } from "./video-classify.ts";
@@ -80,7 +81,7 @@ const REFRESH_LOOKBACK_DAYS = 30;
 /** Ignore tiny YouTube schedule jitter / half-hour snap noise */
 const RESCHEDULE_MIN_DELTA_MS = 2 * 60 * 1000;
 const COLLAB_TITLE_RE =
-  /\bft\.?\b|\bfeat\.?\b|featuring|collab|コラボ|คอลาบ|ร่วมกับ/i;
+  /\bft\.?\b|\bfeat\.?\b|featuring|collab|コラボ|คอลแลป|คอลแลบ|คอลาบ|ร่วมกับ/i;
 
 function classifyLiveOwnership(channelId: string, title: string) {
   const is_own_channel = channelId === MAIN_CHANNEL_ID;
@@ -88,27 +89,14 @@ function classifyLiveOwnership(channelId: string, title: string) {
   return { is_own_channel, is_collab };
 }
 
-/**
- * Lives from other channels count only when the title or description tags the official handle
- * (group collabs often list guests as @handles in the description only).
- * A bare "Mild-R" in someone else's title is just a mention, not a collab.
- */
-const MILD_HANDLE_RE = /@MildRWorldEnd\b/i;
-
-function tagsMildRHandle(title: string | null | undefined) {
-  return Boolean(title && MILD_HANDLE_RE.test(title));
-}
-
-function liveTagsMildRHandle(row: StreamRow) {
+/** Other channels' lives: see tagsMildRCollab (handle, or ft./คอลแลป + Mild-R in the title). */
+function liveIsMildRCollab(row: StreamRow) {
   const description = row.metadata?.description;
-  return (
-    tagsMildRHandle(row.title) ||
-    (typeof description === "string" && tagsMildRHandle(description))
-  );
+  return tagsMildRCollab(row.title, typeof description === "string" ? description : null);
 }
 
 function isMildRLive(row: StreamRow) {
-  return row.is_own_channel || liveTagsMildRHandle(row);
+  return row.is_own_channel || liveIsMildRCollab(row);
 }
 
 function parseLikeCount(raw: string | undefined | null): number | null {
@@ -763,7 +751,7 @@ async function checkGuestChannelPlaylists() {
   const unique = [...new Set(videoIds)];
   const { lives, uploads } = await getVideoDetails(unique);
   const guestCollabs = lives.filter(
-    (row) => !row.is_own_channel && liveTagsMildRHandle(row)
+    (row) => !row.is_own_channel && liveIsMildRCollab(row)
   );
   await saveToDatabase(guestCollabs);
   const videos = await saveUploads(uploads.filter(mentionsMildRVideo));
@@ -837,7 +825,7 @@ async function searchRelatedChannels() {
     const kept = lives.filter(isMildRLive);
     const dropped = lives.length - kept.length;
     if (dropped > 0) {
-      console.log(`⏭️ [Step 2] ข้าม ${dropped} ไลฟจากช่องอื่นที่ไม่ได้แท็ก @MildRWorldEnd ในหัวข้อหรือคำอธิบาย`);
+      console.log(`⏭️ [Step 2] ข้าม ${dropped} ไลฟจากช่องอื่นที่ไม่ใช่คอลแลป (ไม่มี @MildRWorldEnd หรือ ft./คอลแลป + Mild-R)`);
     }
     await saveToDatabase(kept);
     searchSaved = kept.length;

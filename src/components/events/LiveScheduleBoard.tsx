@@ -111,7 +111,7 @@ function WeekSlotCard({
           cancelled
             ? "border-[#8a7f88]/30 opacity-85 hover:border-[#8a7f88]/50"
             : guestTone
-              ? "border-r-acc/30 hover:border-r-acc/50 hover:bg-r-acc/10"
+              ? "border-r-collab/35 hover:border-r-collab/55 hover:bg-r-collab/10"
               : "border-r-line hover:border-r-pri/45 hover:bg-r-pri/[0.06]"
         )}
       >
@@ -144,7 +144,7 @@ function WeekSlotCard({
                   className={cn(
                     LIVE_BADGE_PILL_COMPACT,
                     LIVE_BADGE_CANCELLED,
-                    "h-4 bg-r-bg/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
+                    "bg-r-bg/85 shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
                   )}
                 >
                   ยกเลิก
@@ -156,7 +156,7 @@ function WeekSlotCard({
                       className={cn(
                         LIVE_BADGE_PILL_COMPACT,
                         LIVE_BADGE_MEMBER,
-                        "h-4 bg-r-bg/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
+                        "bg-r-bg/85 shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
                       )}
                     >
                       Member
@@ -167,7 +167,7 @@ function WeekSlotCard({
                       className={cn(
                         LIVE_BADGE_PILL_COMPACT,
                         LIVE_BADGE_COLLAB,
-                        "h-4 bg-r-bg/85 px-1.5 text-[0.6rem] shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
+                        "bg-r-bg/85 shadow-[0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-md"
                       )}
                     >
                       Collab
@@ -192,7 +192,7 @@ function WeekSlotCard({
                   : isMember
                     ? "text-[#cfc6ff]"
                     : guestTone
-                      ? "text-r-acc"
+                      ? "text-r-collab"
                       : "text-r-pri"
               }
             />
@@ -249,7 +249,7 @@ function MobileCalendarTimeSlot({
           : isMember
             ? "border-[#9b8cff]/80"
             : guestTone
-              ? "border-r-acc"
+              ? "border-r-collab"
               : "border-r-pri/70"
       )}
       title={`${time} · ${label}${cancelled ? " (ยกเลิก)" : ""}`}
@@ -262,7 +262,7 @@ function MobileCalendarTimeSlot({
             : isMember
               ? "text-[#cfc6ff]"
               : guestTone
-                ? "text-r-acc"
+                ? "text-r-collab"
                 : "text-r-pri"
         )}
       >
@@ -309,7 +309,7 @@ function CalendarMonthSlot({
           : isMember
             ? "border-[#9b8cff]/80 text-r-text hover:bg-[#9b8cff]/08"
             : guestTone
-              ? "border-r-acc text-r-text hover:bg-white/5"
+              ? "border-r-collab text-r-text hover:bg-white/5"
               : "border-r-pri/60 text-r-text/90 hover:bg-white/5"
       )}
       title={`${slot.timePrevious ? `${slot.timePrevious}→` : ""}${time} · ${label}${cancelled ? " (ยกเลิก)" : ""}`}
@@ -329,7 +329,7 @@ function CalendarMonthSlot({
               isMember
                 ? "text-[#cfc6ff]"
                 : guestTone
-                  ? "text-r-acc"
+                  ? "text-r-collab"
                   : "text-r-pri"
             }
           />
@@ -774,7 +774,7 @@ export function LiveScheduleBoard() {
               [
                 ["Member", monthKindStats.member, "bg-[#9b8cff]"],
                 ["Solo", monthKindStats.solo, "bg-r-pri"],
-                ["Collab", monthKindStats.collab, "bg-r-acc"],
+                ["Collab", monthKindStats.collab, "bg-r-collab"],
               ] as const
             ).map(([label, count, dot]) => (
               <span key={label} className={cn(R_CHIP_SOFT_CLASS, "gap-1.5 tabular-nums")}>
@@ -941,7 +941,7 @@ export function LiveScheduleBoard() {
             Solo
           </li>
           <li className="inline-flex items-center gap-1.5">
-            <span className="h-3 w-0.5 shrink-0 rounded-full bg-r-acc" aria-hidden />
+            <span className="h-3 w-0.5 shrink-0 rounded-full bg-r-collab" aria-hidden />
             Collab
           </li>
           <li className="inline-flex items-center gap-1.5">

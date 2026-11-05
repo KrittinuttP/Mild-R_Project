@@ -8,13 +8,6 @@ export function textMentionsMildR(text: string | null | undefined) {
   return Boolean(text && MILD_R_MENTION_RE.test(text));
 }
 
-/** Official handle only. Other channels' lives need this in the title or description to count as a collab. */
-export const MILD_R_HANDLE_RE = /@MildRWorldEnd\b/i;
-
-export function textTagsMildRHandle(text: string | null | undefined) {
-  return Boolean(text && MILD_R_HANDLE_RE.test(text));
-}
-
 /** Where Mild-R was found on a YouTube video snippet (first match wins). */
 export function videoMentionsMildR(snippet: {
   title?: string;

@@ -2,7 +2,7 @@
 export const MILD_R_CHANNEL_ID = "UCknOyz3O0-G6w5SJNAgO7uQ";
 
 const COLLAB_TITLE_RE =
-  /\bft\.?\b|\bfeat\.?\b|featuring|collab|コラボ|คอลาบ|ร่วมกับ/i;
+  /\bft\.?\b|\bfeat\.?\b|featuring|collab|コラボ|คอลแลป|คอลแลบ|คอลาบ|ร่วมกับ/i;
 
 export function classifyLiveOwnership(
   channelId: string | null | undefined,

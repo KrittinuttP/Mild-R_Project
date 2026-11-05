@@ -1037,12 +1037,22 @@ function FanartUploadForm({
         ) : null}
         {items.length > 1 ? (
           <label className="flex min-h-8 cursor-pointer items-center gap-2.5 text-[13px] text-r-text-2">
+            {/* Same custom box as the consent checkbox (the native one rendered as a white square). */}
             <input
               type="checkbox"
               checked={Boolean(current.all)}
               onChange={(event) => setDraft({ ...current, all: event.target.checked })}
-              className="size-4 flex-none accent-r-pri"
+              className="peer sr-only"
             />
+            <span
+              aria-hidden
+              className={cn(
+                "flex size-[18px] flex-none items-center justify-center rounded-[6px] transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-r-acc peer-focus-visible:outline-solid",
+                current.all ? "bg-r-pri text-r-on-pri" : "ring-[1.5px] ring-r-text-2/50 ring-inset"
+              )}
+            >
+              {current.all ? <Check className="size-3" strokeWidth={3} /> : null}
+            </span>
             ใช้เครดิตนี้กับทุกรูป
           </label>
         ) : null}

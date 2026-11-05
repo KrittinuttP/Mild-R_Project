@@ -1,11 +1,13 @@
 import { eventStatusLabel } from "@/lib/events";
+import { R_BADGE_M, R_BADGE_TONE } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import type { CalendarEvent, CalendarEventStatus } from "@/types/vtuber";
 
+// RBadge size M (5 Nov): pink = ongoing · mint = upcoming · grey = ended (sits on covers → dark backing).
 const STATUS_CLASS: Record<CalendarEventStatus, string> = {
-  ongoing: "bg-r-pri text-r-on-pri",
-  upcoming: "bg-r-acc text-r-on-acc",
-  ended: "bg-r-bg/80 text-r-text-2/80 ring-1 ring-r-line ring-inset",
+  ongoing: R_BADGE_TONE.now,
+  upcoming: R_BADGE_TONE.soon,
+  ended: cn(R_BADGE_TONE.done, "bg-r-bg/80"),
 };
 
 type EventStatusBadgeProps = {
@@ -18,7 +20,8 @@ export function EventStatusBadge({ event, className }: EventStatusBadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium tracking-wide backdrop-blur-sm sm:text-sm",
+        R_BADGE_M,
+        "backdrop-blur-sm",
         STATUS_CLASS[event.status],
         className
       )}

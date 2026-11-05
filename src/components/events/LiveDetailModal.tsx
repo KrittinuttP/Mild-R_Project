@@ -426,7 +426,7 @@ export function LiveDetailModal({
                     </MetaPill>
                   ) : null}
                   {!own && slot.sourceTitle ? (
-                    <MetaPill className="border-sky-500/40 bg-sky-500/15 text-xs text-sky-200">
+                    <MetaPill className="border-r-collab/50 bg-r-collab/15 text-xs text-r-collab-text">
                       {slot.sourceTitle}
                     </MetaPill>
                   ) : null}
@@ -436,7 +436,7 @@ export function LiveDetailModal({
                     </MetaPill>
                   ) : null}
                   {collab ? (
-                    <MetaPill className="border-r-acc/60 bg-r-acc/20 text-xs font-semibold text-r-acc uppercase">
+                    <MetaPill className="border-r-collab/60 bg-r-collab/20 text-xs font-semibold text-r-collab-text uppercase">
                       Collab
                     </MetaPill>
                   ) : null}
