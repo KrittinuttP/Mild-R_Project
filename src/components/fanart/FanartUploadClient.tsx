@@ -110,7 +110,7 @@ function IntroCardBody() {
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-[15px] text-r-text">ดูวิธีส่งแฟนอาร์ต</span>
-        <span className="block truncate text-[12.5px] text-r-text-3">3 ขั้น · ใช้ที่ไหน · ถาม-ตอบ</span>
+        <span className="block truncate text-[12.5px] text-r-text-3">ขั้นตอนการส่ง และคำถามที่พบบ่อย</span>
       </span>
       <ChevronRight aria-hidden className="size-[18px] flex-none text-r-pri" />
     </>
