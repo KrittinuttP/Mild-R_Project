@@ -29,7 +29,7 @@ function enDate(ymd: string | undefined) {
   );
 }
 
-function PrimaryCard({ social }: { social: SocialLink }) {
+function PrimaryCard({ social, lead = false }: { social: SocialLink; lead?: boolean }) {
   return (
     <div className={cn(BOX, "relative flex items-center gap-3.5 p-[18px]")}>
       <span className="flex size-12 shrink-0 items-center justify-center rounded-[15px] bg-r-pri/12 text-r-text-2">
@@ -44,7 +44,13 @@ function PrimaryCard({ social }: { social: SocialLink }) {
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`ติดตามบน ${social.label}`}
-        className="inline-flex h-[38px] shrink-0 items-center gap-1.5 rounded-full bg-r-pri px-4 text-sm text-r-on-pri transition-colors after:absolute after:inset-0 after:rounded-[20px] hover:bg-r-pri-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-r-acc"
+        // One solid pink button per section (5 Nov · UI round 2 P1): the first channel leads, the rest are outline.
+        className={cn(
+          "inline-flex h-[38px] shrink-0 items-center gap-1.5 rounded-full px-4 text-sm transition-colors after:absolute after:inset-0 after:rounded-[20px] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-r-acc",
+          lead
+            ? "bg-r-pri text-r-on-pri hover:bg-r-pri-hover"
+            : "bg-white/[0.06] text-r-text ring-1 ring-r-text-2/25 ring-inset hover:bg-white/10"
+        )}
       >
         ติดตาม
         <ExternalLink aria-hidden className="size-3.5" />
@@ -131,8 +137,8 @@ export function Socials({ data, xPosts = [], xRetweets = [] }: SocialsProps) {
 
       <div className="mt-8 grid grid-cols-1 items-start gap-4 lg:mt-9 lg:grid-cols-[400px_minmax(0,1fr)] lg:gap-7">
         <ScrollReveal className="flex flex-col gap-4">
-          {primary.map((social) => (
-            <PrimaryCard key={social.id} social={social} />
+          {primary.map((social, index) => (
+            <PrimaryCard key={social.id} social={social} lead={index === 0} />
           ))}
           {secondary.length > 0 ? <OtherChannels socials={secondary} /> : null}
           {hasHashtags ? (

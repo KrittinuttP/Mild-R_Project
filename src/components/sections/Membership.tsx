@@ -1,5 +1,21 @@
 import type { CSSProperties } from "react";
-import { Award, ChevronDown, ExternalLink, Heart, Smile } from "lucide-react";
+import {
+  Award,
+  BookHeart,
+  ChevronDown,
+  CupSoda,
+  ExternalLink,
+  Gamepad2,
+  Gift,
+  Headphones,
+  Heart,
+  HeartPlus,
+  type LucideIcon,
+  MessageCircleMore,
+  Smile,
+  Star,
+  StickyNote,
+} from "lucide-react";
 
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { RChip } from "@/components/common/RChip";
@@ -11,6 +27,26 @@ import { R_CTA_OUTLINE_CLASS, R_CTA_PRIMARY_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
 import { getYoutubeVideoId } from "@/lib/youtube";
 import type { MembershipInfo, MembershipTier, VtuberProfile } from "@/types/vtuber";
+
+/** Perk emoji in membership.json → line icon (falls back to the emoji for unknown ones). */
+const PERK_ICONS: Record<string, LucideIcon> = {
+  "🧋": CupSoda,
+  "😊": Smile,
+  "⭐": Star,
+  "🤭": MessageCircleMore,
+  "🎮": Gamepad2,
+  "💭": StickyNote,
+  "📜": BookHeart,
+  "🎧": Headphones,
+  "🎁": Gift,
+  "💞": HeartPlus,
+};
+
+function PerkIcon({ icon }: { icon: string }) {
+  const Icon = PERK_ICONS[icon];
+  if (!Icon) return <span aria-hidden>{icon}</span>;
+  return <Icon aria-hidden className="mt-[0.2em] size-[15px] shrink-0 text-r-text-2" strokeWidth={1.75} />;
+}
 
 type MembershipProps = {
   data: VtuberProfile;
@@ -86,7 +122,7 @@ function TierCard({ tiers, index }: { tiers: MembershipTier[]; index: number }) 
           {inherit ? <li className="text-r-text-2">{inherit}</li> : null}
           {tier.perks.map((perk) => (
             <li key={perk.label} className="flex gap-1.5">
-              <span aria-hidden>{perk.icon}</span>
+              <PerkIcon icon={perk.icon} />
               {perk.label}
             </li>
           ))}
@@ -175,7 +211,7 @@ function TierAccordion({ tiers, index }: { tiers: MembershipTier[]; index: numbe
         {inherit ? <li className="text-r-text-2">{inherit}</li> : null}
         {tier.perks.map((perk) => (
           <li key={perk.label} className="flex gap-2">
-            <span aria-hidden>{perk.icon}</span>
+            <PerkIcon icon={perk.icon} />
             {perk.label}
           </li>
         ))}

@@ -269,7 +269,7 @@ const APLUS_SKIN: LiveTableSkin = {
   todayGlowMobile: "pointer-events-none absolute -inset-x-2 -inset-y-1.5 rounded-2xl r-ring",
   dayRuleToday: "border-r-pri/40",
   dayRule: "border-r-line",
-  todayDot: "r-ping size-1.5 rounded-full bg-r-pri",
+  todayDot: "size-1.5 rounded-full bg-r-pri", // static: pulsing is only for live now (5 Nov)
   dayNameToday: "font-medium text-r-text",
   dayName: "text-r-text-3",
   dayDateToday:
@@ -550,7 +550,7 @@ function SlotCard({
           showMember={false}
           compactChannel
           tone={skin.tone}
-          className="absolute bottom-1.5 right-1.5 max-w-[calc(100%-0.75rem)] rounded-full bg-[#140a0d]/85 shadow-md backdrop-blur-md [&>span]:truncate"
+          className="absolute bottom-1.5 right-1.5 max-w-[calc(100%-0.75rem)] rounded-full bg-r-bg/85 shadow-md backdrop-blur-md [&>span]:truncate"
         />
       </div>
 
@@ -591,7 +591,7 @@ function SlotCard({
                 className={cn(
                   LIVE_BADGE_PILL_COMPACT,
                   LIVE_BADGE_CANCELLED,
-                  "shadow-[0_4px_12px_rgba(0,0,0,0.8)] backdrop-blur-md bg-[#140a0d]/85"
+                  "shadow-[0_4px_12px_rgba(0,0,0,0.8)] backdrop-blur-md bg-r-bg/85"
                 )}
               >
                 ยกเลิก
@@ -603,7 +603,7 @@ function SlotCard({
                     className={cn(
                       LIVE_BADGE_PILL_COMPACT,
                       LIVE_BADGE_MEMBER,
-                      "shadow-[0_4px_12px_rgba(0,0,0,0.8)] backdrop-blur-md bg-[#140a0d]/85"
+                      "shadow-[0_4px_12px_rgba(0,0,0,0.8)] backdrop-blur-md bg-r-bg/85"
                     )}
                   >
                     Member
@@ -614,7 +614,7 @@ function SlotCard({
           className={cn(
                       LIVE_BADGE_PILL_COMPACT,
                       LIVE_BADGE_COLLAB,
-                      "shadow-[0_4px_12px_rgba(0,0,0,0.8)] backdrop-blur-md bg-[#140a0d]/85"
+                      "shadow-[0_4px_12px_rgba(0,0,0,0.8)] backdrop-blur-md bg-r-bg/85"
                     )}
                   >
                     Collab
@@ -778,7 +778,7 @@ function LiveSpotlightBanner({
 
             {countdownText ? (
               <span className={skin.countdown}>
-                <Timer className={cn("size-3.5", skin.tone === "aplus" ? "text-r-text-2" : "animate-pulse text-[#fff5f7]")} />
+                <Timer className="size-3.5 text-r-text-2" />
                 {countdownText}
               </span>
             ) : null}
@@ -903,7 +903,7 @@ function LiveSpotlightBanner({
 
               {countdownText ? (
                 <span className={skin.countdownSm}>
-                  <Timer className={cn("size-3", skin.tone === "aplus" ? "text-r-text" : "animate-pulse text-[#e85a7a]")} />
+                  <Timer className="size-3 text-r-text" />
                   {countdownText}
                 </span>
               ) : null}
@@ -942,7 +942,7 @@ function LiveSpotlightBanner({
 
               {countdownText ? (
                 <span className={skin.countdownSmBare}>
-                  <Timer className={cn("size-3", skin.tone === "aplus" ? "text-r-text-2" : "animate-pulse text-[#fff5f7]")} />
+                  <Timer className="size-3 text-r-text-2" />
                   {countdownText}
                 </span>
               ) : null}
@@ -1803,8 +1803,12 @@ export function LiveWeekTable({
           const offline = offlineByDate.get(iso);
           const isToday = iso === todayIso;
           const isSelected = selectable && iso === selectedIso;
+          const isFocused = selectable ? isSelected : isToday;
+          // No live + not today/selected → one short line ("TUE 03 Nov · OFFLINE ไม่มีไลฟ์") to keep the week short.
+          const compactRow = daySlots.length === 0 && !showNoLiveData && !isFocused;
           const headerClass = cn(
-            "relative z-10 flex w-full flex-wrap items-center gap-1.5 text-left",
+            "relative z-10 flex flex-wrap items-center gap-1.5 text-left",
+            compactRow ? "w-auto shrink-0" : "w-full",
             selectable &&
               "cursor-pointer rounded-xl px-1 py-1 hover:bg-white/[0.04] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc"
           );
@@ -1832,9 +1836,12 @@ export function LiveWeekTable({
           return (
             <li
               key={iso}
-              className="relative py-4 first:pt-1.5 last:pb-1.5 transition-all"
+              className={cn(
+                "relative first:pt-1.5 last:pb-1.5 transition-all",
+                compactRow ? "flex items-center gap-2 py-2.5" : "py-4"
+              )}
             >
-              {(selectable ? isSelected : isToday) ? (
+              {isFocused ? (
                 <div className={skin.todayGlowMobile} />
               ) : null}
 
@@ -1851,6 +1858,12 @@ export function LiveWeekTable({
               ) : (
                 <div className={headerClass}>{headerInner}</div>
               )}
+              {compactRow ? (
+                <div className="relative z-10 flex min-w-0 items-center gap-2">
+                  <OfflineBadge size="sm" tone={skin.tone} />
+                  <span className={skin.mobileEmptyNote}>ไม่มีไลฟ์</span>
+                </div>
+              ) : (
               <div className="relative z-10 mt-2.5 flex flex-col gap-2">
                 {daySlots.length > 0 || offline ? (
                   renderDayBody(iso, true)
@@ -1871,6 +1884,7 @@ export function LiveWeekTable({
                   </div>
                 )}
               </div>
+              )}
             </li>
           );
         })}

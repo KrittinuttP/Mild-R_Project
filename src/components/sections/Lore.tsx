@@ -294,7 +294,7 @@ export function Lore({ data }: LoreProps) {
           className="r-card rounded-[22px] px-5 py-6 sm:px-7 md:col-span-2"
         >
           <p className={cn(R_CARD_TITLE_CLASS, "mb-[18px]")}>TEAM · ทีมผู้สร้าง</p>
-          <DesignCredits design={design} variant="aplus" />
+          <DesignCredits design={design} />
         </section>
       </div>
     </Section>

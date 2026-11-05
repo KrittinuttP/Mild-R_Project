@@ -6,20 +6,18 @@ import { cn } from "@/lib/utils";
 type OfflineBadgeProps = {
   className?: string;
   size?: "sm" | "md";
-  /** Homepage table uses `--r-acc`. /live keeps the original mint. */
+  /** Kept for callers; every page uses the A+ mint since the legacy table skin was removed. */
   tone?: "legacy" | "aplus";
 };
 
 /** Offline pill — mint accent for empty / offline days */
-export function OfflineBadge({ className, size = "sm", tone = "legacy" }: OfflineBadgeProps) {
+export function OfflineBadge({ className, size = "sm" }: OfflineBadgeProps) {
   return (
     <span
       className={cn(
         // RBadge (5 Nov): S / M sizes, mint tint (Offline stays mint; Collab moved to sky blue).
         size === "md" ? R_BADGE_M : R_BADGE_S,
-        tone === "aplus"
-          ? R_BADGE_TONE.offline
-          : "bg-[#6ec9b0]/12 text-[#a8e6d4] uppercase tracking-[0.06em] ring-1 ring-[#6ec9b0]/50 ring-inset",
+        R_BADGE_TONE.offline,
         className
       )}
     >
