@@ -3,10 +3,12 @@
  * Self-hosted: the font files and @font-face rules live in `src/fonts/site-fonts.css`
  * (imported by the root layout). `@font-face` files only download where the font is used.
  * Each `variable` is a class that sets the CSS variable, like next/font's `.variable`.
+ * Named `fontvar-*`, not `font-*`: `cn()` (tailwind-merge) treats any `font-*` class as a font-family
+ * and would drop one of two when both are passed (the hero passes name + courier).
  */
 
 /** Name "Mild-R" · close to the logo lettering · OFL · sets --font-name */
-export const heroNameFont = { variable: "font-v-name" } as const;
+export const heroNameFont = { variable: "fontvar-name" } as const;
 
 /** Monitor readouts + unit label · sets --font-courier */
-export const heroMonoFont = { variable: "font-v-courier" } as const;
+export const heroMonoFont = { variable: "fontvar-courier" } as const;

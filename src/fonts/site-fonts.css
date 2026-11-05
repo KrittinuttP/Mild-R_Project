@@ -362,7 +362,7 @@
   size-adjust: 93.09%;
 }
 
-.font-v-name {
+.fontvar-name {
   --font-name: "Sansita Swashed", "Sansita Swashed Fallback";
 }
 
@@ -412,6 +412,6 @@
   size-adjust: 134.5%;
 }
 
-.font-v-courier {
+.fontvar-courier {
   --font-courier: "Courier Prime", "Courier Prime Fallback";
 }
