@@ -21,6 +21,27 @@ type Remain = {
 
 type Phase = "pending" | "open" | "closed";
 
+/**
+ * Each digit in a 1ch box. Libre Baskerville's figures are proportional (tabular-nums does
+ * nothing), so a ticking clock changed width every second and the chip around it jumped.
+ * `1ch` is the width of "0", the widest figure in that face (equal in monospace faces).
+ */
+function FixedDigits({ text }: { text: string }) {
+  return (
+    <>
+      {Array.from(text).map((ch, i) =>
+        ch >= "0" && ch <= "9" ? (
+          <span key={i} className="inline-block w-[1ch] text-center">
+            {ch}
+          </span>
+        ) : (
+          ch
+        )
+      )}
+    </>
+  );
+}
+
 function pad(value: number, size: number) {
   return String(Math.max(0, value)).padStart(size, "0");
 }
@@ -209,7 +230,7 @@ export function CafeCountdown({
         {now === null
           ? "\u00a0"
           : phase === "pending"
-            ? pending
+            ? <FixedDigits text={pending} />
             : phase === "open"
               ? "Case Open"
               : "Case Closed"}

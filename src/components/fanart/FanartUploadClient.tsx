@@ -15,6 +15,7 @@ import {
   ArrowLeft,
   ArrowRight,
   BookOpen,
+  ChevronRight,
   Cake,
   Check,
   ChevronDown,
@@ -95,11 +96,26 @@ function ErrorLine({ children }: { children: ReactNode }) {
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ?? "";
 const UNDO_MS = 6000;
 
-/** Pink text link that opens the "วิธีส่ง" screen from the form (narrow screens). */
-const INTRO_LINK = cn(
-  "inline-flex min-h-8 items-center gap-1.5 rounded-md text-[13.5px] text-r-pri transition-colors hover:text-r-pri-hover",
+/** Card that opens the "วิธีส่ง" screen (form top on narrow screens, sidebar on lg). */
+const INTRO_CARD = cn(
+  "flex min-h-[62px] w-full items-center gap-3 rounded-2xl bg-r-pri/10 px-3.5 py-2.5 text-left ring-1 ring-r-pri/45 transition-colors ring-inset hover:bg-r-pri/15",
   FOCUS
 );
+
+function IntroCardBody() {
+  return (
+    <>
+      <span aria-hidden className="flex size-[38px] flex-none items-center justify-center rounded-full bg-r-pri text-r-on-pri">
+        <BookOpen className="size-[18px]" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[15px] text-r-text">ดูวิธีส่งแฟนอาร์ต</span>
+        <span className="block truncate text-[12.5px] text-r-text-3">3 ขั้น · ใช้ที่ไหน · ถาม-ตอบ</span>
+      </span>
+      <ChevronRight aria-hidden className="size-[18px] flex-none text-r-pri" />
+    </>
+  );
+}
 
 const DRAFT_INVALID = "เครดิตที่กำลังแก้ยังไม่ถูกต้อง";
 const ART_MISSING = "กรุณาเลือกรูปแฟนอาร์ตอย่างน้อย 1 รูป";
@@ -1116,7 +1132,7 @@ function FanartUploadForm({
               placeholder="เช่น ฮันนี่"
               className={cn(INPUT, "pr-14")}
             />
-            <span className="pointer-events-none absolute top-1/2 right-3.5 -translate-y-1/2 text-[11px] text-r-text-2/45">
+            <span className="pointer-events-none absolute top-1/2 right-3.5 -translate-y-1/2 text-xs text-r-text-2/45">
               {nameLength}/{FANART_TEXT_LIMITS.displayName}
             </span>
           </div>
@@ -1506,33 +1522,18 @@ function FanartUploadForm({
         </Link>
       )}
       {header("", "left")}
-      <nav aria-label="ขั้นตอนการกรอก" className="-ml-3 hidden space-y-1 lg:block">
-        <button
-          type="button"
-          onClick={showIntro}
-          aria-current={phase === "intro" ? "step" : undefined}
-          className={cn(
-            "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors",
-            FOCUS,
-            phase === "intro" ? "bg-r-pri/[0.09] shadow-[inset_2px_0_0_var(--r-pri)]" : "hover:bg-white/[0.03]"
-          )}
-        >
-          <span
-            aria-hidden
-            className={cn(
-              "flex size-[26px] flex-none items-center justify-center rounded-full transition-colors",
-              phase === "intro" ? "bg-r-pri text-r-on-pri" : "text-r-text-2 ring-[1.5px] ring-r-text-2/40 ring-inset"
-            )}
-          >
-            <BookOpen className="size-3.5" />
-          </span>
-          <span className="min-w-0">
-            <span className={cn("block text-[15px]", phase === "intro" ? "text-r-text" : "text-r-text/85")}>
-              วิธีส่ง
-            </span>
-            <span className="block truncate text-xs text-r-text-3">3 ขั้น · ใช้ที่ไหน</span>
-          </span>
-        </button>
+      <button
+        type="button"
+        onClick={showIntro}
+        aria-current={phase === "intro" ? "page" : undefined}
+        className={cn(INTRO_CARD, "hidden lg:flex", phase === "intro" && "bg-r-pri/15 ring-r-pri")}
+      >
+        <IntroCardBody />
+      </button>
+      <nav aria-labelledby={`${ids}-steps-label`} className="-ml-3 hidden space-y-1 lg:block">
+        <p id={`${ids}-steps-label`} className="px-3 pb-1 text-xs text-r-text-3">
+          ขั้นตอนการกรอก
+        </p>
         {steps.map((step, index) => {
           const current = phase === "form" && activeSection === index;
           return (
@@ -1688,9 +1689,8 @@ function FanartUploadForm({
           <div>
             {phase === "form" ? (
               <form onSubmit={onSubmitForm} noValidate className="space-y-3.5 lg:space-y-4">
-                <button type="button" onClick={showIntro} className={cn(INTRO_LINK, "lg:hidden")}>
-                  <BookOpen className="size-4" aria-hidden />
-                  ดูวิธีส่งแฟนอาร์ต
+                <button type="button" onClick={showIntro} className={cn(INTRO_CARD, "lg:hidden")}>
+                  <IntroCardBody />
                 </button>
                 {aboutSection}
                 {artSection}

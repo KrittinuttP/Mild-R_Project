@@ -349,9 +349,19 @@ body:has([data-cafe-root]) {
 :root:has([data-theme="cafe-upload"]) body {
   background-color: var(--color-cafe-ground);
 }
-/* Headings (DISPLAY = --font-display) in the cafe serif; form text stays sans. */
+/* One face for the whole page (option C, 5 Nov): headings (DISPLAY = --font-display) use the
+   body's Noto Sans Thai; only the Sherlock Sweetie logo keeps the cafe serif. Set on :root so
+   portalled dialogs (avatar crop) match. */
+:root:has([data-theme="cafe-upload"]) {
+  --font-display: "Noto Sans Thai", "Noto Sans Thai Fallback", ui-sans-serif, system-ui, sans-serif;
+}
+:root:has([data-theme="cafe-upload"]) h1 {
+  font-weight: 500;
+}
+:root:has([data-theme="cafe-upload"]) h2 {
+  font-weight: 600;
+}
 [data-theme="cafe-upload"] {
-  --font-display: var(--font-cafe-thai), var(--font-cafe-serif), serif;
   color: var(--r-text-2);
   background: radial-gradient(ellipse 120% 420px at 50% 0%, var(--color-cafe-glow), transparent 70%);
 }

@@ -127,7 +127,7 @@ export function AvatarPicker({
       >
         <span className="flex flex-col items-center leading-none">
           <span className="text-xl">+</span>
-          <span className="mt-0.5 text-[10.5px]">รูป</span>
+          <span className="mt-0.5 text-xs">รูป</span>
         </span>
       </button>
     );
