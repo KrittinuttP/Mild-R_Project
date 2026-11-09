@@ -6,7 +6,7 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
-import { Heart } from "lucide-react";
+import { Heart, ZoomIn } from "lucide-react";
 
 import { CafeCountdown } from "@/components/cafe/CafeCountdown";
 import { CafeFollowLinks } from "@/components/cafe/board/CafeFollowLinks";
@@ -448,10 +448,29 @@ export function CafeOverview({
           data-motion="develop"
           className={cn(
             "pointer-events-none absolute inset-x-2 top-2 opacity-0 bg-[radial-gradient(circle_at_50%_45%,rgba(120,98,60,.55),rgba(40,32,20,.92))]",
-            frame
+            frame,
+            "w-auto"
           )}
           aria-hidden
         />
+        {/* Tells people the photo opens bigger: on hover with a mouse, always on touch screens. */}
+        <span
+          className={cn(
+            "pointer-events-none absolute inset-x-2 top-2 flex items-end justify-end p-1.5",
+            frame,
+            "w-auto"
+          )}
+          aria-hidden
+        >
+          <span
+            className={cn(
+              "flex size-7 items-center justify-center rounded-full bg-cafe-cream-light/95 text-cafe-forest shadow-[0_2px_6px_rgba(0,0,0,.45)] ring-[1.5px] ring-cafe-gold transition-opacity duration-200",
+              "[@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 group-focus-visible:opacity-100"
+            )}
+          >
+            <ZoomIn className="size-3.5" strokeWidth={2.4} />
+          </span>
+        </span>
         <span className={caption}>Venue Photo</span>
       </button>
     );
@@ -547,7 +566,7 @@ export function CafeOverview({
             {/* ── Character (desktop: left column; phone: beside the notes) ── */}
             <div
               className={cn(
-                "order-2 mt-6 grid grid-cols-[44%_minmax(0,1fr)] items-end gap-2.5 min-[640px]:mt-10 min-[640px]:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] min-[640px]:items-center min-[640px]:gap-8",
+                "order-2 mt-2 grid grid-cols-[62%_minmax(0,1fr)] items-end gap-0 min-[640px]:mt-10 min-[640px]:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] min-[640px]:items-center min-[640px]:gap-8",
                 "min-[1100px]:order-none min-[1100px]:mt-0 min-[1100px]:block min-[1100px]:self-end"
               )}
             >
@@ -558,7 +577,7 @@ export function CafeOverview({
                     "relative mx-auto",
                     // The half-body box is capped here so the pin and tag follow it.
                     half
-                      ? "w-full max-w-[220px] min-[640px]:max-w-[min(400px,48vw)] min-[1100px]:max-w-[min(480px,calc((100svh-9rem)*2/3))]"
+                      ? "w-full max-w-[240px] min-[640px]:max-w-[min(400px,48vw)] min-[1100px]:max-w-[min(480px,calc((100svh-9rem)*2/3))]"
                       : "w-max max-w-full",
                     // The Live2D KV moves on its own; a still one floats.
                     !motion && "animate-cafe-float"
@@ -590,11 +609,12 @@ export function CafeOverview({
                       )}
                     />
                   )}
-                  {/* She is the detective on this case, never the suspect. */}
+                  {/* She is the detective on this case, never the suspect.
+                      Phone: on the faded hem, inside her box, left of the polaroid. */}
                   <p
                     className={cn(
                       THAI,
-                      "absolute bottom-[6%] -left-1.5 z-20 rotate-[-4deg] border border-cafe-gold/70 bg-cafe-cream/95 px-1.5 py-0.5 text-[13px] font-bold whitespace-nowrap text-cafe-forest shadow-md min-[640px]:bottom-[10%] min-[640px]:px-2.5 min-[640px]:py-1 min-[640px]:text-lg",
+                      "absolute bottom-[2%] left-[4%] z-20 rotate-[-4deg] border border-cafe-gold/70 bg-cafe-cream/95 px-1.5 py-0.5 text-[13px] font-bold whitespace-nowrap text-cafe-forest shadow-md min-[640px]:bottom-[10%] min-[640px]:-left-1.5 min-[640px]:px-2.5 min-[640px]:py-1 min-[640px]:text-lg",
                       "min-[1100px]:px-3 min-[1100px]:py-1 min-[1100px]:text-xl",
                       // Half body: her hand is at the lower right, so the tag stays on the left.
                       half
@@ -619,11 +639,17 @@ export function CafeOverview({
                 </div>
               </div>
 
-              {/* Phone: the venue polaroid pinned beside her; the thread runs from her heart to its clip. */}
-              <div className={cn("self-start pt-10 min-[640px]:pt-16", "min-[1100px]:hidden")}>
+              {/* Phone: she leads (~62% of the row); the venue polaroid hangs low in front of
+                  her skirt, so the thread drops from her heart to its clip like a pinned clue. */}
+              <div
+                className={cn(
+                  "relative z-40 -ml-11 self-start pt-36 min-[640px]:z-auto min-[640px]:ml-0 min-[640px]:pt-16",
+                  "min-[1100px]:hidden"
+                )}
+              >
                 <div
                   data-motion="hero-card"
-                  className={cn(TILT, "mx-auto w-full max-w-[11rem] min-[640px]:max-w-[16rem]")}
+                  className={cn(TILT, "mx-auto w-full max-w-[8.5rem] min-[640px]:max-w-[16rem]")}
                   style={tiltStyle(5)}
                 >
                   {venue("phone")}
