@@ -25,8 +25,6 @@ import { cn } from "@/lib/utils";
 
 /** Cards before "ดูประกาศทั้งหมด": the latest big + 4 small (one full block, no gaps). */
 const NOTICES_FIRST = 5;
-/** Clips on the page: the latest big + up to 4 beside it. More live on YouTube. */
-const TAPES_ON_PAGE = 5;
 
 const PAPER_SHADOW = "shadow-[0_14px_26px_rgba(0,0,0,0.45)]";
 const LINE_LINK =
@@ -244,167 +242,313 @@ export function CafeNoticeBoard({ notices }: { notices: CafeNotice[] }) {
 
 /* ───────────────────────────── Case Footage ───────────────────────────── */
 
+/** Rows of the tape log before "ดูอีก" below 1024px; from 1024 the whole log scrolls in its panel. */
+const TAPES_FIRST = 3;
+/** Rows each "ดูอีก" adds. */
+const TAPES_STEP = 8;
+/** Manila of the sealed folders: the row that is playing. */
+const MANILA = "bg-[#e6d3a0]";
+
+type TapeKind = "video" | "short";
+const TAPE_KINDS: readonly TapeKind[] = ["video", "short"];
+const KIND_LABEL: Record<TapeKind, string> = { video: "วิดีโอ", short: "Shorts" };
+
 /** Film frame with sprocket holes along the top and bottom. */
-function Film({
-  children,
-  holes = "md",
-}: {
-  children: ReactNode;
-  holes?: "md" | "sm";
-}) {
+function Film({ children }: { children: ReactNode }) {
   const row = (
-    <div aria-hidden className={cn("flex items-center px-1.5", holes === "md" ? "h-3" : "h-2")}>
-      <div
-        className={cn(
-          "flex-1 rounded-[2px]",
-          holes === "md"
-            ? "h-1.5 bg-[repeating-linear-gradient(90deg,rgba(241,230,207,0.8)_0_11px,transparent_11px_22px)]"
-            : "h-1 bg-[repeating-linear-gradient(90deg,rgba(241,230,207,0.8)_0_7px,transparent_7px_14px)]"
-        )}
-      />
+    <div aria-hidden className="flex h-3 items-center px-1.5">
+      <div className="h-1.5 flex-1 rounded-[2px] bg-[repeating-linear-gradient(90deg,rgba(241,230,207,0.8)_0_11px,transparent_11px_22px)]" />
     </div>
   );
   return (
     <div className="bg-[#0d1714] shadow-[0_8px_16px_rgba(0,0,0,0.35)]">
       {row}
-      <div className={cn("relative", holes === "md" ? "px-2 sm:px-2.5" : "px-1")}>{children}</div>
+      <div className="relative px-2 sm:px-2.5">{children}</div>
       {row}
     </div>
   );
 }
 
-function TapeThumb({ tape, play }: { tape: CafeTape; play: "lg" | "sm" }) {
-  const duration = tapeDuration(tape.durationSeconds);
+/** A clip's cover. Shorts covers carry the vertical frame in the middle, so a centred crop shows it. */
+function TapeCover({ tape }: { tape: CafeTape }) {
   return (
-    <span className="relative block aspect-video overflow-hidden bg-cafe-deep">
-      <ProtectedImage
-        src={tape.thumbnailUrl ?? getYoutubeThumbnailUrl(tape.id)}
-        alt=""
-        loading="lazy"
-        wrapClassName="absolute inset-0 block"
-        className="size-full object-cover"
-      />
-      <span className="absolute inset-0 flex items-center justify-center">
-        <span
-          className={cn(
-            "flex items-center justify-center rounded-full bg-cafe-deep/72 text-cafe-gold-soft shadow-[inset_0_0_0_2px_var(--color-cafe-gold)] transition group-hover:scale-110",
-            play === "lg" ? "size-14 sm:size-[72px]" : "size-8"
-          )}
-        >
-          <Play className={cn("translate-x-[1px] fill-current", play === "lg" ? "size-6 sm:size-7" : "size-3")} aria-hidden />
-        </span>
+    <ProtectedImage
+      src={tape.thumbnailUrl ?? getYoutubeThumbnailUrl(tape.id)}
+      alt=""
+      loading="lazy"
+      wrapClassName="absolute inset-0 block"
+      className="size-full object-cover"
+    />
+  );
+}
+
+function PlayDisc({ size }: { size: "lg" | "sm" }) {
+  return (
+    <span className="absolute inset-0 flex items-center justify-center">
+      <span
+        className={cn(
+          "flex items-center justify-center rounded-full bg-cafe-deep/72 text-cafe-gold-soft shadow-[inset_0_0_0_2px_var(--color-cafe-gold)] transition group-hover:scale-110",
+          size === "lg" ? "size-14 sm:size-[72px]" : "size-7"
+        )}
+      >
+        <Play className={cn("translate-x-[1px] fill-current", size === "lg" ? "size-6 sm:size-7" : "size-3")} aria-hidden />
       </span>
-      {duration ? (
-        <span className={cn(SERIF, "absolute right-1.5 bottom-1.5 bg-cafe-deep/88 px-1.5 py-px text-[11.5px] text-cafe-cream")}>
-          {duration}
-        </span>
-      ) : null}
     </span>
   );
 }
 
-function tapeMeta(tape: CafeTape) {
-  return tape.isShort ? `${feedDate(tape.publishedAt)} · Short` : feedDate(tape.publishedAt);
+function Duration({ tape, small }: { tape: CafeTape; small?: boolean }) {
+  const duration = tapeDuration(tape.durationSeconds);
+  if (!duration) return null;
+  return (
+    <span
+      className={cn(
+        SERIF,
+        "absolute bg-cafe-deep/88 text-cafe-cream",
+        small ? "right-1 bottom-1 px-1 text-[10.5px]" : "right-1.5 bottom-1.5 px-1.5 py-px text-[11.5px]"
+      )}
+    >
+      {duration}
+    </span>
+  );
 }
 
-export function CafeCaseTapes({ tapes }: { tapes: CafeTape[] }) {
-  const all = sortTapes(tapes);
-  const onPage = all.slice(0, TAPES_ON_PAGE);
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [playing, setPlaying] = useState(false);
-  const featureRef = useRef<HTMLDivElement>(null);
-  if (onPage.length === 0) return null;
+function TapeEmbed({ tape }: { tape: CafeTape }) {
+  return (
+    <iframe
+      key={tape.id}
+      src={getYoutubeEmbedUrl(tape.id, true)}
+      title={tape.title}
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerPolicy="strict-origin-when-cross-origin"
+      allowFullScreen
+      className="absolute inset-0 size-full"
+    />
+  );
+}
 
-  const active = onPage.find((tape) => tape.id === activeId) ?? onPage[0];
-  const others = onPage.filter((tape) => tape.id !== active.id).slice(0, TAPES_ON_PAGE - 1);
-  const total = all.length;
+type StageProps = { tape: CafeTape; latest: boolean; playing: boolean; onPlay: () => void };
 
-  const play = (tape: CafeTape) => {
-    setActiveId(tape.id);
-    setPlaying(true);
-    const top = featureRef.current?.getBoundingClientRect().top ?? 0;
-    if (top < 0 || top > window.innerHeight * 0.6) {
-      featureRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  };
-
-  const featured = (
-    <div
-      ref={featureRef}
-      data-motion="rise"
-      className={cn("relative scroll-mt-24 bg-cafe-cream p-4 pb-5 text-cafe-ink sm:p-[26px] sm:pb-7", PAPER_SHADOW)}
-      style={{ transform: "rotate(-0.4deg)" }}
-    >
-      <KeyholePlate className="top-0 left-1/2 -translate-x-1/2 -translate-y-[60%]" />
-      <div className="flex items-baseline justify-between gap-3">
-        <span className={cn(LABEL, "text-[10.5px] text-cafe-gold-deep sm:text-[10.5px]")}>
-          {active.id === onPage[0].id ? "Latest footage" : "Footage"}
-        </span>
-        <time dateTime={active.publishedAt} className={cn(SERIF, "text-[13px] text-cafe-ink-muted")}>
-          {tapeMeta(active)}
-        </time>
-      </div>
-      <div className="mt-3.5">
+/** Videos: the film strip right on the felt, title over the picture, pinned at the top. */
+function VideoWall({ tape, latest, playing, onPlay }: StageProps) {
+  const duration = tapeDuration(tape.durationSeconds);
+  return (
+    <div className="relative lg:flex lg:h-full lg:items-center">
+      <div className="relative w-full" style={{ transform: "rotate(-0.4deg)" }}>
+        <KeyholePlate className="top-0 left-1/2 z-10 -translate-x-1/2 -translate-y-[60%]" />
         <Film>
           {playing ? (
             <div className="relative aspect-video bg-black">
-              <iframe
-                key={active.id}
-                src={getYoutubeEmbedUrl(active.id, true)}
-                title={active.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerPolicy="strict-origin-when-cross-origin"
-                allowFullScreen
-                className="absolute inset-0 size-full"
-              />
+              <TapeEmbed tape={tape} />
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={() => play(active)}
-              className="group block w-full"
-              aria-label={`เล่นคลิป ${active.title}`}
-            >
-              <TapeThumb tape={active} play="lg" />
+            <button type="button" onClick={onPlay} className="group block w-full text-left" aria-label={`เล่นคลิป ${tape.title}`}>
+              <span className="relative block aspect-video overflow-hidden bg-cafe-deep">
+                <TapeCover tape={tape} />
+                <PlayDisc size="lg" />
+                <span className={cn(LABEL, "absolute top-2.5 left-2.5 bg-cafe-deep/88 px-2 py-1 text-[10.5px] text-cafe-gold-soft sm:top-3.5 sm:left-3.5 sm:text-[10.5px]")}>
+                  {latest ? "Latest footage" : "Footage"}
+                </span>
+                <span className="absolute inset-x-0 bottom-0 bg-[linear-gradient(0deg,rgba(10,31,26,0.92),transparent)] px-3.5 pt-12 pb-3 sm:px-5 sm:pb-4">
+                  <span className={cn(SERIF, "line-clamp-2 text-base leading-snug font-bold text-cafe-cream sm:text-2xl")}>{tape.title}</span>
+                  <span className={cn(SERIF, "mt-1 block text-[12px] text-cafe-muted sm:text-[13px]")}>
+                    {feedDate(tape.publishedAt)}
+                    {duration ? ` · ${duration}` : ""}
+                  </span>
+                </span>
+              </span>
             </button>
           )}
         </Film>
       </div>
-      <h3 className={cn(SERIF, "mt-4 text-lg leading-[1.3] font-bold sm:mt-[18px] sm:text-2xl")}>{active.title}</h3>
-      <a
-        href={`https://www.youtube.com/watch?v=${active.id}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={cn(THAI, LINE_LINK, "mt-2.5 inline-flex items-center gap-1.5 text-sm text-cafe-gold-deep")}
-      >
-        ดูบน YouTube
-        <ExternalLink className="size-3.5" aria-hidden />
-      </a>
     </div>
   );
+}
 
-  const slip = (tape: CafeTape, row: boolean) => (
-    <button
-      key={tape.id}
-      type="button"
-      onClick={() => play(tape)}
-      className={cn(
-        "group bg-cafe-cream p-3 text-left text-cafe-ink shadow-[0_10px_18px_rgba(0,0,0,0.35)] transition hover:-translate-y-0.5",
-        row ? "grid w-full grid-cols-[150px_1fr] items-center gap-4" : "block w-[220px] flex-none snap-start"
-      )}
-    >
-      <Film holes="sm">
-        <TapeThumb tape={tape} play="sm" />
-      </Film>
-      <span className={cn("block min-w-0", !row && "mt-2.5")}>
-        <span className={cn(SERIF, "line-clamp-2 text-[14.5px] leading-[1.4] font-bold sm:text-[15.5px]")}>{tape.title}</span>
-        <span className={cn(SERIF, "mt-1 block text-[12.5px] text-cafe-ink-muted")}>{tapeMeta(tape)}</span>
-      </span>
-    </button>
+/** Shorts: a 9:16 phone frame with a gold edge (the home page's Shorts frame, in cafe colours), on the felt. */
+function ShortWall({ tape, playing, onPlay }: StageProps) {
+  return (
+    <div className="flex items-center justify-center py-2 lg:h-full">
+      <div className="relative aspect-[9/16] w-[min(220px,58vw)] overflow-hidden rounded-[20px] bg-black shadow-[0_0_0_2px_var(--color-cafe-gold),0_0_0_8px_#0d1714,0_0_0_9px_rgba(201,161,74,0.4),0_18px_30px_rgba(0,0,0,0.5)] sm:w-[260px] lg:w-[290px]">
+        {playing ? (
+          <TapeEmbed tape={tape} />
+        ) : (
+          <button type="button" onClick={onPlay} className="group absolute inset-0 block text-left" aria-label={`เล่นคลิป ${tape.title}`}>
+            <TapeCover tape={tape} />
+            <PlayDisc size="lg" />
+            <span className={cn(LABEL, "absolute top-2.5 left-2.5 bg-cafe-deep/88 px-2 py-1 text-[10.5px] text-cafe-gold-soft sm:text-[10.5px]")}>
+              Short
+            </span>
+            <span className="absolute inset-x-0 bottom-0 bg-[linear-gradient(0deg,rgba(10,31,26,0.92),transparent)] px-3.5 pt-10 pb-3.5">
+              <span className={cn(SERIF, "line-clamp-2 text-sm leading-snug font-bold text-cafe-cream")}>{tape.title}</span>
+              <span className={cn(SERIF, "mt-0.5 block text-[11.5px] text-cafe-muted")}>{feedDate(tape.publishedAt)}</span>
+            </span>
+          </button>
+        )}
+      </div>
+    </div>
   );
+}
+
+function TapeRow({
+  tape,
+  kind,
+  active,
+  playing,
+  onPlay,
+  className,
+}: {
+  tape: CafeTape;
+  kind: TapeKind;
+  active: boolean;
+  playing: boolean;
+  onPlay: () => void;
+  className?: string;
+}) {
+  return (
+    <li className={className}>
+      <button
+        type="button"
+        onClick={onPlay}
+        aria-current={active ? "true" : undefined}
+        className={cn(
+          "grid w-full items-center gap-3 px-2 py-1.5 text-left transition sm:py-2",
+          kind === "video" ? "grid-cols-[92px_1fr] sm:grid-cols-[128px_1fr]" : "grid-cols-[38px_1fr] sm:grid-cols-[56px_1fr]",
+          active ? cn(MANILA, "shadow-[inset_3px_0_0_var(--color-cafe-gold-deep)]") : "hover:bg-cafe-ink/[0.05]"
+        )}
+      >
+        <span
+          className={cn(
+            "relative block overflow-hidden bg-cafe-deep shadow-[0_0_0_1px_rgba(20,33,28,0.3),0_4px_8px_rgba(0,0,0,0.18)]",
+            kind === "video" ? "aspect-video" : "aspect-[9/16]"
+          )}
+        >
+          <TapeCover tape={tape} />
+          <Duration tape={tape} small />
+        </span>
+        <span className="min-w-0">
+          <span className={cn(SERIF, "line-clamp-1 text-[14px] leading-[1.4] font-bold sm:line-clamp-2 sm:text-[14.5px]")}>
+            {tape.title}
+          </span>
+          <span className={cn(SERIF, "mt-0.5 block text-xs text-cafe-ink-muted")}>{feedDate(tape.publishedAt)}</span>
+          {active && playing ? (
+            <span className={cn(THAI, "mt-1 inline-block bg-cafe-ink px-1.5 text-[11.5px] font-bold text-cafe-gold-soft")}>
+              กำลังเล่น
+            </span>
+          ) : null}
+        </span>
+      </button>
+    </li>
+  );
+}
+
+/**
+ * One tab of Case Footage: the clip playing (big) + the tape log. From 1024px the log
+ * sits beside it, exactly as tall, and scrolls inside; below that it lists 3 and grows with "ดูอีก".
+ */
+function FootagePanel({
+  kind,
+  tapes,
+  playing,
+  onPlay,
+}: {
+  kind: TapeKind;
+  tapes: CafeTape[];
+  playing: boolean;
+  onPlay: () => void;
+}) {
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [shown, setShown] = useState(TAPES_FIRST);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const active = tapes.find((tape) => tape.id === activeId) ?? tapes[0];
+  const single = tapes.length === 1;
+
+  const play = (tape: CafeTape) => {
+    setActiveId(tape.id);
+    onPlay();
+    const top = stageRef.current?.getBoundingClientRect().top ?? 0;
+    if (top < 0 || top > window.innerHeight * 0.6) {
+      stageRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const stageProps: StageProps = {
+    tape: active,
+    latest: active.id === tapes[0].id,
+    playing,
+    onPlay: () => play(active),
+  };
+  const more = Math.min(TAPES_STEP, tapes.length - shown);
+
+  return (
+    // lg:h-full: the shorter tab fills the shared cell, so its log is as tall as the other tab's.
+    <div className={cn("grid gap-6 lg:h-full lg:gap-9", !single && "lg:grid-cols-[1.6fr_1fr]")}>
+      <div ref={stageRef} className={cn("min-w-0 scroll-mt-24 lg:h-full", single && "mx-auto w-full max-w-3xl")}>
+        {kind === "video" ? <VideoWall {...stageProps} /> : <ShortWall {...stageProps} />}
+      </div>
+      {single ? null : (
+        <div className="relative min-w-0">
+          <div className={cn("flex flex-col bg-cafe-cream p-3 pb-3.5 text-cafe-ink sm:p-4 lg:absolute lg:inset-0", PAPER_SHADOW)}>
+            <div className="flex items-baseline justify-between gap-3 border-b border-cafe-ink/15 px-1 pb-2.5">
+              <span className={cn(LABEL, "text-[10.5px] text-cafe-gold-deep sm:text-[10.5px]")}>Tape log</span>
+              <span className={cn(THAI, "text-[13px] text-cafe-ink-muted")}>บันทึกเทป · {tapes.length} คลิป</span>
+            </div>
+            <ol className="mt-2 flex flex-col gap-0.5 lg:-mr-1.5 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1.5 lg:[scrollbar-color:var(--color-cafe-gold)_transparent] lg:[scrollbar-width:thin]">
+              {tapes.map((tape, index) => (
+                <TapeRow
+                  key={tape.id}
+                  tape={tape}
+                  kind={kind}
+                  active={tape.id === active.id}
+                  playing={playing}
+                  onPlay={() => play(tape)}
+                  className={index >= shown ? "lg:block max-lg:hidden" : undefined}
+                />
+              ))}
+            </ol>
+            {more > 0 ? (
+              <button
+                type="button"
+                onClick={() => setShown((n) => n + TAPES_STEP)}
+                className={cn(THAI, "mx-auto mt-3 inline-flex min-h-11 items-center gap-1.5 border border-cafe-ink px-5 text-[14.5px] font-bold transition hover:bg-cafe-ink/[0.06] lg:hidden")}
+              >
+                ดูอีก {more} คลิป
+                <ChevronDown className="size-4" aria-hidden />
+              </button>
+            ) : tapes.length > TAPES_FIRST ? (
+              <button
+                type="button"
+                onClick={() => setShown(TAPES_FIRST)}
+                className={cn(THAI, "mx-auto mt-3 inline-flex min-h-11 items-center gap-1.5 px-5 text-sm text-cafe-ink-muted transition hover:text-cafe-ink lg:hidden")}
+              >
+                ย่อรายการ
+                <ChevronUp className="size-4" aria-hidden />
+              </button>
+            ) : null}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function CafeCaseTapes({ tapes }: { tapes: CafeTape[] }) {
+  const [tab, setTab] = useState<TapeKind>("video");
+  const [playingKind, setPlayingKind] = useState<TapeKind | null>(null);
+
+  const all = sortTapes(tapes);
+  const byKind: Record<TapeKind, CafeTape[]> = {
+    video: all.filter((tape) => !tape.isShort),
+    short: all.filter((tape) => tape.isShort),
+  };
+  const kinds = TAPE_KINDS.filter((kind) => byKind[kind].length > 0);
+  if (kinds.length === 0) return null;
+  // Always opens on Videos; the Shorts tab appears only when there are both.
+  const current = kinds.includes(tab) ? tab : kinds[0];
+  const tabbed = kinds.length > 1;
 
   const channel = (
-    <div className="flex flex-col items-start gap-3.5 border border-cafe-gold/45 p-4 sm:px-5 sm:py-[18px]">
+    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border border-cafe-gold/45 p-4 sm:px-5 sm:py-4">
       <div className="flex items-center gap-3">
         <SocialPlatformIcon platform="youtube" className="size-6 text-cafe-gold-soft" />
         <div>
@@ -418,7 +562,7 @@ export function CafeCaseTapes({ tapes }: { tapes: CafeTape[] }) {
         rel="noopener noreferrer"
         className={cn(THAI, LINE_LINK, "inline-flex items-center gap-1.5 text-sm text-cafe-gold-soft")}
       >
-        {total > TAPES_ON_PAGE ? `ดูทั้งหมด ${total} คลิปบน YouTube` : `ไปที่ช่อง ${CAFE_YOUTUBE_NAME}`}
+        ไปที่ช่อง YouTube
         <ExternalLink className="size-3.5" aria-hidden />
       </a>
     </div>
@@ -427,26 +571,56 @@ export function CafeCaseTapes({ tapes }: { tapes: CafeTape[] }) {
   return (
     <BoardSection id="tapes" className="mt-24">
       <FeedHead title="Case Footage" local={`คลิปจากช่อง ${CAFE_YOUTUBE_NAME}`} />
-      {/* 1024+: the clip big on the left, up to 4 slips + the channel on the right.
-          Smaller: the clip, then the slips side by side (swipe), then the channel. */}
-      <div className="mt-8 grid gap-6 sm:mt-11 lg:grid-cols-[1.65fr_1fr] lg:items-start lg:gap-10">
-        {featured}
-        <div className="flex min-w-0 flex-col gap-[18px]">
-          {others.length > 0 ? (
-            <>
-              <p className={cn(LABEL, "hidden lg:block")}>More footage</p>
-              <div className="hidden flex-col gap-[18px] lg:flex">{others.map((tape) => slip(tape, true))}</div>
-              <div className="-mx-5 flex snap-x gap-3.5 overflow-x-auto px-5 pt-1.5 pb-3.5 sm:-mx-8 sm:px-8 lg:hidden">
-                {others.map((tape) => slip(tape, false))}
-              </div>
-              {others.length > 1 ? (
-                <p className={cn(THAI, "-mt-2 text-center text-[13px] text-cafe-muted lg:hidden")}>ปัดดูคลิปอื่น</p>
-              ) : null}
-            </>
-          ) : null}
-          {channel}
+      {tabbed ? (
+        <div role="tablist" aria-label="ประเภทคลิป" className="mt-7 flex gap-2 sm:mt-9">
+          {kinds.map((kind) => (
+            <button
+              key={kind}
+              type="button"
+              role="tab"
+              id={`tapes-tab-${kind}`}
+              aria-selected={kind === current}
+              aria-controls={`tapes-${kind}`}
+              onClick={() => {
+                setTab(kind);
+                setPlayingKind(null);
+              }}
+              className={cn(
+                THAI,
+                "inline-flex min-h-11 items-center border px-[18px] text-[15px] font-bold transition",
+                kind === current
+                  ? "border-cafe-gold bg-cafe-gold text-cafe-ink"
+                  : "border-cafe-gold/55 text-cafe-gold-soft hover:border-cafe-gold hover:bg-cafe-gold/10"
+              )}
+            >
+              {KIND_LABEL[kind]}
+            </button>
+          ))}
         </div>
+      ) : null}
+      {/* From 1024px both tabs sit in one grid cell, so switching never changes the height below
+          (below 1024 only the open tab is laid out: the taller one would leave a gap under the other).
+          The reveal animation lives here, not inside a tab, so it never un-hides the other one. */}
+      <div data-motion="rise" className={cn("grid", tabbed ? "mt-6 sm:mt-8" : "mt-8 sm:mt-11")}>
+        {kinds.map((kind) => (
+          <div
+            key={kind}
+            id={`tapes-${kind}`}
+            role={tabbed ? "tabpanel" : undefined}
+            aria-labelledby={tabbed ? `tapes-tab-${kind}` : undefined}
+            inert={kind !== current}
+            className={cn("min-w-0 [grid-area:1/1]", kind !== current && "invisible max-lg:hidden")}
+          >
+            <FootagePanel
+              kind={kind}
+              tapes={byKind[kind]}
+              playing={playingKind === kind && kind === current}
+              onPlay={() => setPlayingKind(kind)}
+            />
+          </div>
+        ))}
       </div>
+      <div className="mt-6">{channel}</div>
     </BoardSection>
   );
 }

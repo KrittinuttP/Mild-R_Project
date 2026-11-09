@@ -82,7 +82,7 @@ export const loadCafeFeeds = cache(async (): Promise<CafeFeeds> => {
     const supabase = createPublicClient();
     const [posts, tapes] = await Promise.all([
       supabase.from(POSTS).select(POST_COLS).eq("hidden", false).order("posted_at", { ascending: false }).limit(60),
-      supabase.from(TAPES).select(TAPE_COLS).eq("hidden", false).order("published_at", { ascending: false }).limit(40),
+      supabase.from(TAPES).select(TAPE_COLS).eq("hidden", false).order("published_at", { ascending: false }).limit(200),
     ]);
     if (posts.error) console.error("[cafe_feeds] posts", posts.error.message);
     if (tapes.error) console.error("[cafe_feeds] tapes", tapes.error.message);
