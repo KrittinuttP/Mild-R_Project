@@ -261,8 +261,13 @@ function OpenOnYoutube({ href }: { href: string }) {
 /* ── playlist ────────────────────────────────────────────────────── */
 
 const PANEL = "r-card rounded-3xl p-3 md:p-3.5";
-/** Rows that fit before the list scrolls: 4 on phones, 6 from tablet up. */
-const VISIBLE_ROWS = { phone: 4, wide: 6 } as const;
+/** Rows that fit before the list scrolls (the list is as tall as the player on lg). */
+const VISIBLE_ROWS = {
+  video: { phone: 4, wide: 4 },
+  short: { phone: 3, wide: 3 },
+} as const;
+/** Both tabs share these columns, so switching tabs keeps the same layout. */
+const BOARD_GRID = "grid grid-cols-1 gap-[22px] lg:grid-cols-[minmax(0,1.75fr)_minmax(0,1fr)]";
 
 function PlaylistPanel({
   title,
@@ -271,6 +276,7 @@ function PlaylistPanel({
   onSelect,
   status,
   onRetry,
+  shape = "video",
 }: {
   title: string;
   clips: PlayerClip[];
@@ -278,13 +284,18 @@ function PlaylistPanel({
   onSelect: (id: string) => void;
   status: "ready" | "loading" | "error";
   onRetry: () => void;
+  /** "short": 9:16 covers, so the Shorts tab scrolls down the same way as the videos. */
+  shape?: "video" | "short";
 }) {
   const hasExternal = clips.some((clip) => !clip.embed);
-  const morePhone = clips.length - VISIBLE_ROWS.phone;
-  const moreWide = clips.length - VISIBLE_ROWS.wide;
+  const morePhone = clips.length - VISIBLE_ROWS[shape].phone;
+  const moreWide = clips.length - VISIBLE_ROWS[shape].wide;
+  const cover =
+    shape === "short" ? "aspect-[9/16] w-[46px] md:w-[54px]" : "aspect-video w-[104px] md:w-[120px]";
 
   return (
-    <div className={PANEL}>
+    // lg: fills its grid cell, so the list ends level with the player beside it.
+    <div className={cn(PANEL, "lg:absolute lg:inset-0 lg:flex lg:flex-col")}>
       <div className="flex items-baseline justify-between gap-3 px-1.5 pt-0.5 pb-3">
         <p className="font-[family-name:var(--font-display)] text-base text-r-text">เพลย์ลิสต์ · {title}</p>
         {status === "ready" ? <span className="text-xs text-r-text-3">{clips.length} คลิป</span> : null}
@@ -302,7 +313,7 @@ function PlaylistPanel({
           {Array.from({ length: 4 }, (_, i) => (
             <li key={i} className="flex items-center gap-3 p-2">
               <span className="w-[18px]" />
-              <span className="aspect-video w-[104px] shrink-0 animate-pulse rounded-xl bg-white/[0.05] md:w-[120px]" />
+              <span className={cn(cover, "shrink-0 animate-pulse rounded-xl bg-white/[0.05]")} />
               <span className="flex-1 space-y-2">
                 <span className="block h-3.5 w-4/5 animate-pulse rounded bg-white/[0.05]" />
                 <span className="block h-3 w-2/5 animate-pulse rounded bg-white/[0.05]" />
@@ -314,7 +325,7 @@ function PlaylistPanel({
         <p className="px-2 py-3 text-sm text-r-text-3">ยังไม่มีคลิปในหมวดนี้</p>
       ) : (
         <>
-          <ul className="flex max-h-[312px] flex-col gap-1 overflow-y-auto [scrollbar-color:color-mix(in_srgb,var(--r-text-2)_35%,transparent)_transparent] [scrollbar-width:thin] md:max-h-[520px]">
+          <ul className="flex max-h-[312px] flex-col gap-1 overflow-y-auto [scrollbar-color:color-mix(in_srgb,var(--r-text-2)_35%,transparent)_transparent] [scrollbar-width:thin] md:max-h-[360px] lg:max-h-none lg:min-h-0 lg:flex-1">
             {clips.map((clip, index) => {
               const selected = clip.id === activeId;
               return (
@@ -331,11 +342,16 @@ function PlaylistPanel({
                     <span className={cn("w-[18px] shrink-0 text-center text-xs", selected ? "text-r-pri" : "text-r-text-3")}>
                       {selected ? "▶" : index + 1}
                     </span>
-                    <span className="relative aspect-video w-[104px] shrink-0 overflow-hidden rounded-xl bg-[linear-gradient(140deg,color-mix(in_srgb,var(--r-pri)_22%,var(--r-bg)),var(--r-bg))] ring-1 ring-r-text-2/15 md:w-[120px]">
+                    <span className={cn(cover, "relative shrink-0 overflow-hidden rounded-xl bg-[linear-gradient(140deg,color-mix(in_srgb,var(--r-pri)_22%,var(--r-bg)),var(--r-bg))] ring-1 ring-r-text-2/15")}>
                       {clip.thumbUrl ? (
                         <ProtectedImage src={clip.thumbUrl} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
                       ) : null}
-                      <span className="absolute top-1/2 left-1/2 flex size-[34px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-r-bg/60 text-r-text">
+                      <span
+                        className={cn(
+                          "absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-r-bg/60 text-r-text",
+                          shape === "short" ? "size-7" : "size-[34px]"
+                        )}
+                      >
                         <Play aria-hidden className="size-3 fill-current" />
                       </span>
                     </span>
@@ -393,97 +409,66 @@ function ShortsBoard({
   }
 
   return (
-    <div className="grid grid-cols-1 items-center gap-[22px] lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
-      <div className="relative mx-auto aspect-[9/16] w-[min(222px,64vw)] overflow-hidden rounded-2xl bg-[radial-gradient(circle_at_50%_30%,color-mix(in_srgb,var(--r-pri)_35%,var(--r-bg)),var(--r-bg)_70%)] ring-2 ring-r-pri lg:w-[252px]">
-        {active && playing && active.embed ? (
-          <YoutubeFrame clip={active} />
-        ) : (
-          <>
-            {active ? <Poster key={active.id} clip={active} /> : null}
-            <span aria-hidden className="absolute inset-0 bg-gradient-to-b from-r-bg/40 via-transparent to-r-bg/85" />
-            <span className="absolute top-3 left-3 inline-flex items-center gap-1 text-xs text-r-acc">
-              <Smartphone aria-hidden className="size-3.5" /> Shorts
-            </span>
-            {active ? (
-              active.embed ? (
-                <button
-                  type="button"
-                  onClick={() => setPlaying(true)}
-                  aria-label={`เล่น ${active.title}`}
-                  className="absolute top-1/2 left-1/2 flex size-[54px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-r-pri text-r-on-pri transition-colors hover:bg-r-pri-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-r-acc"
-                >
-                  <Play aria-hidden className="size-5 fill-current" />
-                </button>
-              ) : (
-                <a
-                  href={active.youtubeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`ดู ${active.title} บน YouTube`}
-                  className="absolute top-1/2 left-1/2 flex size-[54px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-r-pri text-r-on-pri"
-                >
-                  <ExternalLink aria-hidden className="size-5" />
-                </a>
-              )
-            ) : null}
-            {active ? (
-              <span className="absolute inset-x-3 bottom-3">
-                <span className="line-clamp-2 text-[0.8125rem] leading-snug text-r-text">{active.title}</span>
-                <span className="mt-0.5 block truncate text-[0.6875rem] text-r-text-3">{active.subtitle}</span>
-              </span>
-            ) : null}
-          </>
-        )}
+    <div className={BOARD_GRID}>
+      {/* lg: a stage exactly as big as the video tab's player + the row under it
+          (16:9 of the column width + 51px), with the phone filling its height. */}
+      <div className="min-w-0 @container">
+        <div className="relative lg:h-[calc(56.25cqw+51px)] lg:overflow-hidden lg:rounded-3xl lg:bg-[radial-gradient(ellipse_at_50%_45%,color-mix(in_srgb,var(--r-pri)_22%,var(--r-bg)),var(--r-bg)_72%)] lg:ring-1 lg:ring-r-text-2/15 lg:shadow-[0_40px_80px_-45px_color-mix(in_srgb,var(--r-pri)_60%,transparent)]">
+          <div className="relative mx-auto aspect-[9/16] w-[min(268px,72vw)] overflow-hidden rounded-[1.75rem] bg-[radial-gradient(circle_at_50%_30%,color-mix(in_srgb,var(--r-pri)_35%,var(--r-bg)),var(--r-bg)_70%)] shadow-[0_24px_60px_-28px_color-mix(in_srgb,var(--r-pri)_75%,transparent)] ring-2 ring-r-pri sm:w-[300px] lg:absolute lg:inset-y-3 lg:left-1/2 lg:h-auto lg:w-auto lg:-translate-x-1/2">
+            {active && playing && active.embed ? (
+              <YoutubeFrame clip={active} />
+            ) : (
+              <>
+                {active ? <Poster key={active.id} clip={active} /> : null}
+                <span aria-hidden className="absolute inset-0 bg-gradient-to-b from-r-bg/40 via-transparent to-r-bg/85" />
+                <span className="absolute top-3 left-3 inline-flex items-center gap-1 text-xs text-r-acc">
+                  <Smartphone aria-hidden className="size-3.5" /> Shorts
+                </span>
+                {active ? (
+                  active.embed ? (
+                    <button
+                      type="button"
+                      onClick={() => setPlaying(true)}
+                      aria-label={`เล่น ${active.title}`}
+                      className="absolute top-1/2 left-1/2 flex size-[54px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-r-pri text-r-on-pri transition-colors hover:bg-r-pri-hover focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-r-acc"
+                    >
+                      <Play aria-hidden className="size-5 fill-current" />
+                    </button>
+                  ) : (
+                    <a
+                      href={active.youtubeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`ดู ${active.title} บน YouTube`}
+                      className="absolute top-1/2 left-1/2 flex size-[54px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-r-pri text-r-on-pri"
+                    >
+                      <ExternalLink aria-hidden className="size-5" />
+                    </a>
+                  )
+                ) : null}
+                {active ? (
+                  <span className="absolute inset-x-3 bottom-3">
+                    <span className="line-clamp-2 text-[0.8125rem] leading-snug text-r-text">{active.title}</span>
+                    <span className="mt-0.5 block truncate text-[0.6875rem] text-r-text-3">{active.subtitle}</span>
+                  </span>
+                ) : null}
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
-      <div className={cn(PANEL, "md:p-[18px]")}>
-        <div className="flex items-baseline justify-between gap-3 px-1 pb-3.5">
-          <p className="inline-flex items-center gap-2 font-[family-name:var(--font-display)] text-base text-r-text">
-            <Smartphone aria-hidden className="size-4 text-r-acc" /> Shorts ล่าสุด
-          </p>
-        </div>
-        {status === "error" ? (
-          <div className="flex flex-wrap items-center gap-3 px-1 py-3">
-            <p className="text-sm text-r-text-3">โหลดคลิปไม่สำเร็จ</p>
-            <button type="button" onClick={onRetry} className={cn(R_CTA_OUTLINE_CLASS, "h-10")}>
-              ลองใหม่
-            </button>
-          </div>
-        ) : status === "ready" && shorts.length === 0 ? (
-          <p className="px-1 py-3 text-sm text-r-text-3">ยังไม่มี Shorts</p>
-        ) : (
-          <ul
-            aria-busy={status === "loading" || undefined}
-            className="-mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-4 lg:overflow-visible lg:px-0"
-          >
-            {(status === "loading" ? Array.from({ length: DYNAMIC_TAB_LIMIT }, () => null) : shorts).map((short, i) => (
-              <li key={short?.id ?? i} className="w-[84px] shrink-0 snap-start lg:w-auto">
-                {short ? (
-                  <button
-                    type="button"
-                    onClick={() => select(short.id)}
-                    aria-current={short.id === active?.id || undefined}
-                    title={short.title}
-                    className={cn(
-                      "relative block aspect-[9/16] w-full overflow-hidden rounded-xl bg-[linear-gradient(160deg,color-mix(in_srgb,var(--r-pri)_20%,var(--r-bg)),var(--r-bg))] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-r-acc",
-                      short.id === active?.id ? "ring-2 ring-r-pri" : "ring-1 ring-r-text-2/15 hover:ring-r-pri/45"
-                    )}
-                  >
-                    {short.thumbUrl ? (
-                      <ProtectedImage src={short.thumbUrl} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
-                    ) : null}
-                    <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-r-text drop-shadow">
-                      <Play aria-hidden className="size-3 fill-current" />
-                    </span>
-                  </button>
-                ) : (
-                  <span className="block aspect-[9/16] w-full animate-pulse rounded-xl bg-white/[0.05]" />
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-        <p className="mt-3 px-1 text-[0.78125rem] text-r-text-2 lg:hidden">ปัด / เลื่อนเพื่อดูคลิปถัดไป</p>
+      {/* Same playlist as the videos (scrolls down), with 9:16 covers. */}
+      <div className="relative min-w-0">
+        <PlaylistPanel
+          title="Shorts"
+          clips={shorts}
+          activeId={active?.id ?? null}
+          onSelect={select}
+          status={status}
+          onRetry={onRetry}
+          shape="short"
+        />
       </div>
     </div>
   );
@@ -589,7 +574,7 @@ export function Media({ data }: MediaProps) {
         {activeTab === "shorts" ? (
           <ShortsBoard shorts={playlist} status={status} onRetry={retry} />
         ) : (
-          <div className="grid grid-cols-1 items-start gap-[22px] lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
+          <div className={BOARD_GRID}>
             <div className="min-w-0">
               {active ? (
                 <>
@@ -616,14 +601,16 @@ export function Media({ data }: MediaProps) {
                 <div className={cn(STAGE_FRAME, "aspect-video", status === "loading" && "animate-pulse")} />
               )}
             </div>
-            <PlaylistPanel
-              title={dynamicTab?.label ?? group?.label ?? ""}
-              clips={playlist}
-              activeId={active?.id ?? null}
-              onSelect={selectClip}
-              status={status}
-              onRetry={retry}
-            />
+            <div className="relative min-w-0">
+              <PlaylistPanel
+                title={dynamicTab?.label ?? group?.label ?? ""}
+                clips={playlist}
+                activeId={active?.id ?? null}
+                onSelect={selectClip}
+                status={status}
+                onRetry={retry}
+              />
+            </div>
           </div>
         )}
       </ScrollReveal>
