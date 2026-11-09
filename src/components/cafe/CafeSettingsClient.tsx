@@ -146,7 +146,7 @@ export function CafeSettingsClient() {
     setVisibility(defaultCafeVisibility());
   }
 
-  /** Key Visual has three steps, saved as its two switches in one request. */
+  /** Key Visual has four steps, saved as its switches in one request. */
   async function onKvMode(mode: KvMode) {
     if (kvModeOf(visibility) === mode) return;
     const switches = kvModeSwitches(mode);
@@ -402,7 +402,7 @@ export function CafeSettingsClient() {
               <div
                 role="radiogroup"
                 aria-label="Key Visual mode"
-                className="flex w-full shrink-0 gap-1.5 sm:w-auto sm:min-w-[17rem]"
+                className="grid w-full shrink-0 grid-cols-2 gap-1.5 sm:flex sm:w-auto sm:min-w-[23rem]"
               >
                 {KV_MODES.map((mode) => {
                   const active = kvModeOf(visibility) === mode;

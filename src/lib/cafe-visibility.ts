@@ -5,6 +5,7 @@ export const CAFE_SECTION_KEYS = [
   "mainSiteLink",
   "heroCutout",
   "kvSpoil",
+  "kvMotion",
   "dispatch",
   "notices",
   "daySchedule",
@@ -21,36 +22,45 @@ export const CAFE_SECTION_KEYS = [
 export type CafeSectionKey = (typeof CAFE_SECTION_KEYS)[number];
 
 /**
- * Content blocks on `/cafe` (excludes chrome / nav toggles). `kvSpoil` is not
- * a block of its own: it is the middle step of the Key Visual mode.
+ * Content blocks on `/cafe` (excludes chrome / nav toggles). `kvSpoil` and
+ * `kvMotion` are not blocks of their own: they are steps of the Key Visual mode.
  */
 export const CAFE_CONTENT_SECTION_KEYS = CAFE_SECTION_KEYS.filter(
-  (key) => key !== "mainSiteLink" && key !== "kvSpoil"
-) as Exclude<CafeSectionKey, "mainSiteLink" | "kvSpoil">[];
+  (key) => key !== "mainSiteLink" && key !== "kvSpoil" && key !== "kvMotion"
+) as Exclude<CafeSectionKey, "mainSiteLink" | "kvSpoil" | "kvMotion">[];
 
 /**
  * Key Visual on the cafe board, from most to least hidden:
- * `hidden` blacked-out silhouette · `spoil` partly revealed · `full` the KV.
- * Stored as two switches (`heroCutout`, `kvSpoil`) so the settings table
- * keeps one boolean per row; `heroCutout` on always means the full KV.
+ * `hidden` blacked-out silhouette · `spoil` partly revealed · `full` the KV ·
+ * `motion` the Live2D KV (half body), with the full KV as its poster.
+ * Stored as switches (`heroCutout`, `kvSpoil`, `kvMotion`) so the settings
+ * table keeps one boolean per row; `heroCutout` on always means the full KV,
+ * and `kvMotion` only counts while it is on.
  */
-export const KV_MODES = ["hidden", "spoil", "full"] as const;
+export const KV_MODES = ["hidden", "spoil", "full", "motion"] as const;
 export type KvMode = (typeof KV_MODES)[number];
 
 export const KV_MODE_META: Record<KvMode, { label: string; labelLocal: string }> = {
   hidden: { label: "Top Secret", labelLocal: "ถมดำ" },
   spoil: { label: "Spoil", labelLocal: "สปอย" },
   full: { label: "Declassified", labelLocal: "KV เต็ม" },
+  motion: { label: "Live2D", labelLocal: "KV ขยับได้" },
 };
 
 export function kvModeOf(visibility: CafeSectionVisibilityMap): KvMode {
-  if (visibility.heroCutout) return "full";
+  if (visibility.heroCutout) return visibility.kvMotion ? "motion" : "full";
   return visibility.kvSpoil ? "spoil" : "hidden";
 }
 
-/** The two switches to save for a Key Visual mode. */
-export function kvModeSwitches(mode: KvMode): Pick<CafeSectionVisibilityMap, "heroCutout" | "kvSpoil"> {
-  return { heroCutout: mode === "full", kvSpoil: mode === "spoil" };
+/** The switches to save for a Key Visual mode. */
+export function kvModeSwitches(
+  mode: KvMode
+): Pick<CafeSectionVisibilityMap, "heroCutout" | "kvSpoil" | "kvMotion"> {
+  return {
+    heroCutout: mode === "full" || mode === "motion",
+    kvSpoil: mode === "spoil",
+    kvMotion: mode === "motion",
+  };
 }
 
 export type CafeSectionVisibilityMap = Record<CafeSectionKey, boolean>;
@@ -99,6 +109,10 @@ export const CAFE_SECTION_META: Record<
   kvSpoil: {
     label: "Key Visual · Spoil",
     labelLocal: "โหมดสปอยของรูป KV (ใช้เมื่อ KV เต็มยังปิดอยู่)",
+  },
+  kvMotion: {
+    label: "Key Visual · Live2D",
+    labelLocal: "โหมด KV ขยับได้ (ครึ่งตัว · ใช้เมื่อ KV เต็มเปิดอยู่)",
   },
   dispatch: {
     label: "Crime Scene Details",
@@ -152,6 +166,8 @@ export function defaultCafeVisibility(): CafeSectionVisibilityMap {
     heroCutout: true,
     // No saved row yet: the Key Visual falls back to spoil, not the silhouette.
     kvSpoil: true,
+    // The Live2D KV is opt-in: no saved row keeps the still KV.
+    kvMotion: false,
     dispatch: true,
     daySchedule: true,
     operations: true,
@@ -376,7 +392,15 @@ export function cafeForVisibility(
   cafe: CafePage,
   visibility: CafeSectionVisibilityMap
 ): CafePage {
-  const { heroCutoutSilhouette, heroCutoutSpoil, heroCutoutSpoilPin, ...listed } = cafe;
+  const {
+    heroCutoutSilhouette,
+    heroCutoutSpoil,
+    heroCutoutSpoilPin,
+    heroHalf,
+    heroHalfPin,
+    heroMotion,
+    ...listed
+  } = cafe;
   // Goods for sale are not announced yet: drop them before anything is sent.
   const rest =
     listed.goods && !listed.goods.saleListed
@@ -388,10 +412,22 @@ export function cafeForVisibility(
           },
         }
       : listed;
-  const redacted = redactSections(rest, visibility);
   const mode = kvModeOf(visibility);
+  const redacted = redactSections(rest, visibility);
+  if ((mode === "full" || mode === "motion") && heroHalf) {
+    // Once out, the KV is shown half body, so the board never sends the full-body file
+    // (the acrylic stand gets its own picture before goods go on sale).
+    // The Live2D KV reaches the page only in its own mode.
+    return {
+      ...redacted,
+      heroCutout: heroHalf,
+      heroHalf,
+      heroHalfPin,
+      ...(mode === "motion" && heroMotion ? { heroMotion } : {}),
+    };
+  }
   const shown =
-    mode === "full"
+    mode === "full" || mode === "motion"
       ? undefined
       : mode === "spoil"
         ? (heroCutoutSpoil ?? heroCutoutSilhouette)

@@ -747,6 +747,22 @@ export interface CafeEdition {
 /** Where the heart pin sits on the cafe cutout: `top` / `left` as CSS percentages. */
 export type CafeHeroPin = { top: string; left: string };
 
+/**
+ * Live2D Key Visual (half body, transparent), shown in the KV mode "motion".
+ * `poster` (its first frame) paints first and stays for reduced motion / no video.
+ */
+export type CafeHeroMotion = {
+  /** First frame of the video, as a still (same frame, so the swap does not jump). */
+  poster: string;
+  /** VP9 + alpha: Chrome · Edge · Firefox. */
+  webm: string;
+  /** Smaller VP9 for phones (< 640px wide). */
+  webmSmall?: string;
+  /** HEVC + alpha: Safari and every iOS browser. Without it they keep the still KV. */
+  mov?: string;
+  movSmall?: string;
+};
+
 export interface CafePage {
   title: string;
   titleLocal?: string;
@@ -772,6 +788,15 @@ export interface CafePage {
   heroCutoutSpoilPin?: CafeHeroPin;
   /** Heart pin on the cutout being shown; set by `cafeForVisibility`. Default 15% / 80%. */
   heroCutoutPin?: CafeHeroPin;
+  /**
+   * The KV cut to half body (2:3), shown in the KV modes "full" and "motion" instead of
+   * `heroCutout`, so the full-body KV is never sent once the KV is out.
+   */
+  heroHalf?: string;
+  /** Heart pin on the half-body frame (`heroHalf` and the Live2D video), as CSS percentages. */
+  heroHalfPin?: CafeHeroPin;
+  /** Live2D KV; sent to the page only in the KV mode "motion" (`cafeForVisibility`). */
+  heroMotion?: CafeHeroMotion;
   dispatch: CafeDispatchSection;
   daySchedule?: CafeDayScheduleSection;
   /** HQ briefing (doc §8) — replaces plates + highlights */

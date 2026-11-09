@@ -91,12 +91,12 @@ async function cafePageLock(request: NextRequest, pathname: string, onCafeHost: 
   return NextResponse.next(init);
 }
 
-/** The KV cutout exists only on this site; it may be drawn by our pages, not opened. */
+/** The KV cutout (and its Live2D video) exists only on this site; it may be drawn by our pages, not opened. */
 const PROTECTED_IMAGE_PREFIX = "/assets/cafe/kv/";
 
 /**
  * Browsers say why they fetch (`Sec-Fetch-Dest`) and from where
- * (`Sec-Fetch-Site`). An <img> on our own pages passes; opening the file in a
+ * (`Sec-Fetch-Site`). An <img> or <video> on our own pages passes; opening the file in a
  * tab, typing its address, or another site embedding it gets a 404. Requests
  * without these headers (old browsers, server-side fetches) still pass: this
  * stops casual saving, not a determined copy (the file carries an invisible
@@ -106,7 +106,7 @@ function protectedImage(request: NextRequest) {
   const dest = request.headers.get("sec-fetch-dest");
   const from = request.headers.get("sec-fetch-site");
   const blocked =
-    (dest !== null && dest !== "image") ||
+    (dest !== null && dest !== "image" && dest !== "video") ||
     (from !== null && from !== "same-origin" && from !== "same-site");
   if (blocked) {
     return new NextResponse(null, {

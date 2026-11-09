@@ -19,6 +19,15 @@
   "heroCutoutSilhouette": "/assets/cafe/kv/KV_cafe_shadow.webp",
   "heroCutoutSpoil": "/assets/cafe/kv/KV_cafe_spoil.webp",
   "heroCutoutSpoilPin": { "top": "17%", "left": "66%" },
+  "heroHalf": "/assets/cafe/kv/KV_cafe_half.webp",
+  "heroHalfPin": { "top": "18%", "left": "80%" },
+  "heroMotion": {
+    "poster": "/assets/cafe/kv/KV_cafe_l2d_poster.webp",
+    "webm": "/assets/cafe/kv/KV_cafe_l2d_half.webm",
+    "webmSmall": "/assets/cafe/kv/KV_cafe_l2d_half_m.webm",
+    "mov": "/assets/cafe/kv/KV_cafe_l2d_half.mov",
+    "movSmall": "/assets/cafe/kv/KV_cafe_l2d_half_m.mov"
+  },
   "dispatch": {
     "eyebrow": "Dispatch",
     "stamp": "CONFIDENTIAL",

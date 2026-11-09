@@ -28,6 +28,7 @@ import {
   tiltStyle,
 } from "@/components/cafe/board/pieces";
 import { ThaiPhrases } from "@/components/common/ThaiPhrases";
+import { KvMotion } from "@/components/cafe/board/KvMotion";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { useNow } from "@/hooks/useNow";
 import { preorderIsListed } from "@/lib/cafe-visibility";
@@ -341,6 +342,9 @@ const VALUE = cn(SERIF, "font-bold tracking-[0.05em] text-cafe-ink");
 const CHIP =
   "inline-block bg-cafe-forest px-2 py-0.5 font-[family-name:var(--font-cafe-serif)] font-bold tracking-[0.04em] text-cafe-cream";
 
+/** Half-body KV (still or Live2D): 2:3, the cut at her skirt fades into the felt. */
+const HALF_FRAME = "aspect-[2/3] w-full [mask-image:linear-gradient(to_bottom,#000_78%,transparent)]";
+
 type CafeOverviewProps = {
   cafe: CafePage;
   showDispatch: boolean;
@@ -362,6 +366,9 @@ export function CafeOverview({
   const hidden = !showDispatch;
   const follow = cafe.closing.ctas;
   const cutout = cafe.heroCutout || "/assets/cafe/kv/KV_cafe.webp";
+  // Once the KV is out it is shown half body (`cafeForVisibility`); the Live2D one moves.
+  const half = cafe.heroHalf;
+  const motion = half ? cafe.heroMotion : undefined;
   const when = hidden ? null : caseDate(schedule.startsAt);
   const statusLabel = hidden
     ? cafe.statusLabelSealed ?? "CASE FILE · SEALED"
@@ -547,22 +554,52 @@ export function CafeOverview({
               <div className={cn("relative z-30", "min-[1100px]:z-auto")}>
                 <div
                   data-motion="hero-char"
-                  className="animate-cafe-float relative mx-auto w-max max-w-full"
+                  className={cn(
+                    "relative mx-auto",
+                    // The half-body box is capped here so the pin and tag follow it.
+                    half
+                      ? "w-full max-w-[220px] min-[640px]:max-w-[min(400px,48vw)] min-[1100px]:max-w-[min(480px,calc((100svh-9rem)*2/3))]"
+                      : "w-max max-w-full",
+                    // The Live2D KV moves on its own; a still one floats.
+                    !motion && "animate-cafe-float"
+                  )}
                 >
-                  <ProtectedImage
-                    src={cutout}
-                    alt={cafe.heroAlt ?? cafe.title}
-                    className={cn(
-                      "h-[min(330px,85vw)] w-auto max-w-full object-contain [filter:drop-shadow(8px_14px_10px_rgba(0,0,0,.55))] min-[640px]:h-[min(600px,72vw)]",
-                      "min-[1100px]:h-[min(720px,calc(100svh-9rem))] min-[1100px]:min-h-[600px] min-[1100px]:max-w-none"
-                    )}
-                  />
+                  {motion ? (
+                    <KvMotion
+                      motion={motion}
+                      poster={motion.poster}
+                      alt={cafe.heroAlt ?? cafe.title}
+                      className={HALF_FRAME}
+                    />
+                  ) : half ? (
+                    <ProtectedImage
+                      src={half}
+                      alt={cafe.heroAlt ?? cafe.title}
+                      className={cn(
+                        HALF_FRAME,
+                        "block object-cover object-top [filter:drop-shadow(6px_10px_8px_rgba(0,0,0,.45))]"
+                      )}
+                    />
+                  ) : (
+                    <ProtectedImage
+                      src={cutout}
+                      alt={cafe.heroAlt ?? cafe.title}
+                      className={cn(
+                        "h-[min(330px,85vw)] w-auto max-w-full object-contain [filter:drop-shadow(8px_14px_10px_rgba(0,0,0,.55))] min-[640px]:h-[min(600px,72vw)]",
+                        "min-[1100px]:h-[min(720px,calc(100svh-9rem))] min-[1100px]:min-h-[600px] min-[1100px]:max-w-none"
+                      )}
+                    />
+                  )}
                   {/* She is the detective on this case, never the suspect. */}
                   <p
                     className={cn(
                       THAI,
                       "absolute bottom-[6%] -left-1.5 z-20 rotate-[-4deg] border border-cafe-gold/70 bg-cafe-cream/95 px-1.5 py-0.5 text-[13px] font-bold whitespace-nowrap text-cafe-forest shadow-md min-[640px]:bottom-[10%] min-[640px]:px-2.5 min-[640px]:py-1 min-[640px]:text-lg",
-                      "min-[1100px]:bottom-[14%] min-[1100px]:left-auto min-[1100px]:-right-[4%] min-[1100px]:px-3 min-[1100px]:py-1 min-[1100px]:text-xl"
+                      "min-[1100px]:px-3 min-[1100px]:py-1 min-[1100px]:text-xl",
+                      // Half body: her hand is at the lower right, so the tag stays on the left.
+                      half
+                        ? "min-[1100px]:bottom-[12%] min-[1100px]:-left-[4%]"
+                        : "min-[1100px]:bottom-[14%] min-[1100px]:left-auto min-[1100px]:-right-[4%]"
                     )}
                   >
                     นักสืบ: Mild-R
@@ -570,7 +607,7 @@ export function CafeOverview({
                   <span
                     data-pin="heart"
                     data-motion="hero-heart"
-                    style={cafe.heroCutoutPin}
+                    style={half ? cafe.heroHalfPin : cafe.heroCutoutPin}
                     className="absolute top-[15%] left-[80%] z-10 flex size-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center min-[1100px]:size-7"
                     aria-hidden
                   >

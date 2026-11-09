@@ -58,3 +58,6 @@ next-env.d.ts
 /assets-private/
 
 __pycache__/
+
+# KV source masters (large, never deployed)
+/_source/
