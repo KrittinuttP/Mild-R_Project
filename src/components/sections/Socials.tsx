@@ -129,7 +129,7 @@ export function Socials({ data, xPosts = [], xRetweets = [] }: SocialsProps) {
     <Section id="socials" strong className="pb-[max(5rem,env(safe-area-inset-bottom))]">
       <ScrollReveal>
         <SectionHeader
-          eyebrow="Follow"
+          eyebrow="Socials"
           title={`ติดตาม ${data.basic.name}`}
           description={<span className="text-base text-r-text-2">{data.fan.greetingToFans ?? `${data.fan.fanName} ${data.fan.oshiMark}`}</span>}
         />

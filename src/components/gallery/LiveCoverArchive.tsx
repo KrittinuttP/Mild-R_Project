@@ -67,9 +67,9 @@ const FILTER_LABEL: Record<Filter, string> = {
   collab: "Collab",
 };
 
-/** Mild-R includes member lives; Collab covers both in- and out-of-channel collabs. */
+/** Mild-R = solo lives on Mild-R's channel (member lives included, collabs not); Collab covers both in- and out-of-channel collabs. */
 function matchesFilter(item: LiveCoverItem, filter: Filter): boolean {
-  if (filter === "own") return item.isOwnChannel;
+  if (filter === "own") return item.isOwnChannel && !item.isCollab;
   if (filter === "member") return item.isMember;
   if (filter === "collab") return item.isCollab;
   return true;

@@ -403,7 +403,7 @@ export function Header({ data }: HeaderProps) {
             onClick={(event) => handleNavClick(event, homeSectionHref(SOCIALS_HASH))}
             className="hidden h-[34px] items-center rounded-full bg-r-pri px-3.5 text-[13px] font-semibold text-r-on-pri transition hover:bg-r-pri-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-r-acc md:inline-flex"
           >
-            Follow
+            Socials
           </Link>
           <button
             type="button"

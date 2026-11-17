@@ -82,7 +82,7 @@ export function ChannelBadge({ item }: { item: LiveCoverItem }) {
       >
         {item.channelLabel}
       </span>
-      {item.isOwnChannel && item.isCollab ? (
+      {item.isCollab ? (
         <span className={cn(LIVE_BADGE_PILL_SM, LIVE_BADGE_COLLAB)}>
           Collab
         </span>
