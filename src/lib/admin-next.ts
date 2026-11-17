@@ -4,6 +4,8 @@ export function adminLoginUrl(next: string) {
 }
 
 export const ADMIN_FANART_LOGIN = adminLoginUrl("/admin/fanart");
+export const ADMIN_X_GALLERY_LOGIN = adminLoginUrl("/admin/x-gallery");
+export const ADMIN_MOMENTS_LOGIN = adminLoginUrl("/admin/moments");
 
 /**
  * The `next` page to open after unlocking, or null. Only admin pages on this

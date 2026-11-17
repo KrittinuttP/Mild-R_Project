@@ -155,6 +155,15 @@ export interface GalleryItem {
   height?: number;
   /** When true, item is sorted after the rest of the board. */
   loadOnDemand?: boolean;
+  /**
+   * Not in gallery.json: "x" = Mild-R's X posts (src/lib/x-gallery.ts),
+   * "upload" = uploaded at /admin/moments (src/lib/moment-photos.ts).
+   */
+  source?: "x" | "upload";
+  /** ISO time: the X post, or when the photo was uploaded. Moments sorts by it. */
+  postedAt?: string;
+  /** Link to the X post (source "x"). */
+  postUrl?: string;
 }
 
 /** Fan-submitted / community art (separate from official archive gallery) */

@@ -66,6 +66,40 @@ export function sortGalleryItems<T extends GalleryItem>(items: T[]) {
   });
 }
 
+/** Moments sort: as curated (X photos after), or by X post date. */
+export type MomentsOrder = "default" | "newest" | "oldest";
+
+/** The Moments board opens on this order. */
+export const MOMENTS_DEFAULT_ORDER: MomentsOrder = "newest";
+
+export const MOMENTS_ORDERS: readonly { key: MomentsOrder; label: string }[] = [
+  { key: "newest", label: "ใหม่สุด" },
+  { key: "oldest", label: "เก่าสุด" },
+  { key: "default", label: "ลำดับเดิม" },
+];
+
+function postedMs(item: GalleryItem) {
+  const ms = item.postedAt ? Date.parse(item.postedAt) : NaN;
+  return Number.isFinite(ms) ? ms : 0;
+}
+
+/**
+ * Dated items (X posts + admin uploads) are sorted together by date. Curated
+ * gallery.json items have no date and count as the oldest: newest puts them
+ * last in reverse order (the last one in gallery.json is the newest of them),
+ * oldest puts them first in their own order. Expects `sortGalleryItems` output.
+ */
+export function orderMoments<T extends GalleryItem>(items: T[], order: MomentsOrder): T[] {
+  const curated = items.filter((item) => !item.source);
+  const dated = items.filter((item) => Boolean(item.source));
+  const newestFirst = () => [...dated].sort((a, b) => postedMs(b) - postedMs(a));
+  if (order === "newest") return [...newestFirst(), ...[...curated].reverse()];
+  if (order === "oldest") {
+    return [...curated, ...[...dated].sort((a, b) => postedMs(a) - postedMs(b))];
+  }
+  return [...curated, ...newestFirst()];
+}
+
 export function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }

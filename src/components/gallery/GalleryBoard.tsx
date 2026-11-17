@@ -2,26 +2,38 @@
 
 import { useMemo, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ExternalLink } from "lucide-react";
 
+import {
+  GALLERY_PILL_ACTIVE_CLASS,
+  GALLERY_PILL_CLASS,
+  GALLERY_PILL_GROUP_CLASS,
+  GALLERY_PILL_IDLE_CLASS,
+} from "@/components/gallery/gallery-categories";
 import {
   artistCredit,
   GALLERY_EAGER_COUNT,
   GALLERY_PREVIEW_COUNT,
   isFanArtItem,
   masonrySlots,
+  MOMENTS_ORDERS,
+  orderMoments,
   prefersReducedMotion,
   SIZE_CLASS,
   SIZE_CLASS_FROM_SM,
   sortGalleryItems,
   type GalleryBoardMode,
   type GalleryVariant,
+  MOMENTS_DEFAULT_ORDER,
+  type MomentsOrder,
 } from "@/components/gallery/gallery-utils";
+import { SocialPlatformIcon } from "@/components/icons/SocialPlatformIcon";
 import {
   ImageLightbox,
   type ImageLightboxItem,
 } from "@/components/media/ImageLightbox";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
+import { feedDate, feedDayMonth } from "@/lib/cafe-feeds";
 import { gsap, registerGsapPlugins, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { R_CTA_OUTLINE_CLASS } from "@/lib/site-ui";
 import { cn } from "@/lib/utils";
@@ -47,27 +59,38 @@ export function GalleryBoard({
   className,
 }: GalleryBoardProps) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const items = useMemo(() => sortGalleryItems(rawItems), [rawItems]);
+  const [order, setOrder] = useState<MomentsOrder>(MOMENTS_DEFAULT_ORDER);
+  const sorted = useMemo(() => sortGalleryItems(rawItems), [rawItems]);
+  const xCount = useMemo(() => sorted.filter((item) => item.source === "x").length, [sorted]);
+  const datedCount = useMemo(() => sorted.filter((item) => Boolean(item.source)).length, [sorted]);
+  // Sort pills: the full Moments board once it has dated photos (X or uploads).
+  const showOrder = variant === "archive" && mode === "full" && datedCount > 0;
+  const items = useMemo(
+    () => (showOrder ? orderMoments(sorted, order) : sorted),
+    [showOrder, sorted, order]
+  );
   const lightboxItems = useMemo<ImageLightboxItem[]>(
     () =>
       items.map((item) => {
         const credit = artistCredit(item);
         const extra =
           item.credit && isFanArtItem(item) ? ` · ${item.credit}` : "";
+        const date = item.source && item.postedAt ? ` · ${feedDate(item.postedAt)}` : "";
         return {
           id: item.id,
           src: item.src,
           alt: item.alt,
           caption: item.caption ?? item.alt,
-          description: `${credit}${extra}` || undefined,
+          description: `${credit}${extra}${date}` || undefined,
         };
       }),
     [items]
   );
 
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const activeItem = activeIndex === null ? null : items[activeIndex] ?? null;
 
-  const resetKey = `${variant}|${mode}`;
+  const resetKey = `${variant}|${mode}|${order}`;
   const [appliedResetKey, setAppliedResetKey] = useState(resetKey);
   if (appliedResetKey !== resetKey) {
     setAppliedResetKey(resetKey);
@@ -171,9 +194,36 @@ export function GalleryBoard({
 
   return (
     <div ref={rootRef} className={className}>
+      {showOrder ? (
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-3 sm:mt-10">
+          <div role="group" aria-label="เรียงรูป" className={GALLERY_PILL_GROUP_CLASS}>
+            {MOMENTS_ORDERS.map((option) => (
+              <button
+                key={option.key}
+                type="button"
+                aria-pressed={order === option.key}
+                onClick={() => setOrder(option.key)}
+                className={cn(
+                  GALLERY_PILL_CLASS,
+                  order === option.key ? GALLERY_PILL_ACTIVE_CLASS : GALLERY_PILL_IDLE_CLASS
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <p className="text-[13px] text-r-text-3">
+            {items.length} รูป
+            {xCount > 0 ? <span className="max-sm:hidden"> · จาก X {xCount} รูป</span> : null}
+          </p>
+        </div>
+      ) : null}
       <ul
+        // A new order re-mounts the tiles so they reveal again in their new places.
+        key={order}
         className={cn(
-          "mt-8 grid grid-cols-2 gap-2 sm:mt-10 sm:grid-cols-4 sm:gap-3 lg:gap-4",
+          showOrder ? "mt-5 sm:mt-6" : "mt-8 sm:mt-10",
+          "grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3 lg:gap-4",
           masonry
             ? // Mobile row unit = 1/MASONRY_UNITS of a column: (100vw − px-5 padding − gap-x-2) / 2 / 20.
               "auto-rows-[var(--masonry-unit)] gap-y-0 [--masonry-unit:calc((100vw-3rem)/40)] sm:auto-rows-[9rem] md:auto-rows-[10rem]"
@@ -242,6 +292,18 @@ export function GalleryBoard({
                   className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 skew-x-[-18deg] bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-0 transition duration-500 group-hover:translate-x-[280%] group-hover:opacity-40"
                 />
 
+                {item.source === "x" ? (
+                  <span className="pointer-events-none absolute top-2 right-2 z-[1] inline-flex h-[22px] items-center gap-1.5 rounded-full bg-r-bg/75 px-2 text-[11px] text-r-text ring-1 ring-white/15 backdrop-blur-sm sm:h-[26px] sm:px-2.5 sm:text-xs">
+                    <SocialPlatformIcon platform="x" className="size-[11px] sm:size-3" />
+                    {item.postedAt ? <span>{feedDayMonth(item.postedAt)}</span> : null}
+                    <span className="sr-only">รูปจาก X</span>
+                  </span>
+                ) : item.source === "upload" && item.postedAt ? (
+                  <span className="pointer-events-none absolute top-2 right-2 z-[1] inline-flex h-[22px] items-center rounded-full bg-r-bg/75 px-2 text-[11px] text-r-text ring-1 ring-white/15 backdrop-blur-sm sm:h-[26px] sm:px-2.5 sm:text-xs">
+                    {feedDayMonth(item.postedAt)}
+                  </span>
+                ) : null}
+
                 <div
                   className={cn(
                     "pointer-events-none absolute inset-0 bg-gradient-to-t from-r-bg/90 via-r-bg/15 to-transparent transition duration-500",
@@ -300,6 +362,19 @@ export function GalleryBoard({
         onActiveIndexChange={setActiveIndex}
         useProtectedImage
         counterLabel={variant === "fan-art" ? "Fan art" : "Moments"}
+        footerStart={
+          activeItem?.source === "x" && activeItem.postUrl ? (
+            <a
+              href={activeItem.postUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-sm text-r-text-2 transition hover:text-r-text"
+            >
+              ดูโพสต์บน X
+              <ExternalLink className="size-3.5 opacity-80" aria-hidden />
+            </a>
+          ) : undefined
+        }
       />
     </div>
   );

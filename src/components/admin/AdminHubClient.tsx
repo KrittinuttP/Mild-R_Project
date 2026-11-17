@@ -70,6 +70,20 @@ const TOOLS: AdminTool[] = [
     icon: ImageIcon,
   },
   {
+    href: "/admin/moments",
+    title: "Moments upload",
+    titleLocal: "อัปโหลดรูปเข้า Moments",
+    description: "เพิ่มรูปเข้าแกลเลอรี Moments เอง เรียงตามวันที่อัปโหลด ซ่อนหรือลบได้",
+    icon: ImageIcon,
+  },
+  {
+    href: "/admin/x-gallery",
+    title: "Moments from X",
+    titleLocal: "รูปจาก X ใน Moments",
+    description: "ซ่อนหรือแสดงรูปจากโพสต์ X ที่ต่อท้ายแกลเลอรี Moments",
+    icon: ImageIcon,
+  },
+  {
     href: "/live/ops/trends",
     title: "Live view trends",
     titleLocal: "สถิติและเทรนด์สตรีม",
