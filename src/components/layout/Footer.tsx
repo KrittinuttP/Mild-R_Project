@@ -22,8 +22,8 @@ const FOOTER_NAV = [
 ] as const;
 
 const DEVELOPER = {
-  name: "ZAYZHIK 🦈",
-  xUrl: "https://x.com/ZAYZHIK_KungV2",
+  name: "Honeycomb Project",
+  xUrl: "https://x.com/Mild_Honeycomb",
 } as const;
 
 export function DeveloperCredit() {

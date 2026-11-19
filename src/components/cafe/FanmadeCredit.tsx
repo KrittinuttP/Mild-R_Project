@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 
 /** Who built the cafe site. Shown once the cafe opens; the countdown hides it. */
 export const CAFE_DEVELOPER = {
-  name: "ZAYZHIK 🦈",
-  xUrl: "https://x.com/ZAYZHIK_KungV2",
+  name: "Honeycomb Project",
+  xUrl: "https://x.com/Mild_Honeycomb",
 } as const;
 
 type FanmadeCreditProps = {
