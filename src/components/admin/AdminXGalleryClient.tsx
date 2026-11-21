@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ExternalLink, Eye, EyeOff } from "lucide-react";
+import { ExternalLink, Eye, EyeOff, RefreshCw } from "lucide-react";
 
 import { BackLink } from "@/components/layout/BackLink";
 import { ADMIN_X_GALLERY_LOGIN } from "@/lib/admin-next";
@@ -38,6 +38,24 @@ export function AdminXGalleryClient({ posts: initialPosts, hideSupported }: Prop
   const [tab, setTab] = useState<Tab>("all");
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const [syncNote, setSyncNote] = useState<string | null>(null);
+  const [cooldownUntil, setCooldownUntil] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
+
+  // router.refresh() hands in a fresh list; adopt it (render-time reset, no effect).
+  const [seenPosts, setSeenPosts] = useState(initialPosts);
+  if (seenPosts !== initialPosts) {
+    setSeenPosts(initialPosts);
+    setPosts(initialPosts);
+  }
+
+  useEffect(() => {
+    if (cooldownUntil <= Date.now()) return;
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, [cooldownUntil]);
+  const waitSeconds = Math.max(0, Math.ceil((cooldownUntil - now) / 1000));
 
   const counts = useMemo(() => {
     const hidden = posts.filter((p) => p.hidden).length;
@@ -49,6 +67,42 @@ export function AdminXGalleryClient({ posts: initialPosts, hideSupported }: Prop
       posts.filter((p) => (tab === "all" ? true : tab === "hidden" ? p.hidden : !p.hidden)),
     [posts, tab]
   );
+
+  /** "ดึงตอนนี้": pull new X posts, refresh Moments + home Socials, then reload this list. */
+  async function syncNow() {
+    setError(null);
+    setSyncNote(null);
+    setSyncing(true);
+    try {
+      const res = await fetch("/api/admin/x-sync", { method: "POST" });
+      if (res.status === 401) {
+        router.replace(ADMIN_X_GALLERY_LOGIN);
+        return;
+      }
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        newCount?: number;
+        upserted?: number;
+      };
+      if (!res.ok) {
+        setError(data.error ?? "ดึงไม่สำเร็จ");
+        return;
+      }
+      const fresh = data.newCount ?? 0;
+      setSyncNote(
+        fresh > 0
+          ? `ได้โพสต์ใหม่ ${fresh} โพสต์ · หน้าหลักกับ Moments อัปเดตแล้ว`
+          : "ไม่มีโพสต์ใหม่ · หน้าหลักกับ Moments รีเฟรชแล้ว"
+      );
+      setNow(Date.now());
+      setCooldownUntil(Date.now() + 60_000);
+      router.refresh();
+    } catch {
+      setError("เชื่อมต่อไม่ได้ กรุณาลองใหม่");
+    } finally {
+      setSyncing(false);
+    }
+  }
 
   async function toggle(post: XGalleryPost) {
     setError(null);
@@ -93,6 +147,26 @@ export function AdminXGalleryClient({ posts: initialPosts, hideSupported }: Prop
           Moments เอง ซ่อนแล้วรูปทุกรูปในโพสต์นั้นจะหายจากหน้าเว็บ
         </p>
       </header>
+
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          disabled={syncing || waitSeconds > 0}
+          onClick={() => void syncNow()}
+          className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white/5 px-4 text-sm text-r-text ring-1 ring-white/10 hover:bg-white/10 disabled:opacity-50"
+        >
+          <RefreshCw className={cn("size-4", syncing && "animate-spin")} aria-hidden />
+          {syncing ? "กำลังดึง…" : waitSeconds > 0 ? `ดึงใหม่ได้ใน ${waitSeconds} วิ` : "ดึงโพสต์จาก X ตอนนี้"}
+        </button>
+        <p className="text-xs text-r-text-3">
+          ปกติดึงเองทุกชั่วโมง · ปุ่มนี้ดึงทันที (เสียเครดิต twitterapi.io) แล้วรีเฟรชหน้าหลักกับ Moments
+        </p>
+      </div>
+      {syncNote ? (
+        <p className="mt-3 rounded-2xl bg-white/5 px-4 py-3 text-sm text-r-text-2" role="status">
+          {syncNote}
+        </p>
+      ) : null}
 
       {!hideSupported ? (
         <p className="mt-4 rounded-2xl bg-r-pri/15 px-4 py-3 text-sm" role="status">
