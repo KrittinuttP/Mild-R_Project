@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
+import { HBD_SENT_PATHS } from "@/lib/hbd-sent";
 import { isSiteAdminUnlocked } from "@/lib/site-admin-auth";
 import {
   approveHbdSubmission,
@@ -69,8 +70,8 @@ export async function POST(request: Request, context: RouteContext) {
     if (REVALIDATES_PUBLIC.has(action)) {
       revalidatePath("/hbd/2026", "page");
     }
-    // Sent list shows pending + approved, so any status change can add or drop a name.
-    revalidatePath("/hbd/2026/sent", "page");
+    // Sent lists show pending + approved, so any status change can add or drop a name.
+    for (const path of HBD_SENT_PATHS) revalidatePath(path, "page");
     return NextResponse.json({ ok: true, submission: row });
   } catch (error) {
     const message =
@@ -86,7 +87,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
   try {
     await deleteHbdSubmission(checked.id);
     revalidatePath("/hbd/2026", "page");
-    revalidatePath("/hbd/2026/sent", "page");
+    for (const path of HBD_SENT_PATHS) revalidatePath(path, "page");
     return NextResponse.json({ ok: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : "ลบไม่สำเร็จ";

@@ -7,6 +7,7 @@ import {
   type HbdContactChannel,
 } from "@/lib/hbd-upload";
 import { processHbdAvatar, processHbdCard } from "@/lib/hbd-image";
+import { HBD_SENT_PATHS } from "@/lib/hbd-sent";
 import {
   createHbdSubmission,
   HBD_STORAGE_BUCKET,
@@ -168,8 +169,8 @@ export async function POST(request: Request) {
       avatarUrl,
     });
 
-    // The sender's name shows on /hbd/2026/sent straight away.
-    revalidatePath("/hbd/2026/sent", "page");
+    // The sender's name shows on the sent lists (and the count) straight away.
+    for (const path of HBD_SENT_PATHS) revalidatePath(path, "page");
 
     // Alert channel: who sent it + a link to review. Runs after the reply, so the visitor never waits on Discord.
     after(() => notifyHbdNewCard({ id: row.id, displayName }));

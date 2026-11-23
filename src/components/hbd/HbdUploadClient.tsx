@@ -249,11 +249,21 @@ function ErrorBox({ children }: { children: ReactNode }) {
 }
 
 type HbdUploadClientProps = {
-  /** /upload/hbd: no way back to the site, only "send another card". */
+  /** /upload/hbd/send: no way back to the site, only "send another card". */
   standalone?: boolean;
+  /** Cards sent so far (pending + approved), shown on the sent-list button. */
+  sentCount?: number;
 };
 
-export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
+/** Pill to the sent list (same look as the one on /upload/hbd). */
+const SENT_PILL = cn(
+  "inline-flex min-h-11 items-center gap-2 rounded-full px-4 text-[13.5px] text-r-text-2 ring-1 ring-r-text-2/35 transition-colors ring-inset hover:text-r-text hover:ring-r-pri/50",
+  FOCUS
+);
+
+export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUploadClientProps) {
+  // Standalone (/upload/hbd/send) links stay inside /upload/hbd: no way into the main site.
+  const sentHref = standalone ? "/upload/hbd/sent" : "/hbd/2026/sent";
   const ids = useId();
   const [phase, setPhase] = useState<Phase>("intro");
   const [loading, setLoading] = useState(false);
@@ -631,18 +641,16 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
         standalone ? "lg:top-[88px]" : "lg:top-24"
       )}
     >
-      {standalone ? null : (
-        <Link
-          href="/hbd/2026"
-          className={cn(
-            "inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 text-[13px] text-r-text-2 ring-1 ring-r-text-2/20 transition-colors ring-inset hover:text-r-text hover:ring-r-pri/50",
-            FOCUS
-          )}
-        >
-          <ArrowLeft className="size-3.5" aria-hidden />
-          คำอวยพร
-        </Link>
-      )}
+      <Link
+        href={standalone ? "/upload/hbd" : "/hbd/2026"}
+        className={cn(
+          "inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 text-[13px] text-r-text-2 ring-1 ring-r-text-2/20 transition-colors ring-inset hover:text-r-text hover:ring-r-pri/50",
+          FOCUS
+        )}
+      >
+        <ArrowLeft className="size-3.5" aria-hidden />
+        {standalone ? "หน้าแรก" : "คำอวยพร"}
+      </Link>
       {header()}
       <nav aria-label="ขั้นตอนการกรอก" className="-ml-3 hidden space-y-1 lg:block">
         <button
@@ -702,9 +710,17 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
           );
         })}
       </nav>
-      <Link href="/hbd/2026/sent" prefetch={false} className={LINK_BTN}>
-        <ListChecks className="size-[15px]" aria-hidden />
-        เช็กว่าการ์ดส่งถึงแล้วหรือยัง
+      <Link href={sentHref} prefetch={false} className={cn(SENT_PILL, "max-lg:mt-4")}>
+        <ListChecks className="size-4 flex-none" aria-hidden />
+        <span>
+          ฮันนี่ที่ส่งการ์ดแล้ว
+          {sentCount > 0 ? (
+            <>
+              {" · "}
+              <span className="font-semibold text-[#ff6b9a] tabular-nums">{sentCount}</span> คน
+            </>
+          ) : null}
+        </span>
       </Link>
       {phase === "form" ? (
         <div className={cn(R_CARD_CLASS, "hidden p-4 lg:block")}>
@@ -720,7 +736,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
             className={cn(BTN_OUTLINE, "mt-3.5 h-11")}
           >
             <Download className="size-4" aria-hidden />
-            โหลดเทมเพลต
+            Download template
           </a>
         </div>
       ) : null}
@@ -776,7 +792,7 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
                         className={cn(R_CTA_OUTLINE_CLASS, "mt-3 h-10 px-4 text-sm whitespace-nowrap")}
                       >
                         <Download className="size-4" aria-hidden />
-                        โหลดเทมเพลต
+                        Download template
                       </a>
                     ) : null}
                   </div>
@@ -1143,9 +1159,9 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
               </button>
             </>
           )}
-          <Link href="/hbd/2026/sent" prefetch={false} className={cn(LINK_BTN, "mx-auto mt-1 justify-center")}>
-            <ListChecks className="size-[15px]" aria-hidden />
-            ดูรายชื่อคนที่ส่งการ์ดแล้ว
+          <Link href={sentHref} prefetch={false} className={cn(SENT_PILL, "w-full justify-center")}>
+            <ListChecks className="size-4" aria-hidden />
+            ฮันนี่ที่ส่งการ์ดแล้ว
           </Link>
         </div>
       </section>

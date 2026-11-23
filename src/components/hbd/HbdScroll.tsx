@@ -53,7 +53,7 @@ const GLOWS = [
   "rgba(255,143,176,0.3)",
 ];
 /** left, top, size(px), color, delay(s) */
-const GATE_SPARKLES: Array<[string, string, number, string, number]> = [
+export const GATE_SPARKLES: Array<[string, string, number, string, number]> = [
   ["7%", "20%", 14, "var(--r-pri)", 0],
   ["15%", "62%", 9, "var(--r-acc)", 0.8],
   ["24%", "32%", 6, "var(--r-text)", 1.6],
@@ -115,7 +115,7 @@ function Sparkle({ className, style }: { className?: string; style?: CSSProperti
   );
 }
 
-function Sparkles({ items }: { items: typeof GATE_SPARKLES }) {
+export function Sparkles({ items }: { items: typeof GATE_SPARKLES }) {
   return (
     <div className="pointer-events-none absolute inset-0" aria-hidden>
       {items.map(([left, top, size, color, delay]) => (
