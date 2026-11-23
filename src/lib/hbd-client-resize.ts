@@ -61,7 +61,44 @@ export async function shrinkImageFile(
   ctx.imageSmoothingQuality = "high";
   ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-  return (await encodeCanvas(canvas, ctx, file.name, 0.9)) ?? file;
+  // Lower the quality first, then the size, until it fits under maxBytes.
+  let out: File | null = null;
+  for (const quality of [0.9, 0.8, 0.7]) {
+    out = await encodeCanvas(canvas, ctx, file.name, quality);
+    if (!out || out.size <= maxBytes) return out ?? file;
+  }
+  for (let step = 0; step < 4; step += 1) {
+    const w = Math.max(1, Math.round(canvas.width * 0.85));
+    const h = Math.max(1, Math.round(canvas.height * 0.85));
+    const smaller = document.createElement("canvas");
+    smaller.width = w;
+    smaller.height = h;
+    const sctx = smaller.getContext("2d");
+    if (!sctx) break;
+    sctx.imageSmoothingQuality = "high";
+    sctx.drawImage(canvas, 0, 0, w, h);
+    canvas.width = w;
+    canvas.height = h;
+    ctx.drawImage(smaller, 0, 0);
+    out = await encodeCanvas(canvas, ctx, file.name, 0.8);
+    if (!out || out.size <= maxBytes) return out ?? file;
+  }
+  return out ?? file;
+}
+
+/**
+ * Checks a picked file right away: an allowed type, and the browser can open it.
+ * Returns a Thai message for the fan, or null when the file is fine.
+ */
+export async function checkImageFile(file: File, accept: string): Promise<string | null> {
+  const allowed = accept.split(",").map((t) => t.trim());
+  if (!allowed.includes(file.type)) return "รองรับเฉพาะไฟล์ JPEG · PNG · WebP";
+  try {
+    await loadImage(file);
+    return null;
+  } catch {
+    return "เปิดไฟล์รูปนี้ไม่ได้ ลองบันทึกเป็น JPEG แล้วเลือกใหม่";
+  }
 }
 
 /**

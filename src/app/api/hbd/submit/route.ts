@@ -4,6 +4,8 @@ import { after, NextResponse } from "next/server";
 import {
   HBD_AVATAR_LIMITS,
   HBD_CARD_TEMPLATE,
+  HBD_TEXT_LIMITS,
+  textLength,
   type HbdContactChannel,
 } from "@/lib/hbd-upload";
 import { processHbdAvatar, processHbdCard } from "@/lib/hbd-image";
@@ -51,6 +53,19 @@ export async function POST(request: Request) {
 
   if (!displayName) {
     return NextResponse.json({ error: "กรุณากรอกชื่อที่แสดง" }, { status: 400 });
+  }
+  // Checked before any file work or database write.
+  if (textLength(displayName) > HBD_TEXT_LIMITS.nameMax) {
+    return NextResponse.json(
+      { error: `ชื่อที่แสดงยาวเกินไป (ไม่เกิน ${HBD_TEXT_LIMITS.nameMax} ตัวอักษร)` },
+      { status: 400 }
+    );
+  }
+  if (textLength(message) > HBD_TEXT_LIMITS.messageMax) {
+    return NextResponse.json(
+      { error: `ข้อความถึงมายด์ยาวเกินไป (ไม่เกิน ${HBD_TEXT_LIMITS.messageMax.toLocaleString("en-US")} ตัวอักษร)` },
+      { status: 400 }
+    );
   }
   if (!isContactChannel(contactChannelRaw)) {
     return NextResponse.json({ error: "ช่องทางติดต่อไม่ถูกต้อง" }, { status: 400 });

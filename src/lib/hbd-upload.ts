@@ -45,3 +45,30 @@ export type HbdUploadDraft = {
   avatarFileName?: string;
   avatarPreviewUrl?: string;
 };
+
+/** Text limits, shared by the form and /api/hbd/submit. Counted as visible characters (an emoji is 1). */
+export const HBD_TEXT_LIMITS = { nameMax: 40, messageMax: 1000 } as const;
+
+type GraphemeSegmenter = { segment(input: string): Iterable<{ segment: string }> };
+let graphemes: GraphemeSegmenter | null | undefined;
+function graphemeSegmenter(): GraphemeSegmenter | null {
+  if (graphemes !== undefined) return graphemes;
+  const Ctor = (Intl as unknown as { Segmenter?: new (l: string, o: { granularity: string }) => GraphemeSegmenter })
+    .Segmenter;
+  graphemes = Ctor ? new Ctor("th", { granularity: "grapheme" }) : null;
+  return graphemes;
+}
+
+/** Visible characters: an emoji or a Thai letter with its vowel/tone marks counts once. */
+export function textLength(text: string): number {
+  const seg = graphemeSegmenter();
+  if (!seg) return Array.from(text).length;
+  return Array.from(seg.segment(text)).length;
+}
+
+/** Cuts `text` to at most `max` visible characters. */
+export function clampText(text: string, max: number): string {
+  const seg = graphemeSegmenter();
+  const parts = seg ? Array.from(seg.segment(text), (s) => s.segment) : Array.from(text);
+  return parts.length <= max ? text : parts.slice(0, max).join("");
+}
