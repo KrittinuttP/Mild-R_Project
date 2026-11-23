@@ -82,8 +82,14 @@ export function buildHbdNewCardPayload(input: { id: string; displayName: string 
   };
 }
 
+/** HBD_DISCORD_ALERTS=off mutes the new-card ping (e.g. while testing); other alerts keep going. */
+function hbdAlertsMuted() {
+  return process.env.HBD_DISCORD_ALERTS?.trim().toLowerCase() === "off";
+}
+
 /** Never throws: the card is already saved when this runs. */
 export async function notifyHbdNewCard(input: { id: string; displayName: string }): Promise<void> {
+  if (hbdAlertsMuted()) return;
   await postDiscordWebhook(buildHbdNewCardPayload(input));
 }
 
