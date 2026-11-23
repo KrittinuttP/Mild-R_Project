@@ -1,23 +1,16 @@
 /**
  * Discord alerts for work waiting in the admin pages (alert channel, DISCORD_WEBHOOK_URL):
  *
- * - New HBD card: one message per card as it is sent (/api/hbd/submit).
  * - Pending digest: fan art + HBD cards still `pending`, twice a day
  *   (09:00 / 21:00 Bangkok, pg_cron → /api/admin/pending-digest). Silent when nothing waits.
+ *   HBD cards no longer ping one by one (23 Nov): they wait for the digest like fan art.
  *
- * Server-only. Messages never ping anyone (see postDiscordWebhook).
+ * Server-only. Messages never ping anyone (see sendDiscordWebhook).
  */
 import { adminSiteOrigin } from "@/lib/cafe-host";
-import { postDiscordWebhook } from "@/lib/discord-job-alert";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const PINK = 0xf2437d;
-const DISPLAY_NAME_MAX = 80;
-
-/** Discord markdown would turn a fan's name into formatting or a link. */
-function escapeMarkdown(text: string) {
-  return text.replace(/([\\*_~`|>[\]()#-])/g, "\\$1");
-}
 
 function adminLink(path: string): string | null {
   const origin = adminSiteOrigin();
@@ -61,36 +54,6 @@ export function formatBangkokShort(iso: string): string {
   }).formatToParts(new Date(iso));
   const get = (type: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === type)?.value ?? "";
   return `${get("day")} ${get("month")} ${get("hour")}:${get("minute")}`;
-}
-
-/* ── New HBD card ─────────────────────────────────────────────────── */
-
-export function buildHbdNewCardPayload(input: { id: string; displayName: string }) {
-  const name = escapeMarkdown(input.displayName.trim().slice(0, DISPLAY_NAME_MAX));
-  // Opens the card in the admin list; approving still needs the admin login and a click.
-  const link = adminLink(`/admin/hbd?focus=${encodeURIComponent(input.id)}`);
-  return {
-    embeds: [
-      {
-        title: "🎂 New HBD card · รอ Approve",
-        description: [`จาก **${name}**`, link ? `→ [Review & Approve](${link})` : null]
-          .filter(Boolean)
-          .join("\n"),
-        color: PINK,
-      },
-    ],
-  };
-}
-
-/** HBD_DISCORD_ALERTS=off mutes the new-card ping (e.g. while testing); other alerts keep going. */
-function hbdAlertsMuted() {
-  return process.env.HBD_DISCORD_ALERTS?.trim().toLowerCase() === "off";
-}
-
-/** Never throws: the card is already saved when this runs. */
-export async function notifyHbdNewCard(input: { id: string; displayName: string }): Promise<void> {
-  if (hbdAlertsMuted()) return;
-  await postDiscordWebhook(buildHbdNewCardPayload(input));
 }
 
 /* ── Pending digest ───────────────────────────────────────────────── */

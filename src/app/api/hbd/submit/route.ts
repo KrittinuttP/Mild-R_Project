@@ -1,5 +1,5 @@
 import { revalidatePath } from "next/cache";
-import { after, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 import {
   HBD_AVATAR_LIMITS,
@@ -14,7 +14,6 @@ import {
   createHbdSubmission,
   HBD_STORAGE_BUCKET,
 } from "@/lib/hbd-submissions-store";
-import { notifyHbdNewCard } from "@/lib/pending-alerts";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
@@ -187,8 +186,8 @@ export async function POST(request: Request) {
     // The sender's name shows on the sent lists (and the count) straight away.
     for (const path of HBD_SENT_PATHS) revalidatePath(path, "page");
 
-    // Alert channel: who sent it + a link to review. Runs after the reply, so the visitor never waits on Discord.
-    after(() => notifyHbdNewCard({ id: row.id, displayName }));
+    // No Discord ping per card: pending cards go into the 09:00 / 21:00 digest
+    // (/api/admin/pending-digest), the same as fan art.
 
     return NextResponse.json({
       ok: true,
