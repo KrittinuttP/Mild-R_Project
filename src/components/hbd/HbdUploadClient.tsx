@@ -3,12 +3,14 @@
 import {
   useEffect,
   useId,
+  useMemo,
   useRef,
   useState,
   type ChangeEvent,
   type FormEvent,
   type ReactNode,
 } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
   AlertCircle,
@@ -21,15 +23,26 @@ import {
   ImageIcon,
   ListChecks,
   Pencil,
+  PenLine,
   Trash2,
   Upload,
   X,
 } from "lucide-react";
 
+import { HbdCardCanvas } from "@/components/hbd/card-maker/HbdCardCanvas";
+import { HbdCardDemo } from "@/components/hbd/card-maker/HbdCardDemo";
+import type { HbdCardMakerResult } from "@/components/hbd/card-maker/HbdCardMaker";
 import { AvatarPicker } from "@/components/upload/AvatarPicker";
 import { UploadFormSkeleton } from "@/components/upload/UploadFormSkeleton";
 import { useAvatarCrop } from "@/components/upload/useAvatarCrop";
-import { shrinkImageFile } from "@/lib/hbd-client-resize";
+import { checkImageFile, shrinkImageFile } from "@/lib/hbd-client-resize";
+import {
+  HBD_CARD_DEFAULT_STYLE,
+  sanitizeStyle,
+  styleLabel,
+  type HbdCardContent,
+  type HbdCardStyle,
+} from "@/lib/hbd-card-maker";
 import {
   formatHandleInput,
   handleForChannel,
@@ -40,6 +53,9 @@ import {
   HBD_AVATAR_LIMITS,
   HBD_CARD_TEMPLATE,
   HBD_IMAGE_SIZES,
+  HBD_TEXT_LIMITS,
+  clampText,
+  textLength,
   type HbdContactChannel,
 } from "@/lib/hbd-upload";
 import {
@@ -72,24 +88,37 @@ const MISSING_SUMMARY = "ยังส่งไม่ได้ — กรุณ�
 /** นายท่านกำหนดประโยคนี้เอง — ห้ามเปลี่ยน (decisions.md) */
 const CONTACT_HINT = "จะใช้ช่องทางนี้ติดต่อกลับ ในกรณีที่มีปัญหา";
 
+/** The card editor (modal / full screen) loads only when someone opens it. */
+const HbdCardMaker = dynamic(
+  () => import("@/components/hbd/card-maker/HbdCardMaker").then((m) => m.HbdCardMaker),
+  { ssr: false }
+);
+
+/** Sample text on the "ทำการ์ดบนเว็บ" panel before anything is typed. */
+const CARD_SAMPLE_MESSAGE = "สุขสันต์วันเกิดนะมายด์ ขอให้มีความสุขมากๆ ฮันนี่อยู่ข้างๆ เสมอเลย";
+
+type CardMode = "web" | "upload";
+
 const HBD_FORM_CACHE_KEY = "mild-r-hbd-upload-draft";
 /** Set once the "วิธีส่ง" screen was read → next visit opens the form directly. */
 const HBD_INTRO_SEEN_KEY = "mild-r-hbd-upload-intro-seen";
 
 /** "วิธีส่ง" screen · short steps; step 1 carries the template download. */
-const HOW_STEPS: ReadonlyArray<{ title: string; detail?: string }> = [
-  { title: "โหลดเทมเพลต แล้วตกแต่งการ์ด" },
-  { title: "อัปโหลดการ์ด + ชื่อ + คำอวยพร", detail: "JPEG · PNG · WebP · ไม่เกิน 20 MB" },
-  { title: "ใส่ช่องทางติดต่อ แล้วส่ง", detail: "X หรือ Discord" },
-];
+/** "วิธีส่ง": the two ways to make a card, shown side by side (same look: this is not a picker). */
+const HOW_WEB_STEPS = ["พิมพ์คำอวยพรลงการ์ด", "เลือก Font · สี · ขนาด", "กด “ใช้การ์ดนี้” เสร็จเลย"] as const;
+const HOW_UPLOAD_STEPS = [
+  "Download template",
+  "แต่งในแอปที่ถนัด (Canva, Ibis Paint …)",
+  "Upload รูปการ์ดกลับมา (.jpg .png ไม่เกิน 20 MB)",
+] as const;
 
 const HOW_FAQ = [
   {
-    q: "ต้องใช้เทมเพลตของโปรเจกต์ไหม?",
-    a: "ต้องใช้ค่ะ โหลดเทมเพลตในขั้นที่ 1 ตกแต่งให้เสร็จ แล้วอัปโหลดเป็นรูปการ์ด",
+    q: "ต้องใช้ Template ของโปรเจกต์ไหม?",
+    a: "ต้องใช้ค่ะ เลือก \"ทำการ์ดบนเว็บ\" แล้วพิมพ์ลง Template ได้เลย หรือ Download template ไปแต่งในแอปที่ถนัด แล้ว Upload รูปการ์ดกลับมา",
   },
   {
-    q: "ต้องใส่รูปโปรไฟล์กับคำอวยพรไหม?",
+    q: "ต้องใส่รูปโปรไฟล์กับข้อความถึงมายด์ไหม?",
     a: "ไม่บังคับค่ะ ถ้าไม่ใส่รูปโปรไฟล์ จะใช้รูปเริ่มต้นแทน",
   },
   {
@@ -127,6 +156,11 @@ type CachedFormFields = {
   message: string;
   contactChannel: HbdContactChannel;
   contactHandle: string;
+  /** Card mode last picked; the next visit opens on it. */
+  cardMode: CardMode;
+  cardStyle: HbdCardStyle;
+  /** Text on the web card (restored into the editor). */
+  cardText: string;
 };
 
 function readFormCache(): CachedFormFields | null {
@@ -146,6 +180,9 @@ function readFormCache(): CachedFormFields | null {
         typeof parsed.contactHandle === "string" && parsed.contactHandle.trim() !== "@"
           ? parsed.contactHandle
           : "",
+      cardMode: parsed.cardMode === "upload" ? "upload" : "web",
+      cardStyle: sanitizeStyle(parsed.cardStyle),
+      cardText: typeof parsed.cardText === "string" ? parsed.cardText : "",
     };
   } catch {
     return null;
@@ -189,6 +226,66 @@ function Spinner({ className }: { className?: string }) {
 }
 
 /** Section title; the number turns mint once the section is complete. */
+const HOW_NUM =
+  "flex size-[22px] flex-none items-center justify-center rounded-full bg-r-pri text-xs font-bold text-r-on-pri";
+
+/** One way to make a card on "วิธีส่ง". Rows line up across the two (grid subgrid on sm+). */
+function HowMethod({
+  icon,
+  title,
+  badge,
+  frameLabel,
+  preview,
+  steps,
+  tags,
+}: {
+  icon: ReactNode;
+  title: string;
+  badge: string;
+  frameLabel: string;
+  preview: ReactNode;
+  steps: ReadonlyArray<string>;
+  tags: ReadonlyArray<string>;
+}) {
+  return (
+    <div className="flex flex-col gap-3.5 rounded-[18px] bg-black/[0.22] p-4 ring-1 ring-white/10 ring-inset sm:row-span-4 sm:grid sm:grid-rows-subgrid sm:gap-3.5">
+      <div className="flex items-center gap-2.5">
+        <span className="flex size-9 flex-none items-center justify-center rounded-full bg-r-pri/14 text-r-pri">{icon}</span>
+        <h3 className="min-w-0 flex-1 text-[1.0625rem] font-normal text-r-text">{title}</h3>
+        <span className="flex-none rounded-full bg-r-acc/15 px-2.5 py-0.5 text-[11.5px] text-r-acc">{badge}</span>
+      </div>
+      <div className="flex flex-col gap-2 rounded-xl bg-[#1a0d12] p-2.5 ring-1 ring-white/10 ring-inset">
+        <span aria-hidden className="flex items-center gap-1.5 text-[11.5px] text-r-text-3">
+          <span className="size-1.5 rounded-full bg-r-text-2/35" />
+          <span className="size-1.5 rounded-full bg-r-text-2/35" />
+          <span className="ml-1">{frameLabel}</span>
+        </span>
+        {preview}
+      </div>
+      <ol className="flex flex-col gap-2">
+        {steps.map((step, index) => (
+          <li key={step} className="flex items-start gap-2.5 text-[13.5px] leading-snug text-r-text">
+            <span
+              aria-hidden
+              className="flex size-5 flex-none items-center justify-center rounded-full text-[11px] font-bold text-r-pri ring-[1.5px] ring-r-pri ring-inset"
+            >
+              {index + 1}
+            </span>
+            {step}
+          </li>
+        ))}
+      </ol>
+      <div className="flex flex-wrap content-end gap-1.5">
+        {tags.map((tag) => (
+          <span key={tag} className="rounded-full bg-white/[0.07] px-2.5 py-0.5 text-[11.5px] text-r-text-2">
+            {tag}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function StepTitle({
   n,
   id,
@@ -279,6 +376,16 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
   const [contactChannel, setContactChannel] = useState<HbdContactChannel>("x");
   const [contactHandle, setContactHandle] = useState("");
   const [cardFile, setCardFile] = useState<File | null>(null);
+  const [cardMode, setCardMode] = useState<CardMode>("web");
+  const [cardStyle, setCardStyle] = useState<HbdCardStyle>(HBD_CARD_DEFAULT_STYLE);
+  /** The card in the form was made with "ทำการ์ดบนเว็บ" (not a picked file). */
+  const [cardFromWeb, setCardFromWeb] = useState(false);
+  /**
+   * Text typed on the web card. Kept apart from "ฝากข้อความถึงมายด์" (the note under
+   * the card), so the same words never show twice; saved in the draft for "แก้ไขการ์ด".
+   */
+  const [cardText, setCardText] = useState("");
+  const [makerOpen, setMakerOpen] = useState(false);
   const [cardPreviewUrl, setCardPreviewUrl] = useState<string | undefined>();
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | undefined>();
@@ -309,6 +416,9 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
       setMessage(cached.message);
       setContactChannel(cached.contactChannel);
       setContactHandle(cached.contactHandle);
+      setCardMode(cached.cardMode);
+      setCardStyle(cached.cardStyle);
+      setCardText(cached.cardText);
     }
     if (readIntroSeen()) setPhase("form");
     setCacheReady(true);
@@ -316,8 +426,8 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
 
   useEffect(() => {
     if (!cacheReady) return;
-    writeFormCache({ displayName, message, contactChannel, contactHandle });
-  }, [displayName, message, contactChannel, contactHandle, cacheReady]);
+    writeFormCache({ displayName, message, contactChannel, contactHandle, cardMode, cardStyle, cardText });
+  }, [displayName, message, contactChannel, contactHandle, cardMode, cardStyle, cardText, cacheReady]);
 
   useEffect(() => {
     return () => {
@@ -380,6 +490,8 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
 
   function clearMedia() {
     setCardMedia(null, undefined);
+    setCardFromWeb(false);
+    setCardText("");
     setAvatarMedia(null, undefined);
     dropRemovedAvatar();
     avatarCrop.clear();
@@ -419,18 +531,43 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
     scrollToSection(index);
   }
 
-  function onCardChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
+  async function onCardChange(event: ChangeEvent<HTMLInputElement>) {
+    const input = event.target;
+    const file = input.files?.[0];
     setCardError(null);
     if (!file) return;
 
     if (file.size > HBD_CARD_TEMPLATE.maxSourceBytes) {
       setCardError("ไฟล์การ์ดใหญ่เกินไป (ไม่เกิน 20 MB)");
-      event.target.value = "";
+      input.value = "";
+      return;
+    }
+    // Wrong type or a file the browser cannot open: say so now, not after "ยืนยันส่ง".
+    const problem = await checkImageFile(file, HBD_CARD_TEMPLATE.accept);
+    if (problem) {
+      setCardError(problem);
+      input.value = "";
       return;
     }
 
+    setCardFromWeb(false);
     setCardMedia(file, URL.createObjectURL(file));
+  }
+
+  function openMaker() {
+    setMakerOpen(true);
+  }
+
+  /** "ใช้การ์ดนี้" in the card editor: the made card becomes the form's card file. */
+  function onMakerDone(result: HbdCardMakerResult) {
+    setCardError(null);
+    setCardMedia(result.file, URL.createObjectURL(result.file));
+    setCardFromWeb(true);
+    setCardStyle(result.style);
+    setMakerOpen(false);
+    // The name fills step 2; the card text stays on the card only.
+    if (result.name) setDisplayName(clampText(result.name, HBD_TEXT_LIMITS.nameMax));
+    setCardText(result.message);
   }
 
   function onAvatarChange(event: ChangeEvent<HTMLInputElement>) {
@@ -443,6 +580,11 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
       event.target.value = "";
       return;
     }
+    if (!HBD_AVATAR_LIMITS.accept.split(",").includes(file.type)) {
+      setAvatarError("รูปโปรไฟล์รองรับเฉพาะ JPEG · PNG · WebP");
+      event.target.value = "";
+      return;
+    }
 
     // Picking the same photo again must still open the cropper.
     event.target.value = "";
@@ -452,6 +594,7 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
   function clearCard() {
     setCardError(null);
     setCardMedia(null, undefined);
+    setCardFromWeb(false);
     if (cardInputRef.current) cardInputRef.current.value = "";
   }
 
@@ -589,7 +732,13 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
 
   const avatarSrc = avatarPreviewUrl ?? HBD_AVATAR_DEFAULT;
   const handleShown = contactHandle.trim();
-  const cardMessage = cardError ?? (showMissing && cardMissing ? "กรุณาอัปโหลดรูปการ์ดจากเทมเพลต" : null);
+  const cardMessage =
+    cardError ??
+    (showMissing && cardMissing
+      ? cardMode === "web"
+        ? "กรุณาทำการ์ดก่อน กด เริ่มทำการ์ด"
+        : "กรุณาอัปโหลดรูปการ์ดจากเทมเพลต"
+      : null);
   const nameMessage = showMissing && nameMissing ? "กรุณากรอกชื่อที่แสดง" : null;
   const contactMessage = showMissing && contactMissing
       ? contactChannel === "x"
@@ -598,8 +747,18 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
       : null;
 
   const steps = [
-    { title: "การ์ดอวยพร", sub: cardFile?.name ?? "", done: !cardMissing },
-    { title: "ชื่อและคำอวยพร", sub: displayName.trim(), done: !nameMissing },
+    {
+      title: "การ์ดอวยพร",
+      sub: cardFile
+        ? cardFromWeb
+          ? `ทำบนเว็บ · ${styleLabel(cardStyle)}`
+          : cardFile.name
+        : cardMode === "web"
+          ? "ทำบนเว็บ"
+          : "อัปโหลดเอง",
+      done: !cardMissing,
+    },
+    { title: "ชื่อและข้อความ", sub: displayName.trim(), done: !nameMissing },
     {
       title: "ช่องทางติดต่อ",
       sub: contactMissing ? "" : `${channelLabel(contactChannel)} · ${handleShown}`,
@@ -676,7 +835,7 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
             <span className={cn("block text-[15px]", phase === "intro" ? "text-r-text" : "text-r-text/85")}>
               วิธีส่ง
             </span>
-            <span className="block truncate text-xs text-r-text-3">3 ขั้น · เทมเพลต</span>
+            <span className="block truncate text-xs text-r-text-3">2 แบบ · เลือกที่ถนัด</span>
           </span>
         </button>
         {steps.map((step, index) => {
@@ -745,60 +904,67 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
 
   const intro = (
     <div className="space-y-3.5 lg:space-y-4">
-      <section
-        className={cn(CARD, "grid gap-6 lg:grid-cols-[minmax(0,15rem)_1fr] lg:items-center lg:gap-8")}
-        aria-labelledby={`${ids}-how`}
-      >
-        <figure className="order-2 lg:order-1">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={HBD_CARD_TEMPLATE.path}
-            alt="ตัวอย่างเทมเพลตการ์ดอวยพร"
-            className="h-auto w-full rounded-xl shadow-[0_14px_34px_rgba(0,0,0,0.45)] ring-1 ring-white/10"
-          />
-          <figcaption className="mt-2.5 text-[12.5px] leading-relaxed text-r-text-3">
-            ทุกการ์ดใช้เทมเพลตเดียวกัน ให้การ์ดทุกใบเข้าชุดกันตอนมายด์อาร์อ่าน
-          </figcaption>
-        </figure>
+      <section className={CARD} aria-labelledby={`${ids}-how`}>
+        <h2 id={`${ids}-how`} className={cn(DISPLAY, "text-xl font-normal text-r-text sm:text-[1.375rem]")}>
+          ส่งการ์ดได้ 2 แบบ
+        </h2>
+        <p className={cn(HINT, "mt-1.5")}>เลือกแบบที่ถนัดได้ตอนกรอกฟอร์ม · ทุกการ์ดใช้ Template เดียวกัน</p>
 
-        <div className="order-1 lg:order-2">
-          <h2 id={`${ids}-how`} className={cn(DISPLAY, "text-xl font-normal text-r-text sm:text-[1.375rem]")}>
-            ส่งการ์ดได้ใน 3 ขั้น
-          </h2>
-          <ol className="mt-5">
-            {HOW_STEPS.map((step, index) => {
-              const last = index === HOW_STEPS.length - 1;
-              return (
-                <li key={step.title} className="relative flex gap-4 pb-6 last:pb-0">
-                  {/* line linking the step numbers */}
-                  {last ? null : (
-                    <span aria-hidden className="absolute top-8 bottom-1 left-[14px] w-px bg-r-pri/30" />
-                  )}
-                  <span
-                    aria-hidden
-                    className="relative flex size-[30px] flex-none items-center justify-center rounded-full bg-r-pri text-sm font-bold text-r-on-pri"
-                  >
-                    {index + 1}
-                  </span>
-                  <div className="min-w-0 pt-[3px]">
-                    <p className="text-[15px] leading-snug text-r-text">{step.title}</p>
-                    {step.detail ? (
-                      <p className="mt-1 text-[13px] leading-relaxed text-r-text-3">{step.detail}</p>
-                    ) : null}
-                    {index === 0 ? (
-                      <a
-                        href={HBD_CARD_TEMPLATE.path}
-                        download={HBD_CARD_TEMPLATE.filename}
-                        className={cn(R_CTA_OUTLINE_CLASS, "mt-3 h-10 px-4 text-sm whitespace-nowrap")}
-                      >
-                        <Download className="size-4" aria-hidden />
-                        Download template
-                      </a>
-                    ) : null}
-                  </div>
-                </li>
-              );
-            })}
+        {/* Same frame for both: this explains the two ways, it is not a picker. */}
+        <div className="mt-5 grid gap-3.5 sm:grid-cols-2 sm:grid-rows-[auto_auto_auto_1fr]">
+          <HowMethod
+            icon={<PenLine className="size-[18px]" aria-hidden />}
+            title="ทำการ์ดบนเว็บ"
+            badge="Easy"
+            frameLabel="Live preview"
+            preview={<HbdCardDemo />}
+            steps={HOW_WEB_STEPS}
+            tags={["ไม่ต้องใช้แอป", "ทำบนมือถือได้"]}
+          />
+          <HowMethod
+            icon={<Upload className="size-[18px]" aria-hidden />}
+            title="แต่งเองแล้ว Upload"
+            badge="Custom"
+            frameLabel="Card template"
+            preview={
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={HBD_CARD_TEMPLATE.path}
+                  alt="Template การ์ดอวยพร"
+                  className="h-auto w-full rounded-lg ring-1 ring-white/10"
+                />
+                <span className="flex h-8 items-center gap-2 rounded-lg bg-white/[0.04] px-2.5 text-[12px] text-r-text-2">
+                  <span className="min-w-0 flex-1 truncate">{HBD_CARD_TEMPLATE.filename}</span>
+                  <span className="text-r-text-3">PNG</span>
+                </span>
+                <a
+                  href={HBD_CARD_TEMPLATE.path}
+                  download={HBD_CARD_TEMPLATE.filename}
+                  className={cn(R_CTA_OUTLINE_CLASS, "mt-auto h-10 w-full px-4 text-sm whitespace-nowrap")}
+                >
+                  <Download className="size-4" aria-hidden />
+                  Download template
+                </a>
+              </>
+            }
+            steps={HOW_UPLOAD_STEPS}
+            tags={["แต่งได้เต็มที่", "ใช้แอปไหนก็ได้"]}
+          />
+        </div>
+
+        <div className="mt-3.5 rounded-2xl bg-white/[0.03] px-4 py-3.5 ring-1 ring-white/[0.08] ring-inset">
+          <p className="text-[12.5px] text-r-text-3">จากนั้นเหมือนกันทั้ง 2 แบบ</p>
+          <ol className="mt-2.5 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4">
+            <li className="flex items-center gap-2 text-[13.5px] text-r-text">
+              <span aria-hidden className={HOW_NUM}>2</span>
+              ใส่ชื่อ + ฝากข้อความถึงมายด์ <span className="text-r-text-3">(ไม่ใส่ก็ได้)</span>
+            </li>
+            <li aria-hidden className="hidden text-r-text-3 sm:block">→</li>
+            <li className="flex items-center gap-2 text-[13.5px] text-r-text">
+              <span aria-hidden className={HOW_NUM}>3</span>
+              ใส่ X หรือ Discord แล้วกดส่ง
+            </li>
           </ol>
         </div>
       </section>
@@ -834,12 +1000,37 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
 
       <div className="pt-1.5">
         <button type="button" onClick={startForm} className={cn(R_CTA_PRIMARY_CLASS, "w-full sm:w-auto sm:px-8")}>
-          เริ่มกรอก
+          เริ่มทำการ์ด
           <ArrowRight className="size-4" aria-hidden />
         </button>
       </div>
     </div>
   );
+
+  const cardSample = useMemo<HbdCardContent>(
+    () => ({
+      message: cardText.trim() || CARD_SAMPLE_MESSAGE,
+      name: displayName.trim() || "ฮันนี่",
+      style: cardStyle,
+    }),
+    [cardText, displayName, cardStyle]
+  );
+
+  const modeTabs: { id: CardMode; title: string; desc: string; icon: ReactNode; badge?: string }[] = [
+    {
+      id: "web",
+      title: "ทำการ์ดบนเว็บ",
+      desc: "พิมพ์คำอวยพรลง Template ได้เลย ไม่ต้องใช้แอป",
+      icon: <PenLine className="size-[18px]" aria-hidden />,
+      badge: "Easy",
+    },
+    {
+      id: "upload",
+      title: "แต่งเองแล้ว Upload",
+      desc: "Download template ไปแต่ง แล้ว Upload รูปกลับมา",
+      icon: <Upload className="size-[18px]" aria-hidden />,
+    },
+  ];
 
   const cardSection = (
     <section
@@ -847,14 +1038,20 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
       className={cn(CARD, "scroll-mt-24")}
       aria-labelledby={`${ids}-card`}
     >
-      <StepTitle n={1} id={`${ids}-card`} done={!cardMissing} required aside={templateLink}>
+      <StepTitle
+        n={1}
+        id={`${ids}-card`}
+        done={!cardMissing}
+        required
+        aside={(cardFile ? !cardFromWeb : cardMode === "upload") ? templateLink : undefined}
+      >
         การ์ดอวยพร
       </StepTitle>
       <input
         ref={cardInputRef}
         type="file"
         accept={HBD_CARD_TEMPLATE.accept}
-        onChange={onCardChange}
+        onChange={(event) => void onCardChange(event)}
         className="sr-only"
         tabIndex={-1}
       />
@@ -870,22 +1067,126 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 px-1">
             <span className="flex min-w-0 flex-1 items-center gap-2.5">
-              <ImageIcon className="size-[17px] flex-none text-r-acc" aria-hidden />
-              <span className="truncate text-[13.5px] text-r-text">{cardFile.name}</span>
+              {cardFromWeb ? (
+                <PenLine className="size-[17px] flex-none text-r-acc" aria-hidden />
+              ) : (
+                <ImageIcon className="size-[17px] flex-none text-r-acc" aria-hidden />
+              )}
+              <span className="truncate text-[13.5px] text-r-text">
+                {cardFromWeb ? `การ์ดจากเว็บ · ${styleLabel(cardStyle)}` : cardFile.name}
+              </span>
             </span>
             <span className="flex gap-4 max-sm:w-full">
-              <button type="button" onClick={() => cardInputRef.current?.click()} className={LINK_BTN}>
-                <Upload className="size-3.5" aria-hidden />
-                เลือกไฟล์ใหม่
-              </button>
+              {cardFromWeb ? (
+                <button type="button" onClick={openMaker} className={LINK_BTN}>
+                  <Pencil className="size-3.5" aria-hidden />
+                  แก้ไขการ์ด
+                </button>
+              ) : (
+                <button type="button" onClick={() => cardInputRef.current?.click()} className={LINK_BTN}>
+                  <Upload className="size-3.5" aria-hidden />
+                  เลือกไฟล์ใหม่
+                </button>
+              )}
               <button type="button" onClick={clearCard} className={cn(LINK_BTN, "text-r-text-2 hover:text-r-text")}>
                 <X className="size-3.5" aria-hidden />
-                ล้างรูปการ์ด
+                {cardFromWeb ? "ล้างการ์ด" : "ล้างรูปการ์ด"}
               </button>
             </span>
           </div>
         </div>
       ) : (
+        <>
+          <p className={cn(HINT, "mt-1.5")}>เลือกได้ 2 แบบ · เปลี่ยนได้ตลอด</p>
+          <div
+            role="radiogroup"
+            aria-label="วิธีทำการ์ด"
+            className="mt-3.5 grid grid-cols-1 gap-2.5 sm:grid-cols-2"
+          >
+            {modeTabs.map((tab) => {
+              const active = cardMode === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  onClick={() => {
+                    setCardMode(tab.id);
+                    setCardError(null);
+                  }}
+                  className={cn(
+                    "flex items-start gap-3 rounded-2xl px-3.5 py-3 text-left transition-colors",
+                    active
+                      ? "bg-r-pri/[0.12] ring-[1.5px] ring-r-pri/70 ring-inset"
+                      : "bg-black/[0.14] ring-1 ring-white/[0.08] ring-inset hover:bg-black/[0.22]",
+                    FOCUS
+                  )}
+                >
+                  <span
+                    aria-hidden
+                    className={cn(
+                      "mt-0.5 flex size-[18px] flex-none items-center justify-center rounded-full ring-[1.5px] ring-inset",
+                      active ? "ring-r-pri" : "ring-r-text-3/60"
+                    )}
+                  >
+                    {active ? <span className="size-2 rounded-full bg-r-pri" /> : null}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className={cn("flex-none", active ? "text-r-pri" : "text-r-text-2")}>{tab.icon}</span>
+                      <span className="text-[15px] text-r-text">{tab.title}</span>
+                      {tab.badge ? (
+                        <span className="rounded-full bg-r-acc/15 px-2 py-0.5 text-[11.5px] text-r-acc">
+                          {tab.badge}
+                        </span>
+                      ) : null}
+                    </span>
+                    <span className="mt-1 block text-[12.5px] leading-snug text-r-text-3">{tab.desc}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {cardMode === "web" ? (
+            <div
+              className={cn(
+                "mt-3 grid gap-4 rounded-2xl bg-black/[0.22] p-3.5 ring-1 ring-inset sm:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] sm:items-center sm:p-4",
+                cardMessage ? "ring-[#ffa062]/70" : "ring-white/[0.08]"
+              )}
+            >
+              <HbdCardCanvas
+                content={cardSample}
+                label="ตัวอย่างการ์ดที่ทำบนเว็บ"
+                className="overflow-hidden rounded-xl"
+              />
+              <div className="flex flex-col gap-3">
+                <ul className="flex flex-col gap-1.5 text-[13.5px] text-r-text-2">
+                  {["พิมพ์คำอวยพร เลือก Font กับสี", "ตัวอักษรพอดีกรอบเสมอ", "ใช้ชื่อที่แสดงเป็นลายเซ็นให้"].map(
+                    (line) => (
+                      <li key={line} className="flex items-start gap-2">
+                        <Check className="mt-[3px] size-3.5 flex-none text-r-acc" aria-hidden />
+                        {line}
+                      </li>
+                    )
+                  )}
+                </ul>
+                <button
+                  id={`${ids}-card-pick`}
+                  type="button"
+                  onClick={openMaker}
+                  aria-describedby={cardMessage ? `${ids}-card-error` : undefined}
+                  className={cn(
+                    "inline-flex h-11 items-center justify-center gap-2 rounded-full bg-r-pri px-5 text-[15px] font-semibold text-r-on-pri transition-[filter] hover:brightness-110",
+                    FOCUS
+                  )}
+                >
+                  <PenLine className="size-4" aria-hidden />
+                  เริ่มทำการ์ด
+                </button>
+              </div>
+            </div>
+          ) : (
         <button
           id={`${ids}-card-pick`}
           type="button"
@@ -903,6 +1204,8 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
           <span className="text-[15px]">เลือกไฟล์การ์ด</span>
           <span className="text-[12.5px] text-r-text-3">JPEG · PNG · WebP · ไม่เกิน 20 MB</span>
         </button>
+          )}
+        </>
       )}
       {cardMessage ? <FieldError id={`${ids}-card-error`}>{cardMessage}</FieldError> : null}
     </section>
@@ -915,7 +1218,7 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
       aria-labelledby={`${ids}-about`}
     >
       <StepTitle n={2} id={`${ids}-about`} done={!nameMissing}>
-        ชื่อและคำอวยพร
+        ชื่อและข้อความ
       </StepTitle>
       <input
         ref={avatarInputRef}
@@ -944,7 +1247,7 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
             id={`${ids}-name`}
             value={displayName}
             autoComplete="nickname"
-            onChange={(event) => setDisplayName(event.target.value)}
+            onChange={(event) => setDisplayName(clampText(event.target.value, HBD_TEXT_LIMITS.nameMax))}
             placeholder="เช่น ฮันนี่"
             aria-invalid={Boolean(nameMessage)}
             aria-describedby={nameMessage ? `${ids}-name-error` : undefined}
@@ -957,14 +1260,23 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
       {avatarError ? <FieldError>{avatarError}</FieldError> : null}
       <div className="mt-[18px]">
         <label htmlFor={`${ids}-message`} className={LABEL}>
-          ข้อความอวยพร<span className="ml-2 text-[12.5px] text-r-text-3">ไม่บังคับ</span>
+          <span className="flex items-baseline justify-between gap-3">
+            <span>
+              ฝากข้อความถึงมายด์<span className="ml-2 text-[12.5px] text-r-text-3">ไม่บังคับ</span>
+            </span>
+            {textLength(message) > HBD_TEXT_LIMITS.messageMax * 0.8 ? (
+              <span className="text-[12.5px] text-r-text-3 tabular-nums">
+                {textLength(message).toLocaleString("en-US")}/{HBD_TEXT_LIMITS.messageMax.toLocaleString("en-US")}
+              </span>
+            ) : null}
+          </span>
         </label>
         <textarea
           id={`${ids}-message`}
           value={message}
-          onChange={(event) => setMessage(event.target.value)}
+          onChange={(event) => setMessage(clampText(event.target.value, HBD_TEXT_LIMITS.messageMax))}
           rows={4}
-          placeholder="สุขสันต์วันเกิดนะมายด์อาร์…"
+          placeholder="อยากบอกอะไรมายด์อาร์…"
           className={cn(INPUT, "mt-2 h-auto resize-y py-3 leading-relaxed")}
         />
       </div>
@@ -1080,7 +1392,7 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
         {message.trim() ? (
           <p className="mt-3 text-[15px] leading-[1.75] whitespace-pre-line text-r-text">{message.trim()}</p>
         ) : (
-          <p className="mt-3 text-sm text-r-text-3">ไม่มีข้อความอวยพร</p>
+          <p className="mt-3 text-sm text-r-text-3">ไม่ได้ฝากข้อความ</p>
         )}
       </article>
       <div className={cn(R_CARD_CLASS, "flex items-center gap-3 rounded-2xl px-[18px] py-3.5 text-sm")}>
@@ -1178,6 +1490,17 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
       )}
     >
       {avatarCrop.dialog}
+      {makerOpen ? (
+        <HbdCardMaker
+          initial={{
+            message: cardText,
+            name: displayName,
+            style: cardStyle,
+          }}
+          onCancel={() => setMakerOpen(false)}
+          onDone={onMakerDone}
+        />
+      ) : null}
 
       {clearConfirmOpen ? (
         <div
