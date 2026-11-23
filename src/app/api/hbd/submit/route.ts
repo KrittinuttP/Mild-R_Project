@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { after, NextResponse } from "next/server";
 
 import {
@@ -166,6 +167,9 @@ export async function POST(request: Request) {
       avatarPath,
       avatarUrl,
     });
+
+    // The sender's name shows on /hbd/2026/sent straight away.
+    revalidatePath("/hbd/2026/sent", "page");
 
     // Alert channel: who sent it + a link to review. Runs after the reply, so the visitor never waits on Discord.
     after(() => notifyHbdNewCard({ id: row.id, displayName }));

@@ -69,6 +69,8 @@ export async function POST(request: Request, context: RouteContext) {
     if (REVALIDATES_PUBLIC.has(action)) {
       revalidatePath("/hbd/2026", "page");
     }
+    // Sent list shows pending + approved, so any status change can add or drop a name.
+    revalidatePath("/hbd/2026/sent", "page");
     return NextResponse.json({ ok: true, submission: row });
   } catch (error) {
     const message =
@@ -84,6 +86,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
   try {
     await deleteHbdSubmission(checked.id);
     revalidatePath("/hbd/2026", "page");
+    revalidatePath("/hbd/2026/sent", "page");
     return NextResponse.json({ ok: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : "ลบไม่สำเร็จ";

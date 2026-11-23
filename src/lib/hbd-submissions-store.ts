@@ -124,6 +124,43 @@ export async function loadApprovedHbdWishes(): Promise<HbdWish[]> {
   }
 }
 
+/** One row on /hbd/2026/sent: the name on the card and when it was sent. */
+export type HbdSentName = { name: string; sentAt: string };
+
+/**
+ * Public list of who has sent a card (/hbd/2026/sent): pending + approved only,
+ * hidden / rejected left out. Reads just the display name and send time, so no
+ * contact handle, card or message leaves the server. Newest first.
+ */
+export async function loadHbdSentNames(): Promise<HbdSentName[]> {
+  if (!isSupabaseConfigured()) return [];
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) return [];
+
+  try {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("mild_r_hbd_submissions")
+      .select("display_name, created_at")
+      .in("status", ["pending", "approved"])
+      .order("created_at", { ascending: false })
+      .limit(2000);
+
+    if (error || !data) {
+      if (error) console.error("[hbd] sent names", error.message);
+      return [];
+    }
+    return data
+      .map((row) => ({
+        name: String(row.display_name ?? "").trim(),
+        sentAt: String(row.created_at),
+      }))
+      .filter((row) => row.name.length > 0);
+  } catch (error) {
+    console.error("[hbd] sent names", error);
+    return [];
+  }
+}
+
 export async function countPendingHbdSubmissions(): Promise<number> {
   if (!isSupabaseConfigured()) return 0;
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) return 0;

@@ -19,6 +19,7 @@ import {
   Download,
   Heart,
   ImageIcon,
+  ListChecks,
   Pencil,
   Trash2,
   Upload,
@@ -701,6 +702,10 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
           );
         })}
       </nav>
+      <Link href="/hbd/2026/sent" prefetch={false} className={LINK_BTN}>
+        <ListChecks className="size-[15px]" aria-hidden />
+        เช็กว่าการ์ดส่งถึงแล้วหรือยัง
+      </Link>
       {phase === "form" ? (
         <div className={cn(R_CARD_CLASS, "hidden p-4 lg:block")}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -1138,6 +1143,10 @@ export function HbdUploadClient({ standalone = false }: HbdUploadClientProps) {
               </button>
             </>
           )}
+          <Link href="/hbd/2026/sent" prefetch={false} className={cn(LINK_BTN, "mx-auto mt-1 justify-center")}>
+            <ListChecks className="size-[15px]" aria-hidden />
+            ดูรายชื่อคนที่ส่งการ์ดแล้ว
+          </Link>
         </div>
       </section>
     </div>
