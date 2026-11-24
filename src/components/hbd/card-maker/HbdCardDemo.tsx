@@ -92,7 +92,7 @@ export function HbdCardDemo({ className }: { className?: string }) {
 
   return (
     <div ref={rootRef} className={cn("flex flex-col gap-2", className)}>
-      <span className="sr-only">ตัวอย่างหน้าทำการ์ดบนเว็บ พิมพ์คำอวยพรแล้วเลือก Font กับสีได้</span>
+      <span className="sr-only">ตัวอย่างหน้าเขียนอวยพรบนเว็บ พิมพ์คำอวยพรแล้วเลือก Font กับสีได้</span>
       <div aria-hidden className="pointer-events-none flex select-none flex-col gap-2">
         <HbdCardCanvas content={content} label="ตัวอย่างการ์ด" className="rounded-lg" />
         <div className="flex h-8 items-center rounded-lg px-2.5 text-[12.5px] text-r-text ring-[1.5px] ring-r-pri/60 ring-inset">

@@ -1,5 +1,5 @@
 /**
- * "ทำการ์ดบนเว็บ" (HBD card maker), browser only.
+ * "เขียนอวยพรบนเว็บ" (HBD card maker), browser only.
  *
  * One canvas renderer for both the live preview and the file that is sent, so
  * the card the fan sees is exactly the card that arrives. Thai has no spaces

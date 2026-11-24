@@ -94,7 +94,7 @@ const HbdCardMaker = dynamic(
   { ssr: false }
 );
 
-/** Sample text on the "ทำการ์ดบนเว็บ" panel before anything is typed. */
+/** Sample text on the "เขียนอวยพรบนเว็บ" panel before anything is typed. */
 const CARD_SAMPLE_MESSAGE = "สุขสันต์วันเกิดนะมายด์ ขอให้มีความสุขมากๆ ฮันนี่อยู่ข้างๆ เสมอเลย";
 
 type CardMode = "web" | "upload";
@@ -115,7 +115,7 @@ const HOW_UPLOAD_STEPS = [
 const HOW_FAQ = [
   {
     q: "ต้องใช้ Template ของโปรเจกต์ไหม?",
-    a: "ต้องใช้ค่ะ เลือก \"ทำการ์ดบนเว็บ\" แล้วพิมพ์ลง Template ได้เลย หรือ Download template ไปแต่งในแอปที่ถนัด แล้ว Upload รูปการ์ดกลับมา",
+    a: "ต้องใช้ค่ะ เลือก \"เขียนอวยพรบนเว็บ\" แล้วพิมพ์ลง Template ได้เลย หรือ Download template ไปแต่งในแอปที่ถนัด แล้ว Upload รูปการ์ดกลับมา",
   },
   {
     q: "ต้องใส่รูปโปรไฟล์กับข้อความถึงมายด์ไหม?",
@@ -378,7 +378,7 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
   const [cardFile, setCardFile] = useState<File | null>(null);
   const [cardMode, setCardMode] = useState<CardMode>("web");
   const [cardStyle, setCardStyle] = useState<HbdCardStyle>(HBD_CARD_DEFAULT_STYLE);
-  /** The card in the form was made with "ทำการ์ดบนเว็บ" (not a picked file). */
+  /** The card in the form was made with "เขียนอวยพรบนเว็บ" (not a picked file). */
   const [cardFromWeb, setCardFromWeb] = useState(false);
   /**
    * Text typed on the web card. Kept apart from "ฝากข้อความถึงมายด์" (the note under
@@ -914,7 +914,7 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
         <div className="mt-5 grid gap-3.5 sm:grid-cols-2 sm:grid-rows-[auto_auto_auto_1fr]">
           <HowMethod
             icon={<PenLine className="size-[18px]" aria-hidden />}
-            title="ทำการ์ดบนเว็บ"
+            title="เขียนอวยพรบนเว็บ"
             badge="Easy"
             frameLabel="Live preview"
             preview={<HbdCardDemo />}
@@ -1019,7 +1019,7 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
   const modeTabs: { id: CardMode; title: string; desc: string; icon: ReactNode; badge?: string }[] = [
     {
       id: "web",
-      title: "ทำการ์ดบนเว็บ",
+      title: "เขียนอวยพรบนเว็บ",
       desc: "พิมพ์คำอวยพรลง Template ได้เลย ไม่ต้องใช้แอป",
       icon: <PenLine className="size-[18px]" aria-hidden />,
       badge: "Easy",

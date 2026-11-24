@@ -45,7 +45,7 @@ type Props = {
 };
 
 /**
- * "ทำการ์ดบนเว็บ": a modal on desktop, a full screen that slides in on phones.
+ * "เขียนอวยพรบนเว็บ": a modal on desktop, a full screen that slides in on phones.
  * Mount it only while open; it locks page scroll and closes on Escape.
  */
 export function HbdCardMaker({ initial, onCancel, onDone }: Props) {
@@ -367,7 +367,7 @@ export function HbdCardMaker({ initial, onCancel, onDone }: Props) {
           </span>
           <div className="min-w-0 flex-1 max-lg:text-center max-lg:pr-16">
             <h2 id={`${ids}-title`} className="text-base text-r-text lg:text-[1.1875rem]">
-              ทำการ์ดบนเว็บ
+              เขียนอวยพรบนเว็บ
             </h2>
             <p className="hidden text-[12.5px] text-r-text-3 lg:block">พิมพ์แล้วการ์ดเปลี่ยนตามทันที</p>
           </div>
