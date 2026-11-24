@@ -105,12 +105,15 @@ const HBD_INTRO_SEEN_KEY = "mild-r-hbd-upload-intro-seen";
 
 /** "วิธีส่ง" screen · short steps; step 1 carries the template download. */
 /** "วิธีส่ง": the two ways to make a card, shown side by side (same look: this is not a picker). */
+/** A step line; `note` sits on its own line under the text, in a quieter color. */
+type HowStep = string | { text: string; note: string };
+
 const HOW_WEB_STEPS = ["พิมพ์คำอวยพรลงการ์ด", "เลือก Font · สี · ขนาด", "กด “ใช้การ์ดนี้” เสร็จเลย"] as const;
-const HOW_UPLOAD_STEPS = [
+const HOW_UPLOAD_STEPS: ReadonlyArray<HowStep> = [
   "Download template",
-  "แต่งในแอปที่ถนัด (Canva, Ibis Paint …)",
-  "Upload รูปการ์ดกลับมา (.jpg .png ไม่เกิน 20 MB)",
-] as const;
+  "เขียนอวยพรและแต่งในแอปที่ถนัด",
+  { text: "Upload รูปการ์ดกลับมา", note: "(.jpg .png ไม่เกิน 20 MB)" },
+];
 
 const HOW_FAQ = [
   {
@@ -244,7 +247,7 @@ function HowMethod({
   badge: string;
   frameLabel: string;
   preview: ReactNode;
-  steps: ReadonlyArray<string>;
+  steps: ReadonlyArray<HowStep>;
   tags: ReadonlyArray<string>;
 }) {
   return (
@@ -263,17 +266,23 @@ function HowMethod({
         {preview}
       </div>
       <ol className="flex flex-col gap-2">
-        {steps.map((step, index) => (
-          <li key={step} className="flex items-start gap-2.5 text-[13.5px] leading-snug text-r-text">
-            <span
-              aria-hidden
-              className="flex size-5 flex-none items-center justify-center rounded-full text-[11px] font-bold text-r-pri ring-[1.5px] ring-r-pri ring-inset"
-            >
-              {index + 1}
-            </span>
-            {step}
-          </li>
-        ))}
+        {steps.map((step, index) => {
+          const { text, note } = typeof step === "string" ? { text: step, note: undefined } : step;
+          return (
+            <li key={text} className="flex items-start gap-2.5 text-[13.5px] leading-snug text-r-text">
+              <span
+                aria-hidden
+                className="flex size-5 flex-none items-center justify-center rounded-full text-[11px] font-bold text-r-pri ring-[1.5px] ring-r-pri ring-inset"
+              >
+                {index + 1}
+              </span>
+              <span className="min-w-0">
+                {text}
+                {note ? <span className="mt-0.5 block text-[12px] text-r-text-3">{note}</span> : null}
+              </span>
+            </li>
+          );
+        })}
       </ol>
       <div className="flex flex-wrap content-end gap-1.5">
         {tags.map((tag) => (
@@ -923,7 +932,7 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
           />
           <HowMethod
             icon={<Upload className="size-[18px]" aria-hidden />}
-            title="แต่งเองแล้ว Upload"
+            title="ใช้การ์ดที่ทำเอง"
             badge="Custom"
             frameLabel="Card template"
             preview={
@@ -949,7 +958,7 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
               </>
             }
             steps={HOW_UPLOAD_STEPS}
-            tags={["แต่งได้เต็มที่", "ใช้แอปไหนก็ได้"]}
+            tags={["ปรับแต่งได้ตามชอบ", "ใช้แอปไหนก็ได้"]}
           />
         </div>
 
@@ -1026,7 +1035,7 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
     },
     {
       id: "upload",
-      title: "แต่งเองแล้ว Upload",
+      title: "ใช้การ์ดที่ทำเอง",
       desc: "Download template ไปแต่ง แล้ว Upload รูปกลับมา",
       icon: <Upload className="size-[18px]" aria-hidden />,
     },
