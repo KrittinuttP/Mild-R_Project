@@ -11,7 +11,7 @@
  */
 import { HBD_CARD_TEMPLATE, HBD_IMAGE_SIZES, HBD_TEXT_LIMITS, clampText } from "@/lib/hbd-upload";
 
-/** Visible characters (see textLength). 400 still renders ≈ 50 px on the 2048 px card. */
+/** Visible characters (see textLength). 400 Thai characters render ≈ 40 px on the 2048 px card. */
 export const HBD_CARD_MESSAGE_MAX = 400;
 export const HBD_CARD_NAME_MAX = HBD_TEXT_LIMITS.nameMax;
 /** Line breaks kept on the card; later ones become spaces. */
@@ -214,12 +214,18 @@ function getSegmenter(): Segmenter | null {
 /** Word-sized pieces; spaces stay attached so they can be dropped at line ends. */
 function pieces(paragraph: string): string[] {
   const seg = getSegmenter();
-  const raw = seg ? Array.from(seg.segment(paragraph), (s) => s.segment) : Array.from(paragraph);
-  // Keep "#tag" and "@name" together: a lone "#" / "@" joins the next piece.
+  // ICU splits "ความสุขมากๆ" as "ความ|สุ|ขมา|กๆ" (a line could break inside "สุข").
+  // A zero-width space before "ๆ" makes it segment as "ความ|สุข|มาก|ๆ"; it is removed again below.
+  const raw = seg
+    ? Array.from(seg.segment(paragraph.replace(/ๆ/g, "\u200bๆ")), (s) => s.segment.replace(/\u200b/g, "")).filter(Boolean)
+    : Array.from(paragraph);
+  // Keep "#tag" and "@name" together (a lone "#" / "@" joins the next piece),
+  // and never start a line with "ๆ" (it joins the word before it).
   const out: string[] = [];
   for (const piece of raw) {
     const prev = out[out.length - 1];
-    if (prev !== undefined && /[#@]$/.test(prev) && !/^\s/.test(piece)) out[out.length - 1] = prev + piece;
+    const glue = (/[#@]$/.test(prev ?? "") && !/^\s/.test(piece)) || /^\s*ๆ/.test(piece);
+    if (prev !== undefined && glue) out[out.length - 1] = prev + piece;
     else out.push(piece);
   }
   return out;

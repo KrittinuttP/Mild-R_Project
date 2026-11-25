@@ -1273,11 +1273,10 @@ export function HbdUploadClient({ standalone = false, sentCount = 0 }: HbdUpload
             <span>
               ฝากข้อความถึงมายด์<span className="ml-2 text-[12.5px] text-r-text-3">ไม่บังคับ</span>
             </span>
-            {textLength(message) > HBD_TEXT_LIMITS.messageMax * 0.8 ? (
-              <span className="text-[12.5px] text-r-text-3 tabular-nums">
-                {textLength(message).toLocaleString("en-US")}/{HBD_TEXT_LIMITS.messageMax.toLocaleString("en-US")}
-              </span>
-            ) : null}
+            {/* Always shown, so fans know how much they can write. */}
+            <span className="text-[12.5px] text-r-text-3 tabular-nums">
+              {textLength(message).toLocaleString("en-US")}/{HBD_TEXT_LIMITS.messageMax.toLocaleString("en-US")}
+            </span>
           </span>
         </label>
         <textarea

@@ -13,18 +13,23 @@ import { ArrowDown, ArrowLeft, Download, Heart, RotateCw } from "lucide-react";
 
 import { ImageLightbox } from "@/components/media/ImageLightbox";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
+import { hbdConfetti, hbdHeartFirework, stopHbdFireworks } from "@/lib/hbd-fireworks";
 import { HBD_AVATAR_DEFAULT } from "@/lib/hbd-upload";
 import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
 import { PROJECTS_COMING_SOON } from "@/lib/site-flags";
 import { cn } from "@/lib/utils";
 import type { HbdPage, HbdWish, VtuberProfile } from "@/types/vtuber";
 
+import "@/fonts/hbd-card-fonts.css";
+
 registerGsapPlugins();
 
 /*
  * /hbd/2026 · design E
  * 1. Gate: 3 sealed envelopes (drawn in CSS, no card is shown) + "เริ่มอ่าน".
- * 2. "เริ่มอ่าน" opens the front envelope, then scrolls to the first card.
+ * 2. "เริ่มอ่าน" opens the front envelope: heart firework → the letter flips into a
+ *    cover card ("สุขสันต์วันเกิดนะ มายด์อาร์") → confetti. The page stays on the
+ *    cover; "เลื่อนลงไปเปิดอ่านได้เลย" takes the reader to the first card.
  * 3. Cards show one by one, in order, each once its image has loaded.
  * Envelope / button styles live in globals.css (".hbd-*").
  */
@@ -33,8 +38,8 @@ const DISPLAY = "font-[family-name:var(--font-display)]";
 const FOCUS =
   "outline-none focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-solid focus-visible:outline-r-pri";
 const UPLOAD_HREF = "/hbd/2026/upload";
-/** This browser already opened the envelope once → play the short opening. */
-const OPENED_KEY = "mild-r-hbd-2026-opened";
+/** Cover card shown after the letter flips (the template, downsized). */
+const COVER_SRC = "/assets/hbd/template/hbd-card-cover.jpg";
 /** Cards fetched (low priority) while the envelope is still closed. */
 const PRELOAD_COUNT = 3;
 /** Hearts that pop out of the seal: x, y offsets in px. */
@@ -73,21 +78,6 @@ function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-function readOpened() {
-  try {
-    return localStorage.getItem(OPENED_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function writeOpened() {
-  try {
-    localStorage.setItem(OPENED_KEY, "1");
-  } catch {
-    /* private mode */
-  }
-}
 
 /** Runs `onEnter` once, when `el` comes into view. Returns a cleanup. */
 function onceInView(el: Element, onEnter: () => void, rootMargin = "0px 0px -12% 0px") {
@@ -154,8 +144,9 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
   const labelRef = useRef<HTMLSpanElement>(null);
   const burstRef = useRef<HTMLSpanElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
+  const coverRef = useRef<HTMLDivElement>(null);
   const openTlRef = useRef<gsap.core.Timeline | null>(null);
-  const pendingScroll = useRef<ScrollBehavior | null>(null);
+  const introTlRef = useRef<gsap.core.Timeline | null>(null);
 
   const [opened, setOpened] = useState(false);
   const [settled, setSettled] = useState<boolean[]>(() => wishes.map(() => false));
@@ -192,15 +183,8 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
     return () => window.clearTimeout(timer);
   }, [opened, revealCount, settled, total]);
 
-  // After the cards are shown, glide down to the first one.
-  useEffect(() => {
-    if (!opened || !pendingScroll.current) return;
-    const behavior = pendingScroll.current;
-    pendingScroll.current = null;
-    const target = document.getElementById("hbd-cards");
-    target?.scrollIntoView({ behavior, block: "start" });
-    target?.focus({ preventScroll: true });
-  }, [opened]);
+  // Leaving the page stops any fireworks still running.
+  useEffect(() => () => stopHbdFireworks(), []);
 
   // Entrance: title → back envelopes → front envelope → seal stamp → text + button.
   useGSAP(
@@ -215,7 +199,7 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
         return;
       }
 
-      gsap
+      introTlRef.current = gsap
         .timeline({ defaults: { ease: "power3.out" }, onComplete: startIdle })
         .from(q("[data-hbd-intro]"), { autoAlpha: 0, y: 28, duration: 0.8, stagger: 0.1 })
         .from(q("[data-env='back-1']"), { autoAlpha: 0, x: 50, y: 80, rotation: 0, duration: 0.7 }, 0.35)
@@ -238,39 +222,60 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
     { scope: rootRef }
   );
 
-  function showCards(behavior: ScrollBehavior) {
-    pendingScroll.current = behavior;
-    writeOpened();
+  function showCards() {
     setOpened(true);
+  }
+
+  function goToCards() {
+    const target = document.getElementById("hbd-cards");
+    target?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+    target?.focus({ preventScroll: true });
+  }
+
+  /** End state: the cover card replaces the envelopes (also the reduced-motion path). */
+  function finishOpen() {
+    const stack = stackRef.current;
+    stack?.classList.add("is-covered");
+    gsap.set(stack, { clearProps: "height" });
+    gsap.set(coverRef.current, { clearProps: "all" });
+    showCards();
+  }
+
+  function fireHeart() {
+    const front = frontRef.current?.getBoundingClientRect();
+    if (front) hbdHeartFirework(front.left + front.width / 2, front.top - front.height * 0.55);
   }
 
   function onStart() {
     if (opened) {
-      document
-        .getElementById("hbd-cards")
-        ?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+      goToCards();
       return;
     }
-    // A second tap while the envelope is opening skips the rest.
+    // A second tap while the envelope is opening skips to the cover.
     const running = openTlRef.current;
     if (running?.isActive()) {
       running.progress(1);
       return;
     }
-    stackRef.current?.classList.remove("is-idle");
-    stackRef.current?.classList.add("is-open");
+    // Tapped before the entrance finished: jump it to the end so it cannot undo the opening.
+    introTlRef.current?.progress(1);
+    const stack = stackRef.current;
+    stack?.classList.remove("is-idle");
+    stack?.classList.add("is-open");
 
     if (prefersReducedMotion()) {
-      showCards("auto");
+      finishOpen();
       return;
     }
 
     const hearts = burstRef.current ? Array.from(burstRef.current.children) : [];
-    const backs = stackRef.current?.querySelectorAll("[data-env^='back']") ?? [];
-    const quick = readOpened();
+    const backs = stack?.querySelectorAll("[data-env^='back']") ?? [];
+    const frontParts = frontRef.current?.querySelectorAll(".hbd-env__body, .hbd-env__pocket, .hbd-env__flap") ?? [];
+    // The full opening plays every time (Mild-R may come back to it); a second tap skips it.
+    const T = 2.6;
 
     const tl = gsap
-      .timeline()
+      .timeline({ onComplete: finishOpen })
       .to(frontRef.current, { rotation: "-=2", duration: 0.06, yoyo: true, repeat: 3 }, 0)
       .to(sealRef.current, { scale: 1.25, duration: 0.12 }, 0.1)
       .to(sealRef.current, { y: -90, rotation: -25, scale: 0.6, autoAlpha: 0, duration: 0.4, ease: "power2.in" }, 0.22)
@@ -297,9 +302,20 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
       .to(letterRef.current, { yPercent: -14, scale: 1.1, duration: 0.45, ease: "power2.out" }, 1.3)
       .to(glowRef.current, { autoAlpha: 0.9, scale: 1.1, duration: 0.6 }, 1.2)
       .to(backs, { autoAlpha: 0.25, duration: 0.5 }, 1.3)
-      .call(() => showCards("smooth"), undefined, 1.6);
+      // The letter flips into the cover card; the stack grows to the cover's height.
+      .to(stack, { height: () => coverRef.current?.offsetHeight ?? 0, duration: 0.6, ease: "power2.inOut" }, T)
+      .to(letterRef.current, { scale: 1.6, rotationY: 90, duration: 0.6, ease: "power2.in" }, T)
+      .to([...backs, ...frontParts], { autoAlpha: 0, duration: 0.4 }, T + 0.2)
+      .set(letterRef.current, { autoAlpha: 0 }, T + 0.6)
+      .fromTo(
+        coverRef.current,
+        { autoAlpha: 1, rotationY: -90, scale: 0.85, transformPerspective: 1100 },
+        { rotationY: 0, scale: 1, duration: 0.85, ease: "back.out(1.4)", immediateRender: false },
+        T + 0.6
+      )
+      .to(glowRef.current, { autoAlpha: 0.8, scale: 1.25, duration: 0.8 }, T + 0.6);
 
-    if (quick) tl.timeScale(2.2);
+    tl.call(fireHeart, undefined, 1.3).call(hbdConfetti, undefined, T + 1.1);
     openTlRef.current = tl;
   }
 
@@ -401,21 +417,46 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
                     ))}
                   </span>
                 </div>
+                {/* Cover card: the letter flips into this once the envelope is open. */}
+                <div ref={coverRef} className="hbd-cover">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- decorative, fixed size */}
+                  <img src={COVER_SRC} alt="" width={1200} height={851} decoding="async" className="hbd-cover__img" />
+                  <p className="hbd-cover__text">
+                    <span>สุขสันต์วันเกิดนะ</span>
+                    <span className="hbd-cover__name">มายด์อาร์</span>
+                    <span>ฮันนี่ฝากคำอวยพรมาให้</span>
+                  </p>
+                </div>
               </div>
 
-              <p data-gate-after className="mt-2 text-[0.9375rem] text-[#f7d7de] sm:text-base">
-                ฮันนี่ส่งการ์ดมา · รอมายด์อาร์เปิดอ่านอยู่
-              </p>
+              {opened ? (
+                <p className="sr-only">สุขสันต์วันเกิดนะมายด์อาร์ ฮันนี่ฝากคำอวยพรมาให้</p>
+              ) : (
+                <p data-gate-after className="mt-2 text-[0.9375rem] text-[#f7d7de] sm:text-base">
+                  ฮันนี่ส่งการ์ดมา · รอมายด์อาร์เปิดอ่านอยู่
+                </p>
+              )}
               <div data-gate-after className="mt-6">
-                <button type="button" onClick={onStart} className={cn("hbd-start", FOCUS)}>
-                  <span className="hbd-start__shine" aria-hidden />
-                  {opened ? (
-                    <ArrowDown className="size-[18px]" aria-hidden />
-                  ) : (
+                {opened ? (
+                  // After opening: a plain line of text (no button look) that takes the reader to the cards.
+                  <button
+                    type="button"
+                    onClick={goToCards}
+                    className={cn(
+                      "inline-flex flex-col items-center gap-1 rounded-lg px-3 py-1 text-base text-[#f7d7de] transition-colors hover:text-r-text sm:text-[1.0625rem]",
+                      FOCUS
+                    )}
+                  >
+                    เลื่อนลงไปเปิดอ่านได้เลย
+                    <ArrowDown className="hbd-bob size-5 text-r-pri" aria-hidden />
+                  </button>
+                ) : (
+                  <button type="button" onClick={onStart} className={cn("hbd-start", FOCUS)}>
+                    <span className="hbd-start__shine" aria-hidden />
                     <Heart className="hbd-beat size-[18px] fill-current" aria-hidden />
-                  )}
-                  {opened ? "ไปที่การ์ด" : "เริ่มอ่าน"}
-                </button>
+                    เริ่มอ่าน
+                  </button>
+                )}
               </div>
             </>
           ) : (
@@ -433,7 +474,7 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
             </>
           )}
 
-          {total > 0 ? (
+          {total > 0 && !opened ? (
             <p data-gate-after className="mt-5 text-[13px] text-r-text-3">
               อยากอวยพรด้วย?{" "}
               <Link
@@ -570,27 +611,21 @@ function WishCard({
       if (!root || !revealed) return;
       const media = root.querySelector("[data-card-media]");
       const copy = root.querySelectorAll("[data-card-copy] > *");
+      const shine = root.querySelector("[data-card-shine]");
 
       if (prefersReducedMotion()) {
         gsap.set([media, ...copy], { autoAlpha: 1 });
         return;
       }
 
+      // "Placed on the table": drops in from a little above, tilted left / right on alternate cards.
+      const side = index % 2 ? 1 : -1;
       const tl = gsap
         .timeline({ paused: true })
         .fromTo(
           media,
-          { autoAlpha: 0, y: 40, rotation: -3, scale: 0.96, filter: "blur(8px)" },
-          {
-            autoAlpha: 1,
-            y: 0,
-            rotation: 0,
-            scale: 1,
-            filter: "blur(0px)",
-            duration: 0.9,
-            ease: "power3.out",
-            clearProps: "filter",
-          }
+          { autoAlpha: 0, y: -34, scale: 1.07, rotation: 5 * side },
+          { autoAlpha: 1, y: 0, scale: 1, rotation: 0, duration: 0.75, ease: "back.out(1.25)" }
         )
         .fromTo(
           copy,
@@ -598,6 +633,13 @@ function WishCard({
           { autoAlpha: 1, y: 0, duration: 0.6, stagger: 0.08, ease: "power2.out" },
           0.35
         );
+      // A light sweeps across the card once it has landed.
+      if (shine) {
+        tl.fromTo(shine, { xPercent: -120, autoAlpha: 1 }, { xPercent: 120, duration: 0.9, ease: "power2.inOut" }, 0.65).set(
+          shine,
+          { autoAlpha: 0 }
+        );
+      }
 
       return onceInView(root, () => tl.play());
     },
@@ -679,6 +721,11 @@ function WishCard({
                   />
                 </button>
               )}
+              {status === "ready" ? (
+                <span className="hbd-shine" aria-hidden>
+                  <span data-card-shine />
+                </span>
+              ) : null}
             </div>
           ) : (
             <div className="flex min-h-[16rem] items-center justify-center text-6xl opacity-40">{fallbackMark}</div>

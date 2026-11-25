@@ -1039,6 +1039,103 @@ body:has([data-cafe-root]) {
 .hbd-envs.is-idle {
   animation: hbd-env-idle 6s ease-in-out infinite;
 }
+/* After opening: the cover card replaces the envelopes (size of the template). */
+.hbd-envs {
+  --cover-w: min(88vw, 520px);
+}
+.hbd-envs.is-covered {
+  height: calc(var(--cover-w) * 0.7095);
+}
+.hbd-envs.is-covered .hbd-env {
+  display: none;
+}
+.hbd-cover {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 8;
+  width: var(--cover-w);
+  aspect-ratio: 2840 / 2015;
+  margin: calc(var(--cover-w) * -0.35475) 0 0 calc(var(--cover-w) / -2);
+  container-type: inline-size;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+.hbd-envs.is-covered .hbd-cover {
+  visibility: visible;
+  opacity: 1;
+}
+.hbd-cover__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 3cqi;
+  box-shadow: 0 30px 60px rgb(0 0 0 / 0.5);
+}
+/* Text on the cream paper of the template (a little wider than the card maker's box). */
+.hbd-cover__text {
+  position: absolute;
+  left: 39%;
+  top: 27%;
+  width: 53%;
+  height: 47%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1em;
+  text-align: center;
+  font-family: "Mali", "IBM Plex Sans Thai", sans-serif;
+  font-weight: 600;
+  font-size: 4.2cqi;
+  line-height: 1.35;
+  color: #c2346a;
+  white-space: nowrap;
+}
+.hbd-cover__name {
+  font-size: 1.5em;
+  margin-bottom: 0.2em;
+}
+.hbd-bob {
+  animation: hbd-bob 1.6s ease-in-out infinite;
+}
+@keyframes hbd-bob {
+  50% {
+    transform: translateY(3px);
+  }
+}
+/* Light that sweeps once across a wish card when it lands (GSAP moves the inner span). */
+.hbd-shine {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  pointer-events: none;
+}
+.hbd-shine > span {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 0.45) 50%, transparent 65%);
+  mix-blend-mode: screen;
+}
+/* Heart firework + confetti canvas (src/lib/hbd-fireworks.ts). */
+.hbd-fx {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hbd-bob {
+    animation: none;
+  }
+}
 .hbd-env {
   position: absolute;
   width: var(--env-w);
@@ -1182,7 +1279,8 @@ body:has([data-cafe-root]) {
   padding: 0 2rem;
   font-size: 1.0625rem;
   font-weight: 600;
-  color: var(--r-on-pri);
+  color: #fff;
+  text-shadow: 0 1px 2px rgb(140 16 58 / 0.4);
   background: linear-gradient(135deg, #ff86ad, var(--r-pri) 60%, #e0306c);
   box-shadow:
     0 14px 34px rgb(242 67 125 / 0.45),

@@ -47,7 +47,7 @@ export type HbdUploadDraft = {
 };
 
 /** Text limits, shared by the form and /api/hbd/submit. Counted as visible characters (an emoji is 1). */
-export const HBD_TEXT_LIMITS = { nameMax: 40, messageMax: 1000 } as const;
+export const HBD_TEXT_LIMITS = { nameMax: 40, messageMax: 200 } as const;
 
 type GraphemeSegmenter = { segment(input: string): Iterable<{ segment: string }> };
 let graphemes: GraphemeSegmenter | null | undefined;
