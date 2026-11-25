@@ -1107,6 +1107,11 @@ body:has([data-cafe-root]) {
     transform: translateY(3px);
   }
 }
+/* Script line at the end of /hbd/2026 (Great Vibes, self-hosted in hbd-card-fonts.css). */
+.hbd-script {
+  font-family: "Great Vibes", cursive;
+  font-weight: 400;
+}
 /* Handwriting for the sender's name under each card (same face as the card text). */
 .hbd-hand {
   font-family: "Mali", "IBM Plex Sans Thai", sans-serif;

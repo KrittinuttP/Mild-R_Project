@@ -11,13 +11,14 @@ import {
 import Link from "next/link";
 import { ArrowDown, ArrowLeft, Download, Heart, RotateCw } from "lucide-react";
 
+import { ThaiPhrases } from "@/components/common/ThaiPhrases";
 import { ImageLightbox } from "@/components/media/ImageLightbox";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { hbdConfetti, hbdHeartFirework, stopHbdFireworks } from "@/lib/hbd-fireworks";
 import { heroNameFont } from "@/lib/hero-fonts";
 import { thaiWordPieces } from "@/lib/thai-wrap";
 import { HBD_AVATAR_DEFAULT } from "@/lib/hbd-upload";
-import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
+import { gsap, registerGsapPlugins, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { PROJECTS_COMING_SOON } from "@/lib/site-flags";
 import { cn } from "@/lib/utils";
 import type { HbdPage, HbdWish, VtuberProfile } from "@/types/vtuber";
@@ -36,7 +37,6 @@ registerGsapPlugins();
  * Envelope / button styles live in globals.css (".hbd-*").
  */
 
-const DISPLAY = "font-[family-name:var(--font-display)]";
 const FOCUS =
   "outline-none focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-solid focus-visible:outline-r-pri";
 const UPLOAD_HREF = "/hbd/2026/upload";
@@ -529,7 +529,7 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
         </ol>
       </section>
 
-      {opened ? <Closing message={hbd.closingMessage} /> : null}
+      {opened ? <Closing closing={hbd.closing} /> : null}
 
       <ImageLightbox
         items={lightboxItems}
@@ -817,53 +817,100 @@ function ThaiWrap({ text }: { text: string }) {
   );
 }
 
-function Closing({ message }: { message?: string }) {
+/**
+ * Last section ("เรียบหวาน", 25 Nov): the English lines are written left to right in a script
+ * face as the reader scrolls; the Thai lines and the signature rise in after them.
+ */
+function Closing({ closing }: { closing?: HbdPage["closing"] }) {
   const rootRef = useRef<HTMLElement>(null);
 
   useGSAP(
     () => {
       const root = rootRef.current;
       if (!root) return;
-      const bits = root.querySelectorAll<HTMLElement>("[data-close-anim]");
+      const fades = Array.from(root.querySelectorAll<HTMLElement>("[data-close-fade]"));
+      const inks = Array.from(root.querySelectorAll<HTMLElement>("[data-close-ink]"));
       if (prefersReducedMotion()) {
-        gsap.set(bits, { autoAlpha: 1 });
+        gsap.set(fades, { autoAlpha: 1 });
         return;
       }
-      const tl = gsap.fromTo(
-        bits,
-        { autoAlpha: 0, y: 24 },
-        { autoAlpha: 1, y: 0, duration: 0.8, stagger: 0.14, ease: "power3.out", paused: true }
+      const [heart, rule, ...rest] = fades;
+      // The section pins to the screen while it plays, so everything has finished before
+      // the page moves on to the footer.
+      const tl = gsap.timeline({
+        scrollTrigger: { trigger: root, start: "top top", end: "+=160%", pin: true, scrub: 0.6 },
+      });
+      tl.fromTo(heart, { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: 0.5 });
+      // Written left to right, one line after another.
+      for (const ink of inks) {
+        tl.fromTo(
+          ink,
+          { clipPath: "inset(-25% 100% -35% -5%)" },
+          { clipPath: "inset(-25% -5% -35% -5%)", duration: 1.1, ease: "none" }
+        );
+      }
+      tl.fromTo(rule, { autoAlpha: 0, scaleX: 0 }, { autoAlpha: 1, scaleX: 1, duration: 0.4 }).fromTo(
+        rest,
+        { autoAlpha: 0, y: 16 },
+        { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.3, ease: "power2.out" }
       );
-      return onceInView(root, () => tl.play(), "0px 0px -20% 0px");
+
+      // Cards above load one by one and change the page height: keep the pin in the right place.
+      const cards = document.getElementById("hbd-cards");
+      let timer = 0;
+      const observer = new ResizeObserver(() => {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => ScrollTrigger.refresh(), 200);
+      });
+      if (cards) observer.observe(cards);
+      return () => {
+        window.clearTimeout(timer);
+        observer.disconnect();
+      };
     },
     { scope: rootRef }
   );
 
-  if (!message) return null;
-  const [headline, ...rest] = message.split(/\s*[—–]\s*/);
-  const tail = rest.join(" — ");
+  if (!closing) return null;
 
   return (
-    <footer ref={rootRef} className="relative overflow-hidden px-5 py-24 text-center sm:px-8 sm:py-32">
+    <footer
+      ref={rootRef}
+      className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden px-5 pt-20 pb-10 text-center sm:px-8 sm:pt-24"
+    >
       <div
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_45%,rgba(242,67,125,0.26),transparent_58%)]"
         aria-hidden
       />
       <Sparkles items={GATE_SPARKLES.slice(0, 6)} />
-      <div className={cn(DISPLAY, "relative mx-auto flex max-w-lg flex-col items-center gap-4 sm:gap-5")}>
-        <span data-close-anim className="opacity-0">
+      <div className="relative mx-auto flex w-full max-w-2xl flex-col items-center gap-3 sm:gap-5">
+        <span data-close-fade className="opacity-0">
           <Heart className="hbd-beat size-9 fill-r-pri text-r-pri sm:size-10" aria-hidden />
         </span>
-        <p data-close-anim className="text-3xl font-normal tracking-tight opacity-0 sm:text-5xl">
-          {headline}
+        <p className="hbd-script text-[clamp(2.5rem,11vw,4.75rem)] leading-[1.12] text-r-text">
+          {closing.en.map((line, i) => (
+            <span key={line} className="block">
+              {i > 0 ? " " : null}
+              <span data-close-ink className="inline-block max-w-full">
+                {line}
+              </span>
+            </span>
+          ))}
         </p>
-        {tail ? (
-          <>
-            <span data-close-anim className="h-px w-28 bg-r-pri/55 opacity-0 sm:w-40" aria-hidden />
-            <p data-close-anim className="max-w-md text-lg leading-relaxed text-r-text-2 opacity-0 sm:text-2xl">
-              {tail}
-            </p>
-          </>
+        <span data-close-fade className="h-px w-28 bg-r-pri/55 opacity-0 sm:w-40" aria-hidden />
+        {closing.th.map((line) => (
+          <p
+            key={line}
+            data-close-fade
+            className="-my-1 max-w-lg text-[clamp(1.125rem,4.6vw,1.5rem)] leading-[1.7] text-[#ffd9e4] opacity-0"
+          >
+            <ThaiPhrases text={line} />
+          </p>
+        ))}
+        {closing.sign ? (
+          <p data-close-fade className="hbd-hand mt-2 text-[clamp(1.5rem,6vw,2rem)] text-[#ffc2d4] opacity-0 sm:mt-4">
+            {closing.sign}
+          </p>
         ) : null}
       </div>
     </footer>

@@ -500,7 +500,8 @@ export interface HbdPage {
   subtitle: string;
   year?: number;
   occasionLabel?: string;
-  closingMessage?: string;
+  /** Last section of /hbd/2026: English lines (one line each, written in script), Thai lines (`|` = wrap point), a signature. */
+  closing?: { en: string[]; th: string[]; sign?: string };
   wishes: HbdWish[];
 }
 
