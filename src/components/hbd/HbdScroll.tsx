@@ -14,6 +14,8 @@ import { ArrowDown, ArrowLeft, Download, Heart, RotateCw } from "lucide-react";
 import { ImageLightbox } from "@/components/media/ImageLightbox";
 import { ProtectedImage } from "@/components/media/ProtectedImage";
 import { hbdConfetti, hbdHeartFirework, stopHbdFireworks } from "@/lib/hbd-fireworks";
+import { heroNameFont } from "@/lib/hero-fonts";
+import { thaiWordPieces } from "@/lib/thai-wrap";
 import { HBD_AVATAR_DEFAULT } from "@/lib/hbd-upload";
 import { gsap, registerGsapPlugins, useGSAP } from "@/lib/gsap";
 import { PROJECTS_COMING_SOON } from "@/lib/site-flags";
@@ -359,7 +361,10 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
           </p>
           <h1
             data-hbd-intro
-            className={cn(DISPLAY, "mt-4 text-[2.875rem] leading-[1.02] font-normal sm:mt-5 sm:text-6xl md:text-[4.75rem]")}
+            className={cn(
+              heroNameFont.variable,
+              "mt-4 font-r-name text-[3rem] leading-[1.05] font-extrabold sm:mt-5 sm:text-[4.25rem] md:text-[5rem]"
+            )}
           >
             {hbd.title}
           </h1>
@@ -390,7 +395,9 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
                     <span className="text-[0.62rem] tracking-[0.2em] text-[#c92b64] sm:text-xs">
                       BIRTHDAY · {hbd.year ?? 2026}
                     </span>
-                    <span className={cn(DISPLAY, "text-lg sm:text-[1.35rem]")}>{hbd.title}</span>
+                    <span className={cn(heroNameFont.variable, "font-r-name text-lg font-extrabold sm:text-[1.35rem]")}>
+                      {hbd.title}
+                    </span>
                     <span className="inline-flex items-center gap-1 text-[0.7rem] text-[#a0405f] sm:text-xs">
                       จากฮันนี่ <Heart className="size-3 fill-r-pri text-r-pri" />
                     </span>
@@ -443,7 +450,7 @@ export function HbdScroll({ data, hbd }: HbdScrollProps) {
                     type="button"
                     onClick={goToCards}
                     className={cn(
-                      "inline-flex flex-col items-center gap-1 rounded-lg px-3 py-1 text-base text-[#f7d7de] transition-colors hover:text-r-text sm:text-[1.0625rem]",
+                      "inline-flex flex-col items-center gap-1 rounded-lg px-3 py-1 text-base font-medium text-[#f7d7de] transition-colors hover:text-r-text sm:text-[1.0625rem]",
                       FOCUS
                     )}
                   >
@@ -744,7 +751,7 @@ function WishCard({
 
       <div data-card-copy className="mt-12 flex flex-col items-center gap-2.5 px-1 text-center sm:mt-[3.25rem] sm:gap-3">
         <span className="text-xs tracking-[0.16em] text-r-text-2/55 tabular-nums opacity-0">{number}</span>
-        <h3 className={cn(DISPLAY, "-mt-1 text-2xl font-normal opacity-0 sm:text-3xl")}>จาก {wish.from}</h3>
+        <h3 className="hbd-hand -mt-1 text-[1.625rem] text-[#ffe3ea] opacity-0 sm:text-3xl">จาก {wish.from}</h3>
         {wish.message ? (
           <div className="relative max-w-md pt-3 opacity-0">
             <span
@@ -753,7 +760,9 @@ function WishCard({
             >
               “
             </span>
-            <p className="text-base leading-[1.8] whitespace-pre-line text-[#f7d7de] sm:text-lg">{wish.message}</p>
+            <p className="text-[1.0625rem] leading-[1.8] whitespace-pre-line text-[#f7d7de] sm:text-lg">
+              <ThaiWrap text={wish.message} />
+            </p>
           </div>
         ) : null}
         {wish.image && wish.downloadUrl ? (
@@ -771,6 +780,40 @@ function WishCard({
         ) : null}
       </div>
     </article>
+  );
+}
+
+/**
+ * Text a fan typed, wrapped only between whole Thai words. The browser's own Thai
+ * line breaking can cut a word ("ความสุ" / "ขมากๆ"); here each word is an inline-block
+ * with a <wbr> between words. Split after mount, so the server HTML (plain text) never
+ * differs from the first client render.
+ */
+function ThaiWrap({ text }: { text: string }) {
+  const [lines, setLines] = useState<string[][] | null>(null);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setLines(text.split("\n").map(thaiWordPieces)));
+    return () => cancelAnimationFrame(frame);
+  }, [text]);
+  if (!lines) return <>{text}</>;
+  return (
+    <>
+      {lines.map((pieces, i) => (
+        <span key={i}>
+          {i > 0 ? "\n" : null}
+          {pieces.map((piece, j) =>
+            /^\s+$/.test(piece) ? (
+              " "
+            ) : (
+              <span key={j}>
+                {j > 0 && !/^\s+$/.test(pieces[j - 1]) ? <wbr /> : null}
+                <span className="inline-block max-w-full">{piece}</span>
+              </span>
+            )
+          )}
+        </span>
+      ))}
+    </>
   );
 }
 

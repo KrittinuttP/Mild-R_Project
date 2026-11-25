@@ -1092,7 +1092,7 @@ body:has([data-cafe-root]) {
   font-weight: 600;
   font-size: 4.2cqi;
   line-height: 1.35;
-  color: #c2346a;
+  color: #b52a60;
   white-space: nowrap;
 }
 .hbd-cover__name {
@@ -1106,6 +1106,12 @@ body:has([data-cafe-root]) {
   50% {
     transform: translateY(3px);
   }
+}
+/* Handwriting for the sender's name under each card (same face as the card text). */
+.hbd-hand {
+  font-family: "Mali", "IBM Plex Sans Thai", sans-serif;
+  font-weight: 600;
+  line-height: 1.3;
 }
 /* Light that sweeps once across a wish card when it lands (GSAP moves the inner span). */
 .hbd-shine {

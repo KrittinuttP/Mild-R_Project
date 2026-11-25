@@ -10,6 +10,7 @@
  * left 41% · top 27% · width 51% · height 47% of the image.
  */
 import { HBD_CARD_TEMPLATE, HBD_IMAGE_SIZES, HBD_TEXT_LIMITS, clampText } from "@/lib/hbd-upload";
+import { thaiWordPieces } from "@/lib/thai-wrap";
 
 /** Visible characters (see textLength). 400 Thai characters render ≈ 40 px on the 2048 px card. */
 export const HBD_CARD_MESSAGE_MAX = 400;
@@ -201,41 +202,11 @@ export async function ensureHbdCardFont(font: HbdCardFontId) {
 
 // ---------------------------------------------------------------- layout
 
-type Segmenter = { segment(input: string): Iterable<{ segment: string }> };
-
-let segmenter: Segmenter | null | undefined;
-function getSegmenter(): Segmenter | null {
-  if (segmenter !== undefined) return segmenter;
-  const Ctor = (Intl as unknown as { Segmenter?: new (l: string, o: { granularity: string }) => Segmenter }).Segmenter;
-  segmenter = Ctor ? new Ctor("th", { granularity: "word" }) : null;
-  return segmenter;
-}
-
-/** Word-sized pieces; spaces stay attached so they can be dropped at line ends. */
-function pieces(paragraph: string): string[] {
-  const seg = getSegmenter();
-  // ICU splits "ความสุขมากๆ" as "ความ|สุ|ขมา|กๆ" (a line could break inside "สุข").
-  // A zero-width space before "ๆ" makes it segment as "ความ|สุข|มาก|ๆ"; it is removed again below.
-  const raw = seg
-    ? Array.from(seg.segment(paragraph.replace(/ๆ/g, "\u200bๆ")), (s) => s.segment.replace(/\u200b/g, "")).filter(Boolean)
-    : Array.from(paragraph);
-  // Keep "#tag" and "@name" together (a lone "#" / "@" joins the next piece),
-  // and never start a line with "ๆ" (it joins the word before it).
-  const out: string[] = [];
-  for (const piece of raw) {
-    const prev = out[out.length - 1];
-    const glue = (/[#@]$/.test(prev ?? "") && !/^\s/.test(piece)) || /^\s*ๆ/.test(piece);
-    if (prev !== undefined && glue) out[out.length - 1] = prev + piece;
-    else out.push(piece);
-  }
-  return out;
-}
-
 function wrap(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
   const lines: string[] = [];
   for (const paragraph of text.split("\n")) {
     let line = "";
-    for (const piece of pieces(paragraph)) {
+    for (const piece of thaiWordPieces(paragraph)) {
       const next = line + piece;
       if (line && ctx.measureText(next.trimEnd()).width > maxWidth) {
         lines.push(line.trimEnd());
