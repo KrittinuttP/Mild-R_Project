@@ -26,10 +26,10 @@ const CATEGORY_LABEL: Record<string, string> = {
   mv: "Fansong",
 };
 
-/** Cover crop for small thumbs, per category (the HBD card template is mostly blank paper). */
-const THUMB_FOCUS: Record<string, { position: string; zoom: number }> = {
-  hbd: { position: "27% 52%", zoom: 2.4 },
-};
+/** HBD: the whole card, landscape (25 Nov · was a square crop on the character). */
+const HBD_THUMB = "/assets/hbd/template/hbd-card-cover.jpg";
+/** Card ratio 2840 × 2015 · every thumb is this shape (25 Nov), so the rows match. */
+const SLOT_RATIO = 1.42;
 
 /** "6 Dec" in Bangkok time (dates stay in English). */
 export function shortDate(iso: string | undefined) {
@@ -87,31 +87,41 @@ export function navProjects(data: VtuberProfile): NavProject[] {
 
 function Thumb({ project, size }: { project: ProjectItem; size: number }) {
   const category = project.category.toLowerCase();
-  const focus = THUMB_FOCUS[category];
-  // Cafe: the gold heart lens on the cafe's green (the full wordmark is too small to read here).
+  const slot = Math.round(size * SLOT_RATIO);
+  // HBD: the whole card. Cafe: the gold heart lens on the cafe's green (the wordmark is too small here).
+  const isHbd = category === "hbd";
   const isCafe = category === "cafe";
   return (
-    <span
-      className="relative shrink-0 overflow-hidden rounded-xl bg-[#2a1a20] ring-1 ring-r-text-2/15 ring-inset sm:rounded-xl"
-      style={{ width: size, height: size }}
-      aria-hidden
-    >
-      {isCafe ? (
-        <CafeLensMark />
-      ) : project.cover ? (
-        <Image
-          src={project.cover}
-          alt=""
-          fill
-          sizes={`${size * 2}px`}
-          unoptimized={project.cover.endsWith(".svg")}
-          draggable={false}
-          className="object-cover"
-          style={focus ? { objectPosition: focus.position, transform: `scale(${focus.zoom})`, transformOrigin: focus.position } : undefined}
-        />
+    <span className="flex shrink-0 items-center justify-center" style={{ width: slot }} aria-hidden>
+      {isHbd ? (
+        <span
+          className="relative overflow-hidden rounded-[7px] shadow-[0_3px_10px_rgba(0,0,0,0.4)] ring-1 ring-white/10 ring-inset"
+          style={{ width: slot, height: size }}
+        >
+          <Image src={HBD_THUMB} alt="" fill sizes={`${slot * 2}px`} draggable={false} className="object-cover" />
+        </span>
       ) : (
-        <span className="absolute inset-0 flex items-center justify-center text-r-text-2/60">
-          <Music2 className="size-[42%]" />
+        <span
+          className="relative overflow-hidden rounded-[7px] bg-[#2a1a20] ring-1 ring-r-text-2/15 ring-inset"
+          style={{ width: slot, height: size }}
+        >
+          {isCafe ? (
+            <CafeLensMark />
+          ) : project.cover ? (
+            <Image
+              src={project.cover}
+              alt=""
+              fill
+              sizes={`${size * 2}px`}
+              unoptimized={project.cover.endsWith(".svg")}
+              draggable={false}
+              className="object-cover"
+            />
+          ) : (
+            <span className="absolute inset-0 flex items-center justify-center text-r-text-2/60">
+              <Music2 className="size-[42%]" />
+            </span>
+          )}
         </span>
       )}
     </span>
